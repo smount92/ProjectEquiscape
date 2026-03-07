@@ -12,6 +12,9 @@ interface CommunityHorse {
   condition_grade: string;
   created_at: string;
   sculptor: string | null;
+  trade_status: string;
+  reference_mold_id: string | null;
+  release_id: string | null;
   users: {
     alias_name: string;
   } | null;
@@ -61,7 +64,7 @@ export default async function CommunityPage() {
     .from("user_horses")
     .select(
       `
-      id, owner_id, custom_name, finish_type, condition_grade, created_at, sculptor,
+      id, owner_id, custom_name, finish_type, condition_grade, created_at, sculptor, trade_status, reference_mold_id, release_id,
       users!inner(alias_name),
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
@@ -120,9 +123,12 @@ export default async function CommunityPage() {
       ownerAlias,
       thumbnailUrl: signedUrl || null,
       sculptor: horse.sculptor || null,
+      tradeStatus: horse.trade_status || "Not for Sale",
       // Search fields from reference data
       moldName: horse.reference_molds?.mold_name || null,
       releaseName: horse.reference_releases?.release_name || null,
+      refMoldId: horse.reference_mold_id || null,
+      refReleaseId: horse.release_id || null,
     };
   });
 

@@ -15,21 +15,17 @@ interface HorseCardData {
     thumbnailUrl: string | null;
     collectionName: string | null;
     sculptor: string | null;
-    // Hidden search fields from reference data
+    tradeStatus: string;
     moldName: string | null;
     releaseName: string | null;
 }
 
 function getFinishBadgeClass(finishType: string): string {
     switch (finishType) {
-        case "OF":
-            return "of";
-        case "Custom":
-            return "custom";
-        case "Artist Resin":
-            return "resin";
-        default:
-            return "";
+        case "OF": return "of";
+        case "Custom": return "custom";
+        case "Artist Resin": return "resin";
+        default: return "";
     }
 }
 
@@ -50,22 +46,18 @@ export default function StableGrid({
 
     const filteredCards = useMemo(() => {
         if (!searchQuery.trim()) return horseCards;
-
         const q = searchQuery.toLowerCase().trim();
-        return horseCards.filter((horse) => {
-            return (
-                horse.customName.toLowerCase().includes(q) ||
-                (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
-                (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
-                (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
-                horse.refName.toLowerCase().includes(q)
-            );
-        });
+        return horseCards.filter((horse) =>
+            horse.customName.toLowerCase().includes(q) ||
+            (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
+            (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
+            (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
+            horse.refName.toLowerCase().includes(q)
+        );
     }, [searchQuery, horseCards]);
 
     return (
         <>
-            {/* Search Bar — sticky above grid */}
             {horseCards.length > 0 && (
                 <SearchBar
                     value={searchQuery}
@@ -75,7 +67,6 @@ export default function StableGrid({
                 />
             )}
 
-            {/* Filtered results count */}
             {searchQuery.trim() && (
                 <div className="search-results-count">
                     {filteredCards.length === 0
@@ -84,20 +75,12 @@ export default function StableGrid({
                 </div>
             )}
 
-            {/* Grid */}
             {filteredCards.length === 0 && !searchQuery.trim() ? (
                 <div className="card shelf-empty">
                     <div className="shelf-empty-icon">🏠</div>
                     <h2>Your Stable is Empty</h2>
-                    <p>
-                        You haven&apos;t added any models yet. Click the button above to
-                        catalog your first horse!
-                    </p>
-                    <Link
-                        href="/add-horse"
-                        className="btn btn-primary"
-                        id="add-first-horse"
-                    >
+                    <p>You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
+                    <Link href="/add-horse" className="btn btn-primary" id="add-first-horse">
                         🐴 Add Your First Horse
                     </Link>
                 </div>
@@ -105,38 +88,31 @@ export default function StableGrid({
                 <div className="card shelf-empty">
                     <div className="shelf-empty-icon">🔍</div>
                     <h2>No Results</h2>
-                    <p>
-                        No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.
-                    </p>
+                    <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
                 </div>
             ) : (
                 <div className="shelf-grid">
                     {filteredCards.map((horse) => (
-                        <Link
-                            key={horse.id}
-                            href={`/stable/${horse.id}`}
-                            className="horse-card"
-                            id={`horse-card-${horse.id}`}
-                        >
+                        <Link key={horse.id} href={`/stable/${horse.id}`} className="horse-card" id={`horse-card-${horse.id}`}>
                             <div className="horse-card-image">
                                 {horse.thumbnailUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={horse.thumbnailUrl}
-                                        alt={horse.customName}
-                                        loading="lazy"
-                                    />
+                                    <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                                 ) : (
                                     <div className="horse-card-placeholder">
                                         <span className="horse-card-placeholder-icon">🐴</span>
                                         <span>No photo</span>
                                     </div>
                                 )}
-                                <span
-                                    className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}
-                                >
+                                <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
                                     {horse.finishType}
                                 </span>
+                                {horse.tradeStatus === "For Sale" && (
+                                    <span className="trade-badge trade-for-sale">💲 For Sale</span>
+                                )}
+                                {horse.tradeStatus === "Open to Offers" && (
+                                    <span className="trade-badge trade-open-offers">🤝 Open to Offers</span>
+                                )}
                             </div>
                             <div className="horse-card-info">
                                 <div className="horse-card-name">{horse.customName}</div>
@@ -156,9 +132,7 @@ export default function StableGrid({
                                     <span>{formatDate(horse.createdAt)}</span>
                                 </div>
                                 {horse.collectionName && (
-                                    <div className="horse-card-collection">
-                                        📁 {horse.collectionName}
-                                    </div>
+                                    <div className="horse-card-collection">📁 {horse.collectionName}</div>
                                 )}
                             </div>
                         </Link>

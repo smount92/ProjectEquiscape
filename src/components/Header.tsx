@@ -58,6 +58,9 @@ export default function Header() {
           <Link href="/community" className="header-nav-link" id="nav-community">
             🏆 Show Ring
           </Link>
+          <Link href="/wishlist" className="header-nav-link" id="nav-wishlist">
+            ❤️ Wishlist
+          </Link>
         </nav>
       )}
 

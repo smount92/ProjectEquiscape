@@ -15,6 +15,7 @@ interface HorseWithDetails {
     created_at: string;
     collection_id: string | null;
     sculptor: string | null;
+    trade_status: string;
     reference_molds: { mold_name: string; manufacturer: string } | null;
     artist_resins: { resin_name: string; sculptor_alias: string } | null;
     reference_releases: { release_name: string; model_number: string | null } | null;
@@ -49,7 +50,7 @@ export default async function DashboardPage() {
         .from("user_horses")
         .select(
             `
-      id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor,
+      id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor, trade_status,
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
       reference_releases(release_name, model_number),
@@ -153,6 +154,7 @@ export default async function DashboardPage() {
             thumbnailUrl: signedUrl || null,
             collectionName: horse.collection_id ? collectionNameMap.get(horse.collection_id) || null : null,
             sculptor: horse.sculptor || null,
+            tradeStatus: horse.trade_status || "Not for Sale",
             // Search fields from reference data
             moldName: horse.reference_molds?.mold_name || null,
             releaseName: horse.reference_releases?.release_name || null,

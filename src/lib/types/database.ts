@@ -19,6 +19,8 @@ export type AngleProfile =
 
 export type FinishType = "OF" | "Custom" | "Artist Resin";
 
+export type TradeStatus = "Not for Sale" | "For Sale" | "Open to Offers";
+
 // --- Table Row Types ---
 
 export interface User {
@@ -68,6 +70,7 @@ export interface UserHorse {
   sculptor: string | null;
   finish_type: FinishType;
   condition_grade: string;
+  trade_status: TradeStatus;
   is_for_sale: boolean;
   is_public: boolean;
   created_at: string;
@@ -107,6 +110,15 @@ export interface UserCollection {
   created_at: string;
 }
 
+export interface UserWishlist {
+  id: string;
+  user_id: string;
+  mold_id: string | null;
+  release_id: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
 // --- Supabase Database Type Interface ---
 // Used to provide type safety to supabase client calls
 
@@ -143,7 +155,7 @@ export interface Database {
       };
       user_horses: {
         Row: UserHorse;
-        Insert: Omit<UserHorse, "id" | "created_at" | "is_for_sale" | "is_public" | "release_id" | "collection_id" | "sculptor"> & {
+        Insert: Omit<UserHorse, "id" | "created_at" | "is_for_sale" | "is_public" | "release_id" | "collection_id" | "sculptor" | "trade_status"> & {
           id?: string;
           created_at?: string;
           is_for_sale?: boolean;
@@ -151,6 +163,7 @@ export interface Database {
           release_id?: string | null;
           collection_id?: string | null;
           sculptor?: string | null;
+          trade_status?: TradeStatus;
         };
         Update: Partial<Omit<UserHorse, "id">>;
         Relationships: [];
@@ -183,6 +196,15 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Omit<UserCollection, "id">>;
+        Relationships: [];
+      };
+      user_wishlists: {
+        Row: UserWishlist;
+        Insert: Omit<UserWishlist, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<UserWishlist, "id">>;
         Relationships: [];
       };
     };

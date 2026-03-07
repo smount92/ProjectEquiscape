@@ -48,6 +48,7 @@ export default function EditHorsePage() {
   const [conditionGrade, setConditionGrade] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [tradeStatus, setTradeStatus] = useState("Not for Sale");
 
   // Reference fields (controlled by UnifiedReferenceSearch)
   const [selectedMoldId, setSelectedMoldId] = useState<string | null>(null);
@@ -77,7 +78,7 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, sculptor, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id")
+        .select("id, owner_id, custom_name, sculptor, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id, trade_status")
         .eq("id", horseId)
         .single<{
           id: string;
@@ -91,6 +92,7 @@ export default function EditHorsePage() {
           reference_mold_id: string | null;
           artist_resin_id: string | null;
           release_id: string | null;
+          trade_status: string;
         }>();
 
       if (horseErr || !horse || horse.owner_id !== user.id) {
@@ -105,6 +107,7 @@ export default function EditHorsePage() {
       setConditionGrade(horse.condition_grade);
       setIsPublic(horse.is_public);
       setSelectedCollectionId(horse.collection_id);
+      setTradeStatus(horse.trade_status || "Not for Sale");
 
       if (horse.reference_mold_id) {
         setSelectedMoldId(horse.reference_mold_id);
@@ -178,6 +181,7 @@ export default function EditHorsePage() {
         finish_type: finishType,
         condition_grade: conditionGrade,
         is_public: isPublic,
+        trade_status: tradeStatus,
         collection_id: selectedCollectionId,
         reference_mold_id: selectedMoldId,
         artist_resin_id: selectedResinId,
@@ -322,11 +326,21 @@ export default function EditHorsePage() {
             </div>
           </div>
 
-          {/* Collection Picker */}
           <CollectionPicker
             selectedCollectionId={selectedCollectionId}
             onSelect={setSelectedCollectionId}
           />
+
+          {/* Marketplace Status */}
+          <div className="form-group">
+            <label htmlFor="edit-trade-status" className="form-label">Marketplace Status</label>
+            <select id="edit-trade-status" className="form-select" value={tradeStatus}
+              onChange={(e) => setTradeStatus(e.target.value)}>
+              <option value="Not for Sale">Not for Sale</option>
+              <option value="For Sale">For Sale</option>
+              <option value="Open to Offers">Open to Offers</option>
+            </select>
+          </div>
         </div>
 
         {/* Community visibility toggle */}

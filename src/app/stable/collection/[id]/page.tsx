@@ -9,6 +9,7 @@ interface CollectionHorse {
   finish_type: string;
   condition_grade: string;
   created_at: string;
+  trade_status: string;
   reference_molds: { mold_name: string; manufacturer: string } | null;
   artist_resins: { resin_name: string; sculptor_alias: string } | null;
   reference_releases: { release_name: string; model_number: string | null } | null;
@@ -81,7 +82,7 @@ export default async function CollectionPage({
     .from("user_horses")
     .select(
       `
-      id, custom_name, finish_type, condition_grade, created_at,
+      id, custom_name, finish_type, condition_grade, created_at, trade_status,
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
       reference_releases(release_name, model_number),
@@ -150,6 +151,7 @@ export default async function CollectionPage({
       refName,
       releaseLine,
       thumbnailUrl: signedUrl || null,
+      tradeStatus: horse.trade_status || "Not for Sale",
     };
   });
 
@@ -239,6 +241,12 @@ export default async function CollectionPage({
                 <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
                   {horse.finishType}
                 </span>
+                {horse.tradeStatus === "For Sale" && (
+                  <span className="trade-badge trade-for-sale">💲 For Sale</span>
+                )}
+                {horse.tradeStatus === "Open to Offers" && (
+                  <span className="trade-badge trade-open-offers">🤝 Open to Offers</span>
+                )}
               </div>
               <div className="horse-card-info">
                 <div className="horse-card-name">{horse.customName}</div>

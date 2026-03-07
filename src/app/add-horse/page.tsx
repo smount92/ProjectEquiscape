@@ -106,6 +106,7 @@ export default function AddHorsePage() {
   const [conditionGrade, setConditionGrade] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [tradeStatus, setTradeStatus] = useState("Not for Sale");
 
   // Step 4 (index 3): Financial Vault
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -322,6 +323,7 @@ export default function AddHorsePage() {
         finish_type: finishType,
         condition_grade: conditionGrade,
         is_public: isPublic,
+        trade_status: tradeStatus,
       };
 
       if (selectedMoldId) horseInsert.reference_mold_id = selectedMoldId;
@@ -766,11 +768,27 @@ export default function AddHorsePage() {
               </select>
             </div>
 
-            {/* Collection Picker */}
             <CollectionPicker
               selectedCollectionId={selectedCollectionId}
               onSelect={setSelectedCollectionId}
             />
+
+            {/* Trade / Marketplace Status */}
+            <div className="form-group">
+              <label htmlFor="trade-status" className="form-label">
+                Marketplace Status
+              </label>
+              <select
+                id="trade-status"
+                className="form-select"
+                value={tradeStatus}
+                onChange={(e) => setTradeStatus(e.target.value)}
+              >
+                <option value="Not for Sale">Not for Sale</option>
+                <option value="For Sale">For Sale</option>
+                <option value="Open to Offers">Open to Offers</option>
+              </select>
+            </div>
           </div>
 
           <div className="step-nav">
