@@ -116,6 +116,7 @@ export default async function CommunityPage() {
 
     return {
       id: horse.id,
+      ownerId: horse.owner_id,
       customName: horse.custom_name,
       finishType: horse.finish_type,
       conditionGrade: horse.condition_grade,

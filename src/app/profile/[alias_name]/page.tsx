@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import ShareButton from "@/components/ShareButton";
+import MessageSellerButton from "@/components/MessageSellerButton";
 
 // Types
 interface ProfileHorse {
@@ -324,6 +325,11 @@ export default async function ProfilePage({
                 {(horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") && horse.marketplaceNotes && (
                   <div className="marketplace-notes-snippet" title={horse.marketplaceNotes}>
                     📝 {horse.marketplaceNotes.length > 50 ? horse.marketplaceNotes.slice(0, 50) + "…" : horse.marketplaceNotes}
+                  </div>
+                )}
+                {!isOwnProfile && (horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") && (
+                  <div style={{ marginTop: "var(--space-sm)" }}>
+                    <MessageSellerButton sellerId={profileUser.id} horseId={horse.id} />
                   </div>
                 )}
               </div>

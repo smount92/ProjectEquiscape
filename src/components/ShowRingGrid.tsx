@@ -4,9 +4,11 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 import WishlistButton from "@/components/WishlistButton";
+import MessageSellerButton from "@/components/MessageSellerButton";
 
 interface CommunityCardData {
     id: string;
+    ownerId: string;
     customName: string;
     finishType: string;
     conditionGrade: string;
@@ -165,6 +167,9 @@ export default function ShowRingGrid({
                                         @{horse.ownerAlias}
                                     </Link>
                                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                                        {isListed && (
+                                            <MessageSellerButton sellerId={horse.ownerId} horseId={horse.id} compact />
+                                        )}
                                         <WishlistButton moldId={horse.refMoldId} releaseId={horse.refReleaseId} />
                                         <span className="community-card-time">{timeAgo(horse.createdAt)}</span>
                                     </div>

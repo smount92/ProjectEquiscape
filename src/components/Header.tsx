@@ -4,13 +4,38 @@ import Link from "next/link";
 import { useSimpleMode } from "@/lib/context/SimpleModeContext";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export default function Header() {
   const { isSimpleMode, toggleSimpleMode } = useSimpleMode();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
   const supabase = createClient();
+
+  const fetchUnreadCount = useCallback(async (userId: string) => {
+    // Get conversation IDs where user is participant
+    const { data: convos } = await supabase
+      .from("conversations")
+      .select("id")
+      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+
+    if (!convos || convos.length === 0) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const convoIds = convos.map((c: { id: string }) => c.id);
+
+    const { count } = await supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .in("conversation_id", convoIds)
+      .neq("sender_id", userId)
+      .eq("is_read", false);
+
+    setUnreadCount(count ?? 0);
+  }, [supabase]);
 
   useEffect(() => {
     async function getUser() {
@@ -18,6 +43,7 @@ export default function Header() {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+      if (user) fetchUnreadCount(user.id);
     }
     getUser();
 
@@ -25,10 +51,19 @@ export default function Header() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) fetchUnreadCount(session.user.id);
+      else setUnreadCount(0);
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, router]);
+  }, [supabase, router, fetchUnreadCount]);
+
+  // Poll for new messages every 30 seconds
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => fetchUnreadCount(user.id), 30000);
+    return () => clearInterval(interval);
+  }, [user, fetchUnreadCount]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -60,6 +95,17 @@ export default function Header() {
           </Link>
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist">
             ❤️ Wishlist
+          </Link>
+          <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            Inbox
+            {unreadCount > 0 && (
+              <span className="inbox-unread-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+            )}
           </Link>
         </nav>
       )}

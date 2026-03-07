@@ -36,6 +36,7 @@ interface MarketplaceMatch {
     marketplace_notes: string | null;
     thumbnailUrl: string | null;
     ownerAlias: string;
+    ownerId: string;
 }
 
 export default async function WishlistPage() {
@@ -152,6 +153,7 @@ export default async function WishlistPage() {
                             marketplace_notes: match.marketplace_notes,
                             thumbnailUrl: imgUrl ? signedUrlMap.get(imgUrl) || null : null,
                             ownerAlias: match.users?.alias_name ?? "Unknown",
+                            ownerId: match.owner_id,
                         });
                     }
                 }

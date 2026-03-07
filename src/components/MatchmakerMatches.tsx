@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import MessageSellerButton from "@/components/MessageSellerButton";
 
 interface MarketplaceMatch {
     id: string;
@@ -11,6 +12,7 @@ interface MarketplaceMatch {
     marketplace_notes: string | null;
     thumbnailUrl: string | null;
     ownerAlias: string;
+    ownerId: string;
 }
 
 export default function MatchmakerMatches({
@@ -91,6 +93,12 @@ export default function MatchmakerMatches({
                                         {match.marketplace_notes}
                                     </div>
                                 )}
+                                <div style={{ marginTop: "6px" }}>
+                                    <MessageSellerButton
+                                        sellerId={match.ownerId}
+                                        horseId={match.id}
+                                    />
+                                </div>
                             </div>
                         </div>
                     ))}
