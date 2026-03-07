@@ -404,6 +404,9 @@ export default function EditHorsePage() {
           horseId,
           horseName: customName.trim(),
           finishType: finishType as string,
+          tradeStatus: tradeStatus as string,
+          moldId: selectedMoldId || null,
+          releaseId: selectedReleaseId || null,
         });
       }
 

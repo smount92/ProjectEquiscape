@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getSignedImageUrls } from "@/lib/utils/storage";
 
 interface FeedItem {
     id: string;
@@ -10,6 +11,7 @@ interface FeedItem {
     eventType: string;
     horseId: string | null;
     horseName: string | null;
+    thumbnailUrl: string | null;
     metadata: Record<string, unknown> | null;
     createdAt: string;
 }
@@ -90,6 +92,28 @@ export async function getActivityFeed(limit: number = 30): Promise<FeedItem[]> {
             horseMap.set(h.id, h.custom_name);
         });
     }
+    // Batch-fetch primary thumbnails for horses
+    const thumbUrlMap1 = new Map<string, string>();
+    if (horseIds.length > 0) {
+        const { data: thumbRows } = await supabase
+            .from("horse_images")
+            .select("horse_id, image_url, angle_profile")
+            .in("horse_id", horseIds);
+        const allThumbUrls: string[] = [];
+        for (const hId of horseIds) {
+            const imgs = (thumbRows ?? []).filter((r: { horse_id: string }) => r.horse_id === hId);
+            const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
+            const url = (primary ?? imgs[0])?.image_url;
+            if (url) {
+                thumbUrlMap1.set(hId, url);
+                allThumbUrls.push(url);
+            }
+        }
+        const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
+        for (const [hId, rawUrl] of thumbUrlMap1) {
+            thumbUrlMap1.set(hId, signedUrls.get(rawUrl) ?? rawUrl);
+        }
+    }
 
     return items.map((e) => ({
         id: e.id,
@@ -98,6 +122,7 @@ export async function getActivityFeed(limit: number = 30): Promise<FeedItem[]> {
         eventType: e.event_type,
         horseId: e.horse_id,
         horseName: e.horse_id ? horseMap.get(e.horse_id) || null : null,
+        thumbnailUrl: e.horse_id ? thumbUrlMap1.get(e.horse_id) ?? null : null,
         metadata: e.metadata,
         createdAt: e.created_at,
     }));
@@ -168,6 +193,28 @@ export async function getFollowingFeed(limit: number = 30): Promise<FeedItem[]> 
             horseMap.set(h.id, h.custom_name);
         });
     }
+    // Batch-fetch primary thumbnails for horses
+    const thumbUrlMap2 = new Map<string, string>();
+    if (horseIds.length > 0) {
+        const { data: thumbRows } = await supabase
+            .from("horse_images")
+            .select("horse_id, image_url, angle_profile")
+            .in("horse_id", horseIds);
+        const allThumbUrls: string[] = [];
+        for (const hId of horseIds) {
+            const imgs = (thumbRows ?? []).filter((r: { horse_id: string }) => r.horse_id === hId);
+            const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
+            const url = (primary ?? imgs[0])?.image_url;
+            if (url) {
+                thumbUrlMap2.set(hId, url);
+                allThumbUrls.push(url);
+            }
+        }
+        const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
+        for (const [hId, rawUrl] of thumbUrlMap2) {
+            thumbUrlMap2.set(hId, signedUrls.get(rawUrl) ?? rawUrl);
+        }
+    }
 
     return items.map((e) => ({
         id: e.id,
@@ -176,6 +223,7 @@ export async function getFollowingFeed(limit: number = 30): Promise<FeedItem[]> 
         eventType: e.event_type,
         horseId: e.horse_id,
         horseName: e.horse_id ? horseMap.get(e.horse_id) || null : null,
+        thumbnailUrl: e.horse_id ? thumbUrlMap2.get(e.horse_id) ?? null : null,
         metadata: e.metadata,
         createdAt: e.created_at,
     }));

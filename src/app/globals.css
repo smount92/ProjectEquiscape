@@ -7758,3 +7758,18 @@ p {
   height: 100%;
   object-fit: cover;
 }
+
+/* ===== Activity Feed Thumbnails ===== */
+.feed-item-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.feed-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

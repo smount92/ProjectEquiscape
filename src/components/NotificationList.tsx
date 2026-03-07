@@ -27,6 +27,7 @@ function getNotifIcon(type: string): string {
         case "follow": return "👤";
         case "message": return "✉️";
         case "feature": return "🌟";
+        case "wishlist_match": return "❤️‍🔥";
         default: return "🔔";
     }
 }

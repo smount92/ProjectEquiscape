@@ -472,7 +472,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟢 Priority: Nice-to-Have
 
-## Task CP-9: Activity Feed Event Thumbnails
+## ✅ Task CP-9: Activity Feed Event Thumbnails (completed)
 
 **Problem:** Feed events like "User added a new horse" or "User favorited a horse" are text-only. Visual feeds drive significantly more engagement.
 
@@ -517,7 +517,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task CP-10: Wishlist Match Notifications
+## ✅ Task CP-10: Wishlist Match Notifications (completed)
 
 **Problem:** The Matchmaker finds For Sale horses matching your wishlist, but ONLY when you visit the Wishlist page. Collectors want to be notified: "A horse matching your wishlist just went For Sale!"
 

@@ -9,6 +9,7 @@ interface FeedItemData {
     eventType: string;
     horseId: string | null;
     horseName: string | null;
+    thumbnailUrl: string | null;
     metadata: Record<string, unknown> | null;
     createdAt: string;
 }
@@ -92,9 +93,16 @@ export default function ActivityFeed({ items, emptyMessage }: ActivityFeedProps)
                         href={link}
                         className="activity-feed-item"
                     >
-                        <span className="activity-feed-icon">
-                            {getEventIcon(item.eventType)}
-                        </span>
+                        {item.thumbnailUrl ? (
+                            <div className="feed-item-thumb">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                            </div>
+                        ) : (
+                            <span className="activity-feed-icon">
+                                {getEventIcon(item.eventType)}
+                            </span>
+                        )}
                         <div className="activity-feed-content">
                             <span className="activity-feed-text">
                                 {getEventText(item)}
