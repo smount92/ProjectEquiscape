@@ -4,6 +4,8 @@ import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import ShareButton from "@/components/ShareButton";
 import MessageSellerButton from "@/components/MessageSellerButton";
+import RatingBadge from "@/components/RatingBadge";
+import { getUserRatingSummary } from "@/app/actions/ratings";
 
 // Types
 interface ProfileHorse {
@@ -98,6 +100,9 @@ export default async function ProfilePage({
   }
 
   const isOwnProfile = profileUser.id === user.id;
+
+  // Fetch rating summary for this profile user
+  const ratingSummary = await getUserRatingSummary(profileUser.id);
 
   // ================================================================
   // PROFILE QUERY: Only public horses for this user
@@ -220,6 +225,9 @@ export default async function ProfilePage({
               text={`Check out @${profileUser.alias_name}'s model horse collection on Model Horse Hub!`}
               variant="icon"
             />
+            {ratingSummary.count > 0 && (
+              <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
+            )}
           </div>
         </div>
       </div>
@@ -334,6 +342,30 @@ export default async function ProfilePage({
                 )}
               </div>
             </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Reviews Section */}
+      {ratingSummary.count > 0 && (
+        <div className="reviews-section animate-fade-in-up" id="reviews">
+          <div className="reviews-section-header">
+            <h2>⭐ Reviews ({ratingSummary.count})</h2>
+          </div>
+          {ratingSummary.ratings.map((r) => (
+            <div key={r.id} className="review-item">
+              <div className="review-item-header">
+                <span className="review-item-author">
+                  @{r.reviewerAlias} — {"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}
+                </span>
+                <span className="review-item-date">
+                  {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </span>
+              </div>
+              {r.reviewText && (
+                <p className="review-item-text">&ldquo;{r.reviewText}&rdquo;</p>
+              )}
+            </div>
           ))}
         </div>
       )}

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import ChatThread from "@/components/ChatThread";
+import RatingForm from "@/components/RatingForm";
 
 export async function generateMetadata({
     params,
@@ -120,6 +121,21 @@ export default async function ChatPage({
 
     const isBuyer = conversation.buyer_id === user.id;
 
+    // Check if user has already rated the other party in this conversation
+    const { data: rawRating } = await supabase
+        .from("user_ratings")
+        .select("id, stars, review_text, created_at")
+        .eq("conversation_id", conversationId)
+        .eq("reviewer_id", user.id)
+        .maybeSingle();
+
+    const existingRating = rawRating ? {
+        id: (rawRating as { id: string }).id,
+        stars: (rawRating as { stars: number }).stars,
+        reviewText: (rawRating as { review_text: string | null }).review_text,
+        createdAt: (rawRating as { created_at: string }).created_at,
+    } : null;
+
     return (
         <div className="page-container chat-page">
             {/* Header */}
@@ -155,8 +171,8 @@ export default async function ChatPage({
                             {horseContext.tradeStatus !== "Not for Sale" && (
                                 <span
                                     className={`inbox-item-status ${horseContext.tradeStatus === "For Sale"
-                                            ? "status-sale"
-                                            : "status-offers"
+                                        ? "status-sale"
+                                        : "status-offers"
                                         }`}
                                 >
                                     {horseContext.price
@@ -198,6 +214,14 @@ export default async function ChatPage({
                     createdAt: m.created_at,
                     isMe: m.sender_id === user.id,
                 }))}
+            />
+
+            {/* Rating Form */}
+            <RatingForm
+                conversationId={conversationId}
+                reviewedId={otherId}
+                reviewedAlias={otherAlias}
+                existingRating={existingRating}
             />
         </div>
     );

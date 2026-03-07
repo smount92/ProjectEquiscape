@@ -116,6 +116,19 @@ export default async function InboxPage() {
         }
     }
 
+    // Check which conversations the user has rated
+    const ratedConvoIds = new Set<string>();
+    if (convoIds.length > 0) {
+        const { data: ratings } = await supabase
+            .from("user_ratings")
+            .select("conversation_id")
+            .eq("reviewer_id", user.id)
+            .in("conversation_id", convoIds);
+        ratings?.forEach((r: { conversation_id: string }) => {
+            ratedConvoIds.add(r.conversation_id);
+        });
+    }
+
     // Build display data
     const inboxItems = conversations.map((c) => {
         const otherId = c.buyer_id === user.id ? c.seller_id : c.buyer_id;
@@ -136,6 +149,7 @@ export default async function InboxPage() {
             latestSenderIsMe: latest?.senderIsMe ?? false,
             latestTime: latest?.createdAt ?? c.created_at,
             unreadCount,
+            isRated: ratedConvoIds.has(c.id),
         };
     });
 
@@ -218,6 +232,9 @@ export default async function InboxPage() {
                                 <div className="inbox-item-info">
                                     <div className="inbox-item-top">
                                         <span className="inbox-item-alias">@{item.otherAlias}</span>
+                                        {item.isRated && (
+                                            <span className="inbox-item-rated">⭐ Rated</span>
+                                        )}
                                         <span className="inbox-item-time">
                                             {timeAgo(item.latestTime)}
                                         </span>
@@ -229,8 +246,8 @@ export default async function InboxPage() {
                                                 item.horseTradeStatus !== "Not for Sale" && (
                                                     <span
                                                         className={`inbox-item-status ${item.horseTradeStatus === "For Sale"
-                                                                ? "status-sale"
-                                                                : "status-offers"
+                                                            ? "status-sale"
+                                                            : "status-offers"
                                                             }`}
                                                     >
                                                         {item.horseTradeStatus === "For Sale"

@@ -167,6 +167,16 @@ export interface HorsePedigree {
   updated_at: string;
 }
 
+export interface UserRating {
+  id: string;
+  conversation_id: string;
+  reviewer_id: string;
+  reviewed_id: string;
+  stars: number;
+  review_text: string | null;
+  created_at: string;
+}
+
 // --- Supabase Database Type Interface ---
 // Used to provide type safety to supabase client calls
 
@@ -292,6 +302,15 @@ export interface Database {
           updated_at?: string;
         };
         Update: Partial<Omit<HorsePedigree, "id">>;
+        Relationships: [];
+      };
+      user_ratings: {
+        Row: UserRating;
+        Insert: Omit<UserRating, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<UserRating, "id">>;
         Relationships: [];
       };
     };
