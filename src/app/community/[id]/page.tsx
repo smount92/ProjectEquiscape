@@ -194,10 +194,11 @@ export default async function PublicPassportPage({
     .eq("user_id", user.id)
     .maybeSingle();
 
-  // Comments with user aliases
+  // Comments — two-step fetch because horse_comments.user_id -> auth.users(id),
+  // NOT public.users(id), so PostgREST can't resolve the join directly.
   const { data: rawComments } = await supabase
     .from("horse_comments")
-    .select("id, content, created_at, user_id, users!inner(alias_name)")
+    .select("id, content, created_at, user_id")
     .eq("horse_id", horseId)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -207,14 +208,28 @@ export default async function PublicPassportPage({
     content: string;
     created_at: string;
     user_id: string;
-    users: { alias_name: string } | null;
   }
 
-  const comments = ((rawComments as unknown as RawComment[]) ?? []).map((c) => ({
+  const commentRows = (rawComments as unknown as RawComment[]) ?? [];
+
+  // Batch-fetch aliases for all comment authors
+  const commentUserIds = [...new Set(commentRows.map((c) => c.user_id))];
+  const aliasMap = new Map<string, string>();
+  if (commentUserIds.length > 0) {
+    const { data: aliasRows } = await supabase
+      .from("users")
+      .select("id, alias_name")
+      .in("id", commentUserIds);
+    ((aliasRows as { id: string; alias_name: string }[]) ?? []).forEach((u) => {
+      aliasMap.set(u.id, u.alias_name);
+    });
+  }
+
+  const comments = commentRows.map((c) => ({
     id: c.id,
     content: c.content,
     createdAt: c.created_at,
-    userAlias: c.users?.alias_name ?? "Unknown",
+    userAlias: aliasMap.get(c.user_id) ?? "Unknown",
     userId: c.user_id,
   }));
 
