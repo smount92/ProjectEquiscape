@@ -95,6 +95,9 @@ export default function Header() {
           <Link href="/community" className="header-nav-link" id="nav-community">
             🏆 Show Ring
           </Link>
+          <Link href="/discover" className="header-nav-link" id="nav-discover">
+            👥 Discover
+          </Link>
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist">
             ❤️ Wishlist
           </Link>

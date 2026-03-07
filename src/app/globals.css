@@ -6682,3 +6682,242 @@ p {
     gap: var(--space-xs);
   }
 }
+
+
+/* ============================================================
+   SOCIAL EXPANSION — Phase 1: Filters, Discover, Featured
+   ============================================================ */
+
+/* Show Ring Filters */
+.showring-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+  padding: var(--space-sm) 0;
+}
+
+.filter-pill-group {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-lg);
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.filter-pill {
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  border-radius: calc(var(--radius-lg) - 2px);
+  font-size: calc(0.8rem * var(--font-scale));
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.filter-pill:hover {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.filter-pill-active {
+  background: var(--color-primary, #818cf8) !important;
+  color: white !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(129, 140, 248, 0.25);
+}
+
+.filter-dropdown {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: calc(0.8rem * var(--font-scale));
+  cursor: pointer;
+  font-family: inherit;
+  appearance: auto;
+  transition: border-color 0.2s ease;
+}
+
+.filter-dropdown:hover {
+  border-color: var(--color-primary, #818cf8);
+}
+
+.filter-dropdown:focus {
+  outline: 2px solid var(--color-primary, #818cf8);
+  outline-offset: 1px;
+}
+
+/* Discover Page */
+.discover-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
+
+.discover-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--color-card-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(12px);
+}
+
+.discover-card:hover {
+  border-color: var(--color-primary, #818cf8);
+  box-shadow: 0 4px 20px rgba(129, 140, 248, 0.12);
+  transform: translateY(-2px);
+}
+
+.discover-card-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.2), rgba(167, 139, 250, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-primary, #818cf8);
+}
+
+.discover-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.discover-card-alias {
+  font-weight: 600;
+  font-size: calc(1rem * var(--font-scale));
+  margin-bottom: var(--space-xs);
+}
+
+.discover-card-stats {
+  display: flex;
+  gap: var(--space-md);
+  font-size: calc(0.8rem * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+/* Featured Horse Card */
+.featured-horse-card {
+  display: flex;
+  gap: var(--space-xl);
+  padding: var(--space-xl);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(234, 179, 8, 0.03));
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.featured-horse-card:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4px 24px rgba(245, 158, 11, 0.12);
+  transform: translateY(-2px);
+}
+
+.featured-horse-image {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.featured-horse-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.featured-horse-badge {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #1a1a2e;
+  font-size: calc(0.7rem * var(--font-scale));
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.featured-horse-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.featured-horse-name {
+  font-size: calc(1.4rem * var(--font-scale));
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+
+.featured-horse-owner {
+  font-size: calc(0.9rem * var(--font-scale));
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.featured-horse-desc {
+  font-size: calc(0.9rem * var(--font-scale));
+  color: var(--color-text-muted);
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Admin feature form */
+.admin-feature-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 500px;
+}
+
+/* Phase 1 Responsive */
+@media (max-width: 600px) {
+  .showring-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-pill-group {
+    justify-content: center;
+  }
+
+  .featured-horse-card {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .featured-horse-image {
+    width: 100%;
+    height: 180px;
+  }
+
+  .discover-grid {
+    grid-template-columns: 1fr;
+  }
+}

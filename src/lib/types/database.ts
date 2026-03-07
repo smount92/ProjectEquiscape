@@ -177,6 +177,16 @@ export interface UserRating {
   created_at: string;
 }
 
+export interface FeaturedHorse {
+  id: string;
+  horse_id: string;
+  title: string;
+  description: string | null;
+  featured_at: string;
+  expires_at: string | null;
+  created_by: string;
+}
+
 // --- Supabase Database Type Interface ---
 // Used to provide type safety to supabase client calls
 
@@ -311,6 +321,15 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Omit<UserRating, "id">>;
+        Relationships: [];
+      };
+      featured_horses: {
+        Row: FeaturedHorse;
+        Insert: Omit<FeaturedHorse, "id" | "featured_at"> & {
+          id?: string;
+          featured_at?: string;
+        };
+        Update: Partial<Omit<FeaturedHorse, "id">>;
         Relationships: [];
       };
     };

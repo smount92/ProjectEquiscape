@@ -5,41 +5,41 @@ import { createClient as createAuthClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
 async function verifyAdmin() {
-    const authClient = await createAuthClient();
-    const {
-        data: { user },
-    } = await authClient.auth.getUser();
+  const authClient = await createAuthClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
 
-    if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
-        return null;
-    }
-    return user;
+  if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
+    return null;
+  }
+  return user;
 }
 
 function getAdminSupabase() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 }
 
 /**
  * Toggle a contact message's is_read status.
  */
 export async function toggleMessageRead(
-    messageId: string,
-    isRead: boolean
+  messageId: string,
+  isRead: boolean
 ): Promise<{ success: boolean; error?: string }> {
-    const user = await verifyAdmin();
-    if (!user) return { success: false, error: "Unauthorized" };
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
 
-    const { error } = await getAdminSupabase()
-        .from("contact_messages")
-        .update({ is_read: isRead })
-        .eq("id", messageId);
+  const { error } = await getAdminSupabase()
+    .from("contact_messages")
+    .update({ is_read: isRead })
+    .eq("id", messageId);
 
-    if (error) return { success: false, error: error.message };
-    return { success: true };
+  if (error) return { success: false, error: error.message };
+  return { success: true };
 }
 
 /**
@@ -47,25 +47,25 @@ export async function toggleMessageRead(
  * Auto-marks the original message as read after sending.
  */
 export async function replyToContactMessage(
-    messageId: string,
-    recipientEmail: string,
-    recipientName: string,
-    originalSubject: string | null,
-    originalMessage: string,
-    replyBody: string
+  messageId: string,
+  recipientEmail: string,
+  recipientName: string,
+  originalSubject: string | null,
+  originalMessage: string,
+  replyBody: string
 ): Promise<{ success: boolean; error?: string }> {
-    const user = await verifyAdmin();
-    if (!user) return { success: false, error: "Unauthorized" };
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
 
-    if (!replyBody.trim()) return { success: false, error: "Reply cannot be empty." };
+  if (!replyBody.trim()) return { success: false, error: "Reply cannot be empty." };
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
-    const replyToEmail = user.email || process.env.ADMIN_EMAIL || "";
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
+  const replyToEmail = user.email || process.env.ADMIN_EMAIL || "";
 
-    const subject = `Re: ${originalSubject || "Your message to Model Horse Hub"}`;
+  const subject = `Re: ${originalSubject || "Your message to Model Horse Hub"}`;
 
-    const html = `
+  const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,38 +108,82 @@ export async function replyToContactMessage(
 </body>
 </html>`.trim();
 
-    try {
-        const { error } = await resend.emails.send({
-            from: fromEmail,
-            to: recipientEmail,
-            replyTo: replyToEmail,
-            subject,
-            html,
-        });
+  try {
+    const { error } = await resend.emails.send({
+      from: fromEmail,
+      to: recipientEmail,
+      replyTo: replyToEmail,
+      subject,
+      html,
+    });
 
-        if (error) {
-            console.error("[Admin Reply] Resend error:", error);
-            return { success: false, error: `Email failed: ${error.message}` };
-        }
-    } catch (err) {
-        console.error("[Admin Reply] Unexpected error:", err);
-        return { success: false, error: "Failed to send email. Check Resend configuration." };
+    if (error) {
+      console.error("[Admin Reply] Resend error:", error);
+      return { success: false, error: `Email failed: ${error.message}` };
     }
+  } catch (err) {
+    console.error("[Admin Reply] Unexpected error:", err);
+    return { success: false, error: "Failed to send email. Check Resend configuration." };
+  }
 
-    // Auto-mark as read after replying
-    await getAdminSupabase()
-        .from("contact_messages")
-        .update({ is_read: true })
-        .eq("id", messageId);
+  // Auto-mark as read after replying
+  await getAdminSupabase()
+    .from("contact_messages")
+    .update({ is_read: true })
+    .eq("id", messageId);
 
-    return { success: true };
+  return { success: true };
+}
+
+/**
+ * Feature a horse (Horse of the Week / spotlight).
+ * Admin-only — uses Service Role to insert into featured_horses.
+ */
+export async function featureHorse(data: {
+  horseId: string;
+  title: string;
+  description?: string;
+  expiresAt?: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  if (!data.horseId.trim() || !data.title.trim()) {
+    return { success: false, error: "Horse ID and title are required." };
+  }
+
+  // Verify horse exists and is public
+  const supabaseAdmin = getAdminSupabase();
+  const { data: horse } = await supabaseAdmin
+    .from("user_horses")
+    .select("id, is_public")
+    .eq("id", data.horseId)
+    .single();
+
+  if (!horse) return { success: false, error: "Horse not found." };
+  if (!(horse as { is_public: boolean }).is_public) {
+    return { success: false, error: "Horse must be public to be featured." };
+  }
+
+  const { error } = await supabaseAdmin
+    .from("featured_horses")
+    .insert({
+      horse_id: data.horseId,
+      title: data.title.trim(),
+      description: data.description?.trim() || null,
+      expires_at: data.expiresAt || null,
+      created_by: user.id,
+    });
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
 }
 
 function escapeHtml(str: string): string {
-    return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 

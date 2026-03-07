@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
+import ShowRingFilters from "@/components/ShowRingFilters";
+import type { FilterState } from "@/components/ShowRingFilters";
 import WishlistButton from "@/components/WishlistButton";
 import MessageSellerButton from "@/components/MessageSellerButton";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -62,19 +64,62 @@ export default function ShowRingGrid({
     communityCards: CommunityCardData[];
 }) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [filters, setFilters] = useState<FilterState>({
+        finishType: null,
+        tradeStatus: null,
+        manufacturer: null,
+        sortBy: "newest",
+    });
+
+    // Extract unique manufacturers from data
+    const manufacturers = useMemo(() => {
+        const set = new Set<string>();
+        communityCards.forEach((h) => {
+            const mfr = h.refName.split(" ")[0];
+            if (mfr && mfr !== "Unlisted") set.add(mfr);
+        });
+        return [...set].sort();
+    }, [communityCards]);
 
     const filteredCards = useMemo(() => {
-        if (!searchQuery.trim()) return communityCards;
-        const q = searchQuery.toLowerCase().trim();
-        return communityCards.filter((horse) =>
-            horse.customName.toLowerCase().includes(q) ||
-            (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
-            (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
-            (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
-            horse.refName.toLowerCase().includes(q) ||
-            horse.ownerAlias.toLowerCase().includes(q)
-        );
-    }, [searchQuery, communityCards]);
+        let cards = communityCards;
+
+        // Text search
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase().trim();
+            cards = cards.filter((horse) =>
+                horse.customName.toLowerCase().includes(q) ||
+                (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
+                (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
+                (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
+                horse.refName.toLowerCase().includes(q) ||
+                horse.ownerAlias.toLowerCase().includes(q)
+            );
+        }
+
+        // Structured filters
+        if (filters.finishType) {
+            cards = cards.filter((h) => h.finishType === filters.finishType);
+        }
+        if (filters.tradeStatus) {
+            cards = cards.filter((h) => h.tradeStatus === filters.tradeStatus);
+        }
+        if (filters.manufacturer) {
+            cards = cards.filter((h) => h.refName.startsWith(filters.manufacturer!));
+        }
+
+        // Sort
+        if (filters.sortBy === "oldest") {
+            cards = [...cards].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        } else if (filters.sortBy === "most-favorited") {
+            cards = [...cards].sort((a, b) => b.favoriteCount - a.favoriteCount);
+        }
+        // "newest" is the default order from the server
+
+        return cards;
+    }, [searchQuery, communityCards, filters]);
+
+    const isFiltering = searchQuery.trim() || filters.finishType || filters.tradeStatus || filters.manufacturer;
 
     return (
         <>
@@ -87,15 +132,23 @@ export default function ShowRingGrid({
                 />
             )}
 
-            {searchQuery.trim() && (
+            {communityCards.length > 0 && (
+                <ShowRingFilters
+                    filters={filters}
+                    onFilterChange={setFilters}
+                    manufacturers={manufacturers}
+                />
+            )}
+
+            {isFiltering && (
                 <div className="search-results-count">
                     {filteredCards.length === 0
-                        ? "No models match your search"
+                        ? "No models match your filters"
                         : `Showing ${filteredCards.length} of ${communityCards.length} models`}
                 </div>
             )}
 
-            {filteredCards.length === 0 && !searchQuery.trim() ? (
+            {filteredCards.length === 0 && !isFiltering ? (
                 <div className="card shelf-empty animate-fade-in-up">
                     <div className="shelf-empty-icon">🏟️</div>
                     <h2>The Show Ring is Empty</h2>

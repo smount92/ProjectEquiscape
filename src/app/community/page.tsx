@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import ShowRingGrid from "@/components/ShowRingGrid";
+import FeaturedHorseCard from "@/components/FeaturedHorseCard";
 
 // Types
 interface CommunityHorse {
@@ -165,6 +166,66 @@ export default async function CommunityPage() {
     };
   });
 
+  // ================================================================
+  // FEATURED HORSE: Query most recent non-expired featured horse
+  // ================================================================
+  let featuredHorse: {
+    horseId: string;
+    horseName: string;
+    title: string;
+    description: string | null;
+    ownerAlias: string;
+    thumbnailUrl: string | null;
+    finishType: string;
+  } | null = null;
+
+  const { data: rawFeatured } = await supabase
+    .from("featured_horses")
+    .select("id, horse_id, title, description, featured_at")
+    .or("expires_at.is.null,expires_at.gt." + new Date().toISOString())
+    .order("featured_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (rawFeatured) {
+    const feat = rawFeatured as { horse_id: string; title: string; description: string | null };
+    const { data: fHorse } = await supabase
+      .from("user_horses")
+      .select(`
+        id, custom_name, finish_type, owner_id,
+        users!inner(alias_name),
+        horse_images(image_url, angle_profile)
+      `)
+      .eq("id", feat.horse_id)
+      .single();
+
+    if (fHorse) {
+      const h = fHorse as unknown as {
+        id: string;
+        custom_name: string;
+        finish_type: string;
+        users: { alias_name: string };
+        horse_images: { image_url: string; angle_profile: string }[];
+      };
+      const thumb = h.horse_images?.find((i) => i.angle_profile === "Primary_Thumbnail");
+      const imgUrl = thumb?.image_url || h.horse_images?.[0]?.image_url;
+      let signedFeatUrl: string | null = null;
+      if (imgUrl) {
+        const fMap = await getSignedImageUrls(supabase, [imgUrl]);
+        signedFeatUrl = fMap.get(imgUrl) || null;
+      }
+      featuredHorse = {
+        horseId: h.id,
+        horseName: h.custom_name,
+        title: feat.title,
+        description: feat.description,
+        ownerAlias: h.users.alias_name,
+        thumbnailUrl: signedFeatUrl,
+        finishType: h.finish_type,
+      };
+    }
+  }
+
   return (
     <div className="page-container">
       {/* Hero */}
@@ -185,6 +246,11 @@ export default async function CommunityPage() {
           </div>
         </div>
       </div>
+
+      {/* Featured Horse */}
+      {featuredHorse && (
+        <FeaturedHorseCard {...featuredHorse} />
+      )}
 
       {/* Grid with Search */}
       <ShowRingGrid communityCards={communityCards} />

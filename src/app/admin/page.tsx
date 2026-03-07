@@ -3,6 +3,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import MarkReadButton from "@/components/MarkReadButton";
 import AdminReplyForm from "@/components/AdminReplyForm";
+import FeatureHorseForm from "@/components/FeatureHorseForm";
 
 export const metadata = {
     title: "Admin Console — Model Horse Hub",
@@ -193,6 +194,15 @@ export default async function AdminPage() {
                             ))}
                         </div>
                     )}
+                </div>
+
+                {/* Feature a Horse */}
+                <div className="admin-section">
+                    <h2 className="admin-section-title">
+                        🌟 Feature a Horse
+                        <span className="admin-section-count">Horse of the Week</span>
+                    </h2>
+                    <FeatureHorseForm />
                 </div>
             </div>
         </div>
