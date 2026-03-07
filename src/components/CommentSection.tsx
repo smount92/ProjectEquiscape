@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addComment, deleteComment } from "@/app/actions/social";
 
@@ -42,11 +43,17 @@ export default function CommentSection({
     horseOwnerId,
     initialComments,
 }: CommentSectionProps) {
+    const router = useRouter();
     const [comments, setComments] = useState<CommentData[]>(initialComments);
     const [newComment, setNewComment] = useState("");
     const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
     const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    // Sync comments state when server re-fetches after revalidation
+    useEffect(() => {
+        setComments(initialComments);
+    }, [initialComments]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -69,6 +76,8 @@ export default function CommentSection({
             setComments((prev) => [optimisticComment, ...prev]);
             setNewComment("");
             setStatus("idle");
+            // Trigger server re-fetch to get the real comment ID & persist
+            router.refresh();
         } else {
             setErrorMsg(result.error || "Failed to post comment.");
             setStatus("error");
@@ -84,6 +93,7 @@ export default function CommentSection({
 
         if (result.success) {
             setComments((prev) => prev.filter((c) => c.id !== commentId));
+            router.refresh();
         }
 
         setDeletingId(null);
