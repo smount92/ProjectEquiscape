@@ -5223,3 +5223,44 @@ p {
   border: 1px solid rgba(239, 68, 68, 0.4);
   color: #ef4444;
 }
+
+
+/* ============================================================
+   EXPORT CSV BUTTON
+   ============================================================ */
+
+.export-csv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(34, 197, 94, 0.15));
+  border: 1px solid rgba(20, 184, 166, 0.3);
+  border-radius: var(--radius-full);
+  color: #14b8a6;
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.export-csv-btn:hover {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.25), rgba(34, 197, 94, 0.25));
+  border-color: rgba(20, 184, 166, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.2);
+}
+
+.export-csv-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+@media (max-width: 600px) {
+  .export-csv-btn span:not(.btn-spinner) {
+    display: none;
+  }
+}

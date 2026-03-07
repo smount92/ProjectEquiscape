@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import DashboardToast from "@/components/DashboardToast";
 import StableGrid from "@/components/StableGrid";
+import ExportButton from "@/components/ExportButton";
 
 // Types for the dashboard query results
 interface HorseWithDetails {
@@ -189,6 +190,7 @@ export default async function DashboardPage() {
                                 {horses.length} model{horses.length === 1 ? "" : "s"}
                             </span>
                         )}
+                        {horses.length > 0 && <ExportButton />}
                         <Link href="/add-horse" className="btn btn-primary" id="add-horse-button">
                             🐴 Add to Stable
                         </Link>
