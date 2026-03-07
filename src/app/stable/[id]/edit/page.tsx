@@ -20,10 +20,11 @@ interface VaultData {
 }
 
 const PHOTO_STUDIO_SLOTS: { angle: AngleProfile; label: string; primary?: boolean }[] = [
-  { angle: "Primary_Thumbnail", label: "Primary / Near-Side", primary: true },
+  { angle: "Primary_Thumbnail", label: "Near-Side", primary: true },
   { angle: "Right_Side", label: "Off-Side" },
-  { angle: "Front_Chest", label: "Front / Face" },
-  { angle: "Flaw_Rub_Damage", label: "Flaws & Details" },
+  { angle: "Front_Chest", label: "Front / Chest" },
+  { angle: "Back_Hind", label: "Hindquarters / Tail" },
+  { angle: "Belly_Makers_Mark", label: "Belly / Maker's Mark" },
 ];
 
 interface ExistingImage {
@@ -87,6 +88,11 @@ export default function EditHorsePage() {
   const [previews, setPreviews] = useState<Partial<Record<AngleProfile, string>>>({});
   const [draggingAngle, setDraggingAngle] = useState<AngleProfile | null>(null);
   const fileInputRefs = useRef<Partial<Record<AngleProfile, HTMLInputElement>>>({});
+
+  // Extra detail images (unlimited)
+  const [existingExtras, setExistingExtras] = useState<ExistingImage[]>([]);
+  const [newExtraFiles, setNewExtraFiles] = useState<{ file: File; previewUrl: string }[]>([]);
+  const extraInputRef = useRef<HTMLInputElement>(null);
 
   // ---- Load existing data ----
   useEffect(() => {
@@ -181,6 +187,19 @@ export default function EditHorsePage() {
         }
         setExistingImages(existingMap);
         setPreviews(previewMap);
+
+        // Separate out extra_detail images
+        const extras = (allImages as { id: string; image_url: string; angle_profile: string }[])
+          .filter(img => img.angle_profile === "extra_detail")
+          .map(img => {
+            const urlParts = img.image_url.split("/horse-images/");
+            return {
+              recordId: img.id,
+              imageUrl: img.image_url,
+              storagePath: urlParts.length > 1 ? urlParts[1] : null,
+            };
+          });
+        setExistingExtras(extras);
       }
 
       setIsLoading(false);
@@ -299,6 +318,31 @@ export default function EditHorsePage() {
             } as Record<string, unknown>);
           }
         }
+      }
+
+      // --- Upload new extra detail files ---
+      for (let i = 0; i < newExtraFiles.length; i++) {
+        const compressed = await compressImage(newExtraFiles[i].file);
+        const filePath = `${user.id}/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from("horse-images")
+          .upload(filePath, compressed, { contentType: "image/webp", upsert: false });
+
+        if (uploadErr) {
+          console.error(`Extra upload error ${i}:`, uploadErr);
+          continue;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("horse-images")
+          .getPublicUrl(filePath);
+
+        await supabase.from("horse_images").insert({
+          horse_id: horseId,
+          image_url: publicUrl,
+          angle_profile: "extra_detail",
+        } as Record<string, unknown>);
       }
 
       // --- Update horse record ---
@@ -499,6 +543,91 @@ export default function EditHorsePage() {
                 </div>
               );
             })}
+          </div>
+
+          {/* Extra Details Multi-Upload Zone */}
+          <div className="extras-upload-zone">
+            <div className="photo-studio-label" style={{ marginBottom: "var(--space-xs)" }}>
+              Extra Details & Flaws
+              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>Unlimited</span>
+            </div>
+            <div
+              className="extras-dropzone"
+              onClick={() => extraInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+                const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
+                setNewExtraFiles(prev => [...prev, ...newExtras]);
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <input
+                ref={extraInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []).filter(f => f.type.startsWith("image/"));
+                  const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
+                  setNewExtraFiles(prev => [...prev, ...newExtras]);
+                  e.target.value = "";
+                }}
+                style={{ display: "none" }}
+              />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Click or drag multiple files</span>
+            </div>
+
+            {/* Existing extras */}
+            {(existingExtras.length > 0 || newExtraFiles.length > 0) && (
+              <div className="extras-preview-grid">
+                {existingExtras.map((ex) => (
+                  <div key={ex.recordId} className="extras-preview-item">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ex.imageUrl} alt="Extra detail" />
+                    <button
+                      className="gallery-remove"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        // Delete from storage + DB
+                        if (ex.storagePath) {
+                          await supabase.storage.from("horse-images").remove([ex.storagePath]);
+                        }
+                        await supabase.from("horse_images").delete().eq("id", ex.recordId);
+                        setExistingExtras(prev => prev.filter(item => item.recordId !== ex.recordId));
+                      }}
+                      aria-label="Remove extra photo"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                {newExtraFiles.map((ef, i) => (
+                  <div key={`new-${i}`} className="extras-preview-item">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ef.previewUrl} alt={`New extra ${i + 1}`} />
+                    <button
+                      className="gallery-remove"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        URL.revokeObjectURL(ef.previewUrl);
+                        setNewExtraFiles(prev => prev.filter((_, idx) => idx !== i));
+                      }}
+                      aria-label={`Remove new extra ${i + 1}`}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

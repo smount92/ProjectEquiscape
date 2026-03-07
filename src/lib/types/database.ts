@@ -15,6 +15,8 @@ export type AngleProfile =
   | "Detail_Ears"
   | "Detail_Hooves"
   | "Flaw_Rub_Damage"
+  | "Belly_Makers_Mark"
+  | "extra_detail"
   | "Other";
 
 export type FinishType = "OF" | "Custom" | "Artist Resin";

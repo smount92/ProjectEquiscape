@@ -49,10 +49,11 @@ const CONDITION_GRADES = [
 ];
 
 const GALLERY_SLOTS: { angle: AngleProfile; label: string; primary?: boolean }[] = [
-  { angle: "Primary_Thumbnail", label: "Primary / Near-Side (Required)", primary: true },
-  { angle: "Right_Side", label: "Off-Side (Optional)" },
-  { angle: "Front_Chest", label: "Front / Face (Optional)" },
-  { angle: "Flaw_Rub_Damage", label: "Flaws & Details (Optional)" },
+  { angle: "Primary_Thumbnail", label: "Near-Side (Required)", primary: true },
+  { angle: "Right_Side", label: "Off-Side" },
+  { angle: "Front_Chest", label: "Front / Chest" },
+  { angle: "Back_Hind", label: "Hindquarters / Tail" },
+  { angle: "Belly_Makers_Mark", label: "Belly / Maker's Mark" },
 ];
 
 // ---- Types ----
@@ -77,6 +78,8 @@ export default function AddHorsePage() {
 
   // Step 1 (index 0): Gallery
   const [imageSlots, setImageSlots] = useState<Partial<Record<AngleProfile, ImageSlot>>>({});
+  const [extraFiles, setExtraFiles] = useState<{ file: File; previewUrl: string }[]>([]);
+  const extraInputRef = useRef<HTMLInputElement>(null);
 
   // AI Vision Detection
   const [aiDetecting, setAiDetecting] = useState(false);
@@ -378,6 +381,29 @@ export default function AddHorsePage() {
         } as Record<string, unknown>);
       }
 
+      // 3b. Upload extra detail files
+      for (let i = 0; i < extraFiles.length; i++) {
+        const compressed = await compressImage(extraFiles[i].file);
+        const filePath = `${user.id}/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("horse-images")
+          .upload(filePath, compressed, { contentType: "image/webp", upsert: false });
+
+        if (uploadError) {
+          console.error(`Upload error for extra ${i}:`, uploadError);
+          continue;
+        }
+
+        const { data: { publicUrl } } = supabase.storage.from("horse-images").getPublicUrl(filePath);
+
+        await supabase.from("horse_images").insert({
+          horse_id: horseId,
+          image_url: publicUrl,
+          angle_profile: "extra_detail",
+        } as Record<string, unknown>);
+      }
+
       // 4. Insert Financial Vault (if any data was entered)
       const hasVaultData =
         purchasePrice || purchaseDate || estimatedValue || insuranceNotes;
@@ -575,6 +601,65 @@ export default function AddHorsePage() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Extra Details Multi-Upload Zone */}
+            <div className="extras-upload-zone">
+              <div
+                className="extras-dropzone"
+                onClick={() => extraInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+                  const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
+                  setExtraFiles(prev => [...prev, ...newExtras]);
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <input
+                  ref={extraInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []).filter(f => f.type.startsWith("image/"));
+                    const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
+                    setExtraFiles(prev => [...prev, ...newExtras]);
+                    e.target.value = "";
+                  }}
+                  style={{ display: "none" }}
+                />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span><strong>Extra Details & Flaws</strong> — Upload as many as needed</span>
+                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>Click or drag multiple files here</span>
+              </div>
+              {extraFiles.length > 0 && (
+                <div className="extras-preview-grid">
+                  {extraFiles.map((ef, i) => (
+                    <div key={i} className="extras-preview-item">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={ef.previewUrl} alt={`Extra detail ${i + 1}`} />
+                      <button
+                        className="gallery-remove"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          URL.revokeObjectURL(ef.previewUrl);
+                          setExtraFiles(prev => prev.filter((_, idx) => idx !== i));
+                        }}
+                        aria-label={`Remove extra photo ${i + 1}`}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* AI result badge (shown after detection) */}

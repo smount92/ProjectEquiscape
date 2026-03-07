@@ -15,12 +15,14 @@ const ANGLE_LABELS: Record<string, string> = {
   Primary_Thumbnail: "Near-Side",
   Left_Side: "Left Side",
   Right_Side: "Off-Side",
-  Front_Chest: "Front",
-  Back_Hind: "Back",
+  Front_Chest: "Front / Chest",
+  Back_Hind: "Hindquarters",
+  Belly_Makers_Mark: "Belly / Mark",
   Detail_Face_Eyes: "Face & Eyes",
   Detail_Ears: "Ears",
   Detail_Hooves: "Hooves",
-  Flaw_Rub_Damage: "Flaws & Details",
+  Flaw_Rub_Damage: "Flaws",
+  extra_detail: "Detail",
   Other: "Other",
 };
 
