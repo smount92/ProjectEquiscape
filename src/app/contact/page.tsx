@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState } from "react";
+import { submitContactForm, type ContactFormState } from "@/app/actions/contact";
+import { useRef, useEffect } from "react";
+
+const initialState: ContactFormState = {
+    error: null,
+    success: false,
+};
 
 export default function ContactPage() {
-    const [submitted, setSubmitted] = useState(false);
+    const [state, formAction, isPending] = useActionState(submitContactForm, initialState);
+    const formRef = useRef<HTMLFormElement>(null);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        // Non-functional placeholder — in production this would call an API
-        setSubmitted(true);
-    };
+    // Clear the form on success
+    useEffect(() => {
+        if (state.success && formRef.current) {
+            formRef.current.reset();
+        }
+    }, [state.success]);
 
     return (
         <div className="static-page">
@@ -26,7 +35,7 @@ export default function ContactPage() {
                 </div>
 
                 <section className="static-section">
-                    {submitted ? (
+                    {state.success ? (
                         <div className="contact-success" id="contact-success">
                             <span className="contact-success-icon" aria-hidden="true">✅</span>
                             <h2>Message Sent!</h2>
@@ -35,7 +44,32 @@ export default function ContactPage() {
                             </p>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="contact-form" id="contact-form">
+                        <form
+                            ref={formRef}
+                            action={formAction}
+                            className="contact-form"
+                            id="contact-form"
+                            noValidate
+                        >
+                            {state.error && (
+                                <div className="form-error" role="alert" id="contact-error">
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        aria-hidden="true"
+                                    >
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                    </svg>
+                                    {state.error}
+                                </div>
+                            )}
+
                             <div className="form-group">
                                 <label htmlFor="contact-name" className="form-label">
                                     Your Name
@@ -48,6 +82,7 @@ export default function ContactPage() {
                                     placeholder="Jane Doe"
                                     required
                                     autoComplete="name"
+                                    maxLength={200}
                                 />
                             </div>
 
@@ -68,7 +103,7 @@ export default function ContactPage() {
 
                             <div className="form-group">
                                 <label htmlFor="contact-subject" className="form-label">
-                                    Subject
+                                    Subject <span style={{ color: "var(--color-text-muted)", fontWeight: 400 }}>(optional)</span>
                                 </label>
                                 <input
                                     id="contact-subject"
@@ -76,7 +111,6 @@ export default function ContactPage() {
                                     type="text"
                                     className="form-input"
                                     placeholder="How can we help?"
-                                    required
                                 />
                             </div>
 
@@ -91,6 +125,7 @@ export default function ContactPage() {
                                     placeholder="Tell us what's on your mind..."
                                     rows={6}
                                     required
+                                    maxLength={5000}
                                 />
                             </div>
 
@@ -98,8 +133,16 @@ export default function ContactPage() {
                                 type="submit"
                                 className="btn btn-primary btn-full"
                                 id="contact-submit"
+                                disabled={isPending}
                             >
-                                Send Message
+                                {isPending ? (
+                                    <>
+                                        <span className="btn-spinner" aria-hidden="true" />
+                                        Sending…
+                                    </>
+                                ) : (
+                                    "Send Message"
+                                )}
                             </button>
                         </form>
                     )}
