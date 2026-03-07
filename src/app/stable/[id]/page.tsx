@@ -194,7 +194,7 @@ export default async function HorsePassportPage({
     <div className="page-container form-page">
       {/* Breadcrumb */}
       <nav className="passport-breadcrumb animate-fade-in-up" aria-label="Breadcrumb">
-        <Link href="/">Digital Stable</Link>
+        <Link href="/dashboard">Digital Stable</Link>
         <span className="separator" aria-hidden="true">
           /
         </span>
@@ -348,7 +348,7 @@ export default async function HorsePassportPage({
           {/* Actions */}
           <div className="passport-actions">
             <Link
-              href="/"
+              href="/dashboard"
               className="btn btn-ghost"
               id="back-to-stable"
             >

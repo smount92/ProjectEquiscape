@@ -38,16 +38,21 @@ export default function Header() {
 
   return (
     <header className="header" role="banner">
-      <Link href="/" className="header-logo" aria-label="Model Horse Hub — Home">
+      <Link
+        href={user ? "/dashboard" : "/"}
+        className="header-logo"
+        aria-label="Model Horse Hub — Home"
+      >
         <span className="header-logo-icon" aria-hidden="true">
           🐴
         </span>
         <span>Model Horse Hub</span>
       </Link>
 
+      {/* ── Authenticated Navigation ── */}
       {user && (
         <nav className="header-nav" aria-label="Main navigation">
-          <Link href="/" className="header-nav-link" id="nav-stable">
+          <Link href="/dashboard" className="header-nav-link" id="nav-stable">
             🏠 Digital Stable
           </Link>
           <Link href="/community" className="header-nav-link" id="nav-community">
@@ -56,8 +61,20 @@ export default function Header() {
         </nav>
       )}
 
+      {/* ── Public Navigation (not signed in) ── */}
+      {!user && (
+        <nav className="header-nav" aria-label="Public navigation">
+          <Link href="/about" className="header-nav-link" id="nav-about">
+            About
+          </Link>
+          <Link href="/contact" className="header-nav-link" id="nav-contact">
+            Contact
+          </Link>
+        </nav>
+      )}
+
       <div className="header-actions">
-        {user && (
+        {user ? (
           <button
             className="btn btn-ghost"
             onClick={handleSignOut}
@@ -66,6 +83,14 @@ export default function Header() {
           >
             Sign Out
           </button>
+        ) : (
+          <Link
+            href="/login"
+            className="btn btn-primary btn-sm"
+            id="header-login-button"
+          >
+            Log In
+          </Link>
         )}
 
         <button

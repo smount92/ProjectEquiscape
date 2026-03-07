@@ -218,7 +218,7 @@ export default function EditHorsePage() {
         await supabase.from("financial_vault").delete().eq("horse_id", horseId);
       }
 
-      router.push("/?toast=updated&name=" + encodeURIComponent(customName.trim()));
+      router.push("/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim()));
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to save changes.");
       setIsSaving(false);
@@ -245,7 +245,7 @@ export default function EditHorsePage() {
           <div className="passport-not-found-icon">🚫</div>
           <h1>Access Denied</h1>
           <p>{error}</p>
-          <Link href="/" className="btn btn-primary">Back to Stable</Link>
+          <Link href="/dashboard" className="btn btn-primary">Back to Stable</Link>
         </div>
       </div>
     );
@@ -254,7 +254,7 @@ export default function EditHorsePage() {
   return (
     <div className="page-container form-page">
       <nav className="passport-breadcrumb animate-fade-in-up" aria-label="Breadcrumb">
-        <Link href="/">Digital Stable</Link>
+        <Link href="/dashboard">Digital Stable</Link>
         <span className="separator" aria-hidden="true">/</span>
         <Link href={`/stable/${horseId}`}>{customName}</Link>
         <span className="separator" aria-hidden="true">/</span>

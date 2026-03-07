@@ -1,241 +1,185 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
-import { getSignedImageUrls } from "@/lib/utils/storage";
-import DashboardToast from "@/components/DashboardToast";
-import StableGrid from "@/components/StableGrid";
+import type { Metadata } from "next";
 
-// Types for the dashboard query results
-interface HorseWithDetails {
-  id: string;
-  custom_name: string;
-  finish_type: string;
-  condition_grade: string;
-  created_at: string;
-  collection_id: string | null;
-  sculptor: string | null;
-  reference_molds: { mold_name: string; manufacturer: string } | null;
-  artist_resins: { resin_name: string; sculptor_alias: string } | null;
-  reference_releases: { release_name: string; model_number: string | null } | null;
-  horse_images: { image_url: string; angle_profile: string }[];
-}
+export const metadata: Metadata = {
+  title: "Model Horse Hub — The Ultimate Digital Stable for Collectors",
+  description:
+    "Catalog your model horse collection with AI mold detection, secure financial tracking, and a vibrant community show ring. Start your digital stable for free.",
+};
 
-interface UserCollection {
-  id: string;
-  name: string;
-  description: string | null;
-}
-
-export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  // Get user profile
-  const { data: profile } = await supabase
-    .from("users")
-    .select("alias_name")
-    .eq("id", user.id)
-    .single<{ alias_name: string }>();
-
-  // Fetch horses with reference data and thumbnail images
-  const { data: rawHorses } = await supabase
-    .from("user_horses")
-    .select(
-      `
-      id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor,
-      reference_molds(mold_name, manufacturer),
-      artist_resins(resin_name, sculptor_alias),
-      reference_releases(release_name, model_number),
-      horse_images(image_url, angle_profile)
-    `
-    )
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: false });
-
-  const horses = (rawHorses as unknown as HorseWithDetails[]) ?? [];
-
-  // Fetch user's collections
-  const { data: rawCollections } = await supabase
-    .from("user_collections")
-    .select("id, name, description")
-    .eq("user_id", user.id)
-    .order("name");
-
-  const collections = (rawCollections as unknown as UserCollection[]) ?? [];
-
-  // Fetch financial vault totals (owner-only via RLS — strictly private)
-  const { data: rawVaults } = await supabase
-    .from("financial_vault")
-    .select("purchase_price, estimated_current_value, horse_id")
-    .in(
-      "horse_id",
-      horses.map((h) => h.id)
-    );
-
-  const vaults = (rawVaults as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[]) ?? [];
-
-  // Compute total vault value: prefer estimated_current_value, fall back to purchase_price
-  let totalVaultValue = 0;
-  vaults.forEach((v) => {
-    totalVaultValue += v.estimated_current_value ?? v.purchase_price ?? 0;
-  });
-
-  // Count horses per collection
-  const collectionCounts = new Map<string, number>();
-  horses.forEach((h) => {
-    if (h.collection_id) {
-      collectionCounts.set(h.collection_id, (collectionCounts.get(h.collection_id) || 0) + 1);
-    }
-  });
-
-  // Build collection name map for badge display
-  const collectionNameMap = new Map<string, string>();
-  collections.forEach((c) => collectionNameMap.set(c.id, c.name));
-
-  // Collect all thumbnail image URLs and generate signed URLs
-  const thumbnailUrls: string[] = [];
-  horses.forEach((horse) => {
-    const thumb = horse.horse_images?.find(
-      (img) => img.angle_profile === "Primary_Thumbnail"
-    );
-    if (thumb) thumbnailUrls.push(thumb.image_url);
-  });
-
-  const signedUrlMap = await getSignedImageUrls(supabase, thumbnailUrls);
-
-  // Build display data
-  const horseCards = horses.map((horse) => {
-    const thumb = horse.horse_images?.find(
-      (img) => img.angle_profile === "Primary_Thumbnail"
-    );
-    const firstImage = horse.horse_images?.[0];
-    const imageUrl = thumb?.image_url || firstImage?.image_url;
-    const signedUrl = imageUrl ? signedUrlMap.get(imageUrl) : undefined;
-
-    const refName = horse.reference_molds
-      ? `${horse.reference_molds.manufacturer} ${horse.reference_molds.mold_name}`
-      : horse.artist_resins
-        ? `${horse.artist_resins.sculptor_alias} — ${horse.artist_resins.resin_name}`
-        : "Unlisted Mold";
-
-    const releaseLine = horse.reference_releases
-      ? `${horse.reference_releases.release_name}${horse.reference_releases.model_number ? ` (#${horse.reference_releases.model_number})` : ""}`
-      : null;
-
-    return {
-      id: horse.id,
-      customName: horse.custom_name,
-      finishType: horse.finish_type,
-      conditionGrade: horse.condition_grade,
-      createdAt: horse.created_at,
-      refName,
-      releaseLine,
-      thumbnailUrl: signedUrl || null,
-      collectionName: horse.collection_id ? collectionNameMap.get(horse.collection_id) || null : null,
-      sculptor: horse.sculptor || null,
-      // Search fields from reference data
-      moldName: horse.reference_molds?.mold_name || null,
-      releaseName: horse.reference_releases?.release_name || null,
-    };
-  });
-
+export default function LandingPage() {
   return (
-    <div className="page-container form-page">
-      <div className="animate-fade-in-up">
-        {/* Shelf Header */}
-        <div className="shelf-header">
-          <div>
-            <h1>
-              <span className="text-gradient">Digital Stable</span>
-              {profile?.alias_name && (
-                <span
-                  style={{
-                    fontSize: "calc(var(--font-size-lg) * var(--font-scale))",
-                    color: "var(--color-text-muted)",
-                    fontWeight: 400,
-                    marginLeft: "var(--space-md)",
-                  }}
-                >
-                  {profile.alias_name}&apos;s Herd
-                </span>
-              )}
-            </h1>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)" }}>
-            {horses.length > 0 && (
-              <span className="shelf-stats">
-                {horses.length} model{horses.length === 1 ? "" : "s"}
-              </span>
-            )}
-            <Link href="/add-horse" className="btn btn-primary" id="add-horse-button">
-              🐴 Add to Stable
+    <div className="landing-page">
+      {/* ─── Hero Section ─── */}
+      <section className="hero-section" id="hero">
+        <div className="hero-glow" aria-hidden="true" />
+        <div className="hero-glow hero-glow-secondary" aria-hidden="true" />
+        <div className="hero-content animate-fade-in-up">
+          <span className="hero-badge">🐴 Built for Collectors, by Collectors</span>
+          <h1 className="hero-headline">
+            The Ultimate Digital Stable for{" "}
+            <span className="text-gradient">Model Horse Collectors</span>
+          </h1>
+          <p className="hero-subheadline">
+            Catalog every model in your herd with multi-angle photography, AI-powered mold
+            detection, a private financial vault, and a community show ring — all in one
+            beautifully designed platform.
+          </p>
+          <div className="hero-cta-group">
+            <Link href="/signup" className="btn btn-primary btn-lg" id="hero-cta-signup">
+              Create Free Account
+            </Link>
+            <Link href="/community" className="btn btn-ghost btn-lg" id="hero-cta-explore">
+              Explore Show Ring
             </Link>
           </div>
+          <p className="hero-trust-line">
+            ✦ No credit card required &nbsp;·&nbsp; ✦ Privacy-first &nbsp;·&nbsp; ✦ Free forever
+            tier
+          </p>
         </div>
+      </section>
 
-        {/* Success toast (reads URL ?toast= param) */}
-        <Suspense fallback={null}>
-          <DashboardToast />
-        </Suspense>
+      {/* ─── Features Grid ─── */}
+      <section className="features-section" id="features">
+        <div className="features-inner">
+          <h2 className="features-title">
+            Everything Your <span className="text-gradient">Herd</span> Needs
+          </h2>
+          <p className="features-subtitle">
+            Three powerful pillars designed to organize, protect, and celebrate your collection.
+          </p>
 
-        {/* 🔒 Stable Overview — PRIVATE analytics (never exposed publicly) */}
-        {horses.length > 0 && (
-          <div className="analytics-row">
-            <div className="analytics-card">
-              <div className="analytics-icon">🐴</div>
-              <div className="analytics-value">{horses.length}</div>
-              <div className="analytics-label">Total Models</div>
-            </div>
-            <div className="analytics-card">
-              <div className="analytics-icon">📁</div>
-              <div className="analytics-value">{collections.length}</div>
-              <div className="analytics-label">Collections</div>
-            </div>
-            <div className="analytics-card">
-              <div className="analytics-icon">💰</div>
-              <div className="analytics-value">
-                {totalVaultValue > 0
-                  ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-                  : "—"}
-              </div>
-              <div className="analytics-label">Vault Value</div>
-            </div>
-          </div>
-        )}
-
-        {/* Collection Folders Row */}
-        {collections.length > 0 && (
-          <div className="collections-row">
-            <h2 className="collections-row-title">📁 Collections</h2>
-            <div className="collections-scroll">
-              {collections.map((col) => (
-                <Link
-                  key={col.id}
-                  href={`/stable/collection/${col.id}`}
-                  className="collection-folder"
-                  id={`collection-${col.id}`}
+          <div className="features-grid">
+            {/* Feature 1 — AI Mold Detection */}
+            <div className="feature-card" id="feature-ai">
+              <div className="feature-icon">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <span className="collection-folder-icon">📁</span>
-                  <span className="collection-folder-name">{col.name}</span>
-                  <span className="collection-folder-count">
-                    {collectionCounts.get(col.id) || 0} model{(collectionCounts.get(col.id) || 0) !== 1 ? "s" : ""}
-                  </span>
-                </Link>
-              ))}
+                  <path d="M12 2L9.5 8.5 3 10l5 4.5L6.5 21 12 17.5 17.5 21 16 14.5l5-4.5-6.5-1.5z" />
+                </svg>
+              </div>
+              <h3 className="feature-card-title">AI Mold Detection</h3>
+              <p className="feature-card-desc">
+                Upload a photo and our intelligent reference engine helps you identify the exact
+                mold, manufacturer, and release — so you never have to guess again.
+              </p>
+            </div>
+
+            {/* Feature 2 — Financial Vault */}
+            <div className="feature-card" id="feature-vault">
+              <div className="feature-icon feature-icon-vault">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </div>
+              <h3 className="feature-card-title">Secure Financial Vault</h3>
+              <p className="feature-card-desc">
+                Track purchase prices, current market values, and insurance details in a
+                private vault visible only to you — encrypted and protected by row-level
+                security.
+              </p>
+            </div>
+
+            {/* Feature 3 — Community Show Ring */}
+            <div className="feature-card" id="feature-showring">
+              <div className="feature-icon feature-icon-ring">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="8" r="7" />
+                  <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+                </svg>
+              </div>
+              <h3 className="feature-card-title">The Community Show Ring</h3>
+              <p className="feature-card-desc">
+                Publish your proudest models to a shared gallery. Browse other collectors&apos;
+                herds, discover rare releases, and connect with the community.
+              </p>
             </div>
           </div>
-        )}
+        </div>
+      </section>
 
-        {/* Horse Grid with Search */}
-        <StableGrid horseCards={horseCards} />
-      </div>
+      {/* ─── Social Proof / Stats ─── */}
+      <section className="stats-section" id="stats">
+        <div className="stats-inner">
+          <div className="stat-item">
+            <span className="stat-value">100%</span>
+            <span className="stat-label">Free to Start</span>
+          </div>
+          <div className="stat-divider" aria-hidden="true" />
+          <div className="stat-item">
+            <span className="stat-value">🔒</span>
+            <span className="stat-label">Privacy-First</span>
+          </div>
+          <div className="stat-divider" aria-hidden="true" />
+          <div className="stat-item">
+            <span className="stat-value">♾️</span>
+            <span className="stat-label">Unlimited Models</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Final CTA ─── */}
+      <section className="final-cta-section" id="final-cta">
+        <div className="final-cta-inner animate-fade-in-up">
+          <h2>
+            Ready to Grow Your{" "}
+            <span className="text-gradient">Digital Herd</span>?
+          </h2>
+          <p>
+            Join collectors who trust Model Horse Hub to catalog, value, and celebrate their
+            collections.
+          </p>
+          <Link href="/signup" className="btn btn-primary btn-lg" id="final-cta-signup">
+            Create Your Free Account →
+          </Link>
+        </div>
+      </section>
+
+      {/* ─── Footer ─── */}
+      <footer className="landing-footer" id="site-footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <span className="footer-logo-icon" aria-hidden="true">🐴</span>
+            <span className="footer-logo-text">Model Horse Hub</span>
+          </div>
+          <nav className="footer-nav" aria-label="Footer navigation">
+            <Link href="/about" className="footer-link" id="footer-about">About</Link>
+            <Link href="/contact" className="footer-link" id="footer-contact">Contact</Link>
+            <Link href="/community" className="footer-link" id="footer-showring">Show Ring</Link>
+          </nav>
+          <p className="footer-copy">
+            &copy; {new Date().getFullYear()} Model Horse Hub. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

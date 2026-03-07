@@ -425,7 +425,7 @@ export default function AddHorsePage() {
             <Link href="/add-horse" className="btn btn-primary" onClick={() => window.location.reload()}>
               Add Another
             </Link>
-            <Link href="/" className="btn btn-ghost">
+            <Link href="/dashboard" className="btn btn-ghost">
               View Stable
             </Link>
           </div>

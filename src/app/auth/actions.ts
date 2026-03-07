@@ -30,7 +30,7 @@ export async function loginAction(
     return { error: error.message, success: false };
   }
 
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function signupAction(

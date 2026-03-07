@@ -243,7 +243,7 @@ export default async function ProfilePage({
               : "Check back later — they may share some soon!"}
           </p>
           {isOwnProfile && (
-            <Link href="/" className="btn btn-primary">
+            <Link href="/dashboard" className="btn btn-primary">
               🏠 Go to My Stable
             </Link>
           )}

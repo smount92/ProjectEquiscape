@@ -105,6 +105,26 @@ export default async function CollectionPage({
 
   const signedUrlMap = await getSignedImageUrls(supabase, thumbnailUrls);
 
+  // Fetch financial vault totals for horses in this collection (owner-only via RLS)
+  const horseIds = horses.map((h) => h.id);
+  const { data: rawVaults } = horseIds.length > 0
+    ? await supabase
+      .from("financial_vault")
+      .select("purchase_price, estimated_current_value")
+      .in("horse_id", horseIds)
+    : { data: [] };
+
+  const vaults = (rawVaults as { purchase_price: number | null; estimated_current_value: number | null }[]) ?? [];
+
+  let collectionVaultValue = 0;
+  vaults.forEach((v) => {
+    collectionVaultValue += v.estimated_current_value ?? v.purchase_price ?? 0;
+  });
+
+  const avgValue = horses.length > 0 && collectionVaultValue > 0
+    ? collectionVaultValue / horses.length
+    : 0;
+
   const horseCards = horses.map((horse) => {
     const thumb = horse.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
     const firstImage = horse.horse_images?.[0];
@@ -137,7 +157,7 @@ export default async function CollectionPage({
     <div className="page-container form-page">
       {/* Breadcrumb */}
       <nav className="passport-breadcrumb animate-fade-in-up" aria-label="Breadcrumb">
-        <Link href="/">Digital Stable</Link>
+        <Link href="/dashboard">Digital Stable</Link>
         <span className="separator" aria-hidden="true">/</span>
         <span>📁 {collection.name}</span>
       </nav>
@@ -155,6 +175,35 @@ export default async function CollectionPage({
           </span>
         </div>
       </div>
+
+      {/* 🔒 Collection Stats — PRIVATE analytics */}
+      {horseCards.length > 0 && (
+        <div className="analytics-row animate-fade-in-up">
+          <div className="analytics-card">
+            <div className="analytics-icon">🐴</div>
+            <div className="analytics-value">{horseCards.length}</div>
+            <div className="analytics-label">Models</div>
+          </div>
+          <div className="analytics-card">
+            <div className="analytics-icon">💰</div>
+            <div className="analytics-value">
+              {collectionVaultValue > 0
+                ? `$${collectionVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                : "—"}
+            </div>
+            <div className="analytics-label">Collection Value</div>
+          </div>
+          <div className="analytics-card">
+            <div className="analytics-icon">📊</div>
+            <div className="analytics-value">
+              {avgValue > 0
+                ? `$${avgValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                : "—"}
+            </div>
+            <div className="analytics-label">Avg. Value</div>
+          </div>
+        </div>
+      )}
 
       {/* Grid */}
       {horseCards.length === 0 ? (
