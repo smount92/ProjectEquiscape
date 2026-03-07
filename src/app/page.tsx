@@ -12,10 +12,17 @@ interface HorseWithDetails {
   finish_type: string;
   condition_grade: string;
   created_at: string;
+  collection_id: string | null;
   reference_molds: { mold_name: string; manufacturer: string } | null;
   artist_resins: { resin_name: string; sculptor_alias: string } | null;
   reference_releases: { release_name: string; model_number: string | null } | null;
   horse_images: { image_url: string; angle_profile: string }[];
+}
+
+interface UserCollection {
+  id: string;
+  name: string;
+  description: string | null;
 }
 
 function getFinishBadgeClass(finishType: string): string {
@@ -61,7 +68,7 @@ export default async function HomePage() {
     .from("user_horses")
     .select(
       `
-      id, custom_name, finish_type, condition_grade, created_at,
+      id, custom_name, finish_type, condition_grade, created_at, collection_id,
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
       reference_releases(release_name, model_number),
@@ -72,6 +79,27 @@ export default async function HomePage() {
     .order("created_at", { ascending: false });
 
   const horses = (rawHorses as unknown as HorseWithDetails[]) ?? [];
+
+  // Fetch user's collections
+  const { data: rawCollections } = await supabase
+    .from("user_collections")
+    .select("id, name, description")
+    .eq("user_id", user.id)
+    .order("name");
+
+  const collections = (rawCollections as unknown as UserCollection[]) ?? [];
+
+  // Count horses per collection
+  const collectionCounts = new Map<string, number>();
+  horses.forEach((h) => {
+    if (h.collection_id) {
+      collectionCounts.set(h.collection_id, (collectionCounts.get(h.collection_id) || 0) + 1);
+    }
+  });
+
+  // Build collection name map for badge display
+  const collectionNameMap = new Map<string, string>();
+  collections.forEach((c) => collectionNameMap.set(c.id, c.name));
 
   // Collect all thumbnail image URLs and generate signed URLs
   const thumbnailUrls: string[] = [];
@@ -114,6 +142,7 @@ export default async function HomePage() {
       refName,
       releaseLine,
       thumbnailUrl: signedUrl || null,
+      collectionName: horse.collection_id ? collectionNameMap.get(horse.collection_id) || null : null,
     };
   });
 
@@ -155,6 +184,29 @@ export default async function HomePage() {
         <Suspense fallback={null}>
           <DashboardToast />
         </Suspense>
+
+        {/* Collection Folders Row */}
+        {collections.length > 0 && (
+          <div className="collections-row">
+            <h2 className="collections-row-title">📁 Collections</h2>
+            <div className="collections-scroll">
+              {collections.map((col) => (
+                <Link
+                  key={col.id}
+                  href={`/stable/collection/${col.id}`}
+                  className="collection-folder"
+                  id={`collection-${col.id}`}
+                >
+                  <span className="collection-folder-icon">📁</span>
+                  <span className="collection-folder-name">{col.name}</span>
+                  <span className="collection-folder-count">
+                    {collectionCounts.get(col.id) || 0} model{(collectionCounts.get(col.id) || 0) !== 1 ? "s" : ""}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Horse Grid or Empty State */}
         {horseCards.length === 0 ? (
@@ -214,6 +266,11 @@ export default async function HomePage() {
                     <span>{horse.conditionGrade}</span>
                     <span>{formatDate(horse.createdAt)}</span>
                   </div>
+                  {horse.collectionName && (
+                    <div className="horse-card-collection">
+                      📁 {horse.collectionName}
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}

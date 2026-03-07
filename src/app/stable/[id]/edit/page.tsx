@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { FinishType } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
+import CollectionPicker from "@/components/CollectionPicker";
 
 // ---- Types ----
 
@@ -45,6 +46,7 @@ export default function EditHorsePage() {
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
   const [isPublic, setIsPublic] = useState(true);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
 
   // Reference fields (controlled by UnifiedReferenceSearch)
   const [selectedMoldId, setSelectedMoldId] = useState<string | null>(null);
@@ -74,7 +76,7 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, finish_type, condition_grade, is_public, reference_mold_id, artist_resin_id, release_id")
+        .select("id, owner_id, custom_name, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id")
         .eq("id", horseId)
         .single<{
           id: string;
@@ -83,6 +85,7 @@ export default function EditHorsePage() {
           finish_type: FinishType;
           condition_grade: string;
           is_public: boolean;
+          collection_id: string | null;
           reference_mold_id: string | null;
           artist_resin_id: string | null;
           release_id: string | null;
@@ -98,6 +101,7 @@ export default function EditHorsePage() {
       setFinishType(horse.finish_type);
       setConditionGrade(horse.condition_grade);
       setIsPublic(horse.is_public);
+      setSelectedCollectionId(horse.collection_id);
 
       if (horse.reference_mold_id) {
         setSelectedMoldId(horse.reference_mold_id);
@@ -170,6 +174,7 @@ export default function EditHorsePage() {
         finish_type: finishType,
         condition_grade: conditionGrade,
         is_public: isPublic,
+        collection_id: selectedCollectionId,
         reference_mold_id: selectedMoldId,
         artist_resin_id: selectedResinId,
         release_id: selectedReleaseId,
@@ -302,6 +307,12 @@ export default function EditHorsePage() {
               </select>
             </div>
           </div>
+
+          {/* Collection Picker */}
+          <CollectionPicker
+            selectedCollectionId={selectedCollectionId}
+            onSelect={setSelectedCollectionId}
+          />
         </div>
 
           {/* Community visibility toggle */}

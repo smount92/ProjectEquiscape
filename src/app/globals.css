@@ -2733,3 +2733,275 @@ p {
     align-items: flex-start;
   }
 }
+
+
+/* ================================================================
+   COLLECTIONS — Dashboard Row
+   ================================================================ */
+
+.collections-row {
+  margin-bottom: var(--space-xl);
+}
+
+.collections-row-title {
+  font-size: calc(var(--font-size-md) * var(--font-scale));
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.collections-scroll {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  padding-bottom: var(--space-sm);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.collections-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.collections-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.collections-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.collection-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 120px;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.collection-folder:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124, 109, 240, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: var(--color-text-primary);
+}
+
+.collection-folder-icon {
+  font-size: 1.8rem;
+}
+
+.collection-folder-name {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collection-folder-count {
+  font-size: calc(0.7rem * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+
+/* ================================================================
+   COLLECTIONS — Horse Card Badge
+   ================================================================ */
+
+.horse-card-collection {
+  font-size: calc(0.7rem * var(--font-scale));
+  color: var(--color-accent-primary);
+  margin-top: var(--space-xs);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(124, 109, 240, 0.08);
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ================================================================
+   COLLECTIONS — Collection View Hero
+   ================================================================ */
+
+.collection-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-xl) var(--space-2xl);
+  margin-bottom: var(--space-xl);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    135deg,
+    rgba(124, 109, 240, 0.06) 0%,
+    rgba(74, 222, 222, 0.04) 100%
+  );
+  border: 1px solid var(--color-border);
+}
+
+.collection-hero-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.collection-hero-content h1 {
+  font-size: calc(1.5rem * var(--font-scale));
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.collection-hero-desc {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.collection-hero-count {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+
+/* ================================================================
+   COLLECTION PICKER — Form Row
+   ================================================================ */
+
+.collection-picker-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.collection-picker-row .form-select {
+  flex: 1;
+}
+
+.collection-create-btn {
+  white-space: nowrap;
+  font-size: calc(var(--font-size-sm) * var(--font-scale)) !important;
+  padding: var(--space-sm) var(--space-md) !important;
+  border: 1px dashed var(--color-border) !important;
+}
+
+.collection-create-btn:hover {
+  border-color: var(--color-accent-primary) !important;
+  color: var(--color-accent-primary) !important;
+}
+
+
+/* ================================================================
+   MODAL — Create Collection
+   ================================================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-lg);
+  animation: fadeIn 0.15s ease-out;
+}
+
+.modal-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.2s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h3 {
+  font-size: calc(var(--font-size-lg) * var(--font-scale));
+  font-weight: 700;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: var(--space-xs);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-body {
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl) var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .collection-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-lg);
+  }
+
+  .collection-picker-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-content {
+    max-width: 100%;
+  }
+}

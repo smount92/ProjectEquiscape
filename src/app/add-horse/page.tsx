@@ -13,6 +13,7 @@ import {
 import type { AngleProfile, FinishType } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
+import CollectionPicker from "@/components/CollectionPicker";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -103,6 +104,7 @@ export default function AddHorsePage() {
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
   const [isPublic, setIsPublic] = useState(true);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
 
   // Step 4 (index 3): Financial Vault
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -324,6 +326,7 @@ export default function AddHorsePage() {
       if (selectedMoldId) horseInsert.reference_mold_id = selectedMoldId;
       if (selectedResinId) horseInsert.artist_resin_id = selectedResinId;
       if (selectedReleaseId) horseInsert.release_id = selectedReleaseId;
+      if (selectedCollectionId) horseInsert.collection_id = selectedCollectionId;
 
       const { data: horse, error: horseError } = await supabase
         .from("user_horses")
@@ -744,6 +747,12 @@ export default function AddHorsePage() {
                 ))}
               </select>
             </div>
+
+            {/* Collection Picker */}
+            <CollectionPicker
+              selectedCollectionId={selectedCollectionId}
+              onSelect={setSelectedCollectionId}
+            />
           </div>
 
           <div className="step-nav">

@@ -10,6 +10,7 @@ interface ProfileHorse {
   finish_type: string;
   condition_grade: string;
   created_at: string;
+  user_collections: { name: string } | null;
   reference_molds: {
     mold_name: string;
     manufacturer: string;
@@ -102,6 +103,7 @@ export default async function ProfilePage({
     .select(
       `
       id, custom_name, finish_type, condition_grade, created_at,
+      user_collections(name),
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
       reference_releases(release_name, model_number),
@@ -155,6 +157,7 @@ export default async function ProfilePage({
       refName,
       releaseLine,
       thumbnailUrl: signedUrl || null,
+      collectionName: horse.user_collections?.name || null,
     };
   });
 
@@ -291,6 +294,11 @@ export default async function ProfilePage({
                     {formatDate(horse.createdAt)}
                   </span>
                 </div>
+                {horse.collectionName && (
+                  <div className="horse-card-collection">
+                    📁 {horse.collectionName}
+                  </div>
+                )}
               </div>
             </Link>
           ))}

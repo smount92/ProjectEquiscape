@@ -63,6 +63,7 @@ export interface UserHorse {
   reference_mold_id: string | null;
   artist_resin_id: string | null;
   release_id: string | null;
+  collection_id: string | null;
   custom_name: string;
   finish_type: FinishType;
   condition_grade: string;
@@ -95,6 +96,14 @@ export interface CustomizationLog {
   work_type: string;
   materials_used: string | null;
   date_completed: string | null;
+}
+
+export interface UserCollection {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
 }
 
 // --- Supabase Database Type Interface ---
@@ -133,12 +142,13 @@ export interface Database {
       };
       user_horses: {
         Row: UserHorse;
-        Insert: Omit<UserHorse, "id" | "created_at" | "is_for_sale" | "is_public" | "release_id"> & {
+        Insert: Omit<UserHorse, "id" | "created_at" | "is_for_sale" | "is_public" | "release_id" | "collection_id"> & {
           id?: string;
           created_at?: string;
           is_for_sale?: boolean;
           is_public?: boolean;
           release_id?: string | null;
+          collection_id?: string | null;
         };
         Update: Partial<Omit<UserHorse, "id">>;
         Relationships: [];
@@ -162,6 +172,15 @@ export interface Database {
         Row: CustomizationLog;
         Insert: Omit<CustomizationLog, "id"> & { id?: string };
         Update: Partial<Omit<CustomizationLog, "id">>;
+        Relationships: [];
+      };
+      user_collections: {
+        Row: UserCollection;
+        Insert: Omit<UserCollection, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<UserCollection, "id">>;
         Relationships: [];
       };
     };
