@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import MarkReadButton from "@/components/MarkReadButton";
+import AdminReplyForm from "@/components/AdminReplyForm";
 
 export const metadata = {
     title: "Admin Console — Model Horse Hub",
@@ -179,18 +180,13 @@ export default async function AdminPage() {
                                     )}
                                     <div className="admin-message-body">{msg.message}</div>
                                     <div className="admin-message-footer">
-                                        <a
-                                            href={`mailto:${msg.email}?subject=${encodeURIComponent(`Re: ${msg.subject || 'Your message to Model Horse Hub'}`)}&body=${encodeURIComponent(`Hi ${msg.name},\n\nThank you for reaching out!\n\n---\n\nOn ${new Date(msg.created_at).toLocaleDateString()}, ${msg.name} wrote:\n> ${msg.message.replace(/\n/g, '\n> ')}`)}`}
-                                            className="admin-reply-btn"
-                                        >
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                                                strokeLinejoin="round" aria-hidden="true">
-                                                <polyline points="9 17 4 12 9 7" />
-                                                <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
-                                            </svg>
-                                            Reply via Email
-                                        </a>
+                                        <AdminReplyForm
+                                            messageId={msg.id}
+                                            recipientEmail={msg.email}
+                                            recipientName={msg.name}
+                                            originalSubject={msg.subject}
+                                            originalMessage={msg.message}
+                                        />
                                         <MarkReadButton messageId={msg.id} isRead={msg.is_read} />
                                     </div>
                                 </div>
