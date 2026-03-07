@@ -9,6 +9,7 @@ import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { compressImage } from "@/lib/utils/imageCompression";
+import { notifyHorsePublic } from "@/app/actions/horse-events";
 
 // ---- Types ----
 
@@ -394,6 +395,16 @@ export default function EditHorsePage() {
         }
       } else if (hasExistingVault) {
         await supabase.from("financial_vault").delete().eq("horse_id", horseId);
+      }
+
+      // Activity event if public (fire-and-forget)
+      if (isPublic) {
+        notifyHorsePublic({
+          userId: user.id,
+          horseId,
+          horseName: customName.trim(),
+          finishType: finishType as string,
+        });
       }
 
       router.push("/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim()));

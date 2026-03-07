@@ -14,6 +14,7 @@ import type { AngleProfile, FinishType } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
+import { notifyHorsePublic } from "@/app/actions/horse-events";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -427,7 +428,17 @@ export default function AddHorsePage() {
         }
       }
 
-      // 5. Show success!
+      // 5. Activity event if public (fire-and-forget)
+      if (isPublic) {
+        notifyHorsePublic({
+          userId: user.id,
+          horseId,
+          horseName: customName.trim(),
+          finishType: finishType as string,
+        });
+      }
+
+      // 6. Show success!
       setSavedHorseName(customName.trim());
       setShowSuccess(true);
     } catch (err) {

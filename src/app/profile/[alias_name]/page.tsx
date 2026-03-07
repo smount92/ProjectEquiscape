@@ -116,6 +116,14 @@ export default async function ProfilePage({
   // Fetch follow stats
   const followStats = await getFollowStats(profileUser.id);
 
+  // Fetch public collections
+  const { data: publicCollections } = await supabase
+    .from("user_collections")
+    .select("id, name")
+    .eq("user_id", profileUser.id)
+    .eq("is_public", true)
+    .order("name");
+
   // ================================================================
   // PROFILE QUERY: Only public horses for this user
   // 🔒 financial_vault is NEVER queried here.
@@ -261,6 +269,26 @@ export default async function ProfilePage({
           )}
         </div>
       </div>
+
+      {/* Public Collections */}
+      {publicCollections && publicCollections.length > 0 && (
+        <div className="profile-public-collections animate-fade-in-up">
+          <h3 style={{ fontSize: "calc(0.9rem * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
+            📁 Public Collections
+          </h3>
+          <div className="profile-collection-pills">
+            {(publicCollections as { id: string; name: string }[]).map((col) => (
+              <Link
+                key={col.id}
+                href={`/stable/collection/${col.id}`}
+                className="profile-collection-pill"
+              >
+                📁 {col.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Breadcrumb */}
       <nav

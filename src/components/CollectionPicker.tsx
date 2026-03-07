@@ -24,6 +24,7 @@ export default function CollectionPicker({
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [newIsPublic, setNewIsPublic] = useState(false);
   const [creating, setCreating] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +70,7 @@ export default function CollectionPicker({
         user_id: user.id,
         name: newName.trim(),
         description: newDesc.trim() || null,
+        is_public: newIsPublic,
       } as Record<string, unknown>)
       .select("id, name, description")
       .single<Collection>();
@@ -81,6 +83,7 @@ export default function CollectionPicker({
       setShowModal(false);
       setNewName("");
       setNewDesc("");
+      setNewIsPublic(false);
     }
     setCreating(false);
   };
@@ -177,6 +180,19 @@ export default function CollectionPicker({
                   onChange={(e) => setNewDesc(e.target.value)}
                   maxLength={200}
                 />
+              </div>
+
+              <div className="form-group" style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
+                <input
+                  id="new-collection-public"
+                  type="checkbox"
+                  checked={newIsPublic}
+                  onChange={(e) => setNewIsPublic(e.target.checked)}
+                  style={{ width: "16px", height: "16px" }}
+                />
+                <label htmlFor="new-collection-public" className="form-label" style={{ margin: 0 }}>
+                  🌐 Make public on profile
+                </label>
               </div>
             </div>
 

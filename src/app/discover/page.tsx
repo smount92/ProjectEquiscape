@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import RatingBadge from "@/components/RatingBadge";
-import { getUserRatingSummary } from "@/app/actions/ratings";
 
 export const metadata = {
     title: "Discover Collectors — Model Horse Hub",
@@ -46,13 +45,27 @@ export default async function DiscoverPage() {
     // Filter to only active users (at least 1 public horse)
     const activeUsers = allUsers.filter((u) => (countMap.get(u.id) || 0) > 0);
 
-    // Fetch rating summaries for active users
+    // Batch-fetch ratings for all active users (eliminates N+1)
+    const activeUserIds = activeUsers.map((u) => u.id);
     const ratingMap = new Map<string, { average: number; count: number }>();
-    for (const u of activeUsers) {
-        const summary = await getUserRatingSummary(u.id);
-        if (summary.count > 0) {
-            ratingMap.set(u.id, { average: summary.average, count: summary.count });
-        }
+    if (activeUserIds.length > 0) {
+        const { data: allRatings } = await supabase
+            .from("user_ratings")
+            .select("reviewed_id, stars")
+            .in("reviewed_id", activeUserIds);
+        const sumMap = new Map<string, { sum: number; count: number }>();
+        (allRatings ?? []).forEach((r: { reviewed_id: string; stars: number }) => {
+            const existing = sumMap.get(r.reviewed_id) || { sum: 0, count: 0 };
+            existing.sum += r.stars;
+            existing.count += 1;
+            sumMap.set(r.reviewed_id, existing);
+        });
+        sumMap.forEach((val, userId) => {
+            ratingMap.set(userId, {
+                average: Math.round((val.sum / val.count) * 10) / 10,
+                count: val.count,
+            });
+        });
     }
 
     const memberSince = (dateStr: string) =>

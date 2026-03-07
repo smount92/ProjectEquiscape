@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/app/actions/notifications";
+import { createActivityEvent } from "@/app/actions/activity";
 
 /**
  * Leave a rating for the other party in a conversation.
@@ -46,6 +47,11 @@ export async function leaveRating(data: {
         actorId: user.id,
         content: `@${alias} left you a ★${data.stars} rating`,
         conversationId: data.conversationId,
+    });
+    createActivityEvent({
+        actorId: user.id,
+        eventType: "rating",
+        metadata: { stars: data.stars, targetAlias: alias },
     });
 
     return { success: true };

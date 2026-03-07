@@ -7386,3 +7386,35 @@ p {
     align-items: stretch;
   }
 }
+
+
+/* Profile Public Collections */
+.profile-public-collections {
+  margin-bottom: var(--space-lg);
+}
+
+.profile-collection-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.profile-collection-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 6px 14px;
+  font-size: calc(0.85rem * var(--font-scale));
+  background: rgba(129, 140, 248, 0.06);
+  border: 1px solid rgba(129, 140, 248, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--color-primary, #818cf8);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.profile-collection-pill:hover {
+  background: rgba(129, 140, 248, 0.12);
+  border-color: rgba(129, 140, 248, 0.3);
+  transform: translateY(-1px);
+}

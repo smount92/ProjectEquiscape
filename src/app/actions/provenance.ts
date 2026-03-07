@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createActivityEvent } from "@/app/actions/activity";
 
 // ============================================================
 // SHOW RECORDS
@@ -43,6 +44,15 @@ export async function addShowRecord(data: {
     });
 
     if (error) return { success: false, error: error.message };
+
+    // Activity event (fire-and-forget)
+    createActivityEvent({
+        actorId: user.id,
+        eventType: "show_record",
+        horseId: data.horseId,
+        metadata: { showName: data.showName, placing: data.placing || null },
+    });
+
     return { success: true };
 }
 

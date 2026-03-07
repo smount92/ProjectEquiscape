@@ -20,6 +20,7 @@ function getEventIcon(type: string): string {
         case "comment": return "💬";
         case "rating": return "⭐";
         case "follow": return "👤";
+        case "show_record": return "🏆";
         case "transaction_complete": return "✅";
         default: return "📌";
     }
@@ -38,6 +39,8 @@ function getEventText(item: FeedItemData): string {
             return `${who} left a rating`;
         case "follow":
             return `${who} followed a collector`;
+        case "show_record":
+            return `${who} added a show record for ${item.horseName || "a horse"}`;
         case "transaction_complete":
             return `${who} completed a transaction`;
         default:

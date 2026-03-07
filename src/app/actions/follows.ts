@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/app/actions/notifications";
+import { createActivityEvent } from "@/app/actions/activity";
 
 /**
  * Toggle follow on a user. Returns new state + counts.
@@ -57,6 +58,12 @@ export async function toggleFollow(
             type: "follow",
             actorId: user.id,
             content: `@${alias} started following you`,
+        });
+        createActivityEvent({
+            actorId: user.id,
+            eventType: "follow",
+            targetId: targetUserId,
+            metadata: { targetAlias: alias },
         });
     }
 
