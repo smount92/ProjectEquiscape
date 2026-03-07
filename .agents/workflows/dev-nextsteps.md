@@ -39,267 +39,465 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 ---
 
 # ═══════════════════════════════════════
-# OPTION 4: COLLECTOR POLISH — Daily-Use UX
+# OPTION 5: PHOTO SHOWS OVERHAUL + PLATFORM GAPS
 # ═══════════════════════════════════════
 
-# 🔴 Priority: Critical (Daily-Use Blockers)
+# 🔴 Priority: Critical (Trust & Functionality)
 
-## ✅ Task CP-1: Stable Sort Options (completed)
+## Task PS-1: Self-Voting Guard
 
-**Problem:** The Dashboard stable grid (StableGrid component) only has a search bar — no sort. Collectors with 100+ models need to sort by name, date added, condition, or value.
+**Problem:** Users can vote for their OWN show entries. `voteForEntry()` in `src/app/actions/shows.ts` checks if the user already voted, but never checks if the entry belongs to the voter. This destroys credibility in any contest.
 
-**What to build:**
+**What to fix:**
 
-**File:** `src/components/StableGrid.tsx`
+**File:** `src/app/actions/shows.ts` — function `voteForEntry()`
 
-1. Add a sort state next to the existing search state:
+After the existing auth check (`if (!user)`), add an ownership check BEFORE the existing vote logic:
 
-```tsx
-const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name-az" | "name-za" | "condition">("newest");
+```typescript
+// Check if user is trying to vote for their own entry
+const { data: entryData } = await supabase
+    .from("show_entries")
+    .select("user_id")
+    .eq("id", entryId)
+    .single();
+
+if (!entryData) return { success: false, error: "Entry not found." };
+if ((entryData as { user_id: string }).user_id === user.id) {
+    return { success: false, error: "You can't vote for your own entry." };
+}
 ```
 
-2. Add a sort dropdown next to the SearchBar:
+Also update the `VoteButton.tsx` component to display the error message from the server action if one is returned, instead of silently failing.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task PS-2: End Date in Create Show Form + Display
+
+**Problem:** The `CreateShowForm.tsx` has no date picker, so shows are created without deadlines. The `end_at` column exists in the DB and the `createPhotoShow()` action accepts `endAt`, but the UI never sends it.
+
+**What to fix:**
+
+### 1. Add date picker to CreateShowForm
+
+**File:** `src/components/CreateShowForm.tsx`
+
+Add an `endAt` state field and a date/time input:
 
 ```tsx
-<div style={{ display: "flex", gap: "var(--space-md)", alignItems: "center", flexWrap: "wrap" }}>
-    <div style={{ flex: 1, minWidth: "200px" }}>
-        <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search your stable by name, mold, release, or sculptor…"
-            id="stable-search-bar"
-        />
-    </div>
-    <select
-        value={sortBy}
-        onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+const [endAt, setEndAt] = useState("");
+```
+
+Add a form group after the description textarea:
+
+```tsx
+<div className="form-group">
+    <label className="form-label">Entries Close (optional)</label>
+    <input
+        type="datetime-local"
         className="form-input"
-        style={{ width: "auto", minWidth: "160px", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
-        id="stable-sort"
-        aria-label="Sort your stable"
-    >
-        <option value="newest">🕐 Newest First</option>
-        <option value="oldest">🕐 Oldest First</option>
-        <option value="name-az">🔤 Name A→Z</option>
-        <option value="name-za">🔤 Name Z→A</option>
-        <option value="condition">⭐ By Condition</option>
-    </select>
+        value={endAt}
+        onChange={(e) => setEndAt(e.target.value)}
+    />
+    <p style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "4px" }}>
+        Leave blank for no deadline. Show will stay open until manually closed.
+    </p>
 </div>
 ```
 
-3. Apply the sort in the `filteredCards` useMemo, AFTER the existing search filter:
+Pass `endAt` to the action:
 
 ```tsx
-// Sort
-const CONDITION_ORDER = ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Fair", "Poor", "Play Grade"];
-
-let sorted = [...filtered];
-if (sortBy === "oldest") {
-    sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-} else if (sortBy === "name-az") {
-    sorted.sort((a, b) => a.customName.localeCompare(b.customName));
-} else if (sortBy === "name-za") {
-    sorted.sort((a, b) => b.customName.localeCompare(a.customName));
-} else if (sortBy === "condition") {
-    sorted.sort((a, b) => {
-        const aIdx = CONDITION_ORDER.indexOf(a.conditionGrade);
-        const bIdx = CONDITION_ORDER.indexOf(b.conditionGrade);
-        return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
-    });
-}
-// "newest" is the default server order — no re-sort needed
-
-return sorted;
+const result = await createPhotoShow({
+    title: title.trim(),
+    theme: theme.trim() || undefined,
+    description: description.trim() || undefined,
+    endAt: endAt || undefined,  // ADD THIS
+});
 ```
 
-Make sure to rename the existing `filteredCards` to use a two-step approach: filter first, then sort.
+### 2. Display deadline on show listing
 
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
+**File:** `src/app/shows/page.tsx`
 
----
-
-## ✅ Task CP-2: Scale Filter on Show Ring (completed)
-
-**Problem:** The Show Ring `ShowRingFilters` component has filters for Finish Type, Trade Status, and Manufacturer — but NOT Scale. Model horse collectors think in scales: Traditional, Classic, Stablemate, Paddock Pal, etc.
-
-**What to build:**
-
-**File:** `src/components/ShowRingFilters.tsx`
-
-1. Add `scale` to the `FilterState` interface:
+In the show card footer, add the deadline display:
 
 ```tsx
-export interface FilterState {
-    finishType: string | null;
-    tradeStatus: string | null;
-    manufacturer: string | null;
-    scale: string | null;  // ADD THIS
-    sortBy: "newest" | "oldest" | "most-favorited";
-}
-```
-
-2. Add a scale prop and dropdown to the filter bar. Accept a `scales` prop (array of unique scale strings extracted from data):
-
-```tsx
-<select value={filters.scale ?? ""} onChange={(e) => onChange({ ...filters, scale: e.target.value || null })} className="form-input" style={{ width: "auto", minWidth: "140px" }} id="filter-scale" aria-label="Filter by scale">
-    <option value="">All Scales</option>
-    {scales.map((s) => <option key={s} value={s}>{s}</option>)}
-</select>
-```
-
-**File:** `src/components/ShowRingGrid.tsx`
-
-3. Extract unique scales from data (like `manufacturers` is already extracted):
-
-```tsx
-const scales = useMemo(() => {
-    const set = new Set<string>();
-    communityCards.forEach((h) => {
-        if (h.scale) set.add(h.scale);
-    });
-    return [...set].sort();
-}, [communityCards]);
-```
-
-4. You'll need to pass `scale` through from the community page data. Check `CommunityCardData` in ShowRingGrid.tsx — it may need a `scale: string | null` field. If it's not there, add it and populate it from the community page's query (the `reference_molds(... scale ...)` join already exists).
-
-5. Add the filter logic in `filteredCards`:
-
-```tsx
-if (filters.scale) {
-    cards = cards.filter((h) => h.scale === filters.scale);
-}
-```
-
-6. Initialize `scale: null` in the filter state default.
-
-7. Pass `scales` to ShowRingFilters component.
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## ✅ Task CP-3: Photo Thumbnails in Show Entries (completed)
-
-**Problem:** The virtual photo show entries (`src/app/shows/[id]/page.tsx`) show only horse name and owner — no photos. A *photo show* needs photos.
-
-**What to build:**
-
-**File:** `src/app/actions/shows.ts`
-
-1. Find the `getShowEntries` function. It fetches entries but needs to also fetch the primary thumbnail for each entered horse. Modify the query to join `horse_images`:
-
-```sql
-user_horses!inner(id, custom_name, finish_type, owner_id, users!inner(alias_name), horse_images(image_url, angle_profile))
-```
-
-2. Extract the Primary_Thumbnail (or first image) for each entry and include it in the return value.
-
-3. Generate signed URLs for the thumbnails using `getSignedImageUrls`.
-
-**File:** `src/app/shows/[id]/page.tsx`
-
-4. Display the thumbnail in each entry card. Add an image element to `.show-entry-card`:
-
-```tsx
-{entry.thumbnailUrl && (
-    <div className="show-entry-thumb">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
-    </div>
+{show.endAt && (
+    <span>
+        ⏰ {new Date(show.endAt) > new Date()
+            ? `Closes ${new Date(show.endAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+            : "Entries closed"
+        }
+    </span>
 )}
 ```
 
-**File:** `src/app/globals.css`
+### 3. Display deadline on show detail page
 
-5. Add CSS for the thumbnail:
+**File:** `src/app/shows/[id]/page.tsx`
 
-```css
-.show-entry-thumb {
-    width: 64px;
-    height: 64px;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    flex-shrink: 0;
-}
-.show-entry-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-```
-
-6. Make the `.show-entry-card` a flex row with the thumb on the left.
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## ✅ Task CP-4: Profile Bio Field (completed — migration needed)
-
-**Problem:** User profiles have no bio/about section. Collectors want to say "I've been collecting since 1998, I focus on Traditionals, I show NAN regularly."
-
-**What to build:**
-
-### 1. Database migration: `supabase/migrations/017_user_bio.sql`
-
-```sql
--- Add bio field to users table
-ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT NULL;
-
-COMMENT ON COLUMN users.bio IS 'Public bio/about text for the collector profile. Max 500 chars enforced at app layer.';
-```
-
-**IMPORTANT:** The agent must pause and ask the user to run this migration in the Supabase SQL Editor before proceeding.
-
-### 2. Display on profile: `src/app/profile/[alias_name]/page.tsx`
-
-The page already fetches user data. Add `bio` to the select query. Then display it below the alias:
+In the hero section, add below the description:
 
 ```tsx
-{profileUser.bio && (
-    <p className="profile-bio" style={{
-        color: "var(--color-text-muted)",
-        fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
-        maxWidth: "480px",
-        lineHeight: 1.5,
-        marginTop: "var(--space-sm)",
+{show.endAt && (
+    <p className="community-hero-subtitle" style={{
+        color: new Date(show.endAt) > new Date() ? "var(--color-accent, #f59e0b)" : "var(--color-text-muted)"
     }}>
-        {profileUser.bio}
+        ⏰ {new Date(show.endAt) > new Date()
+            ? `Entries close: ${new Date(show.endAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}`
+            : "Entries are closed"
+        }
     </p>
 )}
 ```
 
-### 3. Edit bio from own profile
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
 
-When viewing your OWN profile (`isOwnProfile` flag already exists in the page), show an "Edit Bio" button that opens an inline text area:
+---
 
-- Create a small client component `src/components/EditBioButton.tsx`
-- It shows a pencil icon button when not editing
-- On click, it reveals a textarea (max 500 chars) with Save/Cancel buttons
-- Save calls a server action that updates `users.bio` where `id = auth.uid()`
-- Add the server action to `src/app/actions/social.ts` or a new `src/app/actions/profile.ts`:
+## Task PS-3: Auto-Close Expired Shows
+
+**Problem:** Even if `end_at` is set, shows stay "open" forever. Nothing checks the deadline.
+
+**What to build:**
+
+### 1. Server-side check in `getPhotoShows()`
+
+**File:** `src/app/actions/shows.ts` — function `getPhotoShows()`
+
+After fetching shows, add a check that auto-transitions expired shows:
 
 ```typescript
-export async function updateBio(bio: string) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
+// Auto-close shows past their end date
+const now = new Date().toISOString();
+const expiredShows = shows.filter(
+    (s: { id: string; status: string; end_at: string | null }) =>
+        s.status === "open" && s.end_at && new Date(s.end_at) < new Date()
+);
 
-    const trimmed = bio.trim().slice(0, 500);
-    await supabase.from("users").update({ bio: trimmed }).eq("id", user.id);
-    revalidatePath(`/profile`);
+if (expiredShows.length > 0) {
+    // Use service role to update status (RLS may block user-level updates)
+    const admin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    for (const expired of expiredShows) {
+        await admin.from("photo_shows")
+            .update({ status: "judging" })
+            .eq("id", (expired as { id: string }).id);
+    }
 }
 ```
+
+This runs lazily whenever anyone loads the shows page — no cron needed.
+
+### 2. Also check in `enterShow()`
+
+**File:** `src/app/actions/shows.ts` — function `enterShow()`
+
+The function already checks `show.status !== "open"`. Add an additional deadline check:
+
+```typescript
+// Also check deadline
+const showData = show as { status: string; end_at: string | null };
+if (showData.end_at && new Date(showData.end_at) < new Date()) {
+    return { success: false, error: "This show's entry deadline has passed." };
+}
+```
+
+Update the select query in `enterShow()` to also fetch `end_at`:
+
+```typescript
+.select("status, end_at")
+```
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task PS-4: Admin Show Management
+
+**Problem:** Admin can CREATE shows from `/admin` but can't change status, update end dates, or manage existing shows.
+
+**What to build:**
+
+### 1. Server actions for show management
+
+**File:** `src/app/actions/shows.ts`
+
+Add these admin actions:
+
+```typescript
+/**
+ * Admin: Update show status.
+ */
+export async function updateShowStatus(
+    showId: string,
+    newStatus: "open" | "judging" | "closed"
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
+        return { success: false, error: "Unauthorized." };
+    }
+
+    const admin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await admin.from("photo_shows")
+        .update({ status: newStatus })
+        .eq("id", showId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/**
+ * Admin: Delete a show.
+ */
+export async function deleteShow(
+    showId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
+        return { success: false, error: "Unauthorized." };
+    }
+
+    const admin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await admin.from("photo_shows").delete().eq("id", showId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+```
+
+### 2. Admin show list component
+
+**File:** `src/components/AdminShowManager.tsx` (new file)
+
+Create a client component that:
+- Receives an array of shows `{ id, title, status, endAt, entryCount }`
+- Displays each show in a row with:
+  - Title + status badge
+  - Entry count
+  - A `<select>` to change status (open/judging/closed)
+  - A "Delete" button with confirmation
+- Calls `updateShowStatus()` or `deleteShow()` on change
+- Uses `router.refresh()` after mutations
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { updateShowStatus, deleteShow } from "@/app/actions/shows";
+
+interface AdminShow {
+    id: string;
+    title: string;
+    status: string;
+    endAt: string | null;
+    entryCount: number;
+}
+
+export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
+    const router = useRouter();
+    const [busy, setBusy] = useState<string | null>(null);
+
+    const handleStatusChange = async (showId: string, newStatus: string) => {
+        setBusy(showId);
+        await updateShowStatus(showId, newStatus as "open" | "judging" | "closed");
+        router.refresh();
+        setBusy(null);
+    };
+
+    const handleDelete = async (showId: string, title: string) => {
+        if (!confirm(`Delete "${title}" and all its entries? This cannot be undone.`)) return;
+        setBusy(showId);
+        await deleteShow(showId);
+        router.refresh();
+        setBusy(null);
+    };
+
+    if (shows.length === 0) {
+        return <p style={{ color: "var(--color-text-muted)" }}>No shows yet. Create one above.</p>;
+    }
+
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
+            {shows.map((show) => (
+                <div key={show.id} className="card" style={{ padding: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
+                    <div style={{ flex: 1, minWidth: "200px" }}>
+                        <div style={{ fontWeight: 600 }}>{show.title}</div>
+                        <div style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                            🐴 {show.entryCount} entries
+                            {show.endAt && <> · ⏰ {new Date(show.endAt).toLocaleDateString()}</>}
+                        </div>
+                    </div>
+                    <select
+                        value={show.status}
+                        onChange={(e) => handleStatusChange(show.id, e.target.value)}
+                        className="form-input"
+                        style={{ width: "auto", minWidth: "120px" }}
+                        disabled={busy === show.id}
+                    >
+                        <option value="open">🟢 Open</option>
+                        <option value="judging">🟡 Judging</option>
+                        <option value="closed">🔴 Closed</option>
+                    </select>
+                    <button
+                        className="btn btn-ghost"
+                        onClick={() => handleDelete(show.id, show.title)}
+                        disabled={busy === show.id}
+                        style={{ color: "var(--color-error, #ef4444)", fontSize: "calc(0.8rem * var(--font-scale))" }}
+                    >
+                        🗑 Delete
+                    </button>
+                </div>
+            ))}
+        </div>
+    );
+}
+```
+
+### 3. Wire into admin page
+
+**File:** `src/app/admin/page.tsx`
+
+After the "Create Photo Show" section, add a "Manage Shows" section. Fetch all shows with `getPhotoShows()` and pass them to the new component:
+
+```tsx
+import AdminShowManager from "@/components/AdminShowManager";
+import { getPhotoShows } from "@/app/actions/shows";
+
+// ... in the AdminPage function body:
+const allShows = await getPhotoShows();
+
+// ... in the JSX, after the Create Photo Show section:
+<div className="admin-section">
+    <h2 className="admin-section-title">
+        🎛️ Manage Shows
+        <span className="admin-section-count">{allShows.length} total</span>
+    </h2>
+    <AdminShowManager shows={allShows.map(s => ({
+        id: s.id,
+        title: s.title,
+        status: s.status,
+        endAt: s.endAt,
+        entryCount: s.entryCount,
+    }))} />
+</div>
+```
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task PS-5: Winner Display on Closed Shows
+
+**Problem:** When a show status is "closed", entries look exactly the same as an open show. No winners, no podium, no urgency.
+
+**What to fix:**
+
+**File:** `src/app/shows/[id]/page.tsx`
+
+Wrap the entries grid in conditional rendering based on show status:
+
+### For closed shows — add winner podium:
+
+```tsx
+{show.status === "closed" && entries.length > 0 && (
+    <div className="show-winners animate-fade-in-up" style={{
+        textAlign: "center",
+        padding: "var(--space-xl)",
+        marginBottom: "var(--space-lg)",
+    }}>
+        <h2 style={{ fontSize: "calc(1.3rem * var(--font-scale))", marginBottom: "var(--space-lg)" }}>
+            🏆 <span className="text-gradient">Results</span>
+        </h2>
+        <div style={{ display: "flex", justifyContent: "center", gap: "var(--space-xl)", flexWrap: "wrap" }}>
+            {entries.slice(0, 3).map((entry, i) => {
+                const medals = ["🥇", "🥈", "🥉"];
+                const labels = ["1st Place", "2nd Place", "3rd Place"];
+                return (
+                    <div key={entry.id} style={{ textAlign: "center", minWidth: "120px" }}>
+                        <div style={{ fontSize: "2.5rem" }}>{medals[i]}</div>
+                        {entry.thumbnailUrl && (
+                            <div className="show-entry-thumb" style={{ width: "80px", height: "80px", margin: "var(--space-sm) auto" }}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={entry.thumbnailUrl} alt={entry.horseName} />
+                            </div>
+                        )}
+                        <div style={{ fontWeight: 600, fontSize: "calc(0.9rem * var(--font-scale))" }}>
+                            {entry.horseName}
+                        </div>
+                        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                            by @{entry.ownerAlias} · {entry.votes} vote{entry.votes !== 1 ? "s" : ""}
+                        </div>
+                        <div style={{ fontWeight: 700, color: "var(--color-accent, #f59e0b)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                            {labels[i]}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    </div>
+)}
+```
+
+### For judging shows — add a banner:
+
+```tsx
+{show.status === "judging" && (
+    <div className="card animate-fade-in-up" style={{
+        textAlign: "center",
+        padding: "var(--space-lg)",
+        marginBottom: "var(--space-lg)",
+        background: "rgba(245, 158, 11, 0.1)",
+        border: "1px solid rgba(245, 158, 11, 0.3)",
+    }}>
+        <div style={{ fontSize: "2rem" }}>🟡</div>
+        <h3>Judging in Progress</h3>
+        <p style={{ color: "var(--color-text-muted)" }}>Voting is closed. Results will be announced soon!</p>
+    </div>
+)}
+```
+
+### Disable voting on non-open shows:
+
+The `VoteButton` should be disabled when the show is not open. Pass `disabled` prop:
+
+```tsx
+<VoteButton
+    entryId={entry.id}
+    initialVotes={entry.votes}
+    initialHasVoted={entry.hasVoted}
+    disabled={show.status !== "open"}
+/>
+```
+
+Update `VoteButton.tsx` to accept and honor an optional `disabled?: boolean` prop, greying out the button and preventing clicks.
 
 ### Verify:
 ```
@@ -310,108 +508,191 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium
 
-## ✅ Task CP-5: "See More from Seller" Link on Passport (completed)
+## Task PS-6: Entry Limit Per User (Cap at 3)
 
-**Problem:** When viewing a public passport (`/community/[id]`), there's no link to see the seller's other horses. Collectors who find a good seller want to browse everything they have.
+**Problem:** One user can enter every horse they own into a single show. Most photo shows cap entries at 1-3 per person.
 
-**What to build:**
+**What to fix:**
 
-**File:** `src/app/community/[id]/page.tsx`
+**File:** `src/app/actions/shows.ts` — function `enterShow()`
 
-The page already fetches `owner_id` and the owner's `alias_name`. Add a link below the owner display:
-
-```tsx
-<Link
-    href={`/profile/${encodeURIComponent(ownerAlias)}`}
-    className="btn btn-ghost"
-    style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginTop: "var(--space-sm)" }}
-    id="see-more-seller"
->
-    👤 See all models from @{ownerAlias} →
-</Link>
-```
-
-Place this in the sidebar section, near/below the owner alias display. Verify it only shows when the viewer is NOT the owner (you wouldn't "see more from yourself").
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## ✅ Task CP-6: Release Years in Reference Search (already existed)
-
-**Problem:** The add-horse reference search (`WizardMoldSearch` or similar component) doesn't show release years in results. Collectors often know "I have the 1995 palomino" but not the official release name.
-
-**What to build:**
-
-Find the reference search component that queries `reference_releases`. The search results dropdown should already show `release_name` and `model_number`. Add `release_year_start` and `release_year_end` to the display:
-
-```tsx
-{release.release_year_start && (
-    <span style={{ opacity: 0.6, fontSize: "calc(0.75rem * var(--font-scale))" }}>
-        {" "}({release.release_year_start}{release.release_year_end && release.release_year_end !== release.release_year_start ? `–${release.release_year_end}` : ""})
-    </span>
-)}
-```
-
-Also ensure the search query is already fetching `release_year_start, release_year_end` from the reference_releases table. If not, add those columns to the select.
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## ✅ Task CP-7: Mark All Notifications Read (already existed)
-
-**Problem:** The notifications page (`NotificationList` component) has individual mark-as-read but no "Mark All Read" button.
-
-**What to build:**
-
-### 1. Server action: `src/app/actions/notifications.ts`
-
-Add a `markAllNotificationsRead` function:
+After verifying the horse is public, add an entry count check:
 
 ```typescript
-export async function markAllNotificationsRead() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+// Check entry limit (max 3 per user per show)
+const { count: existingEntries } = await supabase
+    .from("show_entries")
+    .select("id", { count: "exact", head: true })
+    .eq("show_id", showId)
+    .eq("user_id", user.id);
 
-    await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("user_id", user.id)
-        .eq("is_read", false);
-
-    revalidatePath("/notifications");
+if ((existingEntries ?? 0) >= 3) {
+    return { success: false, error: "Maximum 3 entries per show." };
 }
 ```
 
-### 2. Client component update: `src/components/NotificationList.tsx`
+**File:** `src/components/ShowEntryForm.tsx`
 
-Add a "Mark All Read" button at the top of the notification list, only visible when there are unread notifications:
+Display the error message from the action if the limit is hit. Also consider showing "X/3 entries used" as a hint.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task PS-7: Withdraw Entry Button
+
+**Problem:** RLS policy allows users to delete their own entries, but there's no UI button to do so.
+
+**What to build:**
+
+### 1. Server action
+
+**File:** `src/app/actions/shows.ts`
+
+```typescript
+/**
+ * Remove your own entry from a show.
+ */
+export async function withdrawEntry(
+    entryId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not logged in." };
+
+    // Verify ownership
+    const { data: entry } = await supabase
+        .from("show_entries")
+        .select("user_id, show_id, votes")
+        .eq("id", entryId)
+        .single();
+
+    if (!entry || (entry as { user_id: string }).user_id !== user.id) {
+        return { success: false, error: "Not your entry." };
+    }
+
+    const { error } = await supabase
+        .from("show_entries")
+        .delete()
+        .eq("id", entryId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+```
+
+### 2. UI button on show detail page
+
+**File:** `src/app/shows/[id]/page.tsx`
+
+In the entries grid, when the entry belongs to the current user AND the show is still "open", show a small "Withdraw" button:
+
+```tsx
+{entry.ownerId === user.id && show.status === "open" && (
+    <WithdrawButton entryId={entry.id} />
+)}
+```
+
+### 3. Create the WithdrawButton component
+
+**File:** `src/components/WithdrawButton.tsx` (new file)
+
+A small client component that calls `withdrawEntry()` with a confirm dialog, then refreshes the page.
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { withdrawEntry } from "@/app/actions/shows";
+
+export default function WithdrawButton({ entryId }: { entryId: string }) {
+    const router = useRouter();
+    const [busy, setBusy] = useState(false);
+
+    const handleWithdraw = async () => {
+        if (!confirm("Remove your entry from this show?")) return;
+        setBusy(true);
+        await withdrawEntry(entryId);
+        router.refresh();
+    };
+
+    return (
+        <button
+            className="btn btn-ghost"
+            onClick={handleWithdraw}
+            disabled={busy}
+            style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "2px 8px", color: "var(--color-error, #ef4444)" }}
+            title="Withdraw your entry"
+        >
+            {busy ? "…" : "✕ Withdraw"}
+        </button>
+    );
+}
+```
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task PS-8: Dashboard Unread Messages Indicator
+
+**Problem:** The dashboard analytics cards show model count, value, and show placings — but not unread messages. Users don't know they have messages until they click Inbox.
+
+**What to fix:**
+
+**File:** `src/app/dashboard/page.tsx`
+
+The page already fetches the user. Add a query for unread message count:
+
+```typescript
+// Fetch unread message count
+const { data: unreadMsgs } = await supabase
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .neq("sender_id", user.id)
+    .eq("is_read", false)
+    .in("conversation_id", /* conversations where user is buyer or seller */);
+```
+
+**Simpler approach:** Just count unread messages in conversations where the user participates. You can do a two-step:
+
+```typescript
+const { data: userConvos } = await supabase
+    .from("conversations")
+    .select("id")
+    .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
+const convoIds = (userConvos ?? []).map((c: { id: string }) => c.id);
+
+let unreadCount = 0;
+if (convoIds.length > 0) {
+    const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .neq("sender_id", user.id)
+        .eq("is_read", false)
+        .in("conversation_id", convoIds);
+    unreadCount = count ?? 0;
+}
+```
+
+Add an analytics card for it:
 
 ```tsx
 {unreadCount > 0 && (
-    <button
-        className="btn btn-ghost"
-        onClick={async () => {
-            await markAllNotificationsRead();
-            router.refresh();
-        }}
-        style={{ marginBottom: "var(--space-md)" }}
-        id="mark-all-read"
-    >
-        ✓ Mark All Read ({unreadCount})
-    </button>
+    <Link href="/inbox" className="analytics-card" style={{ textDecoration: "none", cursor: "pointer" }}>
+        <div className="analytics-icon">✉️</div>
+        <div className="analytics-value">{unreadCount}</div>
+        <div className="analytics-label">Unread Messages</div>
+    </Link>
 )}
 ```
-
-Import the action and compute `unreadCount` from the notifications prop.
 
 ### Verify:
 ```
@@ -420,48 +701,32 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## ✅ Task CP-8: "New" Badge on Show Ring Cards (completed)
+## Task PS-9: Profile "For Sale" Count Badge
 
-**Problem:** When users return to the Show Ring, they can't tell which horses are new since their last visit.
+**Problem:** When viewing someone's profile, you can't tell at a glance how many models they have for sale. You have to scroll through all horses.
 
-**What to build:**
+**What to fix:**
 
-**File:** `src/components/ShowRingGrid.tsx`
+**File:** `src/app/profile/[alias_name]/page.tsx`
 
-Add a "NEW" badge to cards where `createdAt` is within the last 48 hours:
+The page already fetches all horses. Count how many have `trade_status` of "For Sale" or "Open to Offers":
+
+```typescript
+const forSaleCount = profileHorses.filter(
+    (h) => h.trade_status === "For Sale" || h.trade_status === "Open to Offers"
+).length;
+```
+
+Display it in the profile stats section (where follower/following counts are):
 
 ```tsx
-{(Date.now() - new Date(horse.createdAt).getTime()) < 48 * 60 * 60 * 1000 && (
-    <span className="new-badge">NEW</span>
+{forSaleCount > 0 && (
+    <div className="profile-stat">
+        <span className="profile-stat-number">{forSaleCount}</span>
+        <span className="profile-stat-label">For Sale/Trade</span>
+    </div>
 )}
 ```
-
-**File:** `src/app/globals.css`
-
-```css
-.new-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: var(--color-accent, #f59e0b);
-    color: #000;
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 999px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    z-index: 2;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-```
-
-Place the badge inside `.horse-card-image` (which already has `position: relative`).
 
 ### Verify:
 ```
@@ -472,79 +737,42 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟢 Priority: Nice-to-Have
 
-## ✅ Task CP-9: Activity Feed Event Thumbnails (completed)
+## Task PS-10: Vote Notifications
 
-**Problem:** Feed events like "User added a new horse" or "User favorited a horse" are text-only. Visual feeds drive significantly more engagement.
+**Problem:** When someone votes for your show entry, you receive no notification. This would drive engagement back to the show page.
 
-**What to build:**
+**What to fix:**
 
-**File:** `src/app/actions/activity.ts`
+**File:** `src/app/actions/shows.ts` — in the `voteForEntry()` function
 
-The `getActivityFeed` function currently returns events with `horseId` and `horseName`. Add a thumbnail by joining `horse_images` in the query:
-
-1. After fetching activity events, collect all `horse_id` values
-2. Batch-fetch primary thumbnails for those horses:
+After a successful vote (NOT unvote), create a notification for the entry owner:
 
 ```typescript
-const horseIds = events.filter(e => e.horse_id).map(e => e.horse_id);
-const { data: thumbs } = await supabase
-    .from("horse_images")
-    .select("horse_id, image_url")
-    .in("horse_id", horseIds)
-    .eq("angle_profile", "Primary_Thumbnail");
-```
+// Notify entry owner of new vote
+if (!existing) {
+    // We already fetched entryData above (from self-voting guard)
+    const entryOwnerId = (entryData as { user_id: string }).user_id;
+    if (entryOwnerId !== user.id) {
+        // Get voter alias
+        const { data: voter } = await supabase
+            .from("users")
+            .select("alias_name")
+            .eq("id", user.id)
+            .single();
+        const voterAlias = (voter as { alias_name: string } | null)?.alias_name || "Someone";
 
-3. Generate signed URLs and include `thumbnailUrl` in the return type
+        // Get show info for the link
+        const { data: showEntry } = await supabase
+            .from("show_entries")
+            .select("show_id")
+            .eq("id", entryId)
+            .single();
 
-**File:** `src/components/ActivityFeed.tsx`
-
-4. Display the thumbnail next to the event text:
-
-```tsx
-{item.thumbnailUrl && (
-    <div className="feed-item-thumb">
-        <img src={item.thumbnailUrl} alt="" loading="lazy" />
-    </div>
-)}
-```
-
-5. Add CSS for a small 48x48 rounded thumbnail on the left of each feed item.
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## ✅ Task CP-10: Wishlist Match Notifications (completed)
-
-**Problem:** The Matchmaker finds For Sale horses matching your wishlist, but ONLY when you visit the Wishlist page. Collectors want to be notified: "A horse matching your wishlist just went For Sale!"
-
-**What to build:**
-
-**File:** `src/app/actions/horse-events.ts`
-
-In the `notifyHorsePublic` function (or wherever trade_status changes are processed), add wishlist match checking:
-
-1. When a horse is marked "For Sale" or "Open to Offers", query `user_wishlists` for any user who has that `mold_id` or `release_id` on their wishlist
-2. For each match, create a notification:
-
-```typescript
-// Check for wishlist matches
-if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
-    const { data: wishlistMatches } = await supabase
-        .from("user_wishlists")
-        .select("user_id")
-        .or(`mold_id.eq.${moldId},release_id.eq.${releaseId}`)
-        .neq("user_id", ownerId); // Don't notify the seller
-
-    for (const match of wishlistMatches ?? []) {
         await supabase.from("notifications").insert({
-            user_id: match.user_id,
-            type: "wishlist_match",
-            message: `A ${horseName} matching your wishlist is now ${tradeStatus}!`,
-            link: `/community/${horseId}`,
+            user_id: entryOwnerId,
+            type: "show_vote",
+            message: `@${voterAlias} voted for your show entry!`,
+            link: showEntry ? `/shows/${(showEntry as { show_id: string }).show_id}` : "/shows",
         });
     }
 }
@@ -552,7 +780,7 @@ if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
 
 **File:** `src/components/NotificationList.tsx`
 
-3. Handle the `wishlist_match` notification type with a ❤️‍🔥 icon.
+Handle the `show_vote` notification type with a 📸 icon.
 
 ### Verify:
 ```
@@ -561,12 +789,12 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task CP-11: Commit & Push Collector Polish
+## Task PS-11: Commit & Push Photo Shows Overhaul
 
-After all CP tasks above are complete:
+After all PS tasks above are complete:
 
 ```
-cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "polish: stable sort, scale filter, show thumbs, bio, seller link, notif mark-all, new badges" 2>&1"
+cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "feat: photo shows overhaul - deadlines, winners, admin mgmt, self-vote guard, entry limits" 2>&1"
 ```
 
 Then push:
