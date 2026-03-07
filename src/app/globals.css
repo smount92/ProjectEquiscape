@@ -7174,3 +7174,215 @@ p {
   font-size: calc(0.75rem * var(--font-scale));
   color: var(--color-text-muted);
 }
+
+
+/* ============================================================
+   SOCIAL EXPANSION — Phase 4: Photo Shows
+   ============================================================ */
+
+/* Shows Grid */
+.shows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+}
+
+.show-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  background: var(--color-card-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.25s ease;
+}
+
+.show-card:hover {
+  border-color: var(--color-primary, #818cf8);
+  box-shadow: 0 4px 20px rgba(129, 140, 248, 0.12);
+  transform: translateY(-2px);
+}
+
+.show-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.show-card-title {
+  font-size: calc(1.05rem * var(--font-scale));
+  font-weight: 600;
+  margin: 0;
+}
+
+.show-status-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: calc(0.7rem * var(--font-scale));
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.show-status-open {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22C55E;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.show-status-judging {
+  background: rgba(234, 179, 8, 0.1);
+  color: #EAB308;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.show-status-closed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.show-card-theme {
+  font-size: calc(0.85rem * var(--font-scale));
+  color: var(--color-primary, #818cf8);
+  font-weight: 500;
+}
+
+.show-card-desc {
+  font-size: calc(0.85rem * var(--font-scale));
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.show-card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: calc(0.8rem * var(--font-scale));
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* Show Detail — Entries */
+.show-entry-section {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+  background: rgba(129, 140, 248, 0.04);
+  border: 1px solid rgba(129, 140, 248, 0.15);
+  border-radius: var(--radius-lg);
+}
+
+.show-entry-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.show-entries-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.show-entry-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.06));
+  transition: background 0.2s ease;
+}
+
+.show-entry-card:last-child {
+  border-bottom: none;
+}
+
+.show-entry-card:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.show-entry-rank {
+  font-size: calc(1.1rem * var(--font-scale));
+  font-weight: 700;
+  color: var(--color-text-muted);
+  min-width: 32px;
+  text-align: center;
+}
+
+.show-entry-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.show-entry-horse-name {
+  font-weight: 600;
+  font-size: calc(0.95rem * var(--font-scale));
+  text-decoration: none;
+  color: inherit;
+}
+
+.show-entry-horse-name:hover {
+  color: var(--color-primary, #818cf8);
+}
+
+.show-entry-owner {
+  font-size: calc(0.8rem * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+.show-entry-owner a {
+  color: var(--color-primary, #818cf8);
+  text-decoration: none;
+}
+
+/* Vote Button */
+.vote-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--color-text);
+  font-size: calc(0.9rem * var(--font-scale));
+  transition: all 0.2s ease;
+}
+
+.vote-button:hover {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.vote-button-voted {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.vote-count {
+  font-weight: 600;
+}
+
+/* Phase 4 Responsive */
+@media (max-width: 600px) {
+  .shows-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .show-entry-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

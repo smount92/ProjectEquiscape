@@ -216,6 +216,34 @@ export interface ActivityEvent {
   created_at: string;
 }
 
+export interface PhotoShow {
+  id: string;
+  title: string;
+  description: string | null;
+  theme: string | null;
+  status: "open" | "judging" | "closed";
+  created_by: string;
+  start_at: string;
+  end_at: string | null;
+  created_at: string;
+}
+
+export interface ShowEntry {
+  id: string;
+  show_id: string;
+  horse_id: string;
+  user_id: string;
+  votes: number;
+  created_at: string;
+}
+
+export interface ShowVote {
+  id: string;
+  entry_id: string;
+  user_id: string;
+  created_at: string;
+}
+
 // --- Supabase Database Type Interface ---
 // Used to provide type safety to supabase client calls
 
@@ -387,6 +415,35 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Omit<ActivityEvent, "id">>;
+        Relationships: [];
+      };
+      photo_shows: {
+        Row: PhotoShow;
+        Insert: Omit<PhotoShow, "id" | "created_at" | "status"> & {
+          id?: string;
+          created_at?: string;
+          status?: string;
+        };
+        Update: Partial<Omit<PhotoShow, "id">>;
+        Relationships: [];
+      };
+      show_entries: {
+        Row: ShowEntry;
+        Insert: Omit<ShowEntry, "id" | "created_at" | "votes"> & {
+          id?: string;
+          created_at?: string;
+          votes?: number;
+        };
+        Update: Partial<Omit<ShowEntry, "id">>;
+        Relationships: [];
+      };
+      show_votes: {
+        Row: ShowVote;
+        Insert: Omit<ShowVote, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<ShowVote, "id">>;
         Relationships: [];
       };
     };

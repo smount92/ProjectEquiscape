@@ -102,6 +102,9 @@ export default function Header() {
           <Link href="/feed" className="header-nav-link" id="nav-feed">
             📰 Feed
           </Link>
+          <Link href="/shows" className="header-nav-link" id="nav-shows">
+            📸 Shows
+          </Link>
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist">
             ❤️ Wishlist
           </Link>

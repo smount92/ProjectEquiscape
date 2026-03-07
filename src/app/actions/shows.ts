@@ -1,0 +1,302 @@
+"use server";
+
+import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
+// ============================================================
+// PHOTO SHOWS — Server Actions
+// ============================================================
+
+interface ShowDisplay {
+    id: string;
+    title: string;
+    description: string | null;
+    theme: string | null;
+    status: string;
+    entryCount: number;
+    createdAt: string;
+    endAt: string | null;
+}
+
+interface ShowEntryDisplay {
+    id: string;
+    horseName: string;
+    horseId: string;
+    ownerAlias: string;
+    ownerId: string;
+    thumbnailUrl: string | null;
+    finishType: string;
+    votes: number;
+    hasVoted: boolean;
+    createdAt: string;
+}
+
+/**
+ * Get all photo shows (latest first).
+ */
+export async function getPhotoShows(): Promise<ShowDisplay[]> {
+    const supabase = await createClient();
+
+    const { data: shows } = await supabase
+        .from("photo_shows")
+        .select("id, title, description, theme, status, created_at, end_at")
+        .order("created_at", { ascending: false });
+
+    if (!shows || shows.length === 0) return [];
+
+    // Count entries per show
+    const showIds = shows.map((s: { id: string }) => s.id);
+    const { data: entries } = await supabase
+        .from("show_entries")
+        .select("show_id")
+        .in("show_id", showIds);
+
+    const countMap = new Map<string, number>();
+    (entries ?? []).forEach((e: { show_id: string }) => {
+        countMap.set(e.show_id, (countMap.get(e.show_id) || 0) + 1);
+    });
+
+    return shows.map((s: { id: string; title: string; description: string | null; theme: string | null; status: string; created_at: string; end_at: string | null }) => ({
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        theme: s.theme,
+        status: s.status,
+        entryCount: countMap.get(s.id) || 0,
+        createdAt: s.created_at,
+        endAt: s.end_at,
+    }));
+}
+
+/**
+ * Get entries for a specific show.
+ */
+export async function getShowEntries(showId: string): Promise<{
+    show: ShowDisplay | null;
+    entries: ShowEntryDisplay[];
+}> {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    // Fetch show
+    const { data: showData } = await supabase
+        .from("photo_shows")
+        .select("id, title, description, theme, status, created_at, end_at")
+        .eq("id", showId)
+        .single();
+
+    if (!showData) return { show: null, entries: [] };
+
+    const s = showData as { id: string; title: string; description: string | null; theme: string | null; status: string; created_at: string; end_at: string | null };
+
+    // Fetch entries with horse + user data
+    const { data: rawEntries } = await supabase
+        .from("show_entries")
+        .select("id, horse_id, user_id, votes, created_at")
+        .eq("show_id", showId)
+        .order("votes", { ascending: false });
+
+    const entryList = (rawEntries ?? []) as { id: string; horse_id: string; user_id: string; votes: number; created_at: string }[];
+
+    if (entryList.length === 0) {
+        return {
+            show: { id: s.id, title: s.title, description: s.description, theme: s.theme, status: s.status, entryCount: 0, createdAt: s.created_at, endAt: s.end_at },
+            entries: [],
+        };
+    }
+
+    // Batch-fetch horse names + finishes
+    const horseIds = [...new Set(entryList.map((e) => e.horse_id))];
+    const { data: horses } = await supabase
+        .from("user_horses")
+        .select("id, custom_name, finish_type")
+        .in("id", horseIds);
+
+    const horseMap = new Map<string, { name: string; finish: string }>();
+    (horses ?? []).forEach((h: { id: string; custom_name: string; finish_type: string }) => {
+        horseMap.set(h.id, { name: h.custom_name, finish: h.finish_type });
+    });
+
+    // Batch-fetch user aliases
+    const userIds = [...new Set(entryList.map((e) => e.user_id))];
+    const { data: users } = await supabase
+        .from("users")
+        .select("id, alias_name")
+        .in("id", userIds);
+
+    const aliasMap = new Map<string, string>();
+    (users ?? []).forEach((u: { id: string; alias_name: string }) => {
+        aliasMap.set(u.id, u.alias_name);
+    });
+
+    // Check if current user has voted on each entry
+    const entryIds = entryList.map((e) => e.id);
+    let votedSet = new Set<string>();
+    if (user) {
+        const { data: votes } = await supabase
+            .from("show_votes")
+            .select("entry_id")
+            .eq("user_id", user.id)
+            .in("entry_id", entryIds);
+        votedSet = new Set((votes ?? []).map((v: { entry_id: string }) => v.entry_id));
+    }
+
+    return {
+        show: { id: s.id, title: s.title, description: s.description, theme: s.theme, status: s.status, entryCount: entryList.length, createdAt: s.created_at, endAt: s.end_at },
+        entries: entryList.map((e) => ({
+            id: e.id,
+            horseName: horseMap.get(e.horse_id)?.name || "Unknown",
+            horseId: e.horse_id,
+            ownerAlias: aliasMap.get(e.user_id) || "Unknown",
+            ownerId: e.user_id,
+            thumbnailUrl: null,
+            finishType: horseMap.get(e.horse_id)?.finish || "OF",
+            votes: e.votes,
+            hasVoted: votedSet.has(e.id),
+            createdAt: e.created_at,
+        })),
+    };
+}
+
+/**
+ * Enter a horse in a show.
+ */
+export async function enterShow(
+    showId: string,
+    horseId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "You must be logged in." };
+
+    // Verify show is open
+    const { data: show } = await supabase
+        .from("photo_shows")
+        .select("status")
+        .eq("id", showId)
+        .single();
+    if (!show || (show as { status: string }).status !== "open") {
+        return { success: false, error: "This show is not accepting entries." };
+    }
+
+    // Verify horse belongs to user and is public
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("id, is_public")
+        .eq("id", horseId)
+        .eq("owner_id", user.id)
+        .single();
+    if (!horse) return { success: false, error: "Horse not found or not yours." };
+    if (!(horse as { is_public: boolean }).is_public) {
+        return { success: false, error: "Horse must be public to enter." };
+    }
+
+    const { error } = await supabase.from("show_entries").insert({
+        show_id: showId,
+        horse_id: horseId,
+        user_id: user.id,
+    });
+
+    if (error) {
+        if (error.code === "23505") return { success: false, error: "This horse is already entered." };
+        return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
+
+/**
+ * Vote for a show entry.
+ */
+export async function voteForEntry(
+    entryId: string
+): Promise<{ success: boolean; newVotes?: number; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "You must be logged in." };
+
+    // Check if already voted
+    const { data: existing } = await supabase
+        .from("show_votes")
+        .select("id")
+        .eq("entry_id", entryId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (existing) {
+        // Unvote
+        await supabase.from("show_votes").delete().eq("id", existing.id);
+
+        // Decrement vote count using Service Role
+        const admin = createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+        const { data: entry } = await admin
+            .from("show_entries")
+            .select("votes")
+            .eq("id", entryId)
+            .single();
+        const newVotes = Math.max(0, ((entry as { votes: number } | null)?.votes || 1) - 1);
+        await admin.from("show_entries").update({ votes: newVotes }).eq("id", entryId);
+
+        return { success: true, newVotes };
+    } else {
+        // Vote
+        const { error } = await supabase.from("show_votes").insert({
+            entry_id: entryId,
+            user_id: user.id,
+        });
+        if (error) return { success: false, error: error.message };
+
+        // Increment
+        const admin = createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+        const { data: entry } = await admin
+            .from("show_entries")
+            .select("votes")
+            .eq("id", entryId)
+            .single();
+        const newVotes = ((entry as { votes: number } | null)?.votes || 0) + 1;
+        await admin.from("show_entries").update({ votes: newVotes }).eq("id", entryId);
+
+        return { success: true, newVotes };
+    }
+}
+
+/**
+ * Admin: Create a photo show.
+ */
+export async function createPhotoShow(data: {
+    title: string;
+    description?: string;
+    theme?: string;
+    endAt?: string;
+}): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
+        return { success: false, error: "Unauthorized." };
+    }
+
+    const admin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await admin.from("photo_shows").insert({
+        title: data.title.trim(),
+        description: data.description?.trim() || null,
+        theme: data.theme?.trim() || null,
+        end_at: data.endAt || null,
+        created_by: user.id,
+    });
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
