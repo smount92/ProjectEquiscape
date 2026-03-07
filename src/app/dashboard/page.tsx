@@ -89,6 +89,12 @@ export default async function DashboardPage() {
         totalVaultValue += v.estimated_current_value ?? v.purchase_price ?? 0;
     });
 
+    // Count total show records across all user's horses
+    const { count: totalShowRecords } = await supabase
+        .from("show_records")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
     // Count horses per collection and compute vault value per collection
     const collectionCounts = new Map<string, number>();
     const collectionValues = new Map<string, number>();
@@ -223,6 +229,11 @@ export default async function DashboardPage() {
                                     : "—"}
                             </div>
                             <div className="analytics-label">Vault Value</div>
+                        </div>
+                        <div className="analytics-card">
+                            <div className="analytics-icon">🏅</div>
+                            <div className="analytics-value">{totalShowRecords ?? 0}</div>
+                            <div className="analytics-label">Show Placings</div>
                         </div>
                     </div>
                 )}

@@ -162,4 +162,32 @@ cd c:\Project Equispace\model-horse-hub && npm run build
 cd c:\Project Equispace\model-horse-hub && git add -A && git commit -m "feat: Social Layer — Favorites & Comments on Show Ring and Passport" && git push
 ```
 
-4. Inform the user: **"✅ Social Layer — Complete!"** with a summary of files changed.
+---
+
+## Documentation Update (MANDATORY)
+
+> **You are NOT done until this step is complete.** Skipping documentation is not acceptable.
+
+4. Update the **Master Architecture Report** (`00_master_architecture.md` in the brain artifacts directory):
+   - Bump the version number (e.g., V1.1 → V1.2)
+   - Add `social.ts` to the actions list in the project structure tree
+   - Add `FavoriteButton.tsx` and `CommentSection.tsx` to the components list
+   - Add `010_social_layer.sql` to the migrations list
+   - Add `horse_favorites` and `horse_comments` to the "Marketplace & Social" DB schema table
+   - Add "Social Layer (Favorites + Comments)" as a new row in the "Completed Features" table
+   - Move "Social Layer" from the roadmap to completed, and update the **NEXT** pointer
+
+5. Update the **Social Layer Plan** (`01_social_layer_plan.md` in the brain artifacts directory):
+   - Add a `> [!NOTE]` banner at the top marking it as **STATUS: COMPLETE** with the date
+
+6. Update the **Future Roadmap** (`03_future_roadmap.md` in the brain artifacts directory):
+   - Update the priority queue diagram to show Social Layer as DONE
+   - Update the NEXT pointer to the next feature in the queue
+
+7. Mark all task files as complete:
+   - Add a completion note to `task_1_migration.md`, `task_2_types_and_actions.md`, `task_3_favorite_button.md`, and `task_4_comments_and_passport.md`
+
+8. Inform the user: **"✅ Social Layer — Complete!"** with:
+   - Summary of files created and modified
+   - Confirmation that all documentation has been updated
+   - What the next feature on the roadmap is

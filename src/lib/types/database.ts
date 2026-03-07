@@ -138,6 +138,35 @@ export interface HorseComment {
   created_at: string;
 }
 
+export interface ShowRecord {
+  id: string;
+  horse_id: string;
+  user_id: string;
+  show_name: string;
+  show_date: string | null;
+  division: string | null;
+  placing: string | null;
+  ribbon_color: string | null;
+  judge_name: string | null;
+  is_nan: boolean;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface HorsePedigree {
+  id: string;
+  horse_id: string;
+  user_id: string;
+  sire_name: string | null;
+  dam_name: string | null;
+  sculptor: string | null;
+  cast_number: string | null;
+  edition_size: string | null;
+  lineage_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // --- Supabase Database Type Interface ---
 // Used to provide type safety to supabase client calls
 
@@ -244,6 +273,25 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Omit<HorseComment, "id">>;
+        Relationships: [];
+      };
+      show_records: {
+        Row: ShowRecord;
+        Insert: Omit<ShowRecord, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<ShowRecord, "id">>;
+        Relationships: [];
+      };
+      horse_pedigrees: {
+        Row: HorsePedigree;
+        Insert: Omit<HorsePedigree, "id" | "created_at" | "updated_at"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<HorsePedigree, "id">>;
         Relationships: [];
       };
     };

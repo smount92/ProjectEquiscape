@@ -5,6 +5,8 @@ import { getSignedImageUrls } from "@/lib/utils/storage";
 import PassportGallery from "@/components/PassportGallery";
 import VaultReveal from "@/components/VaultReveal";
 import DeleteHorseModal from "@/components/DeleteHorseModal";
+import ShowRecordTimeline from "@/components/ShowRecordTimeline";
+import PedigreeCard from "@/components/PedigreeCard";
 
 // Types
 interface HorseDetail {
@@ -158,6 +160,54 @@ export default async function HorsePassportPage({
     .single<VaultData>();
 
   const vault = rawVault ?? null;
+
+  // ================================================================
+  // PROVENANCE: Show Records + Pedigree
+  // ================================================================
+
+  const { data: rawRecords } = await supabase
+    .from("show_records")
+    .select("id, show_name, show_date, division, \"placing\", ribbon_color, judge_name, is_nan, notes")
+    .eq("horse_id", horseId)
+    .order("show_date", { ascending: false, nullsFirst: false });
+
+  const showRecords = (rawRecords ?? []).map((r: {
+    id: string;
+    show_name: string;
+    show_date: string | null;
+    division: string | null;
+    placing: string | null;
+    ribbon_color: string | null;
+    judge_name: string | null;
+    is_nan: boolean;
+    notes: string | null;
+  }) => ({
+    id: r.id,
+    showName: r.show_name,
+    showDate: r.show_date,
+    division: r.division,
+    placing: r.placing,
+    ribbonColor: r.ribbon_color,
+    judgeName: r.judge_name,
+    isNan: r.is_nan,
+    notes: r.notes,
+  }));
+
+  const { data: rawPedigree } = await supabase
+    .from("horse_pedigrees")
+    .select("id, sire_name, dam_name, sculptor, cast_number, edition_size, lineage_notes")
+    .eq("horse_id", horseId)
+    .maybeSingle();
+
+  const pedigree = rawPedigree ? {
+    id: rawPedigree.id as string,
+    sireName: (rawPedigree as { sire_name: string | null }).sire_name,
+    damName: (rawPedigree as { dam_name: string | null }).dam_name,
+    sculptor: (rawPedigree as { sculptor: string | null }).sculptor,
+    castNumber: (rawPedigree as { cast_number: string | null }).cast_number,
+    editionSize: (rawPedigree as { edition_size: string | null }).edition_size,
+    lineageNotes: (rawPedigree as { lineage_notes: string | null }).lineage_notes,
+  } : null;
 
   // Reference display info
   const refInfo = horse.reference_molds
@@ -341,6 +391,20 @@ export default async function HorsePassportPage({
               </div>
             )}
           </div>
+
+          {/* Show Records */}
+          <ShowRecordTimeline
+            horseId={horseId}
+            records={showRecords}
+            isOwner={true}
+          />
+
+          {/* Pedigree Card */}
+          <PedigreeCard
+            horseId={horseId}
+            pedigree={pedigree}
+            isOwner={true}
+          />
 
           {/* Financial Vault */}
           <VaultReveal vault={vault} />

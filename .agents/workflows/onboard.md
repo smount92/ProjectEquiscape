@@ -34,4 +34,14 @@ View the developer conventions artifact in the brain directory (02_developer_con
    - `src/lib/` — types, utils, supabase clients
    - `supabase/migrations/` — SQL schema history
 
-5. You are now ready to work. Ask the user what they'd like to do next.
+5. Understand the **documentation responsibility**. This project maintains living documentation that YOU must update after completing any feature work. The documentation artifacts live in the brain directory and include:
+
+   - `00_master_architecture.md` — The master architecture report. Update the version number, project structure tree, database schema tables, completed features list, and roadmap whenever you add a feature.
+   - `01_social_layer_plan.md` — Example of a completed feature spec (reference only).
+   - `02_developer_conventions.md` — Coding patterns reference. Update if you establish new patterns.
+   - `03_future_roadmap.md` — Roadmap outlines. Update the priority queue when features are completed or new ones are planned.
+   - `task_*.md` — Atomic task specs. Mark as COMPLETE when finished, or create new ones for new features.
+
+   **RULE:** Every workflow and feature implementation MUST end with a "Documentation Update" step. You are NOT done until the docs reflect reality. See the social-layer workflow for an example.
+
+6. You are now ready to work. Ask the user what they'd like to do next.
