@@ -5799,6 +5799,48 @@ p {
 }
 
 
+/* Photo Studio Grid */
+
+.photo-studio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.photo-studio-slot {
+  display: flex;
+  flex-direction: column;
+}
+
+.photo-studio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.photo-studio-required {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-weight: 700;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.photo-studio-slot .image-upload-zone {
+  min-height: 160px;
+  border-radius: var(--radius-md);
+}
+
+.photo-studio-slot .image-upload-preview img {
+  max-height: 220px;
+}
+
+
 @media (max-width: 768px) {
   .admin-metrics-row {
     grid-template-columns: 1fr;
@@ -5810,5 +5852,9 @@ p {
 
   .admin-shield-badge {
     display: none;
+  }
+
+  .photo-studio-grid {
+    grid-template-columns: 1fr;
   }
 }

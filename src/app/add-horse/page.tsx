@@ -49,16 +49,10 @@ const CONDITION_GRADES = [
 ];
 
 const GALLERY_SLOTS: { angle: AngleProfile; label: string; primary?: boolean }[] = [
-  { angle: "Primary_Thumbnail", label: "Primary Thumbnail", primary: true },
-  { angle: "Left_Side", label: "Left Side" },
-  { angle: "Right_Side", label: "Right Side" },
-  { angle: "Front_Chest", label: "Front / Chest" },
-  { angle: "Back_Hind", label: "Back / Hind" },
-  { angle: "Detail_Face_Eyes", label: "Detail: Face & Eyes" },
-  { angle: "Detail_Ears", label: "Detail: Ears" },
-  { angle: "Detail_Hooves", label: "Detail: Hooves" },
-  { angle: "Flaw_Rub_Damage", label: "Flaw / Rub / Damage" },
-  { angle: "Other", label: "Other" },
+  { angle: "Primary_Thumbnail", label: "Primary / Near-Side (Required)", primary: true },
+  { angle: "Right_Side", label: "Off-Side (Optional)" },
+  { angle: "Front_Chest", label: "Front / Face (Optional)" },
+  { angle: "Flaw_Rub_Damage", label: "Flaws & Details (Optional)" },
 ];
 
 // ---- Types ----

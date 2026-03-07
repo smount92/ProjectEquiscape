@@ -12,15 +12,15 @@ interface PassportGalleryProps {
 }
 
 const ANGLE_LABELS: Record<string, string> = {
-  Primary_Thumbnail: "Primary",
+  Primary_Thumbnail: "Near-Side",
   Left_Side: "Left Side",
-  Right_Side: "Right Side",
+  Right_Side: "Off-Side",
   Front_Chest: "Front",
   Back_Hind: "Back",
   Detail_Face_Eyes: "Face & Eyes",
   Detail_Ears: "Ears",
   Detail_Hooves: "Hooves",
-  Flaw_Rub_Damage: "Flaws",
+  Flaw_Rub_Damage: "Flaws & Details",
   Other: "Other",
 };
 

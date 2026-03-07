@@ -46,15 +46,15 @@ interface HorseImage {
 }
 
 const ANGLE_LABELS: Record<string, string> = {
-  Primary_Thumbnail: "Primary Thumbnail",
+  Primary_Thumbnail: "Near-Side",
   Left_Side: "Left Side",
-  Right_Side: "Right Side",
-  Front_Chest: "Front / Chest",
+  Right_Side: "Off-Side",
+  Front_Chest: "Front / Face",
   Back_Hind: "Back / Hind",
   Detail_Face_Eyes: "Face & Eyes Detail",
   Detail_Ears: "Ears Detail",
   Detail_Hooves: "Hooves Detail",
-  Flaw_Rub_Damage: "Flaws / Damage",
+  Flaw_Rub_Damage: "Flaws & Details",
   Other: "Other",
 };
 

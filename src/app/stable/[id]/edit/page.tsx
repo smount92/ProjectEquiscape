@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import type { FinishType } from "@/lib/types/database";
+import type { FinishType, AngleProfile } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
@@ -17,6 +17,19 @@ interface VaultData {
   purchase_date: string | null;
   estimated_current_value: number | null;
   insurance_notes: string | null;
+}
+
+const PHOTO_STUDIO_SLOTS: { angle: AngleProfile; label: string; primary?: boolean }[] = [
+  { angle: "Primary_Thumbnail", label: "Primary / Near-Side", primary: true },
+  { angle: "Right_Side", label: "Off-Side" },
+  { angle: "Front_Chest", label: "Front / Face" },
+  { angle: "Flaw_Rub_Damage", label: "Flaws & Details" },
+];
+
+interface ExistingImage {
+  recordId: string;
+  imageUrl: string;
+  storagePath: string | null;
 }
 
 const CONDITION_GRADES = [
@@ -68,14 +81,12 @@ export default function EditHorsePage() {
   const [insuranceNotes, setInsuranceNotes] = useState("");
   const [hasExistingVault, setHasExistingVault] = useState(false);
 
-  // Image management
-  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
-  const [currentImagePath, setCurrentImagePath] = useState<string | null>(null); // storage path for cleanup
-  const [currentImageRecordId, setCurrentImageRecordId] = useState<string | null>(null);
-  const [newImageFile, setNewImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Multi-angle image management
+  const [existingImages, setExistingImages] = useState<Partial<Record<AngleProfile, ExistingImage>>>({});
+  const [newFiles, setNewFiles] = useState<Partial<Record<AngleProfile, File>>>({});
+  const [previews, setPreviews] = useState<Partial<Record<AngleProfile, string>>>({});
+  const [draggingAngle, setDraggingAngle] = useState<AngleProfile | null>(null);
+  const fileInputRefs = useRef<Partial<Record<AngleProfile, HTMLInputElement>>>({});
 
   // ---- Load existing data ----
   useEffect(() => {
@@ -150,23 +161,26 @@ export default function EditHorsePage() {
         if (vault.insurance_notes !== null) setInsuranceNotes(vault.insurance_notes);
       }
 
-      // Load existing image
-      const { data: imageData } = await supabase
+      // Load all existing images for this horse
+      const { data: allImages } = await supabase
         .from("horse_images")
-        .select("id, image_url")
-        .eq("horse_id", horseId)
-        .eq("angle_profile", "Primary_Thumbnail")
-        .single<{ id: string; image_url: string }>();
+        .select("id, image_url, angle_profile")
+        .eq("horse_id", horseId);
 
-      if (imageData) {
-        setCurrentImageRecordId(imageData.id);
-        setCurrentImageUrl(imageData.image_url);
-        setImagePreview(imageData.image_url);
-        // Extract storage path from the public URL
-        const urlParts = imageData.image_url.split("/horse-images/");
-        if (urlParts.length > 1) {
-          setCurrentImagePath(urlParts[1]);
+      if (allImages) {
+        const existingMap: Partial<Record<AngleProfile, ExistingImage>> = {};
+        const previewMap: Partial<Record<AngleProfile, string>> = {};
+        for (const img of allImages as { id: string; image_url: string; angle_profile: AngleProfile }[]) {
+          const urlParts = img.image_url.split("/horse-images/");
+          existingMap[img.angle_profile] = {
+            recordId: img.id,
+            imageUrl: img.image_url,
+            storagePath: urlParts.length > 1 ? urlParts[1] : null,
+          };
+          previewMap[img.angle_profile] = img.image_url;
         }
+        setExistingImages(existingMap);
+        setPreviews(previewMap);
       }
 
       setIsLoading(false);
@@ -199,26 +213,37 @@ export default function EditHorsePage() {
     return () => { cancelled = true; };
   }, [selectedMoldId, supabase]);
 
-  // ---- Image handlers ----
-  const handleImageSelect = (file: File) => {
+  // ---- Photo Studio handlers ----
+  const handleSlotSelect = (angle: AngleProfile, file: File) => {
     if (!file.type.startsWith("image/")) return;
-    setNewImageFile(file);
+    setNewFiles((prev) => ({ ...prev, [angle]: file }));
     const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.onloadend = () => setPreviews((prev) => ({ ...prev, [angle]: reader.result as string }));
     reader.readAsDataURL(file);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleSlotDrop = (angle: AngleProfile, e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
+    setDraggingAngle(null);
     const file = e.dataTransfer.files?.[0];
-    if (file) handleImageSelect(file);
+    if (file) handleSlotSelect(angle, file);
   };
 
-  const handleRemoveNewImage = () => {
-    setNewImageFile(null);
-    setImagePreview(currentImageUrl);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleSlotRevert = (angle: AngleProfile) => {
+    setNewFiles((prev) => { const u = { ...prev }; delete u[angle]; return u; });
+    setPreviews((prev) => ({
+      ...prev,
+      [angle]: existingImages[angle]?.imageUrl || undefined,
+    }) as Partial<Record<AngleProfile, string>>);
+    const ref = fileInputRefs.current[angle];
+    if (ref) ref.value = "";
+  };
+
+  const handleSlotRemove = (angle: AngleProfile) => {
+    setNewFiles((prev) => { const u = { ...prev }; delete u[angle]; return u; });
+    setPreviews((prev) => { const u = { ...prev }; delete u[angle]; return u; });
+    // Mark for deletion by clearing existing
+    setExistingImages((prev) => { const u = { ...prev }; delete u[angle]; return u; });
   };
 
   // ---- Save handler ----
@@ -235,43 +260,44 @@ export default function EditHorsePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // --- Image upload + cleanup ---
-      if (newImageFile) {
-        const compressed = await compressImage(newImageFile);
-        const newFilePath = `${user.id}/${horseId}/Primary_Thumbnail_${Date.now()}.webp`;
+      // --- Multi-angle image upload + cleanup ---
+      for (const slot of PHOTO_STUDIO_SLOTS) {
+        const angle = slot.angle;
+        const newFile = newFiles[angle];
+        const existing = existingImages[angle];
 
-        const { error: uploadErr } = await supabase.storage
-          .from("horse-images")
-          .upload(newFilePath, compressed, {
-            contentType: "image/webp",
-            upsert: false,
-          });
+        if (newFile) {
+          // Compress and upload new image
+          const compressed = await compressImage(newFile);
+          const filePath = `${user.id}/${horseId}/${angle}_${Date.now()}.webp`;
 
-        if (uploadErr) throw new Error(`Image upload failed: ${uploadErr.message}`);
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("horse-images")
-          .getPublicUrl(newFilePath);
-
-        // Delete old image from storage (cleanup orphans)
-        if (currentImagePath) {
-          await supabase.storage
+          const { error: uploadErr } = await supabase.storage
             .from("horse-images")
-            .remove([currentImagePath]);
-        }
+            .upload(filePath, compressed, { contentType: "image/webp", upsert: false });
 
-        // Update or insert horse_images record
-        if (currentImageRecordId) {
-          await supabase
-            .from("horse_images")
-            .update({ image_url: publicUrl })
-            .eq("id", currentImageRecordId);
-        } else {
-          await supabase.from("horse_images").insert({
-            horse_id: horseId,
-            image_url: publicUrl,
-            angle_profile: "Primary_Thumbnail",
-          } as Record<string, unknown>);
+          if (uploadErr) throw new Error(`Upload failed (${slot.label}): ${uploadErr.message}`);
+
+          const { data: { publicUrl } } = supabase.storage
+            .from("horse-images")
+            .getPublicUrl(filePath);
+
+          // Delete old file from storage (orphan cleanup)
+          if (existing?.storagePath) {
+            await supabase.storage.from("horse-images").remove([existing.storagePath]);
+          }
+
+          // Update or insert horse_images record
+          if (existing?.recordId) {
+            await supabase.from("horse_images")
+              .update({ image_url: publicUrl })
+              .eq("id", existing.recordId);
+          } else {
+            await supabase.from("horse_images").insert({
+              horse_id: horseId,
+              image_url: publicUrl,
+              angle_profile: angle,
+            } as Record<string, unknown>);
+          }
         }
       }
 
@@ -383,69 +409,97 @@ export default function EditHorsePage() {
           </div>
         )}
 
-        {/* ===== Image Upload Zone ===== */}
+        {/* ===== Photo Studio ===== */}
         <div className="edit-section">
           <div className="edit-section-header">
             <div className="edit-section-icon">📸</div>
-            <h2>Photo</h2>
+            <h2>Photo Studio</h2>
           </div>
+          <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+            Upload up to 4 standardized angles. The primary photo is used as the thumbnail everywhere.
+          </p>
 
-          <div
-            className={`image-upload-zone ${isDragging ? "drag-active" : ""} ${imagePreview ? "has-preview" : ""}`}
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={handleDrop}
-            role="button"
-            tabIndex={0}
-            aria-label="Upload or replace horse photo"
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleImageSelect(f);
-              }}
-              style={{ display: "none" }}
-              id="edit-image-input"
-            />
-            {imagePreview ? (
-              <div className="image-upload-preview">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={imagePreview} alt="Preview" />
-                <div className="image-upload-overlay">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                  <span>{newImageFile ? "Change photo" : "Click or drag to replace"}</span>
+          <div className="photo-studio-grid">
+            {PHOTO_STUDIO_SLOTS.map((slot) => {
+              const preview = previews[slot.angle];
+              const hasNew = !!newFiles[slot.angle];
+              const isDrag = draggingAngle === slot.angle;
+
+              return (
+                <div key={slot.angle} className="photo-studio-slot">
+                  <div className="photo-studio-label">
+                    {slot.label}
+                    {slot.primary && <span className="photo-studio-required">Required</span>}
+                  </div>
+                  <div
+                    className={`image-upload-zone ${isDrag ? "drag-active" : ""} ${preview ? "has-preview" : ""}`}
+                    onClick={() => fileInputRefs.current[slot.angle]?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setDraggingAngle(slot.angle); }}
+                    onDragLeave={() => setDraggingAngle(null)}
+                    onDrop={(e) => handleSlotDrop(slot.angle, e)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Upload ${slot.label} photo`}
+                  >
+                    <input
+                      ref={(el) => { if (el) fileInputRefs.current[slot.angle] = el; }}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleSlotSelect(slot.angle, f);
+                      }}
+                      style={{ display: "none" }}
+                    />
+                    {preview ? (
+                      <div className="image-upload-preview">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={preview} alt={slot.label} />
+                        <div className="image-upload-overlay">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                          </svg>
+                          <span>Replace</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="image-upload-placeholder">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        <span>{slot.primary ? "+ Add Photo" : "+ Optional"}</span>
+                      </div>
+                    )}
+                  </div>
+                  {hasNew && (
+                    <button
+                      type="button"
+                      className="image-revert-btn"
+                      onClick={(e) => { e.stopPropagation(); handleSlotRevert(slot.angle); }}
+                    >
+                      ↩ Revert
+                    </button>
+                  )}
+                  {!hasNew && preview && !slot.primary && (
+                    <button
+                      type="button"
+                      className="image-revert-btn"
+                      style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.3)" }}
+                      onClick={(e) => { e.stopPropagation(); handleSlotRemove(slot.angle); }}
+                    >
+                      ✕ Remove
+                    </button>
+                  )}
                 </div>
-              </div>
-            ) : (
-              <div className="image-upload-placeholder">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                <span>Click or drag an image here</span>
-              </div>
-            )}
+              );
+            })}
           </div>
-          {newImageFile && (
-            <button
-              type="button"
-              className="image-revert-btn"
-              onClick={(e) => { e.stopPropagation(); handleRemoveNewImage(); }}
-            >
-              ↩ Revert to original photo
-            </button>
-          )}
         </div>
 
         {/* ===== Section 1: Identity ===== */}
@@ -639,7 +693,7 @@ export default function EditHorsePage() {
             {isSaving ? (
               <>
                 <span className="btn-spinner" aria-hidden="true" />
-                {newImageFile ? "Uploading…" : "Saving…"}
+                {Object.keys(newFiles).length > 0 ? "Uploading…" : "Saving…"}
               </>
             ) : (
               <>✅ Save Changes</>
