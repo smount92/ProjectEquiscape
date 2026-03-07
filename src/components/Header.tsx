@@ -13,7 +13,7 @@ export default function Header() {
   const router = useRouter();
   const supabase = createClient();
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  const isAdmin = user?.email && adminEmail && user.email === adminEmail;
+  const isAdmin = user?.email && adminEmail && user.email.toLowerCase() === adminEmail.toLowerCase();
 
   const fetchUnreadCount = useCallback(async (userId: string) => {
     // Get conversation IDs where user is participant

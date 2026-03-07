@@ -18,7 +18,7 @@ export async function toggleMessageRead(
         data: { user },
     } = await authClient.auth.getUser();
 
-    if (!user || user.email !== process.env.ADMIN_EMAIL) {
+    if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
         return { success: false, error: "Unauthorized" };
     }
 

@@ -24,8 +24,8 @@ export default async function AdminPage() {
         data: { user },
     } = await supabase.auth.getUser();
 
-    // CRITICAL: Security gate — only ADMIN_EMAIL can access
-    if (!user || user.email !== process.env.ADMIN_EMAIL) {
+    // CRITICAL: Security gate — only ADMIN_EMAIL can access (case-insensitive)
+    if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
         redirect("/dashboard");
     }
 
@@ -169,7 +169,6 @@ export default async function AdminPage() {
                                             <span className="admin-message-date">
                                                 {formatDate(msg.created_at)}
                                             </span>
-                                            <MarkReadButton messageId={msg.id} isRead={msg.is_read} />
                                         </div>
                                     </div>
                                     {msg.subject && (
@@ -179,6 +178,21 @@ export default async function AdminPage() {
                                         </div>
                                     )}
                                     <div className="admin-message-body">{msg.message}</div>
+                                    <div className="admin-message-footer">
+                                        <a
+                                            href={`mailto:${msg.email}?subject=${encodeURIComponent(`Re: ${msg.subject || 'Your message to Model Horse Hub'}`)}&body=${encodeURIComponent(`Hi ${msg.name},\n\nThank you for reaching out!\n\n---\n\nOn ${new Date(msg.created_at).toLocaleDateString()}, ${msg.name} wrote:\n> ${msg.message.replace(/\n/g, '\n> ')}`)}`}
+                                            className="admin-reply-btn"
+                                        >
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                                strokeLinejoin="round" aria-hidden="true">
+                                                <polyline points="9 17 4 12 9 7" />
+                                                <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
+                                            </svg>
+                                            Reply via Email
+                                        </a>
+                                        <MarkReadButton messageId={msg.id} isRead={msg.is_read} />
+                                    </div>
                                 </div>
                             ))}
                         </div>
