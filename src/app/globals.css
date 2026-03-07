@@ -3278,7 +3278,7 @@ p {
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--gradient-accent);
+  background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
   opacity: 0.5;
   transition: opacity var(--transition-base);
 }
@@ -3302,9 +3302,8 @@ p {
   font-size: calc(1.6rem * var(--font-scale));
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--color-text-primary);
   line-height: 1.2;
-  background: var(--gradient-accent);
+  background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
