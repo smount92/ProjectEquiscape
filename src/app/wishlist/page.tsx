@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import WishlistRemoveButton from "@/components/WishlistRemoveButton";
 import MatchmakerMatches from "@/components/MatchmakerMatches";
+import WishlistSearch from "@/components/WishlistSearch";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 
 export const metadata = {
@@ -189,6 +190,9 @@ export default async function WishlistPage() {
                         🏆 Browse Show Ring
                     </Link>
                 </div>
+
+                {/* Search to Add */}
+                <WishlistSearch />
 
                 {/* Wishlist Grid */}
                 {items.length === 0 ? (

@@ -2,7 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function addToWishlist(moldId: string | null, releaseId: string | null) {
+export async function addToWishlist(
+    moldId: string | null,
+    releaseId: string | null,
+    notes?: string
+) {
     const supabase = await createClient();
     const {
         data: { user },
@@ -12,14 +16,16 @@ export async function addToWishlist(moldId: string | null, releaseId: string | n
         return { error: "You must be logged in.", success: false };
     }
 
-    if (!moldId && !releaseId) {
-        return { error: "No mold or release to wishlist.", success: false };
+    // Allow either a mold/release ID OR notes-only (custom escape hatch)
+    if (!moldId && !releaseId && !notes?.trim()) {
+        return { error: "No mold, release, or custom note to wishlist.", success: false };
     }
 
     const { error } = await supabase.from("user_wishlists").insert({
         user_id: user.id,
         mold_id: moldId || null,
         release_id: releaseId || null,
+        notes: notes?.trim() || null,
     });
 
     if (error) {
