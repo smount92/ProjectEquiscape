@@ -11,6 +11,8 @@ export const metadata = {
     description: "Models you're hunting for — your personal wishlist with Matchmaker.",
 };
 
+export const dynamic = "force-dynamic";
+
 interface WishlistItem {
     id: string;
     notes: string | null;

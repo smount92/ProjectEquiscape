@@ -45,6 +45,8 @@ export const metadata = {
     "Browse the community showcase of model horses cataloged by collectors around the world.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function CommunityPage() {
   const supabase = await createClient();
 

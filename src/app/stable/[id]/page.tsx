@@ -8,6 +8,8 @@ import DeleteHorseModal from "@/components/DeleteHorseModal";
 import ShowRecordTimeline from "@/components/ShowRecordTimeline";
 import PedigreeCard from "@/components/PedigreeCard";
 
+export const dynamic = "force-dynamic";
+
 // Types
 interface HorseDetail {
   id: string;

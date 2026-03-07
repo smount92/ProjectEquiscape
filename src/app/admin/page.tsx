@@ -11,6 +11,8 @@ export const metadata = {
     description: "Founder's Command Center.",
 };
 
+export const dynamic = "force-dynamic";
+
 interface ContactMessage {
     id: string;
     name: string;

@@ -9,6 +9,8 @@ export const metadata = {
     description: "See the latest activity from the Model Horse Hub community.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function FeedPage({
     searchParams,
 }: {

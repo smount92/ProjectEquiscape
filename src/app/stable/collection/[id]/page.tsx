@@ -3,6 +3,8 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 
+export const dynamic = "force-dynamic";
+
 interface CollectionHorse {
   id: string;
   custom_name: string;

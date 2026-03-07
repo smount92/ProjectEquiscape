@@ -9,6 +9,8 @@ import FollowButton from "@/components/FollowButton";
 import { getUserRatingSummary } from "@/app/actions/ratings";
 import { getFollowStats } from "@/app/actions/follows";
 
+export const dynamic = "force-dynamic";
+
 // Types
 interface ProfileHorse {
   id: string;

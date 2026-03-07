@@ -17,6 +17,8 @@ export async function generateMetadata({
     };
 }
 
+export const dynamic = "force-dynamic";
+
 interface ConversationData {
     id: string;
     buyer_id: string;

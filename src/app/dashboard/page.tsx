@@ -7,6 +7,8 @@ import DashboardToast from "@/components/DashboardToast";
 import StableGrid from "@/components/StableGrid";
 import ExportButton from "@/components/ExportButton";
 
+export const dynamic = "force-dynamic";
+
 // Types for the dashboard query results
 interface HorseWithDetails {
     id: string;

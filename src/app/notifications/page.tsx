@@ -8,6 +8,8 @@ export const metadata = {
     description: "Your latest activity notifications from the Model Horse Hub community.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function NotificationsPage() {
     const supabase = await createClient();
     const {

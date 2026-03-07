@@ -9,6 +9,8 @@ export const metadata = {
         "Browse active collectors in the Model Horse Hub community. Find stables to follow and admire.",
 };
 
+export const dynamic = "force-dynamic";
+
 interface UserRow {
     id: string;
     alias_name: string;

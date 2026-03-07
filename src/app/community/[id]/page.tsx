@@ -9,6 +9,9 @@ import CommentSection from "@/components/CommentSection";
 import ShowRecordTimeline from "@/components/ShowRecordTimeline";
 import PedigreeCard from "@/components/PedigreeCard";
 
+// Force fresh data on every request — prevents stale comments/favorites
+export const dynamic = "force-dynamic";
+
 // Types — mirrors the private passport but WITHOUT VaultData
 interface PublicHorseDetail {
   id: string;
