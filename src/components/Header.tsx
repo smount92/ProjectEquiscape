@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useSimpleMode } from "@/lib/context/SimpleModeContext";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import NotificationBell from "@/components/NotificationBell";
 
 export default function Header() {
   const { isSimpleMode, toggleSimpleMode } = useSimpleMode();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
   const router = useRouter();
   const supabase = createClient();
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -74,6 +76,20 @@ export default function Header() {
     router.refresh();
   };
 
+  // Close mobile menu on outside click
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mobileMenuOpen]);
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
     <header className="header" role="banner">
       <Link
@@ -86,29 +102,52 @@ export default function Header() {
         </span>
         <span>Model Horse Hub</span>
       </Link>
+      {/* ── Hamburger Button (mobile only) ── */}
+      {user && (
+        <button
+          className="header-hamburger"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+          id="hamburger-menu"
+        >
+          {mobileMenuOpen ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          )}
+        </button>
+      )}
 
       {/* ── Authenticated Navigation ── */}
       {user && (
-        <nav className="header-nav" aria-label="Main navigation">
-          <Link href="/dashboard" className="header-nav-link" id="nav-stable">
+        <nav ref={navRef} className={`header-nav ${mobileMenuOpen ? "header-nav-open" : ""}`} aria-label="Main navigation">
+          <Link href="/dashboard" className="header-nav-link" id="nav-stable" onClick={closeMobileMenu}>
             🏠 Digital Stable
           </Link>
-          <Link href="/community" className="header-nav-link" id="nav-community">
+          <Link href="/community" className="header-nav-link" id="nav-community" onClick={closeMobileMenu}>
             🏆 Show Ring
           </Link>
-          <Link href="/discover" className="header-nav-link" id="nav-discover">
+          <Link href="/discover" className="header-nav-link" id="nav-discover" onClick={closeMobileMenu}>
             👥 Discover
           </Link>
-          <Link href="/feed" className="header-nav-link" id="nav-feed">
+          <Link href="/feed" className="header-nav-link" id="nav-feed" onClick={closeMobileMenu}>
             📰 Feed
           </Link>
-          <Link href="/shows" className="header-nav-link" id="nav-shows">
+          <Link href="/shows" className="header-nav-link" id="nav-shows" onClick={closeMobileMenu}>
             📸 Shows
           </Link>
-          <Link href="/wishlist" className="header-nav-link" id="nav-wishlist">
+          <Link href="/wishlist" className="header-nav-link" id="nav-wishlist" onClick={closeMobileMenu}>
             ❤️ Wishlist
           </Link>
-          <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox">
+          <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox" onClick={closeMobileMenu}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />

@@ -171,6 +171,31 @@ export default async function DashboardPage() {
     return (
         <div className="page-container form-page">
             <div className="animate-fade-in-up">
+                {/* Welcome Card for new users */}
+                {horseCards.length === 0 && (
+                    <div className="welcome-card card animate-fade-in-up">
+                        <h2>👋 Welcome to Model Horse Hub!</h2>
+                        <p>Let&apos;s get started by adding your first model to your digital stable.</p>
+                        <div className="welcome-steps">
+                            <div className="welcome-step">
+                                <span className="welcome-step-number">1</span>
+                                <span>📸 Add your first horse with photos</span>
+                            </div>
+                            <div className="welcome-step">
+                                <span className="welcome-step-number">2</span>
+                                <span>🏆 Make it public for the Show Ring</span>
+                            </div>
+                            <div className="welcome-step">
+                                <span className="welcome-step-number">3</span>
+                                <span>👥 Discover and follow other collectors</span>
+                            </div>
+                        </div>
+                        <Link href="/add-horse" className="btn btn-primary btn-lg">
+                            🐴 Add Your First Horse
+                        </Link>
+                    </div>
+                )}
+
                 {/* Shelf Header */}
                 <div className="shelf-header">
                     <div>

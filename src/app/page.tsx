@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Model Horse Hub — The Ultimate Digital Stable for Collectors",
   description:
-    "Catalog your model horse collection with AI mold detection, secure financial tracking, and a vibrant community show ring. Start your digital stable for free.",
+    "Catalog your model horse collection with AI mold detection, a secure financial vault, community show ring, virtual photo shows, social follows, and user ratings. Start your digital stable for free.",
 };
 
 export default function LandingPage() {
@@ -22,8 +22,8 @@ export default function LandingPage() {
           </h1>
           <p className="hero-subheadline">
             Catalog every model in your herd with multi-angle photography, AI-powered mold
-            detection, a private financial vault, and a community show ring — all in one
-            beautifully designed platform.
+            detection, a private financial vault, virtual photo shows, and a thriving collector
+            community — all in one beautifully designed platform.
           </p>
           <div className="hero-cta-group">
             <Link href="/signup" className="btn btn-primary btn-lg" id="hero-cta-signup">
@@ -47,7 +47,7 @@ export default function LandingPage() {
             Everything Your <span className="text-gradient">Herd</span> Needs
           </h2>
           <p className="features-subtitle">
-            Three powerful pillars designed to organize, protect, and celebrate your collection.
+            Six powerful pillars designed to organize, protect, and celebrate your collection.
           </p>
 
           <div className="features-grid">
@@ -122,6 +122,80 @@ export default function LandingPage() {
                 herds, discover rare releases, and connect with the community.
               </p>
             </div>
+
+            {/* Feature 4 — Social Community */}
+            <div className="feature-card" id="feature-social">
+              <div className="feature-icon feature-icon-social">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <h3 className="feature-card-title">Social Community</h3>
+              <p className="feature-card-desc">
+                Follow collectors, browse activity feeds, and discover stables. A thriving
+                community of model horse enthusiasts, all connected.
+              </p>
+            </div>
+
+            {/* Feature 5 — Virtual Photo Shows */}
+            <div className="feature-card" id="feature-shows">
+              <div className="feature-icon feature-icon-shows">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              </div>
+              <h3 className="feature-card-title">Virtual Photo Shows</h3>
+              <p className="feature-card-desc">
+                Enter your models in community photo shows. Vote for your favorites and
+                compete for glory in themed competitions.
+              </p>
+            </div>
+
+            {/* Feature 6 — Trusted Marketplace */}
+            <div className="feature-card" id="feature-marketplace">
+              <div className="feature-icon feature-icon-market">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
+                </svg>
+              </div>
+              <h3 className="feature-card-title">Trusted Marketplace</h3>
+              <p className="feature-card-desc">
+                Buy, sell, and trade with confidence. User ratings, transaction tracking,
+                and direct messaging make every deal safe.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -132,6 +206,11 @@ export default function LandingPage() {
           <div className="stat-item">
             <span className="stat-value">100%</span>
             <span className="stat-label">Free to Start</span>
+          </div>
+          <div className="stat-divider" aria-hidden="true" />
+          <div className="stat-item">
+            <span className="stat-value">7,000+</span>
+            <span className="stat-label">Reference Releases</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
