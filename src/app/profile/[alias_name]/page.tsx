@@ -202,6 +202,10 @@ export default async function ProfilePage({
     { month: "long", year: "numeric" }
   );
 
+  const forSaleCount = profileCards.filter(
+    (h) => h.tradeStatus === "For Sale" || h.tradeStatus === "Open to Offers"
+  ).length;
+
   return (
     <div className="page-container">
       {/* Profile Header */}
@@ -268,6 +272,11 @@ export default async function ProfilePage({
             {(completedTxCount ?? 0) > 0 && (
               <span className="profile-stat" style={{ color: "#22C55E" }}>
                 ✅ {completedTxCount} transaction{completedTxCount !== 1 ? "s" : ""} completed
+              </span>
+            )}
+            {forSaleCount > 0 && (
+              <span className="profile-stat" style={{ color: "var(--color-accent, #f59e0b)" }}>
+                💲 {forSaleCount} for sale/trade
               </span>
             )}
           </div>

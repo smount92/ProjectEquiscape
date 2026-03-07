@@ -78,6 +78,14 @@ export default async function ShowsPage() {
                                 )}
                                 <div className="show-card-footer">
                                     <span>🐴 {show.entryCount} entr{show.entryCount !== 1 ? "ies" : "y"}</span>
+                                    {show.endAt && (
+                                        <span>
+                                            ⏰ {new Date(show.endAt) > new Date()
+                                                ? `Closes ${new Date(show.endAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+                                                : "Entries closed"
+                                            }
+                                        </span>
+                                    )}
                                     <span>
                                         {new Date(show.createdAt).toLocaleDateString("en-US", {
                                             month: "short",

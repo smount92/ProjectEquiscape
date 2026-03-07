@@ -44,7 +44,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🔴 Priority: Critical (Trust & Functionality)
 
-## Task PS-1: Self-Voting Guard
+## ✅ Task PS-1: Self-Voting Guard (completed)
 
 **Problem:** Users can vote for their OWN show entries. `voteForEntry()` in `src/app/actions/shows.ts` checks if the user already voted, but never checks if the entry belongs to the voter. This destroys credibility in any contest.
 
@@ -77,7 +77,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-2: End Date in Create Show Form + Display
+## ✅ Task PS-2: End Date in Create Show Form + Display (completed)
 
 **Problem:** The `CreateShowForm.tsx` has no date picker, so shows are created without deadlines. The `end_at` column exists in the DB and the `createPhotoShow()` action accepts `endAt`, but the UI never sends it.
 
@@ -164,7 +164,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-3: Auto-Close Expired Shows
+## ✅ Task PS-3: Auto-Close Expired Shows (completed)
 
 **Problem:** Even if `end_at` is set, shows stay "open" forever. Nothing checks the deadline.
 
@@ -227,7 +227,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-4: Admin Show Management
+## ✅ Task PS-4: Admin Show Management (completed)
 
 **Problem:** Admin can CREATE shows from `/admin` but can't change status, update end dates, or manage existing shows.
 
@@ -414,7 +414,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-5: Winner Display on Closed Shows
+## ✅ Task PS-5: Winner Display on Closed Shows (completed)
 
 **Problem:** When a show status is "closed", entries look exactly the same as an open show. No winners, no podium, no urgency.
 
@@ -508,7 +508,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium
 
-## Task PS-6: Entry Limit Per User (Cap at 3)
+## ✅ Task PS-6: Entry Limit Per User (completed)
 
 **Problem:** One user can enter every horse they own into a single show. Most photo shows cap entries at 1-3 per person.
 
@@ -542,7 +542,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-7: Withdraw Entry Button
+## ✅ Task PS-7: Withdraw Entry Button (completed)
 
 **Problem:** RLS policy allows users to delete their own entries, but there's no UI button to do so.
 
@@ -641,7 +641,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-8: Dashboard Unread Messages Indicator
+## ✅ Task PS-8: Dashboard Unread Messages Indicator (completed)
 
 **Problem:** The dashboard analytics cards show model count, value, and show placings — but not unread messages. Users don't know they have messages until they click Inbox.
 
@@ -701,7 +701,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-9: Profile "For Sale" Count Badge
+## ✅ Task PS-9: Profile "For Sale" Count Badge (completed)
 
 **Problem:** When viewing someone's profile, you can't tell at a glance how many models they have for sale. You have to scroll through all horses.
 
@@ -737,7 +737,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟢 Priority: Nice-to-Have
 
-## Task PS-10: Vote Notifications
+## ✅ Task PS-10: Vote Notifications (completed)
 
 **Problem:** When someone votes for your show entry, you receive no notification. This would drive engagement back to the show page.
 

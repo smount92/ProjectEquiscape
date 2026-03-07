@@ -97,6 +97,23 @@ export default async function DashboardPage() {
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id);
 
+    // Count unread messages
+    const { data: userConvos } = await supabase
+        .from("conversations")
+        .select("id")
+        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
+    const convoIds = (userConvos ?? []).map((c: { id: string }) => c.id);
+    let unreadMsgCount = 0;
+    if (convoIds.length > 0) {
+        const { count } = await supabase
+            .from("messages")
+            .select("id", { count: "exact", head: true })
+            .neq("sender_id", user.id)
+            .eq("is_read", false)
+            .in("conversation_id", convoIds);
+        unreadMsgCount = count ?? 0;
+    }
+
     // Count horses per collection and compute vault value per collection
     const collectionCounts = new Map<string, number>();
     const collectionValues = new Map<string, number>();
@@ -262,6 +279,13 @@ export default async function DashboardPage() {
                             <div className="analytics-value">{totalShowRecords ?? 0}</div>
                             <div className="analytics-label">Show Placings</div>
                         </div>
+                        {unreadMsgCount > 0 && (
+                            <Link href="/inbox" className="analytics-card" style={{ textDecoration: "none", cursor: "pointer" }}>
+                                <div className="analytics-icon">✉️</div>
+                                <div className="analytics-value">{unreadMsgCount}</div>
+                                <div className="analytics-label">Unread Messages</div>
+                            </Link>
+                        )}
                     </div>
                 )}
 

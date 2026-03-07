@@ -7,6 +7,7 @@ export default function CreateShowForm() {
     const [title, setTitle] = useState("");
     const [theme, setTheme] = useState("");
     const [description, setDescription] = useState("");
+    const [endAt, setEndAt] = useState("");
     const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
 
@@ -21,6 +22,7 @@ export default function CreateShowForm() {
             title: title.trim(),
             theme: theme.trim() || undefined,
             description: description.trim() || undefined,
+            endAt: endAt || undefined,
         });
 
         if (result.success) {
@@ -28,6 +30,7 @@ export default function CreateShowForm() {
             setTitle("");
             setTheme("");
             setDescription("");
+            setEndAt("");
             setTimeout(() => setStatus("idle"), 3000);
         } else {
             setErrorMsg(result.error || "Failed to create show.");
@@ -68,6 +71,19 @@ export default function CreateShowForm() {
                     placeholder="Show rules and details…"
                     rows={2}
                 />
+            </div>
+
+            <div className="form-group">
+                <label className="form-label">Entries Close (optional)</label>
+                <input
+                    type="datetime-local"
+                    className="form-input"
+                    value={endAt}
+                    onChange={(e) => setEndAt(e.target.value)}
+                />
+                <p style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "4px" }}>
+                    Leave blank for no deadline. Show stays open until manually closed.
+                </p>
             </div>
 
             {status === "error" && errorMsg && (

@@ -28,6 +28,7 @@ function getNotifIcon(type: string): string {
         case "message": return "✉️";
         case "feature": return "🌟";
         case "wishlist_match": return "❤️‍🔥";
+        case "show_vote": return "📸";
         default: return "🔔";
     }
 }

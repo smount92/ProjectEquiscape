@@ -5,6 +5,8 @@ import MarkReadButton from "@/components/MarkReadButton";
 import AdminReplyForm from "@/components/AdminReplyForm";
 import FeatureHorseForm from "@/components/FeatureHorseForm";
 import CreateShowForm from "@/components/CreateShowForm";
+import AdminShowManager from "@/components/AdminShowManager";
+import { getPhotoShows } from "@/app/actions/shows";
 
 export const metadata = {
     title: "Admin Console — Model Horse Hub",
@@ -70,6 +72,8 @@ export default async function AdminPage() {
     const totalHorses = horsesResult.count ?? 0;
     const unreadMessages = unreadResult.count ?? 0;
     const messages = (messagesResult.data as ContactMessage[]) ?? [];
+
+    const allShows = await getPhotoShows();
 
     function formatDate(dateStr: string): string {
         return new Date(dateStr).toLocaleDateString("en-US", {
@@ -215,6 +219,21 @@ export default async function AdminPage() {
                         <span className="admin-section-count">Virtual Shows</span>
                     </h2>
                     <CreateShowForm />
+                </div>
+
+                {/* Manage Shows */}
+                <div className="admin-section">
+                    <h2 className="admin-section-title">
+                        🎛️ Manage Shows
+                        <span className="admin-section-count">{allShows.length} total</span>
+                    </h2>
+                    <AdminShowManager shows={allShows.map(s => ({
+                        id: s.id,
+                        title: s.title,
+                        status: s.status,
+                        endAt: s.endAt,
+                        entryCount: s.entryCount,
+                    }))} />
                 </div>
             </div>
         </div>

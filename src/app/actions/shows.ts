@@ -57,6 +57,25 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
         countMap.set(e.show_id, (countMap.get(e.show_id) || 0) + 1);
     });
 
+    // Auto-close shows past their end date (lazy)
+    const expiredShows = shows.filter(
+        (s: { id: string; status: string; end_at: string | null }) =>
+            s.status === "open" && s.end_at && new Date(s.end_at) < new Date()
+    );
+    if (expiredShows.length > 0) {
+        const admin = createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+        for (const expired of expiredShows) {
+            await admin.from("photo_shows")
+                .update({ status: "judging" })
+                .eq("id", (expired as { id: string }).id);
+            // Update local reference so return reflects new status
+            (expired as { status: string }).status = "judging";
+        }
+    }
+
     return shows.map((s: { id: string; title: string; description: string | null; theme: string | null; status: string; created_at: string; end_at: string | null }) => ({
         id: s.id,
         title: s.title,
@@ -196,11 +215,17 @@ export async function enterShow(
     // Verify show is open
     const { data: show } = await supabase
         .from("photo_shows")
-        .select("status")
+        .select("status, end_at")
         .eq("id", showId)
         .single();
     if (!show || (show as { status: string }).status !== "open") {
         return { success: false, error: "This show is not accepting entries." };
+    }
+
+    // Check deadline
+    const showData = show as { status: string; end_at: string | null };
+    if (showData.end_at && new Date(showData.end_at) < new Date()) {
+        return { success: false, error: "This show's entry deadline has passed." };
     }
 
     // Verify horse belongs to user and is public
@@ -213,6 +238,17 @@ export async function enterShow(
     if (!horse) return { success: false, error: "Horse not found or not yours." };
     if (!(horse as { is_public: boolean }).is_public) {
         return { success: false, error: "Horse must be public to enter." };
+    }
+
+    // Check entry limit (max 3 per user per show)
+    const { count: existingEntries } = await supabase
+        .from("show_entries")
+        .select("id", { count: "exact", head: true })
+        .eq("show_id", showId)
+        .eq("user_id", user.id);
+
+    if ((existingEntries ?? 0) >= 3) {
+        return { success: false, error: "Maximum 3 entries per show." };
     }
 
     const { error } = await supabase.from("show_entries").insert({
@@ -238,6 +274,18 @@ export async function voteForEntry(
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "You must be logged in." };
+
+    // Check if user is trying to vote for their own entry
+    const { data: entryData } = await supabase
+        .from("show_entries")
+        .select("user_id")
+        .eq("id", entryId)
+        .single();
+
+    if (!entryData) return { success: false, error: "Entry not found." };
+    if ((entryData as { user_id: string }).user_id === user.id) {
+        return { success: false, error: "You can't vote for your own entry." };
+    }
 
     // Check if already voted
     const { data: existing } = await supabase
@@ -286,6 +334,33 @@ export async function voteForEntry(
         const newVotes = ((entry as { votes: number } | null)?.votes || 0) + 1;
         await admin.from("show_entries").update({ votes: newVotes }).eq("id", entryId);
 
+        // Notify entry owner of new vote (fire-and-forget)
+        try {
+            const entryOwnerId = (entryData as { user_id: string }).user_id;
+            const { data: voter } = await supabase
+                .from("users")
+                .select("alias_name")
+                .eq("id", user.id)
+                .single();
+            const voterAlias = (voter as { alias_name: string } | null)?.alias_name || "Someone";
+            const { data: showEntry } = await supabase
+                .from("show_entries")
+                .select("show_id")
+                .eq("id", entryId)
+                .single();
+
+            await admin.from("notifications").insert({
+                user_id: entryOwnerId,
+                type: "show_vote",
+                actor_id: user.id,
+                content: `@${voterAlias} voted for your show entry!`,
+                horse_id: null,
+            });
+            void showEntry; // link could be added via metadata in future
+        } catch {
+            // Non-blocking
+        }
+
         return { success: true, newVotes };
     }
 }
@@ -317,6 +392,84 @@ export async function createPhotoShow(data: {
         end_at: data.endAt || null,
         created_by: user.id,
     });
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/**
+ * Admin: Update show status.
+ */
+export async function updateShowStatus(
+    showId: string,
+    newStatus: "open" | "judging" | "closed"
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
+        return { success: false, error: "Unauthorized." };
+    }
+
+    const admin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await admin.from("photo_shows")
+        .update({ status: newStatus })
+        .eq("id", showId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/**
+ * Admin: Delete a show.
+ */
+export async function deleteShow(
+    showId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
+        return { success: false, error: "Unauthorized." };
+    }
+
+    const admin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await admin.from("photo_shows").delete().eq("id", showId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/**
+ * Remove your own entry from a show.
+ */
+export async function withdrawEntry(
+    entryId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not logged in." };
+
+    // Verify ownership
+    const { data: entry } = await supabase
+        .from("show_entries")
+        .select("user_id")
+        .eq("id", entryId)
+        .single();
+
+    if (!entry || (entry as { user_id: string }).user_id !== user.id) {
+        return { success: false, error: "Not your entry." };
+    }
+
+    const { error } = await supabase
+        .from("show_entries")
+        .delete()
+        .eq("id", entryId);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
