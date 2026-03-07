@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { sendNewMessageNotification } from "@/lib/email";
 
 /**
  * Create or find an existing conversation between buyer and seller for a specific horse.
@@ -83,6 +85,7 @@ export async function createOrFindConversation(
 
 /**
  * Send a message in a conversation.
+ * After insertion, triggers an email notification to the recipient.
  */
 export async function sendMessage(
     conversationId: string,
@@ -110,6 +113,66 @@ export async function sendMessage(
         .from("conversations")
         .update({ updated_at: new Date().toISOString() })
         .eq("id", conversationId);
+
+    // --- Email notification (fire-and-forget, never blocks the response) ---
+    try {
+        // Use service role to bypass RLS and look up recipient details
+        const supabaseAdmin = createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        // Get conversation details to find the other participant
+        const { data: convo } = await supabaseAdmin
+            .from("conversations")
+            .select("buyer_id, seller_id, horse_id")
+            .eq("id", conversationId)
+            .single<{ buyer_id: string; seller_id: string; horse_id: string | null }>();
+
+        if (convo) {
+            const recipientId =
+                convo.buyer_id === user.id ? convo.seller_id : convo.buyer_id;
+
+            // Fetch recipient's email + alias, sender's alias, and horse name in parallel
+            const [recipientAuth, senderProfile, horseData] = await Promise.all([
+                supabaseAdmin.auth.admin.getUserById(recipientId),
+                supabaseAdmin
+                    .from("users")
+                    .select("alias_name")
+                    .eq("id", user.id)
+                    .single<{ alias_name: string }>(),
+                convo.horse_id
+                    ? supabaseAdmin
+                        .from("user_horses")
+                        .select("custom_name")
+                        .eq("id", convo.horse_id)
+                        .single<{ custom_name: string }>()
+                    : Promise.resolve({ data: null }),
+            ]);
+
+            const recipientEmail = recipientAuth.data?.user?.email;
+            // Also get recipient alias
+            const { data: recipientProfile } = await supabaseAdmin
+                .from("users")
+                .select("alias_name")
+                .eq("id", recipientId)
+                .single<{ alias_name: string }>();
+
+            if (recipientEmail) {
+                await sendNewMessageNotification({
+                    toEmail: recipientEmail,
+                    recipientName: recipientProfile?.alias_name || "Collector",
+                    senderName: senderProfile?.data?.alias_name || "Someone",
+                    horseName: horseData?.data?.custom_name || null,
+                    messageSnippet: content.trim(),
+                    conversationId,
+                });
+            }
+        }
+    } catch (emailErr) {
+        // Log but never crash — the in-app message was already delivered
+        console.error("[Messaging] Email notification failed (non-blocking):", emailErr);
+    }
 
     return { success: true };
 }
