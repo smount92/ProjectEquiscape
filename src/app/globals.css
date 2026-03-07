@@ -5575,6 +5575,30 @@ p {
   color: var(--color-text);
 }
 
+.admin-reply-original {
+  margin-bottom: var(--space-sm);
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid rgba(99, 102, 241, 0.4);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.admin-reply-original-label {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-weight: 600;
+  color: #818cf8;
+  margin-bottom: 4px;
+}
+
+.admin-reply-original-body {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
 .admin-reply-textarea {
   width: 100%;
   padding: 10px 14px;

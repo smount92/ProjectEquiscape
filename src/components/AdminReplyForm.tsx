@@ -87,6 +87,12 @@ export default function AdminReplyForm({
                     ✕
                 </button>
             </div>
+            <div className="admin-reply-original">
+                <div className="admin-reply-original-label">
+                    {originalSubject ? `Re: ${originalSubject}` : "Original message"}
+                </div>
+                <div className="admin-reply-original-body">{originalMessage}</div>
+            </div>
             <textarea
                 className="admin-reply-textarea"
                 placeholder={`Write your reply to ${recipientName}…`}
