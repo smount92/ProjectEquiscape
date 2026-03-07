@@ -508,3 +508,18 @@ Added 85 lines of missing `.header-nav`, `.header-nav-link`, `.header-hamburger`
 
 ## ✅ BF-3: Remove AI References (completed 2026-03-07)
 Removed AI language from landing page (meta, hero, feature card). Hidden AI detect button and hint on add-horse page via `{false && ...}` guard. Code preserved for future re-enable.
+
+## ✅ TU-1: Forgot Password Flow (completed 2026-03-07)
+Added `forgotPasswordAction` to auth/actions.ts. Created `/forgot-password` page with email form + success screen. Created `/auth/reset-password` page with new password form + auto-redirect. Added "Forgot your password?" link to login page. Added `/forgot-password` to proxy public paths.
+
+## ✅ TU-2: Auth Error Page (completed 2026-03-07)
+Created `/auth/auth-code-error/page.tsx` with branded error messaging for expired/invalid confirmation links. Includes "Sign Up Again" and "Back to Sign In" CTAs.
+
+## ✅ TU-3: My Profile Navigation Link (completed 2026-03-07)
+Added `aliasName` state to Header.tsx. Fetches from `users` table on auth. Renders 👤 Profile link between Wishlist and Inbox in nav. Works on both desktop and mobile hamburger menu.
+
+## ✅ TU-4: Contact Seller CTA on Show Ring Cards (completed 2026-03-07)
+Added "View & Contact" button inside card link for For Sale / Open to Offers horses. Supplements existing trade badges and MessageSellerButton.
+
+## ✅ TU-5: Commit & Push Test-User Readiness (completed 2026-03-07)
+Committed and pushed as `feat: forgot password, auth error page, profile nav link, contact seller CTA`.
