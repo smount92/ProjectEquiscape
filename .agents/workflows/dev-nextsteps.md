@@ -7,6 +7,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
 > **Last Updated:** 2026-03-07
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
+> **Archive:** Completed tasks are moved to `dev-nextsteps-archive.md` in this same directory.
 
 // turbo-all
 
@@ -38,356 +39,267 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 ---
 
 # ═══════════════════════════════════════
-# OPTION 3: TEST-USER READINESS
+# OPTION 4: COLLECTOR POLISH — Daily-Use UX
 # ═══════════════════════════════════════
 
-# 🔴 Priority: Critical (Test User Blockers)
+# 🔴 Priority: Critical (Daily-Use Blockers)
 
-## Task TU-1: Forgot Password Flow
+## Task CP-1: Stable Sort Options
 
-**Problem:** The login page has no "Forgot your password?" link. Test users who forget their password will need manual intervention. This is the #1 support request for any app.
+**Problem:** The Dashboard stable grid (StableGrid component) only has a search bar — no sort. Collectors with 100+ models need to sort by name, date added, condition, or value.
 
 **What to build:**
 
-### 1. Create the server action: `src/app/auth/actions.ts`
+**File:** `src/components/StableGrid.tsx`
 
-Add this function to the EXISTING `auth/actions.ts` file (append to the bottom, don't overwrite):
+1. Add a sort state next to the existing search state:
+
+```tsx
+const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name-az" | "name-za" | "condition">("newest");
+```
+
+2. Add a sort dropdown next to the SearchBar:
+
+```tsx
+<div style={{ display: "flex", gap: "var(--space-md)", alignItems: "center", flexWrap: "wrap" }}>
+    <div style={{ flex: 1, minWidth: "200px" }}>
+        <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search your stable by name, mold, release, or sculptor…"
+            id="stable-search-bar"
+        />
+    </div>
+    <select
+        value={sortBy}
+        onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+        className="form-input"
+        style={{ width: "auto", minWidth: "160px", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
+        id="stable-sort"
+        aria-label="Sort your stable"
+    >
+        <option value="newest">🕐 Newest First</option>
+        <option value="oldest">🕐 Oldest First</option>
+        <option value="name-az">🔤 Name A→Z</option>
+        <option value="name-za">🔤 Name Z→A</option>
+        <option value="condition">⭐ By Condition</option>
+    </select>
+</div>
+```
+
+3. Apply the sort in the `filteredCards` useMemo, AFTER the existing search filter:
+
+```tsx
+// Sort
+const CONDITION_ORDER = ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Fair", "Poor", "Play Grade"];
+
+let sorted = [...filtered];
+if (sortBy === "oldest") {
+    sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+} else if (sortBy === "name-az") {
+    sorted.sort((a, b) => a.customName.localeCompare(b.customName));
+} else if (sortBy === "name-za") {
+    sorted.sort((a, b) => b.customName.localeCompare(a.customName));
+} else if (sortBy === "condition") {
+    sorted.sort((a, b) => {
+        const aIdx = CONDITION_ORDER.indexOf(a.conditionGrade);
+        const bIdx = CONDITION_ORDER.indexOf(b.conditionGrade);
+        return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+    });
+}
+// "newest" is the default server order — no re-sort needed
+
+return sorted;
+```
+
+Make sure to rename the existing `filteredCards` to use a two-step approach: filter first, then sort.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task CP-2: Scale Filter on Show Ring
+
+**Problem:** The Show Ring `ShowRingFilters` component has filters for Finish Type, Trade Status, and Manufacturer — but NOT Scale. Model horse collectors think in scales: Traditional, Classic, Stablemate, Paddock Pal, etc.
+
+**What to build:**
+
+**File:** `src/components/ShowRingFilters.tsx`
+
+1. Add `scale` to the `FilterState` interface:
+
+```tsx
+export interface FilterState {
+    finishType: string | null;
+    tradeStatus: string | null;
+    manufacturer: string | null;
+    scale: string | null;  // ADD THIS
+    sortBy: "newest" | "oldest" | "most-favorited";
+}
+```
+
+2. Add a scale prop and dropdown to the filter bar. Accept a `scales` prop (array of unique scale strings extracted from data):
+
+```tsx
+<select value={filters.scale ?? ""} onChange={(e) => onChange({ ...filters, scale: e.target.value || null })} className="form-input" style={{ width: "auto", minWidth: "140px" }} id="filter-scale" aria-label="Filter by scale">
+    <option value="">All Scales</option>
+    {scales.map((s) => <option key={s} value={s}>{s}</option>)}
+</select>
+```
+
+**File:** `src/components/ShowRingGrid.tsx`
+
+3. Extract unique scales from data (like `manufacturers` is already extracted):
+
+```tsx
+const scales = useMemo(() => {
+    const set = new Set<string>();
+    communityCards.forEach((h) => {
+        if (h.scale) set.add(h.scale);
+    });
+    return [...set].sort();
+}, [communityCards]);
+```
+
+4. You'll need to pass `scale` through from the community page data. Check `CommunityCardData` in ShowRingGrid.tsx — it may need a `scale: string | null` field. If it's not there, add it and populate it from the community page's query (the `reference_molds(... scale ...)` join already exists).
+
+5. Add the filter logic in `filteredCards`:
+
+```tsx
+if (filters.scale) {
+    cards = cards.filter((h) => h.scale === filters.scale);
+}
+```
+
+6. Initialize `scale: null` in the filter state default.
+
+7. Pass `scales` to ShowRingFilters component.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task CP-3: Photo Thumbnails in Show Entries
+
+**Problem:** The virtual photo show entries (`src/app/shows/[id]/page.tsx`) show only horse name and owner — no photos. A *photo show* needs photos.
+
+**What to build:**
+
+**File:** `src/app/actions/shows.ts`
+
+1. Find the `getShowEntries` function. It fetches entries but needs to also fetch the primary thumbnail for each entered horse. Modify the query to join `horse_images`:
+
+```sql
+user_horses!inner(id, custom_name, finish_type, owner_id, users!inner(alias_name), horse_images(image_url, angle_profile))
+```
+
+2. Extract the Primary_Thumbnail (or first image) for each entry and include it in the return value.
+
+3. Generate signed URLs for the thumbnails using `getSignedImageUrls`.
+
+**File:** `src/app/shows/[id]/page.tsx`
+
+4. Display the thumbnail in each entry card. Add an image element to `.show-entry-card`:
+
+```tsx
+{entry.thumbnailUrl && (
+    <div className="show-entry-thumb">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
+    </div>
+)}
+```
+
+**File:** `src/app/globals.css`
+
+5. Add CSS for the thumbnail:
+
+```css
+.show-entry-thumb {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.show-entry-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+```
+
+6. Make the `.show-entry-card` a flex row with the thumb on the left.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task CP-4: Profile Bio Field
+
+**Problem:** User profiles have no bio/about section. Collectors want to say "I've been collecting since 1998, I focus on Traditionals, I show NAN regularly."
+
+**What to build:**
+
+### 1. Database migration: `supabase/migrations/017_user_bio.sql`
+
+```sql
+-- Add bio field to users table
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT NULL;
+
+COMMENT ON COLUMN users.bio IS 'Public bio/about text for the collector profile. Max 500 chars enforced at app layer.';
+```
+
+**IMPORTANT:** The agent must pause and ask the user to run this migration in the Supabase SQL Editor before proceeding.
+
+### 2. Display on profile: `src/app/profile/[alias_name]/page.tsx`
+
+The page already fetches user data. Add `bio` to the select query. Then display it below the alias:
+
+```tsx
+{profileUser.bio && (
+    <p className="profile-bio" style={{
+        color: "var(--color-text-muted)",
+        fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+        maxWidth: "480px",
+        lineHeight: 1.5,
+        marginTop: "var(--space-sm)",
+    }}>
+        {profileUser.bio}
+    </p>
+)}
+```
+
+### 3. Edit bio from own profile
+
+When viewing your OWN profile (`isOwnProfile` flag already exists in the page), show an "Edit Bio" button that opens an inline text area:
+
+- Create a small client component `src/components/EditBioButton.tsx`
+- It shows a pencil icon button when not editing
+- On click, it reveals a textarea (max 500 chars) with Save/Cancel buttons
+- Save calls a server action that updates `users.bio` where `id = auth.uid()`
+- Add the server action to `src/app/actions/social.ts` or a new `src/app/actions/profile.ts`:
 
 ```typescript
-export async function forgotPasswordAction(
-  _prevState: AuthFormState,
-  formData: FormData
-): Promise<AuthFormState> {
-  const email = formData.get("email") as string;
+export async function updateBio(bio: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
 
-  if (!email) {
-    return { error: "Please enter your email address.", success: false };
-  }
-
-  const supabase = await createClient();
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password`,
-  });
-
-  if (error) {
-    return { error: error.message, success: false };
-  }
-
-  // Always show success to prevent email enumeration
-  return { error: null, success: true };
+    const trimmed = bio.trim().slice(0, 500);
+    await supabase.from("users").update({ bio: trimmed }).eq("id", user.id);
+    revalidatePath(`/profile`);
 }
 ```
-
-### 2. Create the forgot password page: `src/app/forgot-password/page.tsx`
-
-```tsx
-"use client";
-
-import { useActionState } from "react";
-import Link from "next/link";
-import { forgotPasswordAction, type AuthFormState } from "@/app/auth/actions";
-
-const initialState: AuthFormState = { error: null, success: false };
-
-export default function ForgotPasswordPage() {
-  const [state, formAction, isPending] = useActionState(forgotPasswordAction, initialState);
-
-  if (state.success) {
-    return (
-      <div className="auth-page">
-        <div className="card card-auth animate-fade-in-up">
-          <div className="card-header">
-            <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }} aria-hidden="true">
-              ✉️
-            </div>
-            <h1>Check Your Email</h1>
-            <p style={{ marginTop: "var(--space-md)" }}>
-              If an account exists with that email, we&apos;ve sent you a password reset link.
-              Check your inbox and spam folder.
-            </p>
-          </div>
-          <Link href="/login" className="btn btn-primary btn-full" id="back-to-login">
-            Back to Sign In
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="auth-page">
-      <div className="card card-auth animate-fade-in-up">
-        <div className="card-header">
-          <h1>Reset <span className="text-gradient">Password</span></h1>
-          <p>Enter your email and we&apos;ll send you a reset link</p>
-        </div>
-
-        {state.error && (
-          <div className="form-error" role="alert" id="forgot-error">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-            {state.error}
-          </div>
-        )}
-
-        <form action={formAction} noValidate>
-          <div className="form-group">
-            <label htmlFor="forgot-email" className="form-label">Email Address</label>
-            <input
-              id="forgot-email"
-              name="email"
-              type="email"
-              className="form-input"
-              placeholder="you@example.com"
-              required
-              autoComplete="email"
-              autoFocus
-            />
-          </div>
-
-          <button type="submit" className="btn btn-primary btn-full" disabled={isPending} id="forgot-submit">
-            {isPending ? (
-              <>
-                <span className="btn-spinner" aria-hidden="true" />
-                Sending...
-              </>
-            ) : (
-              "Send Reset Link"
-            )}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          <p>
-            Remember your password?{" "}
-            <Link href="/login" id="go-to-login">Sign in here</Link>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-### 3. Create the reset password page: `src/app/auth/reset-password/page.tsx`
-
-```tsx
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-
-export default function ResetPasswordPage() {
-  const router = useRouter();
-  const supabase = createClient();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    setIsPending(true);
-    const { error: updateError } = await supabase.auth.updateUser({ password });
-
-    if (updateError) {
-      setError(updateError.message);
-      setIsPending(false);
-      return;
-    }
-
-    setSuccess(true);
-    setTimeout(() => router.push("/dashboard"), 2000);
-  };
-
-  if (success) {
-    return (
-      <div className="auth-page">
-        <div className="card card-auth animate-fade-in-up">
-          <div className="card-header">
-            <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }} aria-hidden="true">✅</div>
-            <h1>Password Updated!</h1>
-            <p style={{ marginTop: "var(--space-md)" }}>Redirecting to your stable...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="auth-page">
-      <div className="card card-auth animate-fade-in-up">
-        <div className="card-header">
-          <h1>New <span className="text-gradient">Password</span></h1>
-          <p>Choose a new password for your account</p>
-        </div>
-
-        {error && (
-          <div className="form-error" role="alert">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
-            </svg>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="form-group">
-            <label htmlFor="new-password" className="form-label">New Password</label>
-            <input
-              id="new-password"
-              type="password"
-              className="form-input"
-              placeholder="At least 6 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              autoComplete="new-password"
-              autoFocus
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="confirm-new-password" className="form-label">Confirm New Password</label>
-            <input
-              id="confirm-new-password"
-              type="password"
-              className="form-input"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-            />
-          </div>
-
-          <button type="submit" className="btn btn-primary btn-full" disabled={isPending} id="reset-submit">
-            {isPending ? (
-              <>
-                <span className="btn-spinner" aria-hidden="true" />
-                Updating...
-              </>
-            ) : (
-              "Update Password"
-            )}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-}
-```
-
-### 4. Add "Forgot password?" link to login page
-
-**File:** `src/app/login/page.tsx`
-
-Find the closing `</form>` tag and add this BEFORE the `<div className="auth-footer">`:
-
-```tsx
-        <div style={{ textAlign: "center", marginTop: "var(--space-md)" }}>
-          <Link
-            href="/forgot-password"
-            style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)" }}
-            id="forgot-password-link"
-          >
-            Forgot your password?
-          </Link>
-        </div>
-```
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## Task TU-2: Auth Error Page
-
-**Problem:** The auth callback (`src/app/auth/callback/route.ts`) redirects to `/auth/auth-code-error` on failure, but that route doesn't exist. Users who click an expired email confirmation link see a generic 404.
-
-**What to build:**
-
-Create `src/app/auth/auth-code-error/page.tsx`:
-
-```tsx
-import Link from "next/link";
-
-export default function AuthCodeErrorPage() {
-  return (
-    <div className="auth-page">
-      <div className="card card-auth animate-fade-in-up">
-        <div className="card-header">
-          <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }} aria-hidden="true">
-            ⚠️
-          </div>
-          <h1>Link Expired</h1>
-          <p style={{ marginTop: "var(--space-md)" }}>
-            This confirmation link has expired or is invalid. Please try signing up again
-            or request a new confirmation email.
-          </p>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
-          <Link href="/signup" className="btn btn-primary btn-full" id="retry-signup">
-            Sign Up Again
-          </Link>
-          <Link href="/login" className="btn btn-ghost btn-full" id="go-to-login">
-            Back to Sign In
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## Task TU-3: Add "My Profile" Link to Navigation
-
-**Problem:** Users have no way to navigate to their own public profile from the header. They'd need to know their alias and type the URL manually.
-
-**What to modify:**
-
-**File:** `src/components/Header.tsx`
-
-1. The component already fetches `user` and `profile` (which contains `alias_name`). Find the authenticated nav section (the `<nav>` with `className="header-nav"`) and add this link **after** the Wishlist link and **before** the Inbox link:
-
-```tsx
-          {profile?.alias_name && (
-            <Link
-              href={`/profile/${encodeURIComponent(profile.alias_name)}`}
-              className="header-nav-link"
-              id="nav-profile"
-              onClick={closeMobileMenu}
-            >
-              👤 Profile
-            </Link>
-          )}
-```
-
-2. Verify by looking at the existing nav structure. The link should go right before `Inbox` or right after `Wishlist`.
 
 ### Verify:
 ```
@@ -398,29 +310,28 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium
 
-## Task TU-4: Contact Seller Button on Show Ring Cards
+## Task CP-5: "See More from Seller" Link on Passport
 
-**Problem:** Horses in the Show Ring show "For Sale" / "For Trade" badges but there's no action button until the user clicks into the full passport detail page. Users see the badge but can't act on it from the listing view.
+**Problem:** When viewing a public passport (`/community/[id]`), there's no link to see the seller's other horses. Collectors who find a good seller want to browse everything they have.
 
-**What to modify:**
+**What to build:**
 
-**File:** `src/app/community/page.tsx`
+**File:** `src/app/community/[id]/page.tsx`
 
-Find the card rendering loop where `trade_status` badges are shown. When `trade_status` is not "Not for Sale", add a small action button that links to the full passport page with a hint to message:
+The page already fetches `owner_id` and the owner's `alias_name`. Add a link below the owner display:
 
 ```tsx
-{horse.trade_status && horse.trade_status !== "Not for Sale" && (
-  <Link
-    href={`/community/${horse.id}`}
-    className="btn btn-primary"
-    style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", padding: "var(--space-xs) var(--space-sm)" }}
-  >
-    View & Contact
-  </Link>
-)}
+<Link
+    href={`/profile/${encodeURIComponent(ownerAlias)}`}
+    className="btn btn-ghost"
+    style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginTop: "var(--space-sm)" }}
+    id="see-more-seller"
+>
+    👤 See all models from @{ownerAlias} →
+</Link>
 ```
 
-**Alternative approach:** If the trade status badge already links to the passport, this may not need a separate button — just ensure the badge itself is clickable. Check the current implementation first.
+Place this in the sidebar section, near/below the owner alias display. Verify it only shows when the viewer is NOT the owner (you wouldn't "see more from yourself").
 
 ### Verify:
 ```
@@ -429,12 +340,233 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task TU-5: Commit & Push Test-User Readiness
+## Task CP-6: Release Years in Reference Search
 
-After all TU tasks above are complete:
+**Problem:** The add-horse reference search (`WizardMoldSearch` or similar component) doesn't show release years in results. Collectors often know "I have the 1995 palomino" but not the official release name.
+
+**What to build:**
+
+Find the reference search component that queries `reference_releases`. The search results dropdown should already show `release_name` and `model_number`. Add `release_year_start` and `release_year_end` to the display:
+
+```tsx
+{release.release_year_start && (
+    <span style={{ opacity: 0.6, fontSize: "calc(0.75rem * var(--font-scale))" }}>
+        {" "}({release.release_year_start}{release.release_year_end && release.release_year_end !== release.release_year_start ? `–${release.release_year_end}` : ""})
+    </span>
+)}
+```
+
+Also ensure the search query is already fetching `release_year_start, release_year_end` from the reference_releases table. If not, add those columns to the select.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task CP-7: Mark All Notifications Read
+
+**Problem:** The notifications page (`NotificationList` component) has individual mark-as-read but no "Mark All Read" button.
+
+**What to build:**
+
+### 1. Server action: `src/app/actions/notifications.ts`
+
+Add a `markAllNotificationsRead` function:
+
+```typescript
+export async function markAllNotificationsRead() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+
+    revalidatePath("/notifications");
+}
+```
+
+### 2. Client component update: `src/components/NotificationList.tsx`
+
+Add a "Mark All Read" button at the top of the notification list, only visible when there are unread notifications:
+
+```tsx
+{unreadCount > 0 && (
+    <button
+        className="btn btn-ghost"
+        onClick={async () => {
+            await markAllNotificationsRead();
+            router.refresh();
+        }}
+        style={{ marginBottom: "var(--space-md)" }}
+        id="mark-all-read"
+    >
+        ✓ Mark All Read ({unreadCount})
+    </button>
+)}
+```
+
+Import the action and compute `unreadCount` from the notifications prop.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task CP-8: "New" Badge on Show Ring Cards
+
+**Problem:** When users return to the Show Ring, they can't tell which horses are new since their last visit.
+
+**What to build:**
+
+**File:** `src/components/ShowRingGrid.tsx`
+
+Add a "NEW" badge to cards where `createdAt` is within the last 48 hours:
+
+```tsx
+{(Date.now() - new Date(horse.createdAt).getTime()) < 48 * 60 * 60 * 1000 && (
+    <span className="new-badge">NEW</span>
+)}
+```
+
+**File:** `src/app/globals.css`
+
+```css
+.new-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--color-accent, #f59e0b);
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    z-index: 2;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+```
+
+Place the badge inside `.horse-card-image` (which already has `position: relative`).
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+# 🟢 Priority: Nice-to-Have
+
+## Task CP-9: Activity Feed Event Thumbnails
+
+**Problem:** Feed events like "User added a new horse" or "User favorited a horse" are text-only. Visual feeds drive significantly more engagement.
+
+**What to build:**
+
+**File:** `src/app/actions/activity.ts`
+
+The `getActivityFeed` function currently returns events with `horseId` and `horseName`. Add a thumbnail by joining `horse_images` in the query:
+
+1. After fetching activity events, collect all `horse_id` values
+2. Batch-fetch primary thumbnails for those horses:
+
+```typescript
+const horseIds = events.filter(e => e.horse_id).map(e => e.horse_id);
+const { data: thumbs } = await supabase
+    .from("horse_images")
+    .select("horse_id, image_url")
+    .in("horse_id", horseIds)
+    .eq("angle_profile", "Primary_Thumbnail");
+```
+
+3. Generate signed URLs and include `thumbnailUrl` in the return type
+
+**File:** `src/components/ActivityFeed.tsx`
+
+4. Display the thumbnail next to the event text:
+
+```tsx
+{item.thumbnailUrl && (
+    <div className="feed-item-thumb">
+        <img src={item.thumbnailUrl} alt="" loading="lazy" />
+    </div>
+)}
+```
+
+5. Add CSS for a small 48x48 rounded thumbnail on the left of each feed item.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task CP-10: Wishlist Match Notifications
+
+**Problem:** The Matchmaker finds For Sale horses matching your wishlist, but ONLY when you visit the Wishlist page. Collectors want to be notified: "A horse matching your wishlist just went For Sale!"
+
+**What to build:**
+
+**File:** `src/app/actions/horse-events.ts`
+
+In the `notifyHorsePublic` function (or wherever trade_status changes are processed), add wishlist match checking:
+
+1. When a horse is marked "For Sale" or "Open to Offers", query `user_wishlists` for any user who has that `mold_id` or `release_id` on their wishlist
+2. For each match, create a notification:
+
+```typescript
+// Check for wishlist matches
+if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
+    const { data: wishlistMatches } = await supabase
+        .from("user_wishlists")
+        .select("user_id")
+        .or(`mold_id.eq.${moldId},release_id.eq.${releaseId}`)
+        .neq("user_id", ownerId); // Don't notify the seller
+
+    for (const match of wishlistMatches ?? []) {
+        await supabase.from("notifications").insert({
+            user_id: match.user_id,
+            type: "wishlist_match",
+            message: `A ${horseName} matching your wishlist is now ${tradeStatus}!`,
+            link: `/community/${horseId}`,
+        });
+    }
+}
+```
+
+**File:** `src/components/NotificationList.tsx`
+
+3. Handle the `wishlist_match` notification type with a ❤️‍🔥 icon.
+
+### Verify:
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
+```
+
+---
+
+## Task CP-11: Commit & Push Collector Polish
+
+After all CP tasks above are complete:
 
 ```
-cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "feat: forgot password, auth error page, profile nav link, contact seller CTA" 2>&1"
+cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "polish: stable sort, scale filter, show thumbs, bio, seller link, notif mark-all, new badges" 2>&1"
 ```
 
 Then push:
@@ -442,84 +574,3 @@ Then push:
 ```
 cd c:\Project Equispace\model-horse-hub && cmd /c "git push origin main 2>&1"
 ```
-
----
-
-# 📝 Completed Tasks
-
-## ✅ Task A: Wire Activity Events into Missing Actions (completed 2026-03-07)
-Wired `createActivityEvent` into ratings.ts, follows.ts, provenance.ts. Added `show_record` event type to ActivityFeed component.
-
-## ✅ Task B: Build Collection Showcases UI (completed 2026-03-07)
-Added `is_public` checkbox to CollectionPicker creation modal. Added public collection pills to profile pages with CSS.
-
-## ✅ Task C: Optimize Discover Page N+1 Queries (completed 2026-03-07)
-Replaced serial `getUserRatingSummary()` loop with single batch query to `user_ratings` table. Removed unused import.
-
-## ✅ Task D: Add "New Horse" Activity Event (completed 2026-03-07)
-Created `notifyHorsePublic` server action in `horse-events.ts`. Wired into both add-horse and edit-horse pages.
-
-## ⏭️ Task E: Middleware Public Paths (skipped — not needed)
-
-## ✅ Task F: Documentation + Commit (completed 2026-03-07)
-Committed and pushed as `fix: wire missing activity events + collection showcase UI + discover optimization`.
-
-## ✅ LP-1: Mobile Navigation — Hamburger Menu (completed 2026-03-07)
-Added `mobileMenuOpen` state and hamburger button to Header.tsx. Nav collapses to full-width slide-down menu on mobile (<768px). Auto-closes on link click and outside click. CSS with backdrop blur and glassmorphism.
-
-## ✅ LP-2: Global Loading States (completed 2026-03-07)
-Created root `loading.tsx` with shimmer skeleton (hero + 6-card grid). Added route-specific loading files for community, dashboard, discover, feed, and shows via re-exports. Added `@keyframes shimmer` and skeleton CSS.
-
-## ✅ LP-3: Error Boundary + Not Found (completed 2026-03-07)
-Created `error.tsx` (client component with retry button) and `not-found.tsx` (branded 404 with back-to-stable link).
-
-## ✅ LP-4: Landing Page Refresh (completed 2026-03-07)
-Added 3 new feature cards (Social Community, Virtual Photo Shows, Trusted Marketplace) for 6 total. Updated meta description, hero subheadline, stats section (added "7,000+ Reference Releases"). Changed grid to `auto-fit minmax(300px, 1fr)`.
-
-## ✅ LP-5: Onboarding Welcome Card (completed 2026-03-07)
-Added welcome card to dashboard for users with 0 horses. Includes 3-step getting started guide and "Add Your First Horse" CTA. Added glassmorphism CSS with numbered step indicators.
-
-## ✅ LP-6: Mobile Polish Pass (completed 2026-03-07)
-Added `@media (max-width: 640px)` rules for feed-tabs, profile-hero-stats, profile-follow-stats, discover-grid, notification-item, and stats-inner.
-
-## ✅ LP-7: Commit Launch Prep (completed 2026-03-07)
-Committed and pushed as `polish: Launch prep - mobile nav, loading states, error boundaries, landing page refresh`.
-
-## ✅ TH-1: Migrate middleware.ts → proxy.ts (completed 2026-03-07)
-Renamed file and export function per Next.js 16 convention. Deprecation warning eliminated from build output.
-
-## ✅ TH-2: TypeScript Type Audit (completed 2026-03-07)
-Cross-referenced all 8 social/expansion interfaces against migration SQL. Found and fixed missing `is_public` field on `UserCollection` interface and its Insert type.
-
-## ✅ TH-3: Circular Import Check (completed 2026-03-07)
-Verified `notifications.ts` and `activity.ts` are leaf modules. All import arrows point one-way — no circular dependencies.
-
-## ✅ TH-4: Commit Technical Hardening (completed 2026-03-07)
-Committed and pushed as `chore: Technical hardening - proxy migration, type audit, import cleanup`.
-
-## ✅ TH-5: Add Basic Automated Test (completed 2026-03-07)
-Installed vitest, created `src/__tests__/smoke.test.ts`, added `"test": "vitest run"` script. Test passes in 938ms.
-
-## ✅ BF-1: Disappearing Comments Fix (completed 2026-03-07)
-Added `revalidatePath` to `addComment`, `deleteComment`, and `toggleFavorite` in social.ts. Cache bust ensures comments/favorites persist across page loads.
-
-## ✅ BF-2: Mobile Nav CSS Fix (completed 2026-03-07)
-Added 85 lines of missing `.header-nav`, `.header-nav-link`, `.header-hamburger` CSS to globals.css. Nav now properly collapses on mobile.
-
-## ✅ BF-3: Remove AI References (completed 2026-03-07)
-Removed AI language from landing page (meta, hero, feature card). Hidden AI detect button and hint on add-horse page via `{false && ...}` guard. Code preserved for future re-enable.
-
-## ✅ TU-1: Forgot Password Flow (completed 2026-03-07)
-Added `forgotPasswordAction` to auth/actions.ts. Created `/forgot-password` page with email form + success screen. Created `/auth/reset-password` page with new password form + auto-redirect. Added "Forgot your password?" link to login page. Added `/forgot-password` to proxy public paths.
-
-## ✅ TU-2: Auth Error Page (completed 2026-03-07)
-Created `/auth/auth-code-error/page.tsx` with branded error messaging for expired/invalid confirmation links. Includes "Sign Up Again" and "Back to Sign In" CTAs.
-
-## ✅ TU-3: My Profile Navigation Link (completed 2026-03-07)
-Added `aliasName` state to Header.tsx. Fetches from `users` table on auth. Renders 👤 Profile link between Wishlist and Inbox in nav. Works on both desktop and mobile hamburger menu.
-
-## ✅ TU-4: Contact Seller CTA on Show Ring Cards (completed 2026-03-07)
-Added "View & Contact" button inside card link for For Sale / Open to Offers horses. Supplements existing trade badges and MessageSellerButton.
-
-## ✅ TU-5: Commit & Push Test-User Readiness (completed 2026-03-07)
-Committed and pushed as `feat: forgot password, auth error page, profile nav link, contact seller CTA`.
