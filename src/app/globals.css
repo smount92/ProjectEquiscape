@@ -2548,3 +2548,175 @@ p {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+
+/* ================================================================
+   TOGGLE SWITCH
+   ================================================================ */
+
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  transition: background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggle-on {
+  background: var(--color-accent-primary);
+}
+
+.toggle-off {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--color-border);
+}
+
+.toggle-knob {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform var(--transition-fast);
+}
+
+.toggle-on .toggle-knob {
+  transform: translateX(24px);
+}
+
+.toggle-off .toggle-knob {
+  transform: translateX(0);
+}
+
+
+/* ================================================================
+   COMMUNITY TOGGLE SECTION (Intake & Edit Forms)
+   ================================================================ */
+
+.community-toggle-section {
+  margin-top: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: rgba(124, 109, 240, 0.04);
+  border: 1px solid rgba(124, 109, 240, 0.12);
+}
+
+.community-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.community-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+  flex: 1;
+}
+
+.community-toggle-label {
+  font-size: calc(var(--font-size-md) * var(--font-scale));
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.community-toggle-hint {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+
+/* ================================================================
+   PROFILE PAGE
+   ================================================================ */
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  padding: var(--space-xl) var(--space-2xl);
+  margin-bottom: var(--space-md);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(
+    135deg,
+    rgba(124, 109, 240, 0.08) 0%,
+    rgba(74, 222, 222, 0.06) 100%
+  );
+  border: 1px solid var(--color-border);
+}
+
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(124, 109, 240, 0.12);
+  border: 2px solid rgba(124, 109, 240, 0.3);
+  color: var(--color-accent-primary);
+  flex-shrink: 0;
+}
+
+.profile-hero-content h1 {
+  font-size: calc(1.6rem * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-xs);
+  color: var(--color-accent-primary);
+}
+
+.profile-hero-subtitle {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-sm);
+}
+
+.profile-hero-stats {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.profile-stat {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-text-secondary);
+}
+
+.community-owner-badge:hover {
+  background: rgba(124, 109, 240, 0.1);
+  border-color: rgba(124, 109, 240, 0.3);
+}
+
+.community-card-owner:hover {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .profile-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .profile-hero-stats {
+    justify-content: center;
+  }
+
+  .community-toggle-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

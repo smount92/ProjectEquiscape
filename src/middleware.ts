@@ -44,6 +44,7 @@ export async function middleware(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/signup") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/community") &&
+    !request.nextUrl.pathname.startsWith("/profile") &&
     !request.nextUrl.pathname.startsWith("/_next") &&
     !request.nextUrl.pathname.startsWith("/favicon.ico")
   ) {

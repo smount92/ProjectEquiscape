@@ -239,7 +239,11 @@ export default async function PublicPassportPage({
           </div>
 
           {/* Owner badge */}
-          <div className="community-owner-badge">
+          <Link
+            href={`/profile/${encodeURIComponent(ownerAlias)}`}
+            className="community-owner-badge"
+            style={{ textDecoration: "none" }}
+          >
             <svg
               width="16"
               height="16"
@@ -260,7 +264,7 @@ export default async function PublicPassportPage({
             {isOwnHorse && (
               <span className="community-own-badge">You</span>
             )}
-          </div>
+          </Link>
 
           {/* Model Details Card */}
           <div className="passport-detail-card">

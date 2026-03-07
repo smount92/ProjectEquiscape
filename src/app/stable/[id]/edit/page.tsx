@@ -44,6 +44,7 @@ export default function EditHorsePage() {
   const [customName, setCustomName] = useState("");
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
 
   // Reference fields (controlled by UnifiedReferenceSearch)
   const [selectedMoldId, setSelectedMoldId] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, finish_type, condition_grade, reference_mold_id, artist_resin_id, release_id")
+        .select("id, owner_id, custom_name, finish_type, condition_grade, is_public, reference_mold_id, artist_resin_id, release_id")
         .eq("id", horseId)
         .single<{
           id: string;
@@ -81,6 +82,7 @@ export default function EditHorsePage() {
           custom_name: string;
           finish_type: FinishType;
           condition_grade: string;
+          is_public: boolean;
           reference_mold_id: string | null;
           artist_resin_id: string | null;
           release_id: string | null;
@@ -95,6 +97,7 @@ export default function EditHorsePage() {
       setCustomName(horse.custom_name);
       setFinishType(horse.finish_type);
       setConditionGrade(horse.condition_grade);
+      setIsPublic(horse.is_public);
 
       if (horse.reference_mold_id) {
         setSelectedMoldId(horse.reference_mold_id);
@@ -166,6 +169,7 @@ export default function EditHorsePage() {
         custom_name: customName.trim(),
         finish_type: finishType,
         condition_grade: conditionGrade,
+        is_public: isPublic,
         reference_mold_id: selectedMoldId,
         artist_resin_id: selectedResinId,
         release_id: selectedReleaseId,
@@ -299,6 +303,29 @@ export default function EditHorsePage() {
             </div>
           </div>
         </div>
+
+          {/* Community visibility toggle */}
+          <div className="community-toggle-section">
+            <div className="community-toggle-row">
+              <div className="community-toggle-info">
+                <span className="community-toggle-label">🏆 Show in Public Community Feed</span>
+                <span className="community-toggle-hint">
+                  When enabled, this model appears in the Show Ring.
+                  Your financial data is always private.
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isPublic}
+                className={`toggle-switch ${isPublic ? "toggle-on" : "toggle-off"}`}
+                onClick={() => setIsPublic(!isPublic)}
+                id="edit-is-public-toggle"
+              >
+                <span className="toggle-knob" />
+              </button>
+            </div>
+          </div>
 
         {/* ===== Section 2: Reference Link (Unified Search) ===== */}
         <div className="edit-section">

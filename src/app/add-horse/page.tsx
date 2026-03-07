@@ -102,6 +102,7 @@ export default function AddHorsePage() {
   const [customName, setCustomName] = useState("");
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
 
   // Step 4 (index 3): Financial Vault
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -317,6 +318,7 @@ export default function AddHorsePage() {
         custom_name: customName.trim(),
         finish_type: finishType,
         condition_grade: conditionGrade,
+        is_public: isPublic,
       };
 
       if (selectedMoldId) horseInsert.reference_mold_id = selectedMoldId;
@@ -756,6 +758,29 @@ export default function AddHorsePage() {
             >
               Next: Financial Vault →
             </button>
+          </div>
+
+          {/* Community visibility toggle */}
+          <div className="community-toggle-section">
+            <div className="community-toggle-row">
+              <div className="community-toggle-info">
+                <span className="community-toggle-label">🏆 Show in Public Community Feed</span>
+                <span className="community-toggle-hint">
+                  When enabled, this model will appear in the Show Ring for
+                  other collectors to admire. Your financial data is always private.
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={isPublic}
+                className={`toggle-switch ${isPublic ? "toggle-on" : "toggle-off"}`}
+                onClick={() => setIsPublic(!isPublic)}
+                id="is-public-toggle"
+              >
+                <span className="toggle-knob" />
+              </button>
+            </div>
           </div>
         </div>
       )}

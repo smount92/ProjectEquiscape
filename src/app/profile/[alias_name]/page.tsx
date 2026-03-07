@@ -1,19 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 
 // Types
-interface CommunityHorse {
+interface ProfileHorse {
   id: string;
-  owner_id: string;
   custom_name: string;
   finish_type: string;
   condition_grade: string;
   created_at: string;
-  users: {
-    alias_name: string;
-  } | null;
   reference_molds: {
     mold_name: string;
     manufacturer: string;
@@ -45,33 +41,37 @@ function getFinishBadgeClass(finish: string): string {
   }
 }
 
-function timeAgo(dateStr: string): string {
-  const seconds = Math.floor(
-    (Date.now() - new Date(dateStr).getTime()) / 1000
-  );
-  if (seconds < 60) return "Just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
+function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
+    year: "numeric",
   });
 }
 
-export const metadata = {
-  title: "The Show Ring — Model Horse Hub",
-  description:
-    "Browse the community showcase of model horses cataloged by collectors around the world.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ alias_name: string }>;
+}) {
+  const { alias_name } = await params;
+  const decoded = decodeURIComponent(alias_name);
+  return {
+    title: `@${decoded}'s Stable — Model Horse Hub`,
+    description: `Browse the public collection of @${decoded} on Model Horse Hub.`,
+  };
+}
 
-export default async function CommunityPage() {
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ alias_name: string }>;
+}) {
+  const { alias_name } = await params;
+  const aliasDecoded = decodeURIComponent(alias_name);
   const supabase = await createClient();
 
-  // Auth check — community requires login (RLS needs authenticated user)
+  // Auth check — needed for RLS
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -80,31 +80,41 @@ export default async function CommunityPage() {
     redirect("/login");
   }
 
+  // Look up the user by alias_name
+  const { data: profileUser } = await supabase
+    .from("users")
+    .select("id, alias_name, created_at")
+    .eq("alias_name", aliasDecoded)
+    .single<{ id: string; alias_name: string; created_at: string }>();
+
+  if (!profileUser) {
+    notFound();
+  }
+
+  const isOwnProfile = profileUser.id === user.id;
+
   // ================================================================
-  // COMMUNITY QUERY: Public horses across all users
-  // CRITICAL: Joins user_horses → users (alias_name only),
-  //           reference_molds, reference_releases, horse_images.
+  // PROFILE QUERY: Only public horses for this user
   // 🔒 financial_vault is NEVER queried here.
   // ================================================================
   const { data: rawHorses } = await supabase
     .from("user_horses")
     .select(
       `
-      id, owner_id, custom_name, finish_type, condition_grade, created_at,
-      users!inner(alias_name),
+      id, custom_name, finish_type, condition_grade, created_at,
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
       reference_releases(release_name, model_number),
       horse_images(image_url, angle_profile)
     `
     )
+    .eq("owner_id", profileUser.id)
     .eq("is_public", true)
-    .order("created_at", { ascending: false })
-    .limit(60);
+    .order("created_at", { ascending: false });
 
-  const horses = (rawHorses as unknown as CommunityHorse[]) ?? [];
+  const horses = (rawHorses as unknown as ProfileHorse[]) ?? [];
 
-  // Collect all thumbnail image URLs and generate signed URLs
+  // Generate signed URLs for thumbnails
   const thumbnailUrls: string[] = [];
   horses.forEach((horse) => {
     const thumb = horse.horse_images?.find(
@@ -118,7 +128,7 @@ export default async function CommunityPage() {
   const signedUrlMap = await getSignedImageUrls(supabase, thumbnailUrls);
 
   // Build display data
-  const communityCards = horses.map((horse) => {
+  const profileCards = horses.map((horse) => {
     const thumb = horse.horse_images?.find(
       (img) => img.angle_profile === "Primary_Thumbnail"
     );
@@ -136,8 +146,6 @@ export default async function CommunityPage() {
       ? `${horse.reference_releases.release_name}${horse.reference_releases.model_number ? ` (#${horse.reference_releases.model_number})` : ""}`
       : null;
 
-    const ownerAlias = horse.users?.alias_name ?? "Unknown";
-
     return {
       id: horse.id,
       customName: horse.custom_name,
@@ -146,53 +154,99 @@ export default async function CommunityPage() {
       createdAt: horse.created_at,
       refName,
       releaseLine,
-      ownerAlias,
       thumbnailUrl: signedUrl || null,
     };
   });
 
+  const memberSince = new Date(profileUser.created_at).toLocaleDateString(
+    "en-US",
+    { month: "long", year: "numeric" }
+  );
+
   return (
     <div className="page-container">
-      {/* Hero */}
-      <div className="community-hero animate-fade-in-up">
-        <div className="community-hero-content">
-          <h1>
-            🏆 The <span className="text-gradient">Show Ring</span>
-          </h1>
-          <p className="community-hero-subtitle">
-            Browse the latest models shared by collectors from around the world.
-            Every horse has a story.
-          </p>
+      {/* Profile Header */}
+      <div className="profile-hero animate-fade-in-up">
+        <div className="profile-avatar">
+          <svg
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
         </div>
-        <div className="community-stats">
-          <div className="community-stat">
-            <span className="community-stat-number">{communityCards.length}</span>
-            <span className="community-stat-label">Models Showcased</span>
+        <div className="profile-hero-content">
+          <h1>
+            @{profileUser.alias_name}
+            {isOwnProfile && (
+              <span className="community-own-badge" style={{ marginLeft: "var(--space-sm)", verticalAlign: "middle" }}>
+                You
+              </span>
+            )}
+          </h1>
+          <p className="profile-hero-subtitle">
+            {isOwnProfile
+              ? "Your public stable — this is how other collectors see your models."
+              : `@${profileUser.alias_name}'s public collection`}
+          </p>
+          <div className="profile-hero-stats">
+            <span className="profile-stat">
+              🐴 {profileCards.length} public model{profileCards.length !== 1 ? "s" : ""}
+            </span>
+            <span className="profile-stat">
+              📅 Member since {memberSince}
+            </span>
           </div>
         </div>
       </div>
 
+      {/* Breadcrumb */}
+      <nav
+        className="passport-breadcrumb animate-fade-in-up"
+        aria-label="Breadcrumb"
+        style={{ marginBottom: "var(--space-lg)" }}
+      >
+        <Link href="/community">Show Ring</Link>
+        <span className="separator" aria-hidden="true">/</span>
+        <span>@{profileUser.alias_name}</span>
+      </nav>
+
       {/* Grid */}
-      {communityCards.length === 0 ? (
+      {profileCards.length === 0 ? (
         <div className="card shelf-empty animate-fade-in-up">
-          <div className="shelf-empty-icon">🏟️</div>
-          <h2>The Show Ring is Empty</h2>
+          <div className="shelf-empty-icon">🔒</div>
+          <h2>
+            {isOwnProfile
+              ? "You haven't made any models public yet"
+              : `@${profileUser.alias_name} hasn't made any models public yet`}
+          </h2>
           <p>
-            No models have been shared yet. Be the first to showcase your
-            collection!
+            {isOwnProfile
+              ? 'Toggle "Show in Public Community Feed" on any of your models to showcase them here.'
+              : "Check back later — they may share some soon!"}
           </p>
-          <Link href="/add-horse" className="btn btn-primary">
-            🐴 Add to Stable
-          </Link>
+          {isOwnProfile && (
+            <Link href="/" className="btn btn-primary">
+              🏠 Go to My Stable
+            </Link>
+          )}
         </div>
       ) : (
         <div className="community-grid animate-fade-in-up">
-          {communityCards.map((horse) => (
+          {profileCards.map((horse) => (
             <Link
               key={horse.id}
               href={`/community/${horse.id}`}
               className="community-card"
-              id={`community-card-${horse.id}`}
+              id={`profile-card-${horse.id}`}
             >
               <div className="community-card-image">
                 {horse.thumbnailUrl ? (
@@ -230,29 +284,11 @@ export default async function CommunityPage() {
                   </div>
                 )}
                 <div className="community-card-footer">
-                  <Link
-                    href={`/profile/${encodeURIComponent(horse.ownerAlias)}`}
-                    className="community-card-owner"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    @{horse.ownerAlias}
-                  </Link>
+                  <span className="community-card-ref">
+                    {horse.conditionGrade}
+                  </span>
                   <span className="community-card-time">
-                    {timeAgo(horse.createdAt)}
+                    {formatDate(horse.createdAt)}
                   </span>
                 </div>
               </div>
