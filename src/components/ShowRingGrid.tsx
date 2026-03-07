@@ -30,6 +30,7 @@ interface CommunityCardData {
     refReleaseId: string | null;
     favoriteCount: number;
     isFavorited: boolean;
+    scale: string | null;
 }
 
 function getFinishBadgeClass(finish: string): string {
@@ -68,6 +69,7 @@ export default function ShowRingGrid({
         finishType: null,
         tradeStatus: null,
         manufacturer: null,
+        scale: null,
         sortBy: "newest",
     });
 
@@ -77,6 +79,15 @@ export default function ShowRingGrid({
         communityCards.forEach((h) => {
             const mfr = h.refName.split(" ")[0];
             if (mfr && mfr !== "Unlisted") set.add(mfr);
+        });
+        return [...set].sort();
+    }, [communityCards]);
+
+    // Extract unique scales from data
+    const scales = useMemo(() => {
+        const set = new Set<string>();
+        communityCards.forEach((h) => {
+            if (h.scale) set.add(h.scale);
         });
         return [...set].sort();
     }, [communityCards]);
@@ -107,6 +118,9 @@ export default function ShowRingGrid({
         if (filters.manufacturer) {
             cards = cards.filter((h) => h.refName.startsWith(filters.manufacturer!));
         }
+        if (filters.scale) {
+            cards = cards.filter((h) => h.scale === filters.scale);
+        }
 
         // Sort
         if (filters.sortBy === "oldest") {
@@ -119,7 +133,7 @@ export default function ShowRingGrid({
         return cards;
     }, [searchQuery, communityCards, filters]);
 
-    const isFiltering = searchQuery.trim() || filters.finishType || filters.tradeStatus || filters.manufacturer;
+    const isFiltering = searchQuery.trim() || filters.finishType || filters.tradeStatus || filters.manufacturer || filters.scale;
 
     return (
         <>
@@ -137,6 +151,7 @@ export default function ShowRingGrid({
                     filters={filters}
                     onFilterChange={setFilters}
                     manufacturers={manufacturers}
+                    scales={scales}
                 />
             )}
 
@@ -183,6 +198,9 @@ export default function ShowRingGrid({
                                         <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
                                             {horse.finishType}
                                         </span>
+                                        {(Date.now() - new Date(horse.createdAt).getTime()) < 48 * 60 * 60 * 1000 && (
+                                            <span className="new-badge">NEW</span>
+                                        )}
                                         {horse.tradeStatus === "For Sale" && (
                                             <span className="trade-badge trade-for-sale">
                                                 💲 {priceLabel || "For Sale"}

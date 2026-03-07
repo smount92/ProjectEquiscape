@@ -4,6 +4,7 @@ interface FilterState {
     finishType: string | null;
     tradeStatus: string | null;
     manufacturer: string | null;
+    scale: string | null;
     sortBy: "newest" | "oldest" | "most-favorited";
 }
 
@@ -11,6 +12,7 @@ interface ShowRingFiltersProps {
     filters: FilterState;
     onFilterChange: (filters: FilterState) => void;
     manufacturers: string[];
+    scales: string[];
 }
 
 const FINISH_TYPES = ["OF", "Custom", "Artist Resin"];
@@ -19,6 +21,7 @@ export default function ShowRingFilters({
     filters,
     onFilterChange,
     manufacturers,
+    scales,
 }: ShowRingFiltersProps) {
     const setFilter = (key: keyof FilterState, value: string | null) => {
         onFilterChange({ ...filters, [key]: value });
@@ -71,6 +74,24 @@ export default function ShowRingFilters({
                     {manufacturers.map((m) => (
                         <option key={m} value={m}>
                             {m}
+                        </option>
+                    ))}
+                </select>
+            )}
+
+            {/* Scale Dropdown */}
+            {scales.length > 1 && (
+                <select
+                    className="filter-dropdown"
+                    value={filters.scale || ""}
+                    onChange={(e) => setFilter("scale", e.target.value || null)}
+                    id="filter-scale"
+                    aria-label="Filter by scale"
+                >
+                    <option value="">All Scales</option>
+                    {scales.map((s) => (
+                        <option key={s} value={s}>
+                            {s}
                         </option>
                     ))}
                 </select>

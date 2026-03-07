@@ -8,6 +8,7 @@ import RatingBadge from "@/components/RatingBadge";
 import FollowButton from "@/components/FollowButton";
 import { getUserRatingSummary } from "@/app/actions/ratings";
 import { getFollowStats } from "@/app/actions/follows";
+import EditBioButton from "@/components/EditBioButton";
 
 export const dynamic = "force-dynamic";
 
@@ -95,9 +96,9 @@ export default async function ProfilePage({
   // Look up the user by alias_name
   const { data: profileUser } = await supabase
     .from("users")
-    .select("id, alias_name, created_at")
+    .select("id, alias_name, created_at, bio")
     .eq("alias_name", aliasDecoded)
-    .single<{ id: string; alias_name: string; created_at: string }>();
+    .single<{ id: string; alias_name: string; created_at: string; bio: string | null }>();
 
   if (!profileUser) {
     notFound();
@@ -235,6 +236,20 @@ export default async function ProfilePage({
               ? "Your public stable — this is how other collectors see your models."
               : `@${profileUser.alias_name}'s public collection`}
           </p>
+          {profileUser.bio && (
+            <p style={{
+              color: "var(--color-text-muted)",
+              fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+              maxWidth: "480px",
+              lineHeight: 1.5,
+              marginTop: "var(--space-xs)",
+            }}>
+              {profileUser.bio}
+            </p>
+          )}
+          {isOwnProfile && (
+            <EditBioButton currentBio={profileUser.bio} />
+          )}
           <div className="profile-hero-stats">
             <span className="profile-stat">
               🐴 {profileCards.length} public model{profileCards.length !== 1 ? "s" : ""}

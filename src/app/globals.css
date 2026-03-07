@@ -7708,3 +7708,53 @@ p {
     display: none;
   }
 }
+
+/* ===== NEW Badge ===== */
+.new-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--color-accent, #f59e0b);
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 2;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ===== Show Entry Thumbnails ===== */
+.show-entry-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.show-entry-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.show-entry-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

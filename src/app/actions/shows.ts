@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getSignedImageUrls } from "@/lib/utils/storage";
 
 // ============================================================
 // PHOTO SHOWS — Server Actions
@@ -144,6 +145,26 @@ export async function getShowEntries(showId: string): Promise<{
         votedSet = new Set((votes ?? []).map((v: { entry_id: string }) => v.entry_id));
     }
 
+    // Batch-fetch primary thumbnails for entered horses
+    const { data: thumbRows } = await supabase
+        .from("horse_images")
+        .select("horse_id, image_url, angle_profile")
+        .in("horse_id", horseIds);
+
+    // Pick Primary_Thumbnail or first image per horse
+    const thumbUrlMap = new Map<string, string>();
+    const allThumbUrls: string[] = [];
+    for (const hId of horseIds) {
+        const imgs = (thumbRows ?? []).filter((r: { horse_id: string; image_url: string; angle_profile: string }) => r.horse_id === hId);
+        const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
+        const url = (primary ?? imgs[0])?.image_url;
+        if (url) {
+            thumbUrlMap.set(hId, url);
+            allThumbUrls.push(url);
+        }
+    }
+    const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
+
     return {
         show: { id: s.id, title: s.title, description: s.description, theme: s.theme, status: s.status, entryCount: entryList.length, createdAt: s.created_at, endAt: s.end_at },
         entries: entryList.map((e) => ({
@@ -152,7 +173,7 @@ export async function getShowEntries(showId: string): Promise<{
             horseId: e.horse_id,
             ownerAlias: aliasMap.get(e.user_id) || "Unknown",
             ownerId: e.user_id,
-            thumbnailUrl: null,
+            thumbnailUrl: thumbUrlMap.has(e.horse_id) ? (signedUrls.get(thumbUrlMap.get(e.horse_id)!) ?? null) : null,
             finishType: horseMap.get(e.horse_id)?.finish || "OF",
             votes: e.votes,
             hasVoted: votedSet.has(e.id),

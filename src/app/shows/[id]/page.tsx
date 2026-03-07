@@ -106,6 +106,12 @@ export default async function ShowDetailPage({
                     {entries.map((entry, index) => (
                         <div key={entry.id} className="show-entry-card">
                             <div className="show-entry-rank">#{index + 1}</div>
+                            {entry.thumbnailUrl && (
+                                <div className="show-entry-thumb">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
+                                </div>
+                            )}
                             <div className="show-entry-info">
                                 <Link
                                     href={`/community/${entry.horseId}`}

@@ -383,6 +383,18 @@ export default async function PublicPassportPage({
             )}
           </Link>
 
+          {/* See More from Seller — only for other users' horses */}
+          {!isOwnHorse && (
+            <Link
+              href={`/profile/${encodeURIComponent(ownerAlias)}`}
+              className="btn btn-ghost"
+              style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginTop: "var(--space-sm)" }}
+              id="see-more-seller"
+            >
+              👤 See all models from @{ownerAlias} →
+            </Link>
+          )}
+
           {/* Model Details Card */}
           <div className="passport-detail-card">
             <h3>

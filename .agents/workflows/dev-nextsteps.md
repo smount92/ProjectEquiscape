@@ -44,7 +44,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🔴 Priority: Critical (Daily-Use Blockers)
 
-## Task CP-1: Stable Sort Options
+## ✅ Task CP-1: Stable Sort Options (completed)
 
 **Problem:** The Dashboard stable grid (StableGrid component) only has a search bar — no sort. Collectors with 100+ models need to sort by name, date added, condition, or value.
 
@@ -121,7 +121,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task CP-2: Scale Filter on Show Ring
+## ✅ Task CP-2: Scale Filter on Show Ring (completed)
 
 **Problem:** The Show Ring `ShowRingFilters` component has filters for Finish Type, Trade Status, and Manufacturer — but NOT Scale. Model horse collectors think in scales: Traditional, Classic, Stablemate, Paddock Pal, etc.
 
@@ -185,7 +185,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task CP-3: Photo Thumbnails in Show Entries
+## ✅ Task CP-3: Photo Thumbnails in Show Entries (completed)
 
 **Problem:** The virtual photo show entries (`src/app/shows/[id]/page.tsx`) show only horse name and owner — no photos. A *photo show* needs photos.
 
@@ -244,7 +244,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task CP-4: Profile Bio Field
+## ✅ Task CP-4: Profile Bio Field (completed — migration needed)
 
 **Problem:** User profiles have no bio/about section. Collectors want to say "I've been collecting since 1998, I focus on Traditionals, I show NAN regularly."
 
@@ -310,7 +310,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium
 
-## Task CP-5: "See More from Seller" Link on Passport
+## ✅ Task CP-5: "See More from Seller" Link on Passport (completed)
 
 **Problem:** When viewing a public passport (`/community/[id]`), there's no link to see the seller's other horses. Collectors who find a good seller want to browse everything they have.
 
@@ -340,7 +340,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task CP-6: Release Years in Reference Search
+## ✅ Task CP-6: Release Years in Reference Search (already existed)
 
 **Problem:** The add-horse reference search (`WizardMoldSearch` or similar component) doesn't show release years in results. Collectors often know "I have the 1995 palomino" but not the official release name.
 
@@ -365,7 +365,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task CP-7: Mark All Notifications Read
+## ✅ Task CP-7: Mark All Notifications Read (already existed)
 
 **Problem:** The notifications page (`NotificationList` component) has individual mark-as-read but no "Mark All Read" button.
 
@@ -420,7 +420,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task CP-8: "New" Badge on Show Ring Cards
+## ✅ Task CP-8: "New" Badge on Show Ring Cards (completed)
 
 **Problem:** When users return to the Show Ring, they can't tell which horses are new since their last visit.
 

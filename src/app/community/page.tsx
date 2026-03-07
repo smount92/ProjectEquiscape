@@ -24,6 +24,7 @@ interface CommunityHorse {
   reference_molds: {
     mold_name: string;
     manufacturer: string;
+    scale: string | null;
   } | null;
   artist_resins: {
     resin_name: string;
@@ -71,7 +72,7 @@ export default async function CommunityPage() {
       `
       id, owner_id, custom_name, finish_type, condition_grade, created_at, sculptor, trade_status, listing_price, marketplace_notes, reference_mold_id, release_id,
       users!inner(alias_name),
-      reference_molds(mold_name, manufacturer),
+      reference_molds(mold_name, manufacturer, scale),
       artist_resins(resin_name, sculptor_alias),
       reference_releases(release_name, model_number),
       horse_images(image_url, angle_profile)
@@ -165,6 +166,7 @@ export default async function CommunityPage() {
       refReleaseId: horse.release_id || null,
       favoriteCount: favCountMap.get(horse.id) || 0,
       isFavorited: userFavSet.has(horse.id),
+      scale: horse.reference_molds?.scale || null,
     };
   });
 

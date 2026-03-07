@@ -43,28 +43,70 @@ export default function StableGrid({
     horseCards: HorseCardData[];
 }) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name-az" | "name-za" | "condition">("newest");
+
+    const CONDITION_ORDER = ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Fair", "Poor", "Play Grade"];
 
     const filteredCards = useMemo(() => {
-        if (!searchQuery.trim()) return horseCards;
-        const q = searchQuery.toLowerCase().trim();
-        return horseCards.filter((horse) =>
-            horse.customName.toLowerCase().includes(q) ||
-            (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
-            (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
-            (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
-            horse.refName.toLowerCase().includes(q)
-        );
-    }, [searchQuery, horseCards]);
+        // Step 1: Filter
+        let filtered = horseCards;
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase().trim();
+            filtered = horseCards.filter((horse) =>
+                horse.customName.toLowerCase().includes(q) ||
+                (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
+                (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
+                (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
+                horse.refName.toLowerCase().includes(q)
+            );
+        }
+
+        // Step 2: Sort
+        const sorted = [...filtered];
+        if (sortBy === "oldest") {
+            sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        } else if (sortBy === "name-az") {
+            sorted.sort((a, b) => a.customName.localeCompare(b.customName));
+        } else if (sortBy === "name-za") {
+            sorted.sort((a, b) => b.customName.localeCompare(a.customName));
+        } else if (sortBy === "condition") {
+            sorted.sort((a, b) => {
+                const aIdx = CONDITION_ORDER.indexOf(a.conditionGrade);
+                const bIdx = CONDITION_ORDER.indexOf(b.conditionGrade);
+                return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+            });
+        }
+        // "newest" is the default server order — no re-sort needed
+        return sorted;
+    }, [searchQuery, horseCards, sortBy, CONDITION_ORDER]);
 
     return (
         <>
             {horseCards.length > 0 && (
-                <SearchBar
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder="Search your stable by name, mold, release, or sculptor\u2026"
-                    id="stable-search-bar"
-                />
+                <div style={{ display: "flex", gap: "var(--space-md)", alignItems: "center", flexWrap: "wrap", marginBottom: "var(--space-md)" }}>
+                    <div style={{ flex: 1, minWidth: "200px" }}>
+                        <SearchBar
+                            value={searchQuery}
+                            onChange={setSearchQuery}
+                            placeholder="Search your stable by name, mold, release, or sculptor\u2026"
+                            id="stable-search-bar"
+                        />
+                    </div>
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                        className="form-input"
+                        style={{ width: "auto", minWidth: "160px", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
+                        id="stable-sort"
+                        aria-label="Sort your stable"
+                    >
+                        <option value="newest">🕐 Newest First</option>
+                        <option value="oldest">🕐 Oldest First</option>
+                        <option value="name-az">🔤 Name A→Z</option>
+                        <option value="name-za">🔤 Name Z→A</option>
+                        <option value="condition">⭐ By Condition</option>
+                    </select>
+                </div>
             )}
 
             {searchQuery.trim() && (
