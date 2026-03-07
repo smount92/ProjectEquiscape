@@ -262,7 +262,19 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m \
 
 # 📝 Completed Tasks
 
-<!-- Move completed tasks here with their completion date -->
-<!-- Example:
-## ✅ Task X: Description (completed 2026-03-07)
--->
+## ✅ Task A: Wire Activity Events into Missing Actions (completed 2026-03-07)
+Wired `createActivityEvent` into ratings.ts, follows.ts, provenance.ts. Added `show_record` event type to ActivityFeed component.
+
+## ✅ Task B: Build Collection Showcases UI (completed 2026-03-07)
+Added `is_public` checkbox to CollectionPicker creation modal. Added public collection pills to profile pages with CSS.
+
+## ✅ Task C: Optimize Discover Page N+1 Queries (completed 2026-03-07)
+Replaced serial `getUserRatingSummary()` loop with single batch query to `user_ratings` table. Removed unused import.
+
+## ✅ Task D: Add "New Horse" Activity Event (completed 2026-03-07)
+Created `notifyHorsePublic` server action in `horse-events.ts`. Wired into both add-horse and edit-horse pages.
+
+## ⏭️ Task E: Middleware Public Paths (skipped — not needed)
+
+## ✅ Task F: Documentation + Commit (completed 2026-03-07)
+Committed and pushed as `fix: wire missing activity events + collection showcase UI + discover optimization`.
