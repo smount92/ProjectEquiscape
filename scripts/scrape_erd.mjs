@@ -5,13 +5,15 @@
  * (equineresindirectory.com) for artist resin data.
  *
  * Strategy:
- *  - Sequential iteration from resinid=1 to resinid=500
+ *  - Sequential iteration over a configurable ID range
  *  - 1-second delay between every request (polite crawl)
  *  - Cheerio parsing of the legacy ASP HTML
  *  - CSV output with columns: erd_id, resin_name, sculptor, scale
+ *  - Incremental CSV saves every 50 IDs (crash-safe)
  *
  * Usage:
- *   node scripts/scrape_erd.mjs
+ *   node scripts/scrape_erd.mjs                     # defaults: 1-500
+ *   node scripts/scrape_erd.mjs --start=501 --end=5000
  * ============================================================
  */
 
@@ -24,12 +26,14 @@ import http from "http";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// ---- CONFIG ----
+// ---- CONFIG (CLI-overridable) ----
 const BASE_URL = "http://www.equineresindirectory.com/showresin.asp?resinid=";
-const START_ID = 1;
-const END_ID = 500;
+const cliArgs = process.argv.slice(2);
+const START_ID = parseInt(cliArgs.find(a => a.startsWith("--start="))?.split("=")[1] || "1", 10);
+const END_ID = parseInt(cliArgs.find(a => a.startsWith("--end="))?.split("=")[1] || "500", 10);
 const DELAY_MS = 1000; // 1 second between requests — strict polite crawl
 const REQUEST_TIMEOUT = 15000;
+const CONSECUTIVE_MISS_LIMIT = 100; // stop early if 100 consecutive misses (end of DB)
 
 // ---- HTTP fetch (ERD is plain HTTP, not HTTPS) ----
 function fetchPage(url) {
@@ -217,6 +221,15 @@ function escapeCsv(val) {
     return str;
 }
 
+// ---- Write CSV to disk ----
+function writeCsv(outputPath, results) {
+    const csvHeader = "erd_id,resin_name,sculptor,scale";
+    const csvRows = results.map(
+        (r) => `${r.erd_id},${escapeCsv(r.resin_name)},${escapeCsv(r.sculptor)},${escapeCsv(r.scale)}`
+    );
+    writeFileSync(outputPath, csvHeader + "\n" + csvRows.join("\n") + "\n", "utf-8");
+}
+
 // ---- Progress bar ----
 function progressBar(current, total, width = 30) {
     const pct = current / total;
@@ -227,15 +240,26 @@ function progressBar(current, total, width = 30) {
 
 // ---- MAIN ----
 async function main() {
+    // Determine output filename based on range
+    const outputFilename = START_ID === 1 && END_ID === 500
+        ? "erd_resins_batch1.csv"
+        : `erd_resins_${START_ID}_${END_ID}.csv`;
+    const outputPath = join(__dirname, "..", "supabase", "seed", outputFilename);
+
     console.log("🎨 ERD Resin Scraper — Starting...");
     console.log(`   Range: resinid=${START_ID} to resinid=${END_ID}`);
     console.log(`   Delay: ${DELAY_MS}ms between requests`);
-    console.log(`   Estimated time: ~${Math.ceil(((END_ID - START_ID + 1) * DELAY_MS) / 60000)} minutes\n`);
+    console.log(`   Output: ${outputFilename}`);
+    console.log(`   Estimated time: ~${Math.ceil(((END_ID - START_ID + 1) * DELAY_MS) / 60000)} minutes`);
+    console.log(`   Will stop early after ${CONSECUTIVE_MISS_LIMIT} consecutive misses\n`);
 
     const results = [];
     let found = 0;
     let skipped = 0;
     let errors = 0;
+    let consecutiveMisses = 0;
+    let lastSavedCount = 0;
+    let actualEndId = END_ID;
 
     for (let id = START_ID; id <= END_ID; id++) {
         const url = BASE_URL + id;
@@ -244,25 +268,27 @@ async function main() {
             const html = await fetchPage(url);
 
             if (!html) {
-                // 404 or null response
                 skipped++;
+                consecutiveMisses++;
             } else {
                 const resin = parseResinPage(html, id);
                 if (resin) {
                     results.push(resin);
                     found++;
+                    consecutiveMisses = 0; // reset on hit
 
-                    // Log every find
-                    if (found <= 5 || found % 25 === 0) {
+                    if (found <= 5 || found % 50 === 0) {
                         console.log(`   ✅ #${id}: ${resin.resin_name} by ${resin.sculptor} [${resin.scale}]`);
                     }
                 } else {
                     skipped++;
+                    consecutiveMisses++;
                 }
             }
         } catch (err) {
             errors++;
-            if (errors <= 5) {
+            consecutiveMisses++;
+            if (errors <= 10) {
                 console.log(`   ❌ #${id}: ${err.message}`);
             }
         }
@@ -273,27 +299,34 @@ async function main() {
             process.stdout.write(`\r   ${progress}  ID ${id}/${END_ID}  |  Found: ${found}  Skipped: ${skipped}  Errors: ${errors}  `);
         }
 
+        // Incremental CSV save every 100 IDs (crash safety)
+        if (results.length > lastSavedCount && (id % 100 === 0 || id === END_ID)) {
+            writeCsv(outputPath, results);
+            lastSavedCount = results.length;
+        }
+
+        // Stop early if we've hit too many consecutive misses
+        if (consecutiveMisses >= CONSECUTIVE_MISS_LIMIT) {
+            actualEndId = id;
+            console.log(`\n\n   ⛔ ${CONSECUTIVE_MISS_LIMIT} consecutive misses — reached end of ERD database at ID ${id}`);
+            break;
+        }
+
         // Polite delay — EVERY request
         await sleep(DELAY_MS);
     }
 
     console.log("\n");
 
-    // ---- Write CSV ----
-    const csvHeader = "erd_id,resin_name,sculptor,scale";
-    const csvRows = results.map(
-        (r) => `${r.erd_id},${escapeCsv(r.resin_name)},${escapeCsv(r.sculptor)},${escapeCsv(r.scale)}`
-    );
-    const csvContent = csvHeader + "\n" + csvRows.join("\n") + "\n";
-
-    const outputPath = join(__dirname, "..", "supabase", "seed", "erd_resins_batch1.csv");
-    writeFileSync(outputPath, csvContent, "utf-8");
+    // ---- Final CSV write ----
+    writeCsv(outputPath, results);
 
     // ---- Summary ----
+    const scanned = actualEndId - START_ID + 1;
     console.log("═".repeat(50));
     console.log("📊 SCRAPE COMPLETE");
     console.log("═".repeat(50));
-    console.log(`   IDs scanned:   ${END_ID - START_ID + 1}`);
+    console.log(`   IDs scanned:   ${scanned}`);
     console.log(`   Resins found:  ${found}`);
     console.log(`   IDs skipped:   ${skipped} (empty/deleted)`);
     console.log(`   Errors:        ${errors}`);
@@ -302,7 +335,7 @@ async function main() {
 
     // Show a sample
     if (results.length > 0) {
-        console.log("\n📋 Sample entries:");
+        console.log("\n📋 Sample entries (first 8):");
         const sample = results.slice(0, 8);
         console.log("   " + "─".repeat(80));
         console.log(`   ${"ID".padEnd(6)} ${"Resin Name".padEnd(30)} ${"Sculptor".padEnd(25)} Scale`);
