@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/app/actions/notifications";
+import { createActivityEvent } from "@/app/actions/activity";
 
 // ============================================================
 // FAVORITES
@@ -69,6 +70,11 @@ export async function toggleFavorite(
                 content: `@${alias} ❤️ your horse ${h.custom_name}`,
                 horseId,
             });
+            createActivityEvent({
+                actorId: user.id,
+                eventType: "favorite",
+                horseId,
+            });
         }
     }
 
@@ -114,7 +120,7 @@ export async function addComment(
 
     if (error) return { success: false, error: error.message };
 
-    // Notify horse owner (fire-and-forget)
+    // Notify + activity event (fire-and-forget)
     const { data: horse } = await supabase
         .from("user_horses")
         .select("owner_id, custom_name")
@@ -129,6 +135,11 @@ export async function addComment(
             type: "comment",
             actorId: user.id,
             content: `@${alias} commented on ${h.custom_name}`,
+            horseId,
+        });
+        createActivityEvent({
+            actorId: user.id,
+            eventType: "comment",
             horseId,
         });
     }

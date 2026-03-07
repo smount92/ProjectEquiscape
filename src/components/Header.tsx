@@ -99,6 +99,9 @@ export default function Header() {
           <Link href="/discover" className="header-nav-link" id="nav-discover">
             👥 Discover
           </Link>
+          <Link href="/feed" className="header-nav-link" id="nav-feed">
+            📰 Feed
+          </Link>
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist">
             ❤️ Wishlist
           </Link>

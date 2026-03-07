@@ -5,7 +5,9 @@ import { getSignedImageUrls } from "@/lib/utils/storage";
 import ShareButton from "@/components/ShareButton";
 import MessageSellerButton from "@/components/MessageSellerButton";
 import RatingBadge from "@/components/RatingBadge";
+import FollowButton from "@/components/FollowButton";
 import { getUserRatingSummary } from "@/app/actions/ratings";
+import { getFollowStats } from "@/app/actions/follows";
 
 // Types
 interface ProfileHorse {
@@ -110,6 +112,9 @@ export default async function ProfilePage({
     .select("id", { count: "exact", head: true })
     .or(`buyer_id.eq.${profileUser.id},seller_id.eq.${profileUser.id}`)
     .eq("transaction_status", "completed");
+
+  // Fetch follow stats
+  const followStats = await getFollowStats(profileUser.id);
 
   // ================================================================
   // PROFILE QUERY: Only public horses for this user
@@ -241,6 +246,19 @@ export default async function ProfilePage({
               </span>
             )}
           </div>
+          <FollowButton
+            targetUserId={profileUser.id}
+            initialIsFollowing={followStats.isFollowing}
+            initialFollowerCount={followStats.followerCount}
+            isOwnProfile={isOwnProfile}
+          />
+          {(followStats.followerCount > 0 || followStats.followingCount > 0) && (
+            <div className="profile-follow-stats">
+              <span>{followStats.followerCount} follower{followStats.followerCount !== 1 ? "s" : ""}</span>
+              <span>·</span>
+              <span>{followStats.followingCount} following</span>
+            </div>
+          )}
         </div>
       </div>
 

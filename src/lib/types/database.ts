@@ -199,6 +199,23 @@ export interface Notification {
   created_at: string;
 }
 
+export interface UserFollow {
+  id: string;
+  follower_id: string;
+  following_id: string;
+  created_at: string;
+}
+
+export interface ActivityEvent {
+  id: string;
+  actor_id: string;
+  event_type: string;
+  horse_id: string | null;
+  target_id: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
 // --- Supabase Database Type Interface ---
 // Used to provide type safety to supabase client calls
 
@@ -352,6 +369,24 @@ export interface Database {
           is_read?: boolean;
         };
         Update: Partial<Omit<Notification, "id">>;
+        Relationships: [];
+      };
+      user_follows: {
+        Row: UserFollow;
+        Insert: Omit<UserFollow, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<UserFollow, "id">>;
+        Relationships: [];
+      };
+      activity_events: {
+        Row: ActivityEvent;
+        Insert: Omit<ActivityEvent, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<ActivityEvent, "id">>;
         Relationships: [];
       };
     };
