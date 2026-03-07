@@ -49,6 +49,8 @@ export default function EditHorsePage() {
   const [isPublic, setIsPublic] = useState(true);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
+  const [listingPrice, setListingPrice] = useState("");
+  const [marketplaceNotes, setMarketplaceNotes] = useState("");
 
   // Reference fields (controlled by UnifiedReferenceSearch)
   const [selectedMoldId, setSelectedMoldId] = useState<string | null>(null);
@@ -78,7 +80,7 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, sculptor, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id, trade_status")
+        .select("id, owner_id, custom_name, sculptor, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id, trade_status, listing_price, marketplace_notes")
         .eq("id", horseId)
         .single<{
           id: string;
@@ -93,6 +95,8 @@ export default function EditHorsePage() {
           artist_resin_id: string | null;
           release_id: string | null;
           trade_status: string;
+          listing_price: number | null;
+          marketplace_notes: string | null;
         }>();
 
       if (horseErr || !horse || horse.owner_id !== user.id) {
@@ -108,6 +112,8 @@ export default function EditHorsePage() {
       setIsPublic(horse.is_public);
       setSelectedCollectionId(horse.collection_id);
       setTradeStatus(horse.trade_status || "Not for Sale");
+      if (horse.listing_price !== null) setListingPrice(String(horse.listing_price));
+      setMarketplaceNotes(horse.marketplace_notes || "");
 
       if (horse.reference_mold_id) {
         setSelectedMoldId(horse.reference_mold_id);
@@ -182,6 +188,8 @@ export default function EditHorsePage() {
         condition_grade: conditionGrade,
         is_public: isPublic,
         trade_status: tradeStatus,
+        listing_price: tradeStatus !== "Not for Sale" && listingPrice ? parseFloat(listingPrice) : null,
+        marketplace_notes: tradeStatus !== "Not for Sale" && marketplaceNotes.trim() ? marketplaceNotes.trim() : null,
         collection_id: selectedCollectionId,
         reference_mold_id: selectedMoldId,
         artist_resin_id: selectedResinId,
@@ -341,6 +349,25 @@ export default function EditHorsePage() {
               <option value="Open to Offers">Open to Offers</option>
             </select>
           </div>
+
+          {/* Conditional marketplace fields */}
+          {(tradeStatus === "For Sale" || tradeStatus === "Open to Offers") && (
+            <div className="marketplace-fields animate-fade-in-up">
+              <div className="form-group">
+                <label htmlFor="edit-listing-price" className="form-label">💲 Listing Price ($)</label>
+                <input id="edit-listing-price" type="number" className="form-input"
+                  placeholder="0.00" min="0" step="0.01" value={listingPrice}
+                  onChange={(e) => setListingPrice(e.target.value)} />
+                <span className="form-hint">Optional — leave blank for &ldquo;Contact for price&rdquo;</span>
+              </div>
+              <div className="form-group">
+                <label htmlFor="edit-marketplace-notes" className="form-label">📝 Seller Notes</label>
+                <textarea id="edit-marketplace-notes" className="form-textarea" rows={3}
+                  maxLength={500} placeholder="e.g. Will ship anywhere, Trades welcome..."
+                  value={marketplaceNotes} onChange={(e) => setMarketplaceNotes(e.target.value)} />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Community visibility toggle */}

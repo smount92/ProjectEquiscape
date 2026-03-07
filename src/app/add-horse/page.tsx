@@ -107,6 +107,8 @@ export default function AddHorsePage() {
   const [isPublic, setIsPublic] = useState(true);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
+  const [listingPrice, setListingPrice] = useState("");
+  const [marketplaceNotes, setMarketplaceNotes] = useState("");
 
   // Step 4 (index 3): Financial Vault
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -331,6 +333,12 @@ export default function AddHorsePage() {
       if (selectedReleaseId) horseInsert.release_id = selectedReleaseId;
       if (selectedCollectionId) horseInsert.collection_id = selectedCollectionId;
       if (sculptor.trim()) horseInsert.sculptor = sculptor.trim();
+
+      // Marketplace fields (only when listing)
+      if (tradeStatus !== "Not for Sale") {
+        if (listingPrice) horseInsert.listing_price = parseFloat(listingPrice);
+        if (marketplaceNotes.trim()) horseInsert.marketplace_notes = marketplaceNotes.trim();
+      }
 
       const { data: horse, error: horseError } = await supabase
         .from("user_horses")
@@ -789,6 +797,44 @@ export default function AddHorsePage() {
                 <option value="Open to Offers">Open to Offers</option>
               </select>
             </div>
+
+            {/* Conditional marketplace fields */}
+            {(tradeStatus === "For Sale" || tradeStatus === "Open to Offers") && (
+              <div className="marketplace-fields animate-fade-in-up">
+                <div className="form-group">
+                  <label htmlFor="listing-price" className="form-label">
+                    💲 Listing Price ($)
+                  </label>
+                  <input
+                    id="listing-price"
+                    type="number"
+                    className="form-input"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    value={listingPrice}
+                    onChange={(e) => setListingPrice(e.target.value)}
+                  />
+                  <span className="form-hint">
+                    Optional — leave blank for &ldquo;Contact for price&rdquo;
+                  </span>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="marketplace-notes" className="form-label">
+                    📝 Seller Notes
+                  </label>
+                  <textarea
+                    id="marketplace-notes"
+                    className="form-textarea"
+                    rows={3}
+                    maxLength={500}
+                    placeholder="e.g. Will ship anywhere, Trades welcome, Smoke-free home..."
+                    value={marketplaceNotes}
+                    onChange={(e) => setMarketplaceNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="step-nav">

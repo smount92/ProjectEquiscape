@@ -11,6 +11,9 @@ interface ProfileHorse {
   finish_type: string;
   condition_grade: string;
   created_at: string;
+  trade_status: string;
+  listing_price: number | null;
+  marketplace_notes: string | null;
   user_collections: { name: string } | null;
   reference_molds: {
     mold_name: string;
@@ -103,7 +106,7 @@ export default async function ProfilePage({
     .from("user_horses")
     .select(
       `
-      id, custom_name, finish_type, condition_grade, created_at,
+      id, custom_name, finish_type, condition_grade, created_at, trade_status, listing_price, marketplace_notes,
       user_collections(name),
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
@@ -159,6 +162,9 @@ export default async function ProfilePage({
       releaseLine,
       thumbnailUrl: signedUrl || null,
       collectionName: horse.user_collections?.name || null,
+      tradeStatus: horse.trade_status || "Not for Sale",
+      listingPrice: horse.listing_price ?? null,
+      marketplaceNotes: horse.marketplace_notes || null,
     };
   });
 
@@ -276,6 +282,16 @@ export default async function ProfilePage({
                 >
                   {horse.finishType}
                 </span>
+                {horse.tradeStatus === "For Sale" && (
+                  <span className="trade-badge trade-for-sale">
+                    💲 {horse.listingPrice ? `$${horse.listingPrice.toLocaleString("en-US")}` : "For Sale"}
+                  </span>
+                )}
+                {horse.tradeStatus === "Open to Offers" && (
+                  <span className="trade-badge trade-open-offers">
+                    🤝 {horse.listingPrice ? `~$${horse.listingPrice.toLocaleString("en-US")}` : "Open to Offers"}
+                  </span>
+                )}
               </div>
               <div className="community-card-info">
                 <div className="community-card-name">{horse.customName}</div>
@@ -303,6 +319,11 @@ export default async function ProfilePage({
                 {horse.collectionName && (
                   <div className="horse-card-collection">
                     📁 {horse.collectionName}
+                  </div>
+                )}
+                {(horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") && horse.marketplaceNotes && (
+                  <div className="marketplace-notes-snippet" title={horse.marketplaceNotes}>
+                    📝 {horse.marketplaceNotes.length > 50 ? horse.marketplaceNotes.slice(0, 50) + "…" : horse.marketplaceNotes}
                   </div>
                 )}
               </div>

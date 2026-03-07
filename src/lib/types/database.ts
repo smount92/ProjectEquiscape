@@ -71,6 +71,8 @@ export interface UserHorse {
   finish_type: FinishType;
   condition_grade: string;
   trade_status: TradeStatus;
+  listing_price: number | null;
+  marketplace_notes: string | null;
   is_for_sale: boolean;
   is_public: boolean;
   created_at: string;
@@ -155,7 +157,7 @@ export interface Database {
       };
       user_horses: {
         Row: UserHorse;
-        Insert: Omit<UserHorse, "id" | "created_at" | "is_for_sale" | "is_public" | "release_id" | "collection_id" | "sculptor" | "trade_status"> & {
+        Insert: Omit<UserHorse, "id" | "created_at" | "is_for_sale" | "is_public" | "release_id" | "collection_id" | "sculptor" | "trade_status" | "listing_price" | "marketplace_notes"> & {
           id?: string;
           created_at?: string;
           is_for_sale?: boolean;
@@ -164,6 +166,8 @@ export interface Database {
           collection_id?: string | null;
           sculptor?: string | null;
           trade_status?: TradeStatus;
+          listing_price?: number | null;
+          marketplace_notes?: string | null;
         };
         Update: Partial<Omit<UserHorse, "id">>;
         Relationships: [];

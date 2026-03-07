@@ -4241,3 +4241,218 @@ p {
     opacity: 1;
   }
 }
+
+
+/* ============================================================
+   MARKETPLACE FORM FIELDS + CARD NOTES
+   ============================================================ */
+
+.marketplace-fields {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: rgba(34, 197, 94, 0.05);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+  border-radius: var(--radius-md);
+}
+
+.marketplace-notes-snippet {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  color: var(--color-text-muted);
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid rgba(34, 197, 94, 0.4);
+  cursor: help;
+  line-height: 1.4;
+}
+
+
+/* ============================================================
+   MATCHMAKER ENGINE UI
+   ============================================================ */
+
+.matchmaker-header-badge {
+  display: inline-block;
+  margin-left: var(--space-sm);
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(251, 146, 60, 0.15));
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-full);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-weight: 600;
+  color: #fb923c;
+  animation: matchmaker-pulse 2s ease-in-out infinite;
+}
+
+@keyframes matchmaker-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.matchmaker-section {
+  margin-top: var(--space-md);
+}
+
+.matchmaker-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(251, 146, 60, 0.1));
+  color: #fb923c;
+  font-weight: 600;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.matchmaker-badge:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(251, 146, 60, 0.2));
+  border-color: rgba(251, 146, 60, 0.5);
+  transform: translateY(-1px);
+}
+
+.matchmaker-badge-fire {
+  font-size: 1.1em;
+  animation: fire-flicker 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes fire-flicker {
+  0% {
+    transform: scale(1) rotate(-2deg);
+  }
+
+  100% {
+    transform: scale(1.1) rotate(2deg);
+  }
+}
+
+.matchmaker-badge-text {
+  flex: 1;
+}
+
+.matchmaker-chevron {
+  transition: transform 0.2s ease;
+}
+
+.matchmaker-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+.matchmaker-results {
+  margin-top: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.matchmaker-card {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.matchmaker-card:hover {
+  border-color: rgba(251, 146, 60, 0.4);
+  box-shadow: 0 2px 12px rgba(251, 146, 60, 0.1);
+}
+
+.matchmaker-card-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.matchmaker-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.matchmaker-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  opacity: 0.4;
+}
+
+.matchmaker-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.matchmaker-card-name {
+  font-weight: 600;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-primary);
+  text-decoration: none;
+  display: block;
+}
+
+.matchmaker-card-name:hover {
+  text-decoration: underline;
+}
+
+.matchmaker-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: 2px;
+}
+
+.matchmaker-status {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.matchmaker-status.status-sale {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.matchmaker-status.status-offers {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.matchmaker-card-seller {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.matchmaker-card-seller:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.matchmaker-card-notes {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  color: var(--color-text-muted);
+  margin-top: 4px;
+  font-style: italic;
+  line-height: 1.3;
+}
