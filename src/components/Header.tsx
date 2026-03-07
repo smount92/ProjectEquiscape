@@ -5,6 +5,7 @@ import { useSimpleMode } from "@/lib/context/SimpleModeContext";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Header() {
   const { isSimpleMode, toggleSimpleMode } = useSimpleMode();
@@ -112,6 +113,7 @@ export default function Header() {
               <span className="inbox-unread-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
             )}
           </Link>
+          <NotificationBell />
           {isAdmin && (
             <Link href="/admin" className="header-nav-link admin-nav-link" id="nav-admin">
               Admin ⚡

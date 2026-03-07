@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createNotification } from "@/app/actions/notifications";
 
 /**
  * Leave a rating for the other party in a conversation.
@@ -35,6 +36,17 @@ export async function leaveRating(data: {
         }
         return { success: false, error: error.message };
     }
+
+    // Notify rated user (fire-and-forget)
+    const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
+    const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+    createNotification({
+        userId: data.reviewedId,
+        type: "rating",
+        actorId: user.id,
+        content: `@${alias} left you a ★${data.stars} rating`,
+        conversationId: data.conversationId,
+    });
 
     return { success: true };
 }

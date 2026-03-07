@@ -187,6 +187,18 @@ export interface FeaturedHorse {
   created_by: string;
 }
 
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  actor_id: string | null;
+  horse_id: string | null;
+  conversation_id: string | null;
+  content: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
 // --- Supabase Database Type Interface ---
 // Used to provide type safety to supabase client calls
 
@@ -330,6 +342,16 @@ export interface Database {
           featured_at?: string;
         };
         Update: Partial<Omit<FeaturedHorse, "id">>;
+        Relationships: [];
+      };
+      notifications: {
+        Row: Notification;
+        Insert: Omit<Notification, "id" | "created_at" | "is_read"> & {
+          id?: string;
+          created_at?: string;
+          is_read?: boolean;
+        };
+        Update: Partial<Omit<Notification, "id">>;
         Relationships: [];
       };
     };

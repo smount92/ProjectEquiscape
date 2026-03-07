@@ -104,6 +104,13 @@ export default async function ProfilePage({
   // Fetch rating summary for this profile user
   const ratingSummary = await getUserRatingSummary(profileUser.id);
 
+  // Count completed transactions
+  const { count: completedTxCount } = await supabase
+    .from("conversations")
+    .select("id", { count: "exact", head: true })
+    .or(`buyer_id.eq.${profileUser.id},seller_id.eq.${profileUser.id}`)
+    .eq("transaction_status", "completed");
+
   // ================================================================
   // PROFILE QUERY: Only public horses for this user
   // 🔒 financial_vault is NEVER queried here.
@@ -227,6 +234,11 @@ export default async function ProfilePage({
             />
             {ratingSummary.count > 0 && (
               <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
+            )}
+            {(completedTxCount ?? 0) > 0 && (
+              <span className="profile-stat" style={{ color: "#22C55E" }}>
+                ✅ {completedTxCount} transaction{completedTxCount !== 1 ? "s" : ""} completed
+              </span>
             )}
           </div>
         </div>

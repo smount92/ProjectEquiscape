@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import ChatThread from "@/components/ChatThread";
 import RatingForm from "@/components/RatingForm";
+import TransactionActions from "@/components/TransactionActions";
 
 export async function generateMetadata({
     params,
@@ -48,9 +49,9 @@ export default async function ChatPage({
     // Fetch conversation (RLS ensures user is buyer or seller)
     const { data: conversation } = await supabase
         .from("conversations")
-        .select("id, buyer_id, seller_id, horse_id")
+        .select("id, buyer_id, seller_id, horse_id, transaction_status")
         .eq("id", conversationId)
-        .single<ConversationData>();
+        .single<ConversationData & { transaction_status: string }>();
 
     if (!conversation) notFound();
 
@@ -214,6 +215,13 @@ export default async function ChatPage({
                     createdAt: m.created_at,
                     isMe: m.sender_id === user.id,
                 }))}
+            />
+
+            {/* Transaction Actions */}
+            <TransactionActions
+                conversationId={conversationId}
+                initialStatus={conversation.transaction_status || "open"}
+                hasRating={!!existingRating}
             />
 
             {/* Rating Form */}

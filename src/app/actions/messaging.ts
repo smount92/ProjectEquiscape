@@ -230,3 +230,40 @@ export async function getUnreadCount(): Promise<number> {
 
     return count ?? 0;
 }
+
+/**
+ * Mark a conversation's transaction as completed.
+ * Either buyer or seller can mark it.
+ */
+export async function markTransactionComplete(
+    conversationId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return { success: false, error: "You must be logged in." };
+
+    // Verify user is part of this conversation
+    const { data: convo } = await supabase
+        .from("conversations")
+        .select("buyer_id, seller_id")
+        .eq("id", conversationId)
+        .single();
+
+    if (!convo) return { success: false, error: "Conversation not found." };
+    const c = convo as { buyer_id: string; seller_id: string };
+    if (c.buyer_id !== user.id && c.seller_id !== user.id) {
+        return { success: false, error: "Unauthorized." };
+    }
+
+    const { error } = await supabase
+        .from("conversations")
+        .update({ transaction_status: "completed" })
+        .eq("id", conversationId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+

@@ -1,0 +1,138 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+    markNotificationRead,
+    markAllNotificationsRead,
+    clearNotifications,
+} from "@/app/actions/notifications";
+
+interface NotifItem {
+    id: string;
+    type: string;
+    content: string | null;
+    actorAlias: string | null;
+    horseId: string | null;
+    conversationId: string | null;
+    isRead: boolean;
+    createdAt: string;
+}
+
+function getNotifIcon(type: string): string {
+    switch (type) {
+        case "favorite": return "❤️";
+        case "comment": return "💬";
+        case "rating": return "⭐";
+        case "follow": return "👤";
+        case "message": return "✉️";
+        case "feature": return "🌟";
+        default: return "🔔";
+    }
+}
+
+function getNotifLink(n: NotifItem): string {
+    if (n.horseId) return `/community/${n.horseId}`;
+    if (n.conversationId) return `/inbox/${n.conversationId}`;
+    if (n.actorAlias) return `/profile/${encodeURIComponent(n.actorAlias)}`;
+    return "/notifications";
+}
+
+function timeAgo(dateStr: string): string {
+    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    if (seconds < 60) return "Just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+    });
+}
+
+interface NotificationListProps {
+    initialNotifications: NotifItem[];
+}
+
+export default function NotificationList({
+    initialNotifications,
+}: NotificationListProps) {
+    const [notifs, setNotifs] = useState(initialNotifications);
+    const [clearing, setClearing] = useState(false);
+
+    const handleMarkAllRead = async () => {
+        await markAllNotificationsRead();
+        setNotifs((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    };
+
+    const handleClear = async () => {
+        setClearing(true);
+        await clearNotifications();
+        setNotifs([]);
+        setClearing(false);
+    };
+
+    const handleClick = async (id: string) => {
+        await markNotificationRead(id);
+        setNotifs((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+        );
+    };
+
+    const unreadCount = notifs.filter((n) => !n.isRead).length;
+
+    return (
+        <div>
+            {/* Actions Bar */}
+            {notifs.length > 0 && (
+                <div className="notif-actions-bar">
+                    {unreadCount > 0 && (
+                        <button className="btn btn-ghost btn-sm" onClick={handleMarkAllRead}>
+                            ✓ Mark All Read
+                        </button>
+                    )}
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={handleClear}
+                        disabled={clearing}
+                        style={{ color: "var(--color-text-muted)" }}
+                    >
+                        {clearing ? "Clearing…" : "🗑️ Clear All"}
+                    </button>
+                </div>
+            )}
+
+            {/* List */}
+            {notifs.length === 0 ? (
+                <div className="card shelf-empty animate-fade-in-up">
+                    <div className="shelf-empty-icon">🔔</div>
+                    <h2>All Caught Up!</h2>
+                    <p>No notifications yet. Activity from the community will appear here.</p>
+                </div>
+            ) : (
+                <div className="notif-list">
+                    {notifs.map((n) => (
+                        <Link
+                            key={n.id}
+                            href={getNotifLink(n)}
+                            className={`notif-item ${n.isRead ? "notif-item-read" : "notif-item-unread"}`}
+                            onClick={() => handleClick(n.id)}
+                        >
+                            <span className="notif-icon">{getNotifIcon(n.type)}</span>
+                            <div className="notif-content">
+                                <span className="notif-text">
+                                    {n.content || "New notification"}
+                                </span>
+                                <span className="notif-time">{timeAgo(n.createdAt)}</span>
+                            </div>
+                            {!n.isRead && <span className="notif-unread-dot" />}
+                        </Link>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}

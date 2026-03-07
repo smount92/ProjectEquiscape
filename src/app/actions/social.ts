@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createNotification } from "@/app/actions/notifications";
 
 // ============================================================
 // FAVORITES
@@ -50,6 +51,25 @@ export async function toggleFavorite(
             }
             return { success: false, error: error.message };
         }
+
+        // Notify horse owner (fire-and-forget)
+        const { data: horse } = await supabase
+            .from("user_horses")
+            .select("owner_id, custom_name")
+            .eq("id", horseId)
+            .single();
+        if (horse) {
+            const h = horse as { owner_id: string; custom_name: string };
+            const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
+            const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+            createNotification({
+                userId: h.owner_id,
+                type: "favorite",
+                actorId: user.id,
+                content: `@${alias} ❤️ your horse ${h.custom_name}`,
+                horseId,
+            });
+        }
     }
 
     // Fetch updated count
@@ -93,6 +113,25 @@ export async function addComment(
     });
 
     if (error) return { success: false, error: error.message };
+
+    // Notify horse owner (fire-and-forget)
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("owner_id, custom_name")
+        .eq("id", horseId)
+        .single();
+    if (horse) {
+        const h = horse as { owner_id: string; custom_name: string };
+        const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
+        const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+        createNotification({
+            userId: h.owner_id,
+            type: "comment",
+            actorId: user.id,
+            content: `@${alias} commented on ${h.custom_name}`,
+            horseId,
+        });
+    }
 
     return { success: true };
 }
