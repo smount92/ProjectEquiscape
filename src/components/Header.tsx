@@ -12,6 +12,8 @@ export default function Header() {
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
   const supabase = createClient();
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  const isAdmin = user?.email && adminEmail && user.email === adminEmail;
 
   const fetchUnreadCount = useCallback(async (userId: string) => {
     // Get conversation IDs where user is participant
@@ -107,6 +109,11 @@ export default function Header() {
               <span className="inbox-unread-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
             )}
           </Link>
+          {isAdmin && (
+            <Link href="/admin" className="header-nav-link admin-nav-link" id="nav-admin">
+              Admin ⚡
+            </Link>
+          )}
         </nav>
       )}
 
