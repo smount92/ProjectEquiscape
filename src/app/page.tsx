@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Model Horse Hub — The Ultimate Digital Stable for Collectors",
   description:
-    "Catalog your model horse collection with AI mold detection, a secure financial vault, community show ring, virtual photo shows, social follows, and user ratings. Start your digital stable for free.",
+    "Catalog your model horse collection with a 7,000+ release reference database, secure financial vault, community show ring, virtual photo shows, social follows, and user ratings. Start your digital stable for free.",
 };
 
 export default function LandingPage() {
@@ -21,8 +21,8 @@ export default function LandingPage() {
             <span className="text-gradient">Model Horse Collectors</span>
           </h1>
           <p className="hero-subheadline">
-            Catalog every model in your herd with multi-angle photography, AI-powered mold
-            detection, a private financial vault, virtual photo shows, and a thriving collector
+            Catalog every model in your herd with multi-angle photography, a
+            7,000+ release reference database, a private financial vault, virtual photo shows, and a thriving collector
             community — all in one beautifully designed platform.
           </p>
           <div className="hero-cta-group">
@@ -51,8 +51,8 @@ export default function LandingPage() {
           </p>
 
           <div className="features-grid">
-            {/* Feature 1 — AI Mold Detection */}
-            <div className="feature-card" id="feature-ai">
+            {/* Feature 1 — Reference Database */}
+            <div className="feature-card" id="feature-reference">
               <div className="feature-icon">
                 <svg
                   width="32"
@@ -67,9 +67,9 @@ export default function LandingPage() {
                   <path d="M12 2L9.5 8.5 3 10l5 4.5L6.5 21 12 17.5 17.5 21 16 14.5l5-4.5-6.5-1.5z" />
                 </svg>
               </div>
-              <h3 className="feature-card-title">AI Mold Detection</h3>
+              <h3 className="feature-card-title">Reference Database</h3>
               <p className="feature-card-desc">
-                Upload a photo and our intelligent reference engine helps you identify the exact
+                Search across 7,000+ releases from Breyer, Stone, and more. Identify the exact
                 mold, manufacturer, and release — so you never have to guess again.
               </p>
             </div>

@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 import { createNotification } from "@/app/actions/notifications";
 import { createActivityEvent } from "@/app/actions/activity";
 
@@ -39,6 +40,7 @@ export async function toggleFavorite(
             .eq("id", existing.id);
 
         if (error) return { success: false, error: error.message };
+        revalidatePath(`/community/${horseId}`);
     } else {
         // Favorite
         const { error } = await supabase
@@ -120,6 +122,8 @@ export async function addComment(
 
     if (error) return { success: false, error: error.message };
 
+    revalidatePath(`/community/${horseId}`);
+
     // Notify + activity event (fire-and-forget)
     const { data: horse } = await supabase
         .from("user_horses")
@@ -168,5 +172,6 @@ export async function deleteComment(
 
     if (error) return { success: false, error: error.message };
 
+    revalidatePath("/community");
     return { success: true };
 }

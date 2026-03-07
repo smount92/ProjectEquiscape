@@ -561,8 +561,8 @@ export default function AddHorsePage() {
                         </button>
                         <div className="gallery-slot-check">✓</div>
 
-                        {/* ✨ AI Auto-Detect button — only on Primary Thumbnail */}
-                        {isPrimary && (
+                        {/* AI Auto-Detect button — hidden for now */}
+                        {false && isPrimary && (
                           <button
                             className={`ai-detect-btn ${aiDetecting ? "detecting" : ""}`}
                             onClick={(e) => {
@@ -572,7 +572,7 @@ export default function AddHorsePage() {
                             }}
                             disabled={aiDetecting}
                             id="ai-detect-mold"
-                            title="Auto-Detect Mold with AI"
+                            title="Auto-Detect Mold"
                           >
                             {aiDetecting ? (
                               <>
@@ -584,7 +584,7 @@ export default function AddHorsePage() {
                                 <svg className="ai-detect-sparkle" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
                                 </svg>
-                                <span className="ai-detect-label">Auto-Detect Mold with AI</span>
+                                <span className="ai-detect-label">Auto-Detect Mold</span>
                               </>
                             )}
                           </button>
@@ -594,9 +594,7 @@ export default function AddHorsePage() {
                       <>
                         <span className="gallery-slot-icon">{isPrimary ? "🖼️" : "📷"}</span>
                         <span className="gallery-slot-label">{slot.label}</span>
-                        {isPrimary && (
-                          <span className="gallery-slot-hint">Upload to enable AI detection</span>
-                        )}
+                        {/* AI hint hidden for now */}
                       </>
                     )}
                     <input
