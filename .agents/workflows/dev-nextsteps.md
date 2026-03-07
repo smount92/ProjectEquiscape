@@ -559,3 +559,39 @@ Created `notifyHorsePublic` server action in `horse-events.ts`. Wired into both 
 
 ## ✅ Task F: Documentation + Commit (completed 2026-03-07)
 Committed and pushed as `fix: wire missing activity events + collection showcase UI + discover optimization`.
+
+## ✅ LP-1: Mobile Navigation — Hamburger Menu (completed 2026-03-07)
+Added `mobileMenuOpen` state and hamburger button to Header.tsx. Nav collapses to full-width slide-down menu on mobile (<768px). Auto-closes on link click and outside click. CSS with backdrop blur and glassmorphism.
+
+## ✅ LP-2: Global Loading States (completed 2026-03-07)
+Created root `loading.tsx` with shimmer skeleton (hero + 6-card grid). Added route-specific loading files for community, dashboard, discover, feed, and shows via re-exports. Added `@keyframes shimmer` and skeleton CSS.
+
+## ✅ LP-3: Error Boundary + Not Found (completed 2026-03-07)
+Created `error.tsx` (client component with retry button) and `not-found.tsx` (branded 404 with back-to-stable link).
+
+## ✅ LP-4: Landing Page Refresh (completed 2026-03-07)
+Added 3 new feature cards (Social Community, Virtual Photo Shows, Trusted Marketplace) for 6 total. Updated meta description, hero subheadline, stats section (added "7,000+ Reference Releases"). Changed grid to `auto-fit minmax(300px, 1fr)`.
+
+## ✅ LP-5: Onboarding Welcome Card (completed 2026-03-07)
+Added welcome card to dashboard for users with 0 horses. Includes 3-step getting started guide and "Add Your First Horse" CTA. Added glassmorphism CSS with numbered step indicators.
+
+## ✅ LP-6: Mobile Polish Pass (completed 2026-03-07)
+Added `@media (max-width: 640px)` rules for feed-tabs, profile-hero-stats, profile-follow-stats, discover-grid, notification-item, and stats-inner.
+
+## ✅ LP-7: Commit Launch Prep (completed 2026-03-07)
+Committed and pushed as `polish: Launch prep - mobile nav, loading states, error boundaries, landing page refresh`.
+
+## ✅ TH-1: Migrate middleware.ts → proxy.ts (completed 2026-03-07)
+Renamed file and export function per Next.js 16 convention. Deprecation warning eliminated from build output.
+
+## ✅ TH-2: TypeScript Type Audit (completed 2026-03-07)
+Cross-referenced all 8 social/expansion interfaces against migration SQL. Found and fixed missing `is_public` field on `UserCollection` interface and its Insert type.
+
+## ✅ TH-3: Circular Import Check (completed 2026-03-07)
+Verified `notifications.ts` and `activity.ts` are leaf modules. All import arrows point one-way — no circular dependencies.
+
+## ✅ TH-4: Commit Technical Hardening (completed 2026-03-07)
+Committed and pushed as `chore: Technical hardening - proxy migration, type audit, import cleanup`.
+
+## ✅ TH-5: Add Basic Automated Test (completed 2026-03-07)
+Installed vitest, created `src/__tests__/smoke.test.ts`, added `"test": "vitest run"` script. Test passes in 938ms.
