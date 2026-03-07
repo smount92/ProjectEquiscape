@@ -2419,6 +2419,19 @@ p {
   color: var(--color-text-primary);
 }
 
+.community-card-link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.community-card-link:hover {
+  text-decoration: none;
+  color: var(--color-text-primary);
+}
+
 .community-card-image {
   position: relative;
   width: 100%;
@@ -2467,8 +2480,8 @@ p {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
-  margin-top: var(--space-sm);
-  padding-top: var(--space-sm);
+  margin-top: 0;
+  padding: var(--space-sm) var(--space-lg) var(--space-md);
   border-top: 1px solid var(--color-border);
 }
 

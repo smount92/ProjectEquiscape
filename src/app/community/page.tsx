@@ -188,75 +188,75 @@ export default async function CommunityPage() {
       ) : (
         <div className="community-grid animate-fade-in-up">
           {communityCards.map((horse) => (
-            <Link
+            <div
               key={horse.id}
-              href={`/community/${horse.id}`}
               className="community-card"
               id={`community-card-${horse.id}`}
             >
-              <div className="community-card-image">
-                {horse.thumbnailUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={horse.thumbnailUrl}
-                    alt={horse.customName}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="horse-card-placeholder">
-                    <span className="horse-card-placeholder-icon">🐴</span>
-                    <span>No photo</span>
-                  </div>
-                )}
-                <span
-                  className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}
-                >
-                  {horse.finishType}
-                </span>
-              </div>
-              <div className="community-card-info">
-                <div className="community-card-name">{horse.customName}</div>
-                <div className="community-card-ref">{horse.refName}</div>
-                {horse.releaseLine && (
-                  <div
-                    className="community-card-ref"
-                    style={{
-                      fontSize: "calc(0.7rem * var(--font-scale))",
-                      opacity: 0.7,
-                      marginTop: "2px",
-                    }}
+              <Link href={`/community/${horse.id}`} className="community-card-link">
+                <div className="community-card-image">
+                  {horse.thumbnailUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={horse.thumbnailUrl}
+                      alt={horse.customName}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="horse-card-placeholder">
+                      <span className="horse-card-placeholder-icon">🐴</span>
+                      <span>No photo</span>
+                    </div>
+                  )}
+                  <span
+                    className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}
                   >
-                    🎨 {horse.releaseLine}
-                  </div>
-                )}
-                <div className="community-card-footer">
-                  <Link
-                    href={`/profile/${encodeURIComponent(horse.ownerAlias)}`}
-                    className="community-card-owner"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    @{horse.ownerAlias}
-                  </Link>
-                  <span className="community-card-time">
-                    {timeAgo(horse.createdAt)}
+                    {horse.finishType}
                   </span>
                 </div>
+                <div className="community-card-info">
+                  <div className="community-card-name">{horse.customName}</div>
+                  <div className="community-card-ref">{horse.refName}</div>
+                  {horse.releaseLine && (
+                    <div
+                      className="community-card-ref"
+                      style={{
+                        fontSize: "calc(0.7rem * var(--font-scale))",
+                        opacity: 0.7,
+                        marginTop: "2px",
+                      }}
+                    >
+                      🎨 {horse.releaseLine}
+                    </div>
+                  )}
+                </div>
+              </Link>
+              <div className="community-card-footer">
+                <Link
+                  href={`/profile/${encodeURIComponent(horse.ownerAlias)}`}
+                  className="community-card-owner"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  @{horse.ownerAlias}
+                </Link>
+                <span className="community-card-time">
+                  {timeAgo(horse.createdAt)}
+                </span>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}
