@@ -5,6 +5,7 @@ import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 import WishlistButton from "@/components/WishlistButton";
 import MessageSellerButton from "@/components/MessageSellerButton";
+import FavoriteButton from "@/components/FavoriteButton";
 
 interface CommunityCardData {
     id: string;
@@ -25,6 +26,8 @@ interface CommunityCardData {
     releaseName: string | null;
     refMoldId: string | null;
     refReleaseId: string | null;
+    favoriteCount: number;
+    isFavorited: boolean;
 }
 
 function getFinishBadgeClass(finish: string): string {
@@ -170,6 +173,11 @@ export default function ShowRingGrid({
                                         {isListed && (
                                             <MessageSellerButton sellerId={horse.ownerId} horseId={horse.id} compact />
                                         )}
+                                        <FavoriteButton
+                                            horseId={horse.id}
+                                            initialIsFavorited={horse.isFavorited}
+                                            initialCount={horse.favoriteCount}
+                                        />
                                         <WishlistButton moldId={horse.refMoldId} releaseId={horse.refReleaseId} />
                                         <span className="community-card-time">{timeAgo(horse.createdAt)}</span>
                                     </div>

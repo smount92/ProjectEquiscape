@@ -4,6 +4,8 @@ import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import PassportGallery from "@/components/PassportGallery";
 import ShareButton from "@/components/ShareButton";
+import FavoriteButton from "@/components/FavoriteButton";
+import CommentSection from "@/components/CommentSection";
 
 // Types — mirrors the private passport but WITHOUT VaultData
 interface PublicHorseDetail {
@@ -167,6 +169,48 @@ export default async function PublicPassportPage({
     signedUrl: signedUrlMap.get(img.image_url) || img.image_url,
     angle_profile: img.angle_profile,
     label: ANGLE_LABELS[img.angle_profile] || img.angle_profile,
+  }));
+
+  // ================================================================
+  // SOCIAL: Favorites + Comments
+  // ================================================================
+
+  // Favorite count
+  const { count: favoriteCount } = await supabase
+    .from("horse_favorites")
+    .select("id", { count: "exact", head: true })
+    .eq("horse_id", horseId);
+
+  // Current user's favorite status
+  const { data: userFav } = await supabase
+    .from("horse_favorites")
+    .select("id")
+    .eq("horse_id", horseId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  // Comments with user aliases
+  const { data: rawComments } = await supabase
+    .from("horse_comments")
+    .select("id, content, created_at, user_id, users!inner(alias_name)")
+    .eq("horse_id", horseId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  interface RawComment {
+    id: string;
+    content: string;
+    created_at: string;
+    user_id: string;
+    users: { alias_name: string } | null;
+  }
+
+  const comments = ((rawComments as unknown as RawComment[]) ?? []).map((c) => ({
+    id: c.id,
+    content: c.content,
+    createdAt: c.created_at,
+    userAlias: c.users?.alias_name ?? "Unknown",
+    userId: c.user_id,
   }));
 
   // Reference display info
@@ -395,6 +439,11 @@ export default async function PublicPassportPage({
               ← Back to Show Ring
             </Link>
             <div style={{ display: "flex", gap: "var(--space-sm)" }}>
+              <FavoriteButton
+                horseId={horseId}
+                initialIsFavorited={!!userFav}
+                initialCount={favoriteCount ?? 0}
+              />
               <ShareButton
                 title={`${horse.custom_name} — Model Horse Hub`}
                 text={`Check out ${horse.custom_name} on Model Horse Hub!`}
@@ -412,6 +461,16 @@ export default async function PublicPassportPage({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Comments */}
+      <div className="animate-fade-in-up" style={{ marginTop: "var(--space-xl)" }}>
+        <CommentSection
+          horseId={horseId}
+          currentUserId={user.id}
+          horseOwnerId={horse.owner_id}
+          initialComments={comments}
+        />
       </div>
     </div>
   );

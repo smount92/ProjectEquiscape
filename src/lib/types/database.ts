@@ -123,6 +123,21 @@ export interface UserWishlist {
   created_at: string;
 }
 
+export interface HorseFavorite {
+  id: string;
+  user_id: string;
+  horse_id: string;
+  created_at: string;
+}
+
+export interface HorseComment {
+  id: string;
+  user_id: string;
+  horse_id: string;
+  content: string;
+  created_at: string;
+}
+
 // --- Supabase Database Type Interface ---
 // Used to provide type safety to supabase client calls
 
@@ -211,6 +226,24 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Omit<UserWishlist, "id">>;
+        Relationships: [];
+      };
+      horse_favorites: {
+        Row: HorseFavorite;
+        Insert: Omit<HorseFavorite, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<HorseFavorite, "id">>;
+        Relationships: [];
+      };
+      horse_comments: {
+        Row: HorseComment;
+        Insert: Omit<HorseComment, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<HorseComment, "id">>;
         Relationships: [];
       };
     };

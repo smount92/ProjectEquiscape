@@ -93,6 +93,33 @@ export default async function CommunityPage() {
 
   const signedUrlMap = await getSignedImageUrls(supabase, thumbnailUrls);
 
+  // ================================================================
+  // SOCIAL: Fetch favorite counts + user's own favorites
+  // ================================================================
+  const horseIds = horses.map((h: CommunityHorse) => h.id);
+
+  // Get all favorites for displayed horses (to count)
+  const { data: allFavs } = await supabase
+    .from("horse_favorites")
+    .select("horse_id")
+    .in("horse_id", horseIds);
+
+  const favCountMap = new Map<string, number>();
+  (allFavs ?? []).forEach((f: { horse_id: string }) => {
+    favCountMap.set(f.horse_id, (favCountMap.get(f.horse_id) || 0) + 1);
+  });
+
+  // Get current user's favorites
+  const { data: userFavs } = await supabase
+    .from("horse_favorites")
+    .select("horse_id")
+    .eq("user_id", user.id)
+    .in("horse_id", horseIds);
+
+  const userFavSet = new Set(
+    (userFavs ?? []).map((f: { horse_id: string }) => f.horse_id)
+  );
+
   // Build display data
   const communityCards = horses.map((horse) => {
     const thumb = horse.horse_images?.find(
@@ -133,6 +160,8 @@ export default async function CommunityPage() {
       releaseName: horse.reference_releases?.release_name || null,
       refMoldId: horse.reference_mold_id || null,
       refReleaseId: horse.release_id || null,
+      favoriteCount: favCountMap.get(horse.id) || 0,
+      isFavorited: userFavSet.has(horse.id),
     };
   });
 
