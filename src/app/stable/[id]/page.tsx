@@ -16,6 +16,7 @@ interface HorseDetail {
   is_for_sale: boolean;
   is_public: boolean;
   created_at: string;
+  sculptor: string | null;
   reference_molds: {
     mold_name: string;
     manufacturer: string;
@@ -101,7 +102,7 @@ export default async function HorsePassportPage({
     .select(
       `
       id, owner_id, custom_name, finish_type, condition_grade,
-      is_for_sale, is_public, created_at,
+      is_for_sale, is_public, created_at, sculptor,
       reference_molds(mold_name, manufacturer, scale, release_year_start),
       artist_resins(resin_name, sculptor_alias, scale, cast_medium),
       reference_releases(release_name, model_number, color_description, release_year_start, release_year_end)
@@ -161,32 +162,32 @@ export default async function HorsePassportPage({
   // Reference display info
   const refInfo = horse.reference_molds
     ? {
-        type: "Mold",
-        name: horse.reference_molds.mold_name,
-        maker: horse.reference_molds.manufacturer,
-        scale: horse.reference_molds.scale,
-        extra: horse.reference_molds.release_year_start
-          ? `First released ${horse.reference_molds.release_year_start}`
-          : null,
-      }
+      type: "Mold",
+      name: horse.reference_molds.mold_name,
+      maker: horse.reference_molds.manufacturer,
+      scale: horse.reference_molds.scale,
+      extra: horse.reference_molds.release_year_start
+        ? `First released ${horse.reference_molds.release_year_start}`
+        : null,
+    }
     : horse.artist_resins
       ? {
-          type: "Artist Resin",
-          name: horse.artist_resins.resin_name,
-          maker: horse.artist_resins.sculptor_alias,
-          scale: horse.artist_resins.scale,
-          extra: horse.artist_resins.cast_medium,
-        }
+        type: "Artist Resin",
+        name: horse.artist_resins.resin_name,
+        maker: horse.artist_resins.sculptor_alias,
+        scale: horse.artist_resins.scale,
+        extra: horse.artist_resins.cast_medium,
+      }
       : null;
 
   const releaseInfo = horse.reference_releases
     ? {
-        name: horse.reference_releases.release_name,
-        modelNumber: horse.reference_releases.model_number,
-        color: horse.reference_releases.color_description,
-        yearStart: horse.reference_releases.release_year_start,
-        yearEnd: horse.reference_releases.release_year_end,
-      }
+      name: horse.reference_releases.release_name,
+      modelNumber: horse.reference_releases.model_number,
+      color: horse.reference_releases.color_description,
+      yearStart: horse.reference_releases.release_year_start,
+      yearEnd: horse.reference_releases.release_year_end,
+    }
     : null;
 
   return (
@@ -332,6 +333,13 @@ export default async function HorsePassportPage({
                 {images.length} uploaded
               </span>
             </div>
+
+            {horse.sculptor && (
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">Sculptor / Artist</span>
+                <span className="passport-detail-value">{horse.sculptor}</span>
+              </div>
+            )}
           </div>
 
           {/* Financial Vault */}

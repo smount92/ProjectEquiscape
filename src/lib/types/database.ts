@@ -65,6 +65,7 @@ export interface UserHorse {
   release_id: string | null;
   collection_id: string | null;
   custom_name: string;
+  sculptor: string | null;
   finish_type: FinishType;
   condition_grade: string;
   is_for_sale: boolean;
@@ -142,13 +143,14 @@ export interface Database {
       };
       user_horses: {
         Row: UserHorse;
-        Insert: Omit<UserHorse, "id" | "created_at" | "is_for_sale" | "is_public" | "release_id" | "collection_id"> & {
+        Insert: Omit<UserHorse, "id" | "created_at" | "is_for_sale" | "is_public" | "release_id" | "collection_id" | "sculptor"> & {
           id?: string;
           created_at?: string;
           is_for_sale?: boolean;
           is_public?: boolean;
           release_id?: string | null;
           collection_id?: string | null;
+          sculptor?: string | null;
         };
         Update: Partial<Omit<UserHorse, "id">>;
         Relationships: [];

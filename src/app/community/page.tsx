@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
+import ShowRingGrid from "@/components/ShowRingGrid";
 
 // Types
 interface CommunityHorse {
@@ -11,6 +11,7 @@ interface CommunityHorse {
   finish_type: string;
   condition_grade: string;
   created_at: string;
+  sculptor: string | null;
   users: {
     alias_name: string;
   } | null;
@@ -30,36 +31,6 @@ interface CommunityHorse {
     image_url: string;
     angle_profile: string;
   }[];
-}
-
-function getFinishBadgeClass(finish: string): string {
-  switch (finish) {
-    case "OF":
-      return "badge-of";
-    case "Custom":
-      return "badge-custom";
-    case "Artist Resin":
-      return "badge-resin";
-    default:
-      return "";
-  }
-}
-
-function timeAgo(dateStr: string): string {
-  const seconds = Math.floor(
-    (Date.now() - new Date(dateStr).getTime()) / 1000
-  );
-  if (seconds < 60) return "Just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
 }
 
 export const metadata = {
@@ -90,7 +61,7 @@ export default async function CommunityPage() {
     .from("user_horses")
     .select(
       `
-      id, owner_id, custom_name, finish_type, condition_grade, created_at,
+      id, owner_id, custom_name, finish_type, condition_grade, created_at, sculptor,
       users!inner(alias_name),
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
@@ -148,6 +119,10 @@ export default async function CommunityPage() {
       releaseLine,
       ownerAlias,
       thumbnailUrl: signedUrl || null,
+      sculptor: horse.sculptor || null,
+      // Search fields from reference data
+      moldName: horse.reference_molds?.mold_name || null,
+      releaseName: horse.reference_releases?.release_name || null,
     };
   });
 
@@ -172,94 +147,8 @@ export default async function CommunityPage() {
         </div>
       </div>
 
-      {/* Grid */}
-      {communityCards.length === 0 ? (
-        <div className="card shelf-empty animate-fade-in-up">
-          <div className="shelf-empty-icon">🏟️</div>
-          <h2>The Show Ring is Empty</h2>
-          <p>
-            No models have been shared yet. Be the first to showcase your
-            collection!
-          </p>
-          <Link href="/add-horse" className="btn btn-primary">
-            🐴 Add to Stable
-          </Link>
-        </div>
-      ) : (
-        <div className="community-grid animate-fade-in-up">
-          {communityCards.map((horse) => (
-            <div
-              key={horse.id}
-              className="community-card"
-              id={`community-card-${horse.id}`}
-            >
-              <Link href={`/community/${horse.id}`} className="community-card-link">
-                <div className="community-card-image">
-                  {horse.thumbnailUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={horse.thumbnailUrl}
-                      alt={horse.customName}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="horse-card-placeholder">
-                      <span className="horse-card-placeholder-icon">🐴</span>
-                      <span>No photo</span>
-                    </div>
-                  )}
-                  <span
-                    className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}
-                  >
-                    {horse.finishType}
-                  </span>
-                </div>
-                <div className="community-card-info">
-                  <div className="community-card-name">{horse.customName}</div>
-                  <div className="community-card-ref">{horse.refName}</div>
-                  {horse.releaseLine && (
-                    <div
-                      className="community-card-ref"
-                      style={{
-                        fontSize: "calc(0.7rem * var(--font-scale))",
-                        opacity: 0.7,
-                        marginTop: "2px",
-                      }}
-                    >
-                      🎨 {horse.releaseLine}
-                    </div>
-                  )}
-                </div>
-              </Link>
-              <div className="community-card-footer">
-                <Link
-                  href={`/profile/${encodeURIComponent(horse.ownerAlias)}`}
-                  className="community-card-owner"
-                >
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  @{horse.ownerAlias}
-                </Link>
-                <span className="community-card-time">
-                  {timeAgo(horse.createdAt)}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Grid with Search */}
+      <ShowRingGrid communityCards={communityCards} />
     </div>
   );
 }

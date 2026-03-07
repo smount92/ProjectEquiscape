@@ -43,6 +43,7 @@ export default function EditHorsePage() {
 
   // Identity fields
   const [customName, setCustomName] = useState("");
+  const [sculptor, setSculptor] = useState("");
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
   const [isPublic, setIsPublic] = useState(true);
@@ -76,12 +77,13 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id")
+        .select("id, owner_id, custom_name, sculptor, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id")
         .eq("id", horseId)
         .single<{
           id: string;
           owner_id: string;
           custom_name: string;
+          sculptor: string | null;
           finish_type: FinishType;
           condition_grade: string;
           is_public: boolean;
@@ -98,6 +100,7 @@ export default function EditHorsePage() {
       }
 
       setCustomName(horse.custom_name);
+      setSculptor(horse.sculptor || "");
       setFinishType(horse.finish_type);
       setConditionGrade(horse.condition_grade);
       setIsPublic(horse.is_public);
@@ -171,6 +174,7 @@ export default function EditHorsePage() {
     try {
       const horseUpdate: Record<string, unknown> = {
         custom_name: customName.trim(),
+        sculptor: sculptor.trim() || null,
         finish_type: finishType,
         condition_grade: conditionGrade,
         is_public: isPublic,
@@ -284,6 +288,16 @@ export default function EditHorsePage() {
               onChange={(e) => setCustomName(e.target.value)} maxLength={100} />
           </div>
 
+          <div className="form-group">
+            <label htmlFor="edit-sculptor" className="form-label">Sculptor / Artist</label>
+            <input id="edit-sculptor" type="text" className="form-input" value={sculptor}
+              onChange={(e) => setSculptor(e.target.value)} maxLength={100}
+              placeholder="e.g. Sarah Rose, Brigitte Eberl…" />
+            <span className="form-hint">
+              Optional — tag the sculptor or artist, especially for Artist Resins or custom work.
+            </span>
+          </div>
+
           <div className="edit-row">
             <div className="form-group">
               <label htmlFor="edit-finish" className="form-label">Finish Type *</label>
@@ -315,28 +329,28 @@ export default function EditHorsePage() {
           />
         </div>
 
-          {/* Community visibility toggle */}
-          <div className="community-toggle-section">
-            <div className="community-toggle-row">
-              <div className="community-toggle-info">
-                <span className="community-toggle-label">🏆 Show in Public Community Feed</span>
-                <span className="community-toggle-hint">
-                  When enabled, this model appears in the Show Ring.
-                  Your financial data is always private.
-                </span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isPublic}
-                className={`toggle-switch ${isPublic ? "toggle-on" : "toggle-off"}`}
-                onClick={() => setIsPublic(!isPublic)}
-                id="edit-is-public-toggle"
-              >
-                <span className="toggle-knob" />
-              </button>
+        {/* Community visibility toggle */}
+        <div className="community-toggle-section">
+          <div className="community-toggle-row">
+            <div className="community-toggle-info">
+              <span className="community-toggle-label">🏆 Show in Public Community Feed</span>
+              <span className="community-toggle-hint">
+                When enabled, this model appears in the Show Ring.
+                Your financial data is always private.
+              </span>
             </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isPublic}
+              className={`toggle-switch ${isPublic ? "toggle-on" : "toggle-off"}`}
+              onClick={() => setIsPublic(!isPublic)}
+              id="edit-is-public-toggle"
+            >
+              <span className="toggle-knob" />
+            </button>
           </div>
+        </div>
 
         {/* ===== Section 2: Reference Link (Unified Search) ===== */}
         <div className="edit-section">

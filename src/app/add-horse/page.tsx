@@ -101,6 +101,7 @@ export default function AddHorsePage() {
 
   // Step 3 (index 2): Identity
   const [customName, setCustomName] = useState("");
+  const [sculptor, setSculptor] = useState("");
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
   const [isPublic, setIsPublic] = useState(true);
@@ -327,6 +328,7 @@ export default function AddHorsePage() {
       if (selectedResinId) horseInsert.artist_resin_id = selectedResinId;
       if (selectedReleaseId) horseInsert.release_id = selectedReleaseId;
       if (selectedCollectionId) horseInsert.collection_id = selectedCollectionId;
+      if (sculptor.trim()) horseInsert.sculptor = sculptor.trim();
 
       const { data: horse, error: horseError } = await supabase
         .from("user_horses")
@@ -447,9 +449,8 @@ export default function AddHorsePage() {
         {STEPS.map((step, i) => (
           <div
             key={step.label}
-            className={`stepper-step ${
-              i === currentStep ? "active" : ""
-            } ${i < currentStep ? "completed" : ""}`}
+            className={`stepper-step ${i === currentStep ? "active" : ""
+              } ${i < currentStep ? "completed" : ""}`}
           >
             <div className="stepper-dot" aria-current={i === currentStep ? "step" : undefined}>
               {i < currentStep ? "✓" : i + 1}
@@ -496,9 +497,8 @@ export default function AddHorsePage() {
                 return (
                   <div
                     key={slot.angle}
-                    className={`gallery-slot ${slot.primary ? "primary" : ""} ${
-                      existing ? "has-image" : ""
-                    }`}
+                    className={`gallery-slot ${slot.primary ? "primary" : ""} ${existing ? "has-image" : ""
+                      }`}
                   >
                     {existing ? (
                       <>
@@ -703,6 +703,24 @@ export default function AddHorsePage() {
               />
               <span className="form-hint">
                 What do you call this model? This can be a show name, pet name, or whatever you like.
+              </span>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="sculptor" className="form-label">
+                Sculptor / Artist
+              </label>
+              <input
+                id="sculptor"
+                type="text"
+                className="form-input"
+                placeholder="e.g. Sarah Rose, Brigitte Eberl, Kathleen Moody…"
+                value={sculptor}
+                onChange={(e) => setSculptor(e.target.value)}
+                maxLength={100}
+              />
+              <span className="form-hint">
+                Optional — tag the sculptor or artist, especially for Artist Resins or custom work.
               </span>
             </div>
 

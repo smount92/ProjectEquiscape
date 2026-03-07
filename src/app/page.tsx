@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import DashboardToast from "@/components/DashboardToast";
+import StableGrid from "@/components/StableGrid";
 
 // Types for the dashboard query results
 interface HorseWithDetails {
@@ -13,6 +14,7 @@ interface HorseWithDetails {
   condition_grade: string;
   created_at: string;
   collection_id: string | null;
+  sculptor: string | null;
   reference_molds: { mold_name: string; manufacturer: string } | null;
   artist_resins: { resin_name: string; sculptor_alias: string } | null;
   reference_releases: { release_name: string; model_number: string | null } | null;
@@ -23,27 +25,6 @@ interface UserCollection {
   id: string;
   name: string;
   description: string | null;
-}
-
-function getFinishBadgeClass(finishType: string): string {
-  switch (finishType) {
-    case "OF":
-      return "of";
-    case "Custom":
-      return "custom";
-    case "Artist Resin":
-      return "resin";
-    default:
-      return "";
-  }
-}
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 }
 
 export default async function HomePage() {
@@ -68,7 +49,7 @@ export default async function HomePage() {
     .from("user_horses")
     .select(
       `
-      id, custom_name, finish_type, condition_grade, created_at, collection_id,
+      id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor,
       reference_molds(mold_name, manufacturer),
       artist_resins(resin_name, sculptor_alias),
       reference_releases(release_name, model_number),
@@ -121,8 +102,6 @@ export default async function HomePage() {
     const imageUrl = thumb?.image_url || firstImage?.image_url;
     const signedUrl = imageUrl ? signedUrlMap.get(imageUrl) : undefined;
 
-    // If we didn't get a signed URL for the first image (non-thumbnail), get one
-    // This is a fallback - ideally we'd batch these too, but keeping it simple
     const refName = horse.reference_molds
       ? `${horse.reference_molds.manufacturer} ${horse.reference_molds.mold_name}`
       : horse.artist_resins
@@ -143,6 +122,10 @@ export default async function HomePage() {
       releaseLine,
       thumbnailUrl: signedUrl || null,
       collectionName: horse.collection_id ? collectionNameMap.get(horse.collection_id) || null : null,
+      sculptor: horse.sculptor || null,
+      // Search fields from reference data
+      moldName: horse.reference_molds?.mold_name || null,
+      releaseName: horse.reference_releases?.release_name || null,
     };
   });
 
@@ -208,74 +191,8 @@ export default async function HomePage() {
           </div>
         )}
 
-        {/* Horse Grid or Empty State */}
-        {horseCards.length === 0 ? (
-          <div className="card shelf-empty">
-            <div className="shelf-empty-icon">🏠</div>
-            <h2>Your Stable is Empty</h2>
-            <p>
-              You haven&apos;t added any models yet. Click the button above to
-              catalog your first horse!
-            </p>
-            <Link
-              href="/add-horse"
-              className="btn btn-primary"
-              id="add-first-horse"
-            >
-              🐴 Add Your First Horse
-            </Link>
-          </div>
-        ) : (
-          <div className="shelf-grid">
-            {horseCards.map((horse) => (
-              <Link
-                key={horse.id}
-                href={`/stable/${horse.id}`}
-                className="horse-card"
-                id={`horse-card-${horse.id}`}
-              >
-                <div className="horse-card-image">
-                  {horse.thumbnailUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={horse.thumbnailUrl}
-                      alt={horse.customName}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="horse-card-placeholder">
-                      <span className="horse-card-placeholder-icon">🐴</span>
-                      <span>No photo</span>
-                    </div>
-                  )}
-                  <span
-                    className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}
-                  >
-                    {horse.finishType}
-                  </span>
-                </div>
-                <div className="horse-card-info">
-                  <div className="horse-card-name">{horse.customName}</div>
-                  <div className="horse-card-ref">{horse.refName}</div>
-                  {horse.releaseLine && (
-                    <div className="horse-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
-                      🎨 {horse.releaseLine}
-                    </div>
-                  )}
-                  <div className="horse-card-meta">
-                    <span>{horse.conditionGrade}</span>
-                    <span>{formatDate(horse.createdAt)}</span>
-                  </div>
-                  {horse.collectionName && (
-                    <div className="horse-card-collection">
-                      📁 {horse.collectionName}
-                    </div>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+        {/* Horse Grid with Search */}
+        <StableGrid horseCards={horseCards} />
       </div>
     </div>
   );
