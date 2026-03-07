@@ -15,6 +15,7 @@ import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
+import { initializeHoofprint } from "@/app/actions/hoofprint";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -441,7 +442,14 @@ export default function AddHorsePage() {
         });
       }
 
-      // 6. Show success!
+      // 6. Initialize Hoofprint (fire-and-forget)
+      initializeHoofprint({
+        horseId,
+        horseName: customName.trim(),
+        lifeStage: "completed",
+      });
+
+      // 7. Show success!
       setSavedHorseName(customName.trim());
       setShowSuccess(true);
     } catch (err) {

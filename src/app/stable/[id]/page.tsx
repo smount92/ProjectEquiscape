@@ -7,6 +7,8 @@ import VaultReveal from "@/components/VaultReveal";
 import DeleteHorseModal from "@/components/DeleteHorseModal";
 import ShowRecordTimeline from "@/components/ShowRecordTimeline";
 import PedigreeCard from "@/components/PedigreeCard";
+import HoofprintTimeline from "@/components/HoofprintTimeline";
+import { getHoofprint } from "@/app/actions/hoofprint";
 
 export const dynamic = "force-dynamic";
 
@@ -211,6 +213,9 @@ export default async function HorsePassportPage({
     lineageNotes: (rawPedigree as { lineage_notes: string | null }).lineage_notes,
   } : null;
 
+  // Hoofprint data
+  const { timeline, ownershipChain, lifeStage } = await getHoofprint(horseId);
+
   // Reference display info
   const refInfo = horse.reference_molds
     ? {
@@ -405,6 +410,15 @@ export default async function HorsePassportPage({
           <PedigreeCard
             horseId={horseId}
             pedigree={pedigree}
+            isOwner={true}
+          />
+
+          {/* 🐾 Hoofprint™ Timeline */}
+          <HoofprintTimeline
+            horseId={horseId}
+            timeline={timeline}
+            ownershipChain={ownershipChain}
+            lifeStage={lifeStage}
             isOwner={true}
           />
 

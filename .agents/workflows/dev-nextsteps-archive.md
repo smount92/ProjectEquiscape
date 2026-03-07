@@ -3,6 +3,24 @@
 > **Purpose:** Historical record of completed dev tasks. Moved from `dev-nextsteps.md` to keep the active workflow lean.
 > **Last Updated:** 2026-03-07
 
+> [!NOTE]
+> Options 1-4 are above. Option 5 (Photo Shows Overhaul) was completed 2026-03-07.
+
+---
+
+## Option 5: Photo Shows Overhaul + Platform Gaps (completed 2026-03-07)
+
+- ✅ **PS-1: Self-Voting Guard** — Added ownership check in `voteForEntry()`. Blocks users from voting for their own show entries.
+- ✅ **PS-2: End Date in Create Show Form** — Added date picker to `CreateShowForm`. End date displayed on show listing and detail pages with countdown.
+- ✅ **PS-3: Auto-Close Expired Shows** — Added lazy server-side check in `getPhotoShows()` that transitions expired shows to "judging". Also checks deadline in `enterShow()`.
+- ✅ **PS-4: Admin Show Management** — Created `updateShowStatus()` and `deleteShow()` admin actions. Built `AdminShowManager` component. Wired into admin page.
+- ✅ **PS-5: Winner Display** — Added 🥇🥈🥉 podium for closed shows. Added judging-in-progress banner. Disabled voting on non-open shows via `disabled` prop on VoteButton.
+- ✅ **PS-6: Entry Limit** — Capped at 3 entries per user per show. Check added to `enterShow()`.
+- ✅ **PS-7: Withdraw Entry Button** — Created `withdrawEntry()` action and `WithdrawButton` component. Shows only on own entries when show is open.
+- ✅ **PS-8: Dashboard Unread Messages** — Added unread message count to dashboard analytics cards. Clickable link to inbox.
+- ✅ **PS-9: Profile "For Sale" Count** — Added For Sale/Trade count badge to profile stats section.
+- ✅ **PS-10: Vote Notifications** — Created notifications when someone votes for a show entry. Fire-and-forget, non-blocking.
+
 ---
 
 ## Option 1: Launch Prep & Technical Hardening (completed 2026-03-07)

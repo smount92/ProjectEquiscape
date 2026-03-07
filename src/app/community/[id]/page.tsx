@@ -8,6 +8,8 @@ import FavoriteButton from "@/components/FavoriteButton";
 import CommentSection from "@/components/CommentSection";
 import ShowRecordTimeline from "@/components/ShowRecordTimeline";
 import PedigreeCard from "@/components/PedigreeCard";
+import HoofprintTimeline from "@/components/HoofprintTimeline";
+import { getHoofprint } from "@/app/actions/hoofprint";
 
 // Force fresh data on every request — prevents stale comments/favorites
 export const dynamic = "force-dynamic";
@@ -564,6 +566,23 @@ export default async function PublicPassportPage({
           )}
         </div>
       )}
+
+      {/* 🐾 Hoofprint™ — Public Read-Only */}
+      {await (async () => {
+        const { timeline: hfTimeline, ownershipChain: hfChain, lifeStage: hfStage } = await getHoofprint(horseId);
+        if (hfTimeline.length === 0 && hfChain.length === 0) return null;
+        return (
+          <div className="animate-fade-in-up" style={{ marginTop: "var(--space-xl)" }}>
+            <HoofprintTimeline
+              horseId={horseId}
+              timeline={hfTimeline}
+              ownershipChain={hfChain}
+              lifeStage={hfStage}
+              isOwner={false}
+            />
+          </div>
+        );
+      })()}
 
       {/* Comments */}
       <div className="animate-fade-in-up" style={{ marginTop: "var(--space-xl)" }}>
