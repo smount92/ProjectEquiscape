@@ -3241,3 +3241,199 @@ p {
     font-size: calc(var(--font-size-sm) * var(--font-scale));
   }
 }
+
+
+/* ================================================================
+   STABLE OVERVIEW — Private Analytics Row
+   ================================================================ */
+
+.analytics-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.analytics-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-lg) var(--space-md);
+  border-radius: var(--radius-lg);
+  background: rgba(20, 20, 34, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  text-align: center;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.analytics-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-accent);
+  opacity: 0.5;
+  transition: opacity var(--transition-base);
+}
+
+.analytics-card:hover {
+  border-color: rgba(124, 109, 240, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.analytics-card:hover::before {
+  opacity: 1;
+}
+
+.analytics-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.analytics-value {
+  font-size: calc(1.6rem * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.analytics-label {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+
+/* ================================================================
+   SHARE BUTTON
+   ================================================================ */
+
+.share-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 109, 240, 0.08);
+  border: 1px solid rgba(124, 109, 240, 0.2);
+  color: var(--color-accent-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.share-icon-btn:hover {
+  background: rgba(124, 109, 240, 0.16);
+  border-color: rgba(124, 109, 240, 0.4);
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(124, 109, 240, 0.2);
+}
+
+.share-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.share-btn svg {
+  flex-shrink: 0;
+}
+
+
+/* ================================================================
+   SHARE TOAST — "Link Copied!" notification
+   ================================================================ */
+
+.share-toast {
+  position: fixed;
+  bottom: var(--space-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  background: rgba(92, 224, 160, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(92, 224, 160, 0.35);
+  border-radius: var(--radius-full);
+  color: var(--color-accent-success);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: share-toast-in 0.35s ease forwards;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes share-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+
+/* ================================================================
+   RESPONSIVE — ANALYTICS + SHARE
+   ================================================================ */
+
+@media (max-width: 640px) {
+  .analytics-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+  }
+
+  .analytics-card {
+    padding: var(--space-md) var(--space-sm);
+  }
+
+  .analytics-value {
+    font-size: calc(1.2rem * var(--font-scale));
+  }
+
+  .analytics-icon {
+    font-size: 1.2rem;
+  }
+
+  .share-toast {
+    left: var(--space-md);
+    right: var(--space-md);
+    transform: none;
+    justify-content: center;
+  }
+
+  @keyframes share-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+}

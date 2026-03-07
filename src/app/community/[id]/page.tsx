@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import PassportGallery from "@/components/PassportGallery";
+import ShareButton from "@/components/ShareButton";
 
 // Types — mirrors the private passport but WITHOUT VaultData
 interface PublicHorseDetail {
@@ -167,32 +168,32 @@ export default async function PublicPassportPage({
   // Reference display info
   const refInfo = horse.reference_molds
     ? {
-        type: "Mold",
-        name: horse.reference_molds.mold_name,
-        maker: horse.reference_molds.manufacturer,
-        scale: horse.reference_molds.scale,
-        extra: horse.reference_molds.release_year_start
-          ? `First released ${horse.reference_molds.release_year_start}`
-          : null,
-      }
+      type: "Mold",
+      name: horse.reference_molds.mold_name,
+      maker: horse.reference_molds.manufacturer,
+      scale: horse.reference_molds.scale,
+      extra: horse.reference_molds.release_year_start
+        ? `First released ${horse.reference_molds.release_year_start}`
+        : null,
+    }
     : horse.artist_resins
       ? {
-          type: "Artist Resin",
-          name: horse.artist_resins.resin_name,
-          maker: horse.artist_resins.sculptor_alias,
-          scale: horse.artist_resins.scale,
-          extra: horse.artist_resins.cast_medium,
-        }
+        type: "Artist Resin",
+        name: horse.artist_resins.resin_name,
+        maker: horse.artist_resins.sculptor_alias,
+        scale: horse.artist_resins.scale,
+        extra: horse.artist_resins.cast_medium,
+      }
       : null;
 
   const releaseInfo = horse.reference_releases
     ? {
-        name: horse.reference_releases.release_name,
-        modelNumber: horse.reference_releases.model_number,
-        color: horse.reference_releases.color_description,
-        yearStart: horse.reference_releases.release_year_start,
-        yearEnd: horse.reference_releases.release_year_end,
-      }
+      name: horse.reference_releases.release_name,
+      modelNumber: horse.reference_releases.model_number,
+      color: horse.reference_releases.color_description,
+      yearStart: horse.reference_releases.release_year_start,
+      yearEnd: horse.reference_releases.release_year_end,
+    }
     : null;
 
   const ownerAlias = horse.users?.alias_name ?? "Unknown";
@@ -361,7 +362,7 @@ export default async function PublicPassportPage({
                     <span className="passport-detail-value">
                       {releaseInfo.yearStart}
                       {releaseInfo.yearEnd &&
-                      releaseInfo.yearEnd !== releaseInfo.yearStart
+                        releaseInfo.yearEnd !== releaseInfo.yearStart
                         ? `–${releaseInfo.yearEnd}`
                         : ""}
                     </span>
@@ -389,14 +390,22 @@ export default async function PublicPassportPage({
             <Link href="/community" className="btn btn-ghost">
               ← Back to Show Ring
             </Link>
-            {isOwnHorse && (
-              <Link
-                href={`/stable/${horse.id}`}
-                className="btn btn-primary"
-              >
-                View My Passport
-              </Link>
-            )}
+            <div style={{ display: "flex", gap: "var(--space-sm)" }}>
+              <ShareButton
+                title={`${horse.custom_name} — Model Horse Hub`}
+                text={`Check out ${horse.custom_name} on Model Horse Hub!`}
+                label="Share"
+                variant="full"
+              />
+              {isOwnHorse && (
+                <Link
+                  href={`/stable/${horse.id}`}
+                  className="btn btn-primary"
+                >
+                  View My Passport
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

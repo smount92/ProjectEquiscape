@@ -70,6 +70,23 @@ export default async function HomePage() {
 
   const collections = (rawCollections as unknown as UserCollection[]) ?? [];
 
+  // Fetch financial vault totals (owner-only via RLS — strictly private)
+  const { data: rawVaults } = await supabase
+    .from("financial_vault")
+    .select("purchase_price, estimated_current_value, horse_id")
+    .in(
+      "horse_id",
+      horses.map((h) => h.id)
+    );
+
+  const vaults = (rawVaults as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[]) ?? [];
+
+  // Compute total vault value: prefer estimated_current_value, fall back to purchase_price
+  let totalVaultValue = 0;
+  vaults.forEach((v) => {
+    totalVaultValue += v.estimated_current_value ?? v.purchase_price ?? 0;
+  });
+
   // Count horses per collection
   const collectionCounts = new Map<string, number>();
   horses.forEach((h) => {
@@ -167,6 +184,31 @@ export default async function HomePage() {
         <Suspense fallback={null}>
           <DashboardToast />
         </Suspense>
+
+        {/* 🔒 Stable Overview — PRIVATE analytics (never exposed publicly) */}
+        {horses.length > 0 && (
+          <div className="analytics-row">
+            <div className="analytics-card">
+              <div className="analytics-icon">🐴</div>
+              <div className="analytics-value">{horses.length}</div>
+              <div className="analytics-label">Total Models</div>
+            </div>
+            <div className="analytics-card">
+              <div className="analytics-icon">📁</div>
+              <div className="analytics-value">{collections.length}</div>
+              <div className="analytics-label">Collections</div>
+            </div>
+            <div className="analytics-card">
+              <div className="analytics-icon">💰</div>
+              <div className="analytics-value">
+                {totalVaultValue > 0
+                  ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                  : "—"}
+              </div>
+              <div className="analytics-label">Vault Value</div>
+            </div>
+          </div>
+        )}
 
         {/* Collection Folders Row */}
         {collections.length > 0 && (

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
+import ShareButton from "@/components/ShareButton";
 
 // Types
 interface ProfileHorse {
@@ -207,6 +208,11 @@ export default async function ProfilePage({
             <span className="profile-stat">
               📅 Member since {memberSince}
             </span>
+            <ShareButton
+              title={`@${profileUser.alias_name}'s Stable — Model Horse Hub`}
+              text={`Check out @${profileUser.alias_name}'s model horse collection on Model Horse Hub!`}
+              variant="icon"
+            />
           </div>
         </div>
       </div>
