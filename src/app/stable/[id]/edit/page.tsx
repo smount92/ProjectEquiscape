@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -8,6 +8,7 @@ import type { FinishType } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
+import { compressImage } from "@/lib/utils/imageCompression";
 
 // ---- Types ----
 
@@ -66,6 +67,15 @@ export default function EditHorsePage() {
   const [estimatedValue, setEstimatedValue] = useState("");
   const [insuranceNotes, setInsuranceNotes] = useState("");
   const [hasExistingVault, setHasExistingVault] = useState(false);
+
+  // Image management
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [currentImagePath, setCurrentImagePath] = useState<string | null>(null); // storage path for cleanup
+  const [currentImageRecordId, setCurrentImageRecordId] = useState<string | null>(null);
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ---- Load existing data ----
   useEffect(() => {
@@ -140,6 +150,25 @@ export default function EditHorsePage() {
         if (vault.insurance_notes !== null) setInsuranceNotes(vault.insurance_notes);
       }
 
+      // Load existing image
+      const { data: imageData } = await supabase
+        .from("horse_images")
+        .select("id, image_url")
+        .eq("horse_id", horseId)
+        .eq("angle_profile", "Primary_Thumbnail")
+        .single<{ id: string; image_url: string }>();
+
+      if (imageData) {
+        setCurrentImageRecordId(imageData.id);
+        setCurrentImageUrl(imageData.image_url);
+        setImagePreview(imageData.image_url);
+        // Extract storage path from the public URL
+        const urlParts = imageData.image_url.split("/horse-images/");
+        if (urlParts.length > 1) {
+          setCurrentImagePath(urlParts[1]);
+        }
+      }
+
       setIsLoading(false);
     }
 
@@ -170,6 +199,28 @@ export default function EditHorsePage() {
     return () => { cancelled = true; };
   }, [selectedMoldId, supabase]);
 
+  // ---- Image handlers ----
+  const handleImageSelect = (file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    setNewImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleImageSelect(file);
+  };
+
+  const handleRemoveNewImage = () => {
+    setNewImageFile(null);
+    setImagePreview(currentImageUrl);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   // ---- Save handler ----
   const handleSave = async () => {
     if (!customName.trim() || !finishType || !conditionGrade) {
@@ -181,6 +232,50 @@ export default function EditHorsePage() {
     setSaveError(null);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // --- Image upload + cleanup ---
+      if (newImageFile) {
+        const compressed = await compressImage(newImageFile);
+        const newFilePath = `${user.id}/${horseId}/Primary_Thumbnail_${Date.now()}.webp`;
+
+        const { error: uploadErr } = await supabase.storage
+          .from("horse-images")
+          .upload(newFilePath, compressed, {
+            contentType: "image/webp",
+            upsert: false,
+          });
+
+        if (uploadErr) throw new Error(`Image upload failed: ${uploadErr.message}`);
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("horse-images")
+          .getPublicUrl(newFilePath);
+
+        // Delete old image from storage (cleanup orphans)
+        if (currentImagePath) {
+          await supabase.storage
+            .from("horse-images")
+            .remove([currentImagePath]);
+        }
+
+        // Update or insert horse_images record
+        if (currentImageRecordId) {
+          await supabase
+            .from("horse_images")
+            .update({ image_url: publicUrl })
+            .eq("id", currentImageRecordId);
+        } else {
+          await supabase.from("horse_images").insert({
+            horse_id: horseId,
+            image_url: publicUrl,
+            angle_profile: "Primary_Thumbnail",
+          } as Record<string, unknown>);
+        }
+      }
+
+      // --- Update horse record ---
       const horseUpdate: Record<string, unknown> = {
         custom_name: customName.trim(),
         sculptor: sculptor.trim() || null,
@@ -203,6 +298,7 @@ export default function EditHorsePage() {
 
       if (updErr) throw new Error(updErr.message);
 
+      // --- Financial vault ---
       const hasVaultData = purchasePrice || purchaseDate || estimatedValue || insuranceNotes;
 
       if (hasVaultData) {
@@ -286,6 +382,71 @@ export default function EditHorsePage() {
             {saveError}
           </div>
         )}
+
+        {/* ===== Image Upload Zone ===== */}
+        <div className="edit-section">
+          <div className="edit-section-header">
+            <div className="edit-section-icon">📸</div>
+            <h2>Photo</h2>
+          </div>
+
+          <div
+            className={`image-upload-zone ${isDragging ? "drag-active" : ""} ${imagePreview ? "has-preview" : ""}`}
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            role="button"
+            tabIndex={0}
+            aria-label="Upload or replace horse photo"
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImageSelect(f);
+              }}
+              style={{ display: "none" }}
+              id="edit-image-input"
+            />
+            {imagePreview ? (
+              <div className="image-upload-preview">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={imagePreview} alt="Preview" />
+                <div className="image-upload-overlay">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  <span>{newImageFile ? "Change photo" : "Click or drag to replace"}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="image-upload-placeholder">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+                <span>Click or drag an image here</span>
+              </div>
+            )}
+          </div>
+          {newImageFile && (
+            <button
+              type="button"
+              className="image-revert-btn"
+              onClick={(e) => { e.stopPropagation(); handleRemoveNewImage(); }}
+            >
+              ↩ Revert to original photo
+            </button>
+          )}
+        </div>
 
         {/* ===== Section 1: Identity ===== */}
         <div className="edit-section">
@@ -478,7 +639,7 @@ export default function EditHorsePage() {
             {isSaving ? (
               <>
                 <span className="btn-spinner" aria-hidden="true" />
-                Saving…
+                {newImageFile ? "Uploading…" : "Saving…"}
               </>
             ) : (
               <>✅ Save Changes</>

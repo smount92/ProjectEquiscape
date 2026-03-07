@@ -5693,6 +5693,112 @@ p {
 }
 
 
+/* ============================================================
+   IMAGE UPLOAD ZONE (Edit Page)
+   ============================================================ */
+
+.image-upload-zone {
+  position: relative;
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.image-upload-zone:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.03);
+}
+
+.image-upload-zone.drag-active {
+  border-color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.08);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.image-upload-zone.has-preview {
+  border-style: solid;
+  border-color: var(--glass-border);
+}
+
+.image-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+  color: var(--color-text-muted);
+}
+
+.image-upload-placeholder svg {
+  opacity: 0.4;
+}
+
+.image-upload-placeholder span {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.image-upload-preview {
+  position: relative;
+  width: 100%;
+}
+
+.image-upload-preview img {
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  display: block;
+}
+
+.image-upload-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: white;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-weight: 500;
+}
+
+.image-upload-zone:hover .image-upload-overlay {
+  opacity: 1;
+}
+
+.image-revert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-sm);
+  padding: 6px 14px;
+  background: rgba(251, 146, 60, 0.1);
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  border-radius: var(--radius-full);
+  color: #fb923c;
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.image-revert-btn:hover {
+  background: rgba(251, 146, 60, 0.2);
+  border-color: rgba(251, 146, 60, 0.5);
+}
+
+
 @media (max-width: 768px) {
   .admin-metrics-row {
     grid-template-columns: 1fr;
