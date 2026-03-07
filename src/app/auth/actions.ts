@@ -108,3 +108,27 @@ export async function signupAction(
     success: true,
   };
 }
+
+export async function forgotPasswordAction(
+  _prevState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const email = formData.get("email") as string;
+
+  if (!email) {
+    return { error: "Please enter your email address.", success: false };
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password`,
+  });
+
+  if (error) {
+    return { error: error.message, success: false };
+  }
+
+  // Always show success to prevent email enumeration
+  return { error: null, success: true };
+}

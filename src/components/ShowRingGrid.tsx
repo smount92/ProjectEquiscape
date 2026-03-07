@@ -212,6 +212,14 @@ export default function ShowRingGrid({
                                                 📝 {horse.marketplaceNotes.length > 60 ? horse.marketplaceNotes.slice(0, 60) + "…" : horse.marketplaceNotes}
                                             </div>
                                         )}
+                                        {isListed && (
+                                            <span
+                                                className="btn btn-primary"
+                                                style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", padding: "var(--space-xs) var(--space-sm)", marginTop: "var(--space-xs)", display: "inline-block" }}
+                                            >
+                                                View &amp; Contact
+                                            </span>
+                                        )}
                                     </div>
                                 </Link>
                                 <div className="community-card-footer">

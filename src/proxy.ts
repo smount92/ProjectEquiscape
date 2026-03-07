@@ -42,6 +42,7 @@ export async function proxy(request: NextRequest) {
         "/login",
         "/signup",
         "/auth",
+        "/forgot-password",
         "/community",
         "/profile",
         "/about",

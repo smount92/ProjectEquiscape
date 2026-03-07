@@ -11,6 +11,7 @@ export default function Header() {
   const { isSimpleMode, toggleSimpleMode } = useSimpleMode();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [aliasName, setAliasName] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const router = useRouter();
@@ -48,16 +49,35 @@ export default function Header() {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
-      if (user) fetchUnreadCount(user.id);
+      if (user) {
+        fetchUnreadCount(user.id);
+        // Fetch alias_name for profile link
+        const { data: profile } = await supabase
+          .from("users")
+          .select("alias_name")
+          .eq("id", user.id)
+          .single<{ alias_name: string }>();
+        setAliasName(profile?.alias_name ?? null);
+      }
     }
     getUser();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchUnreadCount(session.user.id);
-      else setUnreadCount(0);
+      if (session?.user) {
+        fetchUnreadCount(session.user.id);
+        const { data: profile } = await supabase
+          .from("users")
+          .select("alias_name")
+          .eq("id", session.user.id)
+          .single<{ alias_name: string }>();
+        setAliasName(profile?.alias_name ?? null);
+      } else {
+        setUnreadCount(0);
+        setAliasName(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -147,6 +167,16 @@ export default function Header() {
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist" onClick={closeMobileMenu}>
             ❤️ Wishlist
           </Link>
+          {aliasName && (
+            <Link
+              href={`/profile/${encodeURIComponent(aliasName)}`}
+              className="header-nav-link"
+              id="nav-profile"
+              onClick={closeMobileMenu}
+            >
+              👤 Profile
+            </Link>
+          )}
           <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox" onClick={closeMobileMenu}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
