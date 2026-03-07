@@ -111,6 +111,7 @@ export interface UserCollection {
   user_id: string;
   name: string;
   description: string | null;
+  is_public: boolean;
   created_at: string;
 }
 
@@ -318,9 +319,10 @@ export interface Database {
       };
       user_collections: {
         Row: UserCollection;
-        Insert: Omit<UserCollection, "id" | "created_at"> & {
+        Insert: Omit<UserCollection, "id" | "created_at" | "is_public"> & {
           id?: string;
           created_at?: string;
+          is_public?: boolean;
         };
         Update: Partial<Omit<UserCollection, "id">>;
         Relationships: [];
