@@ -167,6 +167,9 @@ export default function Header() {
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist" onClick={closeMobileMenu}>
             ❤️ Wishlist
           </Link>
+          <Link href="/claim" className="header-nav-link" id="nav-claim" onClick={closeMobileMenu}>
+            📦 Claim
+          </Link>
           {aliasName && (
             <Link
               href={`/profile/${encodeURIComponent(aliasName)}`}

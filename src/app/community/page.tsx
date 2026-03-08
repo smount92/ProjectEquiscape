@@ -124,6 +124,18 @@ export default async function CommunityPage() {
     (userFavs ?? []).map((f: { horse_id: string }) => f.horse_id)
   );
 
+  // Hoofprint counts (for badge)
+  const { data: hoofprintData } = await supabase
+    .from("horse_timeline")
+    .select("horse_id")
+    .in("horse_id", horseIds)
+    .eq("is_public", true);
+
+  const hoofprintCountMap = new Map<string, number>();
+  (hoofprintData ?? []).forEach((e: { horse_id: string }) => {
+    hoofprintCountMap.set(e.horse_id, (hoofprintCountMap.get(e.horse_id) || 0) + 1);
+  });
+
   // Build display data
   const communityCards = horses.map((horse) => {
     const thumb = horse.horse_images?.find(
@@ -167,6 +179,7 @@ export default async function CommunityPage() {
       favoriteCount: favCountMap.get(horse.id) || 0,
       isFavorited: userFavSet.has(horse.id),
       scale: horse.reference_molds?.scale || null,
+      hoofprintCount: hoofprintCountMap.get(horse.id) || 0,
     };
   });
 

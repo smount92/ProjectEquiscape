@@ -31,6 +31,7 @@ interface CommunityCardData {
     favoriteCount: number;
     isFavorited: boolean;
     scale: string | null;
+    hoofprintCount?: number;
 }
 
 function getFinishBadgeClass(finish: string): string {
@@ -213,7 +214,12 @@ export default function ShowRingGrid({
                                         )}
                                     </div>
                                     <div className="community-card-info">
-                                        <div className="community-card-name">{horse.customName}</div>
+                                        <div className="community-card-name">
+                                            {horse.customName}
+                                            {(horse.hoofprintCount ?? 0) > 0 && (
+                                                <span className="hoofprint-badge" style={{ marginLeft: "6px" }}>🐾 Hoofprint</span>
+                                            )}
+                                        </div>
                                         <div className="community-card-ref">{horse.refName}</div>
                                         {horse.releaseLine && (
                                             <div className="community-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>

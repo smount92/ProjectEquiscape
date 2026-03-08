@@ -53,6 +53,19 @@ export async function addShowRecord(data: {
         metadata: { showName: data.showName, placing: data.placing || null },
     });
 
+    // Hoofprint timeline event (fire-and-forget)
+    try {
+        const { addTimelineEvent } = await import("@/app/actions/hoofprint");
+        addTimelineEvent({
+            horseId: data.horseId,
+            eventType: "show_result",
+            title: `${data.showName}${data.placing ? ` — ${data.placing}` : ""}`,
+            description: [data.division, data.ribbonColor ? `${data.ribbonColor} ribbon` : null, data.judgeName ? `Judge: ${data.judgeName}` : null]
+                .filter(Boolean).join(" · ") || undefined,
+            eventDate: data.showDate,
+        });
+    } catch { /* non-blocking */ }
+
     return { success: true };
 }
 
