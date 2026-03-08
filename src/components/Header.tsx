@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import NotificationBell from "@/components/NotificationBell";
-
+import { getHeaderData } from "@/app/actions/header";
 export default function Header() {
   const { isSimpleMode, toggleSimpleMode } = useSimpleMode();
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
@@ -19,92 +19,42 @@ export default function Header() {
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
   const isAdmin = user?.email && adminEmail && user.email.toLowerCase() === adminEmail.toLowerCase();
 
-  const fetchUnreadCount = useCallback(async (userId: string) => {
-    // Get conversation IDs where user is participant
-    const { data: convos } = await supabase
-      .from("conversations")
-      .select("id")
-      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
-
-    if (!convos || convos.length === 0) {
-      setUnreadCount(0);
-      return;
+  const fetchHeaderInfo = useCallback(async () => {
+    try {
+      const data = await getHeaderData();
+      setUser(data.user);
+      setAliasName(data.aliasName);
+      setUnreadCount(data.unreadCount);
+    } catch {
+      // Silently fail if server action throws
     }
-
-    const convoIds = convos.map((c: { id: string }) => c.id);
-
-    const { count } = await supabase
-      .from("messages")
-      .select("id", { count: "exact", head: true })
-      .in("conversation_id", convoIds)
-      .neq("sender_id", userId)
-      .eq("is_read", false);
-
-    setUnreadCount(count ?? 0);
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
-    async function getUser() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) {
-        fetchUnreadCount(user.id);
-        // Fetch alias_name for profile link (with timeout)
-        try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 5000);
-          const { data: profile } = await supabase
-            .from("users")
-            .select("alias_name")
-            .eq("id", user.id)
-            .abortSignal(controller.signal)
-            .single<{ alias_name: string }>();
-          clearTimeout(timeout);
-          setAliasName(profile?.alias_name ?? null);
-        } catch {
-          // Silently fail — profile link just won't show
-        }
-      }
-    }
-    getUser();
+    // Initial fetch
+    fetchHeaderInfo();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUnreadCount(session.user.id);
-        try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 5000);
-          const { data: profile } = await supabase
-            .from("users")
-            .select("alias_name")
-            .eq("id", session.user.id)
-            .abortSignal(controller.signal)
-            .single<{ alias_name: string }>();
-          clearTimeout(timeout);
-          setAliasName(profile?.alias_name ?? null);
-        } catch {
-          // Silently fail
-        }
+        fetchHeaderInfo();
       } else {
-        setUnreadCount(0);
+        setUser(null);
         setAliasName(null);
+        setUnreadCount(0);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, router, fetchUnreadCount]);
+  }, [supabase, fetchHeaderInfo]);
 
   // Poll for new messages every 30 seconds
   useEffect(() => {
     if (!user) return;
-    const interval = setInterval(() => fetchUnreadCount(user.id), 30000);
+    const interval = setInterval(() => fetchHeaderInfo(), 30000);
     return () => clearInterval(interval);
-  }, [user, fetchUnreadCount]);
+  }, [user, fetchHeaderInfo]);
 
   const handleSignOut = () => {
     // Fire-and-forget — redirect immediately regardless of signOut result

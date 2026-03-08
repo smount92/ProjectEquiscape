@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { getMoldDetailAction, getResinDetailAction, searchReferencesAction } from "@/app/actions/reference";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -91,8 +91,6 @@ export default function UnifiedReferenceSearch({
   loadingReleases,
   releaseHint,
 }: UnifiedReferenceSearchProps) {
-  const supabase = createClient();
-
   // Internal search state
   const [tab, setTab] = useState<"mold" | "resin">(defaultTab);
   const [query, setQuery] = useState("");
@@ -125,14 +123,9 @@ export default function UnifiedReferenceSearch({
   // ---- Fetch selected item details for badges ----
   useEffect(() => {
     if (selectedMoldId && !selectedMoldInfo) {
-      supabase
-        .from("reference_molds")
-        .select("id, manufacturer, mold_name, scale, release_year_start")
-        .eq("id", selectedMoldId)
-        .single()
-        .then(({ data }) => {
-          if (data) setSelectedMoldInfo(data as unknown as MoldResult);
-        });
+      getMoldDetailAction(selectedMoldId).then((data) => {
+        if (data) setSelectedMoldInfo(data as unknown as MoldResult);
+      });
     } else if (!selectedMoldId) {
       setSelectedMoldInfo(null);
     }
@@ -141,14 +134,9 @@ export default function UnifiedReferenceSearch({
 
   useEffect(() => {
     if (selectedResinId && !selectedResinInfo) {
-      supabase
-        .from("artist_resins")
-        .select("id, sculptor_alias, resin_name, scale, cast_medium")
-        .eq("id", selectedResinId)
-        .single()
-        .then(({ data }) => {
-          if (data) setSelectedResinInfo(data as unknown as ResinResult);
-        });
+      getResinDetailAction(selectedResinId).then((data) => {
+        if (data) setSelectedResinInfo(data as unknown as ResinResult);
+      });
     } else if (!selectedResinId) {
       setSelectedResinInfo(null);
     }
@@ -159,51 +147,20 @@ export default function UnifiedReferenceSearch({
   const runSearch = useCallback(
     async (q: string) => {
       setLoading(true);
-
-      if (tab === "mold") {
-        // Parallel: search molds + releases
-        const moldPromise = supabase
-          .from("reference_molds")
-          .select("id, manufacturer, mold_name, scale, release_year_start")
-          .or(`mold_name.ilike.%${q}%,manufacturer.ilike.%${q}%`)
-          .order("mold_name")
-          .limit(20);
-
-        // Only search releases if query has text (otherwise too many results)
-        const releasePromise = q.trim()
-          ? supabase
-              .from("reference_releases")
-              .select(
-                `id, mold_id, release_name, model_number, color_description,
-                 release_year_start, release_year_end,
-                 reference_molds(mold_name, manufacturer)`
-              )
-              .or(`release_name.ilike.%${q}%,color_description.ilike.%${q}%`)
-              .limit(20)
-          : Promise.resolve({ data: [] as unknown[] });
-
-        const [moldRes, releaseRes] = await Promise.all([
-          moldPromise,
-          releasePromise,
-        ]);
-        setMoldResults((moldRes.data as MoldResult[]) ?? []);
-        setReleaseResults(
-          (releaseRes.data as unknown as ReleaseSearchResult[]) ?? []
-        );
-      } else {
-        // Resin tab: search resins only
-        const { data } = await supabase
-          .from("artist_resins")
-          .select("id, sculptor_alias, resin_name, scale, cast_medium")
-          .or(`resin_name.ilike.%${q}%,sculptor_alias.ilike.%${q}%`)
-          .order("sculptor_alias")
-          .limit(50);
-        setResinResults((data as ResinResult[]) ?? []);
+      try {
+        const results = await searchReferencesAction(tab, q);
+        if (tab === "mold") {
+          setMoldResults((results.molds as MoldResult[]) ?? []);
+          setReleaseResults((results.releases as unknown as ReleaseSearchResult[]) ?? []);
+        } else {
+          setResinResults((results.resins as ResinResult[]) ?? []);
+        }
+      } catch (err) {
+        console.error("Search failed:", err);
       }
-
       setLoading(false);
     },
-    [supabase, tab]
+    [tab]
   );
 
   // Debounced search on query/tab change
@@ -488,25 +445,25 @@ export default function UnifiedReferenceSearch({
           <>
             {resinResults.length > 0
               ? resinResults.map((resin) => (
-                  <div
-                    key={resin.id}
-                    className={`reference-item ${selectedResinId === resin.id ? "selected" : ""}`}
-                    onClick={() => handleResinClick(resin)}
-                    role="option"
-                    aria-selected={selectedResinId === resin.id}
-                  >
-                    <div className="ref-result-main">
-                      <div className="ref-result-info">
-                        <span className="reference-item-name">{resin.resin_name}</span>
-                        <span className="reference-item-meta"> · {resin.sculptor_alias}</span>
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
-                        <span className="reference-item-meta">{resin.scale}</span>
-                        <span className="ref-type-badge resin">Resin</span>
-                      </div>
+                <div
+                  key={resin.id}
+                  className={`reference-item ${selectedResinId === resin.id ? "selected" : ""}`}
+                  onClick={() => handleResinClick(resin)}
+                  role="option"
+                  aria-selected={selectedResinId === resin.id}
+                >
+                  <div className="ref-result-main">
+                    <div className="ref-result-info">
+                      <span className="reference-item-name">{resin.resin_name}</span>
+                      <span className="reference-item-meta"> · {resin.sculptor_alias}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
+                      <span className="reference-item-meta">{resin.scale}</span>
+                      <span className="ref-type-badge resin">Resin</span>
                     </div>
                   </div>
-                ))
+                </div>
+              ))
               : (
                 <div className="reference-empty">
                   {query.trim() ? (
@@ -580,12 +537,11 @@ export default function UnifiedReferenceSearch({
                     {rel.model_number ? ` (#${rel.model_number})` : ""}
                     {rel.color_description ? ` — ${rel.color_description}` : ""}
                     {rel.release_year_start
-                      ? ` (${rel.release_year_start}${
-                          rel.release_year_end &&
-                          rel.release_year_end !== rel.release_year_start
-                            ? `–${rel.release_year_end}`
-                            : ""
-                        })`
+                      ? ` (${rel.release_year_start}${rel.release_year_end &&
+                        rel.release_year_end !== rel.release_year_start
+                        ? `–${rel.release_year_end}`
+                        : ""
+                      })`
                       : ""}
                   </option>
                 ))}
@@ -612,8 +568,8 @@ export default function UnifiedReferenceSearch({
           <div className="reference-selected-badge">
             <span className="ref-type-badge release">Release</span>
             ✓ {releases.find(r => r.id === selectedReleaseId)?.release_name ||
-               releaseResults.find(r => r.id === selectedReleaseId)?.release_name ||
-               "Selected release"}
+              releaseResults.find(r => r.id === selectedReleaseId)?.release_name ||
+              "Selected release"}
             <button
               onClick={() =>
                 onSelectionChange({

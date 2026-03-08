@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { getCollectionsAction, createCollectionAction } from "@/app/actions/collections";
 
 interface Collection {
   id: string;
@@ -18,7 +18,6 @@ export default function CollectionPicker({
   selectedCollectionId,
   onSelect,
 }: CollectionPickerProps) {
-  const supabase = createClient();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -31,22 +30,17 @@ export default function CollectionPicker({
   // Fetch user's collections
   useEffect(() => {
     async function fetchCollections() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("user_collections")
-        .select("id, name, description")
-        .eq("user_id", user.id)
-        .order("name");
-
-      setCollections((data as Collection[]) ?? []);
-      setLoading(false);
+      try {
+        const data = await getCollectionsAction();
+        setCollections((data as Collection[]) ?? []);
+      } catch (err) {
+        console.error("Failed to load collections:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchCollections();
-  }, [supabase]);
+  }, []);
 
   // Focus name input when modal opens
   useEffect(() => {
@@ -59,33 +53,30 @@ export default function CollectionPicker({
     if (!newName.trim()) return;
     setCreating(true);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("user_collections")
-      .insert({
-        user_id: user.id,
-        name: newName.trim(),
-        description: newDesc.trim() || null,
-        is_public: newIsPublic,
-      } as Record<string, unknown>)
-      .select("id, name, description")
-      .single<Collection>();
-
-    if (!error && data) {
-      setCollections((prev) =>
-        [...prev, data].sort((a, b) => a.name.localeCompare(b.name))
+    try {
+      const result = await createCollectionAction(
+        newName.trim(),
+        newDesc.trim() || null,
+        newIsPublic
       );
-      onSelect(data.id);
-      setShowModal(false);
-      setNewName("");
-      setNewDesc("");
-      setNewIsPublic(false);
+
+      if (result.success && result.data) {
+        setCollections((prev) =>
+          [...prev, result.data as Collection].sort((a, b) => a.name.localeCompare(b.name))
+        );
+        onSelect(result.data.id);
+        setShowModal(false);
+        setNewName("");
+        setNewDesc("");
+        setNewIsPublic(false);
+      } else {
+        console.error("Failed to create collection:", result.error);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCreating(false);
     }
-    setCreating(false);
   };
 
   return (

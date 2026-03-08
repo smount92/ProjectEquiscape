@@ -11,6 +11,7 @@ import CollectionPicker from "@/components/CollectionPicker";
 import { compressImage } from "@/lib/utils/imageCompression";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { updateLifeStage, addTimelineEvent } from "@/app/actions/hoofprint";
+import { getReleasesForMoldAction } from "@/app/actions/reference";
 
 // ---- Types ----
 
@@ -223,19 +224,20 @@ export default function EditHorsePage() {
     let cancelled = false;
     const load = async () => {
       setLoadingReleases(true);
-      const { data } = await supabase
-        .from("reference_releases")
-        .select("id, mold_id, model_number, release_name, color_description, release_year_start, release_year_end")
-        .eq("mold_id", selectedMoldId)
-        .order("release_year_start", { ascending: true, nullsFirst: false });
-      if (!cancelled) {
-        setReleases((data as ReleaseDetail[]) ?? []);
-        setLoadingReleases(false);
+      try {
+        const data = await getReleasesForMoldAction(selectedMoldId);
+        if (!cancelled) {
+          setReleases((data as ReleaseDetail[]) ?? []);
+        }
+      } catch (err) {
+        console.error("Failed to load releases:", err);
+      } finally {
+        if (!cancelled) setLoadingReleases(false);
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [selectedMoldId, supabase]);
+  }, [selectedMoldId]);
 
   // ---- Photo Studio handlers ----
   const handleSlotSelect = (angle: AngleProfile, file: File) => {

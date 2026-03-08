@@ -12,6 +12,7 @@ import {
 } from "@/lib/utils/imageCompression";
 import type { AngleProfile, FinishType } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
+import { getReleasesForMoldAction } from "@/app/actions/reference";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
@@ -128,21 +129,21 @@ export default function AddHorsePage() {
     let cancelled = false;
     const fetchReleases = async () => {
       setLoadingReleases(true);
-      const { data } = await supabase
-        .from("reference_releases")
-        .select("id, mold_id, model_number, release_name, color_description, release_year_start, release_year_end")
-        .eq("mold_id", selectedMoldId)
-        .order("release_year_start", { ascending: true, nullsFirst: false });
-
-      if (!cancelled) {
-        setReleases((data as ReleaseDetail[]) ?? []);
-        setLoadingReleases(false);
+      try {
+        const data = await getReleasesForMoldAction(selectedMoldId);
+        if (!cancelled) {
+          setReleases((data as ReleaseDetail[]) ?? []);
+        }
+      } catch (err) {
+        console.error("Failed to load releases:", err);
+      } finally {
+        if (!cancelled) setLoadingReleases(false);
       }
     };
 
     fetchReleases();
     return () => { cancelled = true; };
-  }, [selectedMoldId, supabase]);
+  }, [selectedMoldId]);
 
   // Auto-fill custom_name when a release is selected
   useEffect(() => {
