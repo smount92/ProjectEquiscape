@@ -260,3 +260,239 @@ export async function initializeHoofprint(data: {
         metadata: { life_stage: data.lifeStage || "completed" },
     });
 }
+
+// ============================================================
+// TRANSFER SYSTEM
+// ============================================================
+
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
+function generateCode(): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O, 1/I
+    let code = "";
+    for (let i = 0; i < 6; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return code;
+}
+
+/** Generate a transfer code for a horse. */
+export async function generateTransferCode(data: {
+    horseId: string;
+    acquisitionType: "purchase" | "trade" | "gift" | "transfer";
+    salePrice?: number;
+    isPricePublic?: boolean;
+    notes?: string;
+}): Promise<{ success: boolean; code?: string; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify ownership
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("id, owner_id")
+        .eq("id", data.horseId)
+        .single();
+    if (!horse || (horse as { owner_id: string }).owner_id !== user.id) {
+        return { success: false, error: "You don't own this horse." };
+    }
+
+    // Cancel any existing pending transfers for this horse
+    await supabase
+        .from("horse_transfers")
+        .update({ status: "cancelled" })
+        .eq("horse_id", data.horseId)
+        .eq("sender_id", user.id)
+        .eq("status", "pending");
+
+    const code = generateCode();
+    const { error } = await supabase.from("horse_transfers").insert({
+        horse_id: data.horseId,
+        sender_id: user.id,
+        transfer_code: code,
+        acquisition_type: data.acquisitionType,
+        sale_price: data.salePrice ?? null,
+        is_price_public: data.isPricePublic ?? false,
+        notes: data.notes ?? null,
+    });
+
+    if (error) return { success: false, error: error.message };
+    return { success: true, code };
+}
+
+/** Claim a horse using a transfer code. */
+export async function claimTransfer(transferCode: string): Promise<{
+    success: boolean;
+    horseName?: string;
+    horseId?: string;
+    error?: string;
+}> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Look up transfer
+    const { data: transfer } = await supabase
+        .from("horse_transfers")
+        .select("id, horse_id, sender_id, acquisition_type, sale_price, is_price_public, notes, expires_at")
+        .eq("transfer_code", transferCode.toUpperCase().trim())
+        .eq("status", "pending")
+        .single();
+
+    if (!transfer) {
+        return { success: false, error: "Invalid or expired transfer code." };
+    }
+
+    const t = transfer as {
+        id: string; horse_id: string; sender_id: string;
+        acquisition_type: string; sale_price: number | null;
+        is_price_public: boolean; notes: string | null; expires_at: string;
+    };
+
+    // Check expiration
+    if (new Date(t.expires_at) < new Date()) {
+        await supabase.from("horse_transfers").update({ status: "expired" }).eq("id", t.id);
+        return { success: false, error: "This transfer code has expired." };
+    }
+
+    // Can't claim your own horse
+    if (t.sender_id === user.id) {
+        return { success: false, error: "You can't claim your own horse." };
+    }
+
+    // Use service role for cross-user operations
+    const admin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Get horse name and sender alias
+    const { data: horse } = await admin.from("user_horses").select("custom_name").eq("id", t.horse_id).single();
+    const horseName = (horse as { custom_name: string } | null)?.custom_name || "Unknown Horse";
+
+    const { data: senderProfile } = await admin.from("users").select("alias_name").eq("id", t.sender_id).single();
+    const senderAlias = (senderProfile as { alias_name: string } | null)?.alias_name || "Unknown";
+
+    const { data: receiverProfile } = await admin.from("users").select("alias_name").eq("id", user.id).single();
+    const receiverAlias = (receiverProfile as { alias_name: string } | null)?.alias_name || "Unknown";
+
+    // 1. Close sender's ownership record
+    await admin.from("horse_ownership_history")
+        .update({ released_at: new Date().toISOString() })
+        .eq("horse_id", t.horse_id)
+        .eq("owner_id", t.sender_id)
+        .is("released_at", null);
+
+    // 2. Create receiver's ownership record
+    await admin.from("horse_ownership_history").insert({
+        horse_id: t.horse_id,
+        owner_id: user.id,
+        owner_alias: receiverAlias,
+        acquisition_type: t.acquisition_type,
+        sale_price: t.sale_price,
+        is_price_public: t.is_price_public,
+        notes: t.notes,
+    });
+
+    // 3. Transfer ownership
+    await admin.from("user_horses")
+        .update({ owner_id: user.id, collection_id: null })
+        .eq("id", t.horse_id);
+
+    // 4. Create timeline events
+    await admin.from("horse_timeline").insert([
+        {
+            horse_id: t.horse_id,
+            user_id: t.sender_id,
+            event_type: "transferred",
+            title: `Transferred to @${receiverAlias}`,
+            description: `${horseName} was transferred from @${senderAlias} to @${receiverAlias} via ${t.acquisition_type}.`,
+            metadata: { from: senderAlias, to: receiverAlias, type: t.acquisition_type },
+        },
+        {
+            horse_id: t.horse_id,
+            user_id: user.id,
+            event_type: "acquired",
+            title: `Received from @${senderAlias}`,
+            description: `${horseName} was acquired from @${senderAlias} via ${t.acquisition_type}.`,
+            metadata: { from: senderAlias, to: receiverAlias, type: t.acquisition_type },
+        },
+    ]);
+
+    // 5. Mark transfer as claimed
+    await admin.from("horse_transfers").update({
+        status: "claimed",
+        claimed_by: user.id,
+        claimed_at: new Date().toISOString(),
+    }).eq("id", t.id);
+
+    // 6. Notify sender
+    await admin.from("notifications").insert({
+        user_id: t.sender_id,
+        type: "general",
+        actor_id: user.id,
+        content: `@${receiverAlias} claimed ${horseName}! Transfer complete.`,
+        horse_id: null,
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/stable/${t.horse_id}`);
+    revalidatePath(`/community/${t.horse_id}`);
+
+    return { success: true, horseName, horseId: t.horse_id };
+}
+
+/** Cancel a pending transfer. */
+export async function cancelTransfer(transferId: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from("horse_transfers")
+        .update({ status: "cancelled" })
+        .eq("id", transferId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/** Get pending outgoing transfers for the current user. */
+export async function getMyPendingTransfers(): Promise<{
+    id: string;
+    horseId: string;
+    horseName: string;
+    transferCode: string;
+    expiresAt: string;
+    acquisitionType: string;
+}[]> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data } = await supabase
+        .from("horse_transfers")
+        .select("id, horse_id, transfer_code, expires_at, acquisition_type")
+        .eq("sender_id", user.id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+    if (!data || data.length === 0) return [];
+
+    // Get horse names
+    const horseIds = data.map((t: { horse_id: string }) => t.horse_id);
+    const { data: horses } = await supabase
+        .from("user_horses")
+        .select("id, custom_name")
+        .in("id", horseIds);
+
+    const nameMap = new Map<string, string>();
+    (horses ?? []).forEach((h: { id: string; custom_name: string }) => nameMap.set(h.id, h.custom_name));
+
+    return data.map((t: { id: string; horse_id: string; transfer_code: string; expires_at: string; acquisition_type: string }) => ({
+        id: t.id,
+        horseId: t.horse_id,
+        horseName: nameMap.get(t.horse_id) || "Unknown Horse",
+        transferCode: t.transfer_code,
+        expiresAt: t.expires_at,
+        acquisitionType: t.acquisition_type,
+    }));
+}

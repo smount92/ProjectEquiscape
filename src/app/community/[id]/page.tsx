@@ -540,6 +540,9 @@ export default async function PublicPassportPage({
                   View My Passport
                 </Link>
               )}
+              <Link href={`/community/${horseId}/hoofprint`} className="btn btn-ghost">
+                🐾 View Full Hoofprint
+              </Link>
             </div>
           </div>
         </div>

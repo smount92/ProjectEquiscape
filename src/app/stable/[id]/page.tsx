@@ -8,6 +8,7 @@ import DeleteHorseModal from "@/components/DeleteHorseModal";
 import ShowRecordTimeline from "@/components/ShowRecordTimeline";
 import PedigreeCard from "@/components/PedigreeCard";
 import HoofprintTimeline from "@/components/HoofprintTimeline";
+import TransferModal from "@/components/TransferModal";
 import { getHoofprint } from "@/app/actions/hoofprint";
 
 export const dynamic = "force-dynamic";
@@ -445,6 +446,10 @@ export default async function HorsePassportPage({
               </svg>
               Edit Details
             </Link>
+            <TransferModal
+              horseId={horseId}
+              horseName={horse.custom_name}
+            />
             <DeleteHorseModal
               horseId={horseId}
               horseName={horse.custom_name}
