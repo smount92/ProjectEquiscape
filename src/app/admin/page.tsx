@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import MarkReadButton from "@/components/MarkReadButton";
 import AdminReplyForm from "@/components/AdminReplyForm";
@@ -37,10 +37,7 @@ export default async function AdminPage() {
     }
 
     // Service role client to bypass RLS
-    const supabaseAdmin = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabaseAdmin = getAdminClient();
 
     // Fetch metrics in parallel
     const [usersResult, horsesResult, unreadResult, messagesResult] =

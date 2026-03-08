@@ -216,8 +216,28 @@ export async function updateHorseAction(horseId: string, formData: FormData): Pr
         const hasExistingVault = formData.get("hasExistingVault") === "true";
         const deleteVault = formData.get("deleteVault") === "true";
 
-        const horseUpdate = horseUpdateStr ? JSON.parse(horseUpdateStr) : null;
-        const vaultData = vaultDataStr ? JSON.parse(vaultDataStr) : null;
+        // ── Security: whitelist allowed fields to prevent column injection ──
+        const HORSE_ALLOWED = [
+            'custom_name', 'sculptor', 'finishing_artist', 'finish_type',
+            'condition_grade', 'is_public', 'trade_status', 'listing_price',
+            'marketplace_notes', 'collection_id', 'reference_mold_id',
+            'artist_resin_id', 'release_id', 'life_stage',
+            'edition_number', 'edition_size',
+        ];
+        const VAULT_ALLOWED = [
+            'purchase_price', 'purchase_date', 'estimated_current_value',
+            'insurance_notes', 'horse_id',
+        ];
+
+        const rawHorse = horseUpdateStr ? JSON.parse(horseUpdateStr) : null;
+        const horseUpdate = rawHorse
+            ? Object.fromEntries(Object.entries(rawHorse).filter(([k]) => HORSE_ALLOWED.includes(k)))
+            : null;
+
+        const rawVault = vaultDataStr ? JSON.parse(vaultDataStr) : null;
+        const vaultData = rawVault
+            ? Object.fromEntries(Object.entries(rawVault).filter(([k]) => VAULT_ALLOWED.includes(k)))
+            : null;
 
         if (horseUpdate) {
             const { error: updErr } = await supabase.from("user_horses").update(horseUpdate).eq("id", horseId).eq("owner_id", user.id);

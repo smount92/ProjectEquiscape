@@ -265,7 +265,7 @@ export async function initializeHoofprint(data: {
 // TRANSFER SYSTEM
 // ============================================================
 
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 function generateCode(): string {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O, 1/I
@@ -362,10 +362,7 @@ export async function claimTransfer(transferCode: string): Promise<{
     }
 
     // Use service role for cross-user operations
-    const admin = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const admin = getAdminClient();
 
     // Get horse name and sender alias
     const { data: horse } = await admin.from("user_horses").select("custom_name").eq("id", t.horse_id).single();

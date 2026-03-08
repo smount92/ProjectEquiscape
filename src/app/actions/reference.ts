@@ -2,6 +2,14 @@
 
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * Sanitize a search query for safe use in PostgREST .or() filters.
+ * Strips characters that could inject filter operators.
+ */
+function sanitizeSearchQuery(raw: string): string {
+    return raw.replace(/[,().%\\]/g, "").trim();
+}
+
 export async function getMoldDetailAction(id: string) {
     const supabase = await createClient();
     const { data } = await supabase
@@ -36,7 +44,8 @@ export async function getReleasesForMoldAction(moldId: string) {
 
 export async function searchReferencesAction(tab: "mold" | "resin", query: string) {
     const supabase = await createClient();
-    const q = query.trim();
+    const q = sanitizeSearchQuery(query);
+    if (!q) return tab === "mold" ? { molds: [], releases: [] } : { resins: [] };
 
     if (tab === "mold") {
         const moldPromise = supabase

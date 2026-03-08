@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 
 // ============================================================
@@ -63,10 +63,7 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
             s.status === "open" && s.end_at && new Date(s.end_at) < new Date()
     );
     if (expiredShows.length > 0) {
-        const admin = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const admin = getAdminClient();
         for (const expired of expiredShows) {
             await admin.from("photo_shows")
                 .update({ status: "judging" })
@@ -300,10 +297,7 @@ export async function voteForEntry(
         await supabase.from("show_votes").delete().eq("id", existing.id);
 
         // Decrement vote count using Service Role
-        const admin = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const admin = getAdminClient();
         const { data: entry } = await admin
             .from("show_entries")
             .select("votes")
@@ -322,10 +316,7 @@ export async function voteForEntry(
         if (error) return { success: false, error: error.message };
 
         // Increment
-        const admin = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const admin = getAdminClient();
         const { data: entry } = await admin
             .from("show_entries")
             .select("votes")
@@ -380,10 +371,7 @@ export async function createPhotoShow(data: {
         return { success: false, error: "Unauthorized." };
     }
 
-    const admin = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const admin = getAdminClient();
 
     const { error } = await admin.from("photo_shows").insert({
         title: data.title.trim(),
@@ -410,10 +398,7 @@ export async function updateShowStatus(
         return { success: false, error: "Unauthorized." };
     }
 
-    const admin = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const admin = getAdminClient();
 
     const { error } = await admin.from("photo_shows")
         .update({ status: newStatus })
@@ -435,10 +420,7 @@ export async function deleteShow(
         return { success: false, error: "Unauthorized." };
     }
 
-    const admin = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const admin = getAdminClient();
 
     const { error } = await admin.from("photo_shows").delete().eq("id", showId);
     if (error) return { success: false, error: error.message };

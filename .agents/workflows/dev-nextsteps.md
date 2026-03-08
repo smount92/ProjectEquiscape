@@ -408,3 +408,187 @@ Then push:
 ```
 cd c:\Project Equispace\model-horse-hub && cmd /c "git push origin main 2>&1"
 ```
+
+---
+
+# ═══════════════════════════════════════
+# OPTION 12: SUPABASE ADVISOR FIXES
+# ═══════════════════════════════════════
+
+> **Source:** Supabase Dashboard Linter exports (`Supabase advisors/` folder)
+> **Analysis:** See [supabase_advisor_analysis.md](file:///C:/Users/MTG%20Test/.gemini/antigravity/brain/3e679c33-518f-4174-a7e2-c40c985bfce8/supabase_advisor_analysis.md)
+> **Scope:** 2 security warnings, 12 unindexed FKs, 74 RLS initplan warnings, 18 duplicate permissive policies
+
+---
+
+# 🔴 Priority: Critical — Dashboard Toggle
+
+## Task SA-1: Enable Leaked Password Protection
+
+**Severity:** 🔴 SECURITY
+**Time:** 2 minutes
+**No code change needed.**
+
+1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
+2. Navigate to **Authentication → Settings → Password Protection**
+3. Enable **"Leaked Password Protection"**
+4. This checks new passwords against HaveIBeenPwned.org
+
+**⚠️ STOP:** This is a manual step in the Supabase Dashboard. Confirm to the agent when done.
+
+---
+
+# 🔴 Priority: Critical — RLS Performance
+
+## Task SA-2: Generate Migration 021 — RLS InitPlan Fix + Indexes + Policy Merge
+
+**Severity:** 🔴 PERFORMANCE (will degrade at scale)
+**Time:** 30-45 minutes to generate, 2 minutes to run
+
+**The Problem:** Every RLS policy uses `auth.uid()` directly, which PostgreSQL treats as volatile and **re-evaluates for every row**. With `reference_molds` at 10,500+ rows, this means 10,500 calls per query. The fix is wrapping in `(SELECT auth.uid())` so Postgres evaluates once.
+
+**Create file:** `supabase/migrations/021_performance_hardening.sql`
+
+This migration must:
+
+### Part A: Fix all RLS policies to use `(SELECT auth.uid())`
+
+For **every** RLS policy that references `auth.uid()`, drop and recreate it with the `(SELECT auth.uid())` pattern. The affected tables are:
+
+- `users` (4 policies: select_own, insert_own, update_own, select_public_alias)
+- `user_horses` (5 policies: select_own, select_public, insert_own, update_own, delete_own)
+- `horse_images` (4 policies: select_own, insert_own, update_own, delete_own)
+- `financial_vault` (4 policies: select_own, insert_own, update_own, delete_own)
+- `user_collections` (4 policies: select_own, select_public, insert_own, update_own, delete_own)
+- `customization_logs` (4 policies: select_own, insert_own, update_own, delete_own)
+- `user_wishlists` (4 policies: view, add, update, delete)
+- `conversations` (3 policies: view, create, update)
+- `messages` (3 policies: view, send, mark_read)
+- `horse_favorites` (2 policies: favorite, unfavorite)
+- `horse_comments` (2 policies: comment, delete)
+- `user_follows` (2 policies: follow, unfollow)
+- `show_records` (4 policies: view_own, add, update, delete)
+- `horse_pedigrees` (4 policies: view_own, add, update, delete)
+- `user_ratings` (2 policies: add, retract)
+- `notifications` (3 policies: view, update, delete)
+- `show_entries` (2 policies: enter, remove)
+- `show_votes` (2 policies: vote, remove)
+- `horse_timeline` (4 policies: view_own, add, update, delete)
+- `horse_ownership_history` (1 policy: view_own)
+- `horse_photo_stages` (3 policies: view_own, manage, delete)
+- `horse_transfers` (3 policies: view_own, create, cancel)
+- `database_suggestions` (2 policies: view, submit)
+- `reference_molds` (1 policy: select_authenticated)
+- `artist_resins` (1 policy: select_authenticated)
+- `reference_releases` (1 policy: select_authenticated)
+
+**Pattern for each policy:**
+
+```sql
+-- Before:
+-- USING (owner_id = auth.uid())
+
+-- After:
+DROP POLICY IF EXISTS "policy_name" ON table_name;
+CREATE POLICY "policy_name"
+    ON table_name FOR <action>
+    TO <role>
+    USING (owner_id = (SELECT auth.uid()));
+    -- or WITH CHECK for INSERT
+```
+
+### Part B: Merge duplicate permissive SELECT policies
+
+Where two SELECT policies exist for the same table/role (one for "own" data, one for "public"), merge into a single policy:
+
+```sql
+-- user_horses: merge select_own + select_public
+DROP POLICY IF EXISTS "user_horses_select_own" ON user_horses;
+DROP POLICY IF EXISTS "user_horses_select_public" ON user_horses;
+CREATE POLICY "user_horses_select"
+    ON user_horses FOR SELECT
+    USING (owner_id = (SELECT auth.uid()) OR is_public = true);
+```
+
+Tables needing this merge:
+- `user_horses` (select_own + select_public)
+- `users` (select_own + select_public_alias)
+- `user_collections` (select_own + select_public)
+- `horse_ownership_history` (owner views + public views)
+- `horse_pedigrees` (owner view + public view)
+- `horse_photo_stages` (owner views + public views)
+- `horse_timeline` (owner views + public views)
+- `horse_transfers` (sender views + lookup by code)
+- `show_records` (owner view + public view)
+
+### Part C: Add missing foreign key indexes
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_notifications_actor_id ON notifications(actor_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_conversation_id ON notifications(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_horse_id ON notifications(horse_id);
+CREATE INDEX IF NOT EXISTS idx_horse_transfers_horse_id ON horse_transfers(horse_id);
+CREATE INDEX IF NOT EXISTS idx_horse_transfers_claimed_by ON horse_transfers(claimed_by);
+CREATE INDEX IF NOT EXISTS idx_show_entries_horse_id ON show_entries(horse_id);
+CREATE INDEX IF NOT EXISTS idx_show_votes_user_id ON show_votes(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_wishlists_mold_id ON user_wishlists(mold_id);
+CREATE INDEX IF NOT EXISTS idx_user_wishlists_release_id ON user_wishlists(release_id);
+CREATE INDEX IF NOT EXISTS idx_featured_horses_horse_id ON featured_horses(horse_id);
+CREATE INDEX IF NOT EXISTS idx_featured_horses_created_by ON featured_horses(created_by);
+CREATE INDEX IF NOT EXISTS idx_photo_shows_created_by ON photo_shows(created_by);
+```
+
+### Part D: Harden contact_messages INSERT policy
+
+```sql
+DROP POLICY IF EXISTS "Anyone can submit a contact message" ON contact_messages;
+CREATE POLICY "Anyone can submit a contact message"
+    ON contact_messages FOR INSERT
+    TO anon, authenticated
+    WITH CHECK (
+        length(name) > 0 AND
+        length(email) > 3 AND
+        length(message) > 0 AND
+        length(message) < 5000
+    );
+```
+
+### How to generate:
+
+To generate this migration correctly, you need to read the existing policies from the database. The best approach:
+
+1. **Read all existing migration files** to understand the current policy definitions
+2. **Generate the complete migration** with DROP + CREATE for each policy
+3. **Be extremely careful** — a typo could lock users out of their data
+
+### Verify (does NOT require build — SQL only):
+
+**⚠️ STOP:** This migration must be run in the **Supabase SQL Editor**. Copy the entire contents of `supabase/migrations/021_performance_hardening.sql` and execute it. Confirm success before proceeding.
+
+---
+
+# 🟢 Priority: Low — Informational
+
+## Task SA-3: Unused Indexes — No Action Needed
+
+The Supabase linter flagged 24 "unused indexes." These are all on features that haven't been exercised yet by your 2-3 beta users:
+
+- `idx_horse_comments_horse_id` — no comments yet
+- `idx_user_horses_resin` — no resin horses added yet
+- `idx_show_records_horse_id` — no show records logged yet
+- `idx_transfers_code` — no transfers claimed yet
+- etc.
+
+**Action: None.** These will be used as beta testers exercise more features. Revisit this after 3 months of active use.
+
+---
+
+## Task SA-4: Commit & Push
+
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "perf: migration 021 — RLS initplan fix, FK indexes, policy merge" 2>&1"
+```
+
+```
+cd c:\Project Equispace\model-horse-hub && cmd /c "git push origin main 2>&1"
+```

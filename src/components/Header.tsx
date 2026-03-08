@@ -12,12 +12,11 @@ export default function Header() {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [aliasName, setAliasName] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const router = useRouter();
   const supabase = createClient();
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  const isAdmin = user?.email && adminEmail && user.email.toLowerCase() === adminEmail.toLowerCase();
 
   const fetchHeaderInfo = useCallback(async () => {
     try {
@@ -25,6 +24,7 @@ export default function Header() {
       setUser(data.user);
       setAliasName(data.aliasName);
       setUnreadCount(data.unreadCount);
+      setIsAdmin(data.isAdmin ?? false);
     } catch {
       // Silently fail if server action throws
     }
@@ -43,6 +43,7 @@ export default function Header() {
         setUser(null);
         setAliasName(null);
         setUnreadCount(0);
+        setIsAdmin(false);
       }
     });
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { sendNewMessageNotification } from "@/lib/email";
 
 /**
@@ -117,17 +117,14 @@ export async function sendMessage(
     // --- Email notification (fire-and-forget, never blocks the response) ---
     try {
         // Use service role to bypass RLS and look up recipient details
-        const supabaseAdmin = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const supabaseAdmin = getAdminClient();
 
         // Get conversation details to find the other participant
         const { data: convo } = await supabaseAdmin
             .from("conversations")
             .select("buyer_id, seller_id, horse_id")
             .eq("id", conversationId)
-            .single<{ buyer_id: string; seller_id: string; horse_id: string | null }>();
+            .single();
 
         if (convo) {
             const recipientId =
@@ -140,13 +137,13 @@ export async function sendMessage(
                     .from("users")
                     .select("alias_name")
                     .eq("id", user.id)
-                    .single<{ alias_name: string }>(),
+                    .single(),
                 convo.horse_id
                     ? supabaseAdmin
                         .from("user_horses")
                         .select("custom_name")
                         .eq("id", convo.horse_id)
-                        .single<{ custom_name: string }>()
+                        .single()
                     : Promise.resolve({ data: null }),
             ]);
 
@@ -156,7 +153,7 @@ export async function sendMessage(
                 .from("users")
                 .select("alias_name")
                 .eq("id", recipientId)
-                .single<{ alias_name: string }>();
+                .single();
 
             if (recipientEmail) {
                 await sendNewMessageNotification({

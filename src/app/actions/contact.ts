@@ -2,6 +2,23 @@
 
 import { createClient } from "@/lib/supabase/server";
 
+// Simple in-memory rate limiter (resets on deploy / server restart)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW = 60_000; // 60 seconds
+
+function checkRateLimit(key: string): boolean {
+    const now = Date.now();
+    const entry = rateLimitMap.get(key);
+    if (!entry || now > entry.resetAt) {
+        rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+        return true;
+    }
+    if (entry.count >= RATE_LIMIT_MAX) return false;
+    entry.count++;
+    return true;
+}
+
 export interface ContactFormState {
     error: string | null;
     success: boolean;
@@ -19,6 +36,11 @@ export async function submitContactForm(
     // Server-side validation
     if (!name || !email || !message) {
         return { error: "Please fill in all required fields.", success: false };
+    }
+
+    // Rate limit by email
+    if (!checkRateLimit(email.toLowerCase())) {
+        return { error: "Too many messages. Please try again in a minute.", success: false };
     }
 
     // Basic email format check

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Get the count of unread notifications for the current user.
@@ -157,10 +157,7 @@ export async function createNotification(data: {
         // Don't notify yourself
         if (data.userId === data.actorId) return;
 
-        const supabaseAdmin = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const supabaseAdmin = getAdminClient();
 
         await supabaseAdmin.from("notifications").insert({
             user_id: data.userId,

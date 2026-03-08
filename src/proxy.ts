@@ -43,10 +43,14 @@ export async function proxy(request: NextRequest) {
         "/signup",
         "/auth",
         "/forgot-password",
+        "/getting-started",
         "/community",
         "/profile",
+        "/discover",
         "/about",
         "/contact",
+        "/claim",
+        "/api",
         "/_next",
         "/favicon.ico",
     ];
@@ -59,14 +63,16 @@ export async function proxy(request: NextRequest) {
     if (!user && !isPublicRoute) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
+        url.searchParams.set("redirectTo", request.nextUrl.pathname);
         return NextResponse.redirect(url);
     }
 
-    // IMPORTANT: You *must* return the supabaseResponse object as is.
-    // If you're creating a new response object, make sure to:
-    // 1. Pass the request in it: NextResponse.next({ request })
-    // 2. Copy over the cookies from supabaseResponse
-    // 3. Change the myNewResponse object instead of supabaseResponse
+    // Redirect authenticated users away from auth pages
+    if (user && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/signup")) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/dashboard";
+        return NextResponse.redirect(url);
+    }
 
     return supabaseResponse;
 }

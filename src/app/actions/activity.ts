@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 
 interface FeedItem {
@@ -27,10 +27,7 @@ export async function createActivityEvent(data: {
     metadata?: Record<string, unknown>;
 }): Promise<void> {
     try {
-        const supabaseAdmin = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const supabaseAdmin = getAdminClient();
 
         await supabaseAdmin.from("activity_events").insert({
             actor_id: data.actorId,
@@ -56,10 +53,7 @@ export async function createTextPost(text: string): Promise<{ success: boolean; 
     if (!trimmed) return { success: false, error: "Post cannot be empty." };
     if (trimmed.length > 500) return { success: false, error: "Post must be 500 characters or less." };
 
-    const supabaseAdmin = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabaseAdmin = getAdminClient();
 
     const { error } = await supabaseAdmin.from("activity_events").insert({
         actor_id: user.id,

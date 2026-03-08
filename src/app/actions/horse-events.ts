@@ -1,7 +1,7 @@
 "use server";
 
 import { createActivityEvent } from "@/app/actions/activity";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Fire-and-forget activity event when a horse is made public.
@@ -48,10 +48,7 @@ async function checkWishlistMatches(data: {
     releaseId?: string | null;
 }): Promise<void> {
     try {
-        const supabaseAdmin = createSupabaseClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const supabaseAdmin = getAdminClient();
 
         // Build OR filter for mold_id and release_id matches
         const orConditions: string[] = [];

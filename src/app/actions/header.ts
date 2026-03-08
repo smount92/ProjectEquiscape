@@ -40,9 +40,14 @@ export async function getHeaderData() {
         unreadCount = count ?? 0;
     }
 
+    // Check admin status server-side (never expose admin email to client)
+    const isAdmin = !!user.email && !!process.env.ADMIN_EMAIL &&
+        user.email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
+
     return {
         user: { id: user.id, email: user.email },
         aliasName,
         unreadCount,
+        isAdmin,
     };
 }
