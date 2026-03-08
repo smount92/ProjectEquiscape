@@ -9,9 +9,9 @@ import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { compressImage } from "@/lib/utils/imageCompression";
-import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { updateLifeStage, addTimelineEvent } from "@/app/actions/hoofprint";
 import { getReleasesForMoldAction } from "@/app/actions/reference";
+import { updateHorseAction, deleteHorseImageAction } from "@/app/actions/horse";
 
 // ---- Types ----
 
@@ -265,7 +265,11 @@ export default function EditHorsePage() {
     if (ref) ref.value = "";
   };
 
-  const handleSlotRemove = (angle: AngleProfile) => {
+  const handleSlotRemove = async (angle: AngleProfile) => {
+    const existing = existingImages[angle];
+    if (existing && existing.recordId) {
+      await deleteHorseImageAction(existing.recordId, existing.storagePath || null);
+    }
     setNewFiles((prev) => { const u = { ...prev }; delete u[angle]; return u; });
     setPreviews((prev) => { const u = { ...prev }; delete u[angle]; return u; });
     // Mark for deletion by clearing existing
@@ -286,73 +290,6 @@ export default function EditHorsePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // --- Multi-angle image upload + cleanup ---
-      for (const slot of PHOTO_STUDIO_SLOTS) {
-        const angle = slot.angle;
-        const newFile = newFiles[angle];
-        const existing = existingImages[angle];
-
-        if (newFile) {
-          // Compress and upload new image
-          const compressed = await compressImage(newFile);
-          const filePath = `${user.id}/${horseId}/${angle}_${Date.now()}.webp`;
-
-          const { error: uploadErr } = await supabase.storage
-            .from("horse-images")
-            .upload(filePath, compressed, { contentType: "image/webp", upsert: false });
-
-          if (uploadErr) throw new Error(`Upload failed (${slot.label}): ${uploadErr.message}`);
-
-          const { data: { publicUrl } } = supabase.storage
-            .from("horse-images")
-            .getPublicUrl(filePath);
-
-          // Delete old file from storage (orphan cleanup)
-          if (existing?.storagePath) {
-            await supabase.storage.from("horse-images").remove([existing.storagePath]);
-          }
-
-          // Update or insert horse_images record
-          if (existing?.recordId) {
-            await supabase.from("horse_images")
-              .update({ image_url: publicUrl })
-              .eq("id", existing.recordId);
-          } else {
-            await supabase.from("horse_images").insert({
-              horse_id: horseId,
-              image_url: publicUrl,
-              angle_profile: angle,
-            } as Record<string, unknown>);
-          }
-        }
-      }
-
-      // --- Upload new extra detail files ---
-      for (let i = 0; i < newExtraFiles.length; i++) {
-        const compressed = await compressImage(newExtraFiles[i].file);
-        const filePath = `${user.id}/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
-
-        const { error: uploadErr } = await supabase.storage
-          .from("horse-images")
-          .upload(filePath, compressed, { contentType: "image/webp", upsert: false });
-
-        if (uploadErr) {
-          console.error(`Extra upload error ${i}:`, uploadErr);
-          continue;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("horse-images")
-          .getPublicUrl(filePath);
-
-        await supabase.from("horse_images").insert({
-          horse_id: horseId,
-          image_url: publicUrl,
-          angle_profile: "extra_detail",
-        } as Record<string, unknown>);
-      }
-
-      // --- Update horse record ---
       const horseUpdate: Record<string, unknown> = {
         custom_name: customName.trim(),
         sculptor: sculptor.trim() || null,
@@ -369,52 +306,63 @@ export default function EditHorsePage() {
         life_stage: lifeStage,
       };
 
-      const { error: updErr } = await supabase
-        .from("user_horses")
-        .update(horseUpdate)
-        .eq("id", horseId);
-
-      if (updErr) throw new Error(updErr.message);
-
-      // --- Financial vault ---
       const hasVaultData = purchasePrice || purchaseDate || estimatedValue || insuranceNotes;
+      const vaultData: Record<string, unknown> | null = hasVaultData ? {
+        purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
+        purchase_date: purchaseDate || null,
+        estimated_current_value: estimatedValue ? parseFloat(estimatedValue) : null,
+        insurance_notes: insuranceNotes || null,
+      } : null;
 
-      if (hasVaultData) {
-        const vaultData: Record<string, unknown> = {
-          horse_id: horseId,
-          purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
-          purchase_date: purchaseDate || null,
-          estimated_current_value: estimatedValue ? parseFloat(estimatedValue) : null,
-          insurance_notes: insuranceNotes || null,
-        };
+      const deleteVault = !hasVaultData && hasExistingVault;
 
-        if (hasExistingVault) {
-          const { error: vErr } = await supabase
-            .from("financial_vault")
-            .update(vaultData)
-            .eq("horse_id", horseId);
-          if (vErr) console.error("Vault update error:", vErr);
-        } else {
-          const { error: vErr } = await supabase
-            .from("financial_vault")
-            .insert(vaultData);
-          if (vErr) console.error("Vault insert error:", vErr);
+      const formData = new FormData();
+      formData.append("horseUpdate", JSON.stringify(horseUpdate));
+      if (vaultData) formData.append("vaultData", JSON.stringify(vaultData));
+      formData.append("hasExistingVault", String(hasExistingVault));
+      formData.append("deleteVault", String(deleteVault));
+
+      const slotsMetadata: Record<string, { recordId?: string; storagePath?: string }> = {};
+
+      for (const slot of PHOTO_STUDIO_SLOTS) {
+        const angle = slot.angle;
+        if (newFiles[angle]) {
+          const compressed = await compressImage(newFiles[angle]);
+          formData.append(`slotFile_${angle}`, compressed, `${angle}_temp.webp`);
+
+          if (existingImages[angle]) {
+            slotsMetadata[angle] = {
+              recordId: existingImages[angle].recordId,
+              storagePath: existingImages[angle].storagePath || undefined
+            };
+          }
         }
-      } else if (hasExistingVault) {
-        await supabase.from("financial_vault").delete().eq("horse_id", horseId);
       }
+
+      for (let i = 0; i < newExtraFiles.length; i++) {
+        const compressed = await compressImage(newExtraFiles[i].file);
+        formData.append(`extraFile_${i}`, compressed, `extra_${i}.webp`);
+      }
+
+      formData.append("slotsMetadata", JSON.stringify(slotsMetadata));
+
+      const result = await updateHorseAction(horseId, formData);
+      if (!result.success) throw new Error(result.error || "Failed to save on server.");
 
       // Activity event if public (fire-and-forget)
       if (isPublic) {
-        notifyHorsePublic({
-          userId: user.id,
-          horseId,
-          horseName: customName.trim(),
-          finishType: finishType as string,
-          tradeStatus: tradeStatus as string,
-          moldId: selectedMoldId || null,
-          releaseId: selectedReleaseId || null,
-        });
+        // dynamic import of notifyHorsePublic so it's not mixed into SSR client boundaries improperly
+        import("@/app/actions/horse-events").then((m) => {
+          m.notifyHorsePublic({
+            userId: user.id,
+            horseId,
+            horseName: customName.trim(),
+            finishType: finishType as string,
+            tradeStatus: tradeStatus as string,
+            moldId: selectedMoldId || null,
+            releaseId: selectedReleaseId || null,
+          });
+        }).catch(() => { });
       }
 
       // Auto-create Hoofprint™ listed event (fire-and-forget)
@@ -629,11 +577,8 @@ export default function EditHorsePage() {
                       className="gallery-remove"
                       onClick={async (e) => {
                         e.stopPropagation();
-                        // Delete from storage + DB
-                        if (ex.storagePath) {
-                          await supabase.storage.from("horse-images").remove([ex.storagePath]);
-                        }
-                        await supabase.from("horse_images").delete().eq("id", ex.recordId);
+                        // Delete from server storage + DB
+                        await deleteHorseImageAction(ex.recordId, ex.storagePath || null);
                         setExistingExtras(prev => prev.filter(item => item.recordId !== ex.recordId));
                       }}
                       aria-label="Remove extra photo"

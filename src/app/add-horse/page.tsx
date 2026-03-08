@@ -13,10 +13,11 @@ import {
 import type { AngleProfile, FinishType } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import { getReleasesForMoldAction } from "@/app/actions/reference";
-import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { initializeHoofprint } from "@/app/actions/hoofprint";
+import { addHorseAction } from "@/app/actions/horse";
+import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -314,123 +315,53 @@ export default function AddHorsePage() {
 
     try {
       // 1. Get current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("You must be logged in.");
 
-      // 2. Insert horse record
-      const horseInsert: Record<string, unknown> = {
-        owner_id: user.id,
-        custom_name: customName.trim(),
-        finish_type: finishType,
-        condition_grade: conditionGrade,
-        is_public: isPublic,
-        trade_status: tradeStatus,
-        life_stage: lifeStage,
-      };
+      const formData = new FormData();
+      formData.append("customName", customName.trim());
+      formData.append("finishType", finishType);
+      if (conditionGrade) formData.append("conditionGrade", conditionGrade);
+      formData.append("isPublic", String(isPublic));
+      if (tradeStatus) formData.append("tradeStatus", tradeStatus);
+      if (lifeStage) formData.append("lifeStage", lifeStage);
 
-      if (selectedMoldId) horseInsert.reference_mold_id = selectedMoldId;
-      if (selectedResinId) horseInsert.artist_resin_id = selectedResinId;
-      if (selectedReleaseId) horseInsert.release_id = selectedReleaseId;
-      if (selectedCollectionId) horseInsert.collection_id = selectedCollectionId;
-      if (sculptor.trim()) horseInsert.sculptor = sculptor.trim();
+      if (selectedMoldId) formData.append("selectedMoldId", selectedMoldId);
+      if (selectedResinId) formData.append("selectedResinId", selectedResinId);
+      if (selectedReleaseId) formData.append("selectedReleaseId", selectedReleaseId);
+      if (selectedCollectionId) formData.append("selectedCollectionId", selectedCollectionId);
+      if (sculptor.trim()) formData.append("sculptor", sculptor.trim());
 
-      // Marketplace fields (only when listing)
       if (tradeStatus !== "Not for Sale") {
-        if (listingPrice) horseInsert.listing_price = parseFloat(listingPrice);
-        if (marketplaceNotes.trim()) horseInsert.marketplace_notes = marketplaceNotes.trim();
+        if (listingPrice) formData.append("listingPrice", listingPrice);
+        if (marketplaceNotes.trim()) formData.append("marketplaceNotes", marketplaceNotes.trim());
       }
 
-      const { data: horse, error: horseError } = await supabase
-        .from("user_horses")
-        .insert(horseInsert)
-        .select("id")
-        .single<{ id: string }>();
+      if (purchasePrice) formData.append("purchasePrice", purchasePrice);
+      if (purchaseDate) formData.append("purchaseDate", purchaseDate);
+      if (estimatedValue) formData.append("estimatedValue", estimatedValue);
+      if (insuranceNotes.trim()) formData.append("insuranceNotes", insuranceNotes.trim());
 
-      if (horseError || !horse) throw new Error(horseError?.message || "Failed to save horse.");
-
-      const horseId = horse.id;
-
-      // 3. Upload images to storage & insert records
+      // 3. Compress and append images
       const imageEntries = Object.entries(imageSlots) as [AngleProfile, ImageSlot][];
-
       for (const [angle, slot] of imageEntries) {
-        // Compress before upload
         const compressed = await compressImage(slot.file);
-
-        const filePath = `${user.id}/${horseId}/${angle}_${Date.now()}.webp`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("horse-images")
-          .upload(filePath, compressed, {
-            contentType: "image/webp",
-            upsert: false,
-          });
-
-        if (uploadError) {
-          console.error(`Upload error for ${angle}:`, uploadError);
-          continue; // Don't block on single image failure
-        }
-
-        // Get public URL
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("horse-images").getPublicUrl(filePath);
-
-        // Insert image record
-        await supabase.from("horse_images").insert({
-          horse_id: horseId,
-          image_url: publicUrl,
-          angle_profile: angle,
-        } as Record<string, unknown>);
+        // Turn blob back to file if necessary, but FormData handles bloba/files.
+        formData.append(`imageSlot_${angle}`, compressed, `${angle}.webp`);
       }
 
-      // 3b. Upload extra detail files
       for (let i = 0; i < extraFiles.length; i++) {
         const compressed = await compressImage(extraFiles[i].file);
-        const filePath = `${user.id}/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("horse-images")
-          .upload(filePath, compressed, { contentType: "image/webp", upsert: false });
-
-        if (uploadError) {
-          console.error(`Upload error for extra ${i}:`, uploadError);
-          continue;
-        }
-
-        const { data: { publicUrl } } = supabase.storage.from("horse-images").getPublicUrl(filePath);
-
-        await supabase.from("horse_images").insert({
-          horse_id: horseId,
-          image_url: publicUrl,
-          angle_profile: "extra_detail",
-        } as Record<string, unknown>);
+        formData.append(`extraFile_${i}`, compressed, `extra_${i}.webp`);
       }
 
-      // 4. Insert Financial Vault (if any data was entered)
-      const hasVaultData =
-        purchasePrice || purchaseDate || estimatedValue || insuranceNotes;
-
-      if (hasVaultData) {
-        const vaultInsert: Record<string, unknown> = {
-          horse_id: horseId,
-        };
-        if (purchasePrice) vaultInsert.purchase_price = parseFloat(purchasePrice);
-        if (purchaseDate) vaultInsert.purchase_date = purchaseDate;
-        if (estimatedValue) vaultInsert.estimated_current_value = parseFloat(estimatedValue);
-        if (insuranceNotes) vaultInsert.insurance_notes = insuranceNotes;
-
-        const { error: vaultError } = await supabase
-          .from("financial_vault")
-          .insert(vaultInsert);
-
-        if (vaultError) {
-          console.error("Vault error:", vaultError);
-          // Non-blocking — horse is already saved
-        }
+      // 4. Send to Server Action
+      const result = await addHorseAction(formData);
+      if (!result.success || !result.horseId) {
+        throw new Error(result.error || "Failed to save horse on server.");
       }
+
+      const horseId = result.horseId;
 
       // 5. Activity event if public (fire-and-forget)
       if (isPublic) {
