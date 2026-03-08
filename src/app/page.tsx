@@ -379,6 +379,7 @@ export default function LandingPage() {
           </div>
           <nav className="footer-nav" aria-label="Footer navigation">
             <Link href="/about" className="footer-link" id="footer-about">About</Link>
+            <Link href="/getting-started" className="footer-link" id="footer-getting-started">Getting Started</Link>
             <Link href="/contact" className="footer-link" id="footer-contact">Contact</Link>
             <Link href="/community" className="footer-link" id="footer-showring">Show Ring</Link>
             <Link href="/discover" className="footer-link" id="footer-discover">Discover Collectors</Link>

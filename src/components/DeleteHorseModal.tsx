@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { extractStoragePath } from "@/lib/utils/storage";
+import { deleteHorse } from "@/app/actions/horse";
 
 interface DeleteHorseModalProps {
   horseId: string;
@@ -14,43 +13,22 @@ interface DeleteHorseModalProps {
 export default function DeleteHorseModal({
   horseId,
   horseName,
-  imageUrls,
 }: DeleteHorseModalProps) {
   const [showModal, setShowModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleDelete = async () => {
     setIsDeleting(true);
     setError(null);
 
     try {
-      // 1. Delete images from Supabase Storage bucket
-      if (imageUrls.length > 0) {
-        const storagePaths = imageUrls.map(extractStoragePath);
-        const { error: storageError } = await supabase.storage
-          .from("horse-images")
-          .remove(storagePaths);
-
-        if (storageError) {
-          console.error("Storage delete error:", storageError);
-          // Continue — don't block record deletion on storage cleanup failure
-        }
+      const result = await deleteHorse(horseId);
+      if (!result.success) {
+        throw new Error(result.error || "Failed to delete.");
       }
-
-      // 2. Delete the horse record (cascades to horse_images + financial_vault)
-      const { error: deleteError } = await supabase
-        .from("user_horses")
-        .delete()
-        .eq("id", horseId);
-
-      if (deleteError) {
-        throw new Error(deleteError.message);
-      }
-
-      // 3. Redirect to dashboard with success toast
+      // Redirect to dashboard with success toast
       router.push("/?toast=deleted&name=" + encodeURIComponent(horseName));
     } catch (err) {
       setError(
