@@ -68,6 +68,9 @@ export async function addHorseAction(formData: FormData): Promise<{ success: boo
         const selectedReleaseId = formData.get("selectedReleaseId") as string || null;
         const selectedCollectionId = formData.get("selectedCollectionId") as string || null;
         const sculptor = formData.get("sculptor") as string || null;
+        const finishingArtist = formData.get("finishingArtist") as string || null;
+        const editionNumber = formData.get("editionNumber") as string || null;
+        const editionSize = formData.get("editionSize") as string || null;
 
         const listingPrice = formData.get("listingPrice") as string || null;
         const marketplaceNotes = formData.get("marketplaceNotes") as string || null;
@@ -97,6 +100,9 @@ export async function addHorseAction(formData: FormData): Promise<{ success: boo
         if (selectedReleaseId) horseInsert.release_id = selectedReleaseId;
         if (selectedCollectionId) horseInsert.collection_id = selectedCollectionId;
         if (sculptor) horseInsert.sculptor = sculptor;
+        if (finishingArtist) horseInsert.finishing_artist = finishingArtist;
+        if (editionNumber) horseInsert.edition_number = parseInt(editionNumber);
+        if (editionSize) horseInsert.edition_size = parseInt(editionSize);
 
         // Marketplace fields
         if (tradeStatus && tradeStatus !== "Not for Sale") {

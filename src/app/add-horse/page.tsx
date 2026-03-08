@@ -17,6 +17,7 @@ import CollectionPicker from "@/components/CollectionPicker";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { initializeHoofprint } from "@/app/actions/hoofprint";
 import { addHorseAction } from "@/app/actions/horse";
+import { submitSuggestion } from "@/app/actions/suggestions";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 
 // ---- AI Detection types ----
@@ -103,6 +104,9 @@ export default function AddHorsePage() {
   // Step 3 (index 2): Identity
   const [customName, setCustomName] = useState("");
   const [sculptor, setSculptor] = useState("");
+  const [finishingArtist, setFinishingArtist] = useState("");
+  const [editionNumber, setEditionNumber] = useState("");
+  const [editionSize, setEditionSize] = useState("");
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
   const [isPublic, setIsPublic] = useState(true);
@@ -331,6 +335,9 @@ export default function AddHorsePage() {
       if (selectedReleaseId) formData.append("selectedReleaseId", selectedReleaseId);
       if (selectedCollectionId) formData.append("selectedCollectionId", selectedCollectionId);
       if (sculptor.trim()) formData.append("sculptor", sculptor.trim());
+      if (finishingArtist.trim()) formData.append("finishingArtist", finishingArtist.trim());
+      if (editionNumber) formData.append("editionNumber", editionNumber);
+      if (editionSize) formData.append("editionSize", editionSize);
 
       if (tradeStatus !== "Not for Sale") {
         if (listingPrice) formData.append("listingPrice", listingPrice);
@@ -675,6 +682,11 @@ export default function AddHorsePage() {
                   setCustomName(searchTerm);
                   setNameAutoFilled(true);
                 }
+                // Auto-submit as suggestion (fire-and-forget)
+                submitSuggestion({
+                  suggestionType: "mold",
+                  name: searchTerm,
+                }).catch(() => { });
                 // Skip to Step 3 (Identity)
                 setCurrentStep(2);
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -772,6 +784,50 @@ export default function AddHorsePage() {
             </div>
 
             <div className="form-group">
+              <label htmlFor="finishing-artist" className="form-label">
+                🎨 Finishing Artist
+              </label>
+              <input
+                id="finishing-artist"
+                type="text"
+                className="form-input"
+                placeholder="Who painted or customized this model?"
+                value={finishingArtist}
+                onChange={(e) => setFinishingArtist(e.target.value)}
+                maxLength={100}
+              />
+              <span className="form-hint">
+                The artist who painted/finished this model (if different from sculptor).
+              </span>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">📋 Edition Info</label>
+              <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
+                <input
+                  type="number"
+                  className="form-input"
+                  placeholder="#"
+                  value={editionNumber}
+                  onChange={(e) => setEditionNumber(e.target.value)}
+                  style={{ width: 80 }}
+                  min="1"
+                />
+                <span style={{ color: "var(--color-text-muted)" }}>of</span>
+                <input
+                  type="number"
+                  className="form-input"
+                  placeholder="Total"
+                  value={editionSize}
+                  onChange={(e) => setEditionSize(e.target.value)}
+                  style={{ width: 80 }}
+                  min="1"
+                />
+              </div>
+              <span className="form-hint">
+                e.g., &quot;3 of 50&quot; for limited edition runs.
+              </span>
+            </div>            <div className="form-group">
               <label htmlFor="finish-type" className="form-label">
                 Finish Type *
               </label>

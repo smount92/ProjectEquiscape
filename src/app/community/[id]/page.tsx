@@ -23,6 +23,9 @@ interface PublicHorseDetail {
   condition_grade: string;
   is_public: boolean;
   created_at: string;
+  finishing_artist: string | null;
+  edition_number: number | null;
+  edition_size: number | null;
   users: {
     alias_name: string;
   } | null;
@@ -135,7 +138,7 @@ export default async function PublicPassportPage({
     .select(
       `
       id, owner_id, custom_name, finish_type, condition_grade,
-      is_public, created_at,
+      is_public, created_at, finishing_artist, edition_number, edition_size,
       users!inner(alias_name),
       reference_molds(mold_name, manufacturer, scale, release_year_start),
       artist_resins(resin_name, sculptor_alias, scale, cast_medium),
@@ -499,6 +502,26 @@ export default async function PublicPassportPage({
                   </div>
                 )}
               </>
+            )}
+
+            {horse.finishing_artist && (
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">🎨 Finished by</span>
+                <span className="passport-detail-value">{horse.finishing_artist}</span>
+              </div>
+            )}
+
+            {(horse.edition_number || horse.edition_size) && (
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">📋 Edition</span>
+                <span className="passport-detail-value">
+                  {horse.edition_number && horse.edition_size
+                    ? `${horse.edition_number} of ${horse.edition_size}`
+                    : horse.edition_size
+                      ? `Limited to ${horse.edition_size}`
+                      : `#${horse.edition_number}`}
+                </span>
+              </div>
             )}
 
             <div className="passport-detail-row">

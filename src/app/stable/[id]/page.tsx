@@ -24,6 +24,9 @@ interface HorseDetail {
   is_public: boolean;
   created_at: string;
   sculptor: string | null;
+  finishing_artist: string | null;
+  edition_number: number | null;
+  edition_size: number | null;
   reference_molds: {
     mold_name: string;
     manufacturer: string;
@@ -109,7 +112,7 @@ export default async function HorsePassportPage({
     .select(
       `
       id, owner_id, custom_name, finish_type, condition_grade,
-      is_for_sale, is_public, created_at, sculptor,
+      is_for_sale, is_public, created_at, sculptor, finishing_artist, edition_number, edition_size,
       reference_molds(mold_name, manufacturer, scale, release_year_start),
       artist_resins(resin_name, sculptor_alias, scale, cast_medium),
       reference_releases(release_name, model_number, color_description, release_year_start, release_year_end)
@@ -396,6 +399,26 @@ export default async function HorsePassportPage({
               <div className="passport-detail-row">
                 <span className="passport-detail-label">Sculptor / Artist</span>
                 <span className="passport-detail-value">{horse.sculptor}</span>
+              </div>
+            )}
+
+            {horse.finishing_artist && (
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">🎨 Finished by</span>
+                <span className="passport-detail-value">{horse.finishing_artist}</span>
+              </div>
+            )}
+
+            {(horse.edition_number || horse.edition_size) && (
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">📋 Edition</span>
+                <span className="passport-detail-value">
+                  {horse.edition_number && horse.edition_size
+                    ? `${horse.edition_number} of ${horse.edition_size}`
+                    : horse.edition_size
+                      ? `Limited to ${horse.edition_size}`
+                      : `#${horse.edition_number}`}
+                </span>
               </div>
             )}
           </div>

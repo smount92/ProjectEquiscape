@@ -41,7 +41,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🔴 Priority: Critical — Users Are Hitting These
 
-## Task BF-1: Photo Lightbox — Click to Enlarge & Scroll
+## ✅ Task BF-1: Photo Lightbox — Click to Enlarge & Scroll
 
 **Problem:** Users want to click on photos to open them larger and scroll through all images. Currently photos display as thumbnails with no expand functionality.
 
@@ -205,7 +205,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task BF-2: Edit Horse Save — Fix Infinite Loading
+## ✅ Task BF-2: Edit Horse Save — Fix Infinite Loading
 
 **Problem:** When saving edits, the page appears to hang forever. On refresh, the changes were saved. The issue is that `router.push()` may stall or the `isSaving` state never resets on success.
 
@@ -413,7 +413,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task BF-4: Auto-Fill Sculptor from Resin Selection
+## ✅ Task BF-4: Auto-Fill Sculptor from Resin Selection
 
 **Problem:** When a user selects an artist resin (e.g., "Midnight Dream by SculptorJane"), the sculptor field should auto-fill with the sculptor's name.
 
@@ -543,7 +543,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task BF-6: Resin Search — Match Model Number Too
+## ✅ Task BF-6: Resin Search — Match Model Number Too
 
 **Problem:** User reports resin names don't match well. While the backend already uses `%${q}%` (contains match), the search might miss results because it doesn't search `model_number` for molds/releases.
 
@@ -577,7 +577,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟢 Priority: Nice-to-Have
 
-## Task BF-7: Commit & Push
+## ✅ Task BF-7: Commit & Push
 
 ```
 cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "feat: photo lightbox, finishing artist, edition info, suggest to DB, edit save fix" 2>&1"

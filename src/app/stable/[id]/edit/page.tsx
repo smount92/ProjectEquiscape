@@ -62,6 +62,9 @@ export default function EditHorsePage() {
   // Identity fields
   const [customName, setCustomName] = useState("");
   const [sculptor, setSculptor] = useState("");
+  const [finishingArtist, setFinishingArtist] = useState("");
+  const [editionNumber, setEditionNumber] = useState("");
+  const [editionSize, setEditionSize] = useState("");
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
   const [isPublic, setIsPublic] = useState(true);
@@ -111,13 +114,16 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, sculptor, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id, trade_status, listing_price, marketplace_notes, life_stage")
+        .select("id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id, trade_status, listing_price, marketplace_notes, life_stage")
         .eq("id", horseId)
         .single<{
           id: string;
           owner_id: string;
           custom_name: string;
           sculptor: string | null;
+          finishing_artist: string | null;
+          edition_number: number | null;
+          edition_size: number | null;
           finish_type: FinishType;
           condition_grade: string;
           is_public: boolean;
@@ -139,6 +145,9 @@ export default function EditHorsePage() {
 
       setCustomName(horse.custom_name);
       setSculptor(horse.sculptor || "");
+      setFinishingArtist(horse.finishing_artist || "");
+      setEditionNumber(horse.edition_number ? String(horse.edition_number) : "");
+      setEditionSize(horse.edition_size ? String(horse.edition_size) : "");
       setFinishType(horse.finish_type);
       setConditionGrade(horse.condition_grade);
       setIsPublic(horse.is_public);
@@ -293,6 +302,9 @@ export default function EditHorsePage() {
       const horseUpdate: Record<string, unknown> = {
         custom_name: customName.trim(),
         sculptor: sculptor.trim() || null,
+        finishing_artist: finishingArtist.trim() || null,
+        edition_number: editionNumber ? parseInt(editionNumber) : null,
+        edition_size: editionSize ? parseInt(editionSize) : null,
         finish_type: finishType,
         condition_grade: conditionGrade,
         is_public: isPublic,
@@ -630,6 +642,30 @@ export default function EditHorsePage() {
             <span className="form-hint">
               Optional — tag the sculptor or artist, especially for Artist Resins or custom work.
             </span>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="edit-finishing-artist" className="form-label">🎨 Finishing Artist</label>
+            <input id="edit-finishing-artist" type="text" className="form-input" value={finishingArtist}
+              onChange={(e) => setFinishingArtist(e.target.value)} maxLength={100}
+              placeholder="Who painted or customized this model?" />
+            <span className="form-hint">
+              The artist who painted/finished this model (if different from sculptor).
+            </span>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">📋 Edition Info</label>
+            <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
+              <input type="number" className="form-input" placeholder="#"
+                value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)}
+                style={{ width: 80 }} min="1" />
+              <span style={{ color: "var(--color-text-muted)" }}>of</span>
+              <input type="number" className="form-input" placeholder="Total"
+                value={editionSize} onChange={(e) => setEditionSize(e.target.value)}
+                style={{ width: 80 }} min="1" />
+            </div>
+            <span className="form-hint">e.g., &quot;3 of 50&quot; for limited edition runs.</span>
           </div>
 
           <div className="edit-row">
