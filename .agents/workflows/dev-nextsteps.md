@@ -52,7 +52,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🔴 Priority: Critical
 
-## Task PS-1: Mobile UI Polish
+## ✅ Task PS-1: Mobile UI Polish — DONE
 
 **Why:** Wife tested on mobile and flagged responsive issues. The CSS has zero `@media` queries — all responsiveness comes from flexible layouts and CSS variables. This works for simple pages but breaks on complex layouts like grids, the header nav, and multi-column forms.
 
@@ -260,7 +260,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium
 
-## Task PS-3: Pagination — Feed, Show Ring, Discover
+## ✅ Task PS-3: Pagination — Feed, Show Ring, Discover — DONE
 
 **Why:** All list pages use fixed `limit()` values with no way to load more. As the user base grows, the first 50 items will be all users see.
 
@@ -418,7 +418,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-4: Admin Suggestions Panel
+## ✅ Task PS-4: Admin Suggestions Panel — DONE
 
 **Why:** Users can submit database suggestions (new molds, releases, resins) via the intake form. The server actions `getPendingSuggestions()` and `reviewSuggestion()` already exist but there's no admin UI to view and manage them.
 
