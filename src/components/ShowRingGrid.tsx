@@ -36,9 +36,9 @@ interface CommunityCardData {
 
 function getFinishBadgeClass(finish: string): string {
     switch (finish) {
-        case "OF": return "badge-of";
-        case "Custom": return "badge-custom";
-        case "Artist Resin": return "badge-resin";
+        case "OF": return "of";
+        case "Custom": return "custom";
+        case "Artist Resin": return "resin";
         default: return "";
     }
 }
@@ -142,7 +142,7 @@ export default function ShowRingGrid({
                 <SearchBar
                     value={searchQuery}
                     onChange={setSearchQuery}
-                    placeholder="Search the Show Ring by name, mold, release, sculptor, or collector\u2026"
+                    placeholder="Search the Show Ring by name, mold, release, sculptor, or collector…"
                     id="showring-search-bar"
                 />
             )}

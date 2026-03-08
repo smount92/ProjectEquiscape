@@ -88,7 +88,7 @@ export default function StableGrid({
                         <SearchBar
                             value={searchQuery}
                             onChange={setSearchQuery}
-                            placeholder="Search your stable by name, mold, release, or sculptor\u2026"
+                            placeholder="Search your stable by name, mold, release, or sculptor…"
                             id="stable-search-bar"
                         />
                     </div>

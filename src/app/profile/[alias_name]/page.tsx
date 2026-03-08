@@ -44,11 +44,11 @@ interface ProfileHorse {
 function getFinishBadgeClass(finish: string): string {
   switch (finish) {
     case "OF":
-      return "badge-of";
+      return "of";
     case "Custom":
-      return "badge-custom";
+      return "custom";
     case "Artist Resin":
-      return "badge-resin";
+      return "resin";
     default:
       return "";
   }
@@ -102,6 +102,14 @@ export default async function ProfilePage({
 
   if (!profileUser) {
     notFound();
+  }
+
+  // Resolve avatar from storage path to signed URL
+  if (profileUser.avatar_url && !profileUser.avatar_url.startsWith("http")) {
+    const { data: signedAvatar } = await supabase.storage
+      .from("avatars")
+      .createSignedUrl(profileUser.avatar_url, 3600);
+    profileUser.avatar_url = signedAvatar?.signedUrl || null;
   }
 
   const isOwnProfile = profileUser.id === user.id;

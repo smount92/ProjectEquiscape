@@ -12,7 +12,7 @@ interface SearchBarProps {
 export default function SearchBar({
     value,
     onChange,
-    placeholder = "Search by name, mold, release, or sculptor\u2026",
+    placeholder = "Search by name, mold, release, or sculptor…",
     id = "search-bar",
 }: SearchBarProps) {
     const inputRef = useRef<HTMLInputElement>(null);

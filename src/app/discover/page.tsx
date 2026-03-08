@@ -49,6 +49,16 @@ export default async function DiscoverPage() {
     // Filter to only active users (at least 1 public horse)
     const activeUsers = allUsers.filter((u) => (countMap.get(u.id) || 0) > 0);
 
+    // Resolve avatar storage paths to signed URLs
+    for (const u of activeUsers) {
+        if (u.avatar_url && !u.avatar_url.startsWith("http")) {
+            const { data: signedAvatar } = await supabase.storage
+                .from("avatars")
+                .createSignedUrl(u.avatar_url, 3600);
+            u.avatar_url = signedAvatar?.signedUrl || null;
+        }
+    }
+
     // Batch-fetch ratings for all active users (eliminates N+1)
     const activeUserIds = activeUsers.map((u) => u.id);
     const ratingMap = new Map<string, { average: number; count: number }>();

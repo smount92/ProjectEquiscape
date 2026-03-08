@@ -36,10 +36,19 @@ export async function getProfile(): Promise<{
         default_horse_public: boolean | null;
     };
 
+    // Generate signed URL for avatar if stored as a storage path
+    let resolvedAvatarUrl = d.avatar_url;
+    if (d.avatar_url && !d.avatar_url.startsWith("http")) {
+        const { data: signedData } = await supabase.storage
+            .from("avatars")
+            .createSignedUrl(d.avatar_url, 3600);
+        resolvedAvatarUrl = signedData?.signedUrl || null;
+    }
+
     return {
         aliasName: d.alias_name,
         bio: d.bio || "",
-        avatarUrl: d.avatar_url,
+        avatarUrl: resolvedAvatarUrl,
         email: user.email || "",
         notificationPrefs: d.notification_prefs || {
             show_votes: true,
@@ -169,9 +178,14 @@ export async function uploadAvatar(
         .single<{ avatar_url: string | null }>();
 
     if (currentProfile?.avatar_url) {
-        const oldMatch = currentProfile.avatar_url.match(/avatars\/(.+?)(\?|$)/);
-        if (oldMatch?.[1]) {
-            await supabase.storage.from("avatars").remove([decodeURIComponent(oldMatch[1])]);
+        // Handle both legacy full URLs and new storage paths
+        let oldPath = currentProfile.avatar_url;
+        if (oldPath.startsWith("http")) {
+            const oldMatch = oldPath.match(/avatars\/(.+?)(\?|$)/);
+            oldPath = oldMatch?.[1] ? decodeURIComponent(oldMatch[1]) : "";
+        }
+        if (oldPath) {
+            await supabase.storage.from("avatars").remove([oldPath]);
         }
     }
 
@@ -182,13 +196,10 @@ export async function uploadAvatar(
 
     if (uploadError) return { success: false, error: uploadError.message };
 
-    // Get public URL
-    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
-
-    // Store clean URL in DB (no cache buster)
+    // Store the storage path in DB (not a full URL — we generate signed URLs on read)
     const { error: dbError } = await supabase
         .from("users")
-        .update({ avatar_url: urlData.publicUrl })
+        .update({ avatar_url: path })
         .eq("id", user.id);
 
     if (dbError) return { success: false, error: dbError.message };
@@ -200,6 +211,9 @@ export async function uploadAvatar(
     revalidatePath("/feed");
     revalidatePath("/community");
 
-    // Return with cache buster for immediate UI update
-    return { success: true, url: urlData.publicUrl + "?t=" + Date.now() };
+    // Generate a signed URL for immediate display
+    const { data: signedData } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(path, 3600);
+    return { success: true, url: signedData?.signedUrl || path };
 }
