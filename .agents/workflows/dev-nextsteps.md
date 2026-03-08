@@ -38,7 +38,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🔴 Priority: Critical — Bugs
 
-## Task B2-1: Avatar Upload Not Reflecting on Profile Page
+## ✅ Task B2-1: Avatar Upload Not Reflecting on Profile Page
 
 **Problem:** User uploads a new avatar in Settings (succeeds — they can see it in Settings), but the profile page (`/profile/[alias_name]`) still shows the old avatar or default 🐴 emoji. Other users can also not see the correct avatar.
 
@@ -116,7 +116,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task B2-2: Reference Link Not Always Saving on Intake
+## ✅ Task B2-2: Reference Link Not Always Saving on Intake
 
 **Problem:** User selects a mold/release on the Reference step (Step 2) of the Add Horse form, but after saving, the horse record sometimes has `null` for `reference_mold_id` and `release_id`. Editing the horse after and re-selecting works fine.
 
@@ -208,7 +208,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium — New Feature
 
-## Task B2-3: Text Posts to Feed
+## ✅ Task B2-3: Text Posts to Feed
 
 **Problem:** Users want to post text updates to the activity feed — like a mini-blog or status update. Currently, the feed only shows auto-generated events (horse added, favorited, commented, etc.). There's no way for a user to manually post.
 
@@ -397,7 +397,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task B2-4: Commit & Push
+## ✅ Task B2-4: Commit & Push
 
 ```
 cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "fix: avatar caching, reference save reliability, text posts to feed" 2>&1"
