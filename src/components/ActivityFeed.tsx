@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-interface FeedItemData {
+export interface FeedItemData {
     id: string;
     actorAlias: string;
     actorId: string;

@@ -6,7 +6,9 @@ import AdminReplyForm from "@/components/AdminReplyForm";
 import FeatureHorseForm from "@/components/FeatureHorseForm";
 import CreateShowForm from "@/components/CreateShowForm";
 import AdminShowManager from "@/components/AdminShowManager";
+import AdminSuggestionsPanel from "@/components/AdminSuggestionsPanel";
 import { getPhotoShows } from "@/app/actions/shows";
+import { getPendingSuggestions } from "@/app/actions/suggestions";
 
 export const metadata = {
     title: "Admin Console — Model Horse Hub",
@@ -71,6 +73,7 @@ export default async function AdminPage() {
     const messages = (messagesResult.data as ContactMessage[]) ?? [];
 
     const allShows = await getPhotoShows();
+    const pendingSuggestions = await getPendingSuggestions();
 
     function formatDate(dateStr: string): string {
         return new Date(dateStr).toLocaleDateString("en-US", {
@@ -231,6 +234,17 @@ export default async function AdminPage() {
                         endAt: s.endAt,
                         entryCount: s.entryCount,
                     }))} />
+                </div>
+
+                {/* Database Suggestions */}
+                <div className="admin-section">
+                    <h2 className="admin-section-title">
+                        💡 Database Suggestions
+                        <span className="admin-section-count">
+                            {pendingSuggestions.length} pending
+                        </span>
+                    </h2>
+                    <AdminSuggestionsPanel suggestions={pendingSuggestions} />
                 </div>
             </div>
         </div>

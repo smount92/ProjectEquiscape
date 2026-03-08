@@ -70,16 +70,22 @@ export async function createTextPost(text: string): Promise<{ success: boolean; 
 /**
  * Get the global activity feed (latest events from all users).
  */
-export async function getActivityFeed(limit: number = 30): Promise<FeedItem[]> {
+export async function getActivityFeed(limit: number = 30, cursor?: string): Promise<{ items: FeedItem[]; nextCursor: string | null }> {
     const supabase = await createClient();
 
-    const { data: events } = await supabase
+    let query = supabase
         .from("activity_events")
         .select("id, actor_id, event_type, horse_id, metadata, created_at")
         .order("created_at", { ascending: false })
-        .limit(limit);
+        .limit(limit + 1);
 
-    const items = (events ?? []) as {
+    if (cursor) {
+        query = query.lt("created_at", cursor);
+    }
+
+    const { data: events } = await query;
+
+    const allItems = (events ?? []) as {
         id: string;
         actor_id: string;
         event_type: string;
@@ -88,7 +94,10 @@ export async function getActivityFeed(limit: number = 30): Promise<FeedItem[]> {
         created_at: string;
     }[];
 
-    if (items.length === 0) return [];
+    const hasMore = allItems.length > limit;
+    const items = hasMore ? allItems.slice(0, limit) : allItems;
+
+    if (items.length === 0) return { items: [], nextCursor: null };
 
     // Batch-fetch actor aliases
     const actorIds = [...new Set(items.map((e) => e.actor_id))];
@@ -138,29 +147,34 @@ export async function getActivityFeed(limit: number = 30): Promise<FeedItem[]> {
         }
     }
 
-    return items.map((e) => ({
-        id: e.id,
-        actorAlias: aliasMap.get(e.actor_id) || "Unknown",
-        actorId: e.actor_id,
-        eventType: e.event_type,
-        horseId: e.horse_id,
-        horseName: e.horse_id ? horseMap.get(e.horse_id) || null : null,
-        thumbnailUrl: e.horse_id ? thumbUrlMap1.get(e.horse_id) ?? null : null,
-        metadata: e.metadata,
-        createdAt: e.created_at,
-    }));
+    const nextCursor = hasMore ? items[items.length - 1].created_at : null;
+
+    return {
+        items: items.map((e) => ({
+            id: e.id,
+            actorAlias: aliasMap.get(e.actor_id) || "Unknown",
+            actorId: e.actor_id,
+            eventType: e.event_type,
+            horseId: e.horse_id,
+            horseName: e.horse_id ? horseMap.get(e.horse_id) || null : null,
+            thumbnailUrl: e.horse_id ? thumbUrlMap1.get(e.horse_id) ?? null : null,
+            metadata: e.metadata,
+            createdAt: e.created_at,
+        })),
+        nextCursor,
+    };
 }
 
 /**
  * Get activity feed for users the current user follows.
  */
-export async function getFollowingFeed(limit: number = 30): Promise<FeedItem[]> {
+export async function getFollowingFeed(limit: number = 30, cursor?: string): Promise<{ items: FeedItem[]; nextCursor: string | null }> {
     const supabase = await createClient();
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return [];
+    if (!user) return { items: [], nextCursor: null };
 
     // Get who we follow
     const { data: follows } = await supabase
@@ -173,16 +187,22 @@ export async function getFollowingFeed(limit: number = 30): Promise<FeedItem[]> 
     // Include own activity
     followingIds.push(user.id);
 
-    if (followingIds.length === 0) return [];
+    if (followingIds.length === 0) return { items: [], nextCursor: null };
 
-    const { data: events } = await supabase
+    let query = supabase
         .from("activity_events")
         .select("id, actor_id, event_type, horse_id, metadata, created_at")
         .in("actor_id", followingIds)
         .order("created_at", { ascending: false })
-        .limit(limit);
+        .limit(limit + 1);
 
-    const items = (events ?? []) as {
+    if (cursor) {
+        query = query.lt("created_at", cursor);
+    }
+
+    const { data: events } = await query;
+
+    const allItems = (events ?? []) as {
         id: string;
         actor_id: string;
         event_type: string;
@@ -191,7 +211,10 @@ export async function getFollowingFeed(limit: number = 30): Promise<FeedItem[]> 
         created_at: string;
     }[];
 
-    if (items.length === 0) return [];
+    const hasMore = allItems.length > limit;
+    const items = hasMore ? allItems.slice(0, limit) : allItems;
+
+    if (items.length === 0) return { items: [], nextCursor: null };
 
     // Batch-fetch aliases
     const actorIds = [...new Set(items.map((e) => e.actor_id))];
@@ -239,15 +262,20 @@ export async function getFollowingFeed(limit: number = 30): Promise<FeedItem[]> 
         }
     }
 
-    return items.map((e) => ({
-        id: e.id,
-        actorAlias: aliasMap.get(e.actor_id) || "Unknown",
-        actorId: e.actor_id,
-        eventType: e.event_type,
-        horseId: e.horse_id,
-        horseName: e.horse_id ? horseMap.get(e.horse_id) || null : null,
-        thumbnailUrl: e.horse_id ? thumbUrlMap2.get(e.horse_id) ?? null : null,
-        metadata: e.metadata,
-        createdAt: e.created_at,
-    }));
+    const nextCursor = hasMore ? items[items.length - 1].created_at : null;
+
+    return {
+        items: items.map((e) => ({
+            id: e.id,
+            actorAlias: aliasMap.get(e.actor_id) || "Unknown",
+            actorId: e.actor_id,
+            eventType: e.event_type,
+            horseId: e.horse_id,
+            horseName: e.horse_id ? horseMap.get(e.horse_id) || null : null,
+            thumbnailUrl: e.horse_id ? thumbUrlMap2.get(e.horse_id) ?? null : null,
+            metadata: e.metadata,
+            createdAt: e.created_at,
+        })),
+        nextCursor,
+    };
 }

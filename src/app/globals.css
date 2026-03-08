@@ -349,7 +349,7 @@ p {
     display: flex;
   }
 
-  .header-nav {
+  .header-nav:not(.header-nav-public) {
     display: none;
     position: absolute;
     top: var(--header-height);
@@ -378,6 +378,19 @@ p {
     width: 100%;
     padding: var(--space-sm) var(--space-md);
     font-size: calc(var(--font-size-base) * var(--font-scale));
+  }
+
+  /* Public nav (logged-out) stays inline — only 2-3 links */
+  .header-nav-public {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-xs);
+  }
+
+  .header-nav-public .header-nav-link {
+    width: auto;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
   }
 
   .header-logo span:not(.header-logo-icon) {
@@ -2536,7 +2549,7 @@ p {
     display: flex;
   }
 
-  .header-nav {
+  .header-nav:not(.header-nav-public) {
     display: none;
     position: absolute;
     top: 100%;
@@ -2571,6 +2584,19 @@ p {
 
   .header-nav-link:hover {
     background: rgba(124, 109, 240, 0.12);
+  }
+
+  /* Public nav (logged-out) stays inline */
+  .header-nav-public {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--space-xs);
+  }
+
+  .header-nav-public .header-nav-link {
+    width: auto;
+    padding: var(--space-xs) var(--space-sm) !important;
+    font-size: calc(var(--font-size-xs) * var(--font-scale)) !important;
   }
 
   .header-logo span:not(.header-logo-icon) {
@@ -2809,10 +2835,7 @@ p {
     font-size: calc(1.6rem * var(--font-scale));
   }
 
-  .header-nav {
-    display: none;
-    /* Hide nav links on very small screens — use logo for home */
-  }
+  /* header-nav mobile hide is handled globally, no override needed here */
 }
 
 @media (min-width: 641px) and (max-width: 900px) {
@@ -3570,6 +3593,19 @@ p {
   .analytics-row {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-sm);
+  }
+}
+
+@media (max-width: 400px) {
+  .analytics-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+
+  .analytics-card {
+    flex-direction: row;
+    text-align: left;
+    gap: var(--space-md);
   }
 
   .analytics-card {
@@ -5499,7 +5535,7 @@ p {
 
 .admin-metrics-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-md);
   margin-bottom: var(--space-xl);
 }
@@ -8519,4 +8555,104 @@ p {
 
 .feed-item-text-post p {
   margin: 0;
+}
+
+
+/* ============================================================
+   GLOBAL MOBILE RESPONSIVE POLISHING
+   ============================================================ */
+
+/* ── 768px: Tablet and below ── */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 0 var(--space-md);
+  }
+
+  /* Ensure touch targets are accessible */
+  .btn,
+  button,
+  .header-nav-link,
+  a.header-nav-link {
+    min-height: 44px;
+  }
+
+  /* Form rows stack on mobile */
+  .form-row {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  /* Button groups stack */
+  .btn-group {
+    flex-direction: column;
+  }
+
+  .btn-group .btn {
+    width: 100%;
+  }
+
+  /* Stable page header */
+  .shelf-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  /* Passport layout adjustments */
+  .passport-actions {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  /* Feed compose bar */
+  .feed-compose-bar {
+    padding: var(--space-sm);
+  }
+
+  /* Notification items */
+  .notification-item {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  /* Vault sections */
+  .vault-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  /* Edit sections */
+  .edit-section-header {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+}
+
+/* ── 480px: Small phones ── */
+@media (max-width: 480px) {
+  .page-container {
+    padding: 0 var(--space-sm);
+  }
+
+  /* Tighter card radius */
+  .card,
+  .card-auth,
+  .horse-card,
+  .community-card,
+  .discover-card {
+    border-radius: var(--radius-md);
+  }
+
+  /* Hero sections shrink */
+  .community-hero {
+    padding: var(--space-lg) var(--space-sm);
+    margin: 0 calc(var(--space-sm) * -1);
+    border-radius: 0;
+  }
+
+  /* Reduce margin on static pages */
+  .static-page-container {
+    padding: var(--space-lg) var(--space-sm);
+  }
 }

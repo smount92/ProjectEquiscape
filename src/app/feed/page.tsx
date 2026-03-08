@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getActivityFeed, getFollowingFeed } from "@/app/actions/activity";
-import ActivityFeed from "@/components/ActivityFeed";
+import LoadMoreFeed from "@/components/LoadMoreFeed";
 import FeedComposeBar from "@/components/FeedComposeBar";
 import Link from "next/link";
 
@@ -27,10 +27,10 @@ export default async function FeedPage({
     const { tab } = await searchParams;
     const activeTab = tab === "following" ? "following" : "global";
 
-    const feedItems =
+    const { items: feedItems, nextCursor } =
         activeTab === "following"
-            ? await getFollowingFeed(50)
-            : await getActivityFeed(50);
+            ? await getFollowingFeed(30)
+            : await getActivityFeed(30);
 
     return (
         <div className="page-container">
@@ -65,9 +65,11 @@ export default async function FeedPage({
             {/* Compose */}
             <FeedComposeBar />
 
-            {/* Feed */}
-            <ActivityFeed
-                items={feedItems}
+            {/* Feed with Load More */}
+            <LoadMoreFeed
+                initialItems={feedItems}
+                initialCursor={nextCursor}
+                feedType={activeTab}
                 emptyMessage={
                     activeTab === "following"
                         ? "Follow collectors on the Discover page to see their activity!"

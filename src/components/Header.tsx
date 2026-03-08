@@ -181,7 +181,7 @@ export default function Header() {
 
       {/* ── Public Navigation (not signed in) ── */}
       {!user && (
-        <nav className="header-nav" aria-label="Public navigation">
+        <nav className="header-nav header-nav-public" aria-label="Public navigation">
           <Link href="/about" className="header-nav-link" id="nav-about">
             About
           </Link>
