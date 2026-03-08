@@ -40,7 +40,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🔴 Priority: Critical — Launch Blockers
 
-## Task NV-1: Fix Authenticated Access to Public Pages (Landing, About, Contact)
+## ✅ Task NV-1: Fix Authenticated Access to Public Pages (Landing, About, Contact)
 
 **Problem:** When signed in, the logo link goes to `/dashboard` and there are no nav links to `/`, `/about`, or `/contact`. Authenticated users are effectively locked out of these pages.
 
@@ -105,7 +105,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task NV-2: Fix Sign-Out Button
+## ✅ Task NV-2: Fix Sign-Out Button
 
 **Problem:** The sign-out button doesn't work. Users are stuck signed in.
 
@@ -158,7 +158,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task NV-3: Add "My Profile" Link to Header
+## ✅ Task NV-3: Add "My Profile" Link to Header
 
 **Problem:** There **is** a profile link in the nav (lines 173-182), but it says "👤 Profile" which isn't clear enough. Users don't realize it shows their *public-facing* profile. Also, if `aliasName` is null (still loading), the link disappears entirely.
 
@@ -214,7 +214,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium — Related Polish
 
-## Task NV-4: Add Landing Page Link for Signed-In Users (Logo)
+## ✅ Task NV-4: Add Landing Page Link for Signed-In Users (Logo)
 
 **Problem:** Currently the logo link goes to `/dashboard` when signed in (line 116). This is fine behavior, but it means there's truly no way to see the landing page without signing out first.
 
@@ -226,7 +226,7 @@ The Home link added in Task NV-1 covers this. But also consider adding a subtle 
 
 ---
 
-## Task NV-5: Deduplicate Nav Links + Clean Up Order
+## ✅ Task NV-5: Deduplicate Nav Links + Clean Up Order
 
 **Problem:** The nav has a lot of links now. Some may benefit from grouping or an overflow menu on mobile.
 
@@ -259,7 +259,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task NV-6: Commit & Push
+## ✅ Task NV-6: Commit & Push
 
 ```
 cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "fix: sign-out button, public page access when signed in, My Profile link" 2>&1"
