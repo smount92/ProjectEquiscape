@@ -46,7 +46,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🔴 Priority: Critical
 
-## Task HP-1: Wire HoofprintTimeline into Private Passport
+## ✅ Task HP-1: Wire HoofprintTimeline into Private Passport
 
 **Problem:** `HoofprintTimeline.tsx` exists (285 lines, fully functional), but `src/app/stable/[id]/page.tsx` never imports or renders it.
 
@@ -84,7 +84,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task HP-2: Wire HoofprintTimeline into Public Passport
+## ✅ Task HP-2: Wire HoofprintTimeline into Public Passport
 
 **Problem:** Same gap — the public passport `src/app/community/[id]/page.tsx` doesn't show the Hoofprint timeline.
 
@@ -131,7 +131,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task HP-3: Wire TransferModal into Private Passport
+## ✅ Task HP-3: Wire TransferModal into Private Passport
 
 **Problem:** `TransferModal.tsx` exists (211 lines) but may not be rendered on the private passport page.
 
@@ -159,7 +159,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium
 
-## Task HP-4: Auto-Create Timeline Events from Show Records
+## ✅ Task HP-4: Auto-Create Timeline Events from Show Records
 
 **Problem:** When a user adds a show record via `addShowRecord()` in `src/app/actions/provenance.ts`, no timeline event is created. Show wins should appear in the Hoofprint.
 
@@ -198,7 +198,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task HP-5: Commit & Push
+## ✅ Task HP-5: Commit & Push
 
 ```
 cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "feat: wire Hoofprint into passport pages, auto-events from show records" 2>&1"
