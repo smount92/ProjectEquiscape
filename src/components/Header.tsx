@@ -91,9 +91,16 @@ export default function Header() {
   }, [user, fetchUnreadCount]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setAliasName(null);
+      setUnreadCount(0);
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Sign-out error:", err);
+      window.location.href = "/login";
+    }
   };
 
   // Close mobile menu on outside click
@@ -152,6 +159,16 @@ export default function Header() {
           <Link href="/dashboard" className="header-nav-link" id="nav-stable" onClick={closeMobileMenu}>
             🏠 Digital Stable
           </Link>
+          {aliasName && (
+            <Link
+              href={`/profile/${encodeURIComponent(aliasName)}`}
+              className="header-nav-link"
+              id="nav-profile"
+              onClick={closeMobileMenu}
+            >
+              👤 My Profile
+            </Link>
+          )}
           <Link href="/community" className="header-nav-link" id="nav-community" onClick={closeMobileMenu}>
             🏆 Show Ring
           </Link>
@@ -170,16 +187,6 @@ export default function Header() {
           <Link href="/claim" className="header-nav-link" id="nav-claim" onClick={closeMobileMenu}>
             📦 Claim
           </Link>
-          {aliasName && (
-            <Link
-              href={`/profile/${encodeURIComponent(aliasName)}`}
-              className="header-nav-link"
-              id="nav-profile"
-              onClick={closeMobileMenu}
-            >
-              👤 Profile
-            </Link>
-          )}
           <Link href="/settings" className="header-nav-link" id="nav-settings" onClick={closeMobileMenu}>
             ⚙️ Settings
           </Link>
@@ -200,6 +207,17 @@ export default function Header() {
               Admin ⚡
             </Link>
           )}
+          {/* ── Public info links (always accessible) ── */}
+          <div className="header-nav-divider" aria-hidden="true" />
+          <Link href="/" className="header-nav-link header-nav-link-secondary" id="nav-home" onClick={closeMobileMenu}>
+            🏡 Home
+          </Link>
+          <Link href="/about" className="header-nav-link header-nav-link-secondary" id="nav-about" onClick={closeMobileMenu}>
+            ℹ️ About
+          </Link>
+          <Link href="/contact" className="header-nav-link header-nav-link-secondary" id="nav-contact" onClick={closeMobileMenu}>
+            ✉️ Contact
+          </Link>
         </nav>
       )}
 
