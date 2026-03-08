@@ -7,8 +7,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
 > **Last Updated:** 2026-03-08
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
-> **Archive:** Completed tasks are moved to `dev-nextsteps-archive.md` in this same directory.
-> **Source:** Real beta tester feedback from 2026-03-08.
+> **Source:** Beta tester feedback round 2, 2026-03-08.
 
 // turbo-all
 
@@ -34,221 +33,80 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 ---
 
 # ═══════════════════════════════════════
-# OPTION 10: BETA TESTER FEEDBACK BATCH
+# OPTION 11: BETA FEEDBACK ROUND 2
 # ═══════════════════════════════════════
 
-> **Context:** First real beta tester (wife) provided UI/UX feedback after using modelhorsehub.com. All items are user-reported and high-impact.
+# 🔴 Priority: Critical — Bugs
 
-# 🔴 Priority: Critical — Users Are Hitting These
+## Task B2-1: Avatar Upload Not Reflecting on Profile Page
 
-## ✅ Task BF-1: Photo Lightbox — Click to Enlarge & Scroll
+**Problem:** User uploads a new avatar in Settings (succeeds — they can see it in Settings), but the profile page (`/profile/[alias_name]`) still shows the old avatar or default 🐴 emoji. Other users can also not see the correct avatar.
 
-**Problem:** Users want to click on photos to open them larger and scroll through all images. Currently photos display as thumbnails with no expand functionality.
+**Root Cause Analysis:**
 
-**What to build:**
+The `uploadAvatar` action in `src/app/actions/settings.ts` (lines 149-183):
+1. Uploads to `avatars` bucket with path `{userId}/avatar.{ext}` using `upsert: true` ✅
+2. Gets the public URL ✅
+3. Updates `users.avatar_url` in the database ✅
+4. Revalidates `/settings` and `/dashboard` ✅
 
-Create a reusable `PhotoLightbox` component that:
-- Opens when any photo is clicked on the passport page (public or private)
-- Shows the image at full/large size in a dark overlay
-- Has left/right arrows (or swipe on mobile) to navigate between images
-- Shows photo count indicator (e.g., "3 of 7")
-- Closes on clicking the backdrop, pressing Escape, or clicking an X button
-- Keyboard accessible (arrow keys to navigate, Escape to close)
-- Prevents body scroll when open
+BUT it does **NOT** revalidate:
+- `/profile/[alias_name]` — so the profile page is cached with the old URL
+- `/discover` — so the discover page avatar is stale
+- `/community` — so comments show old avatar
 
-**File:** `src/components/PhotoLightbox.tsx` (new file)
-
-```typescript
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
-
-interface PhotoLightboxProps {
-    images: { url: string; label?: string }[];
-    initialIndex: number;
-    onClose: () => void;
-}
-```
-
-**Key implementation:**
-- Use `position: fixed; inset: 0; z-index: 1000` overlay
-- Image: `max-width: 90vw; max-height: 85vh; object-fit: contain`
-- Arrow buttons: large touch targets (48px+), semi-transparent
-- Animate in with a fade + scale CSS transition
-- Use `useEffect` for keydown listener (Escape, ArrowLeft, ArrowRight)
-
-**Where to integrate:**
-
-1. **`src/app/stable/[id]/page.tsx`** (private passport)
-   - Import `PhotoLightbox`
-   - Add `const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)`
-   - Wrap each gallery image in a clickable wrapper: `onClick={() => setLightboxIndex(i)}`
-   - Render `{lightboxIndex !== null && <PhotoLightbox images={allImages} initialIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />}`
-
-2. **`src/app/community/[id]/page.tsx`** (public passport)
-   - Same integration pattern
-
-**CSS to add to `src/app/globals.css`:**
-
-```css
-/* ===== Photo Lightbox ===== */
-.lightbox-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.92);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: lightbox-fade-in 0.2s ease-out;
-    backdrop-filter: blur(8px);
-}
-
-@keyframes lightbox-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.lightbox-image {
-    max-width: 90vw;
-    max-height: 85vh;
-    object-fit: contain;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
-}
-
-.lightbox-close {
-    position: absolute;
-    top: var(--space-lg);
-    right: var(--space-lg);
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-    z-index: 1001;
-}
-
-.lightbox-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.lightbox-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1.4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-
-.lightbox-nav:hover {
-    background: rgba(255, 255, 255, 0.25);
-}
-
-.lightbox-nav-prev { left: var(--space-lg); }
-.lightbox-nav-next { right: var(--space-lg); }
-
-.lightbox-counter {
-    position: absolute;
-    bottom: var(--space-lg);
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255, 255, 255, 0.6);
-    font-size: calc(var(--font-size-sm) * var(--font-scale));
-}
-
-.lightbox-label {
-    position: absolute;
-    bottom: calc(var(--space-lg) + 24px);
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(255, 255, 255, 0.8);
-    font-size: calc(var(--font-size-sm) * var(--font-scale));
-    font-weight: 600;
-}
-
-/* Make existing gallery images show a zoom cursor */
-.passport-gallery img,
-.passport-photos img {
-    cursor: zoom-in;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.passport-gallery img:hover,
-.passport-photos img:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 20px rgba(124, 109, 240, 0.2);
-}
-```
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## ✅ Task BF-2: Edit Horse Save — Fix Infinite Loading
-
-**Problem:** When saving edits, the page appears to hang forever. On refresh, the changes were saved. The issue is that `router.push()` may stall or the `isSaving` state never resets on success.
-
-**Root Cause:** In `handleSave()` (edit page line ~279-385), after `updateHorseAction` succeeds, the code calls fire-and-forget actions (notifyHorsePublic, addTimelineEvent) using `await` which can stall. Then `router.push("/dashboard?toast=updated...")` may not complete the navigation or the loading state doesn't clear.
+Also, since the file path is always `{userId}/avatar.{ext}` with `upsert: true`, **the CDN caches the old file at the same URL**. The `?t=` cache-buster on the Settings page works locally, but the Supabase CDN may still serve the old file to other users.
 
 **What to fix:**
 
-**File:** `src/app/stable/[id]/edit/page.tsx`
+**File:** `src/app/actions/settings.ts` — `uploadAvatar` function
 
-1. Make the fire-and-forget calls truly non-blocking by NOT awaiting them:
+1. **Use a unique filename** instead of always `avatar.{ext}` to bust CDN cache:
 
-Replace the timeline event block (around line 371-379):
 ```typescript
-// Auto-create Hoofprint™ listed event (fire-and-forget — do NOT await)
-if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
-    addTimelineEvent({
-        horseId: horseId,
-        eventType: "listed",
-        title: `Listed: ${tradeStatus}`,
-        description: listingPrice ? `Listed at $${listingPrice}` : undefined,
-    }).catch(() => { /* Non-blocking */ });
+const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+const path = `${user.id}/avatar_${Date.now()}.${ext}`;
+```
+
+2. **Delete the old avatar file** before uploading the new one:
+
+```typescript
+// Get current avatar URL to find old file path
+const { data: currentProfile } = await supabase
+    .from("users")
+    .select("avatar_url")
+    .eq("id", user.id)
+    .single<{ avatar_url: string | null }>();
+
+if (currentProfile?.avatar_url) {
+    const oldMatch = currentProfile.avatar_url.match(/avatars\/(.+?)(\?|$)/);
+    if (oldMatch?.[1]) {
+        await supabase.storage.from("avatars").remove([oldMatch[1]]);
+    }
 }
 ```
 
-Note: remove the `await` and the `try/catch` wrapper — use `.catch()` instead.
+3. **Revalidate all pages that show avatars:**
 
-2. Use `window.location.href` instead of `router.push()` for the redirect (same fix pattern as sign-out):
-
-Replace `router.push("/dashboard?toast=updated&name=" + ...)` with:
 ```typescript
-window.location.href = "/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim());
+revalidatePath("/settings");
+revalidatePath("/dashboard");
+revalidatePath("/discover");
+revalidatePath("/feed");
+// Can't revalidate dynamic [alias_name] easily, but the DB URL is fresh
 ```
 
-This forces a hard navigation that clears all state, including `isSaving`.
-
-3. As a safety net, add a `finally` block to always reset `isSaving`:
+4. **Store the URL WITHOUT cache buster in the database**, but return it WITH one:
 
 ```typescript
-} catch (err) {
-    setSaveError(err instanceof Error ? err.message : "Failed to save changes.");
-} finally {
-    setIsSaving(false);
-}
+// Store clean URL in DB
+const { error: dbError } = await supabase
+    .from("users")
+    .update({ avatar_url: urlData.publicUrl })
+    .eq("id", user.id);
+
+// Return with cache buster for immediate UI update
+return { success: true, url: urlData.publicUrl + "?t=" + Date.now() };
 ```
 
 ### Verify:
@@ -258,153 +116,88 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-# 🟡 Priority: Medium — Quality of Life
+## Task B2-2: Reference Link Not Always Saving on Intake
 
-## Task BF-3: Add "Finishing Artist" Field to Horse Record
+**Problem:** User selects a mold/release on the Reference step (Step 2) of the Add Horse form, but after saving, the horse record sometimes has `null` for `reference_mold_id` and `release_id`. Editing the horse after and re-selecting works fine.
 
-**Problem:** Users want to track who painted/customized a model. A horse might be sculpted by one person and finished (painted) by another. This is extremely common in the custom/artist resin community.
+**Root Cause Analysis:**
 
-**What to do:**
+The client sends `selectedMoldId`, `selectedResinId`, `selectedReleaseId` via FormData (line 333-335 of `add-horse/page.tsx`):
 
-### Database Migration
-
-**File:** `supabase/migrations/020_beta_feedback.sql` (new file)
-
-```sql
--- ============================================================
--- Migration 020: Beta Feedback — Finishing Artist + Edition Info
--- ============================================================
-
--- ── 1. Finishing artist (who painted/finished the model) ──
-ALTER TABLE user_horses
-  ADD COLUMN IF NOT EXISTS finishing_artist TEXT;
-
-COMMENT ON COLUMN user_horses.finishing_artist IS 'Name of the artist who painted/finished/customized this model.';
-
--- ── 2. Edition info (e.g., "3 of 50") ──
-ALTER TABLE user_horses
-  ADD COLUMN IF NOT EXISTS edition_number INTEGER;
-
-ALTER TABLE user_horses
-  ADD COLUMN IF NOT EXISTS edition_size INTEGER;
-
-COMMENT ON COLUMN user_horses.edition_number IS 'This model''s number in a limited edition run (e.g., 3 of 50).';
-COMMENT ON COLUMN user_horses.edition_size IS 'Total number produced in this edition.';
-
--- ── 3. Database suggestions table (user-submitted entries) ──
-CREATE TABLE IF NOT EXISTS database_suggestions (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  submitted_by UUID NOT NULL REFERENCES auth.users(id),
-  suggestion_type TEXT NOT NULL CHECK (suggestion_type IN ('mold', 'release', 'resin')),
-  name         TEXT NOT NULL,
-  details      TEXT,
-  status       TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
-  admin_notes  TEXT,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-ALTER TABLE database_suggestions ENABLE ROW LEVEL SECURITY;
-
--- Users can see their own suggestions
-CREATE POLICY "Users can view own suggestions"
-  ON database_suggestions FOR SELECT TO authenticated
-  USING (submitted_by = auth.uid());
-
--- Users can insert suggestions
-CREATE POLICY "Users can submit suggestions"
-  ON database_suggestions FOR INSERT TO authenticated
-  WITH CHECK (submitted_by = auth.uid());
-
-CREATE INDEX idx_suggestions_status ON database_suggestions(status);
-CREATE INDEX idx_suggestions_user ON database_suggestions(submitted_by);
+```typescript
+if (selectedMoldId) formData.append("selectedMoldId", selectedMoldId);
 ```
 
-**⚠️ STOP HERE** — Ask the user to run this migration in the Supabase SQL Editor. Do NOT proceed until they confirm success.
+This is correct. BUT there are edge cases:
 
-### Form Integration
+1. **User selects a Release directly from search results** — `handleReleaseClick` sets `moldId` to `release.mold_id`, but if the mold wasn't also in the search results array, `selectedMoldInfo` stays null. The state IS set correctly though.
 
-**Files to update:** `src/app/add-horse/page.tsx` AND `src/app/stable/[id]/edit/page.tsx`
+2. **More likely culprit: The step wizard hides Step 2 content when on Step 3/4.** If the `UnifiedReferenceSearch` component unmounts when `currentStep !== 1`, any internal state in the component that was managing the selection could be lost. BUT — the selection state is lifted to the parent (`selectedMoldId` etc.) so this shouldn't matter.
 
-Add these fields after the "Sculptor" field:
+3. **Most likely: The `onCustomEntry` path.** When a user clicks "Can't find it?" (line 675-693), it explicitly clears all three IDs:
+   ```typescript
+   setSelectedMoldId(null);
+   setSelectedResinId(null);
+   setSelectedReleaseId(null);
+   ```
+   If the user accidentally hits this, their reference link is wiped.
+
+**What to fix:**
+
+**File:** `src/app/add-horse/page.tsx`
+
+1. **Add a debug log** before FormData creation to trace exactly what's being sent:
+
+```typescript
+console.log("[AddHorse] Submitting with refs:", {
+    selectedMoldId,
+    selectedResinId,
+    selectedReleaseId,
+});
+```
+
+2. **Add a visual indicator on Step 3/4** showing what reference is linked, so the user can see if it was lost:
+
+After the step header on Steps 3 and 4, show a compact badge:
 
 ```tsx
-{/* Finishing Artist */}
-<div className="form-group">
-    <label htmlFor="finishing-artist" className="form-label">
-        🎨 Finishing Artist
-    </label>
-    <input
-        type="text"
-        id="finishing-artist"
-        className="form-input"
-        placeholder="Who painted or customized this model?"
-        value={finishingArtist}
-        onChange={(e) => setFinishingArtist(e.target.value)}
-    />
-    <span className="form-hint">
-        The artist who painted/finished this model (if different from sculptor).
-    </span>
-</div>
-
-{/* Edition Info */}
-<div className="form-group">
-    <label className="form-label">📋 Edition Info</label>
-    <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
-        <input
-            type="number"
-            className="form-input"
-            placeholder="#"
-            value={editionNumber}
-            onChange={(e) => setEditionNumber(e.target.value)}
-            style={{ width: 80 }}
-            min="1"
-        />
-        <span style={{ color: "var(--color-text-muted)" }}>of</span>
-        <input
-            type="number"
-            className="form-input"
-            placeholder="Total"
-            value={editionSize}
-            onChange={(e) => setEditionSize(e.target.value)}
-            style={{ width: 80 }}
-            min="1"
-        />
+{/* Reference summary badge — visible on all steps after Step 2 */}
+{currentStep >= 2 && (selectedMoldId || selectedResinId) && (
+    <div className="getting-started-tip" style={{ marginBottom: "var(--space-lg)" }}>
+        🔗 Linked to: <strong>{selectedMoldId ? "Mold" : "Resin"} selected</strong>
+        {selectedReleaseId && <> · Release selected</>}
     </div>
-    <span className="form-hint">
-        e.g., "3 of 50" for limited edition runs.
-    </span>
+)}
+```
+
+3. **Guard the onCustomEntry path** — show a confirmation if reference was already selected:
+
+```typescript
+onCustomEntry={(searchTerm) => {
+    if (selectedMoldId || selectedResinId) {
+        if (!confirm("This will clear your current reference link. Continue?")) {
+            return;
+        }
+    }
+    // ... existing clear logic
+}}
+```
+
+4. **Ensure step content doesn't unmount** — use CSS visibility instead of conditional rendering:
+
+Instead of:
+```tsx
+{currentStep === 1 && (<div>...step 2 content...</div>)}
+```
+
+Use:
+```tsx
+<div style={{ display: currentStep === 1 ? "block" : "none" }}>
+    ...step 2 content...
 </div>
 ```
 
-**Add state variables:**
-```typescript
-const [finishingArtist, setFinishingArtist] = useState("");
-const [editionNumber, setEditionNumber] = useState("");
-const [editionSize, setEditionSize] = useState("");
-```
-
-**Include in save/insert:**
-```typescript
-if (finishingArtist.trim()) horseData.finishing_artist = finishingArtist.trim();
-if (editionNumber) horseData.edition_number = parseInt(editionNumber);
-if (editionSize) horseData.edition_size = parseInt(editionSize);
-```
-
-**Also update the server action** `addHorseAction` and `updateHorseAction` in `src/app/actions/horse.ts` to handle these new fields from FormData.
-
-**Display on passport pages:** Show "Finished by: ArtistName" and "Edition: 3 of 50" on both public and private passport pages.
-
-**Hoofprint integration:** When `finishing_artist` is set, auto-create a timeline event:
-```typescript
-if (finishingArtist.trim()) {
-    addTimelineEvent({
-        horseId,
-        eventType: "custom",
-        title: `Finished by ${finishingArtist.trim()}`,
-        description: "Finishing artist recorded.",
-    }).catch(() => {});
-}
-```
+This keeps the `UnifiedReferenceSearch` component mounted and preserves its internal state.
 
 ### Verify:
 ```
@@ -413,128 +206,189 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## ✅ Task BF-4: Auto-Fill Sculptor from Resin Selection
+# 🟡 Priority: Medium — New Feature
 
-**Problem:** When a user selects an artist resin (e.g., "Midnight Dream by SculptorJane"), the sculptor field should auto-fill with the sculptor's name.
+## Task B2-3: Text Posts to Feed
 
-**What to fix:**
-
-**File:** `src/app/add-horse/page.tsx` (and edit form)
-
-In the `onSelectionChange` handler, when a resin is selected, auto-fill the sculptor field:
-
-```typescript
-// In the parent component where onSelectionChange is handled:
-if (sel.resinId) {
-    // The resin info should include sculptor_alias
-    // Either pass it through the selection state or fetch it
-    // Simplest: extend SelectionState to optionally carry sculptor info
-}
-```
-
-**Simplest approach:** In `UnifiedReferenceSearch.tsx`, when `handleResinClick` fires, also pass the sculptor name back to the parent. Either:
-
-1. Extend `SelectionState` to include `sculptorAlias?: string`
-2. OR add an `onResinSelected?: (resin: ResinResult) => void` callback
-
-Then in the parent:
-```typescript
-onResinSelected={(resin) => setSculptor(resin.sculptor_alias)}
-```
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-## Task BF-5: "Suggest Entry to Database" Feature
-
-**Problem:** Users can't find their model in the 10,500+ reference database and want to suggest additions. Currently the "Can't find it?" button just switches to manual entry, but the data is lost.
+**Problem:** Users want to post text updates to the activity feed — like a mini-blog or status update. Currently, the feed only shows auto-generated events (horse added, favorited, commented, etc.). There's no way for a user to manually post.
 
 **What to build:**
 
-The `database_suggestions` table is created in migration 020 (Task BF-3).
+### Database
+
+The `activity_events` table already supports this! It has:
+- `actor_id` (who posted)
+- `event_type` (we'll add `"text_post"`)
+- `horse_id` (null for text posts)
+- `metadata` (we'll store `{ text: "..." }`)
+- `created_at`
+
+No migration needed.
 
 ### Server Action
 
-**File:** `src/app/actions/suggestions.ts` (new file)
+**File:** `src/app/actions/activity.ts` — Add a new function:
 
 ```typescript
-"use server";
-
-import { createClient } from "@/lib/supabase/server";
-
-export async function submitSuggestion(data: {
-    suggestionType: "mold" | "release" | "resin";
-    name: string;
-    details?: string;
-}): Promise<{ success: boolean; error?: string }> {
+/**
+ * Create a text post on the activity feed.
+ */
+export async function createTextPost(text: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
 
-    const { error } = await supabase.from("database_suggestions").insert({
-        submitted_by: user.id,
-        suggestion_type: data.suggestionType,
-        name: data.name,
-        details: data.details || null,
+    const trimmed = text.trim();
+    if (!trimmed) return { success: false, error: "Post cannot be empty." };
+    if (trimmed.length > 500) return { success: false, error: "Post must be 500 characters or less." };
+
+    // Use admin client to bypass RLS if needed
+    const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await supabaseAdmin.from("activity_events").insert({
+        actor_id: user.id,
+        event_type: "text_post",
+        horse_id: null,
+        target_id: null,
+        metadata: { text: trimmed },
     });
 
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
+```
 
-// Admin: get all pending suggestions
-export async function getPendingSuggestions(): Promise<unknown[]> {
-    const supabase = await createClient();
-    const { data } = await supabase
-        .from("database_suggestions")
-        .select("*, users(alias_name)")
-        .eq("status", "pending")
-        .order("created_at", { ascending: false });
-    return data || [];
-}
+### UI — Add Compose Bar to Feed Page
 
-// Admin: approve/reject
-export async function reviewSuggestion(
-    id: string,
-    status: "approved" | "rejected",
-    adminNotes?: string
-): Promise<{ success: boolean }> {
-    const supabase = await createClient();
-    const { error } = await supabase
-        .from("database_suggestions")
-        .update({ status, admin_notes: adminNotes || null })
-        .eq("id", id);
-    return { success: !error };
+**File:** `src/app/feed/page.tsx`
+
+The feed page is a Server Component, so the compose bar should be a separate Client Component.
+
+**New file:** `src/components/FeedComposeBar.tsx`
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { createTextPost } from "@/app/actions/activity";
+import { useRouter } from "next/navigation";
+
+export default function FeedComposeBar() {
+    const [text, setText] = useState("");
+    const [isPosting, setIsPosting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+
+    const handlePost = async () => {
+        if (!text.trim()) return;
+        setIsPosting(true);
+        setError(null);
+
+        const result = await createTextPost(text);
+        if (result.success) {
+            setText("");
+            router.refresh(); // Refresh feed with new post
+        } else {
+            setError(result.error || "Failed to post.");
+        }
+        setIsPosting(false);
+    };
+
+    return (
+        <div className="feed-compose-bar">
+            <textarea
+                className="form-textarea feed-compose-input"
+                placeholder="Share an update with the community…"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                maxLength={500}
+                rows={2}
+            />
+            <div className="feed-compose-footer">
+                <span className="feed-compose-count">
+                    {text.length}/500
+                </span>
+                <button
+                    className="btn btn-primary btn-sm"
+                    onClick={handlePost}
+                    disabled={isPosting || !text.trim()}
+                >
+                    {isPosting ? "Posting…" : "📝 Post"}
+                </button>
+            </div>
+            {error && <p className="form-error" style={{ marginTop: "var(--space-xs)" }}>{error}</p>}
+        </div>
+    );
 }
 ```
 
-### UI Integration
+**Integrate into feed page** — Add above the ActivityFeed component:
 
-In `UnifiedReferenceSearch.tsx`, the "Can't find it?" buttons already exist (lines ~418-435 and ~474-491). Instead of just calling `onCustomEntry`, also show a toast or mini-modal: "We'll send a suggestion to the admin to add this to the database."
+```tsx
+import FeedComposeBar from "@/components/FeedComposeBar";
 
-Modify the `onCustomEntry` callback in the parent (add-horse page) to also call `submitSuggestion()` as a fire-and-forget:
-
-```typescript
-onCustomEntry={(term) => {
-    // Switch to manual entry mode
-    setManualMode(true);
-    // Also submit as suggestion (fire-and-forget)
-    submitSuggestion({
-        suggestionType: tab === "resin" ? "resin" : "mold",
-        name: term,
-    }).catch(() => {});
-    // Show a subtle toast
-    setToast("📬 Suggestion sent to admin! We'll add it to the database.");
-}}
+// ... inside the return, after the Tab Bar:
+<FeedComposeBar />
 ```
 
-### Admin Panel Integration
+### ActivityFeed Display — Handle "text_post" Event Type
 
-Add a "Database Suggestions" section to `/admin` page showing pending suggestions with approve/reject buttons.
+**File:** `src/components/ActivityFeed.tsx`
+
+In the event rendering logic, add a case for `event_type === "text_post"`:
+
+```tsx
+case "text_post":
+    return (
+        <div className="feed-item-text-post">
+            <p>{(item.metadata as { text: string })?.text}</p>
+        </div>
+    );
+```
+
+### CSS
+
+**File:** `src/app/globals.css`
+
+```css
+/* ===== Feed Compose Bar ===== */
+.feed-compose-bar {
+    background: var(--color-surface-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.feed-compose-input {
+    resize: none;
+    min-height: 60px;
+    margin-bottom: var(--space-sm);
+}
+
+.feed-compose-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.feed-compose-count {
+    font-size: calc(0.75rem * var(--font-scale));
+    color: var(--color-text-muted);
+}
+
+/* ===== Text Post in Feed ===== */
+.feed-item-text-post {
+    font-size: calc(var(--font-size-base) * var(--font-scale));
+    line-height: 1.6;
+    color: var(--color-text);
+    padding: var(--space-sm) 0;
+    white-space: pre-wrap;
+}
+```
 
 ### Verify:
 ```
@@ -543,44 +397,10 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## ✅ Task BF-6: Resin Search — Match Model Number Too
-
-**Problem:** User reports resin names don't match well. While the backend already uses `%${q}%` (contains match), the search might miss results because it doesn't search `model_number` for molds/releases.
-
-**What to fix:**
-
-**File:** `src/app/actions/reference.ts`
-
-In `searchReferencesAction`, update the mold search to also match `model_number` in releases:
-
-```typescript
-// Current release search:
-.or(`release_name.ilike.%${q}%,color_description.ilike.%${q}%`)
-
-// Updated to also search model_number:
-.or(`release_name.ilike.%${q}%,color_description.ilike.%${q}%,model_number.ilike.%${q}%`)
-```
-
-Also consider adding `model_number` matching for the resin search:
-```typescript
-// Resin search — also match sculptor_alias fragments
-.or(`resin_name.ilike.%${q}%,sculptor_alias.ilike.%${q}%`)
-```
-This already matches on sculptor_alias fragments. Verify that partial sculptor names work (e.g., searching "Moon" matches "Moonstone Studios").
-
-### Verify:
-```
-cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
-```
-
----
-
-# 🟢 Priority: Nice-to-Have
-
-## ✅ Task BF-7: Commit & Push
+## Task B2-4: Commit & Push
 
 ```
-cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "feat: photo lightbox, finishing artist, edition info, suggest to DB, edit save fix" 2>&1"
+cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "fix: avatar caching, reference save reliability, text posts to feed" 2>&1"
 ```
 
 Then push:
