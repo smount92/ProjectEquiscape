@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getActivityFeed, getFollowingFeed } from "@/app/actions/activity";
 import ActivityFeed from "@/components/ActivityFeed";
+import FeedComposeBar from "@/components/FeedComposeBar";
 import Link from "next/link";
 
 export const metadata = {
@@ -60,6 +61,9 @@ export default async function FeedPage({
                     👥 Following
                 </Link>
             </div>
+
+            {/* Compose */}
+            <FeedComposeBar />
 
             {/* Feed */}
             <ActivityFeed

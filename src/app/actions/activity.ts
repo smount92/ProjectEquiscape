@@ -45,6 +45,35 @@ export async function createActivityEvent(data: {
 }
 
 /**
+ * Create a text post on the activity feed.
+ */
+export async function createTextPost(text: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const trimmed = text.trim();
+    if (!trimmed) return { success: false, error: "Post cannot be empty." };
+    if (trimmed.length > 500) return { success: false, error: "Post must be 500 characters or less." };
+
+    const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await supabaseAdmin.from("activity_events").insert({
+        actor_id: user.id,
+        event_type: "text_post",
+        horse_id: null,
+        target_id: null,
+        metadata: { text: trimmed },
+    });
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/**
  * Get the global activity feed (latest events from all users).
  */
 export async function getActivityFeed(limit: number = 30): Promise<FeedItem[]> {

@@ -158,9 +158,24 @@ export async function uploadAvatar(
     if (file.size > 2 * 1024 * 1024) return { success: false, error: "File must be under 2MB." };
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${user.id}/avatar.${ext}`;
+    // Use unique filename to bust CDN cache
+    const path = `${user.id}/avatar_${Date.now()}.${ext}`;
 
-    // Upload to storage (upsert)
+    // Delete old avatar file (if any) to prevent orphaned files
+    const { data: currentProfile } = await supabase
+        .from("users")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .single<{ avatar_url: string | null }>();
+
+    if (currentProfile?.avatar_url) {
+        const oldMatch = currentProfile.avatar_url.match(/avatars\/(.+?)(\?|$)/);
+        if (oldMatch?.[1]) {
+            await supabase.storage.from("avatars").remove([decodeURIComponent(oldMatch[1])]);
+        }
+    }
+
+    // Upload to storage
     const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(path, file, { upsert: true, contentType: file.type });
@@ -170,14 +185,21 @@ export async function uploadAvatar(
     // Get public URL
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
 
-    // Update user record
+    // Store clean URL in DB (no cache buster)
     const { error: dbError } = await supabase
         .from("users")
         .update({ avatar_url: urlData.publicUrl })
         .eq("id", user.id);
 
     if (dbError) return { success: false, error: dbError.message };
+
+    // Revalidate all pages that display avatars
     revalidatePath("/settings");
     revalidatePath("/dashboard");
-    return { success: true, url: urlData.publicUrl };
+    revalidatePath("/discover");
+    revalidatePath("/feed");
+    revalidatePath("/community");
+
+    // Return with cache buster for immediate UI update
+    return { success: true, url: urlData.publicUrl + "?t=" + Date.now() };
 }

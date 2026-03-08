@@ -23,6 +23,7 @@ function getEventIcon(type: string): string {
         case "follow": return "👤";
         case "show_record": return "🏆";
         case "transaction_complete": return "✅";
+        case "text_post": return "📝";
         default: return "📌";
     }
 }
@@ -44,6 +45,10 @@ function getEventText(item: FeedItemData): string {
             return `${who} added a show record for ${item.horseName || "a horse"}`;
         case "transaction_complete":
             return `${who} completed a transaction`;
+        case "text_post": {
+            const postText = (item.metadata as { text?: string })?.text || "";
+            return `${who}: ${postText.length > 80 ? postText.slice(0, 80) + "…" : postText}`;
+        }
         default:
             return `${who} did something`;
     }
@@ -104,12 +109,28 @@ export default function ActivityFeed({ items, emptyMessage }: ActivityFeedProps)
                             </span>
                         )}
                         <div className="activity-feed-content">
-                            <span className="activity-feed-text">
-                                {getEventText(item)}
-                            </span>
-                            <span className="activity-feed-time">
-                                {timeAgo(item.createdAt)}
-                            </span>
+                            {item.eventType === "text_post" ? (
+                                <>
+                                    <span className="activity-feed-text" style={{ fontWeight: 600 }}>
+                                        @{item.actorAlias}
+                                    </span>
+                                    <div className="feed-item-text-post">
+                                        <p>{(item.metadata as { text?: string })?.text}</p>
+                                    </div>
+                                    <span className="activity-feed-time">
+                                        {timeAgo(item.createdAt)}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="activity-feed-text">
+                                        {getEventText(item)}
+                                    </span>
+                                    <span className="activity-feed-time">
+                                        {timeAgo(item.createdAt)}
+                                    </span>
+                                </>
+                            )}
                         </div>
                     </Link>
                 );

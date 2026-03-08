@@ -323,6 +323,14 @@ export default function AddHorsePage() {
       if (!user) throw new Error("You must be logged in.");
 
       const formData = new FormData();
+
+      // Debug: trace what reference IDs are being submitted
+      console.log("[AddHorse] Submitting with refs:", {
+        selectedMoldId,
+        selectedResinId,
+        selectedReleaseId,
+      });
+
       formData.append("customName", customName.trim());
       formData.append("finishType", finishType);
       if (conditionGrade) formData.append("conditionGrade", conditionGrade);
@@ -647,90 +655,95 @@ export default function AddHorsePage() {
 
       {/* ================================================================
           STEP 2 (index 1): Reference Link
+          — Use CSS display instead of unmounting to preserve component state
           ================================================================ */}
-      {currentStep === 1 && (
-        <div className="step-content" key="step-1">
-          <div className="step-card">
-            <div className="step-card-header">
-              <div className="step-card-icon">🔗</div>
-              <div>
-                <h2>Reference Link</h2>
-                <p>Search by mold name, release name (paint job), or artist resin</p>
-              </div>
+      <div className="step-content" key="step-1" style={{ display: currentStep === 1 ? "block" : "none" }}>
+        <div className="step-card">
+          <div className="step-card-header">
+            <div className="step-card-icon">🔗</div>
+            <div>
+              <h2>Reference Link</h2>
+              <p>Search by mold name, release name (paint job), or artist resin</p>
             </div>
+          </div>
 
-            <UnifiedReferenceSearch
-              selectedMoldId={selectedMoldId}
-              selectedResinId={selectedResinId}
-              selectedReleaseId={selectedReleaseId}
-              onSelectionChange={(sel) => {
-                setSelectedMoldId(sel.moldId);
-                setSelectedResinId(sel.resinId);
-                setSelectedReleaseId(sel.releaseId);
-                // Auto-fill sculptor when a resin is selected
-                if (sel.sculptorAlias && !sculptor.trim()) {
-                  setSculptor(sel.sculptorAlias);
-                }
-              }}
-              onCustomEntry={(searchTerm) => {
-                // Clear any existing reference selections
-                setSelectedMoldId(null);
-                setSelectedResinId(null);
-                setSelectedReleaseId(null);
-                // Drop the search term into custom_name
-                if (!customName.trim() || nameAutoFilled) {
-                  setCustomName(searchTerm);
-                  setNameAutoFilled(true);
-                }
-                // Auto-submit as suggestion (fire-and-forget)
-                submitSuggestion({
-                  suggestionType: "mold",
-                  name: searchTerm,
-                }).catch(() => { });
-                // Skip to Step 3 (Identity)
-                setCurrentStep(2);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              externalSearchQuery={aiSearchQuery}
-              aiNotice={
-                aiResult ? (
-                  <div className="ai-result-badge" style={{ marginBottom: "var(--space-lg)" }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
-                    </svg>
-                    <span>
-                      AI pre-filled: <strong>{aiResult.mold_name}</strong> — you can change it below
-                    </span>
-                  </div>
-                ) : undefined
+          <UnifiedReferenceSearch
+            selectedMoldId={selectedMoldId}
+            selectedResinId={selectedResinId}
+            selectedReleaseId={selectedReleaseId}
+            onSelectionChange={(sel) => {
+              setSelectedMoldId(sel.moldId);
+              setSelectedResinId(sel.resinId);
+              setSelectedReleaseId(sel.releaseId);
+              // Auto-fill sculptor when a resin is selected
+              if (sel.sculptorAlias && !sculptor.trim()) {
+                setSculptor(sel.sculptorAlias);
               }
-              releases={releases}
-              loadingReleases={loadingReleases}
-              releaseHint={
-                selectedReleaseId ? (
-                  <span className="form-hint" style={{ marginTop: "var(--space-xs)", display: "block", color: "var(--color-accent-primary)" }}>
-                    ✨ This will auto-fill the Custom Name in the Identity step
+            }}
+            onCustomEntry={(searchTerm) => {
+              // Guard: confirm if reference was already selected
+              if (selectedMoldId || selectedResinId) {
+                if (!confirm("This will clear your current reference link. Continue?")) {
+                  return;
+                }
+              }
+              // Clear any existing reference selections
+              setSelectedMoldId(null);
+              setSelectedResinId(null);
+              setSelectedReleaseId(null);
+              // Drop the search term into custom_name
+              if (!customName.trim() || nameAutoFilled) {
+                setCustomName(searchTerm);
+                setNameAutoFilled(true);
+              }
+              // Auto-submit as suggestion (fire-and-forget)
+              submitSuggestion({
+                suggestionType: "mold",
+                name: searchTerm,
+              }).catch(() => { });
+              // Skip to Step 3 (Identity)
+              setCurrentStep(2);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            externalSearchQuery={aiSearchQuery}
+            aiNotice={
+              aiResult ? (
+                <div className="ai-result-badge" style={{ marginBottom: "var(--space-lg)" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
+                  </svg>
+                  <span>
+                    AI pre-filled: <strong>{aiResult.mold_name}</strong> — you can change it below
                   </span>
-                ) : undefined
-              }
-            />
-          </div>
-
-          <div className="step-nav">
-            <button className="btn btn-ghost" onClick={goBack} id="step-2-back">
-              ← Back
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={goNext}
-              disabled={!canProceedStep(1)}
-              id="step-2-next"
-            >
-              {selectedMoldId || selectedResinId ? "Next: Identity →" : "Skip → No Reference"}
-            </button>
-          </div>
+                </div>
+              ) : undefined
+            }
+            releases={releases}
+            loadingReleases={loadingReleases}
+            releaseHint={
+              selectedReleaseId ? (
+                <span className="form-hint" style={{ marginTop: "var(--space-xs)", display: "block", color: "var(--color-accent-primary)" }}>
+                  ✨ This will auto-fill the Custom Name in the Identity step
+                </span>
+              ) : undefined
+            }
+          />
         </div>
-      )}
+
+        <div className="step-nav">
+          <button className="btn btn-ghost" onClick={goBack} id="step-2-back">
+            ← Back
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={goNext}
+            disabled={!canProceedStep(1)}
+            id="step-2-next"
+          >
+            {selectedMoldId || selectedResinId ? "Next: Identity →" : "Skip → No Reference"}
+          </button>
+        </div>
+      </div>
 
       {/* ================================================================
           STEP 3 (index 2): Identity
@@ -738,6 +751,15 @@ export default function AddHorsePage() {
       {currentStep === 2 && (
         <div className="step-content" key="step-2">
           <div className="step-card">
+
+            {/* Reference summary badge */}
+            {(selectedMoldId || selectedResinId) && (
+              <div className="getting-started-tip" style={{ marginBottom: "var(--space-lg)" }}>
+                🔗 Linked to: <strong>{selectedMoldId ? "Mold" : "Resin"} selected</strong>
+                {selectedReleaseId && <> · Release selected</>}
+              </div>
+            )}
+
             <div className="step-card-header">
               <div className="step-card-icon">🏷️</div>
               <div>
@@ -988,128 +1010,140 @@ export default function AddHorsePage() {
             </div>
           </div>
         </div>
-      )}
+      )
+      }
 
       {/* ================================================================
           STEP 4: Financial Vault
           ================================================================ */}
-      {currentStep === 3 && (
-        <div className="step-content" key="step-3">
-          <div className="step-card vault-section">
-            {/* Vault Header */}
-            <div className="vault-header">
-              <div className="vault-icon">🔒</div>
-              <div>
-                <h2>The Financial Vault</h2>
-                <p>Optional — record purchase details and valuations</p>
+      {
+        currentStep === 3 && (
+          <div className="step-content" key="step-3">
+
+            {/* Reference summary badge */}
+            {(selectedMoldId || selectedResinId) && (
+              <div className="getting-started-tip" style={{ marginBottom: "var(--space-lg)" }}>
+                🔗 Linked to: <strong>{selectedMoldId ? "Mold" : "Resin"} selected</strong>
+                {selectedReleaseId && <> · Release selected</>}
+              </div>
+            )}
+
+            <div className="step-card vault-section">
+              {/* Vault Header */}
+              <div className="vault-header">
+                <div className="vault-icon">🔒</div>
+                <div>
+                  <h2>The Financial Vault</h2>
+                  <p>Optional — record purchase details and valuations</p>
+                </div>
+              </div>
+
+              {/* Privacy reassurance */}
+              <div className="vault-privacy-notice" role="note" aria-label="Financial privacy notice">
+                <span style={{ fontSize: "1.3em", flexShrink: 0, marginTop: "2px" }}>🛡️</span>
+                <p>
+                  <strong>This data is encrypted and only visible to you.</strong> No
+                  other user, not even community members who can see your public
+                  horses, will ever have access to your financial information. Your
+                  purchase prices, valuations, and insurance notes are protected by
+                  strict Row Level Security.
+                </p>
+              </div>
+
+              <div className="vault-row">
+                <div className="form-group">
+                  <label htmlFor="purchase-price" className="form-label">
+                    Purchase Price ($)
+                  </label>
+                  <input
+                    id="purchase-price"
+                    type="number"
+                    className="form-input"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    value={purchasePrice}
+                    onChange={(e) => setPurchasePrice(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="purchase-date" className="form-label">
+                    Purchase Date
+                  </label>
+                  <input
+                    id="purchase-date"
+                    type="date"
+                    className="form-input"
+                    value={purchaseDate}
+                    onChange={(e) => setPurchaseDate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="vault-row">
+                <div className="form-group">
+                  <label htmlFor="estimated-value" className="form-label">
+                    Estimated Current Value ($)
+                  </label>
+                  <input
+                    id="estimated-value"
+                    type="number"
+                    className="form-input"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    value={estimatedValue}
+                    onChange={(e) => setEstimatedValue(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="insurance-notes" className="form-label">
+                    Insurance Notes
+                  </label>
+                  <input
+                    id="insurance-notes"
+                    type="text"
+                    className="form-input"
+                    placeholder="Policy number, coverage details, etc."
+                    value={insuranceNotes}
+                    onChange={(e) => setInsuranceNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="vault-skip">
+                <p>
+                  💡 All fields are optional. You can always add or update financial
+                  details later from your Horse Passport view.
+                </p>
               </div>
             </div>
 
-            {/* Privacy reassurance */}
-            <div className="vault-privacy-notice" role="note" aria-label="Financial privacy notice">
-              <span style={{ fontSize: "1.3em", flexShrink: 0, marginTop: "2px" }}>🛡️</span>
-              <p>
-                <strong>This data is encrypted and only visible to you.</strong> No
-                other user, not even community members who can see your public
-                horses, will ever have access to your financial information. Your
-                purchase prices, valuations, and insurance notes are protected by
-                strict Row Level Security.
-              </p>
-            </div>
-
-            <div className="vault-row">
-              <div className="form-group">
-                <label htmlFor="purchase-price" className="form-label">
-                  Purchase Price ($)
-                </label>
-                <input
-                  id="purchase-price"
-                  type="number"
-                  className="form-input"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  value={purchasePrice}
-                  onChange={(e) => setPurchasePrice(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="purchase-date" className="form-label">
-                  Purchase Date
-                </label>
-                <input
-                  id="purchase-date"
-                  type="date"
-                  className="form-input"
-                  value={purchaseDate}
-                  onChange={(e) => setPurchaseDate(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="vault-row">
-              <div className="form-group">
-                <label htmlFor="estimated-value" className="form-label">
-                  Estimated Current Value ($)
-                </label>
-                <input
-                  id="estimated-value"
-                  type="number"
-                  className="form-input"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  value={estimatedValue}
-                  onChange={(e) => setEstimatedValue(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="insurance-notes" className="form-label">
-                  Insurance Notes
-                </label>
-                <input
-                  id="insurance-notes"
-                  type="text"
-                  className="form-input"
-                  placeholder="Policy number, coverage details, etc."
-                  value={insuranceNotes}
-                  onChange={(e) => setInsuranceNotes(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="vault-skip">
-              <p>
-                💡 All fields are optional. You can always add or update financial
-                details later from your Horse Passport view.
-              </p>
+            <div className="step-nav">
+              <button className="btn btn-ghost" onClick={goBack} id="step-4-back">
+                ← Back
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleSubmit}
+                disabled={isSubmitting || !canProceedStep(2)}
+                id="submit-horse"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="btn-spinner" aria-hidden="true" />
+                    Saving to Stable…
+                  </>
+                ) : (
+                  <>🐴 Add to Stable</>
+                )}
+              </button>
             </div>
           </div>
-
-          <div className="step-nav">
-            <button className="btn btn-ghost" onClick={goBack} id="step-4-back">
-              ← Back
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={handleSubmit}
-              disabled={isSubmitting || !canProceedStep(2)}
-              id="submit-horse"
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="btn-spinner" aria-hidden="true" />
-                  Saving to Stable…
-                </>
-              ) : (
-                <>🐴 Add to Stable</>
-              )}
-            </button>
-          </div>
-        </div>
-      )}
+        )
+      }
 
       {/* ── AI Toast Notifications ── */}
       <div className="ai-toast-container" aria-live="polite">
@@ -1126,6 +1160,6 @@ export default function AddHorsePage() {
           </div>
         ))}
       </div>
-    </div>
+    </div >
   );
 }
