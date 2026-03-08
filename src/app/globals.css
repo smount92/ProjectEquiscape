@@ -7933,3 +7933,202 @@ p {
   color: #f59e0b;
   font-weight: 600;
 }
+
+/* ===== How It Works ===== */
+.how-it-works-section {
+  padding: var(--space-3xl) var(--space-xl);
+  text-align: center;
+}
+
+.how-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.how-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-2xl);
+}
+
+.how-step {
+  flex: 1;
+  max-width: 320px;
+  text-align: center;
+  padding: var(--space-xl) var(--space-lg);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.how-step:hover {
+  transform: translateY(-4px);
+  border-color: rgba(124, 109, 240, 0.3);
+}
+
+.how-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-accent-primary-glow);
+  color: var(--color-accent-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: var(--space-md);
+}
+
+.how-step-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
+}
+
+.how-step h3 {
+  font-size: calc(1.1rem * var(--font-scale));
+  margin-bottom: var(--space-sm);
+}
+
+.how-step p {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.how-step-arrow {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+  padding-top: var(--space-3xl);
+}
+
+@media (max-width: 768px) {
+  .how-steps {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .how-step-arrow {
+    transform: rotate(90deg);
+    padding-top: 0;
+  }
+}
+
+/* ===== Hoofprint Teaser ===== */
+.hoofprint-teaser-section {
+  padding: var(--space-3xl) var(--space-xl);
+  text-align: center;
+  background: linear-gradient(180deg, transparent 0%, rgba(245, 158, 11, 0.03) 50%, transparent 100%);
+}
+
+.hoofprint-teaser-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.hoofprint-teaser-badge {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-lg);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-weight: 600;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-xl);
+  letter-spacing: 0.02em;
+}
+
+.hoofprint-teaser-title {
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: var(--space-lg);
+}
+
+.hoofprint-teaser-desc {
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  margin-bottom: var(--space-md);
+}
+
+.hoofprint-teaser-features {
+  display: flex;
+  gap: var(--space-lg);
+  margin-top: var(--space-2xl);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hoofprint-teaser-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 180px;
+  max-width: 220px;
+}
+
+.hoofprint-teaser-feature span:first-child {
+  font-size: 2rem;
+}
+
+.hoofprint-teaser-feature strong {
+  font-size: calc(0.9rem * var(--font-scale));
+}
+
+.hoofprint-teaser-feature span:last-child {
+  font-size: calc(0.8rem * var(--font-scale));
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* ===== Personas ===== */
+.personas-section {
+  padding: var(--space-3xl) var(--space-xl);
+  text-align: center;
+}
+
+.personas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-xl);
+  margin-top: var(--space-2xl);
+}
+
+.persona-card {
+  padding: var(--space-xl);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.persona-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(124, 109, 240, 0.3);
+}
+
+.persona-emoji {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+}
+
+.persona-card h3 {
+  font-size: calc(1.1rem * var(--font-scale));
+  margin-bottom: var(--space-sm);
+}
+
+.persona-card p {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}

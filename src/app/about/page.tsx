@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
     title: "About — Model Horse Hub",
     description:
-        "Learn about Model Horse Hub, our mission to empower model horse collectors with modern digital tools, and the passionate team behind the platform.",
+        "Learn about Model Horse Hub — the first digital stable built by a collector who was tired of notebooks, spreadsheets, and scattered albums. 10,500+ reference entries, Hoofprint™ provenance, and a privacy-first design.",
 };
 
 export default function AboutPage() {
@@ -17,69 +17,97 @@ export default function AboutPage() {
                         About <span className="text-gradient">Model Horse Hub</span>
                     </h1>
                     <p className="static-page-lead">
-                        The platform built by collectors, for collectors — because your herd deserves
-                        better than a spreadsheet.
+                        Built by a collector who was tired of the status quo.
                     </p>
                 </div>
 
-                {/* Story Section */}
+                {/* Our Story */}
                 <section className="static-section">
                     <h2>Our Story</h2>
                     <p>
-                        Model Horse Hub was born out of a simple frustration: there was no modern, beautiful,
-                        privacy-first tool designed specifically for model horse collectors. We kept track of
-                        our herds in notebooks, scattered spreadsheets, and across half a dozen social media
-                        platforms — none of which were built for the nuances of our hobby.
+                        It started the way it starts for most of us: a notebook. Then a spreadsheet.
+                        Then another spreadsheet because the first one got too messy. Then Facebook
+                        albums and mental notes about &ldquo;that palomino I sold in 2019 — what was her name?&rdquo;
                     </p>
                     <p>
-                        So we built one. Model Horse Hub is a purpose-built digital stable that lets you
-                        catalog every model in your collection with multi-angle photography, detailed mold
-                        and release tracking, and a private financial vault to keep your investment data
-                        safe.
+                        The model horse hobby has exploded in size and sophistication, but the tools
+                        for managing a collection haven&apos;t kept up. There was no single platform where
+                        you could catalog your herd with proper multi-angle photos, track what you paid
+                        and what it&apos;s worth, and connect with other collectors — all in one place,
+                        with real privacy protections.
                     </p>
                     <p>
-                        Whether you collect Breyer Traditionals, Stone Artist Resins, or anything in
-                        between, Model Horse Hub is designed to grow with your herd — from a handful of
-                        childhood favorites to a serious collection of hundreds.
+                        So we built one. Model Horse Hub is a purpose-built digital stable backed by
+                        a <strong>10,500+ entry reference database</strong> — 7,000+ Breyer and Stone releases
+                        hand-verified from official catalogs, plus 3,500+ artist resins sourced from the
+                        Equine Resin Directory. When you add a horse, you&apos;re not typing in data from scratch.
+                        You&apos;re selecting from real reference data with mold, manufacturer, scale, and year
+                        already filled in.
+                    </p>
+                    <p>
+                        Whether you collect Breyer Traditionals, Stone Artist Resins, or anything in between,
+                        Model Horse Hub is designed to grow with your herd — from a handful of childhood favorites
+                        to a serious collection of hundreds.
                     </p>
                 </section>
 
-                {/* Mission Section */}
+                {/* What Makes Us Different */}
                 <section className="static-section">
-                    <h2>Our Mission</h2>
+                    <h2>What Makes Us Different</h2>
                     <div className="about-values-grid">
                         <div className="about-value-card">
                             <span className="about-value-icon" aria-hidden="true">🔒</span>
-                            <h3>Privacy First</h3>
+                            <h3>Your Data is YOURS</h3>
                             <p>
-                                Your financial data, your collection details — they&apos;re yours. We use
-                                row-level security to ensure nobody sees your private vault, not even us.
+                                Row-level security means even our team can&apos;t see your financial vault.
+                                No ads, no selling your collection data, no &ldquo;we may share with
+                                partners&rdquo; clauses. Your purchase prices, estimated values, and insurance
+                                notes stay locked behind cryptographic access controls. Period.
                             </p>
                         </div>
                         <div className="about-value-card">
                             <span className="about-value-icon" aria-hidden="true">✨</span>
-                            <h3>Modern Design</h3>
+                            <h3>Built for the Hobby&apos;s Nuances</h3>
                             <p>
-                                We believe collector tools should be as beautiful as the models they catalog.
-                                Every screen is crafted with care.
+                                We know what LSQ means. We know the difference between OF and CM.
+                                We know that a Breyer #5 is fundamentally different from a Beswick #5.
+                                Every feature was designed around how collectors actually work —
+                                not how a generic inventory app thinks you should.
                             </p>
                         </div>
                         <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">🤝</span>
-                            <h3>Community Driven</h3>
+                            <span className="about-value-icon" aria-hidden="true">🐾</span>
+                            <h3>Hoofprint™ — A First for the Hobby</h3>
                             <p>
-                                The Show Ring lets you share your proudest models and discover other
-                                collectors&apos; herds — a celebration of the hobby we all love.
+                                No platform has ever built provenance tracking for model horses.
+                                Hoofprint™ creates a permanent digital identity for every horse —
+                                ownership history, customization records, show results, and photos
+                                that follow the horse, not the owner. The CarFax of model horses.
                             </p>
                         </div>
                     </div>
                 </section>
 
+                {/* The Vision */}
+                <section className="static-section">
+                    <h2>The Vision</h2>
+                    <p>
+                        Model Horse Hub isn&apos;t finished — it&apos;s just getting started. Our roadmap is driven
+                        by the community: features are prioritized by what collectors actually ask for.
+                        Virtual photo shows, wishlist matchmaking, seller ratings, and Hoofprint™ provenance
+                        all exist because real collectors said &ldquo;I wish this existed.&rdquo;
+                    </p>
+                    <p>
+                        We&apos;re building the platform we always wished existed. And we&apos;d love for you to
+                        be part of shaping what comes next.
+                    </p>
+                </section>
+
                 {/* CTA */}
                 <div className="static-cta">
-                    <p>Ready to give your collection the home it deserves?</p>
+                    <p>Your herd is waiting. Give it the home it deserves.</p>
                     <Link href="/signup" className="btn btn-primary btn-lg" id="about-cta-signup">
-                        Join Model Horse Hub — It&apos;s Free
+                        Start Your Digital Stable — Free
                     </Link>
                 </div>
             </div>

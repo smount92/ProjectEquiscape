@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Model Horse Hub — The Ultimate Digital Stable for Collectors",
   description:
-    "Catalog your model horse collection with a 7,000+ release reference database, secure financial vault, community show ring, virtual photo shows, social follows, and user ratings. Start your digital stable for free.",
+    "Catalog your model horse collection with 10,500+ reference releases and artist resins, LSQ multi-angle photography, a private financial vault, community marketplace, virtual photo shows, and Hoofprint™ provenance tracking. Free forever.",
 };
 
 export default function LandingPage() {
@@ -15,15 +15,16 @@ export default function LandingPage() {
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-glow hero-glow-secondary" aria-hidden="true" />
         <div className="hero-content animate-fade-in-up">
-          <span className="hero-badge">🐴 Built for Collectors, by Collectors</span>
+          <span className="hero-badge">🐾 Introducing Hoofprint™ — Living Provenance for Model Horses</span>
           <h1 className="hero-headline">
-            The Ultimate Digital Stable for{" "}
-            <span className="text-gradient">Model Horse Collectors</span>
+            Your Herd Deserves More Than{" "}
+            <span className="text-gradient">a Spreadsheet</span>
           </h1>
           <p className="hero-subheadline">
-            Catalog every model in your herd with multi-angle photography, a
-            7,000+ release reference database, a private financial vault, virtual photo shows, and a thriving collector
-            community — all in one beautifully designed platform.
+            Stop tracking your collection across notebooks, Facebook albums, and half-forgotten spreadsheets.
+            Model Horse Hub is the all-in-one digital stable with a 10,500+ reference database,
+            multi-angle photo galleries, a secure financial vault, and the only
+            provenance tracking system in the hobby.
           </p>
           <div className="hero-cta-group">
             <Link href="/signup" className="btn btn-primary btn-lg" id="hero-cta-signup">
@@ -40,14 +41,61 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── How It Works ─── */}
+      <section className="how-it-works-section" id="how-it-works">
+        <div className="how-inner">
+          <h2 className="features-title">
+            Get Started in <span className="text-gradient">3 Steps</span>
+          </h2>
+          <p className="features-subtitle">
+            From your shelf to the Show Ring in under 5 minutes.
+          </p>
+          <div className="how-steps">
+            <div className="how-step">
+              <div className="how-step-number">1</div>
+              <div className="how-step-icon">📸</div>
+              <h3>Add Your Horse</h3>
+              <p>
+                Search our 10,500+ reference database to instantly identify your model.
+                Upload multi-angle LSQ photos, set condition grades, and track purchase details
+                in your private financial vault.
+              </p>
+            </div>
+            <div className="how-step-arrow" aria-hidden="true">→</div>
+            <div className="how-step">
+              <div className="how-step-number">2</div>
+              <div className="how-step-icon">🏆</div>
+              <h3>Join the Community</h3>
+              <p>
+                Publish your best models to the Show Ring for the community to discover.
+                Enter virtual photo shows, follow other collectors, and build your reputation
+                with verified ratings.
+              </p>
+            </div>
+            <div className="how-step-arrow" aria-hidden="true">→</div>
+            <div className="how-step">
+              <div className="how-step-number">3</div>
+              <div className="how-step-icon">🐾</div>
+              <h3>Build Your Hoofprint</h3>
+              <p>
+                Every horse gets a permanent digital identity. Track it from blank resin
+                to finished custom, through ownership changes, with a provenance chain
+                that follows the horse forever.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Features Grid ─── */}
       <section className="features-section" id="features">
         <div className="features-inner">
           <h2 className="features-title">
-            Everything Your <span className="text-gradient">Herd</span> Needs
+            Six Pillars That Make Your{" "}
+            <span className="text-gradient">Collection Unstoppable</span>
           </h2>
           <p className="features-subtitle">
-            Six powerful pillars designed to organize, protect, and celebrate your collection.
+            Every feature was designed around real collector frustrations — because we are collectors too.
           </p>
 
           <div className="features-grid">
@@ -67,10 +115,11 @@ export default function LandingPage() {
                   <path d="M12 2L9.5 8.5 3 10l5 4.5L6.5 21 12 17.5 17.5 21 16 14.5l5-4.5-6.5-1.5z" />
                 </svg>
               </div>
-              <h3 className="feature-card-title">Reference Database</h3>
+              <h3 className="feature-card-title">10,500+ Reference Releases</h3>
               <p className="feature-card-desc">
-                Search across 7,000+ releases from Breyer, Stone, and more. Identify the exact
-                mold, manufacturer, and release — so you never have to guess again.
+                Stop Googling &ldquo;Breyer palomino 1995.&rdquo; Our database covers 7,000+ Breyer and Stone
+                releases plus 3,500+ artist resins from the Equine Resin Directory. Search by mold,
+                sculptor, scale, or year — and identify any model in seconds.
               </p>
             </div>
 
@@ -91,11 +140,11 @@ export default function LandingPage() {
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
               </div>
-              <h3 className="feature-card-title">Secure Financial Vault</h3>
+              <h3 className="feature-card-title">Private Financial Vault</h3>
               <p className="feature-card-desc">
-                Track purchase prices, current market values, and insurance details in a
-                private vault visible only to you — encrypted and protected by row-level
-                security.
+                Know what your collection is really worth — without anyone else seeing.
+                Track purchase prices, estimated values, and insurance notes in a vault
+                that only you can access. Even our team can&apos;t see your data.
               </p>
             </div>
 
@@ -116,10 +165,11 @@ export default function LandingPage() {
                   <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
                 </svg>
               </div>
-              <h3 className="feature-card-title">The Community Show Ring</h3>
+              <h3 className="feature-card-title">Community Show Ring</h3>
               <p className="feature-card-desc">
-                Publish your proudest models to a shared gallery. Browse other collectors&apos;
-                herds, discover rare releases, and connect with the community.
+                Your proudest models deserve an audience. Browse other collectors&apos; herds,
+                filter by scale, manufacturer, and finish type, and discover
+                your next obsession — or your next purchase.
               </p>
             </div>
 
@@ -142,10 +192,11 @@ export default function LandingPage() {
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </div>
-              <h3 className="feature-card-title">Social Community</h3>
+              <h3 className="feature-card-title">Follow Your Favorite Collectors</h3>
               <p className="feature-card-desc">
-                Follow collectors, browse activity feeds, and discover stables. A thriving
-                community of model horse enthusiasts, all connected.
+                No more scrolling through Facebook groups hoping to see updates.
+                Follow the collectors you care about, see their new additions in your feed,
+                and build real connections in a space made for the hobby.
               </p>
             </div>
 
@@ -169,8 +220,9 @@ export default function LandingPage() {
               </div>
               <h3 className="feature-card-title">Virtual Photo Shows</h3>
               <p className="feature-card-desc">
-                Enter your models in community photo shows. Vote for your favorites and
-                compete for glory in themed competitions.
+                Can&apos;t make it to a live show? Enter themed virtual shows, vote for your favorites,
+                and compete for 🥇🥈🥉 placement — all from home. Shows run on deadlines with
+                real results.
               </p>
             </div>
 
@@ -190,10 +242,87 @@ export default function LandingPage() {
                   <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
                 </svg>
               </div>
-              <h3 className="feature-card-title">Trusted Marketplace</h3>
+              <h3 className="feature-card-title">Buy, Sell &amp; Trade with Confidence</h3>
               <p className="feature-card-desc">
-                Buy, sell, and trade with confidence. User ratings, transaction tracking,
-                and direct messaging make every deal safe.
+                List models for sale with multi-angle photos, message buyers directly,
+                and build your seller rating. Wishlist matchmaking alerts you when your
+                dream horse goes on the market.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Hoofprint™ Teaser ─── */}
+      <section className="hoofprint-teaser-section" id="hoofprint-teaser">
+        <div className="hoofprint-teaser-inner">
+          <div className="hoofprint-teaser-badge">🐾 Now Live</div>
+          <h2 className="hoofprint-teaser-title">
+            Every Horse Has a Story.{" "}
+            <span className="text-gradient">Hoofprint™ Tells It.</span>
+          </h2>
+          <p className="hoofprint-teaser-desc">
+            Imagine a permanent digital identity for every model horse.
+            From the moment a blank resin is cast, through the artist&apos;s brushstrokes,
+            to the collector who treasures it for years — and the next collector after that.
+          </p>
+          <p className="hoofprint-teaser-desc">
+            Hoofprint™ is the first-ever living provenance system for model horses.
+            Photos, ownership transfers, customization records, and show results
+            all follow the horse — not the owner. Like a passport that never expires.
+          </p>
+          <div className="hoofprint-teaser-features">
+            <div className="hoofprint-teaser-feature">
+              <span>📸</span>
+              <strong>Photo Timeline</strong>
+              <span>Track every stage from blank to finished</span>
+            </div>
+            <div className="hoofprint-teaser-feature">
+              <span>🤝</span>
+              <strong>Ownership Chain</strong>
+              <span>Verified history follows the horse forever</span>
+            </div>
+            <div className="hoofprint-teaser-feature">
+              <span>📦</span>
+              <strong>One-Click Transfer</strong>
+              <span>Sell a horse and pass its entire history along</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Who It's For ─── */}
+      <section className="personas-section" id="who-its-for">
+        <div className="features-inner">
+          <h2 className="features-title">
+            Built for <span className="text-gradient">Every Collector</span>
+          </h2>
+          <div className="personas-grid">
+            <div className="persona-card">
+              <div className="persona-emoji">🏡</div>
+              <h3>The Growing Herd</h3>
+              <p>
+                You&apos;ve got 20–100 models and they&apos;re multiplying.
+                You need a real system before that spreadsheet
+                collapses under its own weight.
+              </p>
+            </div>
+            <div className="persona-card">
+              <div className="persona-emoji">🎨</div>
+              <h3>The Artist &amp; Customizer</h3>
+              <p>
+                You paint, body-mod, and create. You want to document every
+                WIP stage — and give buyers a verified history of your work
+                when it&apos;s time to sell.
+              </p>
+            </div>
+            <div className="persona-card">
+              <div className="persona-emoji">🏆</div>
+              <h3>The Shower &amp; Competitor</h3>
+              <p>
+                Live shows, photo shows, NAN qualifications — you need show records,
+                provenance tracking, and a way to show off your winners
+                to the community.
               </p>
             </div>
           </div>
@@ -204,13 +333,13 @@ export default function LandingPage() {
       <section className="stats-section" id="stats">
         <div className="stats-inner">
           <div className="stat-item">
-            <span className="stat-value">100%</span>
-            <span className="stat-label">Free to Start</span>
+            <span className="stat-value">10,500+</span>
+            <span className="stat-label">Releases &amp; Resins</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
-            <span className="stat-value">7,000+</span>
-            <span className="stat-label">Reference Releases</span>
+            <span className="stat-value">🐾</span>
+            <span className="stat-label">Hoofprint™ Tracking</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
@@ -219,8 +348,8 @@ export default function LandingPage() {
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
-            <span className="stat-value">♾️</span>
-            <span className="stat-label">Unlimited Models</span>
+            <span className="stat-value">100%</span>
+            <span className="stat-label">Free to Start</span>
           </div>
         </div>
       </section>
@@ -229,12 +358,11 @@ export default function LandingPage() {
       <section className="final-cta-section" id="final-cta">
         <div className="final-cta-inner animate-fade-in-up">
           <h2>
-            Ready to Grow Your{" "}
-            <span className="text-gradient">Digital Herd</span>?
+            Ready to Give Your Herd{" "}
+            <span className="text-gradient">a Real Home</span>?
           </h2>
           <p>
-            Join collectors who trust Model Horse Hub to catalog, value, and celebrate their
-            collections.
+            Join the collectors who catalog, connect, and trade on the only platform built for the model horse hobby.
           </p>
           <Link href="/signup" className="btn btn-primary btn-lg" id="final-cta-signup">
             Create Your Free Account →
@@ -253,6 +381,7 @@ export default function LandingPage() {
             <Link href="/about" className="footer-link" id="footer-about">About</Link>
             <Link href="/contact" className="footer-link" id="footer-contact">Contact</Link>
             <Link href="/community" className="footer-link" id="footer-showring">Show Ring</Link>
+            <Link href="/discover" className="footer-link" id="footer-discover">Discover Collectors</Link>
           </nav>
           <p className="footer-copy">
             &copy; {new Date().getFullYear()} Model Horse Hub. All rights reserved.
