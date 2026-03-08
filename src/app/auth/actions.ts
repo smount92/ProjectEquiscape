@@ -122,9 +122,7 @@ export async function forgotPasswordAction(
   const supabase = await createClient();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    // Route through /auth/callback so the PKCE code exchange happens first,
-    // then the callback redirects to /auth/reset-password via the "next" param.
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?next=/auth/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password`,
   });
 
   if (error) {
