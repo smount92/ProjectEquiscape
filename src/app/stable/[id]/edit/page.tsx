@@ -10,6 +10,7 @@ import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { compressImage } from "@/lib/utils/imageCompression";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
+import { updateLifeStage } from "@/app/actions/hoofprint";
 
 // ---- Types ----
 
@@ -67,6 +68,7 @@ export default function EditHorsePage() {
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
   const [listingPrice, setListingPrice] = useState("");
   const [marketplaceNotes, setMarketplaceNotes] = useState("");
+  const [lifeStage, setLifeStage] = useState("completed");
 
   // Reference fields (controlled by UnifiedReferenceSearch)
   const [selectedMoldId, setSelectedMoldId] = useState<string | null>(null);
@@ -108,7 +110,7 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, sculptor, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id, trade_status, listing_price, marketplace_notes")
+        .select("id, owner_id, custom_name, sculptor, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id, trade_status, listing_price, marketplace_notes, life_stage")
         .eq("id", horseId)
         .single<{
           id: string;
@@ -125,6 +127,7 @@ export default function EditHorsePage() {
           trade_status: string;
           listing_price: number | null;
           marketplace_notes: string | null;
+          life_stage: string | null;
         }>();
 
       if (horseErr || !horse || horse.owner_id !== user.id) {
@@ -142,6 +145,7 @@ export default function EditHorsePage() {
       setTradeStatus(horse.trade_status || "Not for Sale");
       if (horse.listing_price !== null) setListingPrice(String(horse.listing_price));
       setMarketplaceNotes(horse.marketplace_notes || "");
+      setLifeStage(horse.life_stage || "completed");
 
       if (horse.reference_mold_id) {
         setSelectedMoldId(horse.reference_mold_id);
@@ -360,6 +364,7 @@ export default function EditHorsePage() {
         reference_mold_id: selectedMoldId,
         artist_resin_id: selectedResinId,
         release_id: selectedReleaseId,
+        life_stage: lifeStage,
       };
 
       const { error: updErr } = await supabase
@@ -690,6 +695,29 @@ export default function EditHorsePage() {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Life Stage (Hoofprint) */}
+          <div className="form-group">
+            <label htmlFor="edit-life-stage" className="form-label">🐾 Life Stage</label>
+            <select
+              id="edit-life-stage"
+              className="form-select"
+              value={lifeStage}
+              onChange={(e) => {
+                setLifeStage(e.target.value);
+                // Auto-create timeline event for stage changes
+                updateLifeStage(horseId, e.target.value as "blank" | "in_progress" | "completed" | "for_sale");
+              }}
+            >
+              <option value="blank">🎨 Blank / Unpainted</option>
+              <option value="in_progress">🔧 Work in Progress</option>
+              <option value="completed">✅ Completed</option>
+              <option value="for_sale">💲 For Sale</option>
+            </select>
+            <span className="form-hint">
+              Changing this will add a stage update to the Hoofprint™ timeline.
+            </span>
           </div>
 
           <CollectionPicker

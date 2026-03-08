@@ -108,6 +108,7 @@ export default function AddHorsePage() {
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
   const [listingPrice, setListingPrice] = useState("");
   const [marketplaceNotes, setMarketplaceNotes] = useState("");
+  const [lifeStage, setLifeStage] = useState("completed");
 
   // Step 4 (index 3): Financial Vault
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -325,6 +326,7 @@ export default function AddHorsePage() {
         condition_grade: conditionGrade,
         is_public: isPublic,
         trade_status: tradeStatus,
+        life_stage: lifeStage,
       };
 
       if (selectedMoldId) horseInsert.reference_mold_id = selectedMoldId;
@@ -446,7 +448,7 @@ export default function AddHorsePage() {
       initializeHoofprint({
         horseId,
         horseName: customName.trim(),
-        lifeStage: "completed",
+        lifeStage,
       });
 
       // 7. Show success!
@@ -873,6 +875,27 @@ export default function AddHorsePage() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Life Stage (Hoofprint) */}
+            <div className="form-group">
+              <label htmlFor="life-stage" className="form-label">
+                🐾 Life Stage
+              </label>
+              <select
+                id="life-stage"
+                className="form-select"
+                value={lifeStage}
+                onChange={(e) => setLifeStage(e.target.value)}
+              >
+                <option value="blank">🎨 Blank / Unpainted</option>
+                <option value="in_progress">🔧 Work in Progress</option>
+                <option value="completed">✅ Completed</option>
+                <option value="for_sale">💲 For Sale</option>
+              </select>
+              <span className="form-hint">
+                This sets the life stage on your Hoofprint™ timeline.
+              </span>
             </div>
 
             <CollectionPicker
