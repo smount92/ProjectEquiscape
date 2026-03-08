@@ -51,13 +51,21 @@ export default function Header() {
       setUser(user);
       if (user) {
         fetchUnreadCount(user.id);
-        // Fetch alias_name for profile link
-        const { data: profile } = await supabase
-          .from("users")
-          .select("alias_name")
-          .eq("id", user.id)
-          .single<{ alias_name: string }>();
-        setAliasName(profile?.alias_name ?? null);
+        // Fetch alias_name for profile link (with timeout)
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 5000);
+          const { data: profile } = await supabase
+            .from("users")
+            .select("alias_name")
+            .eq("id", user.id)
+            .abortSignal(controller.signal)
+            .single<{ alias_name: string }>();
+          clearTimeout(timeout);
+          setAliasName(profile?.alias_name ?? null);
+        } catch {
+          // Silently fail — profile link just won't show
+        }
       }
     }
     getUser();
@@ -68,12 +76,20 @@ export default function Header() {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUnreadCount(session.user.id);
-        const { data: profile } = await supabase
-          .from("users")
-          .select("alias_name")
-          .eq("id", session.user.id)
-          .single<{ alias_name: string }>();
-        setAliasName(profile?.alias_name ?? null);
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 5000);
+          const { data: profile } = await supabase
+            .from("users")
+            .select("alias_name")
+            .eq("id", session.user.id)
+            .abortSignal(controller.signal)
+            .single<{ alias_name: string }>();
+          clearTimeout(timeout);
+          setAliasName(profile?.alias_name ?? null);
+        } catch {
+          // Silently fail
+        }
       } else {
         setUnreadCount(0);
         setAliasName(null);
@@ -90,17 +106,10 @@ export default function Header() {
     return () => clearInterval(interval);
   }, [user, fetchUnreadCount]);
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      setAliasName(null);
-      setUnreadCount(0);
-      window.location.href = "/login";
-    } catch (err) {
-      console.error("Sign-out error:", err);
-      window.location.href = "/login";
-    }
+  const handleSignOut = () => {
+    // Fire-and-forget — redirect immediately regardless of signOut result
+    supabase.auth.signOut().catch(() => { });
+    window.location.href = "/login";
   };
 
   // Close mobile menu on outside click
