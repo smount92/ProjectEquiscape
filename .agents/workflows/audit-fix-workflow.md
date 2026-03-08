@@ -651,16 +651,16 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "git push origin main 2>&1"
 
 After completing all tasks, verify:
 
-- [ ] AF-1: Search queries sanitized
-- [ ] AF-2: updateHorseAction fields whitelisted
-- [ ] AF-3: middleware.ts created and tested
-- [ ] AF-4: Admin client centralized, admin email removed from client bundle
-- [ ] AF-5: Contact form rate limited
-- [ ] AF-6: Validation utility created
-- [ ] AF-7: Database indexes added (run in Supabase SQL Editor)
-- [ ] AF-8: Error boundary + 404 page created
-- [ ] AF-9: Vercel env vars verified
-- [ ] AF-10: All changes committed and pushed
+- [x] AF-1: Search queries sanitized ✅
+- [x] AF-2: updateHorseAction fields whitelisted ✅
+- [x] AF-3: proxy.ts enhanced (session refresh + route protection) ✅
+- [x] AF-4: Admin client centralized, admin email removed from client bundle ✅
+- [x] AF-5: Contact form rate limited ✅
+- [x] AF-6: Validation utility created ✅
+- [x] AF-7: Database indexes migration created (⚠️ run in Supabase SQL Editor)
+- [x] AF-8: Error boundary + 404 page verified ✅
+- [x] AF-9: Vercel env vars verified ✅
+- [x] AF-10: All changes committed and pushed ✅
 
 Final build check:
 ```
