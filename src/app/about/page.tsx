@@ -90,17 +90,42 @@ export default function AboutPage() {
 
                 {/* The Vision */}
                 <section className="static-section">
-                    <h2>The Vision</h2>
+                    <h2>Where We&apos;re Going</h2>
                     <p>
-                        Model Horse Hub isn&apos;t finished — it&apos;s just getting started. Our roadmap is driven
-                        by the community: features are prioritized by what collectors actually ask for.
-                        Virtual photo shows, wishlist matchmaking, seller ratings, and Hoofprint™ provenance
-                        all exist because real collectors said &ldquo;I wish this existed.&rdquo;
+                        Model Horse Hub isn&apos;t finished — it&apos;s just getting started. Every feature on this
+                        platform exists because a real collector said &ldquo;I wish this existed.&rdquo; Virtual photo
+                        shows, wishlist matchmaking, seller ratings, and Hoofprint™ provenance all started
+                        as conversations in the community.
                     </p>
                     <p>
-                        We&apos;re building the platform we always wished existed. And we&apos;d love for you to
-                        be part of shaping what comes next.
+                        Here&apos;s what&apos;s on our horizon:
                     </p>
+                    <div className="about-values-grid" style={{ marginTop: "var(--space-md)" }}>
+                        <div className="about-value-card">
+                            <span className="about-value-icon" aria-hidden="true">📊</span>
+                            <h3>Market Price Guide</h3>
+                            <p>
+                                Aggregate pricing data across the hobby. See what your release
+                                is worth based on real collector data — not guesswork.
+                            </p>
+                        </div>
+                        <div className="about-value-card">
+                            <span className="about-value-icon" aria-hidden="true">📱</span>
+                            <h3>Mobile Experience</h3>
+                            <p>
+                                Take your collection to live shows. Quick photo capture,
+                                offline access, and push notifications — all from your phone.
+                            </p>
+                        </div>
+                        <div className="about-value-card">
+                            <span className="about-value-icon" aria-hidden="true">🤝</span>
+                            <h3>Your Features</h3>
+                            <p>
+                                We build what you ask for. Every feature request from the community
+                                gets heard, prioritized, and built. This is your platform.
+                            </p>
+                        </div>
+                    </div>
                 </section>
 
                 {/* CTA */}

@@ -10,7 +10,7 @@ import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { compressImage } from "@/lib/utils/imageCompression";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
-import { updateLifeStage } from "@/app/actions/hoofprint";
+import { updateLifeStage, addTimelineEvent } from "@/app/actions/hoofprint";
 
 // ---- Types ----
 
@@ -413,6 +413,18 @@ export default function EditHorsePage() {
           moldId: selectedMoldId || null,
           releaseId: selectedReleaseId || null,
         });
+      }
+
+      // Auto-create Hoofprint™ listed event (fire-and-forget)
+      if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
+        try {
+          await addTimelineEvent({
+            horseId: horseId,
+            eventType: "listed",
+            title: `Listed: ${tradeStatus}`,
+            description: listingPrice ? `Listed at $${listingPrice}` : undefined,
+          });
+        } catch { /* Non-blocking */ }
       }
 
       router.push("/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim()));

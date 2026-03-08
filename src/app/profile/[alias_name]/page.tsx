@@ -96,9 +96,9 @@ export default async function ProfilePage({
   // Look up the user by alias_name
   const { data: profileUser } = await supabase
     .from("users")
-    .select("id, alias_name, created_at, bio")
+    .select("id, alias_name, created_at, bio, avatar_url")
     .eq("alias_name", aliasDecoded)
-    .single<{ id: string; alias_name: string; created_at: string; bio: string | null }>();
+    .single<{ id: string; alias_name: string; created_at: string; bio: string | null; avatar_url: string | null }>();
 
   if (!profileUser) {
     notFound();
@@ -211,20 +211,25 @@ export default async function ProfilePage({
       {/* Profile Header */}
       <div className="profile-hero animate-fade-in-up">
         <div className="profile-avatar">
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+          {profileUser.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profileUser.avatar_url} alt={profileUser.alias_name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+          ) : (
+            <svg
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          )}
         </div>
         <div className="profile-hero-content">
           <h1>

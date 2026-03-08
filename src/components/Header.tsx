@@ -180,6 +180,9 @@ export default function Header() {
               👤 Profile
             </Link>
           )}
+          <Link href="/settings" className="header-nav-link" id="nav-settings" onClick={closeMobileMenu}>
+            ⚙️ Settings
+          </Link>
           <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox" onClick={closeMobileMenu}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

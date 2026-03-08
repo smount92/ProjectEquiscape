@@ -1,0 +1,337 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+    getProfile,
+    updateProfile,
+    updateNotificationPrefs,
+    changePassword,
+    uploadAvatar,
+} from "@/app/actions/settings";
+
+const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
+    { key: "show_votes", emoji: "📸", label: "Show votes on your entries" },
+    { key: "favorites", emoji: "❤️", label: "Favorites on your horses" },
+    { key: "comments", emoji: "💬", label: "Comments on your horses" },
+    { key: "new_followers", emoji: "👥", label: "New followers" },
+    { key: "messages", emoji: "✉️", label: "Messages" },
+    { key: "show_results", emoji: "🏆", label: "Show results" },
+    { key: "transfers", emoji: "📦", label: "Transfer notifications" },
+];
+
+export default function SettingsPage() {
+    const router = useRouter();
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+
+    // Loading
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Profile
+    const [aliasName, setAliasName] = useState("");
+    const [bio, setBio] = useState("");
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [email, setEmail] = useState("");
+    const [defaultHorsePublic, setDefaultHorsePublic] = useState(true);
+    const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+    // Notifications
+    const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({});
+
+    // Password
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const [isSavingPassword, setIsSavingPassword] = useState(false);
+
+    // Avatar upload
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+    useEffect(() => {
+        async function load() {
+            const profile = await getProfile();
+            if (!profile) {
+                router.push("/login");
+                return;
+            }
+            setAliasName(profile.aliasName);
+            setBio(profile.bio);
+            setAvatarUrl(profile.avatarUrl);
+            setEmail(profile.email);
+            setNotifPrefs(profile.notificationPrefs);
+            setDefaultHorsePublic(profile.defaultHorsePublic);
+            setIsLoading(false);
+        }
+        load();
+    }, [router]);
+
+    // ── Profile save ──
+    const handleSaveProfile = async () => {
+        setIsSavingProfile(true);
+        setProfileMsg(null);
+        const result = await updateProfile({ aliasName, bio, defaultHorsePublic });
+        if (result.success) {
+            setProfileMsg({ type: "success", text: "Profile updated!" });
+        } else {
+            setProfileMsg({ type: "error", text: result.error || "Failed to save." });
+        }
+        setIsSavingProfile(false);
+    };
+
+    // ── Notification toggle ──
+    const handleToggleNotif = async (key: string) => {
+        const updated = { ...notifPrefs, [key]: !notifPrefs[key] };
+        setNotifPrefs(updated);
+        await updateNotificationPrefs(updated);
+    };
+
+    // ── Password change ──
+    const handleChangePassword = async () => {
+        setIsSavingPassword(true);
+        setPasswordMsg(null);
+        const result = await changePassword({ newPassword, confirmPassword });
+        if (result.success) {
+            setPasswordMsg({ type: "success", text: "Password changed!" });
+            setNewPassword("");
+            setConfirmPassword("");
+        } else {
+            setPasswordMsg({ type: "error", text: result.error || "Failed to change password." });
+        }
+        setIsSavingPassword(false);
+    };
+
+    // ── Avatar upload ──
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setIsUploadingAvatar(true);
+        const formData = new FormData();
+        formData.set("avatar", file);
+        const result = await uploadAvatar(formData);
+        if (result.success && result.url) {
+            setAvatarUrl(result.url + "?t=" + Date.now()); // bust cache
+        }
+        setIsUploadingAvatar(false);
+        e.target.value = "";
+    };
+
+    if (isLoading) {
+        return (
+            <div className="page-container">
+                <div style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+                    <div
+                        className="btn-spinner"
+                        style={{
+                            width: 36,
+                            height: 36,
+                            margin: "0 auto var(--space-lg)",
+                            borderWidth: 3,
+                            borderColor: "var(--color-border)",
+                            borderTopColor: "var(--color-accent-primary)",
+                        }}
+                    />
+                    <p>Loading settings…</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="page-container">
+            <nav className="passport-breadcrumb animate-fade-in-up" aria-label="Breadcrumb">
+                <Link href="/dashboard">Digital Stable</Link>
+                <span className="separator" aria-hidden="true">/</span>
+                <span>Settings</span>
+            </nav>
+
+            <div className="static-page-inner animate-fade-in-up" style={{ maxWidth: 680 }}>
+                <h1 style={{ marginBottom: "var(--space-2xl)" }}>
+                    <span className="text-gradient">⚙️ Settings</span>
+                </h1>
+
+                {/* ═══ Profile ═══ */}
+                <div className="settings-section">
+                    <h2 className="settings-section-title">👤 Profile</h2>
+                    <div className="settings-card">
+                        {/* Avatar */}
+                        <div className="settings-avatar-row">
+                            <div className="settings-avatar">
+                                {avatarUrl ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={avatarUrl} alt="Your avatar" />
+                                ) : (
+                                    "🐴"
+                                )}
+                            </div>
+                            <div>
+                                <button
+                                    className="btn btn-ghost"
+                                    style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
+                                    onClick={() => avatarInputRef.current?.click()}
+                                    disabled={isUploadingAvatar}
+                                >
+                                    {isUploadingAvatar ? "Uploading…" : "📷 Change Avatar"}
+                                </button>
+                                <input
+                                    ref={avatarInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                    style={{ display: "none" }}
+                                />
+                                <p style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: 4 }}>
+                                    Max 2MB. JPG, PNG, or WebP.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Alias */}
+                        <div className="form-group">
+                            <label htmlFor="settings-alias" className="form-label">
+                                Display Name
+                            </label>
+                            <input
+                                id="settings-alias"
+                                type="text"
+                                className="form-input"
+                                value={aliasName}
+                                onChange={(e) => setAliasName(e.target.value)}
+                                maxLength={30}
+                                minLength={3}
+                            />
+                            <span className="form-hint">3-30 characters. Must be unique.</span>
+                        </div>
+
+                        {/* Bio */}
+                        <div className="form-group">
+                            <label htmlFor="settings-bio" className="form-label">
+                                Bio
+                            </label>
+                            <textarea
+                                id="settings-bio"
+                                className="form-textarea"
+                                rows={3}
+                                maxLength={500}
+                                placeholder="Tell other collectors about yourself…"
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
+                            />
+                            <span className="form-hint">{bio.length}/500</span>
+                        </div>
+
+                        {/* Default horse visibility */}
+                        <div className="settings-toggle-row">
+                            <span className="settings-toggle-label">
+                                🏆 Default new horses to public
+                            </span>
+                            <button
+                                type="button"
+                                className={`settings-toggle ${defaultHorsePublic ? "active" : ""}`}
+                                onClick={() => setDefaultHorsePublic(!defaultHorsePublic)}
+                                aria-pressed={defaultHorsePublic}
+                            />
+                        </div>
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleSaveProfile}
+                            disabled={isSavingProfile}
+                            style={{ marginTop: "var(--space-lg)" }}
+                        >
+                            {isSavingProfile ? "Saving…" : "Save Profile"}
+                        </button>
+
+                        {profileMsg && (
+                            <p className={profileMsg.type === "success" ? "settings-success" : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
+                                {profileMsg.text}
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                {/* ═══ Security ═══ */}
+                <div className="settings-section">
+                    <h2 className="settings-section-title">🔒 Security</h2>
+                    <div className="settings-card">
+                        <div className="form-group">
+                            <label className="form-label">Email</label>
+                            <input
+                                type="email"
+                                className="form-input"
+                                value={email}
+                                disabled
+                                style={{ opacity: 0.6 }}
+                            />
+                            <span className="form-hint">Email changes require verification (coming soon).</span>
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="settings-new-password" className="form-label">
+                                New Password
+                            </label>
+                            <input
+                                id="settings-new-password"
+                                type="password"
+                                className="form-input"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="At least 8 characters"
+                                minLength={8}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="settings-confirm-password" className="form-label">
+                                Confirm Password
+                            </label>
+                            <input
+                                id="settings-confirm-password"
+                                type="password"
+                                className="form-input"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Type it again"
+                            />
+                        </div>
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleChangePassword}
+                            disabled={isSavingPassword || !newPassword || !confirmPassword}
+                        >
+                            {isSavingPassword ? "Changing…" : "Change Password"}
+                        </button>
+
+                        {passwordMsg && (
+                            <p className={passwordMsg.type === "success" ? "settings-success" : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
+                                {passwordMsg.text}
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                {/* ═══ Notifications ═══ */}
+                <div className="settings-section">
+                    <h2 className="settings-section-title">🔔 Notifications</h2>
+                    <div className="settings-card">
+                        {NOTIF_LABELS.map((n) => (
+                            <div key={n.key} className="settings-toggle-row">
+                                <span className="settings-toggle-label">
+                                    {n.emoji} {n.label}
+                                </span>
+                                <button
+                                    type="button"
+                                    className={`settings-toggle ${notifPrefs[n.key] ? "active" : ""}`}
+                                    onClick={() => handleToggleNotif(n.key)}
+                                    aria-pressed={notifPrefs[n.key]}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

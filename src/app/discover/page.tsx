@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import RatingBadge from "@/components/RatingBadge";
+import UserAvatar from "@/components/UserAvatar";
 
 export const metadata = {
     title: "Discover Collectors — Model Horse Hub",
@@ -15,6 +16,7 @@ interface UserRow {
     id: string;
     alias_name: string;
     created_at: string;
+    avatar_url: string | null;
 }
 
 export default async function DiscoverPage() {
@@ -28,7 +30,7 @@ export default async function DiscoverPage() {
     // Fetch all users
     const { data: rawUsers } = await supabase
         .from("users")
-        .select("id, alias_name, created_at")
+        .select("id, alias_name, created_at, avatar_url")
         .order("created_at", { ascending: false });
 
     const allUsers = (rawUsers as UserRow[]) ?? [];
@@ -119,20 +121,7 @@ export default async function DiscoverPage() {
                                 id={`discover-${u.id}`}
                             >
                                 <div className="discover-card-avatar">
-                                    <svg
-                                        width="32"
-                                        height="32"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="1.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        aria-hidden="true"
-                                    >
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                        <circle cx="12" cy="7" r="4" />
-                                    </svg>
+                                    <UserAvatar avatarUrl={u.avatar_url} aliasName={u.alias_name} size={40} />
                                 </div>
                                 <div className="discover-card-info">
                                     <div className="discover-card-alias">
