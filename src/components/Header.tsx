@@ -176,6 +176,24 @@ export default function Header() {
           <Link href="/contact" className="header-nav-link header-nav-link-secondary" id="nav-contact" onClick={closeMobileMenu}>
             ✉️ Contact
           </Link>
+          {/* ── Mobile-only: Sign Out + Simple Mode inside hamburger ── */}
+          <div className="header-auth-actions-mobile">
+            <button
+              className="btn btn-ghost"
+              onClick={() => { closeMobileMenu(); handleSignOut(); }}
+              style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", width: "100%", justifyContent: "flex-start" }}
+            >
+              🚪 Sign Out
+            </button>
+            <button
+              className="simple-mode-toggle"
+              onClick={() => { toggleSimpleMode(); }}
+              aria-pressed={isSimpleMode}
+              style={{ justifyContent: "flex-start", gap: "var(--space-sm)", width: "100%" }}
+            >
+              {isSimpleMode ? "👁 Simple Mode: ON" : "👁‍🗨 Simple Mode: OFF"}
+            </button>
+          </div>
         </nav>
       )}
 
@@ -191,7 +209,7 @@ export default function Header() {
         </nav>
       )}
 
-      <div className="header-actions">
+      <div className="header-actions header-auth-actions-desktop">
         {user ? (
           <button
             className="btn btn-ghost"

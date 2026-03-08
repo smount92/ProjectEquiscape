@@ -8559,13 +8559,32 @@ p {
 
 
 /* ============================================================
-   GLOBAL MOBILE RESPONSIVE POLISHING
+   GLOBAL MOBILE RESPONSIVE POLISHING (M-1 through M-14)
    ============================================================ */
+
+/* ── M-1: Header auth actions — hide mobile version on desktop ── */
+.header-auth-actions-mobile {
+  display: none;
+}
 
 /* ── 768px: Tablet and below ── */
 @media (max-width: 768px) {
   .page-container {
     padding: 0 var(--space-md);
+  }
+
+  /* M-1: Move Sign Out + Simple Mode into hamburger */
+  .header-auth-actions-desktop {
+    display: none !important;
+  }
+
+  .header-nav .header-auth-actions-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--space-md);
   }
 
   /* Ensure touch targets are accessible */
@@ -8574,6 +8593,129 @@ p {
   .header-nav-link,
   a.header-nav-link {
     min-height: 44px;
+  }
+
+  /* M-2: Dashboard — reduce whitespace */
+  .welcome-card {
+    padding: var(--space-lg);
+  }
+
+  .welcome-card h2 {
+    font-size: calc(var(--font-size-lg) * var(--font-scale));
+  }
+
+  /* M-3: Feed — improve inactive tab contrast */
+  .feed-tab:not(.feed-tab-active) {
+    color: var(--color-text-secondary);
+    opacity: 1;
+  }
+
+  /* M-3: Community hero tighter */
+  .community-hero h1 {
+    font-size: calc(var(--font-size-xl) * var(--font-scale));
+  }
+
+  /* M-5: Show Ring filter controls */
+  .show-ring-controls {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  /* M-7: Settings — compact layout */
+  .settings-section {
+    padding: var(--space-md);
+  }
+
+  .settings-avatar-row {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .settings-toggle-row {
+    flex-wrap: wrap;
+  }
+
+  /* M-8: Notifications — compact items */
+  .notif-item {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .notif-time {
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
+  }
+
+  /* M-9: Inbox — message layout */
+  .chat-bubble {
+    max-width: 85%;
+    font-size: calc(var(--font-size-sm) * var(--font-scale));
+  }
+
+  .chat-input-area {
+    padding: var(--space-sm);
+  }
+
+  .chat-header {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .chat-header-info {
+    min-width: 0;
+  }
+
+  /* M-10: Wishlist — reduce empty state padding */
+  .shelf-empty {
+    padding: var(--space-xl) var(--space-md);
+  }
+
+  .shelf-empty-icon {
+    font-size: 2.5rem;
+  }
+
+  /* M-11: Shows — card header */
+  .show-card-header {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  /* M-13: Profile — stack the header */
+  .profile-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-hero-stats {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .profile-follow-stats {
+    justify-content: center;
+  }
+
+  .profile-public-collections {
+    text-align: center;
+  }
+
+  .profile-collection-pills {
+    justify-content: center;
+  }
+
+  /* M-14: Passport — sidebar stacks (handled by 900px grid override) */
+  .passport-thumbs {
+    gap: var(--space-xs);
+  }
+
+  .passport-actions {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .passport-actions .btn {
+    flex: 1 1 auto;
+    min-width: 140px;
   }
 
   /* Form rows stack on mobile */
@@ -8595,12 +8737,6 @@ p {
   .shelf-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-sm);
-  }
-
-  /* Passport layout adjustments */
-  .passport-actions {
-    flex-wrap: wrap;
     gap: var(--space-sm);
   }
 
@@ -8635,6 +8771,22 @@ p {
     padding: 0 var(--space-sm);
   }
 
+  /* M-4: Stepper horizontal scroll */
+  .stepper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding-bottom: var(--space-xs);
+  }
+
+  .stepper-step {
+    flex-shrink: 0;
+  }
+
+  .stepper-label {
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
+  }
+
   /* Tighter card radius */
   .card,
   .card-auth,
@@ -8651,8 +8803,36 @@ p {
     border-radius: 0;
   }
 
+  /* M-6: Discover — tighter cards */
+  .discover-card {
+    padding: var(--space-md);
+  }
+
   /* Reduce margin on static pages */
   .static-page-container {
     padding: var(--space-lg) var(--space-sm);
+  }
+
+  /* M-12: Getting Started — tighten */
+  .getting-started-tip {
+    padding: var(--space-md);
+  }
+
+  .getting-started-list {
+    padding-left: var(--space-md);
+  }
+
+  /* M-14: Passport detail */
+  .passport-detail-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .passport-detail-label {
+    min-width: unset;
+  }
+
+  .passport-title {
+    font-size: calc(var(--font-size-lg) * var(--font-scale));
   }
 }
