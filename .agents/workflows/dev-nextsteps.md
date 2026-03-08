@@ -40,7 +40,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🔴 Priority: Critical (Users Notice These)
 
-## Task AP-1: Edit Form — Life Stage Selector + Hoofprint Auto-Events
+## ✅ Task AP-1: Edit Form — Life Stage Selector + Hoofprint Auto-Events
 
 **Problem:** The add-horse form has a 🐾 Life Stage selector, but the edit-horse form (`src/app/stable/[id]/edit/page.tsx`) doesn't. Users can't update a horse's life stage after creation. Also, changing `trade_status` to "For Sale" or "Open to Offers" should auto-create a `listed` timeline event.
 
@@ -139,7 +139,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task AP-2: Settings Page — Database Migration
+## ✅ Task AP-2: Settings Page — Database Migration
 
 **Problem:** No settings page exists. Users can't change password, update email, edit bio/alias, or manage notification preferences.
 
@@ -188,7 +188,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "dir supabase\migrations\019_s
 
 ---
 
-## Task AP-3: Settings Server Actions
+## ✅ Task AP-3: Settings Server Actions
 
 **What:** Create the server actions for profile updates, password change, and notification preferences.
 
@@ -389,7 +389,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task AP-4: Settings Page UI
+## ✅ Task AP-4: Settings Page UI
 
 **What:** Create the `/settings` page with sections for Profile, Security, Notifications, and Preferences.
 
@@ -549,7 +549,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task AP-5: Display Avatars Across the Platform
+## ✅ Task AP-5: Display Avatars Across the Platform
 
 **What:** Show user avatars wherever user identity appears. Currently these show generic emoji/initial icons.
 
@@ -628,7 +628,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 # 🟡 Priority: Medium
 
-## Task AP-6: About Page — Expand Vision Section
+## ✅ Task AP-6: About Page — Expand Vision Section
 
 **Problem:** The About page is solid but the "Vision" section at the bottom feels thin (just 2 short paragraphs). It should hint at what's coming and give users a reason to stick around.
 
@@ -687,7 +687,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task AP-7: Commit & Push
+## ✅ Task AP-7: Commit & Push
 
 ```
 cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "feat: settings page, user avatars, edit form life stage, about page polish" 2>&1"
