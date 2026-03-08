@@ -191,7 +191,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npm run build 2>&1"
 
 ---
 
-## Task PS-2: Forgot Password End-to-End Verification
+## ✅ Task PS-2: Forgot Password End-to-End Verification — DONE
 
 **Why:** The user created an account and verified email but hasn't tested forgot password. The `forgotPasswordAction` uses `NEXT_PUBLIC_SITE_URL` for the redirect URL — if this wasn't set in Vercel, the reset link would point to `localhost:3000`.
 
