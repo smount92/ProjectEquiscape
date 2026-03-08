@@ -423,7 +423,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "git push origin main 2>&1"
 
 # 🔴 Priority: Critical — Dashboard Toggle
 
-## Task SA-1: Enable Leaked Password Protection
+## ✅ Task SA-1: Enable Leaked Password Protection
 
 **Severity:** 🔴 SECURITY
 **Time:** 2 minutes
@@ -440,7 +440,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "git push origin main 2>&1"
 
 # 🔴 Priority: Critical — RLS Performance
 
-## Task SA-2: Generate Migration 021 — RLS InitPlan Fix + Indexes + Policy Merge
+## ✅ Task SA-2: Generate Migration 022 — RLS InitPlan Fix + Indexes + Policy Merge
 
 **Severity:** 🔴 PERFORMANCE (will degrade at scale)
 **Time:** 30-45 minutes to generate, 2 minutes to run
@@ -569,7 +569,7 @@ To generate this migration correctly, you need to read the existing policies fro
 
 # 🟢 Priority: Low — Informational
 
-## Task SA-3: Unused Indexes — No Action Needed
+## ✅ Task SA-3: Unused Indexes — No Action Needed
 
 The Supabase linter flagged 24 "unused indexes." These are all on features that haven't been exercised yet by your 2-3 beta users:
 
@@ -583,7 +583,7 @@ The Supabase linter flagged 24 "unused indexes." These are all on features that 
 
 ---
 
-## Task SA-4: Commit & Push
+## ✅ Task SA-4: Commit & Push
 
 ```
 cd c:\Project Equispace\model-horse-hub && cmd /c "git add -A && git commit -m "perf: migration 021 — RLS initplan fix, FK indexes, policy merge" 2>&1"
