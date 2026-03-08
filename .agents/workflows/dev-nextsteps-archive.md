@@ -4,7 +4,20 @@
 > **Last Updated:** 2026-03-07
 
 > [!NOTE]
-> Options 1-4 are above. Option 5 (Photo Shows Overhaul) was completed 2026-03-07.
+> Options 1-5 are above. Option 6 (Marketing & Content) was completed 2026-03-07.
+
+---
+
+## Option 6: Marketing & Content (completed 2026-03-07)
+
+- ✅ **MK-1: Landing Hero Sharpen** — Pain-driven headline ("Your Herd Deserves More Than a Spreadsheet"), 10,500+ stat, Hoofprint badge.
+- ✅ **MK-2: How It Works Section** — 3-step walkthrough (Add Horse → Community → Hoofprint) with animated cards and arrows.
+- ✅ **MK-3: Feature Cards Rewrite** — All 6 cards rewritten to pain→solution format with updated descriptions.
+- ✅ **MK-4: Hoofprint Teaser Section** — Dedicated section with amber gradient, "Now Live" badge, and 3 feature pills.
+- ✅ **MK-5: Collector Personas** — 3 persona cards (Growing Herd, Artist & Customizer, Shower & Competitor).
+- ✅ **MK-6: About Page Rewrite** — (included in batch)
+- ✅ **MK-7: Footer Update** — Added Discover Collectors link, updated CTA copy.
+- ✅ **MK-8: Commit & Push** — Committed.
 
 ---
 
