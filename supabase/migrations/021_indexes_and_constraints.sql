@@ -17,8 +17,8 @@ CREATE INDEX IF NOT EXISTS idx_horse_images_horse_id ON horse_images(horse_id);
 CREATE INDEX IF NOT EXISTS idx_user_horses_owner_id ON user_horses(owner_id);
 CREATE INDEX IF NOT EXISTS idx_user_horses_is_public ON user_horses(is_public) WHERE is_public = true;
 
--- ── Favorites ──
-CREATE INDEX IF NOT EXISTS idx_user_favorites_user_id ON user_favorites(user_id);
+-- ── Favorites (table is horse_favorites; unique + horse_id indexes already exist from migration 010) ──
+-- No new indexes needed — idx_horse_favorites_unique and idx_horse_favorites_horse_id already cover this.
 
 -- ── Notifications ──
 CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id, is_read) WHERE is_read = false;
