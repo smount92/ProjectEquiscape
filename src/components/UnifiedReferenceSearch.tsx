@@ -48,6 +48,7 @@ export interface SelectionState {
   moldId: string | null;
   resinId: string | null;
   releaseId: string | null;
+  sculptorAlias?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -207,6 +208,7 @@ export default function UnifiedReferenceSearch({
       moldId: null,
       resinId: newResinId,
       releaseId: null,
+      sculptorAlias: newResinId ? resin.sculptor_alias : undefined,
     });
   };
 

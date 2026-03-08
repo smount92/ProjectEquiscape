@@ -54,7 +54,7 @@ export async function searchReferencesAction(tab: "mold" | "resin", query: strin
              release_year_start, release_year_end,
              reference_molds(mold_name, manufacturer)`
                 )
-                .or(`release_name.ilike.%${q}%,color_description.ilike.%${q}%`)
+                .or(`release_name.ilike.%${q}%,color_description.ilike.%${q}%,model_number.ilike.%${q}%`)
                 .limit(20)
             : Promise.resolve({ data: [] });
 

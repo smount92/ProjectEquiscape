@@ -660,6 +660,10 @@ export default function AddHorsePage() {
                 setSelectedMoldId(sel.moldId);
                 setSelectedResinId(sel.resinId);
                 setSelectedReleaseId(sel.releaseId);
+                // Auto-fill sculptor when a resin is selected
+                if (sel.sculptorAlias && !sculptor.trim()) {
+                  setSculptor(sel.sculptorAlias);
+                }
               }}
               onCustomEntry={(searchTerm) => {
                 // Clear any existing reference selections

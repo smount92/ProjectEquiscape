@@ -365,21 +365,21 @@ export default function EditHorsePage() {
         }).catch(() => { });
       }
 
-      // Auto-create Hoofprint™ listed event (fire-and-forget)
+      // Auto-create Hoofprint™ listed event (fire-and-forget — do NOT await)
       if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
-        try {
-          await addTimelineEvent({
-            horseId: horseId,
-            eventType: "listed",
-            title: `Listed: ${tradeStatus}`,
-            description: listingPrice ? `Listed at $${listingPrice}` : undefined,
-          });
-        } catch { /* Non-blocking */ }
+        addTimelineEvent({
+          horseId: horseId,
+          eventType: "listed",
+          title: `Listed: ${tradeStatus}`,
+          description: listingPrice ? `Listed at $${listingPrice}` : undefined,
+        }).catch(() => { /* Non-blocking */ });
       }
 
-      router.push("/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim()));
+      // Hard redirect — clears all client state including isSaving
+      window.location.href = "/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim());
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to save changes.");
+    } finally {
       setIsSaving(false);
     }
   };
@@ -753,6 +753,10 @@ export default function EditHorsePage() {
               setSelectedMoldId(sel.moldId);
               setSelectedResinId(sel.resinId);
               setSelectedReleaseId(sel.releaseId);
+              // Auto-fill sculptor when a resin is selected
+              if (sel.sculptorAlias && !sculptor.trim()) {
+                setSculptor(sel.sculptorAlias);
+              }
             }}
             onCustomEntry={(searchTerm) => {
               setSelectedMoldId(null);

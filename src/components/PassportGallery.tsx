@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import PhotoLightbox from "@/components/PhotoLightbox";
 
 interface GalleryImage {
   signedUrl: string;
@@ -28,6 +29,7 @@ const ANGLE_LABELS: Record<string, string> = {
 
 export default function PassportGallery({ images }: PassportGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   if (images.length === 0) {
     return (
@@ -50,10 +52,15 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
 
   const activeImage = images[activeIndex];
 
+  const lightboxImages = images.map((img) => ({
+    url: img.signedUrl,
+    label: ANGLE_LABELS[img.angle_profile] || img.angle_profile,
+  }));
+
   return (
     <div>
-      {/* Hero Image */}
-      <div className="passport-hero">
+      {/* Hero Image — click to open lightbox */}
+      <div className="passport-hero" onClick={() => setLightboxIndex(activeIndex)} style={{ cursor: "zoom-in" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={activeImage.signedUrl}
@@ -86,6 +93,15 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && (
+        <PhotoLightbox
+          images={lightboxImages}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
     </div>
   );
