@@ -119,16 +119,31 @@ export async function forgotPasswordAction(
     return { error: "Please enter your email address.", success: false };
   }
 
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const redirectTo = `${siteUrl}/auth/reset-password`;
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password`,
-  });
+    console.log("[ForgotPassword] Sending reset email to:", email);
+    console.log("[ForgotPassword] redirectTo:", redirectTo);
 
-  if (error) {
-    return { error: error.message, success: false };
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    if (error) {
+      console.error("[ForgotPassword] Supabase error:", error.message);
+      return { error: error.message, success: false };
+    }
+
+    console.log("[ForgotPassword] Success — email sent");
+    return { error: null, success: true };
+  } catch (err) {
+    console.error("[ForgotPassword] Unexpected error:", err);
+    return {
+      error: "Something went wrong. Please try again.",
+      success: false,
+    };
   }
-
-  // Always show success to prevent email enumeration
-  return { error: null, success: true };
 }
+
