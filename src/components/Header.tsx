@@ -168,16 +168,14 @@ export default function Header() {
           <Link href="/dashboard" className="header-nav-link" id="nav-stable" onClick={closeMobileMenu}>
             🏠 Digital Stable
           </Link>
-          {aliasName && (
-            <Link
-              href={`/profile/${encodeURIComponent(aliasName)}`}
-              className="header-nav-link"
-              id="nav-profile"
-              onClick={closeMobileMenu}
-            >
-              👤 My Profile
-            </Link>
-          )}
+          <Link
+            href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
+            className="header-nav-link"
+            id="nav-profile"
+            onClick={closeMobileMenu}
+          >
+            👤 My Profile
+          </Link>
           <Link href="/community" className="header-nav-link" id="nav-community" onClick={closeMobileMenu}>
             🏆 Show Ring
           </Link>
