@@ -79,7 +79,7 @@ export default async function DiscoverPage() {
         });
 
     return (
-        <div className="page-container">
+        <div className="page-container page-container-wide">
             {/* Hero */}
             <div className="community-hero animate-fade-in-up">
                 <div className="community-hero-content">

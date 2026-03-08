@@ -207,7 +207,7 @@ export default async function ProfilePage({
   ).length;
 
   return (
-    <div className="page-container">
+    <div className="page-container page-container-wide">
       {/* Profile Header */}
       <div className="profile-hero animate-fade-in-up">
         <div className="profile-avatar">

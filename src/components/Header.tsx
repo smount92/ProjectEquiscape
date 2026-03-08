@@ -14,7 +14,9 @@ export default function Header() {
   const [aliasName, setAliasName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -58,7 +60,6 @@ export default function Header() {
   }, [user, fetchHeaderInfo]);
 
   const handleSignOut = () => {
-    // Fire-and-forget — redirect immediately regardless of signOut result
     supabase.auth.signOut().catch(() => { });
     window.location.href = "/login";
   };
@@ -75,6 +76,18 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [mobileMenuOpen]);
 
+  // Close user menu on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [userMenuOpen]);
+
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
@@ -89,6 +102,7 @@ export default function Header() {
         </span>
         <span>Model Horse Hub</span>
       </Link>
+
       {/* ── Hamburger Button (mobile only) ── */}
       {user && (
         <button
@@ -113,42 +127,144 @@ export default function Header() {
         </button>
       )}
 
-      {/* ── Authenticated Navigation ── */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* DESKTOP NAVIGATION — Primary links + icon actions + user  */}
+      {/* Hidden on mobile (mobile uses the hamburger nav below)     */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {user && (
-        <nav ref={navRef} className={`header-nav ${mobileMenuOpen ? "header-nav-open" : ""}`} aria-label="Main navigation">
-          <Link href="/dashboard" className="header-nav-link" id="nav-stable" onClick={closeMobileMenu}>
+        <div className="header-desktop-nav">
+          {/* Primary text links */}
+          <nav className="header-nav-primary" aria-label="Main navigation">
+            <Link href="/dashboard" className="header-nav-link" id="nav-stable">
+              🏠 Stable
+            </Link>
+            <Link href="/community" className="header-nav-link" id="nav-community">
+              🏆 Show Ring
+            </Link>
+            <Link href="/feed" className="header-nav-link" id="nav-feed">
+              📰 Feed
+            </Link>
+            <Link href="/discover" className="header-nav-link" id="nav-discover">
+              👥 Discover
+            </Link>
+            <Link href="/shows" className="header-nav-link" id="nav-shows">
+              📸 Shows
+            </Link>
+          </nav>
+
+          {/* Icon action buttons */}
+          <div className="header-icon-actions">
+            <NotificationBell />
+            <Link href="/inbox" className="header-icon-btn" title="Inbox" id="nav-inbox-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="inbox-unread-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+              )}
+            </Link>
+            <Link href="/wishlist" className="header-icon-btn" title="Wishlist" id="nav-wishlist-icon">
+              ❤️
+            </Link>
+          </div>
+
+          {/* User menu dropdown */}
+          <div className="header-user-menu" ref={userMenuRef}>
+            <button
+              className="header-user-menu-trigger"
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              aria-expanded={userMenuOpen}
+              aria-label="User menu"
+            >
+              <span className="header-user-avatar">
+                {aliasName ? aliasName.charAt(0).toUpperCase() : "U"}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+                className={`header-chevron ${userMenuOpen ? "header-chevron-open" : ""}`}>
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {userMenuOpen && (
+              <div className="header-user-dropdown">
+                <Link
+                  href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
+                  className="header-dropdown-link"
+                  onClick={() => setUserMenuOpen(false)}
+                >
+                  👤 My Profile
+                </Link>
+                <Link href="/settings" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                  ⚙️ Settings
+                </Link>
+                <Link href="/claim" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                  📦 Claim
+                </Link>
+                {isAdmin && (
+                  <Link href="/admin" className="header-dropdown-link header-dropdown-admin" onClick={() => setUserMenuOpen(false)}>
+                    ⚡ Admin
+                  </Link>
+                )}
+                <div className="header-dropdown-divider" />
+                <button
+                  className="header-dropdown-link"
+                  onClick={() => { setUserMenuOpen(false); toggleSimpleMode(); }}
+                >
+                  {isSimpleMode ? "👁 Simple Mode: ON" : "👁‍🗨 Simple Mode"}
+                </button>
+                <button
+                  className="header-dropdown-link header-dropdown-signout"
+                  onClick={() => { setUserMenuOpen(false); handleSignOut(); }}
+                >
+                  🚪 Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* MOBILE NAVIGATION — Full menu in hamburger dropdown       */}
+      {/* Hidden on desktop                                          */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {user && (
+        <nav ref={navRef} className={`header-nav header-nav-mobile ${mobileMenuOpen ? "header-nav-open" : ""}`} aria-label="Mobile navigation">
+          <Link href="/dashboard" className="header-nav-link" id="nav-stable-m" onClick={closeMobileMenu}>
             🏠 Digital Stable
           </Link>
           <Link
             href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
             className="header-nav-link"
-            id="nav-profile"
+            id="nav-profile-m"
             onClick={closeMobileMenu}
           >
             👤 My Profile
           </Link>
-          <Link href="/community" className="header-nav-link" id="nav-community" onClick={closeMobileMenu}>
+          <Link href="/community" className="header-nav-link" id="nav-community-m" onClick={closeMobileMenu}>
             🏆 Show Ring
           </Link>
-          <Link href="/discover" className="header-nav-link" id="nav-discover" onClick={closeMobileMenu}>
+          <Link href="/discover" className="header-nav-link" id="nav-discover-m" onClick={closeMobileMenu}>
             👥 Discover
           </Link>
-          <Link href="/feed" className="header-nav-link" id="nav-feed" onClick={closeMobileMenu}>
+          <Link href="/feed" className="header-nav-link" id="nav-feed-m" onClick={closeMobileMenu}>
             📰 Feed
           </Link>
-          <Link href="/shows" className="header-nav-link" id="nav-shows" onClick={closeMobileMenu}>
+          <Link href="/shows" className="header-nav-link" id="nav-shows-m" onClick={closeMobileMenu}>
             📸 Shows
           </Link>
-          <Link href="/wishlist" className="header-nav-link" id="nav-wishlist" onClick={closeMobileMenu}>
+          <Link href="/wishlist" className="header-nav-link" id="nav-wishlist-m" onClick={closeMobileMenu}>
             ❤️ Wishlist
           </Link>
-          <Link href="/claim" className="header-nav-link" id="nav-claim" onClick={closeMobileMenu}>
+          <Link href="/claim" className="header-nav-link" id="nav-claim-m" onClick={closeMobileMenu}>
             📦 Claim
           </Link>
-          <Link href="/settings" className="header-nav-link" id="nav-settings" onClick={closeMobileMenu}>
+          <Link href="/settings" className="header-nav-link" id="nav-settings-m" onClick={closeMobileMenu}>
             ⚙️ Settings
           </Link>
-          <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox" onClick={closeMobileMenu}>
+          <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox-m" onClick={closeMobileMenu}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -161,22 +277,11 @@ export default function Header() {
           </Link>
           <NotificationBell />
           {isAdmin && (
-            <Link href="/admin" className="header-nav-link admin-nav-link" id="nav-admin">
+            <Link href="/admin" className="header-nav-link admin-nav-link" id="nav-admin-m">
               Admin ⚡
             </Link>
           )}
-          {/* ── Public info links (always accessible) ── */}
-          <div className="header-nav-divider" aria-hidden="true" />
-          <Link href="/" className="header-nav-link header-nav-link-secondary" id="nav-home" onClick={closeMobileMenu}>
-            🏡 Home
-          </Link>
-          <Link href="/about" className="header-nav-link header-nav-link-secondary" id="nav-about" onClick={closeMobileMenu}>
-            ℹ️ About
-          </Link>
-          <Link href="/contact" className="header-nav-link header-nav-link-secondary" id="nav-contact" onClick={closeMobileMenu}>
-            ✉️ Contact
-          </Link>
-          {/* ── Mobile-only: Sign Out + Simple Mode inside hamburger ── */}
+          {/* ── Mobile-only: Sign Out + Simple Mode ── */}
           <div className="header-auth-actions-mobile">
             <button
               className="btn btn-ghost"
@@ -209,17 +314,9 @@ export default function Header() {
         </nav>
       )}
 
-      <div className="header-actions header-auth-actions-desktop">
-        {user ? (
-          <button
-            className="btn btn-ghost"
-            onClick={handleSignOut}
-            id="sign-out-button"
-            style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
-          >
-            Sign Out
-          </button>
-        ) : (
+      {/* ── Desktop auth actions for logged-out users ── */}
+      {!user && (
+        <div className="header-actions">
           <Link
             href="/login"
             className="btn btn-primary btn-sm"
@@ -227,56 +324,35 @@ export default function Header() {
           >
             Log In
           </Link>
-        )}
-
-        <button
-          className="simple-mode-toggle"
-          onClick={toggleSimpleMode}
-          aria-pressed={isSimpleMode}
-          aria-label={
-            isSimpleMode
-              ? "Disable Simple Mode (high contrast and large text)"
-              : "Enable Simple Mode (high contrast and large text)"
-          }
-          title={isSimpleMode ? "Simple Mode: ON" : "Simple Mode: OFF"}
-          id="simple-mode-toggle"
-        >
-          {isSimpleMode ? (
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          ) : (
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-              <line x1="1" y1="1" x2="23" y2="23" />
-            </svg>
-          )}
-          <span className="simple-mode-tooltip">
-            {isSimpleMode ? "Simple Mode: ON" : "Simple Mode: OFF"}
-          </span>
-        </button>
-      </div>
+          <button
+            className="simple-mode-toggle"
+            onClick={toggleSimpleMode}
+            aria-pressed={isSimpleMode}
+            aria-label={
+              isSimpleMode
+                ? "Disable Simple Mode (high contrast and large text)"
+                : "Enable Simple Mode (high contrast and large text)"
+            }
+            title={isSimpleMode ? "Simple Mode: ON" : "Simple Mode: OFF"}
+            id="simple-mode-toggle"
+          >
+            {isSimpleMode ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            )}
+            <span className="simple-mode-tooltip">
+              {isSimpleMode ? "Simple Mode: ON" : "Simple Mode: OFF"}
+            </span>
+          </button>
+        </div>
+      )}
     </header>
   );
 }
