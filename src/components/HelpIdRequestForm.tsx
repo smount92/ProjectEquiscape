@@ -28,9 +28,16 @@ export default function HelpIdRequestForm() {
         const form = e.currentTarget;
         const formData = new FormData(form);
 
-        // Compress image before upload
+        // Manual validation for photo (hidden input can't show native validation tooltip)
         const imageFile = formData.get("image") as File;
-        if (imageFile && imageFile.size > 0) {
+        if (!imageFile || imageFile.size === 0) {
+            setStatus("error");
+            setError("Please upload a photo of the model.");
+            return;
+        }
+
+        // Compress image before upload
+        if (imageFile.size > 0) {
             try {
                 const compressed = await compressImage(imageFile);
                 formData.set("image", compressed);
@@ -111,7 +118,7 @@ export default function HelpIdRequestForm() {
                                 accept="image/*"
                                 onChange={handleFileChange}
                                 style={{ display: "none" }}
-                                required
+                                required={false}
                             />
                         </div>
                     </div>
