@@ -67,6 +67,8 @@ export default function EditHorsePage() {
   const [editionSize, setEditionSize] = useState("");
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
+  const [originalCondition, setOriginalCondition] = useState("");
+  const [conditionNote, setConditionNote] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
@@ -150,6 +152,7 @@ export default function EditHorsePage() {
       setEditionSize(horse.edition_size ? String(horse.edition_size) : "");
       setFinishType(horse.finish_type);
       setConditionGrade(horse.condition_grade);
+      setOriginalCondition(horse.condition_grade);
       setIsPublic(horse.is_public);
       setSelectedCollectionId(horse.collection_id);
       setTradeStatus(horse.trade_status || "Not for Sale");
@@ -333,6 +336,15 @@ export default function EditHorsePage() {
       if (vaultData) formData.append("vaultData", JSON.stringify(vaultData));
       formData.append("hasExistingVault", String(hasExistingVault));
       formData.append("deleteVault", String(deleteVault));
+
+      // Condition change tracking
+      if (conditionGrade !== originalCondition) {
+        formData.append("conditionChange", JSON.stringify({
+          oldCondition: originalCondition,
+          newCondition: conditionGrade,
+          note: conditionNote.trim() || null,
+        }));
+      }
 
       const slotsMetadata: Record<string, { recordId?: string; storagePath?: string }> = {};
 
@@ -689,6 +701,32 @@ export default function EditHorsePage() {
                   <option key={g.value} value={g.value}>{g.label}</option>
                 ))}
               </select>
+
+              {/* Condition Change Note - shows when condition was changed */}
+              {originalCondition && conditionGrade && conditionGrade !== originalCondition && (
+                <div className="condition-change-note animate-fade-in-up" style={{ marginTop: "var(--space-sm)" }}>
+                  <div style={{
+                    fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+                    color: "var(--color-accent-warning, #f59e0b)",
+                    marginBottom: "var(--space-xs)",
+                    fontWeight: 600,
+                  }}>
+                    📝 Condition changed: {originalCondition} → {conditionGrade}
+                  </div>
+                  <textarea
+                    className="form-textarea"
+                    rows={2}
+                    maxLength={300}
+                    placeholder="What happened? (optional — visible on Hoofprint™)"
+                    value={conditionNote}
+                    onChange={(e) => setConditionNote(e.target.value)}
+                    style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
+                  />
+                  <span className="form-hint">
+                    e.g., &quot;Minor rub discovered on left hip during cleaning&quot;
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

@@ -38,11 +38,11 @@ BEGIN
     ) VALUES (
       p_user_id,
       horse_record->>'custom_name',
-      COALESCE(horse_record->>'finish_type', 'OF'),
+      COALESCE(horse_record->>'finish_type', 'OF')::finish_type,
       COALESCE(horse_record->>'condition_grade', 'Not Graded'),
-      NULLIF(horse_record->>'reference_mold_id', ''),
-      NULLIF(horse_record->>'artist_resin_id', ''),
-      NULLIF(horse_record->>'release_id', ''),
+      NULLIF(horse_record->>'reference_mold_id', '')::UUID,
+      NULLIF(horse_record->>'artist_resin_id', '')::UUID,
+      NULLIF(horse_record->>'release_id', '')::UUID,
       false,
       'Not for Sale'
     )

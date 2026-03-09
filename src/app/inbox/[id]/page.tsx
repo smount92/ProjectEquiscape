@@ -71,6 +71,35 @@ export default async function ChatPage({
 
     const otherAlias = otherUser?.alias_name ?? "Unknown";
 
+    // ── Trust Signals ──
+    // Account age
+    const { data: otherProfile } = await supabase
+        .from("users")
+        .select("created_at")
+        .eq("id", otherId)
+        .single<{ created_at: string }>();
+
+    const memberSince = otherProfile?.created_at
+        ? new Date(otherProfile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+        : null;
+
+    // Completed transfers count
+    const { count: transferCount } = await supabase
+        .from("horse_transfers")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "claimed")
+        .or(`sender_id.eq.${otherId},claimed_by.eq.${otherId}`);
+
+    // Average rating
+    const { data: ratingsData } = await supabase
+        .from("user_ratings")
+        .select("stars")
+        .eq("reviewed_id", otherId);
+    const ratingsArr = (ratingsData ?? []) as { stars: number }[];
+    const avgRating = ratingsArr.length > 0
+        ? Math.round((ratingsArr.reduce((s, r) => s + r.stars, 0) / ratingsArr.length) * 10) / 10
+        : null;
+
     // Get horse context if present
     let horseContext: {
         id: string;
@@ -139,6 +168,13 @@ export default async function ChatPage({
         createdAt: (rawRating as { created_at: string }).created_at,
     } : null;
 
+    // Check for completed transfer between these two users
+    const { count: mutualTransfers } = await supabase
+        .from("horse_transfers")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "claimed")
+        .or(`and(sender_id.eq.${user.id},claimed_by.eq.${otherId}),and(sender_id.eq.${otherId},claimed_by.eq.${user.id})`);
+
     return (
         <div className="page-container chat-page">
             {/* Header */}
@@ -184,6 +220,23 @@ export default async function ChatPage({
                                 </span>
                             )}
                         </Link>
+                    )}
+                </div>
+
+                {/* Trust Signals */}
+                <div className="chat-trust-signals">
+                    {memberSince && (
+                        <span className="chat-trust-badge" title="Account age">
+                            📅 Member since {memberSince}
+                        </span>
+                    )}
+                    <span className="chat-trust-badge" title="Completed Hoofprint transfers">
+                        📦 {transferCount || 0} transfer{transferCount !== 1 ? "s" : ""}
+                    </span>
+                    {avgRating !== null && (
+                        <span className="chat-trust-badge" title="Average user rating">
+                            ⭐ {avgRating} ({ratingsArr.length})
+                        </span>
                     )}
                 </div>
                 <div className="chat-header-badge">
@@ -232,6 +285,7 @@ export default async function ChatPage({
                 reviewedId={otherId}
                 reviewedAlias={otherAlias}
                 existingRating={existingRating}
+                hasVerifiedTransfer={(mutualTransfers || 0) > 0}
             />
         </div>
     );

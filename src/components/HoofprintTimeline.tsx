@@ -28,6 +28,8 @@ const EVENT_ICONS: Record<string, string> = {
     sold: "🤝",
     transferred: "📦",
     note: "📝",
+    status_change: "🔒",
+    condition_change: "📊",
 };
 
 const STAGE_LABELS: Record<string, string> = {
@@ -35,6 +37,7 @@ const STAGE_LABELS: Record<string, string> = {
     in_progress: "Work in Progress",
     completed: "Completed",
     for_sale: "Listed for Sale",
+    parked: "Parked — Off-Platform Sale",
 };
 
 const STAGE_ICONS: Record<string, string> = {
@@ -42,6 +45,7 @@ const STAGE_ICONS: Record<string, string> = {
     in_progress: "🔧",
     completed: "✅",
     for_sale: "💲",
+    parked: "🔒",
 };
 
 export default function HoofprintTimeline({

@@ -16,6 +16,7 @@ interface RatingFormProps {
     reviewedId: string;
     reviewedAlias: string;
     existingRating: ExistingRating | null;
+    hasVerifiedTransfer?: boolean;
 }
 
 export default function RatingForm({
@@ -23,6 +24,7 @@ export default function RatingForm({
     reviewedId,
     reviewedAlias,
     existingRating,
+    hasVerifiedTransfer,
 }: RatingFormProps) {
     const [rating, setRating] = useState<ExistingRating | null>(existingRating);
     const [stars, setStars] = useState(0);
@@ -109,6 +111,22 @@ export default function RatingForm({
             <div className="rating-form-header">
                 <span>⭐ Rate your experience with @{reviewedAlias}</span>
             </div>
+
+            {hasVerifiedTransfer === false && (
+                <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--space-xs)",
+                    padding: "var(--space-xs) var(--space-sm)",
+                    background: "var(--color-bg-elevated)",
+                    borderRadius: "var(--radius-sm)",
+                    fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+                    color: "var(--color-text-muted)",
+                    marginBottom: "var(--space-md)",
+                }}>
+                    ℹ️ No verified Hoofprint™ transfer found between you and this user.
+                </div>
+            )}
             <form onSubmit={handleSubmit}>
                 <div className="rating-form-stars">
                     <RatingStars

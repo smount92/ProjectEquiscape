@@ -9,6 +9,7 @@ import ShowRecordTimeline from "@/components/ShowRecordTimeline";
 import PedigreeCard from "@/components/PedigreeCard";
 import HoofprintTimeline from "@/components/HoofprintTimeline";
 import TransferModal from "@/components/TransferModal";
+import ParkedExportPanel from "@/components/ParkedExportPanel";
 import { getHoofprint } from "@/app/actions/hoofprint";
 
 export const dynamic = "force-dynamic";
@@ -219,6 +220,23 @@ export default async function HorsePassportPage({
 
   // Hoofprint data
   const { timeline, ownershipChain, lifeStage } = await getHoofprint(horseId);
+
+  // Check if horse is parked (for Parked Export panel)
+  const isParked = lifeStage === "parked";
+  let existingPin: string | null = null;
+  if (isParked) {
+    const { data: activeTransfer } = await supabase
+      .from("horse_transfers")
+      .select("claim_pin")
+      .eq("horse_id", horseId)
+      .eq("sender_id", user.id)
+      .eq("status", "pending")
+      .not("claim_pin", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    existingPin = (activeTransfer as { claim_pin: string } | null)?.claim_pin || null;
+  }
 
   // Reference display info
   const refInfo = horse.reference_molds
@@ -469,6 +487,12 @@ export default async function HorsePassportPage({
               </svg>
               Edit Details
             </Link>
+            <ParkedExportPanel
+              horseId={horseId}
+              horseName={horse.custom_name}
+              isParked={isParked}
+              existingPin={existingPin}
+            />
             <TransferModal
               horseId={horseId}
               horseName={horse.custom_name}

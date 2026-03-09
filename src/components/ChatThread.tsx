@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { sendMessage } from "@/app/actions/messaging";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +19,8 @@ interface ChatThreadProps {
     initialMessages: ChatMessage[];
 }
 
+const RISKY_PAYMENT_REGEX = /(venmo|zelle|paypal\s*f\s*(&|and)\s*f|friends\s*and\s*family|cash\s*app|wire\s*transfer)/i;
+
 export default function ChatThread({
     conversationId,
     currentUserId,
@@ -31,6 +33,9 @@ export default function ChatThread({
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const router = useRouter();
+
+    // Risky payment detection
+    const showPaymentWarning = useMemo(() => RISKY_PAYMENT_REGEX.test(newMessage), [newMessage]);
 
     // Scroll to bottom on mount and new messages
     useEffect(() => {
@@ -149,6 +154,18 @@ export default function ChatThread({
                 )}
                 <div ref={messagesEndRef} />
             </div>
+
+            {/* Risky Payment Warning */}
+            {showPaymentWarning && (
+                <div className="chat-payment-warning" role="alert">
+                    <span className="chat-payment-warning-icon">🛡️</span>
+                    <span>
+                        <strong>Protect yourself:</strong> Always use PayPal Goods &amp; Services for
+                        off-platform payments. Venmo, Zelle, and PayPal Friends &amp; Family offer{" "}
+                        <strong>no buyer protection</strong>.
+                    </span>
+                </div>
+            )}
 
             {/* Input area */}
             <div className="chat-input-area">

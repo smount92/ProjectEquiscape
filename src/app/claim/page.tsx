@@ -1,31 +1,111 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { claimTransfer } from "@/app/actions/hoofprint";
+import { getParkedHorseByPin, claimParkedHorse } from "@/app/actions/parked-export";
 
 export default function ClaimPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [code, setCode] = useState("");
     const [claiming, setClaiming] = useState(false);
+    const [lookingUp, setLookingUp] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<{ horseName: string; horseId: string } | null>(null);
 
-    const handleClaim = async (e: React.FormEvent) => {
+    // PIN-based preview state
+    const [preview, setPreview] = useState<{
+        name: string;
+        photo: string | null;
+        finish: string;
+        condition: string;
+        timelineCount: number;
+        ownerCount: number;
+        transferId: string;
+    } | null>(null);
+    const [isPinMode, setIsPinMode] = useState(false);
+
+    // Auto-fill from URL query param
+    useEffect(() => {
+        const pin = searchParams.get("pin");
+        if (pin) {
+            setCode(pin.toUpperCase());
+            setIsPinMode(true);
+            // Auto-lookup
+            handlePinLookup(pin.toUpperCase());
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handlePinLookup = async (pinValue: string) => {
+        setLookingUp(true);
+        setError(null);
+        const result = await getParkedHorseByPin(pinValue);
+        if (result.success && result.horse) {
+            setPreview(result.horse);
+            setIsPinMode(true);
+        } else {
+            setError(result.error || "Invalid PIN.");
+            setPreview(null);
+        }
+        setLookingUp(false);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (code.trim().length < 6) {
-            setError("Please enter a valid 6-character transfer code.");
+        const trimmed = code.trim();
+        if (trimmed.length < 6) {
+            setError("Please enter a valid 6-character code.");
             return;
         }
-        setClaiming(true);
+
         setError(null);
 
-        const result = await claimTransfer(code.trim());
+        // If we already have a preview from a PIN lookup, claim via PIN
+        if (isPinMode && preview) {
+            setClaiming(true);
+            const result = await claimParkedHorse(trimmed);
+            if (result.success && result.horseName && result.horseId) {
+                setSuccess({ horseName: result.horseName, horseId: result.horseId });
+            } else {
+                setError(result.error || "Failed to claim.");
+            }
+            setClaiming(false);
+            return;
+        }
+
+        // Try PIN lookup first, then fall back to transfer code
+        setLookingUp(true);
+        const pinResult = await getParkedHorseByPin(trimmed);
+        if (pinResult.success && pinResult.horse) {
+            setPreview(pinResult.horse);
+            setIsPinMode(true);
+            setLookingUp(false);
+            return;
+        }
+
+        // Fall back to standard transfer code claim
+        setLookingUp(false);
+        setClaiming(true);
+        const result = await claimTransfer(trimmed);
         if (result.success && result.horseName && result.horseId) {
             setSuccess({ horseName: result.horseName, horseId: result.horseId });
         } else {
-            setError(result.error || "Failed to claim transfer.");
+            setError(result.error || "Invalid code or PIN.");
+        }
+        setClaiming(false);
+    };
+
+    const handleClaim = async () => {
+        setClaiming(true);
+        setError(null);
+        const result = await claimParkedHorse(code.trim());
+        if (result.success && result.horseName && result.horseId) {
+            setSuccess({ horseName: result.horseName, horseId: result.horseId });
+        } else {
+            setError(result.error || "Failed to claim.");
         }
         setClaiming(false);
     };
@@ -57,54 +137,144 @@ export default function ClaimPage() {
 
     return (
         <div className="page-container form-page">
-            <div className="card animate-fade-in-up" style={{ maxWidth: "500px", margin: "0 auto", padding: "var(--space-2xl)" }}>
+            <div className="card animate-fade-in-up" style={{ maxWidth: "520px", margin: "0 auto", padding: "var(--space-2xl)" }}>
                 <div style={{ textAlign: "center", marginBottom: "var(--space-lg)" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>📦</div>
                     <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>
                         <span className="text-gradient">Claim a Horse</span>
                     </h1>
                     <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))", marginTop: "var(--space-xs)" }}>
-                        Enter the 6-character transfer code from the seller to add their horse to your stable.
+                        Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
                     </p>
                 </div>
 
-                <form onSubmit={handleClaim}>
-                    <div className="form-group">
-                        <label className="form-label">Transfer Code</label>
-                        <input
-                            type="text"
-                            className="form-input"
-                            value={code}
-                            onChange={(e) => setCode(e.target.value.toUpperCase())}
-                            placeholder="ABC123"
-                            maxLength={6}
-                            style={{
-                                fontFamily: "monospace",
-                                fontSize: "1.8rem",
-                                fontWeight: 800,
-                                textAlign: "center",
-                                letterSpacing: "0.3em",
-                                padding: "var(--space-md)",
-                            }}
-                            autoFocus
-                        />
+                {/* Preview Card (CoA PIN lookup result) */}
+                {preview && (
+                    <div className="claim-preview-card" style={{
+                        border: "1px solid var(--color-border)",
+                        borderRadius: "var(--radius-lg)",
+                        padding: "var(--space-lg)",
+                        marginBottom: "var(--space-lg)",
+                        background: "var(--color-bg-elevated)",
+                    }}>
+                        <div style={{ display: "flex", gap: "var(--space-lg)", alignItems: "center" }}>
+                            {preview.photo ? (
+                                <img
+                                    src={preview.photo}
+                                    alt={preview.name}
+                                    style={{
+                                        width: 80, height: 80,
+                                        borderRadius: "var(--radius-md)",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                            ) : (
+                                <div style={{
+                                    width: 80, height: 80,
+                                    borderRadius: "var(--radius-md)",
+                                    background: "var(--color-bg-card)",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    fontSize: "2rem",
+                                }}>🐴</div>
+                            )}
+                            <div style={{ flex: 1 }}>
+                                <h3 style={{ fontSize: "calc(1.1rem * var(--font-scale))", fontWeight: 700, marginBottom: 4 }}>
+                                    {preview.name}
+                                </h3>
+                                <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                    {preview.finish} · {preview.condition}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style={{
+                            display: "flex", gap: "var(--space-lg)",
+                            marginTop: "var(--space-md)",
+                            paddingTop: "var(--space-md)",
+                            borderTop: "1px solid var(--color-border)",
+                        }}>
+                            <div style={{ textAlign: "center", flex: 1 }}>
+                                <span style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--color-accent-primary)" }}>
+                                    {preview.timelineCount}
+                                </span>
+                                <br />
+                                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                    Hoofprint Events
+                                </span>
+                            </div>
+                            <div style={{ textAlign: "center", flex: 1 }}>
+                                <span style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--color-accent-primary)" }}>
+                                    {preview.ownerCount}
+                                </span>
+                                <br />
+                                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                    Previous Owner{preview.ownerCount !== 1 ? "s" : ""}
+                                </span>
+                            </div>
+                        </div>
+
+                        <button
+                            className="btn btn-primary"
+                            onClick={handleClaim}
+                            disabled={claiming}
+                            style={{ width: "100%", marginTop: "var(--space-lg)" }}
+                            id="claim-horse-btn"
+                        >
+                            {claiming ? "Claiming…" : "🐴 Claim This Horse"}
+                        </button>
                     </div>
+                )}
 
-                    {error && (
-                        <p style={{ color: "#ef4444", fontSize: "calc(0.8rem * var(--font-scale))", textAlign: "center", marginBottom: "var(--space-md)" }}>
-                            {error}
-                        </p>
-                    )}
+                {/* Code Input */}
+                {!preview && (
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group">
+                            <label className="form-label">Transfer Code or PIN</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={code}
+                                onChange={(e) => {
+                                    setCode(e.target.value.toUpperCase());
+                                    setIsPinMode(false);
+                                    setPreview(null);
+                                }}
+                                placeholder="ABC123"
+                                maxLength={6}
+                                style={{
+                                    fontFamily: "monospace",
+                                    fontSize: "1.8rem",
+                                    fontWeight: 800,
+                                    textAlign: "center",
+                                    letterSpacing: "0.3em",
+                                    padding: "var(--space-md)",
+                                }}
+                                autoFocus
+                            />
+                        </div>
 
-                    <button
-                        type="submit"
-                        className="btn btn-primary"
-                        disabled={claiming || code.trim().length < 6}
-                        style={{ width: "100%" }}
-                    >
-                        {claiming ? "Claiming…" : "🐴 Claim Horse"}
-                    </button>
-                </form>
+                        {error && (
+                            <p style={{ color: "#ef4444", fontSize: "calc(0.8rem * var(--font-scale))", textAlign: "center", marginBottom: "var(--space-md)" }}>
+                                {error}
+                            </p>
+                        )}
+
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={claiming || lookingUp || code.trim().length < 6}
+                            style={{ width: "100%" }}
+                        >
+                            {lookingUp ? "Looking up…" : claiming ? "Claiming…" : "🐴 Look Up & Claim"}
+                        </button>
+                    </form>
+                )}
+
+                {error && preview && (
+                    <p style={{ color: "#ef4444", fontSize: "calc(0.8rem * var(--font-scale))", textAlign: "center", marginTop: "var(--space-md)" }}>
+                        {error}
+                    </p>
+                )}
 
                 <p style={{ textAlign: "center", fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-md)" }}>
                     The horse&apos;s full Hoofprint™ history will transfer with it.

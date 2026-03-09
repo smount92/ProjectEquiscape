@@ -308,6 +308,40 @@ export async function updateHorseAction(horseId: string, formData: FormData): Pr
             }
         }
 
+        // ── Condition History Ledger ──
+        const conditionChangeStr = formData.get("conditionChange") as string;
+        if (conditionChangeStr) {
+            try {
+                const cc = JSON.parse(conditionChangeStr) as {
+                    oldCondition: string;
+                    newCondition: string;
+                    note: string | null;
+                };
+
+                // Insert into condition_history table
+                await supabase.from("condition_history").insert({
+                    horse_id: horseId,
+                    changed_by: user.id,
+                    old_condition: cc.oldCondition,
+                    new_condition: cc.newCondition,
+                    note: cc.note,
+                });
+
+                // Insert Hoofprint timeline event
+                await supabase.from("horse_timeline").insert({
+                    horse_id: horseId,
+                    user_id: user.id,
+                    event_type: "condition_change",
+                    title: `Condition: ${cc.oldCondition} → ${cc.newCondition}`,
+                    description: cc.note || undefined,
+                    metadata: {
+                        old_condition: cc.oldCondition,
+                        new_condition: cc.newCondition,
+                    },
+                });
+            } catch { /* Non-blocking — don't fail the save */ }
+        }
+
         revalidatePath(`/stable/${horseId}`);
         return { success: true };
     } catch (error) {
