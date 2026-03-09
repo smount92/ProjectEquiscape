@@ -13,17 +13,6 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-interface IdRequest {
-    id: string;
-    user_id: string;
-    image_url: string;
-    description: string | null;
-    status: string;
-    created_at: string;
-    users: { alias_name: string } | null;
-    suggestion_count: number;
-}
-
 export default async function HelpIdPage() {
     const supabase = await createClient();
     const {
@@ -34,17 +23,41 @@ export default async function HelpIdPage() {
         redirect("/login");
     }
 
-    // Fetch all open requests (most recent first)
+    // Fetch all requests (most recent first) — NO join to users (FK is auth.users, not public.users)
     const { data: rawRequests } = await supabase
         .from("id_requests")
-        .select(`
-      id, user_id, image_url, description, status, created_at,
-      users:user_id(alias_name)
-    `)
+        .select("id, user_id, image_url, description, status, created_at")
         .order("created_at", { ascending: false })
         .limit(50);
 
-    const requests = (rawRequests as unknown as Omit<IdRequest, "suggestion_count">[]) ?? [];
+    const rawList = (rawRequests ?? []) as {
+        id: string;
+        user_id: string;
+        image_url: string;
+        description: string | null;
+        status: string;
+        created_at: string;
+    }[];
+
+    // Batch-fetch alias names from public.users
+    const userIds = [...new Set(rawList.map((r) => r.user_id))];
+    const userNameMap = new Map<string, string>();
+    if (userIds.length > 0) {
+        const { data: usersData } = await supabase
+            .from("users")
+            .select("id, alias_name")
+            .in("id", userIds);
+        if (usersData) {
+            for (const u of usersData as { id: string; alias_name: string }[]) {
+                userNameMap.set(u.id, u.alias_name);
+            }
+        }
+    }
+
+    const requests = rawList.map((r) => ({
+        ...r,
+        userName: userNameMap.get(r.user_id) ?? "Unknown",
+    }));
 
     // Get suggestion counts for each request
     const requestIds = requests.map((r) => r.id);
@@ -131,7 +144,7 @@ export default async function HelpIdPage() {
                                                 : "No description provided"}
                                         </p>
                                         <div className="help-id-card-meta">
-                                            <span>by {(req.users as { alias_name: string } | null)?.alias_name ?? "Unknown"}</span>
+                                            <span>by {req.userName}</span>
                                             <span>💬 {suggestionCounts.get(req.id) || 0} suggestion{(suggestionCounts.get(req.id) || 0) !== 1 ? "s" : ""}</span>
                                         </div>
                                     </div>
@@ -176,7 +189,7 @@ export default async function HelpIdPage() {
                                                 : "No description"}
                                         </p>
                                         <div className="help-id-card-meta">
-                                            <span>by {(req.users as { alias_name: string } | null)?.alias_name ?? "Unknown"}</span>
+                                            <span>by {req.userName}</span>
                                             <span>💬 {suggestionCounts.get(req.id) || 0}</span>
                                         </div>
                                     </div>

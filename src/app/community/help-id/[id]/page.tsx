@@ -25,19 +25,16 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
 
     if (!user) redirect("/login");
 
-    // Fetch the request
+    // Fetch the request — NO PostgREST join (FK is auth.users, not public.users)
     const { data: request } = await supabase
         .from("id_requests")
-        .select(`
-      id, user_id, image_url, description, status, accepted_suggestion_id, created_at,
-      users:user_id(alias_name)
-    `)
+        .select("id, user_id, image_url, description, status, accepted_suggestion_id, created_at")
         .eq("id", id)
         .single();
 
     if (!request) notFound();
 
-    interface RequestRow {
+    const req = request as {
         id: string;
         user_id: string;
         image_url: string;
@@ -45,26 +42,29 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
         status: string;
         accepted_suggestion_id: string | null;
         created_at: string;
-        users: { alias_name: string } | null;
-    }
-    const req = request as unknown as RequestRow;
+    };
+
+    // Fetch requester's alias name separately
+    const { data: reqUser } = await supabase
+        .from("users")
+        .select("alias_name")
+        .eq("id", req.user_id)
+        .single();
+    const requesterName = (reqUser as { alias_name: string } | null)?.alias_name ?? "Unknown";
 
     // Get signed URL for the image
     const signedImageUrl = req.image_url
         ? await getSignedImageUrl(supabase, req.image_url)
         : null;
 
-    // Fetch suggestions with user info
+    // Fetch suggestions — NO PostgREST join for same reason
     const { data: rawSuggestions } = await supabase
         .from("id_suggestions")
-        .select(`
-      id, user_id, reference_release_id, artist_resin_id, free_text, upvotes, created_at,
-      users:user_id(alias_name)
-    `)
+        .select("id, user_id, reference_release_id, artist_resin_id, free_text, upvotes, created_at")
         .eq("request_id", id)
         .order("upvotes", { ascending: false });
 
-    interface SuggestionRow {
+    const sugRows = (rawSuggestions ?? []) as {
         id: string;
         user_id: string;
         reference_release_id: string | null;
@@ -72,10 +72,22 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
         free_text: string | null;
         upvotes: number;
         created_at: string;
-        users: { alias_name: string } | null;
-    }
+    }[];
 
-    const sugRows = (rawSuggestions as unknown as SuggestionRow[]) ?? [];
+    // Batch-fetch suggestion user names
+    const sugUserIds = [...new Set(sugRows.map((s) => s.user_id))];
+    const sugUserMap = new Map<string, string>();
+    if (sugUserIds.length > 0) {
+        const { data: sugUsers } = await supabase
+            .from("users")
+            .select("id, alias_name")
+            .in("id", sugUserIds);
+        if (sugUsers) {
+            for (const u of sugUsers as { id: string; alias_name: string }[]) {
+                sugUserMap.set(u.id, u.alias_name);
+            }
+        }
+    }
 
     // Enrich suggestions with reference display names
     const releaseIds = sugRows.filter((s) => s.reference_release_id).map((s) => s.reference_release_id!);
@@ -119,7 +131,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
         free_text: s.free_text,
         upvotes: s.upvotes,
         created_at: s.created_at,
-        userName: s.users?.alias_name ?? "Unknown",
+        userName: sugUserMap.get(s.user_id) ?? "Unknown",
         releaseDisplay: s.reference_release_id ? releaseMap.get(s.reference_release_id) || null : null,
         resinDisplay: s.artist_resin_id ? resinMap.get(s.artist_resin_id) || null : null,
         isAccepted: s.id === req.accepted_suggestion_id,
@@ -150,7 +162,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
                             )}
                         </h1>
                         <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
-                            Submitted by {req.users?.alias_name ?? "Unknown"} on{" "}
+                            Submitted by {requesterName} on{" "}
                             {new Date(req.created_at).toLocaleDateString()}
                         </p>
                     </div>
