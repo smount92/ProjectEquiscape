@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { QRCodeSVG } from "qrcode.react";
+import { useState, useCallback, useRef } from "react";
+import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
 import { pdf } from "@react-pdf/renderer";
 import { parkHorse, unparkHorse, getCoaData } from "@/app/actions/parked-export";
 import CertificateOfAuthenticity from "@/components/pdf/CertificateOfAuthenticity";
@@ -25,6 +25,9 @@ export default function ParkedExportPanel({
     const [status, setStatus] = useState<"idle" | "parking" | "unparking" | "downloading">("idle");
     const [error, setError] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
+
+    // Ref to the hidden QRCodeCanvas for PNG export
+    const qrCanvasRef = useRef<HTMLDivElement>(null);
 
     const handlePark = useCallback(async () => {
         setStatus("parking");
@@ -68,59 +71,11 @@ export default function ParkedExportPanel({
             const result = await getCoaData(horseId);
             if (!result.success || !result.data) throw new Error(result.error);
 
-            // Generate QR as data URI using a canvas
-            const qrCanvas = document.createElement("canvas");
-            const qrSize = 400;
-            qrCanvas.width = qrSize;
-            qrCanvas.height = qrSize;
-
-            // Render QR to a temporary SVG string and convert to data URI
-            // We'll use a simpler approach: render QR as SVG string via DOM
-            const qrUrl = `https://modelhorsehub.com/claim?pin=${result.data.pin}`;
-            const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            document.body.appendChild(svgElement);
-
-            // Use a temporary render to get SVG
-            const tempDiv = document.createElement("div");
-            tempDiv.style.position = "absolute";
-            tempDiv.style.left = "-9999px";
-            document.body.appendChild(tempDiv);
-
-            // Generate QR as PNG data URI via canvas
-            const { renderToString } = await import("react-dom/server");
-            const { createElement } = await import("react");
-            const qrSvgString = renderToString(
-                createElement(QRCodeSVG, {
-                    value: qrUrl,
-                    size: qrSize,
-                    level: "M",
-                    bgColor: "#ffffff",
-                    fgColor: "#1a1a2e",
-                })
-            );
-
-            // Convert SVG to PNG data URI
-            const svgBlob = new Blob([qrSvgString], { type: "image/svg+xml" });
-            const svgUrl = URL.createObjectURL(svgBlob);
-            const img = new window.Image();
-
-            const qrDataUri = await new Promise<string>((resolve) => {
-                img.onload = () => {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = qrSize;
-                    canvas.height = qrSize;
-                    const ctx = canvas.getContext("2d")!;
-                    ctx.fillStyle = "#ffffff";
-                    ctx.fillRect(0, 0, qrSize, qrSize);
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL("image/png"));
-                    URL.revokeObjectURL(svgUrl);
-                };
-                img.src = svgUrl;
-            });
-
-            document.body.removeChild(tempDiv);
-            document.body.removeChild(svgElement);
+            // Grab the QR canvas from the hidden element and convert to PNG data URI
+            const canvasEl = qrCanvasRef.current?.querySelector("canvas");
+            const qrDataUri = canvasEl
+                ? canvasEl.toDataURL("image/png")
+                : ""; // fallback: empty (QR will be blank in PDF, but won't crash)
 
             // Generate PDF
             const blob = await pdf(
@@ -217,7 +172,7 @@ export default function ParkedExportPanel({
                         </button>
                     </div>
 
-                    {/* QR Code */}
+                    {/* QR Code (visible) */}
                     {pin && (
                         <div className="parked-export-qr">
                             <QRCodeSVG
@@ -230,6 +185,23 @@ export default function ParkedExportPanel({
                             <p style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
                                 Scan to claim at modelhorsehub.com
                             </p>
+                        </div>
+                    )}
+
+                    {/* Hidden QR canvas for PDF export (white bg, dark QR) */}
+                    {pin && (
+                        <div
+                            ref={qrCanvasRef}
+                            aria-hidden="true"
+                            style={{ position: "absolute", left: "-9999px", top: 0 }}
+                        >
+                            <QRCodeCanvas
+                                value={claimUrl}
+                                size={400}
+                                level="M"
+                                bgColor="#ffffff"
+                                fgColor="#1a1a2e"
+                            />
                         </div>
                     )}
 
