@@ -167,12 +167,12 @@ export async function getParkedHorseByPin(pin: string): Promise<{
     error?: string;
 }> {
     try {
-        const supabase = await createClient();
+        const admin = getAdminClient();
 
-        // Look up transfer by claim_pin
-        const { data: transfer } = await supabase
+        // Look up transfer by claim_pin (admin bypasses RLS)
+        const { data: transfer } = await admin
             .from("horse_transfers")
-            .select("id, horse_id, sender_id")
+            .select("id, horse_id, sender_id, expires_at")
             .eq("claim_pin", pin.toUpperCase().trim())
             .eq("status", "pending")
             .single();
@@ -181,10 +181,16 @@ export async function getParkedHorseByPin(pin: string): Promise<{
             return { success: false, error: "Invalid or expired PIN." };
         }
 
-        const t = transfer as { id: string; horse_id: string; sender_id: string };
+        const t = transfer as { id: string; horse_id: string; sender_id: string; expires_at: string };
 
-        // Get horse details (public data only)
-        const { data: horse } = await supabase
+        // Check expiration
+        if (new Date(t.expires_at) < new Date()) {
+            await admin.from("horse_transfers").update({ status: "expired" }).eq("id", t.id);
+            return { success: false, error: "This claim PIN has expired." };
+        }
+
+        // Get horse details via admin (horse may be private)
+        const { data: horse } = await admin
             .from("user_horses")
             .select(`
                 id, custom_name, finish_type, condition_grade,
@@ -200,23 +206,23 @@ export async function getParkedHorseByPin(pin: string): Promise<{
             horse_images: { image_url: string; angle_profile: string }[];
         };
 
-        // Get photo
+        // Get photo — use admin for signed URL since horse may be private
         const thumb = h.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
         const imageUrl = thumb?.image_url || h.horse_images?.[0]?.image_url;
         let photo: string | null = null;
         if (imageUrl) {
-            photo = await getSignedImageUrl(supabase, imageUrl);
+            photo = await getSignedImageUrl(admin, imageUrl);
         }
 
         // Get timeline count
-        const { count: timelineCount } = await supabase
+        const { count: timelineCount } = await admin
             .from("horse_timeline")
             .select("id", { count: "exact", head: true })
             .eq("horse_id", t.horse_id)
             .eq("is_public", true);
 
         // Get owner count
-        const { count: ownerCount } = await supabase
+        const { count: ownerCount } = await admin
             .from("horse_ownership_history")
             .select("id", { count: "exact", head: true })
             .eq("horse_id", t.horse_id);
@@ -250,8 +256,9 @@ export async function claimParkedHorse(pin: string): Promise<{
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated. Please log in or create an account first." };
 
-        // Look up transfer
-        const { data: transfer } = await supabase
+        // Look up transfer via admin (claimer may not have RLS access to private horse data)
+        const admin = getAdminClient();
+        const { data: transfer } = await admin
             .from("horse_transfers")
             .select("id, horse_id, sender_id, acquisition_type, sale_price, is_price_public, notes, expires_at")
             .eq("claim_pin", pin.toUpperCase().trim())
@@ -270,7 +277,7 @@ export async function claimParkedHorse(pin: string): Promise<{
 
         // Check expiration
         if (new Date(t.expires_at) < new Date()) {
-            await supabase.from("horse_transfers").update({ status: "expired" }).eq("id", t.id);
+            await admin.from("horse_transfers").update({ status: "expired" }).eq("id", t.id);
             return { success: false, error: "This claim PIN has expired." };
         }
 
@@ -279,7 +286,7 @@ export async function claimParkedHorse(pin: string): Promise<{
             return { success: false, error: "You can't claim your own horse." };
         }
 
-        const admin = getAdminClient();
+        // admin already declared above
 
         // Get horse name + aliases
         const { data: horse } = await admin.from("user_horses").select("custom_name").eq("id", t.horse_id).single();
