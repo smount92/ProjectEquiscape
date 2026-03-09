@@ -8,13 +8,19 @@ Run this workflow before starting ANY work on the project. It loads the full con
 
 ## Steps
 
-1. Read the **Master Architecture Report** to understand the tech stack, project structure, database schema, and all completed features:
+1. Read the **Unified Master Implementation Blueprint** — single source of truth for architecture, database schemas, global directives, and all 4 implementation phases:
 
 ```
-View file: C:\Project Equispace\Architecture&State_Report.txt
+View file: c:\Project Equispace\model-horse-hub\.agents\docs\master_implementation_blueprint.md
 ```
 
-2. Read the **Developer Conventions** reference to understand the strict coding patterns you MUST follow (server components, server actions, client components, CSS, migrations, types):
+2. Read the **Project State & Strategic Research Brief** for comprehensive context on what's been built, competitive positioning, and research directions:
+
+```
+View file: c:\Project Equispace\model-horse-hub\.agents\docs\model_horse_hub_state_report.md
+```
+
+3. Read the **Developer Conventions** reference to understand the strict coding patterns you MUST follow (server components, server actions, client components, CSS, migrations, types):
 
 ```
 View the developer conventions artifact in the brain directory (02_developer_conventions.md)
