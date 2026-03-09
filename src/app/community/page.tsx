@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import ShowRingGrid from "@/components/ShowRingGrid";
 import FeaturedHorseCard from "@/components/FeaturedHorseCard";
@@ -261,6 +262,9 @@ export default async function CommunityPage() {
             <span className="community-stat-number">{communityCards.length}</span>
             <span className="community-stat-label">Models Showcased</span>
           </div>
+          <Link href="/community/help-id" className="btn btn-ghost" id="help-id-link" style={{ marginLeft: "var(--space-md)" }}>
+            🔍 Help Me ID
+          </Link>
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { getSignedImageUrls } from "@/lib/utils/storage";
 import DashboardToast from "@/components/DashboardToast";
 import StableGrid from "@/components/StableGrid";
 import ExportButton from "@/components/ExportButton";
+import InsuranceReportButton from "@/components/InsuranceReportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -241,6 +242,10 @@ export default async function DashboardPage() {
                             </span>
                         )}
                         {horses.length > 0 && <ExportButton />}
+                        {horses.length > 0 && <InsuranceReportButton />}
+                        <Link href="/stable/import" className="btn btn-ghost" id="batch-import-button">
+                            📄 Batch Import
+                        </Link>
                         <Link href="/add-horse" className="btn btn-primary" id="add-horse-button">
                             🐴 Add to Stable
                         </Link>
