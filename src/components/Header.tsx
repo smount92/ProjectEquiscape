@@ -150,6 +150,9 @@ export default function Header() {
             <Link href="/shows" className="header-nav-link" id="nav-shows">
               📸 Shows
             </Link>
+            <Link href="/community/help-id" className="header-nav-link" id="nav-helpid">
+              🔍 Help ID
+            </Link>
           </nav>
 
           {/* Icon action buttons */}
@@ -254,6 +257,9 @@ export default function Header() {
           </Link>
           <Link href="/shows" className="header-nav-link" id="nav-shows-m" onClick={closeMobileMenu}>
             📸 Shows
+          </Link>
+          <Link href="/community/help-id" className="header-nav-link" id="nav-helpid-m" onClick={closeMobileMenu}>
+            🔍 Help ID
           </Link>
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist-m" onClick={closeMobileMenu}>
             ❤️ Wishlist

@@ -11,15 +11,15 @@ Font.register({
     family: "Inter",
     fonts: [
         {
-            src: "https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7W0Q5n-wU.woff2",
+            src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMa25L7SUc.ttf",
             fontWeight: 400,
         },
         {
-            src: "https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5n-wU.woff2",
+            src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMa0JL7SUc.ttf",
             fontWeight: 600,
         },
         {
-            src: "https://fonts.gstatic.com/s/inter/v18/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa05L7W0Q5n-wU.woff2",
+            src: "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMa2ZL7SUc.ttf",
             fontWeight: 700,
         },
     ],
