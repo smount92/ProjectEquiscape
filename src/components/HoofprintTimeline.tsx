@@ -16,6 +16,7 @@ interface HoofprintTimelineProps {
     ownershipChain: OwnershipRecord[];
     lifeStage: string;
     isOwner: boolean;
+    currentUserId?: string;
 }
 
 const EVENT_ICONS: Record<string, string> = {
@@ -54,6 +55,7 @@ export default function HoofprintTimeline({
     ownershipChain,
     lifeStage,
     isOwner,
+    currentUserId,
 }: HoofprintTimelineProps) {
     const router = useRouter();
     const [showForm, setShowForm] = useState(false);
@@ -268,7 +270,7 @@ export default function HoofprintTimeline({
                                         <div className="timeline-event-desc">{event.description}</div>
                                     )}
                                 </div>
-                                {isOwner && (
+                                {isOwner && currentUserId && event.userId === currentUserId && (
                                     <button
                                         className="btn btn-ghost"
                                         onClick={() => handleDelete(event.id)}

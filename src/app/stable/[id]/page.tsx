@@ -462,6 +462,7 @@ export default async function HorsePassportPage({
             ownershipChain={ownershipChain}
             lifeStage={lifeStage}
             isOwner={true}
+            currentUserId={user.id}
           />
 
           {/* Financial Vault */}
