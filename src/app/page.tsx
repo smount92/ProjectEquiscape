@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Model Horse Hub — The Ultimate Digital Stable for Collectors",
+  title: "Model Horse Hub — The Digital Home for the Model Horse Hobby",
   description:
-    "Catalog your model horse collection with 10,500+ reference releases and artist resins, LSQ multi-angle photography, a private financial vault, community marketplace, virtual photo shows, and Hoofprint™ provenance tracking. Free forever.",
+    "The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance tracking, LSQ photography, private financial vault, community marketplace, virtual photo shows, and artist commission tools. Free forever.",
 };
 
 export default function LandingPage() {
@@ -15,28 +15,27 @@ export default function LandingPage() {
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-glow hero-glow-secondary" aria-hidden="true" />
         <div className="hero-content animate-fade-in-up">
-          <span className="hero-badge">🐾 Introducing Hoofprint™ — Living Provenance for Model Horses</span>
+          <span className="hero-badge">🐾 Hoofprint™ — The First Living Provenance System for Model Horses</span>
           <h1 className="hero-headline">
-            Your Herd Deserves More Than{" "}
-            <span className="text-gradient">a Spreadsheet</span>
+            The Only Platform Built{" "}
+            <span className="text-gradient">for This Hobby</span>
           </h1>
           <p className="hero-subheadline">
-            Stop tracking your collection across notebooks, Facebook albums, and half-forgotten spreadsheets.
-            Model Horse Hub is the all-in-one digital stable with a 10,500+ reference database,
-            multi-angle photo galleries, a secure financial vault, and the only
-            provenance tracking system in the hobby.
+            Catalog your herd with a 10,500+ reference database. Track provenance
+            from blank resin to finished custom. Sell with verified trust signals.
+            And soon — manage commissions, plan show strings, and join collector groups.
+            All in one place. Built by collectors, for collectors.
           </p>
           <div className="hero-cta-group">
             <Link href="/signup" className="btn btn-primary btn-lg" id="hero-cta-signup">
               Create Free Account
             </Link>
             <Link href="/community" className="btn btn-ghost btn-lg" id="hero-cta-explore">
-              Explore Show Ring
+              Explore the Show Ring
             </Link>
           </div>
           <p className="hero-trust-line">
-            ✦ No credit card required &nbsp;·&nbsp; ✦ Privacy-first &nbsp;·&nbsp; ✦ Free forever
-            tier
+            ✦ No credit card required &nbsp;·&nbsp; ✦ Privacy-first &nbsp;·&nbsp; ✦ Free forever tier
           </p>
         </div>
       </section>
@@ -91,11 +90,11 @@ export default function LandingPage() {
       <section className="features-section" id="features">
         <div className="features-inner">
           <h2 className="features-title">
-            Six Pillars That Make Your{" "}
-            <span className="text-gradient">Collection Unstoppable</span>
+            Everything You Need.{" "}
+            <span className="text-gradient">Nothing You Don&apos;t.</span>
           </h2>
           <p className="features-subtitle">
-            Every feature was designed around real collector frustrations — because we are collectors too.
+            Every feature exists because a real collector said &ldquo;I wish this existed.&rdquo;
           </p>
 
           <div className="features-grid">
@@ -295,34 +294,34 @@ export default function LandingPage() {
       <section className="personas-section" id="who-its-for">
         <div className="features-inner">
           <h2 className="features-title">
-            Built for <span className="text-gradient">Every Collector</span>
+            Built for <span className="text-gradient">Every Part of the Hobby</span>
           </h2>
           <div className="personas-grid">
             <div className="persona-card">
               <div className="persona-emoji">🏡</div>
-              <h3>The Growing Herd</h3>
+              <h3>The Collector</h3>
               <p>
-                You&apos;ve got 20–100 models and they&apos;re multiplying.
-                You need a real system before that spreadsheet
-                collapses under its own weight.
+                From 20 models to 2,000+. Catalog your herd with reference data,
+                multi-angle photos, and a private vault. Import your entire
+                spreadsheet in minutes — not months.
               </p>
             </div>
             <div className="persona-card">
               <div className="persona-emoji">🎨</div>
               <h3>The Artist &amp; Customizer</h3>
               <p>
-                You paint, body-mod, and create. You want to document every
-                WIP stage — and give buyers a verified history of your work
-                when it&apos;s time to sell.
+                Manage commissions, share WIP progress with clients, and build
+                a portfolio that speaks for itself. When you deliver a custom,
+                your creation story becomes part of its Hoofprint&trade; — forever.
               </p>
             </div>
             <div className="persona-card">
               <div className="persona-emoji">🏆</div>
               <h3>The Shower &amp; Competitor</h3>
               <p>
-                Live shows, photo shows, NAN qualifications — you need show records,
-                provenance tracking, and a way to show off your winners
-                to the community.
+                Log show records, track NAN qualifications digitally, and plan
+                your show string before you pack the car. When you sell a champion,
+                its ribbons follow through Hoofprint&trade;.
               </p>
             </div>
           </div>
@@ -354,6 +353,45 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ─── Coming Soon ─── */}
+      <section className="personas-section" id="coming-soon">
+        <div className="features-inner">
+          <h2 className="features-title">
+            On the <span className="text-gradient">Horizon</span>
+          </h2>
+          <p className="features-subtitle">
+            We&apos;re building the operating system for the hobby. Here&apos;s what&apos;s next.
+          </p>
+          <div className="personas-grid">
+            <div className="persona-card">
+              <div className="persona-emoji">🎨</div>
+              <h3>Art Studio</h3>
+              <p>
+                Commission tracking, WIP photo portals, and artist portfolios.
+                Artists manage their queue. Clients watch their custom come to life.
+                Every brushstroke becomes provenance.
+              </p>
+            </div>
+            <div className="persona-card">
+              <div className="persona-emoji">📦</div>
+              <h3>Bulk Import</h3>
+              <p>
+                Upload your entire spreadsheet and we&apos;ll fuzzy-match every row against
+                our 10,500+ reference database. Go from CSV to cataloged in minutes.
+              </p>
+            </div>
+            <div className="persona-card">
+              <div className="persona-emoji">📄</div>
+              <h3>Insurance Reports</h3>
+              <p>
+                One-click PDF with photos, values, and condition grades for every model.
+                Formatted for insurance companies. Always up to date.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Final CTA ─── */}
       <section className="final-cta-section" id="final-cta">
         <div className="final-cta-inner animate-fade-in-up">
@@ -362,7 +400,7 @@ export default function LandingPage() {
             <span className="text-gradient">a Real Home</span>?
           </h2>
           <p>
-            Join the collectors who catalog, connect, and trade on the only platform built for the model horse hobby.
+            Join collectors and artists who catalog, connect, and trade on the only platform built for the model horse hobby.
           </p>
           <Link href="/signup" className="btn btn-primary btn-lg" id="final-cta-signup">
             Create Your Free Account →

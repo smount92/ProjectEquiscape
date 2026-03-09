@@ -92,37 +92,66 @@ export default function AboutPage() {
                 <section className="static-section">
                     <h2>Where We&apos;re Going</h2>
                     <p>
-                        Model Horse Hub isn&apos;t finished — it&apos;s just getting started. Every feature on this
-                        platform exists because a real collector said &ldquo;I wish this existed.&rdquo; Virtual photo
-                        shows, wishlist matchmaking, seller ratings, and Hoofprint™ provenance all started
-                        as conversations in the community.
+                        Model Horse Hub isn&apos;t just a collection manager &mdash; it&apos;s becoming
+                        the operating system for the hobby. Every feature on this platform exists
+                        because a real collector said &ldquo;I wish this existed.&rdquo;
                     </p>
                     <p>
-                        Here&apos;s what&apos;s on our horizon:
+                        Here&apos;s what&apos;s on the roadmap:
                     </p>
                     <div className="about-values-grid" style={{ marginTop: "var(--space-md)" }}>
                         <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">📊</span>
-                            <h3>Market Price Guide</h3>
+                            <span className="about-value-icon" aria-hidden="true">🎨</span>
+                            <h3>Art Studio &amp; Commission Tracking</h3>
                             <p>
-                                Aggregate pricing data across the hobby. See what your release
-                                is worth based on real collector data — not guesswork.
+                                Artists will manage their commission queue, share WIP photos with
+                                clients, and build portfolios. When a custom is delivered, the
+                                creation story flows into the horse&apos;s Hoofprint&trade; &mdash;
+                                permanently.
+                            </p>
+                        </div>
+                        <div className="about-value-card">
+                            <span className="about-value-icon" aria-hidden="true">📦</span>
+                            <h3>Bulk Import &amp; Insurance Reports</h3>
+                            <p>
+                                Upload your spreadsheet and we&apos;ll fuzzy-match every row against
+                                10,500+ references. Generate one-click PDF reports for your
+                                insurance company with photos, values, and condition grades.
+                            </p>
+                        </div>
+                        <div className="about-value-card">
+                            <span className="about-value-icon" aria-hidden="true">🏆</span>
+                            <h3>Competition Engine</h3>
+                            <p>
+                                Digital NAN qualification tracking, show string planning, and
+                                verified judge results. Show records follow the horse through
+                                Hoofprint&trade; transfers &mdash; no more mailing paper cards.
+                            </p>
+                        </div>
+                        <div className="about-value-card">
+                            <span className="about-value-icon" aria-hidden="true">🌍</span>
+                            <h3>Groups &amp; Regional Community</h3>
+                            <p>
+                                Join collector clubs, find hobbyists in your region, and
+                                host group shows. All integrated with your stable, not
+                                scattered across Facebook and Discord.
                             </p>
                         </div>
                         <div className="about-value-card">
                             <span className="about-value-icon" aria-hidden="true">📱</span>
-                            <h3>Mobile Experience</h3>
+                            <h3>Mobile &amp; Offline</h3>
                             <p>
                                 Take your collection to live shows. Quick photo capture,
-                                offline access, and push notifications — all from your phone.
+                                offline access at fairgrounds, and push notifications &mdash;
+                                all from your phone.
                             </p>
                         </div>
                         <div className="about-value-card">
                             <span className="about-value-icon" aria-hidden="true">🤝</span>
-                            <h3>Your Features</h3>
+                            <h3>Your Ideas</h3>
                             <p>
-                                We build what you ask for. Every feature request from the community
-                                gets heard, prioritized, and built. This is your platform.
+                                We build what you ask for. Every feature request from the
+                                community gets heard, prioritized, and built. This is your platform.
                             </p>
                         </div>
                     </div>
