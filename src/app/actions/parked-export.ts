@@ -169,63 +169,71 @@ export async function getParkedHorseByPin(pin: string): Promise<{
     try {
         const admin = getAdminClient();
 
-        // Look up transfer by claim_pin (admin bypasses RLS)
-        const { data: transfer } = await admin
+        // 1. Look up transfer by claim_pin
+        const { data: transfer, error: tErr } = await admin
             .from("horse_transfers")
             .select("id, horse_id, sender_id, expires_at")
             .eq("claim_pin", pin.toUpperCase().trim())
             .eq("status", "pending")
-            .single();
+            .maybeSingle();
 
-        if (!transfer) {
+        if (tErr || !transfer) {
             return { success: false, error: "Invalid or expired PIN." };
         }
 
         const t = transfer as { id: string; horse_id: string; sender_id: string; expires_at: string };
 
-        // Check expiration
+        // 2. Check expiration
         if (new Date(t.expires_at) < new Date()) {
             await admin.from("horse_transfers").update({ status: "expired" }).eq("id", t.id);
             return { success: false, error: "This claim PIN has expired." };
         }
 
-        // Get horse details via admin (horse may be private)
-        const { data: horse } = await admin
+        // 3. Get horse details — NO PostgREST join (separate query for images)
+        const { data: horse, error: hErr } = await admin
             .from("user_horses")
-            .select(`
-                id, custom_name, finish_type, condition_grade,
-                horse_images(image_url, angle_profile)
-            `)
+            .select("id, custom_name, finish_type, condition_grade")
             .eq("id", t.horse_id)
-            .single();
+            .maybeSingle();
 
-        if (!horse) return { success: false, error: "Horse not found." };
+        if (hErr || !horse) return { success: false, error: "Horse not found." };
 
-        const h = horse as unknown as {
-            id: string; custom_name: string; finish_type: string; condition_grade: string;
-            horse_images: { image_url: string; angle_profile: string }[];
-        };
+        const h = horse as { id: string; custom_name: string; finish_type: string; condition_grade: string };
 
-        // Get photo — use admin for signed URL since horse may be private
-        const thumb = h.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
-        const imageUrl = thumb?.image_url || h.horse_images?.[0]?.image_url;
+        // 4. Get photo separately (non-blocking)
         let photo: string | null = null;
-        if (imageUrl) {
-            photo = await getSignedImageUrl(admin, imageUrl);
-        }
+        try {
+            const { data: images } = await admin
+                .from("horse_images")
+                .select("image_url, angle_profile")
+                .eq("horse_id", t.horse_id)
+                .limit(5);
 
-        // Get timeline count
-        const { count: timelineCount } = await admin
-            .from("horse_timeline")
-            .select("id", { count: "exact", head: true })
-            .eq("horse_id", t.horse_id)
-            .eq("is_public", true);
+            const imgList = (images ?? []) as { image_url: string; angle_profile: string }[];
+            const thumb = imgList.find((img) => img.angle_profile === "Primary_Thumbnail");
+            const imageUrl = thumb?.image_url || imgList[0]?.image_url;
+            if (imageUrl) {
+                photo = await getSignedImageUrl(admin, imageUrl);
+            }
+        } catch { /* photo is optional for preview */ }
 
-        // Get owner count
-        const { count: ownerCount } = await admin
-            .from("horse_ownership_history")
-            .select("id", { count: "exact", head: true })
-            .eq("horse_id", t.horse_id);
+        // 5. Get counts (non-blocking)
+        let timelineCount = 0;
+        let ownerCount = 1;
+        try {
+            const { count: tc } = await admin
+                .from("horse_timeline")
+                .select("id", { count: "exact", head: true })
+                .eq("horse_id", t.horse_id)
+                .eq("is_public", true);
+            timelineCount = tc || 0;
+
+            const { count: oc } = await admin
+                .from("horse_ownership_history")
+                .select("id", { count: "exact", head: true })
+                .eq("horse_id", t.horse_id);
+            ownerCount = (oc || 0) + 1;
+        } catch { /* counts are optional */ }
 
         return {
             success: true,
@@ -234,8 +242,8 @@ export async function getParkedHorseByPin(pin: string): Promise<{
                 photo,
                 finish: h.finish_type,
                 condition: h.condition_grade,
-                timelineCount: timelineCount || 0,
-                ownerCount: (ownerCount || 0) + 1,
+                timelineCount,
+                ownerCount,
                 transferId: t.id,
             },
         };
@@ -263,7 +271,7 @@ export async function claimParkedHorse(pin: string): Promise<{
             .select("id, horse_id, sender_id, acquisition_type, sale_price, is_price_public, notes, expires_at")
             .eq("claim_pin", pin.toUpperCase().trim())
             .eq("status", "pending")
-            .single();
+            .maybeSingle();
 
         if (!transfer) {
             return { success: false, error: "Invalid or expired PIN." };
