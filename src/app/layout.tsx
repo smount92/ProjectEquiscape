@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./studio.css";
 import { SimpleModeProvider } from "@/lib/context/SimpleModeContext";
 import Header from "@/components/Header";
 

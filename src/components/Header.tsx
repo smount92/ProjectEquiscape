@@ -150,6 +150,9 @@ export default function Header() {
             <Link href="/shows" className="header-nav-link" id="nav-shows">
               📸 Shows
             </Link>
+            <Link href="/studio/setup" className="header-nav-link" id="nav-studio">
+              🎨 Art Studio
+            </Link>
             <Link href="/community/help-id" className="header-nav-link" id="nav-helpid">
               🔍 Help ID
             </Link>
@@ -205,6 +208,9 @@ export default function Header() {
                 <Link href="/claim" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
                   📦 Claim
                 </Link>
+                <Link href="/studio/my-commissions" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                  🎨 My Commissions
+                </Link>
                 {isAdmin && (
                   <Link href="/admin" className="header-dropdown-link header-dropdown-admin" onClick={() => setUserMenuOpen(false)}>
                     ⚡ Admin
@@ -257,6 +263,9 @@ export default function Header() {
           </Link>
           <Link href="/shows" className="header-nav-link" id="nav-shows-m" onClick={closeMobileMenu}>
             📸 Shows
+          </Link>
+          <Link href="/studio/setup" className="header-nav-link" id="nav-studio-m" onClick={closeMobileMenu}>
+            🎨 Art Studio
           </Link>
           <Link href="/community/help-id" className="header-nav-link" id="nav-helpid-m" onClick={closeMobileMenu}>
             🔍 Help ID
