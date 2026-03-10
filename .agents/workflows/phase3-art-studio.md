@@ -1,176 +1,214 @@
 ---
-description: Phase 3 — The Creator Flywheel (Art Studio). Artist Profiles, Commission Management, WIP Portal, and Hoofprint Pipeline.
+description: Phase 3 — The Creator Flywheel (Art Studio) + Transfer Architecture Fixes. Artist Profiles, Commission Management, WIP Portal, Hoofprint Pipeline, and transfer hardening.
 ---
 
-# Phase 3: The Creator Flywheel (Art Studio)
+# Phase 3: The Creator Flywheel (Art Studio) + Transfer Hardening
 
-> **Goal:** Give artists tools so compelling they abandon Instagram DMs + Google Forms, pulling their buyers onto MHH.
+> **Goal:** Give artists tools so compelling they abandon Instagram DMs + Google Forms, pulling their buyers onto MHH. Also harden the transfer system based on ownership audit.
 > **Pre-requisites:** Phase 1 ✅ and Phase 2 ✅ must be complete. Build must be clean.
 
 // turbo-all
 
 ---
 
-## Feature 3A: Artist Profiles & Commission Management
+## PRIORITY 0: Transfer Architecture Fixes (Do First!)
 
-### Task 3A-1: Database Migration — `027_art_studio.sql`
+> These fix ownership-related RLS bugs discovered during testing. Must be run BEFORE Phase 3 features.
 
-Create `supabase/migrations/027_art_studio.sql`:
+### Task 0A: Database Migration — `029_transfer_improvements.sql`
+
+Create `supabase/migrations/029_transfer_improvements.sql`:
 
 ```sql
 -- ============================================================
--- Migration 027: Art Studio — Artist Profiles & Commissions
+-- Migration 029: Transfer Architecture Improvements
+-- Fixes: ownership_history RLS, pedigree UPDATE, ghost remnants
 -- ============================================================
 
--- ── Artist Profiles ──
-CREATE TABLE IF NOT EXISTS artist_profiles (
-  user_id            UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  studio_name        TEXT NOT NULL,
-  studio_slug        TEXT UNIQUE NOT NULL,
-  specialties        TEXT[] DEFAULT '{}',
-  mediums            TEXT[] DEFAULT '{}',
-  scales_offered     TEXT[] DEFAULT '{}',
-  bio_artist         TEXT,
-  portfolio_visible  BOOLEAN DEFAULT true,
-  status             TEXT NOT NULL DEFAULT 'closed'
-    CHECK (status IN ('open', 'waitlist', 'closed')),
-  max_slots          INTEGER DEFAULT 5 CHECK (max_slots BETWEEN 1 AND 20),
-  turnaround_min_days INTEGER,
-  turnaround_max_days INTEGER,
-  price_range_min    DECIMAL(10,2),
-  price_range_max    DECIMAL(10,2),
-  terms_text         TEXT,
-  paypal_me_link     TEXT,
-  accepting_types    TEXT[] DEFAULT '{}',
-  created_at         TIMESTAMPTZ DEFAULT now(),
-  updated_at         TIMESTAMPTZ DEFAULT now()
-);
-
-ALTER TABLE artist_profiles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Anyone can view artist profiles"
-  ON artist_profiles FOR SELECT TO authenticated USING (true);
-CREATE POLICY "Owner inserts own artist profile"
-  ON artist_profiles FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Owner updates own artist profile"
-  ON artist_profiles FOR UPDATE TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Owner deletes own artist profile"
-  ON artist_profiles FOR DELETE TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE INDEX idx_artist_profiles_slug ON artist_profiles (studio_slug);
-CREATE INDEX idx_artist_profiles_status ON artist_profiles (status);
-
--- ── Commissions ──
-CREATE TABLE IF NOT EXISTS commissions (
-  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  artist_id         UUID NOT NULL REFERENCES users(id),
-  client_id         UUID REFERENCES users(id),
-  client_email      TEXT,
-  horse_id          UUID REFERENCES user_horses(id) ON DELETE SET NULL,
-  commission_type   TEXT NOT NULL,
-  description       TEXT NOT NULL,
-  reference_images  TEXT[] DEFAULT '{}',
-  slot_number       INTEGER,
-  estimated_start   DATE,
-  estimated_completion DATE,
-  actual_start      DATE,
-  actual_completion DATE,
-  price_quoted      DECIMAL(10,2),
-  deposit_amount    DECIMAL(10,2),
-  deposit_paid      BOOLEAN DEFAULT false,
-  final_paid        BOOLEAN DEFAULT false,
-  status            TEXT NOT NULL DEFAULT 'requested'
-    CHECK (status IN (
-      'requested', 'accepted', 'declined', 'cancelled',
-      'in_progress', 'review', 'revision',
-      'completed', 'delivered'
-    )),
-  is_public_in_queue BOOLEAN DEFAULT true,
-  last_update_at    TIMESTAMPTZ DEFAULT now(),
-  created_at        TIMESTAMPTZ DEFAULT now(),
-  updated_at        TIMESTAMPTZ DEFAULT now(),
-  CONSTRAINT artist_not_client CHECK (artist_id != client_id)
-);
-
-ALTER TABLE commissions ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Artist views own commissions"
-  ON commissions FOR SELECT TO authenticated
-  USING (auth.uid() = artist_id);
-CREATE POLICY "Client views own commissions"
-  ON commissions FOR SELECT TO authenticated
-  USING (auth.uid() = client_id);
-CREATE POLICY "Public queue visibility"
-  ON commissions FOR SELECT TO authenticated
-  USING (is_public_in_queue = true AND status IN ('accepted', 'in_progress'));
-CREATE POLICY "Artist manages commissions"
-  ON commissions FOR UPDATE TO authenticated
-  USING (auth.uid() = artist_id)
-  WITH CHECK (auth.uid() = artist_id);
-CREATE POLICY "Artist deletes commissions"
-  ON commissions FOR DELETE TO authenticated
-  USING (auth.uid() = artist_id);
-CREATE POLICY "Client creates commission requests"
-  ON commissions FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = client_id);
-CREATE POLICY "Artist creates own commissions"
-  ON commissions FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = artist_id);
-
-CREATE INDEX idx_commissions_artist ON commissions (artist_id, status);
-CREATE INDEX idx_commissions_client ON commissions (client_id);
-
--- ── Commission Updates (WIP Photos, Status Changes, Messages) ──
-CREATE TABLE IF NOT EXISTS commission_updates (
-  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  commission_id         UUID NOT NULL REFERENCES commissions(id) ON DELETE CASCADE,
-  author_id             UUID NOT NULL REFERENCES users(id),
-  update_type           TEXT NOT NULL CHECK (update_type IN (
-    'wip_photo', 'status_change', 'message',
-    'revision_request', 'approval', 'milestone'
-  )),
-  title                 TEXT,
-  body                  TEXT,
-  image_urls            TEXT[] DEFAULT '{}',
-  old_status            TEXT,
-  new_status            TEXT,
-  requires_payment      BOOLEAN DEFAULT false,
-  is_visible_to_client  BOOLEAN DEFAULT true,
-  created_at            TIMESTAMPTZ DEFAULT now()
-);
-
-ALTER TABLE commission_updates ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Artist views all updates for own commissions"
-  ON commission_updates FOR SELECT TO authenticated
-  USING (EXISTS (
-    SELECT 1 FROM commissions c WHERE c.id = commission_id AND c.artist_id = auth.uid()
-  ));
-CREATE POLICY "Client views visible updates for own commissions"
-  ON commission_updates FOR SELECT TO authenticated
+-- 1. Fix horse_ownership_history SELECT
+--    Problem: New owner can't see chain of custody on private horses
+--    because the policy uses `auth.uid() = owner_id` (the record's
+--    owner, not the horse's current owner).
+DROP POLICY IF EXISTS "horse_ownership_history_select" ON horse_ownership_history;
+CREATE POLICY "horse_ownership_history_select"
+  ON horse_ownership_history FOR SELECT TO authenticated
   USING (
-    is_visible_to_client = true
-    AND EXISTS (
-      SELECT 1 FROM commissions c WHERE c.id = commission_id AND c.client_id = auth.uid()
+    (SELECT auth.uid()) = owner_id
+    OR EXISTS (
+      SELECT 1 FROM user_horses h
+      WHERE h.id = horse_ownership_history.horse_id
+        AND h.owner_id = (SELECT auth.uid())
+    )
+    OR EXISTS (
+      SELECT 1 FROM user_horses h
+      WHERE h.id = horse_ownership_history.horse_id
+        AND h.is_public = true
     )
   );
-CREATE POLICY "Commission participants create updates"
-  ON commission_updates FOR INSERT TO authenticated
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM commissions c WHERE c.id = commission_id
-    AND (c.artist_id = auth.uid() OR c.client_id = auth.uid())
-  ));
 
-CREATE INDEX idx_commission_updates ON commission_updates (commission_id, created_at DESC);
+-- 2. Fix horse_pedigrees UPDATE
+--    Problem: New owner can't update pedigree on transferred horse
+--    because UPDATE policy uses `auth.uid() = user_id` (the original
+--    creator, not the current owner).
+DROP POLICY IF EXISTS "Owner can update own pedigree" ON horse_pedigrees;
+DROP POLICY IF EXISTS "Owner can update pedigree" ON horse_pedigrees;
+CREATE POLICY "Owner can update pedigree"
+  ON horse_pedigrees FOR UPDATE TO authenticated
+  USING (
+    (SELECT auth.uid()) = user_id
+    OR EXISTS (
+      SELECT 1 FROM user_horses h
+      WHERE h.id = horse_pedigrees.horse_id
+        AND h.owner_id = (SELECT auth.uid())
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM user_horses h
+      WHERE h.id = horse_pedigrees.horse_id
+        AND h.owner_id = (SELECT auth.uid())
+    )
+  );
+
+-- 3. Add snapshot columns for ghost remnants
+--    When a horse is transferred, the seller keeps a ghost card
+--    showing the horse's name and thumbnail at time of transfer.
+ALTER TABLE horse_ownership_history
+  ADD COLUMN IF NOT EXISTS horse_name TEXT,
+  ADD COLUMN IF NOT EXISTS horse_thumbnail TEXT;
 ```
 
-**IMPORTANT:** FK references use `users(id)` (the `public.users` table), NOT `auth.users(id)`. This ensures PostgREST joins work correctly (learned from Help ID bug in Phase 1).
+**Present this SQL to the user for approval.** They will run it in the Supabase SQL Editor.
 
-**Verification:** Present this SQL to the user for approval. They will run it in the Supabase SQL Editor.
+---
+
+### Task 0B: Update Transfer Actions — Clear Vault + Save Ghost Snapshot
+
+Modify **both** `claimTransfer()` in `src/app/actions/hoofprint.ts` and `claimParkedHorse()` in `src/app/actions/parked-export.ts`.
+
+**In both functions, after the ownership transfer step (step 3), add:**
+
+```typescript
+// ── Clear financial vault (seller's data does not transfer) ──
+await admin.from("financial_vault")
+    .update({
+        purchase_price: null,
+        purchase_date: null,
+        estimated_current_value: null,
+        insurance_notes: null,
+    })
+    .eq("horse_id", t.horse_id);
+```
+
+**In both functions, when closing sender's ownership record (step 1), add the snapshot fields:**
+
+First, fetch the horse's primary thumbnail URL:
+
+```typescript
+// Get thumbnail for ghost remnant
+let thumbnailUrl: string | null = null;
+try {
+    const { data: thumbImg } = await admin
+        .from("horse_images")
+        .select("image_url")
+        .eq("horse_id", t.horse_id)
+        .eq("angle_profile", "Primary_Thumbnail")
+        .maybeSingle();
+    thumbnailUrl = (thumbImg as { image_url: string } | null)?.image_url || null;
+} catch { /* optional */ }
+```
+
+Then update the ownership closing to include snapshot:
+
+```typescript
+// Close sender's ownership record with ghost snapshot
+await admin.from("horse_ownership_history")
+    .update({
+        released_at: new Date().toISOString(),
+        horse_name: horseName,       // Already fetched earlier
+        horse_thumbnail: thumbnailUrl // Snapshot for ghost card
+    })
+    .eq("horse_id", t.horse_id)
+    .eq("owner_id", t.sender_id)
+    .is("released_at", null);
+```
+
+---
+
+### Task 0C: Transfer History View — `getTransferHistory()` action
+
+Add to `src/app/actions/hoofprint.ts`:
+
+```typescript
+/** Get horses the current user has transferred away (ghost remnants) */
+export async function getTransferHistory(): Promise<{
+    id: string;
+    horseId: string;
+    horseName: string | null;
+    horseThumbnail: string | null;
+    salePrice: number | null;
+    isPricePublic: boolean;
+    acquisitionType: string;
+    releasedAt: string;
+}[]> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: records } = await supabase
+        .from("horse_ownership_history")
+        .select("id, horse_id, horse_name, horse_thumbnail, sale_price, is_price_public, acquisition_type, released_at")
+        .eq("owner_id", user.id)
+        .not("released_at", "is", null)
+        .order("released_at", { ascending: false });
+
+    if (!records) return [];
+
+    return (records as any[]).map(r => ({
+        id: r.id,
+        horseId: r.horse_id,
+        horseName: r.horse_name,
+        horseThumbnail: r.horse_thumbnail,
+        salePrice: r.sale_price,
+        isPricePublic: r.is_price_public,
+        acquisitionType: r.acquisition_type,
+        releasedAt: r.released_at,
+    }));
+}
+```
+
+### Task 0D: Dashboard "Transfer History" Section
+
+On the main dashboard page, add a section below the horse grid:
+
+**If `getTransferHistory()` returns results**, show:
+
+```
+📤 Transfer History
+─────────────────────
+🐴 [Horse Name]       [Horse Thumbnail]
+   Transferred March 9, 2026
+   Sale: $125.00
+   [View Hoofprint →]
+```
+
+- Show as faded/ghost-style cards (reduced opacity, dashed border)
+- Each card links to `/community/[horse_id]` (the horse's public passport, if still public)
+- Only show `sale_price` if `is_price_public = true`
+- Use a collapsible section so it doesn't clutter the main stable view
+- CSS: `.transfer-ghost-card` — glass card with 0.6 opacity, dashed border, grayscale thumbnail
+
+---
+
+## Feature 3A: Artist Profiles & Commission Management
+
+### Task 3A-1: Database Migration — `028_art_studio.sql`
+
+**This migration already exists at `supabase/migrations/028_art_studio.sql`.** Verify it's been run. If not, present to user.
+
+The migration creates 3 tables: `artist_profiles`, `commissions`, `commission_updates`.
+
+**IMPORTANT:** FK references use `users(id)` (the `public.users` table), NOT `auth.users(id)`. This ensures PostgREST joins work correctly (learned from Help ID bug in Phase 1).
 
 ---
 
@@ -318,6 +356,7 @@ Add to `src/app/globals.css` all necessary styles for:
 - Commission cards (Kanban layout or tabbed view)
 - Commission timeline (WIP photos, status changes, messages)
 - Commission request form
+- Transfer ghost cards (`.transfer-ghost-card` — glass card with 0.6 opacity, dashed border, grayscale thumbnail)
 - Status badges with colors:
   - `requested` → gray
   - `accepted` → blue
@@ -337,21 +376,26 @@ Use existing design tokens from globals.css. Glass-card style for commission car
 After implementing all tasks:
 
 1. `npm run build` — must compile with zero errors
-2. Test artist profile creation at `/studio/setup`
-3. Verify public studio page renders at `/studio/[slug]`
-4. Test commission request flow from client perspective
-5. Test commission management from artist dashboard
-6. Test WIP photo upload in commission detail view
-7. Verify all RLS policies work (artist sees own commissions, client sees own, public queue visible)
-8. Git commit with message: `feat: Phase 3 — Art Studio (Artist Profiles, Commissions, WIP Portal)`
-9. Push to main
+2. Run migration 029 (transfer improvements) in Supabase SQL Editor
+3. Test transfer between accounts — vault is cleared, ghost card appears
+4. Test artist profile creation at `/studio/setup`
+5. Verify public studio page renders at `/studio/[slug]`
+6. Test commission request flow from client perspective
+7. Test commission management from artist dashboard
+8. Test WIP photo upload in commission detail view
+9. Verify all RLS policies work (artist sees own commissions, client sees own, public queue visible)
+10. Git commit with message: `feat: Phase 3 — Art Studio + Transfer Hardening`
+11. Push to main
 
 ---
 
-## ⚠️ Common Pitfalls (From Phase 1 & 2 Bugs)
+## ⚠️ Common Pitfalls (From Phase 1, 2, & Transfer Audit)
 
 1. **FK Joins:** All `user_id` / `artist_id` / `client_id` FKs in migration MUST reference `users(id)` (public table), NOT `auth.users(id)`. This ensures PostgREST joins work. See Help ID fix for context.
 2. **Hidden required inputs:** Never put `required` on a hidden file input. Use manual JS validation.
 3. **Font loading:** If generating PDFs, use locally bundled `.ttf` fonts from `/fonts/`, not Google Fonts CDN URLs.
 4. **Image compression:** All uploads must go through `compressImage()` utility before Supabase Storage.
 5. **revalidatePath:** Call after every mutation to ensure SSR pages refresh.
+6. **Transfer-safe RLS:** For any table with horse-related data, SELECT policies must include an ownership check (`EXISTS(user_horses.owner_id)`), not just `auth.uid() = user_id`. The `user_id` is the record creator, not the current owner.
+7. **Financial vault on transfer:** Always clear vault after ownership change. Sale price lives in `horse_ownership_history` / `horse_transfers`, not the vault.
+8. **Photo limits:** Tier-based photo limits apply on UPLOAD only, never on DISPLAY. A transferred horse keeps all its photos regardless of new owner's tier.
