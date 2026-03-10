@@ -110,14 +110,17 @@ export async function getShowEntries(showId: string): Promise<{
 
     const s = showData as { id: string; title: string; description: string | null; theme: string | null; status: string; created_at: string; end_at: string | null };
 
-    // Fetch entries with horse + user data
+    // Fetch entries with user alias via PostgREST join
     const { data: rawEntries } = await supabase
         .from("show_entries")
-        .select("id, horse_id, user_id, votes, created_at")
+        .select("id, horse_id, user_id, votes, created_at, users!user_id(alias_name)")
         .eq("show_id", showId)
         .order("votes", { ascending: false });
 
-    const entryList = (rawEntries ?? []) as { id: string; horse_id: string; user_id: string; votes: number; created_at: string }[];
+    const entryList = (rawEntries as unknown as {
+        id: string; horse_id: string; user_id: string; votes: number; created_at: string;
+        users: { alias_name: string } | null;
+    }[]) ?? [];
 
     if (entryList.length === 0) {
         return {
@@ -138,17 +141,7 @@ export async function getShowEntries(showId: string): Promise<{
         horseMap.set(h.id, { name: h.custom_name, finish: h.finish_type });
     });
 
-    // Batch-fetch user aliases
-    const userIds = [...new Set(entryList.map((e) => e.user_id))];
-    const { data: users } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", userIds);
 
-    const aliasMap = new Map<string, string>();
-    (users ?? []).forEach((u: { id: string; alias_name: string }) => {
-        aliasMap.set(u.id, u.alias_name);
-    });
 
     // Check if current user has voted on each entry
     const entryIds = entryList.map((e) => e.id);
@@ -188,7 +181,7 @@ export async function getShowEntries(showId: string): Promise<{
             id: e.id,
             horseName: horseMap.get(e.horse_id)?.name || "Unknown",
             horseId: e.horse_id,
-            ownerAlias: aliasMap.get(e.user_id) || "Unknown",
+            ownerAlias: e.users?.alias_name || "Unknown",
             ownerId: e.user_id,
             thumbnailUrl: thumbUrlMap.has(e.horse_id) ? (signedUrls.get(thumbUrlMap.get(e.horse_id)!) ?? null) : null,
             finishType: horseMap.get(e.horse_id)?.finish || "OF",

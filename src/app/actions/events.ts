@@ -107,7 +107,7 @@ export async function getEvents(filters?: {
 
     let query = supabase
         .from("events")
-        .select("*")
+        .select("*, users!events_created_by_fkey(alias_name)")
         .order("starts_at", { ascending: true })
         .limit(50);
 
@@ -127,14 +127,7 @@ export async function getEvents(filters?: {
     const { data: events } = await query;
     if (!events || events.length === 0) return [];
 
-    // Get creator aliases
-    const creatorIds = [...new Set((events as { created_by: string }[]).map(e => e.created_by))];
-    const { data: creators } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", creatorIds);
-    const aliasMap = new Map<string, string>();
-    (creators || []).forEach((c: { id: string; alias_name: string }) => aliasMap.set(c.id, c.alias_name));
+
 
     // Get group names
     const groupIds = [...new Set(
@@ -183,7 +176,7 @@ export async function getEvents(filters?: {
         groupName: e.group_id ? (groupNames.get(e.group_id as string) || null) : null,
         showId: e.show_id as string | null,
         createdBy: e.created_by as string,
-        creatorAlias: aliasMap.get(e.created_by as string) || "Unknown",
+        creatorAlias: (e as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
         isOfficial: e.is_official as boolean,
         rsvpCount: e.rsvp_count as number,
         createdAt: e.created_at as string,

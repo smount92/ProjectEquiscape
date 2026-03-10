@@ -99,33 +99,21 @@ export async function getUserRatingSummary(
 
     const { data: rawRatings } = await supabase
         .from("user_ratings")
-        .select("id, stars, review_text, created_at, reviewer_id")
+        .select("id, stars, review_text, created_at, reviewer_id, users!reviewer_id(alias_name)")
         .eq("reviewed_id", userId)
         .order("created_at", { ascending: false });
 
-    const ratings = (rawRatings ?? []) as {
+    const ratings = (rawRatings as unknown as {
         id: string;
         stars: number;
         review_text: string | null;
         created_at: string;
         reviewer_id: string;
-    }[];
+        users: { alias_name: string } | null;
+    }[]) ?? [];
 
     if (ratings.length === 0) {
         return { average: 0, count: 0, ratings: [] };
-    }
-
-    // Batch-fetch reviewer aliases
-    const reviewerIds = [...new Set(ratings.map((r) => r.reviewer_id))];
-    const aliasMap = new Map<string, string>();
-    if (reviewerIds.length > 0) {
-        const { data: users } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", reviewerIds);
-        users?.forEach((u: { id: string; alias_name: string }) => {
-            aliasMap.set(u.id, u.alias_name);
-        });
     }
 
     const total = ratings.reduce((sum, r) => sum + r.stars, 0);
@@ -138,7 +126,7 @@ export async function getUserRatingSummary(
             id: r.id,
             stars: r.stars,
             reviewText: r.review_text,
-            reviewerAlias: aliasMap.get(r.reviewer_id) ?? "Unknown",
+            reviewerAlias: r.users?.alias_name || "Unknown",
             createdAt: r.created_at,
         })),
     };

@@ -76,7 +76,7 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
 
     let query = supabase
         .from("activity_events")
-        .select("id, actor_id, event_type, horse_id, metadata, created_at")
+        .select("id, actor_id, event_type, horse_id, metadata, created_at, users!actor_id(alias_name)")
         .order("created_at", { ascending: false })
         .limit(limit + 1);
 
@@ -86,32 +86,22 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
 
     const { data: events } = await query;
 
-    const allItems = (events ?? []) as {
+    const allItems = (events as unknown as {
         id: string;
         actor_id: string;
         event_type: string;
         horse_id: string | null;
         metadata: Record<string, unknown> | null;
         created_at: string;
-    }[];
+        users: { alias_name: string } | null;
+    }[]) ?? [];
 
     const hasMore = allItems.length > limit;
     const items = hasMore ? allItems.slice(0, limit) : allItems;
 
     if (items.length === 0) return { items: [], nextCursor: null };
 
-    // Batch-fetch actor aliases via join
-    const actorIds = [...new Set(items.map((e) => e.actor_id))];
-    const aliasMap = new Map<string, string>();
-    if (actorIds.length > 0) {
-        const { data: actorRows } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", actorIds);
-        actorRows?.forEach((u: { id: string; alias_name: string }) => {
-            aliasMap.set(u.id, u.alias_name);
-        });
-    }
+
 
     // Batch-fetch horse names
     const horseIds = [...new Set(items.map((e) => e.horse_id).filter(Boolean))] as string[];
@@ -153,7 +143,7 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
     return {
         items: items.map((e) => ({
             id: e.id,
-            actorAlias: aliasMap.get(e.actor_id) || "Unknown",
+            actorAlias: e.users?.alias_name || "Unknown",
             actorId: e.actor_id,
             eventType: e.event_type,
             horseId: e.horse_id,
@@ -192,7 +182,7 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
 
     let query = supabase
         .from("activity_events")
-        .select("id, actor_id, event_type, horse_id, metadata, created_at")
+        .select("id, actor_id, event_type, horse_id, metadata, created_at, users!actor_id(alias_name)")
         .in("actor_id", followingIds)
         .order("created_at", { ascending: false })
         .limit(limit + 1);
@@ -203,30 +193,22 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
 
     const { data: events } = await query;
 
-    const allItems = (events ?? []) as {
+    const allItems = (events as unknown as {
         id: string;
         actor_id: string;
         event_type: string;
         horse_id: string | null;
         metadata: Record<string, unknown> | null;
         created_at: string;
-    }[];
+        users: { alias_name: string } | null;
+    }[]) ?? [];
 
     const hasMore = allItems.length > limit;
     const items = hasMore ? allItems.slice(0, limit) : allItems;
 
     if (items.length === 0) return { items: [], nextCursor: null };
 
-    // Batch-fetch aliases
-    const actorIds = [...new Set(items.map((e) => e.actor_id))];
-    const aliasMap = new Map<string, string>();
-    const { data: users } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", actorIds);
-    users?.forEach((u: { id: string; alias_name: string }) => {
-        aliasMap.set(u.id, u.alias_name);
-    });
+
 
     // Batch-fetch horse names
     const horseIds = [...new Set(items.map((e) => e.horse_id).filter(Boolean))] as string[];
@@ -268,7 +250,7 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
     return {
         items: items.map((e) => ({
             id: e.id,
-            actorAlias: aliasMap.get(e.actor_id) || "Unknown",
+            actorAlias: e.users?.alias_name || "Unknown",
             actorId: e.actor_id,
             eventType: e.event_type,
             horseId: e.horse_id,

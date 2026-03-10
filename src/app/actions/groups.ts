@@ -181,7 +181,7 @@ export async function getGroups(filters?: {
 
     let query = supabase
         .from("groups")
-        .select("*")
+        .select("*, users!groups_created_by_fkey(alias_name)")
         .order("member_count", { ascending: false })
         .limit(50);
 
@@ -198,15 +198,7 @@ export async function getGroups(filters?: {
     const { data } = await query;
     if (!data || data.length === 0) return [];
 
-    // Get creator aliases
-    const creatorIds = [...new Set((data as { created_by: string }[]).map(g => g.created_by))];
-    const { data: creators } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", creatorIds);
 
-    const aliasMap = new Map<string, string>();
-    (creators || []).forEach((c: { id: string; alias_name: string }) => aliasMap.set(c.id, c.alias_name));
 
     // Check memberships
     let membershipMap = new Map<string, string>();
@@ -236,7 +228,7 @@ export async function getGroups(filters?: {
         memberCount: g.member_count as number,
         createdBy: g.created_by as string,
         createdAt: g.created_at as string,
-        creatorAlias: aliasMap.get(g.created_by as string) || "Unknown",
+        creatorAlias: (g as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
         isMember: membershipMap.has(g.id as string),
         memberRole: membershipMap.get(g.id as string) || null,
     }));
@@ -388,7 +380,7 @@ export async function getGroupPosts(groupId: string): Promise<GroupPost[]> {
 
     const { data: posts } = await supabase
         .from("group_posts")
-        .select("*")
+        .select("*, users!group_posts_user_id_fkey(alias_name)")
         .eq("group_id", groupId)
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false })
@@ -396,14 +388,7 @@ export async function getGroupPosts(groupId: string): Promise<GroupPost[]> {
 
     if (!posts || posts.length === 0) return [];
 
-    // Fetch user aliases
-    const userIds = [...new Set((posts as { user_id: string }[]).map(p => p.user_id))];
-    const { data: users } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", userIds);
-    const aliasMap = new Map<string, string>();
-    (users || []).forEach((u: { id: string; alias_name: string }) => aliasMap.set(u.id, u.alias_name));
+
 
     // Fetch horse names if any
     const horseIds = (posts as { horse_id: string | null }[])
@@ -422,19 +407,11 @@ export async function getGroupPosts(groupId: string): Promise<GroupPost[]> {
     const postIds = (posts as { id: string }[]).map(p => p.id);
     const { data: replies } = await supabase
         .from("group_post_replies")
-        .select("*")
+        .select("*, users!group_post_replies_user_id_fkey(alias_name)")
         .in("post_id", postIds)
         .order("created_at", { ascending: true });
 
-    // Fetch reply user aliases
-    const replyUserIds = [...new Set((replies || [] as { user_id: string }[]).map((r: { user_id: string }) => r.user_id))];
-    if (replyUserIds.length > 0) {
-        const { data: replyUsers } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", replyUserIds);
-        (replyUsers || []).forEach((u: { id: string; alias_name: string }) => aliasMap.set(u.id, u.alias_name));
-    }
+
 
     const repliesByPost = new Map<string, GroupPostReply[]>();
     for (const r of (replies || []) as Record<string, unknown>[]) {
@@ -444,7 +421,7 @@ export async function getGroupPosts(groupId: string): Promise<GroupPost[]> {
             id: r.id as string,
             postId,
             userId: r.user_id as string,
-            userAlias: aliasMap.get(r.user_id as string) || "Unknown",
+            userAlias: (r as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
             content: r.content as string,
             createdAt: r.created_at as string,
         });
@@ -454,7 +431,7 @@ export async function getGroupPosts(groupId: string): Promise<GroupPost[]> {
         id: p.id as string,
         groupId: p.group_id as string,
         userId: p.user_id as string,
-        userAlias: aliasMap.get(p.user_id as string) || "Unknown",
+        userAlias: (p as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
         content: p.content as string,
         horseId: p.horse_id as string | null,
         horseName: p.horse_id ? (horseNameMap.get(p.horse_id as string) || null) : null,

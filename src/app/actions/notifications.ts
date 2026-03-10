@@ -47,12 +47,12 @@ export async function getNotifications(
 
     const { data: rawNotifs } = await supabase
         .from("notifications")
-        .select("id, type, content, actor_id, horse_id, conversation_id, is_read, created_at")
+        .select("id, type, content, actor_id, horse_id, conversation_id, is_read, created_at, users!actor_id(alias_name)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(limit);
 
-    const notifs = (rawNotifs ?? []) as {
+    const notifs = (rawNotifs as unknown as {
         id: string;
         type: string;
         content: string | null;
@@ -61,28 +61,16 @@ export async function getNotifications(
         conversation_id: string | null;
         is_read: boolean;
         created_at: string;
-    }[];
+        users: { alias_name: string } | null;
+    }[]) ?? [];
 
     if (notifs.length === 0) return [];
-
-    // Batch-fetch actor aliases
-    const actorIds = [...new Set(notifs.map((n) => n.actor_id).filter(Boolean))] as string[];
-    const aliasMap = new Map<string, string>();
-    if (actorIds.length > 0) {
-        const { data: users } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", actorIds);
-        users?.forEach((u: { id: string; alias_name: string }) => {
-            aliasMap.set(u.id, u.alias_name);
-        });
-    }
 
     return notifs.map((n) => ({
         id: n.id,
         type: n.type,
         content: n.content,
-        actorAlias: n.actor_id ? aliasMap.get(n.actor_id) || null : null,
+        actorAlias: n.users?.alias_name || null,
         horseId: n.horse_id,
         conversationId: n.conversation_id,
         isRead: n.is_read,

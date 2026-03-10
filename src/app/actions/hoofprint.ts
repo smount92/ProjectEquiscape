@@ -44,31 +44,19 @@ export async function getHoofprint(horseId: string): Promise<{
 }> {
     const supabase = await createClient();
 
-    // Fetch timeline events
+    // Fetch timeline events with user alias via PostgREST join
     const { data: rawTimeline } = await supabase
         .from("horse_timeline")
-        .select("id, event_type, title, description, event_date, metadata, is_public, created_at, user_id")
+        .select("id, event_type, title, description, event_date, metadata, is_public, created_at, user_id, users!user_id(alias_name)")
         .eq("horse_id", horseId)
         .order("event_date", { ascending: false, nullsFirst: false });
 
-    const events = (rawTimeline ?? []) as {
+    const events = (rawTimeline as unknown as {
         id: string; event_type: string; title: string; description: string | null;
         event_date: string | null; metadata: Record<string, unknown>; is_public: boolean;
         created_at: string; user_id: string;
-    }[];
-
-    // Batch fetch user aliases
-    const userIds = [...new Set(events.map(e => e.user_id))];
-    const aliasMap = new Map<string, string>();
-    if (userIds.length > 0) {
-        const { data: users } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", userIds);
-        (users ?? []).forEach((u: { id: string; alias_name: string }) => {
-            aliasMap.set(u.id, u.alias_name);
-        });
-    }
+        users: { alias_name: string } | null;
+    }[]) ?? [];
 
     const timeline: TimelineEvent[] = events.map(e => ({
         id: e.id,
@@ -79,7 +67,7 @@ export async function getHoofprint(horseId: string): Promise<{
         metadata: e.metadata || {},
         isPublic: e.is_public,
         createdAt: e.created_at,
-        userAlias: aliasMap.get(e.user_id) || "Unknown",
+        userAlias: e.users?.alias_name || "Unknown",
         userId: e.user_id,
     }));
 
