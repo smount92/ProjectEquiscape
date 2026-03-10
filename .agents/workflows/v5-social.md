@@ -17,6 +17,172 @@ description: V5 Modern Social Foundation — Likes, @Mentions, Threaded Comments
 
 ---
 
+## Developer Agent Rules
+
+> **MANDATORY:** When you complete a task, update this workflow file immediately:
+> 1. Add `✅ DONE` and the date after the task heading
+> 2. Check off the item in the Completion Checklist at the bottom
+> 3. If you encounter issues or make design decisions, add a brief note under the task
+> 4. Run `npx next build` after every task and note the result
+> 5. Do NOT skip updating this file — the human uses it to track progress
+
+---
+
+## Phase 0: Critical Bug Fixes (from user testing 2026-03-10)
+
+> These bugs were identified during user testing and MUST be fixed before continuing Phase 4.
+
+### Task 0.1 — Fix Storage RLS for Social Image Uploads — CRITICAL
+
+**Bug:** "Upload failed: new row violates row-level security policy" when posting a photo to the activity feed.
+
+**Root Cause:** The storage INSERT policy (migration 038) only allows `horses/`, `help-id/`, and `commissions/` paths. V5 casual image uploads use `social/{user_id}/{timestamp}.webp` — this path is NOT in any RLS policy.
+
+**Fix:** Create `supabase/migrations/040_social_storage_rls.sql`:
+
+```sql
+-- ============================================================
+-- Migration 040: Allow social feed image uploads
+-- ============================================================
+
+-- Drop and recreate the INSERT policy to include social/ path
+DROP POLICY IF EXISTS "Horse image insert (owner)" ON storage.objects;
+CREATE POLICY "Horse image insert (owner)" ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (
+    bucket_id = 'horse-images'
+    AND (
+        -- Standard horse photos
+        ((storage.foldername(name))[1] = 'horses' AND EXISTS (SELECT 1 FROM public.user_horses WHERE id = ((storage.foldername(name))[2])::uuid AND owner_id = (SELECT auth.uid())))
+        OR 
+        -- Help ID photos
+        ((storage.foldername(name))[1] = (SELECT auth.uid())::text AND (storage.foldername(name))[2] = 'help-id')
+        OR
+        -- Art Studio WIP photos
+        ((storage.foldername(name))[1] = (SELECT auth.uid())::text AND (storage.foldername(name))[2] = 'commissions')
+        OR
+        -- Social feed photos (V5)
+        ((storage.foldername(name))[1] = 'social' AND (storage.foldername(name))[2] = (SELECT auth.uid())::text)
+    )
+);
+
+-- Add READ policy for social images (anyone authenticated can see feed images)
+DROP POLICY IF EXISTS "Horse image read (public horses)" ON storage.objects;
+CREATE POLICY "Horse image read (public horses)" ON storage.objects FOR SELECT TO authenticated, anon
+USING (
+    bucket_id = 'horse-images'
+    AND (
+        -- Social feed images (public to all authenticated)
+        (storage.foldername(name))[1] = 'social'
+        OR
+        -- New path format: horses/{horse_id}/...
+        (
+            (storage.foldername(name))[1] = 'horses'
+            AND EXISTS (
+                SELECT 1 FROM public.user_horses
+                WHERE id = ((storage.foldername(name))[2])::uuid
+                AND (is_public = true OR owner_id = (SELECT auth.uid()))
+            )
+        )
+        OR
+        -- Legacy path format: {user_id}/{horse_id}/...
+        (
+            (storage.foldername(name))[1] != 'horses'
+            AND (storage.foldername(name))[1] != 'social'
+            AND EXISTS (
+                SELECT 1 FROM public.user_horses
+                WHERE id = ((storage.foldername(name))[2])::uuid
+                AND (is_public = true OR owner_id = (SELECT auth.uid()))
+            )
+        )
+    )
+);
+```
+
+**Action:** Write this file, apply via Supabase SQL editor.
+
+**Verify:** Try uploading a photo to the activity feed — should succeed.
+
+---
+
+### Task 0.2 — Fix Comments Disappearing (Broken PostgREST Join) — CRITICAL
+
+**Bug:** Comments on other users' horses show optimistically, then vanish on page refresh.
+
+**Root Cause:** The comments query in `community/[id]/page.tsx` uses:
+```typescript
+.select("..., users!horse_comments_user_id_fkey(alias_name)")
+```
+But `horse_comments.user_id` FK points to `auth.users(id)`, NOT `public.users(id)`. PostgREST cannot resolve cross-schema FK joins, so the query returns null/fails silently.
+
+**Fix — Option A (preferred):** Add an explicit FK to `public.users` in migration 040:
+```sql
+-- Add FK from horse_comments.user_id to public.users
+-- (The existing FK to auth.users remains for cascade behavior)
+ALTER TABLE horse_comments
+  ADD CONSTRAINT horse_comments_public_user_fkey
+  FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+```
+
+Then update `community/[id]/page.tsx` to use the named constraint:
+```typescript
+.select("id, content, created_at, user_id, parent_id, likes_count, users!horse_comments_public_user_fkey(alias_name)")
+```
+
+**Fix — Option B (fallback if FK fails):** Revert to the aliasMap batch pattern that was working before:
+```typescript
+// Remove the join, fetch comments plain
+.select("id, content, created_at, user_id, parent_id, likes_count")
+// Then batch-fetch aliases:
+const commentUserIds = [...new Set(commentRows.map(c => c.user_id))];
+const aliasMap = new Map<string, string>();
+if (commentUserIds.length > 0) {
+    const { data: aliasRows } = await supabase
+        .from("users").select("id, alias_name").in("id", commentUserIds);
+    aliasRows?.forEach(u => aliasMap.set(u.id, u.alias_name));
+}
+```
+
+**Verify:** Comment on another user's public horse → refresh page → comment must persist.
+
+---
+
+### Task 0.3 — Fix @Mention for Aliases with Spaces — MODERATE
+
+**Bug:** `@black fox farm` only matches `@black` because the regex doesn't include spaces.
+
+**Root Cause:** `alias_name TEXT` in the DB allows spaces. The mention regex is `@([a-zA-Z0-9_-]{3,30})` — no space character.
+
+**Fix:** Support quoted mentions in both the parser and linkifier:
+
+**File:** `src/lib/utils/mentions.ts`
+```typescript
+export function extractMentions(text: string): string[] {
+    // Match both @simple-alias and @"alias with spaces"
+    const regex = /(?:^|\s)@"([^"]{3,30})"|(?:^|\s)@([a-zA-Z0-9_-]{3,30})/g;
+    const matches: string[] = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+        const alias = match[1] || match[2]; // group 1 = quoted, group 2 = simple
+        if (alias && !matches.includes(alias)) {
+            matches.push(alias);
+        }
+    }
+    return matches;
+}
+```
+
+**File:** `src/components/RichText.tsx` — update `linkifyMentions` to also match `@"alias"`:
+```typescript
+const parts = text.split(/(@"[^"]{3,30}"|@[a-zA-Z0-9_-]{3,30})/g);
+// When processing, strip quotes: alias = part.startsWith('@"') ? part.slice(2, -1) : part.slice(1);
+```
+
+**UI hint:** Update the comment textarea placeholder to mention the quoted syntax: `"Supports @aliases and @\"multi word aliases\""`
+
+**Verify:** Type `@"black fox farm"` in a comment → should resolve and create notification.
+
+---
+
 ## Phase 1: Schema & Real-Time Engine
 
 ### Task 1.1 — Migration 039: Modern Social Tables ✅ DONE (migration applied 2026-03-10)
@@ -837,8 +1003,12 @@ if (blocked && blocked.length > 0) {
 
 ## Completion Checklist
 
-After all 4 phases:
+**Phase 0: Bug Fixes (from user testing 2026-03-10)**
+- [ ] Storage RLS allows `social/` uploads (migration 040)
+- [ ] Comments persist on page refresh (FK or aliasMap fix)
+- [ ] @Mentions work for aliases with spaces (quoted syntax)
 
+**Phases 1-3: Done**
 - [x] Migration 039 applied — all new tables and RPCs exist ✅ 2026-03-10
 - [x] `npx next build` — 0 errors ✅ 2026-03-10
 - [x] NotificationBell uses Realtime (no setInterval) ✅
@@ -849,9 +1019,15 @@ After all 4 phases:
 - [x] LikeToggle uses atomic RPCs (no race conditions) ✅
 - [x] Casual image posts in Feed and Groups ✅
 - [x] Threaded comments (1 level deep) on horse passports ✅
-- [x] Infinite scroll on Activity Feed (IntersectionObserver) ✅
-- [x] Block/Unblock users ✅
-- [x] Blocked users filtered from feeds, DMs, and Show Ring ✅
 - [x] `grep -r "setInterval" src/components/NotificationBell.tsx` returns 0 ✅
 
-**Estimated total effort:** ~15-20 hours across 4 phases.
+**Phase 4: Complete ✅**
+> All block filtering verified in source code 2026-03-10.
+- [x] Infinite scroll on Activity Feed (IntersectionObserver) ✅ — `LoadMoreFeed.tsx`
+- [x] Block/Unblock actions (blocks.ts) ✅ — blockUser, unblockUser, getBlockedUserIds, isBlocked
+- [x] Block UI (BlockButton.tsx) ✅ — wired into profile/[alias_name] and inbox/[id]
+- [x] Blocked users filtered from feeds ✅ — `activity.ts` lines 95-103 (getActivityFeed) + lines 229-235 (getFollowingFeed)
+- [x] Blocked users filtered from DMs ✅ — `messaging.ts` lines 23-31 (block guard in createOrFindConversation)
+- [x] Blocked users filtered from Show Ring ✅ — `community/page.tsx` lines 106-114 (blockedOwnerIds filter)
+
+**Estimated total effort:** ~15-20 hours across all phases.

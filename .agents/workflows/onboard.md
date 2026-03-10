@@ -50,4 +50,10 @@ View the developer conventions artifact in the brain directory (02_developer_con
 
    **RULE:** Every workflow and feature implementation MUST end with a "Documentation Update" step. You are NOT done until the docs reflect reality. See the social-layer workflow for an example.
 
+   **RULE:** When executing a workflow, update the workflow `.md` file itself as you complete each task:
+   - Add `✅ DONE` and the date after completed task headings
+   - Check off items in any Completion Checklist at the bottom of the workflow
+   - Add brief notes about issues encountered or design decisions made
+   - Do NOT mark tasks complete unless you have verified the build passes
+
 6. You are now ready to work. Ask the user what they'd like to do next.
