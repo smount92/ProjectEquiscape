@@ -6,13 +6,17 @@ import Link from "next/link";
 import React from "react";
 
 function linkifyMentions(text: string): React.ReactNode[] {
-    const parts = text.split(/(@[a-zA-Z0-9_-]{3,30})/g);
+    // Match both @simple and @"quoted with spaces"
+    const parts = text.split(/(@"[^"]{3,30}"|@[a-zA-Z0-9_-]{3,30})/g);
     return parts.map((part, i) => {
         if (part.startsWith("@") && part.length > 1) {
-            const alias = part.slice(1);
+            // Strip quotes if present: @"My Alias" -> My Alias
+            const alias = part.startsWith('@"') && part.endsWith('"')
+                ? part.slice(2, -1)
+                : part.slice(1);
             return (
                 <Link key={i} href={`/profile/${encodeURIComponent(alias)}`} className="mention-link">
-                    {part}
+                    @{alias}
                 </Link>
             );
         }

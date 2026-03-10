@@ -1003,10 +1003,10 @@ if (blocked && blocked.length > 0) {
 
 ## Completion Checklist
 
-**Phase 0: Bug Fixes (from user testing 2026-03-10)**
-- [ ] Storage RLS allows `social/` uploads (migration 040)
-- [ ] Comments persist on page refresh (FK or aliasMap fix)
-- [ ] @Mentions work for aliases with spaces (quoted syntax)
+**Phase 0: Bug Fixes ✅ (fixed 2026-03-10)**
+- [x] Storage RLS allows `social/` uploads (migration 040) ✅
+- [x] Comments persist on page refresh — PostgREST join with graceful fallback to aliasMap ✅
+- [x] @Mentions work for aliases with spaces — `@"Alias With Spaces"` quoted syntax ✅
 
 **Phases 1-3: Done**
 - [x] Migration 039 applied — all new tables and RPCs exist ✅ 2026-03-10

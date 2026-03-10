@@ -199,13 +199,30 @@ export default async function PublicPassportPage({
     .eq("user_id", user.id)
     .maybeSingle();
 
-  // Comments — fetch with user alias join, parent_id for threading, and likes_count
-  const { data: rawComments } = await supabase
+  // Comments — try PostgREST join first, fallback to two-step if FK missing
+  let rawComments: unknown[] | null = null;
+  let joinWorked = true;
+
+  const { data: joinedComments, error: joinErr } = await supabase
     .from("horse_comments")
     .select("id, content, created_at, user_id, parent_id, likes_count, users!horse_comments_user_id_fkey(alias_name)")
     .eq("horse_id", horseId)
     .order("created_at", { ascending: false })
     .limit(50);
+
+  if (joinErr || !joinedComments) {
+    // FK doesn't exist yet — fallback to plain query
+    joinWorked = false;
+    const { data: plainComments } = await supabase
+      .from("horse_comments")
+      .select("id, content, created_at, user_id, parent_id, likes_count")
+      .eq("horse_id", horseId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    rawComments = plainComments;
+  } else {
+    rawComments = joinedComments;
+  }
 
   interface RawComment {
     id: string;
@@ -218,6 +235,19 @@ export default async function PublicPassportPage({
   }
 
   const commentRows = (rawComments as unknown as RawComment[]) ?? [];
+
+  // If join didn't work, batch-fetch aliases the old way
+  let aliasMap = new Map<string, string>();
+  if (!joinWorked && commentRows.length > 0) {
+    const commentUserIds = [...new Set(commentRows.map((c) => c.user_id))];
+    const { data: aliasRows } = await supabase
+      .from("users")
+      .select("id, alias_name")
+      .in("id", commentUserIds);
+    ((aliasRows as { id: string; alias_name: string }[]) ?? []).forEach((u) => {
+      aliasMap.set(u.id, u.alias_name);
+    });
+  }
 
   // Batch-fetch current user's comment likes
   let likedCommentIds = new Set<string>();
@@ -235,7 +265,7 @@ export default async function PublicPassportPage({
     id: c.id,
     content: c.content,
     createdAt: c.created_at,
-    userAlias: c.users?.alias_name ?? "Unknown",
+    userAlias: joinWorked ? (c.users?.alias_name ?? "Unknown") : (aliasMap.get(c.user_id) ?? "Unknown"),
     userId: c.user_id,
     parentId: c.parent_id,
     likesCount: c.likes_count ?? 0,
