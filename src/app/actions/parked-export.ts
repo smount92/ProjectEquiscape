@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { getSignedImageUrl } from "@/lib/utils/storage";
+import { checkRateLimit } from "@/lib/utils/rateLimit";
 
 // ============================================================
 // PARKED EXPORT — Server Actions
@@ -260,6 +261,12 @@ export async function claimParkedHorse(pin: string): Promise<{
     error?: string;
 }> {
     try {
+        // Rate limit: 5 attempts per 15 minutes per IP
+        const allowed = await checkRateLimit("claim_pin", 5, 15);
+        if (!allowed) {
+            return { success: false, error: "Too many attempts. Please wait 15 minutes before trying again." };
+        }
+
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated. Please log in or create an account first." };
@@ -412,7 +419,7 @@ export async function getCoaData(horseId: string): Promise<{
         ownerCount: number;
         ownerAlias: string;
         generatedAt: string;
-        photoBase64: string | null;
+        photoUrl: string | null;
     };
     error?: string;
 }> {
@@ -496,21 +503,13 @@ export async function getCoaData(horseId: string): Promise<{
             .eq("id", user.id)
             .single<{ alias_name: string }>();
 
-        // Photo as base64
-        let photoBase64: string | null = null;
+        // Photo as signed URL (NO base64 — defuses payload bomb)
+        let photoUrl: string | null = null;
         const thumb = h.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
         const imageUrl = thumb?.image_url || h.horse_images?.[0]?.image_url;
         if (imageUrl) {
-            try {
-                const signedUrl = await getSignedImageUrl(supabase, imageUrl);
-                const response = await fetch(signedUrl);
-                if (response.ok) {
-                    const buffer = await response.arrayBuffer();
-                    const base64 = Buffer.from(buffer).toString("base64");
-                    const contentType = response.headers.get("content-type") || "image/webp";
-                    photoBase64 = `data:${contentType};base64,${base64}`;
-                }
-            } catch { /* skip */ }
+            const signedUrl = await getSignedImageUrl(supabase, imageUrl);
+            photoUrl = signedUrl || null;
         }
 
         return {
@@ -527,7 +526,7 @@ export async function getCoaData(horseId: string): Promise<{
                 generatedAt: new Date().toLocaleDateString("en-US", {
                     year: "numeric", month: "long", day: "numeric",
                 }),
-                photoBase64,
+                photoUrl,
             },
         };
     } catch (error) {

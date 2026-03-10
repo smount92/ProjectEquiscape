@@ -34,18 +34,6 @@ export interface MHHEvent {
     userRsvp: string | null;
 }
 
-const EVENT_TYPE_LABELS: Record<string, string> = {
-    live_show: "Live Show",
-    photo_show: "Photo Show",
-    swap_meet: "Swap Meet",
-    meetup: "Meetup",
-    breyerfest: "BreyerFest",
-    studio_opening: "Studio Opening",
-    auction: "Auction",
-    workshop: "Workshop",
-    other: "Other",
-};
-
 // ── CRUD ──
 
 /** Create an event */

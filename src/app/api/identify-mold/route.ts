@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/utils/rateLimit";
 
 /**
  * POST /api/identify-mold
@@ -42,6 +43,25 @@ async function callGemini(
 
 export async function POST(req: NextRequest) {
   try {
+    // ── 0. Auth check ─────────────────────────────────────────────────
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit: 5 identifications per 24 hours per user
+    const allowed = await checkRateLimit("identify_mold", 5, 1440, user.id);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Daily identification limit reached (5/day). Try again tomorrow." },
+        { status: 429 }
+      );
+    }
+
     // ── 1. Validate API key ───────────────────────────────────────────
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -71,7 +91,6 @@ export async function POST(req: NextRequest) {
     }
 
     // ── 3. Fetch the Answer Key from reference_molds ──────────────────
-    const supabase = await createClient();
     const { data: moldRows, error: dbError } = await supabase
       .from("reference_molds")
       .select("mold_name")

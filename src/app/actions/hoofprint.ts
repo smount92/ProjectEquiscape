@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { checkRateLimit } from "@/lib/utils/rateLimit";
 
 // ============================================================
 // HOOFPRINT™ — Living Model Horse Provenance Actions
@@ -331,6 +332,12 @@ export async function claimTransfer(transferCode: string): Promise<{
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
+
+    // Rate limit: 5 attempts per 15 minutes per IP
+    const allowed = await checkRateLimit("claim_transfer", 5, 15);
+    if (!allowed) {
+        return { success: false, error: "Too many attempts. Please wait 15 minutes before trying again." };
+    }
 
     // Look up transfer
     const { data: transfer } = await supabase

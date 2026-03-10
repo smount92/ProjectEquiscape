@@ -16,7 +16,7 @@ interface HorseReportData {
     finish: string;
     purchasePrice: number | null;
     estimatedValue: number | null;
-    photoBase64: string | null;
+    photoUrl: string | null;
 }
 
 export interface InsuranceReportPayload {
@@ -112,32 +112,19 @@ export async function getInsuranceReportData(): Promise<{
                 reference = `${horse.artist_resins.sculptor_alias} — ${horse.artist_resins.resin_name}`;
             }
 
-            // Get primary thumbnail and convert to base64
-            let photoBase64: string | null = null;
+            // Get primary thumbnail signed URL (NO base64 — defuses payload bomb)
+            let photoUrl: string | null = null;
             const thumb = horse.horse_images?.find(
                 (img) => img.angle_profile === "Primary_Thumbnail"
             );
             const imageUrl = thumb?.image_url || horse.horse_images?.[0]?.image_url;
 
             if (imageUrl) {
-                try {
-                    const path = extractStoragePath(imageUrl);
-                    const { data: signedData } = await supabase.storage
-                        .from("horse-images")
-                        .createSignedUrl(path, 300);
-
-                    if (signedData?.signedUrl) {
-                        const response = await fetch(signedData.signedUrl);
-                        if (response.ok) {
-                            const buffer = await response.arrayBuffer();
-                            const base64 = Buffer.from(buffer).toString("base64");
-                            const contentType = response.headers.get("content-type") || "image/webp";
-                            photoBase64 = `data:${contentType};base64,${base64}`;
-                        }
-                    }
-                } catch {
-                    // Skip if image fetch fails — show placeholder
-                }
+                const path = extractStoragePath(imageUrl);
+                const { data: signedData } = await supabase.storage
+                    .from("horse-images")
+                    .createSignedUrl(path, 600); // 10 min expiry — enough for PDF render
+                photoUrl = signedData?.signedUrl || null;
             }
 
             reportHorses.push({
@@ -148,7 +135,7 @@ export async function getInsuranceReportData(): Promise<{
                 finish: horse.finish_type,
                 purchasePrice: vault?.purchase_price ?? null,
                 estimatedValue: vault?.estimated_current_value ?? null,
-                photoBase64,
+                photoUrl,
             });
         }
 

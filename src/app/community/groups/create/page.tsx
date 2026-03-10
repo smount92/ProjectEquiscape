@@ -4,14 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createGroup } from "@/app/actions/groups";
 
-const GROUP_TYPE_LABELS: Record<string, string> = {
-    regional_club: "Regional Club",
-    breed_interest: "Breed Interest",
-    scale_interest: "Scale Interest",
-    show_circuit: "Show Circuit",
-    artist_collective: "Artist Collective",
-    general: "General",
-};
+import { GROUP_TYPE_LABELS } from "@/lib/constants/groups";
 export default function CreateGroupPage() {
     const router = useRouter();
     const [name, setName] = useState("");

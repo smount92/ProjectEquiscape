@@ -65,14 +65,14 @@ export async function toggleFavorite(
             const h = horse as { owner_id: string; custom_name: string };
             const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-            createNotification({
+            await createNotification({
                 userId: h.owner_id,
                 type: "favorite",
                 actorId: user.id,
                 content: `@${alias} ❤️ your horse ${h.custom_name}`,
                 horseId,
             });
-            createActivityEvent({
+            await createActivityEvent({
                 actorId: user.id,
                 eventType: "favorite",
                 horseId,
@@ -134,14 +134,14 @@ export async function addComment(
         const h = horse as { owner_id: string; custom_name: string };
         const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
         const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-        createNotification({
+        await createNotification({
             userId: h.owner_id,
             type: "comment",
             actorId: user.id,
             content: `@${alias} commented on ${h.custom_name}`,
             horseId,
         });
-        createActivityEvent({
+        await createActivityEvent({
             actorId: user.id,
             eventType: "comment",
             horseId,

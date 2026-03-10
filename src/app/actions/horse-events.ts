@@ -17,7 +17,7 @@ export async function notifyHorsePublic(data: {
     releaseId?: string | null;
 }): Promise<void> {
     // Log the activity event
-    createActivityEvent({
+    await createActivityEvent({
         actorId: data.userId,
         eventType: "new_horse",
         horseId: data.horseId,
@@ -29,9 +29,11 @@ export async function notifyHorsePublic(data: {
         (data.tradeStatus === "For Sale" || data.tradeStatus === "Open to Offers") &&
         (data.moldId || data.releaseId)
     ) {
-        checkWishlistMatches(data).catch(() => {
-            // Fire-and-forget
-        });
+        try {
+            await checkWishlistMatches(data);
+        } catch {
+            // Non-blocking — best effort
+        }
     }
 }
 

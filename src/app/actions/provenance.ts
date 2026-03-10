@@ -45,18 +45,18 @@ export async function addShowRecord(data: {
 
     if (error) return { success: false, error: error.message };
 
-    // Activity event (fire-and-forget)
-    createActivityEvent({
+    // Activity event
+    await createActivityEvent({
         actorId: user.id,
         eventType: "show_record",
         horseId: data.horseId,
         metadata: { showName: data.showName, placing: data.placing || null },
     });
 
-    // Hoofprint timeline event (fire-and-forget)
+    // Hoofprint timeline event
     try {
         const { addTimelineEvent } = await import("@/app/actions/hoofprint");
-        addTimelineEvent({
+        await addTimelineEvent({
             horseId: data.horseId,
             eventType: "show_result",
             title: `${data.showName}${data.placing ? ` — ${data.placing}` : ""}`,

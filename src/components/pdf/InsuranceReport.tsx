@@ -316,8 +316,8 @@ export default function InsuranceReport({ data }: { data: InsuranceReportPayload
                     <View style={styles.detailGrid}>
                         {pageHorses.map((horse) => (
                             <View key={horse.id} style={styles.detailCard}>
-                                {horse.photoBase64 ? (
-                                    <Image src={horse.photoBase64} style={styles.detailPhoto} />
+                                {horse.photoUrl ? (
+                                    <Image src={horse.photoUrl} style={styles.detailPhoto} />
                                 ) : (
                                     <View style={styles.detailPlaceholder}>
                                         <Text style={styles.detailPlaceholderText}>🐴</Text>

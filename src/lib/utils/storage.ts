@@ -10,12 +10,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * Extract the relative file path from a stored image URL or raw path.
  */
 export function extractStoragePath(imageUrl: string): string {
+  // Strip query params (signed URL tokens) before extracting path
+  const cleanUrl = imageUrl.split("?")[0];
   const marker = "horse-images/";
-  const idx = imageUrl.indexOf(marker);
+  const idx = cleanUrl.indexOf(marker);
   if (idx !== -1) {
-    return imageUrl.substring(idx + marker.length);
+    return cleanUrl.substring(idx + marker.length);
   }
-  return imageUrl;
+  return cleanUrl;
 }
 
 /**

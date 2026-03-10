@@ -41,14 +41,14 @@ export async function leaveRating(data: {
     // Notify rated user (fire-and-forget)
     const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
     const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-    createNotification({
+    await createNotification({
         userId: data.reviewedId,
         type: "rating",
         actorId: user.id,
         content: `@${alias} left you a ★${data.stars} rating`,
         conversationId: data.conversationId,
     });
-    createActivityEvent({
+    await createActivityEvent({
         actorId: user.id,
         eventType: "rating",
         metadata: { stars: data.stars, targetAlias: alias },

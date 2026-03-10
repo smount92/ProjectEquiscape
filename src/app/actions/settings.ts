@@ -217,3 +217,37 @@ export async function uploadAvatar(
         .createSignedUrl(path, 3600);
     return { success: true, url: signedData?.signedUrl || path };
 }
+
+// ── Delete Account (Tombstone) ──
+
+import { getAdminClient } from "@/lib/supabase/admin";
+
+export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Call the soft delete RPC
+    const adminClient = getAdminClient();
+    const { error: rpcError } = await adminClient.rpc("soft_delete_account", {
+        target_uid: user.id,
+    });
+
+    if (rpcError) return { success: false, error: rpcError.message };
+
+    // Disable the auth account (prevents login)
+    const { error: authError } = await adminClient.auth.admin.updateUserById(
+        user.id,
+        { ban_duration: "876000h" } // ~100 years = effectively permanent
+    );
+
+    if (authError) {
+        console.error("[DeleteAccount] Failed to disable auth:", authError.message);
+        // Non-fatal — the soft delete already happened
+    }
+
+    // Sign out the user
+    await supabase.auth.signOut();
+
+    return { success: true };
+}

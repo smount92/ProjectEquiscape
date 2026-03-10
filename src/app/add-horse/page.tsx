@@ -324,12 +324,7 @@ export default function AddHorsePage() {
 
       const formData = new FormData();
 
-      // Debug: trace what reference IDs are being submitted
-      console.log("[AddHorse] Submitting with refs:", {
-        selectedMoldId,
-        selectedResinId,
-        selectedReleaseId,
-      });
+
 
       formData.append("customName", customName.trim());
       formData.append("finishType", finishType);

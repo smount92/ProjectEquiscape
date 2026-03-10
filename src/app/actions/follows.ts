@@ -53,13 +53,13 @@ export async function toggleFollow(
             .eq("id", user.id)
             .single();
         const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-        createNotification({
+        await createNotification({
             userId: targetUserId,
             type: "follow",
             actorId: user.id,
             content: `@${alias} started following you`,
         });
-        createActivityEvent({
+        await createActivityEvent({
             actorId: user.id,
             eventType: "follow",
             targetId: targetUserId,

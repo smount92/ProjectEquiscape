@@ -124,8 +124,6 @@ export async function forgotPasswordAction(
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     const redirectTo = `${siteUrl}/auth/reset-password`;
 
-    console.log("[ForgotPassword] Sending reset email to:", email);
-    console.log("[ForgotPassword] redirectTo:", redirectTo);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
@@ -136,7 +134,6 @@ export async function forgotPasswordAction(
       return { error: error.message, success: false };
     }
 
-    console.log("[ForgotPassword] Success — email sent");
     return { error: null, success: true };
   } catch (err) {
     console.error("[ForgotPassword] Unexpected error:", err);

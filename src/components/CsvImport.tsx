@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Papa from "papaparse";
+import fuzzysort from "fuzzysort";
 import type { CsvRow, MatchResult, ReferenceMatch } from "@/lib/types/csv-import";
-import { matchCsvBatch, executeBatchImport } from "@/app/actions/csv-import";
+import { executeBatchImport } from "@/app/actions/csv-import";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DictRelease = { i: string; n: string; m: string | null; c: string | null; mn: string | null; mf: string | null };
+type DictResin = { i: string; n: string; s: string };
+interface RefDict { releases: DictRelease[]; resins: DictResin[] }
 
 // ============================================================
 // Column mapping presets — auto-detect common CSV headers
@@ -76,6 +82,15 @@ export default function CsvImport() {
     const [dragOver, setDragOver] = useState(false);
     const [parseError, setParseError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const dictRef = useRef<RefDict | null>(null);
+
+    // Fetch reference dictionary on mount (cached for 24h server-side)
+    useEffect(() => {
+        fetch("/api/reference-dictionary")
+            .then((res) => res.json())
+            .then((data: RefDict) => { dictRef.current = data; })
+            .catch((err) => console.error("[CSV] Failed to load dictionary:", err));
+    }, []);
 
     // ── Step 1: File Upload ──────────────────────────────────────
     const handleFile = useCallback((file: File) => {
@@ -167,15 +182,61 @@ export default function CsvImport() {
             return mapped;
         });
 
-        const result = await matchCsvBatch(mappedRows);
-        setIsMatching(false);
-
-        if (result.success && result.results) {
-            setMatchResults(result.results);
-            setStep(3);
-        } else {
-            setParseError(result.error || "Failed to match CSV rows.");
+        // Client-side fuzzy matching using cached dictionary
+        if (!dictRef.current) {
+            setParseError("Reference dictionary not loaded yet. Please wait and try again.");
+            setIsMatching(false);
+            return;
         }
+
+        const dict = dictRef.current;
+
+        // Build search targets
+        const releaseTargets = dict.releases.map((r) => {
+            const display = [r.mf, r.m ? `#${r.m}` : null, "—", r.n, r.mn].filter(Boolean).join(" ");
+            const searchText = [r.n, r.mn, r.c, r.m, r.mf].filter(Boolean).join(" ");
+            return { id: r.i, display, searchText, manufacturer: r.mf ?? "Unknown", mold_name: r.mn ?? "Unknown", release_name: r.n };
+        });
+
+        const resinTargets = dict.resins.map((r) => {
+            const display = `${r.s} — ${r.n}`;
+            const searchText = `${r.n} ${r.s}`;
+            return { id: r.i, display, searchText, sculptor_alias: r.s, resin_name: r.n };
+        });
+
+        const results: MatchResult[] = mappedRows.map((row, index) => {
+            const searchQuery = [row.name, row.mold, row.manufacturer].filter(Boolean).join(" ").trim();
+
+            if (!searchQuery) {
+                return { csvRow: row as unknown as Record<string, string>, rowIndex: index, status: "no_match" as const, matches: [], selectedMatch: null, customName: row.name || `Import Row ${index + 1}` };
+            }
+
+            const releaseResults = fuzzysort.go(searchQuery, releaseTargets, { key: "searchText", limit: 3, threshold: -2000 });
+            const resinResults = fuzzysort.go(searchQuery, resinTargets, { key: "searchText", limit: 3, threshold: -2000 });
+
+            const allMatches: ReferenceMatch[] = [];
+            for (const res of releaseResults) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const obj = res.obj as any;
+                allMatches.push({ id: obj.id, score: res.score, display: obj.display, manufacturer: obj.manufacturer, mold_name: obj.mold_name, release_name: obj.release_name, table: "reference_releases" });
+            }
+            for (const res of resinResults) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const obj = res.obj as any;
+                allMatches.push({ id: obj.id, score: res.score, display: obj.display, manufacturer: obj.sculptor_alias, mold_name: obj.resin_name, release_name: obj.resin_name, table: "artist_resins" });
+            }
+
+            allMatches.sort((a, b) => b.score - a.score);
+            const topMatches = allMatches.slice(0, 3);
+            const bestScore = topMatches[0]?.score ?? -Infinity;
+            const status = bestScore >= -50 ? "perfect" : topMatches.length > 0 ? "review" : "no_match";
+
+            return { csvRow: row as unknown as Record<string, string>, rowIndex: index, status: status as "perfect" | "review" | "no_match", matches: topMatches, selectedMatch: status === "perfect" ? topMatches[0] : null, customName: row.name || `Import Row ${index + 1}` };
+        });
+
+        setIsMatching(false);
+        setMatchResults(results);
+        setStep(3);
     };
 
     // ── Step 3: Reconciliation ───────────────────────────────────

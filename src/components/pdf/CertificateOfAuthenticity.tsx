@@ -199,7 +199,7 @@ interface CoaData {
     ownerCount: number;
     ownerAlias: string;
     generatedAt: string;
-    photoBase64: string | null;
+    photoUrl: string | null;
     qrDataUri: string;
 }
 
@@ -224,8 +224,8 @@ export default function CertificateOfAuthenticity({ data }: { data: CoaData }) {
                 {/* Main: Photo + Info */}
                 <View style={s.mainSection}>
                     <View style={s.photoSection}>
-                        {data.photoBase64 ? (
-                            <Image src={data.photoBase64} style={s.photo} />
+                        {data.photoUrl ? (
+                            <Image src={data.photoUrl} style={s.photo} />
                         ) : (
                             <View style={s.photoPlaceholder}>
                                 <Text style={s.placeholderEmoji}>🐴</Text>

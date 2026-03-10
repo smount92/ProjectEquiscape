@@ -9,6 +9,7 @@ import {
     updateNotificationPrefs,
     changePassword,
     uploadAvatar,
+    deleteAccount,
 } from "@/app/actions/settings";
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
@@ -48,6 +49,11 @@ export default function SettingsPage() {
 
     // Avatar upload
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+    // Delete account
+    const [deleteConfirm, setDeleteConfirm] = useState("");
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     useEffect(() => {
         async function load() {
@@ -329,6 +335,58 @@ export default function SettingsPage() {
                                 />
                             </div>
                         ))}
+                    </div>
+                </div>
+
+                {/* ═══ Danger Zone ═══ */}
+                <div className="settings-section">
+                    <h2 className="settings-section-title" style={{ color: "#ef4444" }}>⚠️ Danger Zone</h2>
+                    <div className="settings-card" style={{ border: "1px solid #ef4444", borderRadius: "var(--radius-lg)" }}>
+                        <p style={{ marginBottom: "var(--space-md)", lineHeight: 1.6 }}>
+                            Permanently delete your account. This action <strong>cannot be undone</strong>.
+                        </p>
+                        <ul style={{ marginBottom: "var(--space-md)", paddingLeft: "var(--space-lg)", lineHeight: 1.8, color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                            <li>Your profile will be anonymized as &ldquo;[Deleted Collector]&rdquo;</li>
+                            <li>Your horses will be orphaned (Hoofprint™ history preserved)</li>
+                            <li>Pending transfers and commissions will be cancelled</li>
+                            <li>You will be signed out and cannot log in again</li>
+                        </ul>
+                        <div className="form-group">
+                            <label htmlFor="delete-confirm" className="form-label">Type <strong>DELETE</strong> to confirm</label>
+                            <input
+                                id="delete-confirm"
+                                type="text"
+                                className="form-input"
+                                value={deleteConfirm}
+                                onChange={(e) => setDeleteConfirm(e.target.value)}
+                                placeholder="DELETE"
+                                autoComplete="off"
+                            />
+                        </div>
+                        <button
+                            className="btn"
+                            style={{
+                                background: deleteConfirm === "DELETE" ? "#ef4444" : "var(--color-surface-elevated)",
+                                color: deleteConfirm === "DELETE" ? "#fff" : "var(--color-text-muted)",
+                                cursor: deleteConfirm === "DELETE" ? "pointer" : "not-allowed",
+                            }}
+                            disabled={deleteConfirm !== "DELETE" || isDeleting}
+                            onClick={async () => {
+                                if (deleteConfirm !== "DELETE") return;
+                                setIsDeleting(true);
+                                setDeleteError(null);
+                                const result = await deleteAccount();
+                                if (result.success) {
+                                    router.push("/");
+                                } else {
+                                    setDeleteError(result.error || "Failed to delete account.");
+                                    setIsDeleting(false);
+                                }
+                            }}
+                        >
+                            {isDeleting ? "Deleting…" : "🗑️ Permanently Delete Account"}
+                        </button>
+                        {deleteError && <p className="form-error" style={{ marginTop: "var(--space-sm)" }}>{deleteError}</p>}
                     </div>
                 </div>
             </div>

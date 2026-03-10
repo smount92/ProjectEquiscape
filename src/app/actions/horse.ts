@@ -28,7 +28,7 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
     if (images && images.length > 0) {
         const paths = images
             .map((img: { image_url: string }) => {
-                const match = img.image_url.match(/horse-images\/(.+)$/);
+                const match = img.image_url.match(/horse-images\/(.+?)(\?|$)/);
                 return match ? match[1] : null;
             })
             .filter(Boolean) as string[];
@@ -146,7 +146,7 @@ export async function addHorseAction(formData: FormData): Promise<{ success: boo
                     safeFileName = `extra_detail_${Date.now()}_${extraIndex++}`;
                 }
 
-                const filePath = `${user.id}/${horseId}/${safeFileName}.webp`;
+                const filePath = `horses/${horseId}/${safeFileName}.webp`;
 
                 const { error: uploadError } = await supabase.storage
                     .from("horse-images")
@@ -279,7 +279,7 @@ export async function updateHorseAction(horseId: string, formData: FormData): Pr
                     safeFileName = `extra_detail_${Date.now()}_${extraIndex++}`;
                 }
 
-                const filePath = `${user.id}/${horseId}/${safeFileName}.webp`;
+                const filePath = `horses/${horseId}/${safeFileName}.webp`;
                 const { error: uploadErr } = await supabase.storage.from("horse-images").upload(filePath, value, {
                     contentType: value.type || "image/webp",
                     upsert: false,

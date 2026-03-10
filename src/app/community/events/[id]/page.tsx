@@ -4,11 +4,7 @@ import Link from "next/link";
 import { getEvent } from "@/app/actions/events";
 import EventRsvpButton from "@/components/EventRsvpButton";
 
-const EVENT_TYPE_LABELS: Record<string, string> = {
-    live_show: "Live Show", photo_show: "Photo Show", swap_meet: "Swap Meet",
-    meetup: "Meetup", breyerfest: "BreyerFest", studio_opening: "Studio Opening",
-    auction: "Auction", workshop: "Workshop", other: "Other",
-};
+import { EVENT_TYPE_LABELS } from "@/lib/constants/events";
 
 export const dynamic = "force-dynamic";
 
