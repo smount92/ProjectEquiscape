@@ -19,7 +19,7 @@ description: V5 Modern Social Foundation — Likes, @Mentions, Threaded Comments
 
 ## Phase 1: Schema & Real-Time Engine
 
-### Task 1.1 — Migration 039: Modern Social Tables
+### Task 1.1 — Migration 039: Modern Social Tables ✅ DONE (migration applied 2026-03-10)
 
 Create `supabase/migrations/039_modern_social.sql`:
 
@@ -158,7 +158,7 @@ $$;
 
 ---
 
-### Task 1.2 — Fix RPC Typo
+### Task 1.2 — Fix RPC Typo ✅ DONE (fixed before applying migration)
 
 **IMPORTANT:** The `toggle_group_post_like` RPC above has a typo. The INSERT line says `activity_id` but should be `post_id`. Fix this in the migration before applying:
 ```sql
@@ -170,7 +170,7 @@ INSERT INTO group_post_likes (user_id, post_id) VALUES (p_user_id, p_post_id);
 
 ---
 
-### Task 1.3 — Real-Time Notification Bell
+### Task 1.3 — Real-Time Notification Bell ✅ DONE
 
 **File:** `src/components/NotificationBell.tsx`
 
@@ -271,7 +271,7 @@ export default function NotificationBell() {
 
 ---
 
-### Task 1.4 — Real-Time Chat Thread
+### Task 1.4 — Real-Time Chat Thread ✅ DONE
 
 **File:** `src/components/ChatThread.tsx`
 
@@ -323,7 +323,7 @@ useEffect(() => {
 
 ## Phase 2: Engagement Layer (Mentions & Likes)
 
-### Task 2.1 — @Mention Parser Utility
+### Task 2.1 — @Mention Parser Utility ✅ DONE
 
 Create `src/lib/utils/mentions.ts`:
 
@@ -347,7 +347,7 @@ export function extractMentions(text: string): string[] {
 
 ---
 
-### Task 2.2 — Mention Notification Server Action
+### Task 2.2 — Mention Notification Server Action ✅ DONE
 
 Create `src/app/actions/mentions.ts`:
 
@@ -402,7 +402,7 @@ export async function parseAndNotifyMentions(
 
 ---
 
-### Task 2.3 — Integrate Mentions into Post Creation
+### Task 2.3 — Integrate Mentions into Post Creation ✅ DONE
 
 **File:** `src/app/actions/activity.ts` — `createTextPost()`
 
@@ -426,7 +426,7 @@ Apply the same pattern to:
 
 ---
 
-### Task 2.4 — RichText Component (Mention Linkifier)
+### Task 2.4 — RichText Component (Mention Linkifier) ✅ DONE
 
 Create `src/components/RichText.tsx`:
 
@@ -485,7 +485,7 @@ export default function RichText({ content }: { content: string }) {
 
 ---
 
-### Task 2.5 — Like Toggle Server Actions
+### Task 2.5 — Like Toggle Server Actions ✅ DONE
 
 Create `src/app/actions/likes.ts`:
 
@@ -546,7 +546,7 @@ export async function toggleCommentLike(commentId: string): Promise<{ success: b
 
 ---
 
-### Task 2.6 — LikeToggle Client Component
+### Task 2.6 — LikeToggle Client Component ✅ DONE
 
 Create `src/components/LikeToggle.tsx`:
 
@@ -621,7 +621,7 @@ export default function LikeToggle({ initialLiked, initialCount, onToggle }: Lik
 
 ---
 
-### Task 2.7 — Integrate Likes into Feeds
+### Task 2.7 — Integrate Likes into Feeds ✅ DONE
 
 **Activity Feed:** Update `getActivityFeed()` and `getFollowingFeed()` in `activity.ts`:
 - Add `likes_count` to the `.select()` query
@@ -638,7 +638,7 @@ export default function LikeToggle({ initialLiked, initialCount, onToggle }: Lik
 
 ## Phase 3: Rich Media & Threading
 
-### Task 3.1 — Casual Image Posts (Feed)
+### Task 3.1 — Casual Image Posts (Feed) ✅ DONE
 
 **File:** `src/components/FeedComposeBar.tsx`
 
@@ -656,13 +656,13 @@ If `item.metadata?.imageUrls` exists and is non-empty, render a CSS-grid image c
 
 ---
 
-### Task 3.2 — Add Group Post Images
+### Task 3.2 — Add Group Post Images ✅ DONE (schema ready via migration 039)
 
 Same V2 direct-to-storage pattern for the group post composer in the group page. Store URLs in the existing `image_urls` TEXT[] column on `group_posts`.
 
 ---
 
-### Task 3.3 — Threaded Comments
+### Task 3.3 — Threaded Comments ✅ DONE
 
 **File:** `src/app/actions/social.ts` — `addComment()`
 
@@ -839,19 +839,19 @@ if (blocked && blocked.length > 0) {
 
 After all 4 phases:
 
-- [ ] Migration 039 applied — all new tables and RPCs exist
-- [ ] `npx next build` — 0 errors
-- [ ] NotificationBell uses Realtime (no setInterval)
-- [ ] ChatThread uses Realtime for new messages
-- [ ] @Mentions parsed and notified in posts, comments, group posts
-- [ ] RichText component renders @mentions as profile links
-- [ ] Like toggles on Activity Feed, Group Posts, and Comments
-- [ ] LikeToggle uses atomic RPCs (no race conditions)
-- [ ] Casual image posts in Feed and Groups
-- [ ] Threaded comments (1 level deep) on horse passports
+- [x] Migration 039 applied — all new tables and RPCs exist ✅ 2026-03-10
+- [x] `npx next build` — 0 errors ✅ 2026-03-10
+- [x] NotificationBell uses Realtime (no setInterval) ✅
+- [x] ChatThread uses Realtime for new messages ✅
+- [x] @Mentions parsed and notified in posts, comments, group posts ✅
+- [x] RichText component renders @mentions as profile links ✅
+- [x] Like toggles on Activity Feed, Group Posts, and Comments ✅
+- [x] LikeToggle uses atomic RPCs (no race conditions) ✅
+- [x] Casual image posts in Feed and Groups ✅
+- [x] Threaded comments (1 level deep) on horse passports ✅
 - [ ] Infinite scroll on Activity Feed (IntersectionObserver)
 - [ ] Block/Unblock users
 - [ ] Blocked users filtered from feeds, DMs, and Show Ring
-- [ ] `grep -r "setInterval" src/components/NotificationBell.tsx` returns 0
+- [x] `grep -r "setInterval" src/components/NotificationBell.tsx` returns 0 ✅
 
 **Estimated total effort:** ~15-20 hours across 4 phases.
