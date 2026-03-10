@@ -90,6 +90,17 @@ export async function createTextPost(text: string, imageUrls?: string[]): Promis
  */
 export async function getActivityFeed(limit: number = 30, cursor?: string): Promise<{ items: FeedItem[]; nextCursor: string | null }> {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Fetch blocked user IDs
+    let blockedIds: string[] = [];
+    if (user) {
+        const { data: blocks } = await supabase
+            .from("user_blocks")
+            .select("blocked_id")
+            .eq("blocker_id", user.id);
+        blockedIds = (blocks ?? []).map((b: { blocked_id: string }) => b.blocked_id);
+    }
 
     let query = supabase
         .from("activity_events")
@@ -115,13 +126,17 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
         users: { alias_name: string } | null;
     }[]) ?? [];
 
-    const hasMore = allItems.length > limit;
-    const items = hasMore ? allItems.slice(0, limit) : allItems;
+    // Filter out blocked users
+    const filteredItems = blockedIds.length > 0
+        ? allItems.filter((e) => !blockedIds.includes(e.actor_id))
+        : allItems;
+
+    const hasMore = filteredItems.length > limit;
+    const items = hasMore ? filteredItems.slice(0, limit) : filteredItems;
 
     if (items.length === 0) return { items: [], nextCursor: null };
 
     // Batch-fetch current user's likes
-    const { data: { user } } = await supabase.auth.getUser();
     let likedSet = new Set<string>();
     if (user && items.length > 0) {
         const itemIds = items.map((e) => e.id);
@@ -211,12 +226,20 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
     // Include own activity
     followingIds.push(user.id);
 
-    if (followingIds.length === 0) return { items: [], nextCursor: null };
+    // Remove blocked users from feed
+    const { data: blocks } = await supabase
+        .from("user_blocks")
+        .select("blocked_id")
+        .eq("blocker_id", user.id);
+    const blockedIds2 = new Set((blocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
+    const filteredFollowingIds = followingIds.filter((id) => !blockedIds2.has(id));
+
+    if (filteredFollowingIds.length === 0) return { items: [], nextCursor: null };
 
     let query = supabase
         .from("activity_events")
         .select("id, actor_id, event_type, horse_id, metadata, created_at, likes_count, image_urls, users!actor_id(alias_name)")
-        .in("actor_id", followingIds)
+        .in("actor_id", filteredFollowingIds)
         .order("created_at", { ascending: false })
         .limit(limit + 1);
 

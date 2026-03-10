@@ -103,7 +103,15 @@ export default async function CommunityPage({
 
   const { data: rawHorses } = await query.limit(60);
 
-  const horses = (rawHorses as unknown as CommunityHorse[]) ?? [];
+  // Filter out blocked users
+  const { data: myBlocks } = await supabase
+    .from("user_blocks")
+    .select("blocked_id")
+    .eq("blocker_id", user.id);
+  const blockedOwnerIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
+
+  const horses = ((rawHorses as unknown as CommunityHorse[]) ?? [])
+    .filter((h) => !blockedOwnerIds.has(h.owner_id));
 
   // Collect all thumbnail image URLs and generate signed URLs
   const thumbnailUrls: string[] = [];

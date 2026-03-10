@@ -20,6 +20,16 @@ export async function createOrFindConversation(
     if (!user) return { success: false, error: "You must be logged in." };
     if (user.id === sellerId) return { success: false, error: "You cannot message yourself." };
 
+    // Block guard — prevent messaging if either party blocked the other
+    const { data: blockCheck } = await supabase
+        .from("user_blocks")
+        .select("blocker_id")
+        .or(`and(blocker_id.eq.${user.id},blocked_id.eq.${sellerId}),and(blocker_id.eq.${sellerId},blocked_id.eq.${user.id})`)
+        .limit(1);
+    if (blockCheck && blockCheck.length > 0) {
+        return { success: false, error: "Unable to message this user." };
+    }
+
     // Check if a conversation already exists for this buyer+seller+horse
     let query = supabase
         .from("conversations")

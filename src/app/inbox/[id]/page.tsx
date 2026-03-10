@@ -4,6 +4,8 @@ import Link from "next/link";
 import ChatThread from "@/components/ChatThread";
 import RatingForm from "@/components/RatingForm";
 import TransactionActions from "@/components/TransactionActions";
+import BlockButton from "@/components/BlockButton";
+import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
 
 export async function generateMetadata({
     params,
@@ -70,6 +72,9 @@ export default async function ChatPage({
         .single<{ alias_name: string }>();
 
     const otherAlias = otherUser?.alias_name ?? "Unknown";
+
+    // Check block status for this conversation partner
+    const isBlockedUser = await checkIsBlocked(otherId);
 
     // ── Trust Signals ──
     // Account age
@@ -256,6 +261,11 @@ export default async function ChatPage({
                     </svg>
                     Private &amp; Secure
                 </div>
+                <BlockButton
+                    targetId={otherId}
+                    targetAlias={otherAlias}
+                    initialBlocked={isBlockedUser}
+                />
             </div>
 
             {/* Chat Thread (Client Component) */}

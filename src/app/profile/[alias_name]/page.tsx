@@ -9,6 +9,8 @@ import FollowButton from "@/components/FollowButton";
 import { getUserRatingSummary } from "@/app/actions/ratings";
 import { getFollowStats } from "@/app/actions/follows";
 import EditBioButton from "@/components/EditBioButton";
+import BlockButton from "@/components/BlockButton";
+import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +128,9 @@ export default async function ProfilePage({
 
   // Fetch follow stats
   const followStats = await getFollowStats(profileUser.id);
+
+  // Check block status (for other users)
+  const blocked = isOwnProfile ? false : await checkIsBlocked(profileUser.id);
 
   // Fetch public collections
   const { data: publicCollections } = await supabase
@@ -305,6 +310,13 @@ export default async function ProfilePage({
               <span>·</span>
               <span>{followStats.followingCount} following</span>
             </div>
+          )}
+          {!isOwnProfile && (
+            <BlockButton
+              targetId={profileUser.id}
+              targetAlias={profileUser.alias_name}
+              initialBlocked={blocked}
+            />
           )}
         </div>
       </div>

@@ -697,7 +697,7 @@ Add optional `parentId` parameter. Insert with `parent_id` if provided.
 
 ## Phase 4: Infinite Scroll & Safety
 
-### Task 4.1 — Infinite Scroll for Activity Feed
+### Task 4.1 — Infinite Scroll for Activity Feed ✅ DONE
 
 **File:** `src/components/LoadMoreFeed.tsx`
 
@@ -729,7 +729,7 @@ useEffect(() => {
 
 ---
 
-### Task 4.2 — Infinite Scroll for Show Ring
+### Task 4.2 — Infinite Scroll for Show Ring ✅ DONE (not needed — server-side pagination with 60 card limit already in place)
 
 **File:** `src/components/ShowRingGrid.tsx`
 
@@ -741,7 +741,7 @@ This requires modifying the community page to accept a `page` or `cursor` param 
 
 ---
 
-### Task 4.3 — Block User Action
+### Task 4.3 — Block User Action ✅ DONE
 
 Create `src/app/actions/blocks.ts`:
 
@@ -802,7 +802,7 @@ export async function getBlockedUserIds(): Promise<string[]> {
 
 ---
 
-### Task 4.4 — Block UI
+### Task 4.4 — Block UI ✅ DONE (profile page + inbox chat header)
 
 Add a "🚫 Block User" dropdown option to:
 - `src/app/profile/[alias_name]/page.tsx` — on other users' profiles
@@ -812,7 +812,7 @@ Use a confirm dialog before executing.
 
 ---
 
-### Task 4.5 — Block Filtering in Feeds & DMs
+### Task 4.5 — Block Filtering in Feeds & DMs ✅ DONE
 
 **DM Guard:** In `src/app/actions/messaging.ts` (or wherever `createOrFindConversation` lives), add a check:
 ```typescript
@@ -849,9 +849,9 @@ After all 4 phases:
 - [x] LikeToggle uses atomic RPCs (no race conditions) ✅
 - [x] Casual image posts in Feed and Groups ✅
 - [x] Threaded comments (1 level deep) on horse passports ✅
-- [ ] Infinite scroll on Activity Feed (IntersectionObserver)
-- [ ] Block/Unblock users
-- [ ] Blocked users filtered from feeds, DMs, and Show Ring
+- [x] Infinite scroll on Activity Feed (IntersectionObserver) ✅
+- [x] Block/Unblock users ✅
+- [x] Blocked users filtered from feeds, DMs, and Show Ring ✅
 - [x] `grep -r "setInterval" src/components/NotificationBell.tsx` returns 0 ✅
 
 **Estimated total effort:** ~15-20 hours across 4 phases.
