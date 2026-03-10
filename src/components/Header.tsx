@@ -159,6 +159,12 @@ export default function Header() {
             <Link href="/community/help-id" className="header-nav-link" id="nav-helpid">
               🔍 Help ID
             </Link>
+            <Link href="/community/groups" className="header-nav-link" id="nav-groups">
+              🏛️ Groups
+            </Link>
+            <Link href="/community/events" className="header-nav-link" id="nav-events">
+              📅 Events
+            </Link>
           </nav>
 
           {/* Icon action buttons */}
@@ -272,6 +278,12 @@ export default function Header() {
           </Link>
           <Link href="/community/help-id" className="header-nav-link" id="nav-helpid-m" onClick={closeMobileMenu}>
             🔍 Help ID
+          </Link>
+          <Link href="/community/groups" className="header-nav-link" id="nav-groups-m" onClick={closeMobileMenu}>
+            🏛️ Groups
+          </Link>
+          <Link href="/community/events" className="header-nav-link" id="nav-events-m" onClick={closeMobileMenu}>
+            📅 Events
           </Link>
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist-m" onClick={closeMobileMenu}>
             ❤️ Wishlist

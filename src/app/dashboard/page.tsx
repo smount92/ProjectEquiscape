@@ -8,6 +8,7 @@ import StableGrid from "@/components/StableGrid";
 import ExportButton from "@/components/ExportButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
+import NanDashboardWidget from "@/components/NanDashboardWidget";
 
 export const dynamic = "force-dynamic";
 
@@ -320,6 +321,11 @@ export default async function DashboardPage() {
                         </div>
                     </div>
                 )}
+
+                {/* NAN Qualification Dashboard */}
+                <Suspense fallback={null}>
+                    <NanDashboardWidget />
+                </Suspense>
 
                 {/* Horse Grid with Search */}
                 <StableGrid horseCards={horseCards} />

@@ -1,0 +1,145 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createEvent } from "@/app/actions/events";
+
+const EVENT_TYPE_LABELS: Record<string, string> = {
+    live_show: "Live Show",
+    photo_show: "Photo Show",
+    swap_meet: "Swap Meet",
+    meetup: "Meetup",
+    breyerfest: "BreyerFest",
+    studio_opening: "Studio Opening",
+    auction: "Auction",
+    workshop: "Workshop",
+    other: "Other",
+};
+
+export default function CreateEventPage() {
+    const router = useRouter();
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [eventType, setEventType] = useState("meetup");
+    const [startsAt, setStartsAt] = useState("");
+    const [endsAt, setEndsAt] = useState("");
+    const [isAllDay, setIsAllDay] = useState(false);
+    const [isVirtual, setIsVirtual] = useState(false);
+    const [locationName, setLocationName] = useState("");
+    const [locationAddress, setLocationAddress] = useState("");
+    const [region, setRegion] = useState("");
+    const [virtualUrl, setVirtualUrl] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!startsAt) { setError("Start date/time is required."); return; }
+        setSaving(true);
+        setError("");
+
+        const result = await createEvent({
+            name: name.trim(),
+            description: description.trim() || undefined,
+            eventType,
+            startsAt: new Date(startsAt).toISOString(),
+            endsAt: endsAt ? new Date(endsAt).toISOString() : undefined,
+            isAllDay,
+            isVirtual,
+            locationName: locationName.trim() || undefined,
+            locationAddress: locationAddress.trim() || undefined,
+            region: region.trim() || undefined,
+            virtualUrl: virtualUrl.trim() || undefined,
+        });
+
+        if (result.success && result.eventId) {
+            router.push(`/community/events/${result.eventId}`);
+        } else {
+            setError(result.error || "Failed to create event");
+            setSaving(false);
+        }
+    }
+
+    return (
+        <div className="page-container">
+            <div className="page-content" style={{ maxWidth: 640 }}>
+                <h1 style={{ marginBottom: "var(--space-xl)" }}>📅 Create Event</h1>
+
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="form-label">Event Name *</label>
+                        <input className="form-input" value={name} onChange={e => setName(e.target.value)} placeholder="Spring Fling Live Show 2026" required />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Event Type *</label>
+                        <select className="form-input" value={eventType} onChange={e => setEventType(e.target.value)}>
+                            {Object.entries(EVENT_TYPE_LABELS).map(([key, label]) => (
+                                <option key={key} value={key}>{label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Description</label>
+                        <textarea className="form-input" rows={4} value={description} onChange={e => setDescription(e.target.value)} placeholder="What's this event about?" style={{ resize: "vertical" }} />
+                    </div>
+
+                    <div className="form-row-2col">
+                        <div className="form-group">
+                            <label className="form-label">Start *</label>
+                            <input className="form-input" type="datetime-local" value={startsAt} onChange={e => setStartsAt(e.target.value)} required />
+                        </div>
+                        <div className="form-group">
+                            <label className="form-label">End</label>
+                            <input className="form-input" type="datetime-local" value={endsAt} onChange={e => setEndsAt(e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "var(--space-lg)", margin: "var(--space-md) 0" }}>
+                        <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer" }}>
+                            <input type="checkbox" checked={isAllDay} onChange={e => setIsAllDay(e.target.checked)} />
+                            All Day
+                        </label>
+                        <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer" }}>
+                            <input type="checkbox" checked={isVirtual} onChange={e => setIsVirtual(e.target.checked)} />
+                            Virtual Event
+                        </label>
+                    </div>
+
+                    {isVirtual ? (
+                        <div className="form-group">
+                            <label className="form-label">Virtual URL</label>
+                            <input className="form-input" type="url" value={virtualUrl} onChange={e => setVirtualUrl(e.target.value)} placeholder="https://zoom.us/..." />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="form-group">
+                                <label className="form-label">Location Name</label>
+                                <input className="form-input" value={locationName} onChange={e => setLocationName(e.target.value)} placeholder="Convention Center" />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Address</label>
+                                <input className="form-input" value={locationAddress} onChange={e => setLocationAddress(e.target.value)} placeholder="123 Main St, City, State" />
+                            </div>
+                        </>
+                    )}
+
+                    <div className="form-group">
+                        <label className="form-label">Region</label>
+                        <input className="form-input" value={region} onChange={e => setRegion(e.target.value)} placeholder="e.g. Pacific Northwest, Northeast" />
+                    </div>
+
+                    {error && <p className="form-error">{error}</p>}
+
+                    <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)" }}>
+                        <button type="submit" className="btn btn-primary" disabled={saving || !name.trim()}>
+                            {saving ? "Creating..." : "Create Event"}
+                        </button>
+                        <button type="button" className="btn btn-ghost" onClick={() => router.push("/community/events")}>Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
