@@ -1003,7 +1003,7 @@ if (blocked && blocked.length > 0) {
 
 ## Completion Checklist
 
-**Phase 0: Bug Fixes ✅ (fixed 2026-03-10)**
+**Phase 0: Bug Fixes ✅ (fixed 2026-03-10, migration 040 applied)**
 - [x] Storage RLS allows `social/` uploads (migration 040) ✅
 - [x] Comments persist on page refresh — PostgREST join with graceful fallback to aliasMap ✅
 - [x] @Mentions work for aliases with spaces — `@"Alias With Spaces"` quoted syntax ✅
