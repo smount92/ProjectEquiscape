@@ -374,9 +374,25 @@ export async function claimTransfer(transferCode: string): Promise<{
     const { data: receiverProfile } = await admin.from("users").select("alias_name").eq("id", user.id).single();
     const receiverAlias = (receiverProfile as { alias_name: string } | null)?.alias_name || "Unknown";
 
-    // 1. Close sender's ownership record
+    // Get thumbnail for ghost remnant
+    let thumbnailUrl: string | null = null;
+    try {
+        const { data: thumbImg } = await admin
+            .from("horse_images")
+            .select("image_url")
+            .eq("horse_id", t.horse_id)
+            .eq("angle_profile", "Primary_Thumbnail")
+            .maybeSingle();
+        thumbnailUrl = (thumbImg as { image_url: string } | null)?.image_url || null;
+    } catch { /* optional */ }
+
+    // 1. Close sender's ownership record with ghost snapshot
     await admin.from("horse_ownership_history")
-        .update({ released_at: new Date().toISOString() })
+        .update({
+            released_at: new Date().toISOString(),
+            horse_name: horseName,
+            horse_thumbnail: thumbnailUrl,
+        })
         .eq("horse_id", t.horse_id)
         .eq("owner_id", t.sender_id)
         .is("released_at", null);
@@ -424,7 +440,17 @@ export async function claimTransfer(transferCode: string): Promise<{
         claimed_at: new Date().toISOString(),
     }).eq("id", t.id);
 
-    // 6. Notify sender
+    // 6. Clear financial vault (seller's data does not transfer)
+    await admin.from("financial_vault")
+        .update({
+            purchase_price: null,
+            purchase_date: null,
+            estimated_current_value: null,
+            insurance_notes: null,
+        })
+        .eq("horse_id", t.horse_id);
+
+    // 7. Notify sender
     await admin.from("notifications").insert({
         user_id: t.sender_id,
         type: "general",
@@ -491,5 +517,41 @@ export async function getMyPendingTransfers(): Promise<{
         transferCode: t.transfer_code,
         expiresAt: t.expires_at,
         acquisitionType: t.acquisition_type,
+    }));
+}
+
+/** Get horses the current user has transferred away (ghost remnants) */
+export async function getTransferHistory(): Promise<{
+    id: string;
+    horseId: string;
+    horseName: string | null;
+    horseThumbnail: string | null;
+    salePrice: number | null;
+    isPricePublic: boolean;
+    acquisitionType: string;
+    releasedAt: string;
+}[]> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: records } = await supabase
+        .from("horse_ownership_history")
+        .select("id, horse_id, horse_name, horse_thumbnail, sale_price, is_price_public, acquisition_type, released_at")
+        .eq("owner_id", user.id)
+        .not("released_at", "is", null)
+        .order("released_at", { ascending: false });
+
+    if (!records) return [];
+
+    return (records as { id: string; horse_id: string; horse_name: string | null; horse_thumbnail: string | null; sale_price: number | null; is_price_public: boolean; acquisition_type: string; released_at: string }[]).map(r => ({
+        id: r.id,
+        horseId: r.horse_id,
+        horseName: r.horse_name,
+        horseThumbnail: r.horse_thumbnail,
+        salePrice: r.sale_price,
+        isPricePublic: r.is_price_public,
+        acquisitionType: r.acquisition_type,
+        releasedAt: r.released_at,
     }));
 }

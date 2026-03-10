@@ -445,12 +445,12 @@ export async function updateCommissionStatus(
     // Fetch current commission
     const { data: commission } = await supabase
         .from("commissions")
-        .select("id, artist_id, client_id, status, commission_type")
+        .select("id, artist_id, client_id, status, commission_type, horse_id")
         .eq("id", commissionId)
         .single();
 
     if (!commission) return { success: false, error: "Commission not found." };
-    const c = commission as { id: string; artist_id: string; client_id: string | null; status: string; commission_type: string };
+    const c = commission as { id: string; artist_id: string; client_id: string | null; status: string; commission_type: string; horse_id: string | null };
 
     // Only artist can change status (except revision_request from client handled separately)
     if (c.artist_id !== user.id) {
@@ -494,6 +494,51 @@ export async function updateCommissionStatus(
         old_status: c.status,
         new_status: newStatus,
     });
+
+    // ── Hoofprint Pipeline: inject WIP photos on delivery ──
+    if (newStatus === "delivered" && c.horse_id) {
+        try {
+            // Get all visible WIP photo updates
+            const { data: wipUpdates } = await supabase
+                .from("commission_updates")
+                .select("title, body, image_urls, created_at")
+                .eq("commission_id", commissionId)
+                .eq("update_type", "wip_photo")
+                .eq("is_visible_to_client", true)
+                .order("created_at", { ascending: true });
+
+            if (wipUpdates && wipUpdates.length > 0) {
+                // Fetch artist alias for timeline entries
+                const { data: artistUser } = await supabase
+                    .from("users")
+                    .select("alias_name")
+                    .eq("id", c.artist_id)
+                    .single();
+                const artistAlias = (artistUser as { alias_name: string } | null)?.alias_name || "Artist";
+
+                // Insert each WIP as a timeline event
+                const timelineEntries = (wipUpdates as { title: string | null; body: string | null; image_urls: string[]; created_at: string }[]).map((wip, i) => ({
+                    horse_id: c.horse_id,
+                    user_id: c.artist_id,
+                    event_type: "customization",
+                    title: wip.title || `${c.commission_type} — WIP ${i + 1}`,
+                    description: wip.body || `Work-in-progress by @${artistAlias}`,
+                    event_date: wip.created_at.split("T")[0],
+                    metadata: {
+                        artist: artistAlias,
+                        commissionType: c.commission_type,
+                        commissionId,
+                        imageUrls: wip.image_urls || [],
+                    },
+                    is_public: true,
+                }));
+
+                await supabase.from("horse_timeline").insert(timelineEntries);
+            }
+        } catch {
+            // Non-blocking: Hoofprint injection is best-effort
+        }
+    }
 
     // Notify client
     if (c.client_id && c.client_id !== user.id) {

@@ -13,6 +13,7 @@ export default function Header() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [aliasName, setAliasName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [artistSlug, setArtistSlug] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -27,6 +28,7 @@ export default function Header() {
       setAliasName(data.aliasName);
       setUnreadCount(data.unreadCount);
       setIsAdmin(data.isAdmin ?? false);
+      setArtistSlug(data.artistStudioSlug ?? null);
     } catch {
       // Silently fail if server action throws
     }
@@ -46,6 +48,7 @@ export default function Header() {
         setAliasName(null);
         setUnreadCount(0);
         setIsAdmin(false);
+        setArtistSlug(null);
       }
     });
 
@@ -150,7 +153,7 @@ export default function Header() {
             <Link href="/shows" className="header-nav-link" id="nav-shows">
               📸 Shows
             </Link>
-            <Link href="/studio/setup" className="header-nav-link" id="nav-studio">
+            <Link href={artistSlug ? "/studio/dashboard" : "/studio/setup"} className="header-nav-link" id="nav-studio">
               🎨 Art Studio
             </Link>
             <Link href="/community/help-id" className="header-nav-link" id="nav-helpid">
@@ -264,7 +267,7 @@ export default function Header() {
           <Link href="/shows" className="header-nav-link" id="nav-shows-m" onClick={closeMobileMenu}>
             📸 Shows
           </Link>
-          <Link href="/studio/setup" className="header-nav-link" id="nav-studio-m" onClick={closeMobileMenu}>
+          <Link href={artistSlug ? "/studio/dashboard" : "/studio/setup"} className="header-nav-link" id="nav-studio-m" onClick={closeMobileMenu}>
             🎨 Art Studio
           </Link>
           <Link href="/community/help-id" className="header-nav-link" id="nav-helpid-m" onClick={closeMobileMenu}>

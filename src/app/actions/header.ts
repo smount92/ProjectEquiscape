@@ -44,10 +44,18 @@ export async function getHeaderData() {
     const isAdmin = !!user.email && !!process.env.ADMIN_EMAIL &&
         user.email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
 
+    // Check if user has an artist profile (for nav link)
+    const { data: artistProfile } = await supabase
+        .from("artist_profiles")
+        .select("studio_slug")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
     return {
         user: { id: user.id, email: user.email },
         aliasName,
         unreadCount,
         isAdmin,
+        artistStudioSlug: (artistProfile as { studio_slug: string } | null)?.studio_slug || null,
     };
 }

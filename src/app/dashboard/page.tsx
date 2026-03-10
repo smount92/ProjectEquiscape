@@ -7,6 +7,7 @@ import DashboardToast from "@/components/DashboardToast";
 import StableGrid from "@/components/StableGrid";
 import ExportButton from "@/components/ExportButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
+import TransferHistorySection from "@/components/TransferHistorySection";
 
 export const dynamic = "force-dynamic";
 
@@ -322,6 +323,9 @@ export default async function DashboardPage() {
 
                 {/* Horse Grid with Search */}
                 <StableGrid horseCards={horseCards} />
+
+                {/* Transfer History (Ghost Cards) */}
+                <TransferHistorySection />
             </div>
         </div>
     );

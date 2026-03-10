@@ -306,9 +306,25 @@ export async function claimParkedHorse(pin: string): Promise<{
         const { data: receiverProfile } = await admin.from("users").select("alias_name").eq("id", user.id).single();
         const receiverAlias = (receiverProfile as { alias_name: string } | null)?.alias_name || "Unknown";
 
-        // 1. Close sender's ownership record
+        // Get thumbnail for ghost remnant
+        let thumbnailUrl: string | null = null;
+        try {
+            const { data: thumbImg } = await admin
+                .from("horse_images")
+                .select("image_url")
+                .eq("horse_id", t.horse_id)
+                .eq("angle_profile", "Primary_Thumbnail")
+                .maybeSingle();
+            thumbnailUrl = (thumbImg as { image_url: string } | null)?.image_url || null;
+        } catch { /* optional */ }
+
+        // 1. Close sender's ownership record with ghost snapshot
         await admin.from("horse_ownership_history")
-            .update({ released_at: new Date().toISOString() })
+            .update({
+                released_at: new Date().toISOString(),
+                horse_name: horseName,
+                horse_thumbnail: thumbnailUrl,
+            })
             .eq("horse_id", t.horse_id)
             .eq("owner_id", t.sender_id)
             .is("released_at", null);
@@ -356,7 +372,17 @@ export async function claimParkedHorse(pin: string): Promise<{
             claimed_at: new Date().toISOString(),
         }).eq("id", t.id);
 
-        // 6. Notify sender
+        // 6. Clear financial vault (seller's data does not transfer)
+        await admin.from("financial_vault")
+            .update({
+                purchase_price: null,
+                purchase_date: null,
+                estimated_current_value: null,
+                insurance_notes: null,
+            })
+            .eq("horse_id", t.horse_id);
+
+        // 7. Notify sender
         await admin.from("notifications").insert({
             user_id: t.sender_id,
             type: "general",
