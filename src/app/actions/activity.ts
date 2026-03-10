@@ -15,6 +15,9 @@ interface FeedItem {
     thumbnailUrl: string | null;
     metadata: Record<string, unknown> | null;
     createdAt: string;
+    likesCount: number;
+    isLiked: boolean;
+    imageUrls: string[];
 }
 
 /**
@@ -44,17 +47,22 @@ export async function createActivityEvent(data: {
 
 /**
  * Create a text post on the activity feed.
+ * Supports optional image URLs for casual image posts.
  */
-export async function createTextPost(text: string): Promise<{ success: boolean; error?: string }> {
+export async function createTextPost(text: string, imageUrls?: string[]): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
 
     const trimmed = text.trim();
-    if (!trimmed) return { success: false, error: "Post cannot be empty." };
+    if (!trimmed && (!imageUrls || imageUrls.length === 0)) return { success: false, error: "Post cannot be empty." };
     if (trimmed.length > 500) return { success: false, error: "Post must be 500 characters or less." };
 
     const supabaseAdmin = getAdminClient();
+
+    // Fetch actor alias for mention notifications
+    const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
+    const actorAlias = (profile as { alias_name: string } | null)?.alias_name || "Someone";
 
     const { error } = await supabaseAdmin.from("activity_events").insert({
         actor_id: user.id,
@@ -62,9 +70,18 @@ export async function createTextPost(text: string): Promise<{ success: boolean; 
         horse_id: null,
         target_id: null,
         metadata: { text: trimmed },
+        image_urls: imageUrls && imageUrls.length > 0 ? imageUrls : [],
     });
 
     if (error) return { success: false, error: error.message };
+
+    // Fire-and-forget: notify mentions
+    if (trimmed) {
+        import("@/app/actions/mentions").then((m) => {
+            m.parseAndNotifyMentions(trimmed, user.id, actorAlias, "/feed");
+        });
+    }
+
     return { success: true };
 }
 
@@ -76,7 +93,7 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
 
     let query = supabase
         .from("activity_events")
-        .select("id, actor_id, event_type, horse_id, metadata, created_at, users!actor_id(alias_name)")
+        .select("id, actor_id, event_type, horse_id, metadata, created_at, likes_count, image_urls, users!actor_id(alias_name)")
         .order("created_at", { ascending: false })
         .limit(limit + 1);
 
@@ -93,6 +110,8 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
         horse_id: string | null;
         metadata: Record<string, unknown> | null;
         created_at: string;
+        likes_count: number;
+        image_urls: string[] | null;
         users: { alias_name: string } | null;
     }[]) ?? [];
 
@@ -101,7 +120,18 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
 
     if (items.length === 0) return { items: [], nextCursor: null };
 
-
+    // Batch-fetch current user's likes
+    const { data: { user } } = await supabase.auth.getUser();
+    let likedSet = new Set<string>();
+    if (user && items.length > 0) {
+        const itemIds = items.map((e) => e.id);
+        const { data: myLikes } = await supabase
+            .from("activity_likes")
+            .select("activity_id")
+            .eq("user_id", user.id)
+            .in("activity_id", itemIds);
+        likedSet = new Set((myLikes ?? []).map((l: { activity_id: string }) => l.activity_id));
+    }
 
     // Batch-fetch horse names
     const horseIds = [...new Set(items.map((e) => e.horse_id).filter(Boolean))] as string[];
@@ -151,6 +181,9 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
             thumbnailUrl: e.horse_id ? thumbUrlMap1.get(e.horse_id) ?? null : null,
             metadata: e.metadata,
             createdAt: e.created_at,
+            likesCount: e.likes_count ?? 0,
+            isLiked: likedSet.has(e.id),
+            imageUrls: e.image_urls ?? [],
         })),
         nextCursor,
     };
@@ -182,7 +215,7 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
 
     let query = supabase
         .from("activity_events")
-        .select("id, actor_id, event_type, horse_id, metadata, created_at, users!actor_id(alias_name)")
+        .select("id, actor_id, event_type, horse_id, metadata, created_at, likes_count, image_urls, users!actor_id(alias_name)")
         .in("actor_id", followingIds)
         .order("created_at", { ascending: false })
         .limit(limit + 1);
@@ -200,6 +233,8 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
         horse_id: string | null;
         metadata: Record<string, unknown> | null;
         created_at: string;
+        likes_count: number;
+        image_urls: string[] | null;
         users: { alias_name: string } | null;
     }[]) ?? [];
 
@@ -208,7 +243,17 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
 
     if (items.length === 0) return { items: [], nextCursor: null };
 
-
+    // Batch-fetch current user's likes
+    let likedSet2 = new Set<string>();
+    if (items.length > 0) {
+        const itemIds = items.map((e) => e.id);
+        const { data: myLikes } = await supabase
+            .from("activity_likes")
+            .select("activity_id")
+            .eq("user_id", user.id)
+            .in("activity_id", itemIds);
+        likedSet2 = new Set((myLikes ?? []).map((l: { activity_id: string }) => l.activity_id));
+    }
 
     // Batch-fetch horse names
     const horseIds = [...new Set(items.map((e) => e.horse_id).filter(Boolean))] as string[];
@@ -258,6 +303,9 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
             thumbnailUrl: e.horse_id ? thumbUrlMap2.get(e.horse_id) ?? null : null,
             metadata: e.metadata,
             createdAt: e.created_at,
+            likesCount: e.likes_count ?? 0,
+            isLiked: likedSet2.has(e.id),
+            imageUrls: e.image_urls ?? [],
         })),
         nextCursor,
     };

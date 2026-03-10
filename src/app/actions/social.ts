@@ -103,7 +103,8 @@ export async function toggleFavorite(
  */
 export async function addComment(
     horseId: string,
-    content: string
+    content: string,
+    parentId?: string
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const {
@@ -114,11 +115,14 @@ export async function addComment(
     if (!content.trim()) return { success: false, error: "Comment cannot be empty." };
     if (content.trim().length > 500) return { success: false, error: "Comment is too long (500 char max)." };
 
-    const { error } = await supabase.from("horse_comments").insert({
+    const insertData: Record<string, unknown> = {
         user_id: user.id,
         horse_id: horseId,
         content: content.trim(),
-    });
+    };
+    if (parentId) insertData.parent_id = parentId;
+
+    const { error } = await supabase.from("horse_comments").insert(insertData);
 
     if (error) return { success: false, error: error.message };
 
@@ -145,6 +149,10 @@ export async function addComment(
             actorId: user.id,
             eventType: "comment",
             horseId,
+        });
+        // Fire-and-forget: notify mentions
+        import("@/app/actions/mentions").then((m) => {
+            m.parseAndNotifyMentions(content.trim(), user.id, alias, `/community/${horseId}`);
         });
     }
 

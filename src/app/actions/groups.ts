@@ -370,6 +370,13 @@ export async function createGroupPost(
 
     if (error) return { success: false, error: error.message };
 
+    // Fire-and-forget: notify mentions
+    const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
+    const actorAlias = (profile as { alias_name: string } | null)?.alias_name || "Someone";
+    import("@/app/actions/mentions").then((m) => {
+        m.parseAndNotifyMentions(content.trim(), user.id, actorAlias, `/community/groups`);
+    });
+
     revalidatePath(`/community/groups`);
     return { success: true };
 }

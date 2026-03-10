@@ -199,11 +199,10 @@ export default async function PublicPassportPage({
     .eq("user_id", user.id)
     .maybeSingle();
 
-  // Comments — two-step fetch because horse_comments.user_id -> auth.users(id),
-  // NOT public.users(id), so PostgREST can't resolve the join directly.
+  // Comments — fetch with user alias join, parent_id for threading, and likes_count
   const { data: rawComments } = await supabase
     .from("horse_comments")
-    .select("id, content, created_at, user_id")
+    .select("id, content, created_at, user_id, parent_id, likes_count, users!horse_comments_user_id_fkey(alias_name)")
     .eq("horse_id", horseId)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -213,29 +212,34 @@ export default async function PublicPassportPage({
     content: string;
     created_at: string;
     user_id: string;
+    parent_id: string | null;
+    likes_count: number;
+    users: { alias_name: string } | null;
   }
 
   const commentRows = (rawComments as unknown as RawComment[]) ?? [];
 
-  // Batch-fetch aliases for all comment authors
-  const commentUserIds = [...new Set(commentRows.map((c) => c.user_id))];
-  const aliasMap = new Map<string, string>();
-  if (commentUserIds.length > 0) {
-    const { data: aliasRows } = await supabase
-      .from("users")
-      .select("id, alias_name")
-      .in("id", commentUserIds);
-    ((aliasRows as { id: string; alias_name: string }[]) ?? []).forEach((u) => {
-      aliasMap.set(u.id, u.alias_name);
-    });
+  // Batch-fetch current user's comment likes
+  let likedCommentIds = new Set<string>();
+  if (commentRows.length > 0) {
+    const commentIds = commentRows.map((c) => c.id);
+    const { data: myCommentLikes } = await supabase
+      .from("comment_likes")
+      .select("comment_id")
+      .eq("user_id", user.id)
+      .in("comment_id", commentIds);
+    likedCommentIds = new Set((myCommentLikes ?? []).map((l: { comment_id: string }) => l.comment_id));
   }
 
   const comments = commentRows.map((c) => ({
     id: c.id,
     content: c.content,
     createdAt: c.created_at,
-    userAlias: aliasMap.get(c.user_id) ?? "Unknown",
+    userAlias: c.users?.alias_name ?? "Unknown",
     userId: c.user_id,
+    parentId: c.parent_id,
+    likesCount: c.likes_count ?? 0,
+    isLiked: likedCommentIds.has(c.id),
   }));
 
   // ================================================================

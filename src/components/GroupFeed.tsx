@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { createGroupPost, replyToPost, deleteGroupPost, type GroupPost } from "@/app/actions/groups";
+import { toggleGroupPostLike } from "@/app/actions/likes";
+import RichText from "@/components/RichText";
+import LikeToggle from "@/components/LikeToggle";
 
 interface Props {
     groupId: string;
@@ -56,7 +57,7 @@ export default function GroupFeed({ groupId, posts, userId }: Props) {
                 <textarea
                     className="form-input"
                     rows={3}
-                    placeholder="Share something with the group..."
+                    placeholder="Share something with the group… (supports @mentions)"
                     value={content}
                     onChange={e => setContent(e.target.value)}
                     style={{ resize: "vertical" }}
@@ -81,15 +82,18 @@ export default function GroupFeed({ groupId, posts, userId }: Props) {
                                 </span>
                                 {post.isPinned && <span className="group-post-pin">📌 Pinned</span>}
                             </div>
-                            <div className="activity-post-content">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
-                            </div>
+                            <RichText content={post.content} />
                             {post.horseName && (
                                 <Link href={`/community/${post.horseId}`} className="group-post-horse-link">
                                     🐴 {post.horseName}
                                 </Link>
                             )}
                             <div className="group-post-actions">
+                                <LikeToggle
+                                    initialLiked={false}
+                                    initialCount={post.likesCount}
+                                    onToggle={() => toggleGroupPostLike(post.id)}
+                                />
                                 <button className="btn btn-ghost btn-sm" onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}>
                                     💬 {post.replies.length > 0 ? post.replies.length : "Reply"}
                                 </button>
@@ -107,14 +111,14 @@ export default function GroupFeed({ groupId, posts, userId }: Props) {
                                             <span className="group-post-date">
                                                 {new Date(reply.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                             </span>
-                                            <p><ReactMarkdown remarkPlugins={[remarkGfm]}>{reply.content}</ReactMarkdown></p>
+                                            <RichText content={reply.content} />
                                         </div>
                                     ))}
                                     {replyingTo === post.id && (
                                         <div className="group-reply-form">
                                             <input
                                                 className="form-input"
-                                                placeholder="Write a reply..."
+                                                placeholder="Write a reply… (supports @mentions)"
                                                 value={replyContent}
                                                 onChange={e => setReplyContent(e.target.value)}
                                                 onKeyDown={e => e.key === "Enter" && handleReply(post.id)}

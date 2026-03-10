@@ -25,9 +25,35 @@ export default function NotificationBell() {
 
     useEffect(() => {
         fetchCount();
-        const interval = setInterval(fetchCount, 30000);
-        return () => clearInterval(interval);
-    }, [fetchCount]);
+
+        // Subscribe to new notifications via Realtime
+        let channel: ReturnType<typeof supabase.channel> | null = null;
+
+        (async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            channel = supabase
+                .channel("notifications-bell")
+                .on(
+                    "postgres_changes",
+                    {
+                        event: "INSERT",
+                        schema: "public",
+                        table: "notifications",
+                        filter: `user_id=eq.${user.id}`,
+                    },
+                    () => {
+                        setUnreadCount((prev) => prev + 1);
+                    }
+                )
+                .subscribe();
+        })();
+
+        return () => {
+            if (channel) supabase.removeChannel(channel);
+        };
+    }, [fetchCount, supabase]);
 
     return (
         <Link
@@ -51,7 +77,7 @@ export default function NotificationBell() {
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
             {unreadCount > 0 && (
-                <span className="notification-badge">
+                <span className="notification-badge notification-badge-pop">
                     {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
             )}

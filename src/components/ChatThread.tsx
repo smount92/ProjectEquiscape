@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { sendMessage } from "@/app/actions/messaging";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 interface ChatMessage {
@@ -46,6 +47,41 @@ export default function ChatThread({
     useEffect(() => {
         inputRef.current?.focus();
     }, []);
+
+    // Real-time: listen for new messages from the other user
+    useEffect(() => {
+        const supabase = createClient();
+        const channel = supabase
+            .channel(`chat-${conversationId}`)
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "messages",
+                    filter: `conversation_id=eq.${conversationId}`,
+                },
+                (payload) => {
+                    const newMsg = payload.new as { id: string; content: string; sender_id: string; created_at: string };
+                    // Only add if not from current user (we already added optimistically)
+                    if (newMsg.sender_id !== currentUserId) {
+                        setMessages((prev) => [
+                            ...prev,
+                            {
+                                id: newMsg.id,
+                                senderId: newMsg.sender_id,
+                                content: newMsg.content,
+                                createdAt: newMsg.created_at,
+                                isMe: false,
+                            },
+                        ]);
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => { supabase.removeChannel(channel); };
+    }, [conversationId, currentUserId]);
 
     const handleSend = async () => {
         if (!newMessage.trim() || sending) return;

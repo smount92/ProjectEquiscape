@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addComment, deleteComment } from "@/app/actions/social";
+import { toggleCommentLike } from "@/app/actions/likes";
+import LikeToggle from "@/components/LikeToggle";
+import RichText from "@/components/RichText";
 
 interface CommentData {
     id: string;
@@ -11,6 +14,9 @@ interface CommentData {
     createdAt: string;
     userAlias: string;
     userId: string;
+    parentId: string | null;
+    likesCount: number;
+    isLiked: boolean;
 }
 
 interface CommentSectionProps {
@@ -49,6 +55,8 @@ export default function CommentSection({
     const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [replyingToId, setReplyingToId] = useState<string | null>(null);
+    const [replyContent, setReplyContent] = useState("");
 
     // Sync comments state when server re-fetches after revalidation
     useEffect(() => {
@@ -72,16 +80,45 @@ export default function CommentSection({
                 createdAt: new Date().toISOString(),
                 userAlias: "You",
                 userId: currentUserId,
+                parentId: null,
+                likesCount: 0,
+                isLiked: false,
             };
             setComments((prev) => [optimisticComment, ...prev]);
             setNewComment("");
             setStatus("idle");
-            // Trigger server re-fetch to get the real comment ID & persist
             router.refresh();
         } else {
             setErrorMsg(result.error || "Failed to post comment.");
             setStatus("error");
             setTimeout(() => setStatus("idle"), 3000);
+        }
+    };
+
+    const handleReply = async (parentId: string) => {
+        if (!replyContent.trim()) return;
+
+        setStatus("saving");
+        const result = await addComment(horseId, replyContent, parentId);
+
+        if (result.success) {
+            const optimisticReply: CommentData = {
+                id: `temp-reply-${Date.now()}`,
+                content: replyContent.trim(),
+                createdAt: new Date().toISOString(),
+                userAlias: "You",
+                userId: currentUserId,
+                parentId,
+                likesCount: 0,
+                isLiked: false,
+            };
+            setComments((prev) => [...prev, optimisticReply]);
+            setReplyContent("");
+            setReplyingToId(null);
+            setStatus("idle");
+            router.refresh();
+        } else {
+            setStatus("idle");
         }
     };
 
@@ -92,7 +129,7 @@ export default function CommentSection({
         const result = await deleteComment(commentId);
 
         if (result.success) {
-            setComments((prev) => prev.filter((c) => c.id !== commentId));
+            setComments((prev) => prev.filter((c) => c.id !== commentId && c.parentId !== commentId));
             router.refresh();
         }
 
@@ -105,6 +142,16 @@ export default function CommentSection({
 
     const charCount = newComment.length;
     const isOverLimit = charCount > 500;
+
+    // Separate top-level comments and replies
+    const topLevel = comments.filter((c) => !c.parentId);
+    const repliesByParent = new Map<string, CommentData[]>();
+    for (const c of comments) {
+        if (c.parentId) {
+            if (!repliesByParent.has(c.parentId)) repliesByParent.set(c.parentId, []);
+            repliesByParent.get(c.parentId)!.push(c);
+        }
+    }
 
     return (
         <div className="comment-section" id="comment-section">
@@ -120,7 +167,7 @@ export default function CommentSection({
                 <div style={{ position: "relative", flex: 1 }}>
                     <textarea
                         className="comment-input"
-                        placeholder="Leave a comment…"
+                        placeholder="Leave a comment…(supports @mentions)"
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         maxLength={520}
@@ -159,37 +206,114 @@ export default function CommentSection({
             )}
 
             {/* Comments List */}
-            {comments.length === 0 ? (
+            {topLevel.length === 0 ? (
                 <div className="comments-empty">
                     <p>No comments yet. Be the first to share your thoughts!</p>
                 </div>
             ) : (
                 <div className="comment-list">
-                    {comments.map((comment) => (
-                        <div key={comment.id} className="comment-item" id={`comment-${comment.id}`}>
-                            <div className="comment-item-header">
-                                <Link
-                                    href={`/profile/${encodeURIComponent(comment.userAlias)}`}
-                                    className="comment-author"
-                                >
-                                    @{comment.userAlias}
-                                </Link>
-                                <span className="comment-time">
-                                    {timeAgo(comment.createdAt)}
-                                </span>
-                                {canDelete(comment) && (
-                                    <button
-                                        className="comment-delete-btn"
-                                        onClick={() => handleDelete(comment.id)}
-                                        disabled={deletingId === comment.id}
-                                        title="Delete comment"
-                                        aria-label="Delete comment"
+                    {topLevel.map((comment) => (
+                        <div key={comment.id}>
+                            {/* Top-level comment */}
+                            <div className="comment-item" id={`comment-${comment.id}`}>
+                                <div className="comment-item-header">
+                                    <Link
+                                        href={`/profile/${encodeURIComponent(comment.userAlias)}`}
+                                        className="comment-author"
                                     >
-                                        ✕
+                                        @{comment.userAlias}
+                                    </Link>
+                                    <span className="comment-time">
+                                        {timeAgo(comment.createdAt)}
+                                    </span>
+                                    {canDelete(comment) && (
+                                        <button
+                                            className="comment-delete-btn"
+                                            onClick={() => handleDelete(comment.id)}
+                                            disabled={deletingId === comment.id}
+                                            title="Delete comment"
+                                            aria-label="Delete comment"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                                <RichText content={comment.content} />
+                                <div className="feed-action-row">
+                                    <LikeToggle
+                                        initialLiked={comment.isLiked}
+                                        initialCount={comment.likesCount}
+                                        onToggle={() => toggleCommentLike(comment.id)}
+                                    />
+                                    <button
+                                        className="btn btn-ghost"
+                                        style={{ padding: '2px 6px', fontSize: '0.8rem' }}
+                                        onClick={() => setReplyingToId(replyingToId === comment.id ? null : comment.id)}
+                                    >
+                                        {replyingToId === comment.id ? "Cancel" : "Reply"}
                                     </button>
+                                </div>
+
+                                {/* Reply compose bar */}
+                                {replyingToId === comment.id && (
+                                    <div className="comment-reply-bar">
+                                        <textarea
+                                            className="comment-input"
+                                            placeholder={`Reply to @${comment.userAlias}…`}
+                                            value={replyContent}
+                                            onChange={(e) => setReplyContent(e.target.value)}
+                                            maxLength={500}
+                                            rows={2}
+                                        />
+                                        <button
+                                            className="btn btn-primary"
+                                            style={{ marginTop: 4, fontSize: '0.85rem', padding: '4px 12px' }}
+                                            disabled={!replyContent.trim()}
+                                            onClick={() => handleReply(comment.id)}
+                                        >
+                                            Reply
+                                        </button>
+                                    </div>
                                 )}
                             </div>
-                            <p className="comment-content">{comment.content}</p>
+
+                            {/* Threaded replies */}
+                            {repliesByParent.get(comment.id)?.map((reply) => (
+                                <div key={reply.id} className="comment-reply-indent">
+                                    <div className="comment-item" id={`comment-${reply.id}`}>
+                                        <div className="comment-item-header">
+                                            <Link
+                                                href={`/profile/${encodeURIComponent(reply.userAlias)}`}
+                                                className="comment-author"
+                                            >
+                                                @{reply.userAlias}
+                                            </Link>
+                                            <span className="comment-time">
+                                                {timeAgo(reply.createdAt)}
+                                            </span>
+                                            {canDelete(reply) && (
+                                                <button
+                                                    className="comment-delete-btn"
+                                                    onClick={() => handleDelete(reply.id)}
+                                                    disabled={deletingId === reply.id}
+                                                    title="Delete reply"
+                                                    aria-label="Delete reply"
+                                                >
+                                                    ✕
+                                                </button>
+                                            )}
+                                        </div>
+                                        <RichText content={reply.content} />
+                                        <div className="feed-action-row">
+                                            <LikeToggle
+                                                initialLiked={reply.isLiked}
+                                                initialCount={reply.likesCount}
+                                                onToggle={() => toggleCommentLike(reply.id)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ))}
                 </div>

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { useRouter } from "next/navigation";
 import { deleteTextPost } from "@/app/actions/activity";
+import { toggleActivityLike } from "@/app/actions/likes";
+import RichText from "@/components/RichText";
+import LikeToggle from "@/components/LikeToggle";
 
 export interface FeedItemData {
     id: string;
@@ -16,6 +17,9 @@ export interface FeedItemData {
     thumbnailUrl: string | null;
     metadata: Record<string, unknown> | null;
     createdAt: string;
+    likesCount: number;
+    isLiked: boolean;
+    imageUrls: string[];
 }
 
 function getEventIcon(type: string): string {
@@ -99,53 +103,79 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                     : `/profile/${encodeURIComponent(item.actorAlias)}`;
 
                 return (
-                    <Link
-                        key={item.id}
-                        href={link}
-                        className="activity-feed-item"
-                    >
-                        {item.thumbnailUrl ? (
-                            <div className="feed-item-thumb">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={item.thumbnailUrl} alt="" loading="lazy" />
-                            </div>
-                        ) : (
-                            <span className="activity-feed-icon">
-                                {getEventIcon(item.eventType)}
-                            </span>
-                        )}
-                        <div className="activity-feed-content">
-                            {item.eventType === "text_post" ? (
-                                <>
-                                    <span className="activity-feed-text" style={{ fontWeight: 600 }}>
-                                        @{item.actorAlias}
-                                    </span>
-                                    <div className="feed-item-text-post">
-                                        <div className="activity-post-content">
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                {(item.metadata as { text?: string })?.text || ""}
-                                            </ReactMarkdown>
-                                        </div>
-                                    </div>
-                                    <span className="activity-feed-time">
-                                        {timeAgo(item.createdAt)}
-                                        {currentUserId && currentUserId === item.actorId && (
-                                            <button className="btn btn-ghost" style={{ padding: '2px 6px', fontSize: '0.8rem', marginLeft: '8px' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (confirm("Delete post?")) { deleteTextPost(item.id).then(() => router.refresh()); } }}>🗑️</button>
-                                        )}
-                                    </span>
-                                </>
+                    <div key={item.id} className="activity-feed-item-wrapper">
+                        <Link
+                            href={link}
+                            className="activity-feed-item"
+                        >
+                            {item.thumbnailUrl ? (
+                                <div className="feed-item-thumb">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={item.thumbnailUrl} alt="" loading="lazy" />
+                                </div>
                             ) : (
-                                <>
-                                    <span className="activity-feed-text">
-                                        {getEventText(item)}
-                                    </span>
-                                    <span className="activity-feed-time">
-                                        {timeAgo(item.createdAt)}
-                                    </span>
-                                </>
+                                <span className="activity-feed-icon">
+                                    {getEventIcon(item.eventType)}
+                                </span>
+                            )}
+                            <div className="activity-feed-content">
+                                {item.eventType === "text_post" ? (
+                                    <>
+                                        <span className="activity-feed-text" style={{ fontWeight: 600 }}>
+                                            @{item.actorAlias}
+                                        </span>
+                                        <div className="feed-item-text-post">
+                                            <RichText content={(item.metadata as { text?: string })?.text || ""} />
+                                        </div>
+                                        {/* Image collage for casual image posts */}
+                                        {item.imageUrls && item.imageUrls.length > 0 && (
+                                            <div className="feed-image-collage" data-count={Math.min(item.imageUrls.length, 4)}>
+                                                {item.imageUrls.slice(0, 4).map((url, i) => (
+                                                    // eslint-disable-next-line @next/next/no-img-element
+                                                    <img key={i} src={url} alt={`Post image ${i + 1}`} loading="lazy" />
+                                                ))}
+                                            </div>
+                                        )}
+                                        <span className="activity-feed-time">
+                                            {timeAgo(item.createdAt)}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="activity-feed-text">
+                                            {getEventText(item)}
+                                        </span>
+                                        <span className="activity-feed-time">
+                                            {timeAgo(item.createdAt)}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
+                        </Link>
+                        {/* Action row: Like + Delete (outside the Link to avoid navigation) */}
+                        <div className="feed-action-row">
+                            {currentUserId && (
+                                <LikeToggle
+                                    initialLiked={item.isLiked}
+                                    initialCount={item.likesCount}
+                                    onToggle={() => toggleActivityLike(item.id)}
+                                />
+                            )}
+                            {currentUserId && currentUserId === item.actorId && item.eventType === "text_post" && (
+                                <button
+                                    className="btn btn-ghost"
+                                    style={{ padding: '2px 6px', fontSize: '0.8rem' }}
+                                    onClick={() => {
+                                        if (confirm("Delete post?")) {
+                                            deleteTextPost(item.id).then(() => router.refresh());
+                                        }
+                                    }}
+                                >
+                                    🗑️
+                                </button>
                             )}
                         </div>
-                    </Link>
+                    </div>
                 );
             })}
         </div>
