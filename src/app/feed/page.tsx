@@ -70,6 +70,7 @@ export default async function FeedPage({
                 initialItems={feedItems}
                 initialCursor={nextCursor}
                 feedType={activeTab}
+                currentUserId={user.id}
                 emptyMessage={
                     activeTab === "following"
                         ? "Follow collectors on the Discover page to see their activity!"

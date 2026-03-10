@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
+import CollectionManager from "@/components/CollectionManager";
 
 export const dynamic = "force-dynamic";
 
@@ -177,6 +178,9 @@ export default async function CollectionPage({
           <span className="collection-hero-count">
             {horseCards.length} model{horseCards.length !== 1 ? "s" : ""} in this collection
           </span>
+          <div style={{ marginTop: "var(--space-sm)" }}>
+            <CollectionManager collection={collection} />
+          </div>
         </div>
       </div>
 

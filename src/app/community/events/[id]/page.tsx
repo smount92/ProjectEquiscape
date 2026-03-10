@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getEvent } from "@/app/actions/events";
 import EventRsvpButton from "@/components/EventRsvpButton";
+import EventDeleteButton from "@/components/EventDeleteButton";
 
 import { EVENT_TYPE_LABELS } from "@/lib/constants/events";
 
@@ -107,6 +108,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     <div className="glass-card" style={{ padding: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-sm)" }}>About</h3>
                         <p style={{ lineHeight: 1.7, whiteSpace: "pre-line" }}>{event.description}</p>
+                    </div>
+                )}
+
+                {/* Creator Actions */}
+                {user.id === event.createdBy && (
+                    <div style={{ marginTop: "var(--space-lg)", textAlign: "right" }}>
+                        <EventDeleteButton eventId={event.id} />
                     </div>
                 )}
             </div>

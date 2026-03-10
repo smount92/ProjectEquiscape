@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { addCommissionUpdate, updateCommissionStatus } from "@/app/actions/art-studio";
 import type { CommissionUpdate } from "@/app/actions/art-studio";
 
@@ -35,22 +36,39 @@ export default function CommissionTimeline({
     const [isVisibleToClient, setIsVisibleToClient] = useState(true);
     const [saving, setSaving] = useState(false);
     const [acting, setActing] = useState(false);
+    const [wipFile, setWipFile] = useState<File | null>(null);
+    const wipInputRef = useRef<HTMLInputElement>(null);
 
     const handleAddUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!body.trim() && updateType !== "approval") return;
         setSaving(true);
 
+        let photoUrl: string | undefined;
+        if (updateType === "wip_photo" && wipFile) {
+            try {
+                const supabase = createClient();
+                const ext = wipFile.name.split('.').pop() || 'webp';
+                const path = `wip/${commissionId}/${Date.now()}.${ext}`;
+                const { error: uploadError } = await supabase.storage.from("horse-images").upload(path, wipFile);
+                if (!uploadError) {
+                    const { data: pubUrl } = supabase.storage.from("horse-images").getPublicUrl(path);
+                    photoUrl = pubUrl.publicUrl;
+                }
+            } catch { /* upload is best-effort */ }
+        }
+
         await addCommissionUpdate(commissionId, {
             updateType: updateType as "wip_photo" | "message" | "milestone" | "revision_request" | "approval",
             title: title.trim() || undefined,
-            body: body.trim() || undefined,
+            body: photoUrl ? `${body.trim()}\n\n![WIP](${photoUrl})` : (body.trim() || undefined),
             isVisibleToClient,
         });
 
         setShowForm(false);
         setTitle("");
         setBody("");
+        setWipFile(null);
         setSaving(false);
         router.refresh();
     };
@@ -147,6 +165,24 @@ export default function CommissionTimeline({
                             rows={3}
                         />
                     </div>
+
+                    {updateType === "wip_photo" && (
+                        <div className="form-group">
+                            <label className="form-label">Attach Photo</label>
+                            <input
+                                ref={wipInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="form-input"
+                                onChange={e => setWipFile(e.target.files?.[0] || null)}
+                            />
+                            {wipFile && (
+                                <p style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: 4 }}>
+                                    📎 {wipFile.name}
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     {isArtist && (
                         <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", fontSize: "calc(0.8rem * var(--font-scale))", marginBottom: "var(--space-sm)", cursor: "pointer" }}>

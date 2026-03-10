@@ -1,6 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { useRouter } from "next/navigation";
+import { deleteTextPost } from "@/app/actions/activity";
 
 export interface FeedItemData {
     id: string;
@@ -72,9 +76,11 @@ function timeAgo(dateStr: string): string {
 interface ActivityFeedProps {
     items: FeedItemData[];
     emptyMessage?: string;
+    currentUserId?: string;
 }
 
-export default function ActivityFeed({ items, emptyMessage }: ActivityFeedProps) {
+export default function ActivityFeed({ items, emptyMessage, currentUserId }: ActivityFeedProps) {
+    const router = useRouter();
     if (items.length === 0) {
         return (
             <div className="card shelf-empty animate-fade-in-up">
@@ -115,10 +121,17 @@ export default function ActivityFeed({ items, emptyMessage }: ActivityFeedProps)
                                         @{item.actorAlias}
                                     </span>
                                     <div className="feed-item-text-post">
-                                        <p>{(item.metadata as { text?: string })?.text}</p>
+                                        <div className="activity-post-content">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {(item.metadata as { text?: string })?.text || ""}
+                                            </ReactMarkdown>
+                                        </div>
                                     </div>
                                     <span className="activity-feed-time">
                                         {timeAgo(item.createdAt)}
+                                        {currentUserId && currentUserId === item.actorId && (
+                                            <button className="btn btn-ghost" style={{ padding: '2px 6px', fontSize: '0.8rem', marginLeft: '8px' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (confirm("Delete post?")) { deleteTextPost(item.id).then(() => router.refresh()); } }}>🗑️</button>
+                                        )}
                                     </span>
                                 </>
                             ) : (

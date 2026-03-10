@@ -215,6 +215,26 @@ export async function addIdentifiedHorse(
 
         if (error) return { success: false, error: error.message };
 
+        // Transfer the photo from the Help ID request to the new horse
+        try {
+            const { data: request } = await supabase.from('id_requests').select('image_url').eq('accepted_suggestion_id', suggestionId).single();
+            if (request?.image_url) {
+                const { getAdminClient } = await import("@/lib/supabase/admin");
+                const admin = getAdminClient();
+                const ext = request.image_url.split('.').pop() || 'webp';
+                const newPath = `horses/${horse.id}/Primary_Thumbnail_${Date.now()}.${ext}`;
+
+                const { data: copyData } = await admin.storage.from("horse-images").copy(request.image_url, newPath);
+                if (copyData) {
+                    await admin.from("horse_images").insert({
+                        horse_id: horse.id,
+                        image_url: newPath,
+                        angle_profile: 'Primary_Thumbnail'
+                    });
+                }
+            }
+        } catch { /* Photo transfer is best-effort */ }
+
         revalidatePath("/dashboard");
         return { success: true, horseId: horse.id };
     } catch (error) {

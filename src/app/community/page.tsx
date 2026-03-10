@@ -49,7 +49,12 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function CommunityPage() {
+export default async function CommunityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; finishType?: string; tradeStatus?: string; sortBy?: string }>;
+}) {
+  const params = await searchParams;
   const supabase = await createClient();
 
   // Auth check — community requires login (RLS needs authenticated user)
@@ -62,12 +67,9 @@ export default async function CommunityPage() {
   }
 
   // ================================================================
-  // COMMUNITY QUERY: Public horses across all users
-  // CRITICAL: Joins user_horses → users (alias_name only),
-  //           reference_molds, reference_releases, horse_images.
-  // 🔒 financial_vault is NEVER queried here.
+  // COMMUNITY QUERY: Public horses across all users (server-side filtered)
   // ================================================================
-  const { data: rawHorses } = await supabase
+  let query = supabase
     .from("user_horses")
     .select(
       `
@@ -79,9 +81,27 @@ export default async function CommunityPage() {
       horse_images(image_url, angle_profile)
     `
     )
-    .eq("is_public", true)
-    .order("created_at", { ascending: false })
-    .limit(60);
+    .eq("is_public", true);
+
+  // Apply server-side filters
+  if (params.q) {
+    query = query.or(`custom_name.ilike.%${params.q}%,sculptor.ilike.%${params.q}%`);
+  }
+  if (params.finishType && params.finishType !== "all") {
+    query = query.eq("finish_type", params.finishType);
+  }
+  if (params.tradeStatus && params.tradeStatus !== "all") {
+    query = query.eq("trade_status", params.tradeStatus);
+  }
+
+  // Sorting
+  if (params.sortBy === "oldest") {
+    query = query.order("created_at", { ascending: true });
+  } else {
+    query = query.order("created_at", { ascending: false });
+  }
+
+  const { data: rawHorses } = await query.limit(60);
 
   const horses = (rawHorses as unknown as CommunityHorse[]) ?? [];
 

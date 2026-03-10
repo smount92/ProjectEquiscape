@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import SearchBar from "@/components/SearchBar";
 import ShowRingFilters from "@/components/ShowRingFilters";
 import type { FilterState } from "@/components/ShowRingFilters";
 import WishlistButton from "@/components/WishlistButton";
@@ -65,16 +65,51 @@ export default function ShowRingGrid({
 }: {
     communityCards: CommunityCardData[];
 }) {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filters, setFilters] = useState<FilterState>({
-        finishType: null,
-        tradeStatus: null,
+    const router = useRouter();
+    const currentParams = useSearchParams();
+
+    // Read current URL state for search bar local display
+    const [searchInput, setSearchInput] = useState(currentParams.get("q") || "");
+
+    // Build filter state from URL
+    const filters: FilterState = {
+        finishType: currentParams.get("finishType") || null,
+        tradeStatus: currentParams.get("tradeStatus") || null,
         manufacturer: null,
         scale: null,
-        sortBy: "newest",
-    });
+        sortBy: (currentParams.get("sortBy") || "newest") as "newest" | "oldest" | "most-favorited",
+    };
 
-    // Extract unique manufacturers from data
+    // Push filters to URL (triggers server re-render)
+    const pushParams = useCallback((updates: Record<string, string | null>) => {
+        const params = new URLSearchParams(currentParams.toString());
+        for (const [key, val] of Object.entries(updates)) {
+            if (val && val !== "all") {
+                params.set(key, val);
+            } else {
+                params.delete(key);
+            }
+        }
+        router.push(`/community?${params.toString()}`);
+    }, [currentParams, router]);
+
+    const handleSearch = useCallback((q: string) => {
+        setSearchInput(q);
+    }, []);
+
+    const handleSearchSubmit = useCallback(() => {
+        pushParams({ q: searchInput.trim() || null });
+    }, [searchInput, pushParams]);
+
+    const handleFilterChange = useCallback((newFilters: FilterState) => {
+        pushParams({
+            finishType: newFilters.finishType,
+            tradeStatus: newFilters.tradeStatus,
+            sortBy: newFilters.sortBy === "newest" ? null : newFilters.sortBy,
+        });
+    }, [pushParams]);
+
+    // Extract unique manufacturers/scales from data (for filter dropdowns)
     const manufacturers = useMemo(() => {
         const set = new Set<string>();
         communityCards.forEach((h) => {
@@ -84,7 +119,6 @@ export default function ShowRingGrid({
         return [...set].sort();
     }, [communityCards]);
 
-    // Extract unique scales from data
     const scales = useMemo(() => {
         const set = new Set<string>();
         communityCards.forEach((h) => {
@@ -93,64 +127,29 @@ export default function ShowRingGrid({
         return [...set].sort();
     }, [communityCards]);
 
-    const filteredCards = useMemo(() => {
-        let cards = communityCards;
-
-        // Text search
-        if (searchQuery.trim()) {
-            const q = searchQuery.toLowerCase().trim();
-            cards = cards.filter((horse) =>
-                horse.customName.toLowerCase().includes(q) ||
-                (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
-                (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
-                (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
-                horse.refName.toLowerCase().includes(q) ||
-                horse.ownerAlias.toLowerCase().includes(q)
-            );
-        }
-
-        // Structured filters
-        if (filters.finishType) {
-            cards = cards.filter((h) => h.finishType === filters.finishType);
-        }
-        if (filters.tradeStatus) {
-            cards = cards.filter((h) => h.tradeStatus === filters.tradeStatus);
-        }
-        if (filters.manufacturer) {
-            cards = cards.filter((h) => h.refName.startsWith(filters.manufacturer!));
-        }
-        if (filters.scale) {
-            cards = cards.filter((h) => h.scale === filters.scale);
-        }
-
-        // Sort
-        if (filters.sortBy === "oldest") {
-            cards = [...cards].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        } else if (filters.sortBy === "most-favorited") {
-            cards = [...cards].sort((a, b) => b.favoriteCount - a.favoriteCount);
-        }
-        // "newest" is the default order from the server
-
-        return cards;
-    }, [searchQuery, communityCards, filters]);
-
-    const isFiltering = searchQuery.trim() || filters.finishType || filters.tradeStatus || filters.manufacturer || filters.scale;
+    const isFiltering = currentParams.get("q") || currentParams.get("finishType") || currentParams.get("tradeStatus");
 
     return (
         <>
             {communityCards.length > 0 && (
-                <SearchBar
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder="Search the Show Ring by name, mold, release, sculptor, or collector…"
-                    id="showring-search-bar"
-                />
+                <div className="search-bar-container" style={{ marginBottom: "var(--space-md)" }}>
+                    <input
+                        type="text"
+                        value={searchInput}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleSearchSubmit(); }}
+                        onBlur={handleSearchSubmit}
+                        placeholder="Search the Show Ring by name, sculptor, or collector…"
+                        className="form-input"
+                        id="showring-search-bar"
+                    />
+                </div>
             )}
 
             {communityCards.length > 0 && (
                 <ShowRingFilters
                     filters={filters}
-                    onFilterChange={setFilters}
+                    onFilterChange={handleFilterChange}
                     manufacturers={manufacturers}
                     scales={scales}
                 />
@@ -158,28 +157,28 @@ export default function ShowRingGrid({
 
             {isFiltering && (
                 <div className="search-results-count">
-                    {filteredCards.length === 0
+                    {communityCards.length === 0
                         ? "No models match your filters"
-                        : `Showing ${filteredCards.length} of ${communityCards.length} models`}
+                        : `Showing ${communityCards.length} models`}
                 </div>
             )}
 
-            {filteredCards.length === 0 && !isFiltering ? (
+            {communityCards.length === 0 && !isFiltering ? (
                 <div className="card shelf-empty animate-fade-in-up">
                     <div className="shelf-empty-icon">🏟️</div>
                     <h2>The Show Ring is Empty</h2>
                     <p>No models have been shared yet. Be the first to showcase your collection!</p>
                     <Link href="/add-horse" className="btn btn-primary">🐴 Add to Stable</Link>
                 </div>
-            ) : filteredCards.length === 0 && searchQuery.trim() ? (
+            ) : communityCards.length === 0 && isFiltering ? (
                 <div className="card shelf-empty animate-fade-in-up">
                     <div className="shelf-empty-icon">🔍</div>
                     <h2>No Results</h2>
-                    <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
+                    <p>No models match your search. Try different filters.</p>
                 </div>
             ) : (
                 <div className="community-grid animate-fade-in-up">
-                    {filteredCards.map((horse) => {
+                    {communityCards.map((horse) => {
                         const priceLabel = formatPrice(horse.listingPrice);
                         const isListed = horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers";
 

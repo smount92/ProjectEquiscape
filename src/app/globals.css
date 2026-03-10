@@ -8522,6 +8522,29 @@ p {
   margin: 0;
 }
 
+.activity-post-content a {
+  color: var(--color-accent-primary);
+  text-decoration: underline;
+}
+
+.activity-post-content strong {
+  font-weight: 600;
+}
+
+.activity-post-content ul,
+.activity-post-content ol {
+  padding-left: var(--space-lg);
+  margin: var(--space-xs) 0;
+}
+
+.activity-post-content p {
+  margin: 0 0 var(--space-xs) 0;
+}
+
+.activity-post-content p:last-child {
+  margin-bottom: 0;
+}
+
 
 /* ============================================================
    GLOBAL MOBILE RESPONSIVE POLISHING (M-1 through M-14)

@@ -12,13 +12,6 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
-interface UserRow {
-    id: string;
-    alias_name: string;
-    created_at: string;
-    avatar_url: string | null;
-}
-
 export default async function DiscoverPage() {
     const supabase = await createClient();
     const {
@@ -27,27 +20,21 @@ export default async function DiscoverPage() {
 
     if (!user) redirect("/login");
 
-    // Fetch all users
-    const { data: rawUsers } = await supabase
-        .from("users")
-        .select("id, alias_name, created_at, avatar_url")
+    // Fetch aggregated data from the highly efficient PostgreSQL View
+    const { data: activeUsersView } = await supabase
+        .from("discover_users_view")
+        .select("*")
         .order("created_at", { ascending: false });
 
-    const allUsers = (rawUsers as UserRow[]) ?? [];
-
-    // Count public horses per user
-    const { data: publicHorses } = await supabase
-        .from("user_horses")
-        .select("owner_id")
-        .eq("is_public", true);
-
-    const countMap = new Map<string, number>();
-    (publicHorses ?? []).forEach((h: { owner_id: string }) => {
-        countMap.set(h.owner_id, (countMap.get(h.owner_id) || 0) + 1);
-    });
-
-    // Filter to only active users (at least 1 public horse)
-    const activeUsers = allUsers.filter((u) => (countMap.get(u.id) || 0) > 0);
+    const activeUsers = (activeUsersView || []) as {
+        id: string;
+        alias_name: string;
+        created_at: string;
+        avatar_url: string | null;
+        public_horse_count: number;
+        avg_rating: number;
+        rating_count: number;
+    }[];
 
     // Resolve avatar storage paths to signed URLs
     for (const u of activeUsers) {
@@ -57,29 +44,6 @@ export default async function DiscoverPage() {
                 .createSignedUrl(u.avatar_url, 3600);
             u.avatar_url = signedAvatar?.signedUrl || null;
         }
-    }
-
-    // Batch-fetch ratings for all active users (eliminates N+1)
-    const activeUserIds = activeUsers.map((u) => u.id);
-    const ratingMap = new Map<string, { average: number; count: number }>();
-    if (activeUserIds.length > 0) {
-        const { data: allRatings } = await supabase
-            .from("user_ratings")
-            .select("reviewed_id, stars")
-            .in("reviewed_id", activeUserIds);
-        const sumMap = new Map<string, { sum: number; count: number }>();
-        (allRatings ?? []).forEach((r: { reviewed_id: string; stars: number }) => {
-            const existing = sumMap.get(r.reviewed_id) || { sum: 0, count: 0 };
-            existing.sum += r.stars;
-            existing.count += 1;
-            sumMap.set(r.reviewed_id, existing);
-        });
-        sumMap.forEach((val, userId) => {
-            ratingMap.set(userId, {
-                average: Math.round((val.sum / val.count) * 10) / 10,
-                count: val.count,
-            });
-        });
     }
 
     const memberSince = (dateStr: string) =>
@@ -119,8 +83,7 @@ export default async function DiscoverPage() {
             ) : (
                 <div className="discover-grid animate-fade-in-up">
                     {activeUsers.map((u) => {
-                        const publicCount = countMap.get(u.id) || 0;
-                        const rating = ratingMap.get(u.id);
+                        const publicCount = u.public_horse_count;
                         const isMe = u.id === user.id;
 
                         return (
@@ -151,11 +114,11 @@ export default async function DiscoverPage() {
                                         </span>
                                         <span>📅 {memberSince(u.created_at)}</span>
                                     </div>
-                                    {rating && (
+                                    {u.rating_count > 0 && (
                                         <div style={{ marginTop: "var(--space-xs)" }}>
                                             <RatingBadge
-                                                average={rating.average}
-                                                count={rating.count}
+                                                average={Number(Number(u.avg_rating).toFixed(1))}
+                                                count={u.rating_count}
                                             />
                                         </div>
                                     )}
@@ -168,3 +131,4 @@ export default async function DiscoverPage() {
         </div>
     );
 }
+

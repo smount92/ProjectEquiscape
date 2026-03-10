@@ -64,10 +64,7 @@ export async function reviewSuggestion(
                     manufacturer: details || "Unknown",
                 });
             } else if (s.suggestion_type === "release") {
-                await admin.from("reference_releases").insert({
-                    release_name: s.name as string,
-                    // details may contain mold_id or other context
-                });
+                return { success: false, error: "Releases require a specific mold_id. Please insert this release manually via the Supabase Dashboard, then mark as Approved." };
             } else if (s.suggestion_type === "resin") {
                 await admin.from("artist_resins").insert({
                     resin_name: s.name as string,

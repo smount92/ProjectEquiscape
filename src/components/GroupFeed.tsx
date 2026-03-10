@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createGroupPost, replyToPost, type GroupPost } from "@/app/actions/groups";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { createGroupPost, replyToPost, deleteGroupPost, type GroupPost } from "@/app/actions/groups";
 
 interface Props {
     groupId: string;
@@ -79,7 +81,9 @@ export default function GroupFeed({ groupId, posts, userId }: Props) {
                                 </span>
                                 {post.isPinned && <span className="group-post-pin">📌 Pinned</span>}
                             </div>
-                            <p className="group-post-content">{post.content}</p>
+                            <div className="activity-post-content">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+                            </div>
                             {post.horseName && (
                                 <Link href={`/community/${post.horseId}`} className="group-post-horse-link">
                                     🐴 {post.horseName}
@@ -89,6 +93,9 @@ export default function GroupFeed({ groupId, posts, userId }: Props) {
                                 <button className="btn btn-ghost btn-sm" onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}>
                                     💬 {post.replies.length > 0 ? post.replies.length : "Reply"}
                                 </button>
+                                {userId === post.userId && (
+                                    <button className="btn btn-ghost btn-sm" onClick={() => { if (confirm("Delete post?")) { deleteGroupPost(post.id).then(() => router.refresh()); } }}>🗑️ Delete</button>
+                                )}
                             </div>
 
                             {/* Replies */}
@@ -100,7 +107,7 @@ export default function GroupFeed({ groupId, posts, userId }: Props) {
                                             <span className="group-post-date">
                                                 {new Date(reply.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                             </span>
-                                            <p>{reply.content}</p>
+                                            <p><ReactMarkdown remarkPlugins={[remarkGfm]}>{reply.content}</ReactMarkdown></p>
                                         </div>
                                     ))}
                                     {replyingTo === post.id && (

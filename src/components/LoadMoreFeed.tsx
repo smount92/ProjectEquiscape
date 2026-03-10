@@ -9,6 +9,7 @@ interface LoadMoreFeedProps {
     initialCursor: string | null;
     feedType: "global" | "following";
     emptyMessage?: string;
+    currentUserId?: string;
 }
 
 export default function LoadMoreFeed({
@@ -16,6 +17,7 @@ export default function LoadMoreFeed({
     initialCursor,
     feedType,
     emptyMessage,
+    currentUserId,
 }: LoadMoreFeedProps) {
     const [items, setItems] = useState(initialItems);
     const [cursor, setCursor] = useState(initialCursor);
@@ -33,7 +35,7 @@ export default function LoadMoreFeed({
 
     return (
         <>
-            <ActivityFeed items={items} emptyMessage={emptyMessage} />
+            <ActivityFeed items={items} emptyMessage={emptyMessage} currentUserId={currentUserId} />
             {cursor && (
                 <div style={{ textAlign: "center", padding: "var(--space-xl) 0" }}>
                     <button

@@ -7,23 +7,40 @@ export const revalidate = 86400; // Revalidate once per day
 export async function GET() {
     const supabase = await createClient();
 
-    // Fetch releases with mold info (compact format)
-    const { data: releases } = await supabase
-        .from("reference_releases")
-        .select(`
-            id,
-            release_name,
-            model_number,
-            color_description,
-            reference_molds(mold_name, manufacturer, scale)
-        `)
-        .order("release_name");
+    // Fetch releases with mold info — paginated to bypass PostgREST 1000-row limit
+    const PAGE_SIZE = 1000;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allReleases: any[] = [];
+    let page = 0;
+    while (true) {
+        const { data, error } = await supabase
+            .from("reference_releases")
+            .select("id, release_name, model_number, color_description, reference_molds(mold_name, manufacturer, scale)")
+            .order("release_name")
+            .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+        if (error || !data || data.length === 0) break;
+        allReleases.push(...data);
+        if (data.length < PAGE_SIZE) break;
+        page++;
+    }
+    const releases = allReleases;
 
-    // Fetch resins (compact format)
-    const { data: resins } = await supabase
-        .from("artist_resins")
-        .select("id, resin_name, sculptor_alias, scale")
-        .order("resin_name");
+    // Fetch resins — paginated
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allResins: any[] = [];
+    let resinPage = 0;
+    while (true) {
+        const { data, error } = await supabase
+            .from("artist_resins")
+            .select("id, resin_name, sculptor_alias, scale")
+            .order("resin_name")
+            .range(resinPage * PAGE_SIZE, (resinPage + 1) * PAGE_SIZE - 1);
+        if (error || !data || data.length === 0) break;
+        allResins.push(...data);
+        if (data.length < PAGE_SIZE) break;
+        resinPage++;
+    }
+    const resins = allResins;
 
     // Compress: short keys to reduce payload size
     const dictionary = {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { upvoteSuggestion, acceptSuggestion, addIdentifiedHorse, createSuggestion } from "@/app/actions/help-id";
+import { upvoteSuggestion, acceptSuggestion, addIdentifiedHorse, createSuggestion, deleteIdRequest } from "@/app/actions/help-id";
 import { useRouter } from "next/navigation";
 
 interface Suggestion {
@@ -203,6 +203,27 @@ export default function HelpIdDetailClient({
                             </div>
                         </div>
                     )}
+                </div>
+            )}
+            {/* Owner: Delete Request */}
+            {isOwner && (
+                <div style={{ marginTop: "var(--space-xl)", textAlign: "right" }}>
+                    <button
+                        className="btn btn-ghost"
+                        style={{ color: "red" }}
+                        onClick={async () => {
+                            if (confirm("Delete this Help ID request? This cannot be undone.")) {
+                                const result = await deleteIdRequest(requestId);
+                                if (result.success) {
+                                    router.push("/community/help-id");
+                                } else {
+                                    alert(result.error || "Failed to delete");
+                                }
+                            }
+                        }}
+                    >
+                        🗑️ Delete Request
+                    </button>
                 </div>
             )}
         </div>

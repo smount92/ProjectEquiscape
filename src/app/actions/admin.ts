@@ -9,10 +9,11 @@ async function verifyAdmin() {
   const {
     data: { user },
   } = await authClient.auth.getUser();
+  const adminEmail = process.env.ADMIN_EMAIL;
 
-  if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
-    return null;
-  }
+  if (!user || !user.email || !adminEmail) return null;
+  if (user.email.toLowerCase() !== adminEmail.toLowerCase()) return null;
+
   return user;
 }
 

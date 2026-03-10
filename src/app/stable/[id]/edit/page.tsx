@@ -103,6 +103,9 @@ export default function EditHorsePage() {
   const [newExtraFiles, setNewExtraFiles] = useState<{ file: File; previewUrl: string }[]>([]);
   const extraInputRef = useRef<HTMLInputElement>(null);
 
+  // Deferred image deletions (only executed on save)
+  const [pendingImageDeletes, setPendingImageDeletes] = useState<{ recordId: string, path: string | null }[]>([]);
+
   // ---- Load existing data ----
   useEffect(() => {
     async function loadHorse() {
@@ -277,14 +280,14 @@ export default function EditHorsePage() {
     if (ref) ref.value = "";
   };
 
-  const handleSlotRemove = async (angle: AngleProfile) => {
+  const handleSlotRemove = (angle: AngleProfile) => {
     const existing = existingImages[angle];
     if (existing && existing.recordId) {
-      await deleteHorseImageAction(existing.recordId, existing.storagePath || null);
+      // Defer deletion until save — prevents data loss if user cancels
+      setPendingImageDeletes(prev => [...prev, { recordId: existing.recordId, path: existing.storagePath || null }]);
     }
     setNewFiles((prev) => { const u = { ...prev }; delete u[angle]; return u; });
     setPreviews((prev) => { const u = { ...prev }; delete u[angle]; return u; });
-    // Mark for deletion by clearing existing
     setExistingImages((prev) => { const u = { ...prev }; delete u[angle]; return u; });
   };
 
@@ -344,6 +347,11 @@ export default function EditHorsePage() {
       });
 
       if (!result.success) throw new Error(result.error || "Failed to save.");
+
+      // Process deferred image deletions (only now that save succeeded)
+      for (const del of pendingImageDeletes) {
+        await deleteHorseImageAction(del.recordId, del.path);
+      }
 
       // Step 2: Upload NEW images directly from browser → Supabase Storage
       const uploadedImages: { path: string; angle: string }[] = [];
