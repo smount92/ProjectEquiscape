@@ -93,6 +93,40 @@ export async function getInsuranceReportData(): Promise<{
         let totalValue = 0;
         const reportHorses: HorseReportData[] = [];
 
+        // ── Batch-fetch signed URLs (1 API call for ALL images) ──
+        const imagePathMap = new Map<string, string>(); // horseId → storagePath
+        for (const horse of horses) {
+            const thumb = horse.horse_images?.find(
+                (img) => img.angle_profile === "Primary_Thumbnail"
+            );
+            const imageUrl = thumb?.image_url || horse.horse_images?.[0]?.image_url;
+            if (imageUrl) {
+                imagePathMap.set(horse.id, extractStoragePath(imageUrl));
+            }
+        }
+
+        const signedUrlMap = new Map<string, string>();
+        const allPaths = Array.from(imagePathMap.values());
+        if (allPaths.length > 0) {
+            const { data: signedData } = await supabase.storage
+                .from("horse-images")
+                .createSignedUrls(allPaths, 600); // 10 min expiry
+            if (signedData) {
+                signedData.forEach((item, i) => {
+                    if (item.signedUrl) {
+                        const path = allPaths[i];
+                        for (const [horseId, horsePath] of imagePathMap) {
+                            if (horsePath === path) {
+                                signedUrlMap.set(horseId, item.signedUrl);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Build report data
         for (const horse of horses) {
             const vault = vaultMap.get(horse.id);
             const value = vault?.estimated_current_value ?? vault?.purchase_price ?? 0;
@@ -112,21 +146,6 @@ export async function getInsuranceReportData(): Promise<{
                 reference = `${horse.artist_resins.sculptor_alias} — ${horse.artist_resins.resin_name}`;
             }
 
-            // Get primary thumbnail signed URL (NO base64 — defuses payload bomb)
-            let photoUrl: string | null = null;
-            const thumb = horse.horse_images?.find(
-                (img) => img.angle_profile === "Primary_Thumbnail"
-            );
-            const imageUrl = thumb?.image_url || horse.horse_images?.[0]?.image_url;
-
-            if (imageUrl) {
-                const path = extractStoragePath(imageUrl);
-                const { data: signedData } = await supabase.storage
-                    .from("horse-images")
-                    .createSignedUrl(path, 600); // 10 min expiry — enough for PDF render
-                photoUrl = signedData?.signedUrl || null;
-            }
-
             reportHorses.push({
                 id: horse.id,
                 name: horse.custom_name,
@@ -135,7 +154,7 @@ export async function getInsuranceReportData(): Promise<{
                 finish: horse.finish_type,
                 purchasePrice: vault?.purchase_price ?? null,
                 estimatedValue: vault?.estimated_current_value ?? null,
-                photoUrl,
+                photoUrl: signedUrlMap.get(horse.id) || null,
             });
         }
 

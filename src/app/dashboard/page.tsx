@@ -44,78 +44,55 @@ export default async function DashboardPage() {
         redirect("/login");
     }
 
-    // Get user profile
-    const { data: profile } = await supabase
-        .from("users")
-        .select("alias_name")
-        .eq("id", user.id)
-        .single<{ alias_name: string }>();
+    // ── Round 1: Independent queries in parallel ──
+    const [profileResult, horsesResult, collectionsResult, showRecordsResult, convosResult] = await Promise.all([
+        supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>(),
+        supabase.from("user_horses").select(`
+            id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor, trade_status,
+            reference_molds(mold_name, manufacturer),
+            artist_resins(resin_name, sculptor_alias),
+            reference_releases(release_name, model_number),
+            horse_images(image_url, angle_profile)
+        `).eq("owner_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("user_collections").select("id, name, description").eq("user_id", user.id).order("name"),
+        supabase.from("show_records").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("conversations").select("id").or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`),
+    ]);
 
-    // Fetch horses with reference data and thumbnail images
-    const { data: rawHorses } = await supabase
-        .from("user_horses")
-        .select(
-            `
-      id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor, trade_status,
-      reference_molds(mold_name, manufacturer),
-      artist_resins(resin_name, sculptor_alias),
-      reference_releases(release_name, model_number),
-      horse_images(image_url, angle_profile)
-    `
-        )
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: false });
+    const profile = profileResult.data;
+    const horses = (horsesResult.data as unknown as HorseWithDetails[]) ?? [];
+    const collections = (collectionsResult.data as unknown as UserCollection[]) ?? [];
+    const totalShowRecords = showRecordsResult.count;
+    const convoIds = (convosResult.data ?? []).map((c: { id: string }) => c.id);
 
-    const horses = (rawHorses as unknown as HorseWithDetails[]) ?? [];
-
-    // Fetch user's collections
-    const { data: rawCollections } = await supabase
-        .from("user_collections")
-        .select("id, name, description")
-        .eq("user_id", user.id)
-        .order("name");
-
-    const collections = (rawCollections as unknown as UserCollection[]) ?? [];
-
-    // Fetch financial vault totals (owner-only via RLS — strictly private)
-    const { data: rawVaults } = await supabase
-        .from("financial_vault")
-        .select("purchase_price, estimated_current_value, horse_id")
-        .in(
-            "horse_id",
-            horses.map((h) => h.id)
+    // ── Round 2: Dependent queries in parallel ──
+    const horseIds = horses.map(h => h.id);
+    const thumbnailUrls: string[] = [];
+    horses.forEach((horse) => {
+        const thumb = horse.horse_images?.find(
+            (img) => img.angle_profile === "Primary_Thumbnail"
         );
+        if (thumb) thumbnailUrls.push(thumb.image_url);
+    });
 
-    const vaults = (rawVaults as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[]) ?? [];
+    const [vaultsResult, unreadResult, signedUrlMap] = await Promise.all([
+        horseIds.length > 0
+            ? supabase.from("financial_vault").select("purchase_price, estimated_current_value, horse_id").in("horse_id", horseIds)
+            : Promise.resolve({ data: [] as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[] }),
+        convoIds.length > 0
+            ? supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).eq("is_read", false).in("conversation_id", convoIds)
+            : Promise.resolve({ count: 0 }),
+        getSignedImageUrls(supabase, thumbnailUrls),
+    ]);
+
+    const vaults = (vaultsResult.data as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[]) ?? [];
+    const unreadMsgCount = (unreadResult as { count: number | null }).count ?? 0;
 
     // Compute total vault value: prefer estimated_current_value, fall back to purchase_price
     let totalVaultValue = 0;
     vaults.forEach((v) => {
         totalVaultValue += v.estimated_current_value ?? v.purchase_price ?? 0;
     });
-
-    // Count total show records across all user's horses
-    const { count: totalShowRecords } = await supabase
-        .from("show_records")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id);
-
-    // Count unread messages
-    const { data: userConvos } = await supabase
-        .from("conversations")
-        .select("id")
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
-    const convoIds = (userConvos ?? []).map((c: { id: string }) => c.id);
-    let unreadMsgCount = 0;
-    if (convoIds.length > 0) {
-        const { count } = await supabase
-            .from("messages")
-            .select("id", { count: "exact", head: true })
-            .neq("sender_id", user.id)
-            .eq("is_read", false)
-            .in("conversation_id", convoIds);
-        unreadMsgCount = count ?? 0;
-    }
 
     // Count horses per collection and compute vault value per collection
     const collectionCounts = new Map<string, number>();
@@ -125,7 +102,6 @@ export default async function DashboardPage() {
             collectionCounts.set(h.collection_id, (collectionCounts.get(h.collection_id) || 0) + 1);
         }
     });
-    // Map horse_id -> collection_id for vault value aggregation
     const horseCollectionMap = new Map<string, string>();
     horses.forEach((h) => {
         if (h.collection_id) horseCollectionMap.set(h.id, h.collection_id);
@@ -138,20 +114,8 @@ export default async function DashboardPage() {
         }
     });
 
-    // Build collection name map for badge display
     const collectionNameMap = new Map<string, string>();
     collections.forEach((c) => collectionNameMap.set(c.id, c.name));
-
-    // Collect all thumbnail image URLs and generate signed URLs
-    const thumbnailUrls: string[] = [];
-    horses.forEach((horse) => {
-        const thumb = horse.horse_images?.find(
-            (img) => img.angle_profile === "Primary_Thumbnail"
-        );
-        if (thumb) thumbnailUrls.push(thumb.image_url);
-    });
-
-    const signedUrlMap = await getSignedImageUrls(supabase, thumbnailUrls);
 
     // Build display data
     const horseCards = horses.map((horse) => {

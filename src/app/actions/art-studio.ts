@@ -324,21 +324,13 @@ export async function getArtistCommissions(): Promise<Commission[]> {
 
     const { data: rawCommissions } = await supabase
         .from("commissions")
-        .select("*")
+        .select("*, client:users!client_id(alias_name), artist:users!artist_id(alias_name)")
         .eq("artist_id", user.id)
         .order("last_update_at", { ascending: false });
 
     if (!rawCommissions || rawCommissions.length === 0) return [];
 
-    // Batch-fetch client aliases
-    const clientIds = [...new Set(
-        (rawCommissions as { client_id: string | null }[])
-            .map(c => c.client_id)
-            .filter(Boolean) as string[]
-    )];
-    const aliasMap = await batchFetchAliases(supabase, [...clientIds, user.id]);
-
-    return (rawCommissions as Record<string, unknown>[]).map(c => mapCommission(c, aliasMap));
+    return (rawCommissions as Record<string, unknown>[]).map(c => mapCommissionJoined(c));
 }
 
 /** Fetch all commissions where client_id = current user */
@@ -349,19 +341,13 @@ export async function getClientCommissions(): Promise<Commission[]> {
 
     const { data: rawCommissions } = await supabase
         .from("commissions")
-        .select("*")
+        .select("*, client:users!client_id(alias_name), artist:users!artist_id(alias_name)")
         .eq("client_id", user.id)
         .order("last_update_at", { ascending: false });
 
     if (!rawCommissions || rawCommissions.length === 0) return [];
 
-    // Batch-fetch artist aliases
-    const artistIds = [...new Set(
-        (rawCommissions as { artist_id: string }[]).map(c => c.artist_id)
-    )];
-    const aliasMap = await batchFetchAliases(supabase, [...artistIds, user.id]);
-
-    return (rawCommissions as Record<string, unknown>[]).map(c => mapCommission(c, aliasMap));
+    return (rawCommissions as Record<string, unknown>[]).map(c => mapCommissionJoined(c));
 }
 
 /** Client creates a commission request for an artist */
@@ -634,20 +620,17 @@ export async function getCommissionUpdates(commissionId: string): Promise<Commis
 
     const { data: rawUpdates } = await supabase
         .from("commission_updates")
-        .select("*")
+        .select("*, author:users!author_id(alias_name)")
         .eq("commission_id", commissionId)
         .order("created_at", { ascending: true });
 
     if (!rawUpdates || rawUpdates.length === 0) return [];
 
-    const authorIds = [...new Set((rawUpdates as { author_id: string }[]).map(u => u.author_id))];
-    const aliasMap = await batchFetchAliases(supabase, authorIds);
-
     return (rawUpdates as Record<string, unknown>[]).map(u => ({
         id: u.id as string,
         commissionId: u.commission_id as string,
         authorId: u.author_id as string,
-        authorAlias: aliasMap.get(u.author_id as string) || "Unknown",
+        authorAlias: ((u.author as { alias_name: string } | null)?.alias_name) || "Unknown",
         updateType: u.update_type as string,
         title: u.title as string | null,
         body: u.body as string | null,
@@ -666,18 +649,13 @@ export async function getCommission(commissionId: string): Promise<Commission | 
 
     const { data } = await supabase
         .from("commissions")
-        .select("*")
+        .select("*, client:users!client_id(alias_name), artist:users!artist_id(alias_name)")
         .eq("id", commissionId)
         .maybeSingle();
 
     if (!data) return null;
 
-    const c = data as Record<string, unknown>;
-    const userIds = [c.artist_id as string];
-    if (c.client_id) userIds.push(c.client_id as string);
-    const aliasMap = await batchFetchAliases(supabase, userIds);
-
-    return mapCommission(c, aliasMap);
+    return mapCommissionJoined(data as Record<string, unknown>);
 }
 
 /** Browse all artists (for discovery) */
@@ -686,7 +664,7 @@ export async function browseArtists(statusFilter?: string): Promise<ArtistProfil
 
     let query = supabase
         .from("artist_profiles")
-        .select("*")
+        .select("*, owner:users!user_id(alias_name)")
         .eq("portfolio_visible", true)
         .order("updated_at", { ascending: false })
         .limit(50);
@@ -697,9 +675,6 @@ export async function browseArtists(statusFilter?: string): Promise<ArtistProfil
 
     const { data } = await query;
     if (!data || data.length === 0) return [];
-
-    const userIds = (data as { user_id: string }[]).map(p => p.user_id);
-    const aliasMap = await batchFetchAliases(supabase, userIds);
 
     return (data as Record<string, unknown>[]).map(p => ({
         userId: p.user_id as string,
@@ -719,7 +694,7 @@ export async function browseArtists(statusFilter?: string): Promise<ArtistProfil
         termsText: p.terms_text as string | null,
         paypalMeLink: p.paypal_me_link as string | null,
         acceptingTypes: (p.accepting_types as string[]) || [],
-        ownerAlias: aliasMap.get(p.user_id as string) || "Unknown",
+        ownerAlias: ((p.owner as { alias_name: string } | null)?.alias_name) || "Unknown",
     }));
 }
 
@@ -739,26 +714,13 @@ function parseArrayField(formData: FormData, field: string): string[] {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function batchFetchAliases(supabase: any, userIds: string[]): Promise<Map<string, string>> {
-    const map = new Map<string, string>();
-    const unique = [...new Set(userIds)];
-    if (unique.length === 0) return map;
+/** Map commission row with PostgREST-joined aliases */
+function mapCommissionJoined(c: Record<string, unknown>): Commission {
+    const clientAlias = c.client_id
+        ? ((c.client as { alias_name: string } | null)?.alias_name) || null
+        : null;
+    const artistAlias = ((c.artist as { alias_name: string } | null)?.alias_name) || "Unknown";
 
-    const { data: users } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", unique);
-
-    if (users) {
-        for (const u of users as { id: string; alias_name: string }[]) {
-            map.set(u.id, u.alias_name);
-        }
-    }
-    return map;
-}
-
-function mapCommission(c: Record<string, unknown>, aliasMap: Map<string, string>): Commission {
     return {
         id: c.id as string,
         artistId: c.artist_id as string,
@@ -782,7 +744,7 @@ function mapCommission(c: Record<string, unknown>, aliasMap: Map<string, string>
         isPublicInQueue: c.is_public_in_queue as boolean,
         lastUpdateAt: c.last_update_at as string,
         createdAt: c.created_at as string,
-        clientAlias: c.client_id ? (aliasMap.get(c.client_id as string) || null) : null,
-        artistAlias: aliasMap.get(c.artist_id as string) || "Unknown",
+        clientAlias,
+        artistAlias,
     };
 }

@@ -4,8 +4,8 @@
  * Uses HTML5 Canvas to resize images to a max dimension and compress as WebP/JPEG.
  */
 
-const MAX_DIMENSION = 1600; // Max width or height in pixels
-const QUALITY = 0.82;       // Compression quality (0-1)
+const MAX_DIMENSION = 1000; // Max width or height in pixels
+const QUALITY = 0.7;        // Compression quality (0-1)
 const MAX_FILE_SIZE_MB = 5;  // Max file size in MB
 
 export async function compressImage(file: File): Promise<File> {

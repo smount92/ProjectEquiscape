@@ -16,7 +16,7 @@ import { getReleasesForMoldAction } from "@/app/actions/reference";
 import CollectionPicker from "@/components/CollectionPicker";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { initializeHoofprint } from "@/app/actions/hoofprint";
-import { addHorseAction } from "@/app/actions/horse";
+import { createHorseRecord, finalizeHorseImages } from "@/app/actions/horse";
 import { submitSuggestion } from "@/app/actions/suggestions";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 
@@ -322,58 +322,72 @@ export default function AddHorsePage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("You must be logged in.");
 
-      const formData = new FormData();
+      // Step 1: Create DB record (no files through server)
+      const result = await createHorseRecord({
+        customName: customName.trim(),
+        finishType,
+        conditionGrade: conditionGrade || undefined,
+        isPublic,
+        tradeStatus: tradeStatus || undefined,
+        lifeStage: lifeStage || undefined,
+        selectedMoldId: selectedMoldId || undefined,
+        selectedResinId: selectedResinId || undefined,
+        selectedReleaseId: selectedReleaseId || undefined,
+        selectedCollectionId: selectedCollectionId || undefined,
+        sculptor: sculptor.trim() || undefined,
+        finishingArtist: finishingArtist.trim() || undefined,
+        editionNumber: editionNumber ? parseInt(editionNumber) : undefined,
+        editionSize: editionSize ? parseInt(editionSize) : undefined,
+        listingPrice: (tradeStatus !== "Not for Sale" && listingPrice) ? parseFloat(listingPrice) : undefined,
+        marketplaceNotes: (tradeStatus !== "Not for Sale" && marketplaceNotes.trim()) ? marketplaceNotes.trim() : undefined,
+        purchasePrice: purchasePrice ? parseFloat(purchasePrice) : undefined,
+        purchaseDate: purchaseDate || undefined,
+        estimatedValue: estimatedValue ? parseFloat(estimatedValue) : undefined,
+        insuranceNotes: insuranceNotes.trim() || undefined,
+      });
 
-
-
-      formData.append("customName", customName.trim());
-      formData.append("finishType", finishType);
-      if (conditionGrade) formData.append("conditionGrade", conditionGrade);
-      formData.append("isPublic", String(isPublic));
-      if (tradeStatus) formData.append("tradeStatus", tradeStatus);
-      if (lifeStage) formData.append("lifeStage", lifeStage);
-
-      if (selectedMoldId) formData.append("selectedMoldId", selectedMoldId);
-      if (selectedResinId) formData.append("selectedResinId", selectedResinId);
-      if (selectedReleaseId) formData.append("selectedReleaseId", selectedReleaseId);
-      if (selectedCollectionId) formData.append("selectedCollectionId", selectedCollectionId);
-      if (sculptor.trim()) formData.append("sculptor", sculptor.trim());
-      if (finishingArtist.trim()) formData.append("finishingArtist", finishingArtist.trim());
-      if (editionNumber) formData.append("editionNumber", editionNumber);
-      if (editionSize) formData.append("editionSize", editionSize);
-
-      if (tradeStatus !== "Not for Sale") {
-        if (listingPrice) formData.append("listingPrice", listingPrice);
-        if (marketplaceNotes.trim()) formData.append("marketplaceNotes", marketplaceNotes.trim());
-      }
-
-      if (purchasePrice) formData.append("purchasePrice", purchasePrice);
-      if (purchaseDate) formData.append("purchaseDate", purchaseDate);
-      if (estimatedValue) formData.append("estimatedValue", estimatedValue);
-      if (insuranceNotes.trim()) formData.append("insuranceNotes", insuranceNotes.trim());
-
-      // 3. Compress and append images
-      const imageEntries = Object.entries(imageSlots) as [AngleProfile, ImageSlot][];
-      for (const [angle, slot] of imageEntries) {
-        const compressed = await compressImage(slot.file);
-        // Turn blob back to file if necessary, but FormData handles bloba/files.
-        formData.append(`imageSlot_${angle}`, compressed, `${angle}.webp`);
-      }
-
-      for (let i = 0; i < extraFiles.length; i++) {
-        const compressed = await compressImage(extraFiles[i].file);
-        formData.append(`extraFile_${i}`, compressed, `extra_${i}.webp`);
-      }
-
-      // 4. Send to Server Action
-      const result = await addHorseAction(formData);
       if (!result.success || !result.horseId) {
-        throw new Error(result.error || "Failed to save horse on server.");
+        throw new Error(result.error || "Failed to save horse.");
       }
 
       const horseId = result.horseId;
 
-      // 5. Activity event if public (fire-and-forget)
+      // Step 2: Upload images directly from browser to Supabase Storage
+      const uploadedImages: { path: string; angle: string }[] = [];
+
+      // Compress and upload slot images
+      const imageEntries = Object.entries(imageSlots) as [AngleProfile, ImageSlot][];
+      for (const [angle, slot] of imageEntries) {
+        const compressed = await compressImage(slot.file);
+        const filePath = `horses/${horseId}/${angle}_${Date.now()}.webp`;
+        const { error: uploadError } = await supabase.storage
+          .from("horse-images")
+          .upload(filePath, compressed, { contentType: "image/webp" });
+
+        if (!uploadError) {
+          uploadedImages.push({ path: filePath, angle });
+        }
+      }
+
+      // Compress and upload extra detail images
+      for (let i = 0; i < extraFiles.length; i++) {
+        const compressed = await compressImage(extraFiles[i].file);
+        const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
+        const { error: uploadError } = await supabase.storage
+          .from("horse-images")
+          .upload(filePath, compressed, { contentType: "image/webp" });
+
+        if (!uploadError) {
+          uploadedImages.push({ path: filePath, angle: "extra_detail" });
+        }
+      }
+
+      // Step 3: Finalize image metadata on server
+      if (uploadedImages.length > 0) {
+        await finalizeHorseImages(horseId, uploadedImages);
+      }
+
+      // 4. Activity event if public
       if (isPublic) {
         notifyHorsePublic({
           userId: user.id,
@@ -386,14 +400,14 @@ export default function AddHorsePage() {
         });
       }
 
-      // 6. Initialize Hoofprint (fire-and-forget)
+      // 5. Initialize Hoofprint
       initializeHoofprint({
         horseId,
         horseName: customName.trim(),
         lifeStage,
       });
 
-      // 7. Show success!
+      // 6. Show success!
       setSavedHorseName(customName.trim());
       setShowSuccess(true);
     } catch (err) {

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getSignedImageUrls } from "@/lib/utils/storage";
+import { revalidatePath } from "next/cache";
 
 // ============================================================
 // PHOTO SHOWS — Server Actions
@@ -272,88 +273,46 @@ export async function voteForEntry(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "You must be logged in." };
 
-    // Check if user is trying to vote for their own entry
-    const { data: entryData } = await supabase
-        .from("show_entries")
-        .select("user_id")
-        .eq("id", entryId)
-        .single();
+    // Single atomic RPC — handles self-vote check, toggle, count update
+    const admin = getAdminClient();
+    const { data, error } = await admin.rpc("toggle_show_vote", {
+        p_entry_id: entryId,
+        p_user_id: user.id,
+    });
 
-    if (!entryData) return { success: false, error: "Entry not found." };
-    if ((entryData as { user_id: string }).user_id === user.id) {
-        return { success: false, error: "You can't vote for your own entry." };
-    }
+    if (error) return { success: false, error: error.message };
 
-    // Check if already voted
-    const { data: existing } = await supabase
-        .from("show_votes")
-        .select("id")
-        .eq("entry_id", entryId)
-        .eq("user_id", user.id)
-        .maybeSingle();
+    const result = data as {
+        success: boolean;
+        error?: string;
+        new_votes?: number;
+        action?: string;
+        entry_owner?: string;
+    };
 
-    if (existing) {
-        // Unvote
-        await supabase.from("show_votes").delete().eq("id", existing.id);
+    if (!result.success) return { success: false, error: result.error };
 
-        // Decrement vote count using Service Role
-        const admin = getAdminClient();
-        const { data: entry } = await admin
-            .from("show_entries")
-            .select("votes")
-            .eq("id", entryId)
-            .single();
-        const newVotes = Math.max(0, ((entry as { votes: number } | null)?.votes || 1) - 1);
-        await admin.from("show_entries").update({ votes: newVotes }).eq("id", entryId);
-
-        return { success: true, newVotes };
-    } else {
-        // Vote
-        const { error } = await supabase.from("show_votes").insert({
-            entry_id: entryId,
-            user_id: user.id,
-        });
-        if (error) return { success: false, error: error.message };
-
-        // Increment
-        const admin = getAdminClient();
-        const { data: entry } = await admin
-            .from("show_entries")
-            .select("votes")
-            .eq("id", entryId)
-            .single();
-        const newVotes = ((entry as { votes: number } | null)?.votes || 0) + 1;
-        await admin.from("show_entries").update({ votes: newVotes }).eq("id", entryId);
-
-        // Notify entry owner of new vote (fire-and-forget)
+    // Send notification on upvote (not on unvote)
+    if (result.action === "voted" && result.entry_owner) {
         try {
-            const entryOwnerId = (entryData as { user_id: string }).user_id;
             const { data: voter } = await supabase
                 .from("users")
                 .select("alias_name")
                 .eq("id", user.id)
                 .single();
             const voterAlias = (voter as { alias_name: string } | null)?.alias_name || "Someone";
-            const { data: showEntry } = await supabase
-                .from("show_entries")
-                .select("show_id")
-                .eq("id", entryId)
-                .single();
 
             await admin.from("notifications").insert({
-                user_id: entryOwnerId,
+                user_id: result.entry_owner,
                 type: "show_vote",
                 actor_id: user.id,
                 content: `@${voterAlias} voted for your show entry!`,
-                horse_id: null,
             });
-            void showEntry; // link could be added via metadata in future
-        } catch {
-            // Non-blocking
-        }
-
-        return { success: true, newVotes };
+        } catch { /* Non-blocking */ }
     }
+
+    revalidatePath("/shows");
+    return { success: true, newVotes: result.new_votes };
 }
 
 /**

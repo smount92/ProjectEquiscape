@@ -309,35 +309,23 @@ export async function updateHorseAction(horseId: string, formData: FormData): Pr
         }
 
         // ── Condition History Ledger ──
+        // NOTE: condition_history INSERT is now handled by Postgres trigger
+        // (trg_user_horses_condition). We only add the Hoofprint timeline event.
         const conditionChangeStr = formData.get("conditionChange") as string;
         if (conditionChangeStr) {
             try {
                 const cc = JSON.parse(conditionChangeStr) as {
-                    oldCondition: string;
                     newCondition: string;
                     note: string | null;
                 };
 
-                // Insert into condition_history table
-                await supabase.from("condition_history").insert({
-                    horse_id: horseId,
-                    changed_by: user.id,
-                    old_condition: cc.oldCondition,
-                    new_condition: cc.newCondition,
-                    note: cc.note,
-                });
-
-                // Insert Hoofprint timeline event
+                // Insert Hoofprint timeline event (the note is user-provided context)
                 await supabase.from("horse_timeline").insert({
                     horse_id: horseId,
                     user_id: user.id,
                     event_type: "condition_change",
-                    title: `Condition: ${cc.oldCondition} → ${cc.newCondition}`,
+                    title: `Condition updated to ${cc.newCondition}`,
                     description: cc.note || undefined,
-                    metadata: {
-                        old_condition: cc.oldCondition,
-                        new_condition: cc.newCondition,
-                    },
                 });
             } catch { /* Non-blocking — don't fail the save */ }
         }
@@ -347,4 +335,132 @@ export async function updateHorseAction(horseId: string, formData: FormData): Pr
     } catch (error) {
         return { success: false, error: error instanceof Error ? error.message : "Failed to update horse" };
     }
+}
+
+// ============================================================
+// V2 DIRECT-UPLOAD API: 2-Step Save Pattern
+// Step 1: createHorseRecord() — DB only, no images
+// Step 2: finalizeHorseImages() — metadata after client upload
+// ============================================================
+
+/**
+ * Step 1 of 2-step save: Create the horse DB record WITHOUT images.
+ * Returns the horseId so the client can upload images directly to Storage.
+ */
+export async function createHorseRecord(data: {
+    customName: string;
+    finishType: string;
+    conditionGrade?: string;
+    isPublic: boolean;
+    tradeStatus?: string;
+    lifeStage?: string;
+    selectedMoldId?: string;
+    selectedResinId?: string;
+    selectedReleaseId?: string;
+    selectedCollectionId?: string;
+    sculptor?: string;
+    finishingArtist?: string;
+    editionNumber?: number;
+    editionSize?: number;
+    listingPrice?: number;
+    marketplaceNotes?: string;
+    purchasePrice?: number;
+    purchaseDate?: string;
+    estimatedValue?: number;
+    insuranceNotes?: string;
+}): Promise<{ success: boolean; horseId?: string; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    if (!data.customName?.trim() || !data.finishType) {
+        return { success: false, error: "Missing required fields." };
+    }
+
+    const horseInsert: Record<string, unknown> = {
+        owner_id: user.id,
+        custom_name: data.customName.trim(),
+        finish_type: data.finishType,
+        condition_grade: data.conditionGrade || null,
+        is_public: data.isPublic,
+        trade_status: data.tradeStatus || null,
+        life_stage: data.lifeStage || "Living",
+    };
+
+    if (data.selectedMoldId) horseInsert.reference_mold_id = data.selectedMoldId;
+    if (data.selectedResinId) horseInsert.artist_resin_id = data.selectedResinId;
+    if (data.selectedReleaseId) horseInsert.release_id = data.selectedReleaseId;
+    if (data.selectedCollectionId) horseInsert.collection_id = data.selectedCollectionId;
+    if (data.sculptor) horseInsert.sculptor = data.sculptor;
+    if (data.finishingArtist) horseInsert.finishing_artist = data.finishingArtist;
+    if (data.editionNumber) horseInsert.edition_number = data.editionNumber;
+    if (data.editionSize) horseInsert.edition_size = data.editionSize;
+
+    if (data.tradeStatus && data.tradeStatus !== "Not for Sale") {
+        if (data.listingPrice) horseInsert.listing_price = data.listingPrice;
+        if (data.marketplaceNotes) horseInsert.marketplace_notes = data.marketplaceNotes;
+    }
+
+    const { data: horse, error } = await supabase
+        .from("user_horses")
+        .insert(horseInsert)
+        .select("id")
+        .single<{ id: string }>();
+
+    if (error || !horse) return { success: false, error: error?.message || "Failed to save horse." };
+
+    // Insert financial vault if any data provided
+    const hasVault = data.purchasePrice || data.purchaseDate || data.estimatedValue || data.insuranceNotes;
+    if (hasVault) {
+        const vaultInsert: Record<string, unknown> = { horse_id: horse.id };
+        if (data.purchasePrice) vaultInsert.purchase_price = data.purchasePrice;
+        if (data.purchaseDate) vaultInsert.purchase_date = data.purchaseDate;
+        if (data.estimatedValue) vaultInsert.estimated_current_value = data.estimatedValue;
+        if (data.insuranceNotes) vaultInsert.insurance_notes = data.insuranceNotes;
+        await supabase.from("financial_vault").insert(vaultInsert);
+    }
+
+    revalidatePath("/dashboard");
+    return { success: true, horseId: horse.id };
+}
+
+/**
+ * Step 2 of 2-step save: Record image metadata after client-side upload.
+ * Called AFTER the browser has uploaded files directly to Supabase Storage.
+ */
+export async function finalizeHorseImages(
+    horseId: string,
+    images: { path: string; angle: string }[]
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify ownership
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("id")
+        .eq("id", horseId)
+        .eq("owner_id", user.id)
+        .single();
+    if (!horse) return { success: false, error: "Horse not found or not yours." };
+
+    if (images.length === 0) return { success: true };
+
+    // Build public URLs and insert image records
+    const inserts = images.map((img) => {
+        const { data: { publicUrl } } = supabase.storage.from("horse-images").getPublicUrl(img.path);
+        return {
+            horse_id: horseId,
+            image_url: publicUrl,
+            angle_profile: img.angle,
+        };
+    });
+
+    const { error } = await supabase.from("horse_images").insert(inserts);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/stable/${horseId}`);
+    return { success: true };
 }

@@ -337,10 +337,9 @@ export default function EditHorsePage() {
       formData.append("hasExistingVault", String(hasExistingVault));
       formData.append("deleteVault", String(deleteVault));
 
-      // Condition change tracking
+      // Condition change tracking (trigger handles condition_history, we only pass context for timeline)
       if (conditionGrade !== originalCondition) {
         formData.append("conditionChange", JSON.stringify({
-          oldCondition: originalCondition,
           newCondition: conditionGrade,
           note: conditionNote.trim() || null,
         }));
