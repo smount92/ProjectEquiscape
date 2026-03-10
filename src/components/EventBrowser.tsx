@@ -25,9 +25,15 @@ const TYPE_ICONS: Record<string, string> = {
 export default function EventBrowser({ events, typeLabels }: Props) {
     const router = useRouter();
     const [filter, setFilter] = useState("all");
+    const [search, setSearch] = useState("");
     const [rsvping, setRsvping] = useState<string | null>(null);
 
-    const filtered = filter === "all" ? events : events.filter(e => e.eventType === filter);
+    const filtered = events
+        .filter(e => filter === "all" || e.eventType === filter)
+        .filter(e => !search
+            || e.name.toLowerCase().includes(search.toLowerCase())
+            || e.locationName?.toLowerCase().includes(search.toLowerCase())
+            || e.groupName?.toLowerCase().includes(search.toLowerCase()));
 
     async function handleRsvp(eventId: string, status: "going" | "interested") {
         setRsvping(eventId);
@@ -38,6 +44,18 @@ export default function EventBrowser({ events, typeLabels }: Props) {
 
     return (
         <div>
+            {/* Search */}
+            <div className="search-bar" style={{ marginBottom: "var(--space-md)" }}>
+                <input
+                    type="text"
+                    className="form-input"
+                    placeholder="🔍 Search events by name, location, or group…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    id="event-search"
+                />
+            </div>
+
             {/* Type Filter */}
             <div className="studio-chip-grid" style={{ marginBottom: "var(--space-lg)" }}>
                 <button className={`studio-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>

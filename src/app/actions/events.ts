@@ -368,3 +368,194 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
     revalidatePath("/community/events");
     return { success: true };
 }
+
+// ============================================================
+// EVENT COMMENTS
+// ============================================================
+
+/**
+ * Add a comment to an event.
+ */
+export async function addEventComment(
+    eventId: string,
+    content: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+    if (!content.trim()) return { success: false, error: "Comment cannot be empty." };
+    if (content.trim().length > 500) return { success: false, error: "Comment is too long (500 char max)." };
+
+    const { error } = await supabase.from("event_comments").insert({
+        event_id: eventId,
+        user_id: user.id,
+        content: content.trim(),
+    });
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath(`/community/events/${eventId}`);
+
+    // Fire-and-forget: notify event creator + mention notifications
+    try {
+        const { data: event } = await supabase.from("events").select("created_by, name").eq("id", eventId).single();
+        if (event && (event as { created_by: string }).created_by !== user.id) {
+            const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
+            const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+            const { createNotification } = await import("@/app/actions/notifications");
+            await createNotification({
+                userId: (event as { created_by: string }).created_by,
+                type: "comment",
+                actorId: user.id,
+                content: `@${alias} commented on your event "${(event as { name: string }).name}"`,
+            });
+            const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
+            parseAndNotifyMentions(content.trim(), user.id, alias, `/community/events/${eventId}`);
+        }
+    } catch { /* non-blocking */ }
+
+    return { success: true };
+}
+
+/**
+ * Delete an event comment.
+ */
+export async function deleteEventComment(
+    commentId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const { error } = await supabase
+        .from("event_comments")
+        .delete()
+        .eq("id", commentId);
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/community/events");
+    return { success: true };
+}
+
+/**
+ * Get comments for an event, with user aliases via PostgREST join.
+ */
+export async function getEventComments(eventId: string) {
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from("event_comments")
+        .select("id, content, created_at, user_id, users!event_comments_user_id_fkey(alias_name)")
+        .eq("event_id", eventId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+    return (data ?? []).map((c: Record<string, unknown>) => ({
+        id: c.id as string,
+        content: c.content as string,
+        createdAt: c.created_at as string,
+        userId: c.user_id as string,
+        userAlias: (c.users as { alias_name: string } | null)?.alias_name ?? "Unknown",
+    }));
+}
+
+// ============================================================
+// EVENT ATTENDEES
+// ============================================================
+
+/**
+ * Get list of users who RSVP'd "going" or "interested" to an event.
+ */
+export async function getEventAttendees(eventId: string) {
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from("event_rsvps")
+        .select("user_id, status, users!event_rsvps_user_id_fkey(alias_name)")
+        .eq("event_id", eventId)
+        .in("status", ["going", "interested"])
+        .order("created_at", { ascending: true });
+
+    return (data ?? []).map((r: Record<string, unknown>) => ({
+        userId: r.user_id as string,
+        status: r.status as string,
+        alias: (r.users as { alias_name: string } | null)?.alias_name ?? "Unknown",
+    }));
+}
+
+// ============================================================
+// EVENT PHOTOS
+// ============================================================
+
+/**
+ * Add a photo to an event (direct-to-storage path).
+ */
+export async function addEventPhoto(
+    eventId: string,
+    imagePath: string,
+    caption?: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const { error } = await supabase.from("event_photos").insert({
+        event_id: eventId,
+        user_id: user.id,
+        image_path: imagePath,
+        caption: caption?.trim() || null,
+    });
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath(`/community/events/${eventId}`);
+    return { success: true };
+}
+
+/**
+ * Get photos for an event with signed URLs.
+ */
+export async function getEventPhotos(eventId: string) {
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from("event_photos")
+        .select("id, image_path, caption, created_at, user_id, users!event_photos_user_id_fkey(alias_name)")
+        .eq("event_id", eventId)
+        .order("created_at", { ascending: false });
+
+    const photos = ((data ?? []) as unknown as {
+        id: string; image_path: string; caption: string | null;
+        created_at: string; user_id: string;
+        users: { alias_name: string } | null;
+    }[]);
+
+    // Batch sign URLs
+    if (photos.length === 0) return [];
+    const paths = photos.map(p => p.image_path);
+    const { data: signedBatch } = await supabase.storage
+        .from("horse-images")
+        .createSignedUrls(paths, 3600);
+    const urlMap = new Map<string, string>();
+    signedBatch?.forEach((s) => { if (s.signedUrl) urlMap.set(s.path!, s.signedUrl); });
+
+    return photos.map(p => ({
+        id: p.id,
+        imageUrl: urlMap.get(p.image_path) || "",
+        caption: p.caption,
+        createdAt: p.created_at,
+        userId: p.user_id,
+        userAlias: p.users?.alias_name ?? "Unknown",
+    }));
+}
+
+/**
+ * Delete an event photo.
+ */
+export async function deleteEventPhoto(
+    photoId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const { error } = await supabase.from("event_photos").delete().eq("id", photoId);
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/community/events");
+    return { success: true };
+}

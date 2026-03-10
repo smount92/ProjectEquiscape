@@ -100,7 +100,9 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
             {items.map((item) => {
                 const link = item.horseId
                     ? `/community/${item.horseId}`
-                    : `/profile/${encodeURIComponent(item.actorAlias)}`;
+                    : item.eventType === "text_post"
+                        ? `/feed/${item.id}`
+                        : `/profile/${encodeURIComponent(item.actorAlias)}`;
 
                 return (
                     <div key={item.id} className="activity-feed-item-wrapper">

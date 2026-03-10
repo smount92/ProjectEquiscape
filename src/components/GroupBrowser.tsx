@@ -24,10 +24,14 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
     const router = useRouter();
     const [tab, setTab] = useState<"browse" | "mine">("browse");
     const [filter, setFilter] = useState("all");
+    const [search, setSearch] = useState("");
     const [joining, setJoining] = useState<string | null>(null);
 
     const groups = tab === "mine" ? myGroups : allGroups;
-    const filtered = filter === "all" ? groups : groups.filter(g => g.groupType === filter);
+    const filtered = groups
+        .filter(g => filter === "all" || g.groupType === filter)
+        .filter(g => !search || g.name.toLowerCase().includes(search.toLowerCase())
+            || g.description?.toLowerCase().includes(search.toLowerCase()));
 
     async function handleJoin(groupId: string) {
         setJoining(groupId);
@@ -56,6 +60,18 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                     ⭐ My Groups
                     <span className="studio-tab-badge">{myGroups.length}</span>
                 </button>
+            </div>
+
+            {/* Search */}
+            <div className="search-bar" style={{ marginBottom: "var(--space-md)" }}>
+                <input
+                    type="text"
+                    className="form-input"
+                    placeholder="🔍 Search groups by name or description…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    id="group-search"
+                />
             </div>
 
             {/* Type Filter */}

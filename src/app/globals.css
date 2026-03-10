@@ -9875,3 +9875,45 @@ p {
 .feed-image-collage img:hover {
   opacity: 0.9;
 }
+
+/* ── V6: Event Enrichment ── */
+.event-attendee-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.event-attendee-chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  font-size: calc(0.8rem * var(--font-scale));
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.event-attendee-chip:hover {
+  background: var(--color-accent);
+  color: white;
+}
+
+.event-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.event-photo-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.event-photo-grid img:hover {
+  opacity: 0.85;
+}

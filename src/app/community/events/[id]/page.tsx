@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { getEvent } from "@/app/actions/events";
+import { getEvent, getEventComments, getEventAttendees, getEventPhotos } from "@/app/actions/events";
 import EventRsvpButton from "@/components/EventRsvpButton";
 import EventDeleteButton from "@/components/EventDeleteButton";
+import EventCommentSection from "@/components/EventCommentSection";
+import EventPhotoGallery from "@/components/EventPhotoGallery";
 
 import { EVENT_TYPE_LABELS } from "@/lib/constants/events";
 
@@ -26,6 +28,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
     const event = await getEvent(id);
     if (!event) notFound();
+
+    // Parallel data fetches
+    const [attendees, comments, photos] = await Promise.all([
+        getEventAttendees(id),
+        getEventComments(id),
+        getEventPhotos(id),
+    ]);
 
     const date = new Date(event.startsAt);
     const endDate = event.endsAt ? new Date(event.endsAt) : null;
@@ -117,6 +126,38 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         <EventDeleteButton eventId={event.id} />
                     </div>
                 )}
+
+                {/* Attendees */}
+                {attendees.length > 0 && (
+                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                        <h3 style={{ marginBottom: "var(--space-sm)" }}>👥 Who&apos;s Going ({attendees.filter(a => a.status === "going").length})</h3>
+                        <div className="event-attendee-grid">
+                            {attendees.filter(a => a.status === "going").map(a => (
+                                <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="event-attendee-chip">
+                                    @{a.alias}
+                                </Link>
+                            ))}
+                        </div>
+                        {attendees.filter(a => a.status === "interested").length > 0 && (
+                            <>
+                                <h4 style={{ marginTop: "var(--space-md)", color: "var(--color-text-muted)" }}>⭐ Interested ({attendees.filter(a => a.status === "interested").length})</h4>
+                                <div className="event-attendee-grid">
+                                    {attendees.filter(a => a.status === "interested").map(a => (
+                                        <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="event-attendee-chip">
+                                            @{a.alias}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {/* Photo Gallery */}
+                <EventPhotoGallery eventId={event.id} currentUserId={user.id} initialPhotos={photos} />
+
+                {/* Comments */}
+                <EventCommentSection eventId={event.id} currentUserId={user.id} creatorId={event.createdBy} initialComments={comments} />
             </div>
         </div>
     );

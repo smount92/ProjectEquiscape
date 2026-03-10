@@ -31,8 +31,7 @@ description: V6 Community Enrichment — Event comments/attendees/photos, Group 
 
 > **Goal:** Transform events from static listings into living community hubs — comments, attendee lists, and photo galleries.
 
-### Task 1.1 — Migration 041: Event Comments & Photos ✅ DONE 2026-03-10
-> Migration applied by user.
+### Task 1.1 — Migration 041: Event Comments & Photos
 
 Create `supabase/migrations/041_event_enrichment.sql`:
 
@@ -171,8 +170,7 @@ USING (
 
 ---
 
-### Task 1.2 — Event Comment Server Actions ✅ DONE 2026-03-10
-> addEventComment, deleteEventComment, getEventComments added to events.ts
+### Task 1.2 — Event Comment Server Actions
 
 **File:** `src/app/actions/events.ts` — add at end:
 
@@ -269,8 +267,7 @@ export async function getEventComments(eventId: string) {
 
 ---
 
-### Task 1.3 — Event Attendee List ✅ DONE 2026-03-10
-> getEventAttendees added with PostgREST join
+### Task 1.3 — Event Attendee List
 
 **File:** `src/app/actions/events.ts` — add:
 
@@ -297,8 +294,7 @@ export async function getEventAttendees(eventId: string) {
 
 ---
 
-### Task 1.4 — Event Photo Server Actions ✅ DONE 2026-03-10
-> addEventPhoto, getEventPhotos, deleteEventPhoto with batch signed URLs
+### Task 1.4 — Event Photo Server Actions
 
 **File:** `src/app/actions/events.ts` — add:
 
@@ -381,8 +377,7 @@ export async function deleteEventPhoto(
 
 ---
 
-### Task 1.5 — Event Detail Page Enhancement ✅ DONE 2026-03-10
-> Attendees, EventPhotoGallery, EventCommentSection added. CSS for .event-attendee-grid/.event-photo-grid.
+### Task 1.5 — Event Detail Page Enhancement
 
 **File:** `src/app/community/events/[id]/page.tsx`
 
@@ -463,8 +458,7 @@ After the existing "About" section, add three new sections:
 
 > **Goal:** Make it easy to find groups, art studios, and content. Client-side text filtering that feels instant.
 
-### Task 2.1 — Group Search Filter ✅ DONE 2026-03-10
-> Added search state + input to GroupBrowser
+### Task 2.1 — Group Search Filter
 
 **File:** `src/components/GroupBrowser.tsx`
 
@@ -499,8 +493,7 @@ Add the search input before the type chips:
 
 ---
 
-### Task 2.2 — Art Studio Search & Filtering ✅ DONE 2026-03-10
-> Created /studio page + ArtistBrowser component with search/status/specialty filters
+### Task 2.2 — Art Studio Search & Filtering
 
 **File:** `src/app/studio/page.tsx` — note: this file may not exist yet. Check if there's a browse/discover page for art studios.
 
@@ -646,8 +639,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
 
 ---
 
-### Task 2.3 — Event Search Filter ✅ DONE 2026-03-10
-> Added search by name/location/group to EventBrowser
+### Task 2.3 — Event Search Filter
 
 **File:** `src/components/EventBrowser.tsx`
 
@@ -670,8 +662,7 @@ Add search input before the type chips.
 
 ---
 
-### Task 2.4 — Navigation Links ✅ DONE 2026-03-10
-> /studio page accessible. Art Studio link already exists in header nav.
+### Task 2.4 — Navigation Links
 
 Add `/studio` to the header navigation in `src/app/layout.tsx` or the navigation component, alongside the existing community links.
 
@@ -685,8 +676,7 @@ Ensure the Discover page and Art Studios page are both reachable from the main n
 
 > **Goal:** Give text posts and feed items their own URL for sharing and deeper engagement.
 
-### Task 3.1 — Feed Post Detail Page ✅ DONE 2026-03-10
-> Created /feed/[id] with full post, image collage, like toggle
+### Task 3.1 — Feed Post Detail Page
 
 **Create:** `src/app/feed/[id]/page.tsx`
 
@@ -778,8 +768,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
 
 ---
 
-### Task 3.2 — Update Feed Item Links ✅ DONE 2026-03-10
-> text_post events now link to /feed/{id}
+### Task 3.2 — Update Feed Item Links
 
 **File:** `src/components/ActivityFeed.tsx`
 
@@ -802,27 +791,27 @@ This gives text posts their own shareable URL while keeping other event types (n
 ## Completion Checklist
 
 **Phase 1: Event Enhancement**
-- [x] Migration 041 — event_comments + event_photos tables + storage RLS ✅
-- [x] Event comment CRUD (addEventComment, deleteEventComment, getEventComments) ✅
-- [x] Event attendee list (getEventAttendees) ✅
-- [x] Event photo CRUD (addEventPhoto, getEventPhotos, deleteEventPhoto) ✅
-- [x] Event detail page — attendees, photos, comments sections ✅
-- [x] EventPhotoGallery client component ✅
-- [x] EventCommentSection client component ✅
-- [x] CSS for attendee chips + photo grid ✅
+- [ ] Migration 041 — event_comments + event_photos tables + storage RLS
+- [ ] Event comment CRUD (addEventComment, deleteEventComment, getEventComments)
+- [ ] Event attendee list (getEventAttendees)
+- [ ] Event photo CRUD (addEventPhoto, getEventPhotos, deleteEventPhoto)
+- [ ] Event detail page — attendees, photos, comments sections
+- [ ] EventPhotoGallery client component
+- [ ] EventCommentSection client component
+- [ ] CSS for attendee chips + photo grid
 
 **Phase 2: Discovery & Search**
-- [x] Group search filter in GroupBrowser ✅
-- [x] Art Studio browse page (`/studio`) + ArtistBrowser component ✅
-- [x] Event search filter in EventBrowser ✅
-- [x] Navigation links updated ✅
+- [ ] Group search filter in GroupBrowser
+- [ ] Art Studio browse page (`/studio`) + ArtistBrowser component
+- [ ] Event search filter in EventBrowser
+- [ ] Navigation links updated
 
 **Phase 3: Feed Depth**
-- [x] Feed post detail page (`/feed/[id]`) ✅
-- [x] Feed item links updated (text posts → `/feed/{id}`) ✅
+- [ ] Feed post detail page (`/feed/[id]`)
+- [ ] Feed item links updated (text posts → `/feed/{id}`)
 
 **Final**
-- [x] `npx next build` — 0 errors ✅ 2026-03-10
-- [x] All search filters work client-side ✅
+- [ ] `npx next build` — 0 errors
+- [ ] All search filters work client-side
 
 **Estimated effort:** ~10-14 hours across 3 phases
