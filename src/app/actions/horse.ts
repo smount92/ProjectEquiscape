@@ -205,16 +205,17 @@ export async function deleteHorseImageAction(recordId: string, storagePath: stri
     }
 }
 
-export async function updateHorseAction(horseId: string, formData: FormData): Promise<{ success: boolean; error?: string }> {
+export async function updateHorseAction(horseId: string, data: {
+    horseUpdate: Record<string, unknown> | null;
+    vaultData: Record<string, unknown> | null;
+    hasExistingVault: boolean;
+    deleteVault: boolean;
+    conditionChange: { newCondition: string; note: string | null } | null;
+}): Promise<{ success: boolean; error?: string }> {
     try {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not logged in" };
-
-        const horseUpdateStr = formData.get("horseUpdate") as string;
-        const vaultDataStr = formData.get("vaultData") as string;
-        const hasExistingVault = formData.get("hasExistingVault") === "true";
-        const deleteVault = formData.get("deleteVault") === "true";
 
         // ── Security: whitelist allowed fields to prevent column injection ──
         const HORSE_ALLOWED = [
@@ -229,14 +230,12 @@ export async function updateHorseAction(horseId: string, formData: FormData): Pr
             'insurance_notes', 'horse_id',
         ];
 
-        const rawHorse = horseUpdateStr ? JSON.parse(horseUpdateStr) : null;
-        const horseUpdate = rawHorse
-            ? Object.fromEntries(Object.entries(rawHorse).filter(([k]) => HORSE_ALLOWED.includes(k)))
+        const horseUpdate = data.horseUpdate
+            ? Object.fromEntries(Object.entries(data.horseUpdate).filter(([k]) => HORSE_ALLOWED.includes(k)))
             : null;
 
-        const rawVault = vaultDataStr ? JSON.parse(vaultDataStr) : null;
-        const vaultData = rawVault
-            ? Object.fromEntries(Object.entries(rawVault).filter(([k]) => VAULT_ALLOWED.includes(k)))
+        const vaultData = data.vaultData
+            ? Object.fromEntries(Object.entries(data.vaultData).filter(([k]) => VAULT_ALLOWED.includes(k)))
             : null;
 
         if (horseUpdate) {
@@ -244,88 +243,28 @@ export async function updateHorseAction(horseId: string, formData: FormData): Pr
             if (updErr) throw new Error(updErr.message);
         }
 
-        if (deleteVault) {
+        if (data.deleteVault) {
             await supabase.from("financial_vault").delete().eq("horse_id", horseId);
         } else if (vaultData) {
-            vaultData.horse_id = horseId; // Ensure horse_id is set
-            if (hasExistingVault) {
+            vaultData.horse_id = horseId;
+            if (data.hasExistingVault) {
                 await supabase.from("financial_vault").update(vaultData).eq("horse_id", horseId);
             } else {
                 await supabase.from("financial_vault").insert(vaultData);
             }
         }
 
-        const slotsMetadataStr = formData.get("slotsMetadata") as string;
-        const slotsMetadata = slotsMetadataStr ? JSON.parse(slotsMetadataStr) : {};
-
-        // Process new files
-        const entries = Array.from(formData.entries());
-        let extraIndex = 0;
-
-        for (const [key, value] of entries) {
-            if (value instanceof File && value.size > 0 && value.name) {
-                let angle: string | null = null;
-
-                if (key.startsWith("slotFile_")) {
-                    angle = key.replace("slotFile_", "");
-                } else if (key.startsWith("extraFile_")) {
-                    angle = "extra_detail";
-                } else {
-                    continue; // skip other files if any
-                }
-
-                let safeFileName = `${angle}_${Date.now()}`;
-                if (angle === "extra_detail") {
-                    safeFileName = `extra_detail_${Date.now()}_${extraIndex++}`;
-                }
-
-                const filePath = `horses/${horseId}/${safeFileName}.webp`;
-                const { error: uploadErr } = await supabase.storage.from("horse-images").upload(filePath, value, {
-                    contentType: value.type || "image/webp",
-                    upsert: false,
-                });
-
-                if (!uploadErr) {
-                    const { data: { publicUrl } } = supabase.storage.from("horse-images").getPublicUrl(filePath);
-
-                    if (angle !== "extra_detail" && slotsMetadata[angle]) {
-                        const existing = slotsMetadata[angle];
-                        if (existing.storagePath) {
-                            await supabase.storage.from("horse-images").remove([existing.storagePath]);
-                        }
-                        if (existing.recordId) {
-                            await supabase.from("horse_images").update({ image_url: publicUrl }).eq("id", existing.recordId);
-                            continue;
-                        }
-                    }
-
-                    await supabase.from("horse_images").insert({
-                        horse_id: horseId,
-                        image_url: publicUrl,
-                        angle_profile: angle,
-                    });
-                }
-            }
-        }
-
         // ── Condition History Ledger ──
         // NOTE: condition_history INSERT is now handled by Postgres trigger
         // (trg_user_horses_condition). We only add the Hoofprint timeline event.
-        const conditionChangeStr = formData.get("conditionChange") as string;
-        if (conditionChangeStr) {
+        if (data.conditionChange) {
             try {
-                const cc = JSON.parse(conditionChangeStr) as {
-                    newCondition: string;
-                    note: string | null;
-                };
-
-                // Insert Hoofprint timeline event (the note is user-provided context)
                 await supabase.from("horse_timeline").insert({
                     horse_id: horseId,
                     user_id: user.id,
                     event_type: "condition_change",
-                    title: `Condition updated to ${cc.newCondition}`,
-                    description: cc.note || undefined,
+                    title: `Condition updated to ${data.conditionChange.newCondition}`,
+                    description: data.conditionChange.note || undefined,
                 });
             } catch { /* Non-blocking — don't fail the save */ }
         }

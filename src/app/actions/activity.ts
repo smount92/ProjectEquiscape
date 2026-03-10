@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getSignedImageUrls } from "@/lib/utils/storage";
+import { revalidatePath } from "next/cache";
 
 interface FeedItem {
     id: string;
@@ -99,15 +100,15 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
 
     if (items.length === 0) return { items: [], nextCursor: null };
 
-    // Batch-fetch actor aliases
+    // Batch-fetch actor aliases via join
     const actorIds = [...new Set(items.map((e) => e.actor_id))];
     const aliasMap = new Map<string, string>();
     if (actorIds.length > 0) {
-        const { data: users } = await supabase
+        const { data: actorRows } = await supabase
             .from("users")
             .select("id, alias_name")
             .in("id", actorIds);
-        users?.forEach((u: { id: string; alias_name: string }) => {
+        actorRows?.forEach((u: { id: string; alias_name: string }) => {
             aliasMap.set(u.id, u.alias_name);
         });
     }
@@ -278,4 +279,28 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
         })),
         nextCursor,
     };
+}
+
+/**
+ * Delete a text post (owner only).
+ */
+export async function deleteTextPost(eventId: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const { data: event } = await supabase
+        .from("activity_events")
+        .select("id")
+        .eq("id", eventId)
+        .eq("actor_id", user.id)
+        .maybeSingle();
+
+    if (!event) return { success: false, error: "Post not found or not yours." };
+
+    const { error } = await supabase.from("activity_events").delete().eq("id", eventId);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/feed");
+    return { success: true };
 }

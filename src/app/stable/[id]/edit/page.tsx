@@ -11,7 +11,7 @@ import CollectionPicker from "@/components/CollectionPicker";
 import { compressImage } from "@/lib/utils/imageCompression";
 import { updateLifeStage, addTimelineEvent } from "@/app/actions/hoofprint";
 import { getReleasesForMoldAction } from "@/app/actions/reference";
-import { updateHorseAction, deleteHorseImageAction } from "@/app/actions/horse";
+import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages } from "@/app/actions/horse";
 
 // ---- Types ----
 
@@ -331,50 +331,68 @@ export default function EditHorsePage() {
 
       const deleteVault = !hasVaultData && hasExistingVault;
 
-      const formData = new FormData();
-      formData.append("horseUpdate", JSON.stringify(horseUpdate));
-      if (vaultData) formData.append("vaultData", JSON.stringify(vaultData));
-      formData.append("hasExistingVault", String(hasExistingVault));
-      formData.append("deleteVault", String(deleteVault));
-
-      // Condition change tracking (trigger handles condition_history, we only pass context for timeline)
-      if (conditionGrade !== originalCondition) {
-        formData.append("conditionChange", JSON.stringify({
+      // Step 1: Update DB record (text only — no files)
+      const result = await updateHorseAction(horseId, {
+        horseUpdate,
+        vaultData,
+        hasExistingVault,
+        deleteVault,
+        conditionChange: conditionGrade !== originalCondition ? {
           newCondition: conditionGrade,
           note: conditionNote.trim() || null,
-        }));
-      }
+        } : null,
+      });
 
-      const slotsMetadata: Record<string, { recordId?: string; storagePath?: string }> = {};
+      if (!result.success) throw new Error(result.error || "Failed to save.");
+
+      // Step 2: Upload NEW images directly from browser → Supabase Storage
+      const uploadedImages: { path: string; angle: string }[] = [];
 
       for (const slot of PHOTO_STUDIO_SLOTS) {
         const angle = slot.angle;
         if (newFiles[angle]) {
           const compressed = await compressImage(newFiles[angle]);
-          formData.append(`slotFile_${angle}`, compressed, `${angle}_temp.webp`);
 
-          if (existingImages[angle]) {
-            slotsMetadata[angle] = {
-              recordId: existingImages[angle].recordId,
-              storagePath: existingImages[angle].storagePath || undefined
-            };
+          // Delete old image from storage + DB if it exists
+          const existing = existingImages[angle];
+          if (existing?.storagePath) {
+            await supabase.storage.from("horse-images").remove([existing.storagePath]);
+          }
+          if (existing?.recordId) {
+            await deleteHorseImageAction(existing.recordId, null);
+          }
+
+          const filePath = `horses/${horseId}/${angle}_${Date.now()}.webp`;
+          const { error: uploadError } = await supabase.storage
+            .from("horse-images")
+            .upload(filePath, compressed, { contentType: "image/webp" });
+
+          if (!uploadError) {
+            uploadedImages.push({ path: filePath, angle });
           }
         }
       }
 
+      // Upload new extra detail images
       for (let i = 0; i < newExtraFiles.length; i++) {
         const compressed = await compressImage(newExtraFiles[i].file);
-        formData.append(`extraFile_${i}`, compressed, `extra_${i}.webp`);
+        const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
+        const { error: uploadError } = await supabase.storage
+          .from("horse-images")
+          .upload(filePath, compressed, { contentType: "image/webp" });
+
+        if (!uploadError) {
+          uploadedImages.push({ path: filePath, angle: "extra_detail" });
+        }
       }
 
-      formData.append("slotsMetadata", JSON.stringify(slotsMetadata));
-
-      const result = await updateHorseAction(horseId, formData);
-      if (!result.success) throw new Error(result.error || "Failed to save on server.");
+      // Step 3: Finalize image metadata on server
+      if (uploadedImages.length > 0) {
+        await finalizeHorseImages(horseId, uploadedImages);
+      }
 
       // Activity event if public (fire-and-forget)
       if (isPublic) {
-        // dynamic import of notifyHorsePublic so it's not mixed into SSR client boundaries improperly
         import("@/app/actions/horse-events").then((m) => {
           m.notifyHorsePublic({
             userId: user.id,
@@ -388,7 +406,7 @@ export default function EditHorsePage() {
         }).catch(() => { });
       }
 
-      // Auto-create Hoofprint™ listed event (fire-and-forget — do NOT await)
+      // Auto-create Hoofprint™ listed event (fire-and-forget)
       if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
         addTimelineEvent({
           horseId: horseId,

@@ -221,3 +221,38 @@ export async function addIdentifiedHorse(
         return { success: false, error: error instanceof Error ? error.message : "Failed to add horse" };
     }
 }
+
+/** Delete an ID request (creator only) */
+export async function deleteIdRequest(requestId: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const { data: request } = await supabase
+        .from("id_requests")
+        .select("id, image_url")
+        .eq("id", requestId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (!request) return { success: false, error: "Request not found or not yours." };
+
+    const r = request as { id: string; image_url: string | null };
+
+    // Delete suggestions first
+    await supabase.from("id_suggestions").delete().eq("request_id", requestId);
+
+    // Delete the request
+    const { error } = await supabase.from("id_requests").delete().eq("id", requestId);
+    if (error) return { success: false, error: error.message };
+
+    // Clean up uploaded image (best effort)
+    if (r.image_url) {
+        try {
+            await supabase.storage.from("horse-images").remove([r.image_url]);
+        } catch { /* best effort */ }
+    }
+
+    revalidatePath("/community/help-id");
+    return { success: true };
+}

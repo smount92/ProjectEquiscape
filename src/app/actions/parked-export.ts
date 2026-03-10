@@ -271,138 +271,53 @@ export async function claimParkedHorse(pin: string): Promise<{
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated. Please log in or create an account first." };
 
-        // Look up transfer via admin (claimer may not have RLS access to private horse data)
+        // Single atomic RPC — locks, validates, swaps ownership, clears vault
         const admin = getAdminClient();
-        const { data: transfer } = await admin
-            .from("horse_transfers")
-            .select("id, horse_id, sender_id, acquisition_type, sale_price, is_price_public, notes, expires_at")
-            .eq("claim_pin", pin.toUpperCase().trim())
-            .eq("status", "pending")
-            .maybeSingle();
+        const { data, error } = await admin.rpc("claim_parked_horse_atomic", {
+            p_pin: pin,
+            p_claimant_id: user.id,
+        });
 
-        if (!transfer) {
-            return { success: false, error: "Invalid or expired PIN." };
-        }
+        if (error) return { success: false, error: error.message };
 
-        const t = transfer as {
-            id: string; horse_id: string; sender_id: string;
-            acquisition_type: string; sale_price: number | null;
-            is_price_public: boolean; notes: string | null; expires_at: string;
+        const result = data as {
+            success: boolean;
+            error?: string;
+            horse_id?: string;
+            horse_name?: string;
+            sender_id?: string;
+            sender_alias?: string;
+            receiver_alias?: string;
         };
 
-        // Check expiration
-        if (new Date(t.expires_at) < new Date()) {
-            await admin.from("horse_transfers").update({ status: "expired" }).eq("id", t.id);
-            return { success: false, error: "This claim PIN has expired." };
+        if (!result.success) {
+            return { success: false, error: result.error || "Claim failed." };
         }
 
-        // Can't claim your own horse
-        if (t.sender_id === user.id) {
-            return { success: false, error: "You can't claim your own horse." };
-        }
-
-        // admin already declared above
-
-        // Get horse name + aliases
-        const { data: horse } = await admin.from("user_horses").select("custom_name").eq("id", t.horse_id).single();
-        const horseName = (horse as { custom_name: string } | null)?.custom_name || "Unknown Horse";
-
-        const { data: senderProfile } = await admin.from("users").select("alias_name").eq("id", t.sender_id).single();
-        const senderAlias = (senderProfile as { alias_name: string } | null)?.alias_name || "Unknown";
-
-        const { data: receiverProfile } = await admin.from("users").select("alias_name").eq("id", user.id).single();
-        const receiverAlias = (receiverProfile as { alias_name: string } | null)?.alias_name || "Unknown";
-
-        // Get thumbnail for ghost remnant
-        let thumbnailUrl: string | null = null;
+        // Notification (non-critical)
         try {
-            const { data: thumbImg } = await admin
-                .from("horse_images")
-                .select("image_url")
-                .eq("horse_id", t.horse_id)
-                .eq("angle_profile", "Primary_Thumbnail")
-                .maybeSingle();
-            thumbnailUrl = (thumbImg as { image_url: string } | null)?.image_url || null;
-        } catch { /* optional */ }
-
-        // 1. Close sender's ownership record with ghost snapshot
-        await admin.from("horse_ownership_history")
-            .update({
-                released_at: new Date().toISOString(),
-                horse_name: horseName,
-                horse_thumbnail: thumbnailUrl,
-            })
-            .eq("horse_id", t.horse_id)
-            .eq("owner_id", t.sender_id)
-            .is("released_at", null);
-
-        // 2. Create receiver's ownership record
-        await admin.from("horse_ownership_history").insert({
-            horse_id: t.horse_id,
-            owner_id: user.id,
-            owner_alias: receiverAlias,
-            acquisition_type: t.acquisition_type,
-            sale_price: t.sale_price,
-            is_price_public: t.is_price_public,
-            notes: "Claimed via Certificate of Authenticity PIN",
-        });
-
-        // 3. Transfer ownership + unpark
-        await admin.from("user_horses")
-            .update({ owner_id: user.id, collection_id: null, life_stage: "completed" })
-            .eq("id", t.horse_id);
-
-        // 4. Timeline events
-        await admin.from("horse_timeline").insert([
-            {
-                horse_id: t.horse_id,
-                user_id: t.sender_id,
-                event_type: "transferred",
-                title: `Sold off-platform to @${receiverAlias}`,
-                description: `${horseName} was sold off-platform and claimed via Certificate of Authenticity by @${receiverAlias}.`,
-                metadata: { from: senderAlias, to: receiverAlias, type: "parked_export" },
-            },
-            {
-                horse_id: t.horse_id,
-                user_id: user.id,
-                event_type: "acquired",
-                title: `Received from @${senderAlias}`,
-                description: `${horseName} was acquired from @${senderAlias} via off-platform sale with Certificate of Authenticity.`,
-                metadata: { from: senderAlias, to: receiverAlias, type: "parked_export" },
-            },
-        ]);
-
-        // 5. Mark transfer claimed
-        await admin.from("horse_transfers").update({
-            status: "claimed",
-            claimed_by: user.id,
-            claimed_at: new Date().toISOString(),
-        }).eq("id", t.id);
-
-        // 6. Clear financial vault (seller's data does not transfer)
-        await admin.from("financial_vault")
-            .update({
-                purchase_price: null,
-                purchase_date: null,
-                estimated_current_value: null,
-                insurance_notes: null,
-            })
-            .eq("horse_id", t.horse_id);
-
-        // 7. Notify sender
-        await admin.from("notifications").insert({
-            user_id: t.sender_id,
-            type: "general",
-            actor_id: user.id,
-            content: `@${receiverAlias} claimed ${horseName} using the Certificate of Authenticity! Transfer complete.`,
-            horse_id: null,
-        });
+            await admin.from("notifications").insert({
+                user_id: result.sender_id,
+                type: "transfer_claimed",
+                actor_id: user.id,
+                content: `@${result.receiver_alias} claimed ${result.horse_name} via PIN!`,
+                horse_id: result.horse_id,
+            });
+        } catch { /* Non-blocking */ }
 
         revalidatePath("/dashboard");
-        revalidatePath(`/stable/${t.horse_id}`);
-        return { success: true, horseName, horseId: t.horse_id };
+        revalidatePath(`/stable/${result.horse_id}`);
+
+        return {
+            success: true,
+            horseName: result.horse_name,
+            horseId: result.horse_id,
+        };
     } catch (error) {
-        return { success: false, error: error instanceof Error ? error.message : "Failed to claim horse" };
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred.",
+        };
     }
 }
 

@@ -352,4 +352,26 @@ export async function getUpcomingEvents(): Promise<MHHEvent[]> {
     }));
 }
 
+/** Delete an event (creator only) */
+export async function deleteEvent(eventId: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
 
+    const { data: event } = await supabase
+        .from("events")
+        .select("id")
+        .eq("id", eventId)
+        .eq("created_by", user.id)
+        .maybeSingle();
+
+    if (!event) return { success: false, error: "Event not found or not yours." };
+
+    // Delete RSVPs first
+    await supabase.from("event_rsvps").delete().eq("event_id", eventId);
+    const { error } = await supabase.from("events").delete().eq("id", eventId);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/community/events");
+    return { success: true };
+}

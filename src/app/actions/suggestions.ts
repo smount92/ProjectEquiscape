@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { revalidatePath } from "next/cache";
 
 export async function submitSuggestion(data: {
     suggestionType: "mold" | "release" | "resin";
@@ -33,16 +35,59 @@ export async function getPendingSuggestions() {
     return data || [];
 }
 
-// Admin: approve/reject a suggestion
+// Admin: approve/reject a suggestion — executes DB insertion on approve
 export async function reviewSuggestion(
     id: string,
     status: "approved" | "rejected",
     adminNotes?: string
-): Promise<{ success: boolean }> {
-    const supabase = await createClient();
-    const { error } = await supabase
+): Promise<{ success: boolean; error?: string }> {
+    const admin = getAdminClient();
+
+    // Fetch the suggestion
+    const { data: suggestion } = await admin
         .from("database_suggestions")
-        .update({ status, admin_notes: adminNotes || null })
-        .eq("id", id);
-    return { success: !error };
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (!suggestion) return { success: false, error: "Suggestion not found." };
+
+    const s = suggestion as Record<string, unknown>;
+
+    if (status === "approved") {
+        // Execute the actual database insertion based on suggestion_type
+        try {
+            const details = (s.details as string) || "";
+            if (s.suggestion_type === "mold") {
+                await admin.from("reference_molds").insert({
+                    mold_name: s.name as string,
+                    manufacturer: details || "Unknown",
+                });
+            } else if (s.suggestion_type === "release") {
+                await admin.from("reference_releases").insert({
+                    release_name: s.name as string,
+                    // details may contain mold_id or other context
+                });
+            } else if (s.suggestion_type === "resin") {
+                await admin.from("artist_resins").insert({
+                    resin_name: s.name as string,
+                    sculptor_alias: details || "Unknown",
+                });
+            }
+        } catch (insertError) {
+            return { success: false, error: `Failed to insert: ${insertError}` };
+        }
+    }
+
+    // Update suggestion status
+    const { error } = await admin.from("database_suggestions").update({
+        status,
+        admin_notes: adminNotes || null,
+        reviewed_at: new Date().toISOString(),
+    }).eq("id", id);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/admin");
+    return { success: true };
 }

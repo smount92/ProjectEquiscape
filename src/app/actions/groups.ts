@@ -494,3 +494,27 @@ export async function replyToPost(postId: string, content: string): Promise<{ su
 }
 
 // Re-export type labels for UI
+
+/** Delete a group post (owner only) */
+export async function deleteGroupPost(postId: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const { data: post } = await supabase
+        .from("group_posts")
+        .select("id")
+        .eq("id", postId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (!post) return { success: false, error: "Post not found or not yours." };
+
+    // Delete replies first
+    await supabase.from("group_post_replies").delete().eq("post_id", postId);
+    const { error } = await supabase.from("group_posts").delete().eq("id", postId);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/community/groups");
+    return { success: true };
+}
