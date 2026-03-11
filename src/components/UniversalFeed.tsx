@@ -17,7 +17,7 @@ import LikeToggle from "@/components/LikeToggle";
 
 interface UniversalFeedProps {
     initialPosts: Post[];
-    context: { horseId?: string; groupId?: string; eventId?: string; showId?: string; globalFeed?: boolean };
+    context: { horseId?: string; groupId?: string; eventId?: string; globalFeed?: boolean };
     currentUserId: string;
     showComposer?: boolean;
     composerPlaceholder?: string;
@@ -142,7 +142,6 @@ export default function UniversalFeed({
                     horseId: context.horseId || null,
                     groupId: context.groupId || null,
                     eventId: context.eventId || null,
-                    showId: context.showId || null,
                     studioId: null,
                     helpRequestId: null,
                     likesCount: 0,
@@ -253,7 +252,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                     authorAlias: "You",
                     content: replyText.trim(),
                     parentId: post.id,
-                    horseId: null, groupId: null, eventId: null, showId: null, studioId: null, helpRequestId: null,
+                    horseId: null, groupId: null, eventId: null, studioId: null, helpRequestId: null,
                     likesCount: 0, repliesCount: 0, isPinned: false,
                     createdAt: new Date().toISOString(), media: [], isLikedByMe: false, replies: [],
                 }]);

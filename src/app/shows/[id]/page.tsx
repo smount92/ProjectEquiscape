@@ -35,7 +35,7 @@ export default async function ShowDetailPage({
     const { show, entries } = await getShowEntries(showId);
     if (!show) notFound();
 
-    const showComments = await getPosts({ showId }, { includeReplies: true });
+    const showComments = await getPosts({ eventId: showId }, { includeReplies: true });
 
     // Fetch user's public horses for entry form
     const { data: userHorses } = await supabase
@@ -215,7 +215,7 @@ export default async function ShowDetailPage({
             {/* Show Discussion */}
             <UniversalFeed
                 initialPosts={showComments}
-                context={{ showId }}
+                context={{ eventId: showId }}
                 currentUserId={user.id}
                 showComposer={true}
                 composerPlaceholder="Discuss this show…"

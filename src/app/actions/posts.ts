@@ -17,7 +17,6 @@ export interface Post {
     horseId: string | null;
     groupId: string | null;
     eventId: string | null;
-    showId: string | null;
     studioId: string | null;
     helpRequestId: string | null;
     likesCount: number;
@@ -35,7 +34,6 @@ export async function createPost(data: {
     horseId?: string;
     groupId?: string;
     eventId?: string;
-    showId?: string;
     studioId?: string;
     helpRequestId?: string;
     imagePaths?: string[];
@@ -56,7 +54,6 @@ export async function createPost(data: {
         horse_id: data.horseId || null,
         group_id: data.groupId || null,
         event_id: data.eventId || null,
-        show_id: data.showId || null,
         studio_id: data.studioId || null,
         help_request_id: data.helpRequestId || null,
     }).select("id").single();
@@ -77,7 +74,7 @@ export async function createPost(data: {
     if (data.horseId) revalidatePath(`/community/${data.horseId}`);
     if (data.groupId) revalidatePath("/community/groups");
     if (data.eventId) revalidatePath(`/community/events/${data.eventId}`);
-    if (data.showId) revalidatePath(`/shows/${data.showId}`);
+    if (data.eventId) revalidatePath(`/shows/${data.eventId}`);
     revalidatePath("/feed");
 
     // Fire-and-forget: mention notifications
@@ -149,7 +146,6 @@ export async function getPosts(context: {
     horseId?: string;
     groupId?: string;
     eventId?: string;
-    showId?: string;
     globalFeed?: boolean;
 }, options?: {
     limit?: number;
@@ -162,7 +158,7 @@ export async function getPosts(context: {
 
     let query = supabase
         .from("posts")
-        .select("id, author_id, content, parent_id, horse_id, group_id, event_id, show_id, likes_count, replies_count, is_pinned, created_at, users!posts_author_id_fkey(alias_name)")
+        .select("id, author_id, content, parent_id, horse_id, group_id, event_id, likes_count, replies_count, is_pinned, created_at, users!posts_author_id_fkey(alias_name)")
         .is("parent_id", null)
         .order("created_at", { ascending: false })
         .limit(options?.limit || 25);
@@ -174,14 +170,11 @@ export async function getPosts(context: {
         query = query.eq("group_id", context.groupId);
     } else if (context.eventId) {
         query = query.eq("event_id", context.eventId);
-    } else if (context.showId) {
-        query = query.eq("show_id", context.showId);
     } else if (context.globalFeed) {
         query = query
             .is("horse_id", null)
             .is("group_id", null)
             .is("event_id", null)
-            .is("show_id", null)
             .is("studio_id", null)
             .is("help_request_id", null);
     }
@@ -237,7 +230,7 @@ export async function getPosts(context: {
                 authorAlias: (r.users as { alias_name: string } | null)?.alias_name ?? "Unknown",
                 content: r.content as string,
                 parentId: r.parent_id as string,
-                horseId: null, groupId: null, eventId: null, showId: null, studioId: null, helpRequestId: null,
+                horseId: null, groupId: null, eventId: null, studioId: null, helpRequestId: null,
                 likesCount: (r.likes_count as number) || 0,
                 repliesCount: 0,
                 isPinned: false,
@@ -258,7 +251,6 @@ export async function getPosts(context: {
         horseId: p.horse_id as string | null,
         groupId: p.group_id as string | null,
         eventId: p.event_id as string | null,
-        showId: p.show_id as string | null,
         studioId: null,
         helpRequestId: null,
         likesCount: (p.likes_count as number) || 0,

@@ -6,7 +6,8 @@ import { getSignedImageUrls } from "@/lib/utils/storage";
 import { revalidatePath } from "next/cache";
 
 // ============================================================
-// PHOTO SHOWS — Server Actions
+// UNIFIED COMPETITION — Server Actions
+// Events + Event Entries + Event Votes (replaces photo_shows)
 // ============================================================
 
 interface ShowDisplay {
@@ -35,102 +36,112 @@ interface ShowEntryDisplay {
 
 /**
  * Get all photo shows (latest first).
+ * Now reads from `events` WHERE event_type = 'photo_show'.
  */
 export async function getPhotoShows(): Promise<ShowDisplay[]> {
     const supabase = await createClient();
 
     const { data: shows } = await supabase
-        .from("photo_shows")
-        .select("id, title, description, theme, status, created_at, end_at")
+        .from("events")
+        .select("id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at")
+        .eq("event_type", "photo_show")
         .order("created_at", { ascending: false });
 
     if (!shows || shows.length === 0) return [];
 
+    type EventRow = {
+        id: string; name: string; description: string | null;
+        show_status: string; show_theme: string | null;
+        starts_at: string; ends_at: string | null; created_at: string;
+    };
+
     // Count entries per show
-    const showIds = shows.map((s: { id: string }) => s.id);
+    const eventIds = (shows as EventRow[]).map(s => s.id);
     const { data: entries } = await supabase
-        .from("show_entries")
-        .select("show_id")
-        .in("show_id", showIds);
+        .from("event_entries")
+        .select("event_id")
+        .in("event_id", eventIds)
+        .eq("entry_type", "entered");
 
     const countMap = new Map<string, number>();
-    (entries ?? []).forEach((e: { show_id: string }) => {
-        countMap.set(e.show_id, (countMap.get(e.show_id) || 0) + 1);
+    (entries ?? []).forEach((e: { event_id: string }) => {
+        countMap.set(e.event_id, (countMap.get(e.event_id) || 0) + 1);
     });
 
-    // Auto-close shows past their end date (lazy)
-    const expiredShows = shows.filter(
-        (s: { id: string; status: string; end_at: string | null }) =>
-            s.status === "open" && s.end_at && new Date(s.end_at) < new Date()
+    // Auto-transition expired open shows to judging
+    const expiredShows = (shows as EventRow[]).filter(
+        s => s.show_status === "open" && s.ends_at && new Date(s.ends_at) < new Date()
     );
     if (expiredShows.length > 0) {
         const admin = getAdminClient();
         for (const expired of expiredShows) {
-            await admin.from("photo_shows")
-                .update({ status: "judging" })
-                .eq("id", (expired as { id: string }).id);
-            // Update local reference so return reflects new status
-            (expired as { status: string }).status = "judging";
+            await admin.from("events")
+                .update({ show_status: "judging" })
+                .eq("id", expired.id);
+            expired.show_status = "judging";
         }
     }
 
-    return shows.map((s: { id: string; title: string; description: string | null; theme: string | null; status: string; created_at: string; end_at: string | null }) => ({
+    return (shows as EventRow[]).map(s => ({
         id: s.id,
-        title: s.title,
+        title: s.name,
         description: s.description,
-        theme: s.theme,
-        status: s.status,
+        theme: s.show_theme,
+        status: s.show_status || "open",
         entryCount: countMap.get(s.id) || 0,
         createdAt: s.created_at,
-        endAt: s.end_at,
+        endAt: s.ends_at,
     }));
 }
 
 /**
- * Get entries for a specific show.
+ * Get entries for a specific show (now event-based).
  */
 export async function getShowEntries(showId: string): Promise<{
     show: ShowDisplay | null;
     entries: ShowEntryDisplay[];
 }> {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    // Fetch show
-    const { data: showData } = await supabase
-        .from("photo_shows")
-        .select("id, title, description, theme, status, created_at, end_at")
+    // Fetch event
+    const { data: eventData } = await supabase
+        .from("events")
+        .select("id, name, description, show_status, show_theme, ends_at, created_at, created_by")
         .eq("id", showId)
         .single();
 
-    if (!showData) return { show: null, entries: [] };
+    if (!eventData) return { show: null, entries: [] };
 
-    const s = showData as { id: string; title: string; description: string | null; theme: string | null; status: string; created_at: string; end_at: string | null };
+    const s = eventData as {
+        id: string; name: string; description: string | null;
+        show_status: string; show_theme: string | null;
+        ends_at: string | null; created_at: string; created_by: string;
+    };
 
     // Fetch entries with user alias via PostgREST join
     const { data: rawEntries } = await supabase
-        .from("show_entries")
-        .select("id, horse_id, user_id, votes, created_at, users!user_id(alias_name)")
-        .eq("show_id", showId)
-        .order("votes", { ascending: false });
+        .from("event_entries")
+        .select("id, horse_id, user_id, votes_count, created_at, placing, users!user_id(alias_name)")
+        .eq("event_id", showId)
+        .eq("entry_type", "entered")
+        .order("votes_count", { ascending: false });
 
     const entryList = (rawEntries as unknown as {
-        id: string; horse_id: string; user_id: string; votes: number; created_at: string;
+        id: string; horse_id: string; user_id: string; votes_count: number;
+        created_at: string; placing: string | null;
         users: { alias_name: string } | null;
     }[]) ?? [];
 
     if (entryList.length === 0) {
         return {
-            show: { id: s.id, title: s.title, description: s.description, theme: s.theme, status: s.status, entryCount: 0, createdAt: s.created_at, endAt: s.end_at },
+            show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: 0, createdAt: s.created_at, endAt: s.ends_at },
             entries: [],
         };
     }
 
     // Batch-fetch horse names + finishes
-    const horseIds = [...new Set(entryList.map((e) => e.horse_id))];
+    const horseIds = [...new Set(entryList.map(e => e.horse_id))];
     const { data: horses } = await supabase
         .from("user_horses")
         .select("id, custom_name, finish_type")
@@ -141,31 +152,28 @@ export async function getShowEntries(showId: string): Promise<{
         horseMap.set(h.id, { name: h.custom_name, finish: h.finish_type });
     });
 
-
-
     // Check if current user has voted on each entry
-    const entryIds = entryList.map((e) => e.id);
+    const entryIds = entryList.map(e => e.id);
     let votedSet = new Set<string>();
     if (user) {
         const { data: votes } = await supabase
-            .from("show_votes")
+            .from("event_votes")
             .select("entry_id")
             .eq("user_id", user.id)
             .in("entry_id", entryIds);
         votedSet = new Set((votes ?? []).map((v: { entry_id: string }) => v.entry_id));
     }
 
-    // Batch-fetch primary thumbnails for entered horses
+    // Batch-fetch primary thumbnails
     const { data: thumbRows } = await supabase
         .from("horse_images")
         .select("horse_id, image_url, angle_profile")
         .in("horse_id", horseIds);
 
-    // Pick Primary_Thumbnail or first image per horse
     const thumbUrlMap = new Map<string, string>();
     const allThumbUrls: string[] = [];
     for (const hId of horseIds) {
-        const imgs = (thumbRows ?? []).filter((r: { horse_id: string; image_url: string; angle_profile: string }) => r.horse_id === hId);
+        const imgs = (thumbRows ?? []).filter((r: { horse_id: string }) => r.horse_id === hId);
         const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
         const url = (primary ?? imgs[0])?.image_url;
         if (url) {
@@ -176,8 +184,8 @@ export async function getShowEntries(showId: string): Promise<{
     const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
 
     return {
-        show: { id: s.id, title: s.title, description: s.description, theme: s.theme, status: s.status, entryCount: entryList.length, createdAt: s.created_at, endAt: s.end_at },
-        entries: entryList.map((e) => ({
+        show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: entryList.length, createdAt: s.created_at, endAt: s.ends_at },
+        entries: entryList.map(e => ({
             id: e.id,
             horseName: horseMap.get(e.horse_id)?.name || "Unknown",
             horseId: e.horse_id,
@@ -185,7 +193,7 @@ export async function getShowEntries(showId: string): Promise<{
             ownerId: e.user_id,
             thumbnailUrl: thumbUrlMap.has(e.horse_id) ? (signedUrls.get(thumbUrlMap.get(e.horse_id)!) ?? null) : null,
             finishType: horseMap.get(e.horse_id)?.finish || "OF",
-            votes: e.votes,
+            votes: e.votes_count,
             hasVoted: votedSet.has(e.id),
             createdAt: e.created_at,
         })),
@@ -204,18 +212,17 @@ export async function enterShow(
     if (!user) return { success: false, error: "You must be logged in." };
 
     // Verify show is open
-    const { data: show } = await supabase
-        .from("photo_shows")
-        .select("status, end_at")
+    const { data: event } = await supabase
+        .from("events")
+        .select("show_status, ends_at")
         .eq("id", showId)
         .single();
-    if (!show || (show as { status: string }).status !== "open") {
+    if (!event || (event as { show_status: string }).show_status !== "open") {
         return { success: false, error: "This show is not accepting entries." };
     }
 
-    // Check deadline
-    const showData = show as { status: string; end_at: string | null };
-    if (showData.end_at && new Date(showData.end_at) < new Date()) {
+    const eventData = event as { show_status: string; ends_at: string | null };
+    if (eventData.ends_at && new Date(eventData.ends_at) < new Date()) {
         return { success: false, error: "This show's entry deadline has passed." };
     }
 
@@ -233,19 +240,21 @@ export async function enterShow(
 
     // Check entry limit (max 3 per user per show)
     const { count: existingEntries } = await supabase
-        .from("show_entries")
+        .from("event_entries")
         .select("id", { count: "exact", head: true })
-        .eq("show_id", showId)
-        .eq("user_id", user.id);
+        .eq("event_id", showId)
+        .eq("user_id", user.id)
+        .eq("entry_type", "entered");
 
     if ((existingEntries ?? 0) >= 3) {
         return { success: false, error: "Maximum 3 entries per show." };
     }
 
-    const { error } = await supabase.from("show_entries").insert({
-        show_id: showId,
+    const { error } = await supabase.from("event_entries").insert({
+        event_id: showId,
         horse_id: horseId,
         user_id: user.id,
+        entry_type: "entered",
     });
 
     if (error) {
@@ -257,7 +266,7 @@ export async function enterShow(
 }
 
 /**
- * Vote for a show entry.
+ * Vote for a show entry (uses atomic RPC).
  */
 export async function voteForEntry(
     entryId: string
@@ -266,9 +275,8 @@ export async function voteForEntry(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "You must be logged in." };
 
-    // Single atomic RPC — handles self-vote check, toggle, count update
     const admin = getAdminClient();
-    const { data, error } = await admin.rpc("toggle_show_vote", {
+    const { data, error } = await admin.rpc("vote_for_entry", {
         p_entry_id: entryId,
         p_user_id: user.id,
     });
@@ -285,7 +293,7 @@ export async function voteForEntry(
 
     if (!result.success) return { success: false, error: result.error };
 
-    // Send notification on upvote (not on unvote)
+    // Send notification on upvote
     if (result.action === "voted" && result.entry_owner) {
         try {
             const { data: voter } = await supabase
@@ -309,7 +317,7 @@ export async function voteForEntry(
 }
 
 /**
- * Admin: Create a photo show.
+ * Create a photo show (now inserts into events).
  */
 export async function createPhotoShow(data: {
     title: string;
@@ -325,20 +333,26 @@ export async function createPhotoShow(data: {
 
     const admin = getAdminClient();
 
-    const { error } = await admin.from("photo_shows").insert({
-        title: data.title.trim(),
+    const { error } = await admin.from("events").insert({
+        name: data.title.trim(),
         description: data.description?.trim() || null,
-        theme: data.theme?.trim() || null,
-        end_at: data.endAt || null,
+        event_type: "photo_show",
+        show_status: "open",
+        show_theme: data.theme?.trim() || null,
+        starts_at: new Date().toISOString(),
+        ends_at: data.endAt || null,
+        is_virtual: true,
         created_by: user.id,
     });
 
     if (error) return { success: false, error: error.message };
+    revalidatePath("/shows");
+    revalidatePath("/community/events");
     return { success: true };
 }
 
 /**
- * Admin: Update show status.
+ * Update show status. If closing, calls close_virtual_show RPC.
  */
 export async function updateShowStatus(
     showId: string,
@@ -352,16 +366,31 @@ export async function updateShowStatus(
 
     const admin = getAdminClient();
 
-    const { error } = await admin.from("photo_shows")
-        .update({ status: newStatus })
-        .eq("id", showId);
+    if (newStatus === "closed") {
+        // Use atomic RPC to assign placings and auto-generate show_records
+        const { data, error } = await admin.rpc("close_virtual_show", {
+            p_event_id: showId,
+            p_user_id: user.id,
+        });
 
-    if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: error.message };
+
+        const result = data as { success: boolean; error?: string };
+        if (!result.success) return { success: false, error: result.error };
+    } else {
+        const { error } = await admin.from("events")
+            .update({ show_status: newStatus })
+            .eq("id", showId);
+        if (error) return { success: false, error: error.message };
+    }
+
+    revalidatePath("/shows");
+    revalidatePath(`/shows/${showId}`);
     return { success: true };
 }
 
 /**
- * Admin: Delete a show.
+ * Delete a show (now deletes from events).
  */
 export async function deleteShow(
     showId: string
@@ -374,13 +403,14 @@ export async function deleteShow(
 
     const admin = getAdminClient();
 
-    const { error } = await admin.from("photo_shows").delete().eq("id", showId);
+    const { error } = await admin.from("events").delete().eq("id", showId);
     if (error) return { success: false, error: error.message };
+    revalidatePath("/shows");
     return { success: true };
 }
 
 /**
- * Remove your own entry from a show.
+ * Withdraw your own entry from a show.
  */
 export async function withdrawEntry(
     entryId: string
@@ -389,9 +419,8 @@ export async function withdrawEntry(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not logged in." };
 
-    // Verify ownership
     const { data: entry } = await supabase
-        .from("show_entries")
+        .from("event_entries")
         .select("user_id")
         .eq("id", entryId)
         .single();
@@ -401,7 +430,7 @@ export async function withdrawEntry(
     }
 
     const { error } = await supabase
-        .from("show_entries")
+        .from("event_entries")
         .delete()
         .eq("id", entryId);
 
