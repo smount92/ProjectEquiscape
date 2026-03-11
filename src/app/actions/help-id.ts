@@ -63,8 +63,7 @@ export async function createIdRequest(formData: FormData): Promise<{ success: bo
 export async function createSuggestion(
     requestId: string,
     data: {
-        referenceReleaseId?: string;
-        artistResinId?: string;
+        catalogId?: string;
         freeText?: string;
     }
 ): Promise<{ success: boolean; error?: string }> {
@@ -73,16 +72,14 @@ export async function createSuggestion(
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
-        if (!data.referenceReleaseId && !data.artistResinId && !data.freeText) {
+        if (!data.catalogId && !data.freeText) {
             return { success: false, error: "Please provide a suggestion." };
         }
 
         const { error } = await supabase.from("id_suggestions").insert({
             request_id: requestId,
             user_id: user.id,
-            reference_release_id: data.referenceReleaseId || null,
-            artist_resin_id: data.artistResinId || null,
-            catalog_id: data.referenceReleaseId || data.artistResinId || null,
+            catalog_id: data.catalogId || null,
             free_text: data.freeText || null,
         });
 
@@ -161,28 +158,25 @@ export async function addIdentifiedHorse(
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
-        // Get the suggestion with reference data
+        // Get the suggestion with catalog item reference
         const { data: suggestion } = await supabase
             .from("id_suggestions")
             .select(`
-        id, reference_release_id, artist_resin_id, free_text,
-        reference_releases:reference_release_id(release_name, mold_id, reference_molds(mold_name, manufacturer)),
-        artist_resins:artist_resin_id(resin_name, sculptor_alias)
-      `)
+                id, catalog_id, free_text,
+                catalog_items:catalog_id(id, title, maker, item_type)
+            `)
             .eq("id", suggestionId)
             .single();
 
         if (!suggestion) return { success: false, error: "Suggestion not found." };
 
         // Build horse insert data
-        interface SuggestionWithRefs {
-            reference_release_id: string | null;
-            artist_resin_id: string | null;
+        interface SuggestionWithCatalog {
+            catalog_id: string | null;
             free_text: string | null;
-            reference_releases: { release_name: string; mold_id: string; reference_molds: { mold_name: string; manufacturer: string } | null } | null;
-            artist_resins: { resin_name: string; sculptor_alias: string } | null;
+            catalog_items: { id: string; title: string; maker: string; item_type: string } | null;
         }
-        const s = suggestion as unknown as SuggestionWithRefs;
+        const s = suggestion as unknown as SuggestionWithCatalog;
 
         let customName = "Identified Model";
         const horseInsert: Record<string, unknown> = {
@@ -193,17 +187,9 @@ export async function addIdentifiedHorse(
             trade_status: "Not for Sale",
         };
 
-        if (s.reference_release_id && s.reference_releases) {
-            customName = s.reference_releases.release_name;
-            horseInsert.release_id = s.reference_release_id;
-            horseInsert.catalog_id = s.reference_release_id;
-            if (s.reference_releases.mold_id) {
-                horseInsert.reference_mold_id = s.reference_releases.mold_id;
-            }
-        } else if (s.artist_resin_id && s.artist_resins) {
-            customName = s.artist_resins.resin_name;
-            horseInsert.artist_resin_id = s.artist_resin_id;
-            horseInsert.catalog_id = s.artist_resin_id;
+        if (s.catalog_id && s.catalog_items) {
+            customName = s.catalog_items.title;
+            horseInsert.catalog_id = s.catalog_id;
         } else if (s.free_text) {
             customName = s.free_text;
         }

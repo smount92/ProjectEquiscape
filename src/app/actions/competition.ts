@@ -44,6 +44,7 @@ export interface ShowStringEntry {
     horseId: string;
     horseName: string;
     className: string;
+    classId: string | null;
     division: string | null;
     timeSlot: string | null;
     notes: string | null;
@@ -305,6 +306,7 @@ export async function addShowStringEntry(data: {
     showStringId: string;
     horseId: string;
     className: string;
+    classId?: string;
     division?: string;
     timeSlot?: string;
     notes?: string;
@@ -327,6 +329,7 @@ export async function addShowStringEntry(data: {
         show_string_id: data.showStringId,
         horse_id: data.horseId,
         class_name: data.className,
+        class_id: data.classId || null,
         division: data.division || null,
         time_slot: data.timeSlot || null,
         notes: data.notes || null,
@@ -359,7 +362,7 @@ export async function getShowStringEntries(showStringId: string): Promise<ShowSt
 
     const { data: entries } = await supabase
         .from("show_string_entries")
-        .select("id, show_string_id, horse_id, class_name, division, time_slot, notes")
+        .select("id, show_string_id, horse_id, class_name, class_id, division, time_slot, notes")
         .eq("show_string_id", showStringId)
         .order("created_at", { ascending: true });
 
@@ -377,12 +380,26 @@ export async function getShowStringEntries(showStringId: string): Promise<ShowSt
         nameMap.set(h.id, h.custom_name)
     );
 
+    // If any entries have class_id, fetch class names
+    const classIds = (entries as { class_id: string | null }[]).filter(e => e.class_id).map(e => e.class_id as string);
+    const classNameMap = new Map<string, string>();
+    if (classIds.length > 0) {
+        const { data: classes } = await supabase
+            .from("event_classes")
+            .select("id, name, class_number")
+            .in("id", classIds);
+        for (const c of (classes || []) as { id: string; name: string; class_number: string | null }[]) {
+            classNameMap.set(c.id, c.class_number ? `${c.class_number}: ${c.name}` : c.name);
+        }
+    }
+
     return (entries as Record<string, unknown>[]).map(e => ({
         id: e.id as string,
         showStringId: e.show_string_id as string,
         horseId: e.horse_id as string,
         horseName: nameMap.get(e.horse_id as string) || "Unknown Horse",
-        className: e.class_name as string,
+        className: e.class_id ? (classNameMap.get(e.class_id as string) || e.class_name as string) : e.class_name as string,
+        classId: e.class_id as string | null,
         division: e.division as string | null,
         timeSlot: e.time_slot as string | null,
         notes: e.notes as string | null,
@@ -418,14 +435,14 @@ export async function convertShowStringToResults(
     // Get all entries for this show string
     const { data: entries } = await supabase
         .from("show_string_entries")
-        .select("id, horse_id, class_name, division")
+        .select("id, horse_id, class_name, class_id, division")
         .eq("show_string_id", showStringId);
 
     if (!entries || entries.length === 0) return { success: false, error: "No entries in this show string." };
 
-    const entryMap = new Map<string, { horse_id: string; class_name: string; division: string | null }>();
-    for (const e of entries as { id: string; horse_id: string; class_name: string; division: string | null }[]) {
-        entryMap.set(e.id, { horse_id: e.horse_id, class_name: e.class_name, division: e.division });
+    const entryMap = new Map<string, { horse_id: string; class_name: string; class_id: string | null; division: string | null }>();
+    for (const e of entries as { id: string; horse_id: string; class_name: string; class_id: string | null; division: string | null }[]) {
+        entryMap.set(e.id, { horse_id: e.horse_id, class_name: e.class_name, class_id: e.class_id, division: e.division });
     }
 
     const showDate = ss.show_date || new Date().toISOString().split("T")[0];
@@ -519,4 +536,309 @@ export async function deleteShowString(showStringId: string): Promise<{ success:
 
     revalidatePath("/shows/planner");
     return { success: true };
+}
+
+// ── Division & Class Management ──
+
+export interface Division {
+    id: string;
+    eventId: string;
+    name: string;
+    description: string | null;
+    sortOrder: number;
+    classes: DivisionClass[];
+}
+
+export interface DivisionClass {
+    id: string;
+    divisionId: string;
+    name: string;
+    classNumber: string | null;
+    description: string | null;
+    isNanQualifying: boolean;
+    maxEntries: number | null;
+    sortOrder: number;
+    entryCount?: number;
+}
+
+/** Get all divisions + their classes for an event, ordered by sort_order */
+export async function getEventDivisions(eventId: string): Promise<Division[]> {
+    const supabase = await createClient();
+
+    const { data: divisions } = await supabase
+        .from("event_divisions")
+        .select("id, event_id, name, description, sort_order")
+        .eq("event_id", eventId)
+        .order("sort_order", { ascending: true });
+
+    if (!divisions || divisions.length === 0) return [];
+
+    const divisionIds = (divisions as { id: string }[]).map(d => d.id);
+
+    const { data: classes } = await supabase
+        .from("event_classes")
+        .select("id, division_id, name, class_number, description, is_nan_qualifying, max_entries, sort_order")
+        .in("division_id", divisionIds)
+        .order("sort_order", { ascending: true });
+
+    // Get entry counts per class
+    const classIds = ((classes || []) as { id: string }[]).map(c => c.id);
+    let entryCountMap = new Map<string, number>();
+    if (classIds.length > 0) {
+        const { data: entries } = await supabase
+            .from("event_entries")
+            .select("class_id")
+            .in("class_id", classIds);
+        for (const e of (entries || []) as { class_id: string }[]) {
+            entryCountMap.set(e.class_id, (entryCountMap.get(e.class_id) || 0) + 1);
+        }
+    }
+
+    const classMap = new Map<string, DivisionClass[]>();
+    for (const c of (classes || []) as Record<string, unknown>[]) {
+        const divId = c.division_id as string;
+        if (!classMap.has(divId)) classMap.set(divId, []);
+        classMap.get(divId)!.push({
+            id: c.id as string,
+            divisionId: divId,
+            name: c.name as string,
+            classNumber: c.class_number as string | null,
+            description: c.description as string | null,
+            isNanQualifying: c.is_nan_qualifying as boolean,
+            maxEntries: c.max_entries as number | null,
+            sortOrder: c.sort_order as number,
+            entryCount: entryCountMap.get(c.id as string) || 0,
+        });
+    }
+
+    return (divisions as Record<string, unknown>[]).map(d => ({
+        id: d.id as string,
+        eventId: d.event_id as string,
+        name: d.name as string,
+        description: d.description as string | null,
+        sortOrder: d.sort_order as number,
+        classes: classMap.get(d.id as string) || [],
+    }));
+}
+
+/** Create a division in an event */
+export async function createDivision(data: {
+    eventId: string;
+    name: string;
+    description?: string;
+    sortOrder?: number;
+}): Promise<{ success: boolean; id?: string; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify event ownership
+    const { data: event } = await supabase
+        .from("events")
+        .select("id")
+        .eq("id", data.eventId)
+        .eq("created_by", user.id)
+        .single();
+    if (!event) return { success: false, error: "Event not found or not owned by you." };
+
+    const { data: result, error } = await supabase
+        .from("event_divisions")
+        .insert({
+            event_id: data.eventId,
+            name: data.name.trim(),
+            description: data.description?.trim() || null,
+            sort_order: data.sortOrder ?? 0,
+        })
+        .select("id")
+        .single();
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath(`/community/events/${data.eventId}`);
+    return { success: true, id: (result as { id: string }).id };
+}
+
+/** Update a division */
+export async function updateDivision(divisionId: string, data: {
+    name?: string;
+    description?: string;
+    sortOrder?: number;
+}): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    const update: Record<string, unknown> = {};
+    if (data.name !== undefined) update.name = data.name.trim();
+    if (data.description !== undefined) update.description = data.description.trim() || null;
+    if (data.sortOrder !== undefined) update.sort_order = data.sortOrder;
+
+    const { error } = await supabase
+        .from("event_divisions")
+        .update(update)
+        .eq("id", divisionId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/** Delete a division (cascades to classes and entries) */
+export async function deleteDivision(divisionId: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("event_divisions")
+        .delete()
+        .eq("id", divisionId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/** Create a class within a division */
+export async function createClass(data: {
+    divisionId: string;
+    name: string;
+    classNumber?: string;
+    description?: string;
+    isNanQualifying?: boolean;
+    maxEntries?: number;
+    sortOrder?: number;
+}): Promise<{ success: boolean; id?: string; error?: string }> {
+    const supabase = await createClient();
+
+    const { data: result, error } = await supabase
+        .from("event_classes")
+        .insert({
+            division_id: data.divisionId,
+            name: data.name.trim(),
+            class_number: data.classNumber?.trim() || null,
+            description: data.description?.trim() || null,
+            is_nan_qualifying: data.isNanQualifying || false,
+            max_entries: data.maxEntries || null,
+            sort_order: data.sortOrder ?? 0,
+        })
+        .select("id")
+        .single();
+
+    if (error) return { success: false, error: error.message };
+    return { success: true, id: (result as { id: string }).id };
+}
+
+/** Update a class */
+export async function updateClass(classId: string, data: {
+    name?: string;
+    classNumber?: string;
+    description?: string;
+    isNanQualifying?: boolean;
+    maxEntries?: number;
+    sortOrder?: number;
+}): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    const update: Record<string, unknown> = {};
+    if (data.name !== undefined) update.name = data.name.trim();
+    if (data.classNumber !== undefined) update.class_number = data.classNumber.trim() || null;
+    if (data.description !== undefined) update.description = data.description.trim() || null;
+    if (data.isNanQualifying !== undefined) update.is_nan_qualifying = data.isNanQualifying;
+    if (data.maxEntries !== undefined) update.max_entries = data.maxEntries || null;
+    if (data.sortOrder !== undefined) update.sort_order = data.sortOrder;
+
+    const { error } = await supabase
+        .from("event_classes")
+        .update(update)
+        .eq("id", classId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/** Delete a class */
+export async function deleteClass(classId: string): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("event_classes")
+        .delete()
+        .eq("id", classId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/** Bulk reorder divisions by array position */
+export async function reorderDivisions(divisionIds: string[]): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    for (let i = 0; i < divisionIds.length; i++) {
+        const { error } = await supabase
+            .from("event_divisions")
+            .update({ sort_order: i })
+            .eq("id", divisionIds[i]);
+        if (error) return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
+
+/** Bulk reorder classes by array position */
+export async function reorderClasses(classIds: string[]): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+
+    for (let i = 0; i < classIds.length; i++) {
+        const { error } = await supabase
+            .from("event_classes")
+            .update({ sort_order: i })
+            .eq("id", classIds[i]);
+        if (error) return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
+
+/** Copy division/class tree from another event */
+export async function copyDivisionsFromEvent(
+    sourceEventId: string,
+    targetEventId: string
+): Promise<{ success: boolean; count?: number; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify target event ownership
+    const { data: event } = await supabase
+        .from("events")
+        .select("id")
+        .eq("id", targetEventId)
+        .eq("created_by", user.id)
+        .single();
+    if (!event) return { success: false, error: "Target event not found or not owned by you." };
+
+    // Get source tree
+    const sourceDivisions = await getEventDivisions(sourceEventId);
+    if (sourceDivisions.length === 0) return { success: false, error: "Source event has no divisions." };
+
+    let classCount = 0;
+    for (const div of sourceDivisions) {
+        const divResult = await createDivision({
+            eventId: targetEventId,
+            name: div.name,
+            description: div.description || undefined,
+            sortOrder: div.sortOrder,
+        });
+        if (!divResult.success || !divResult.id) continue;
+
+        for (const cls of div.classes) {
+            await createClass({
+                divisionId: divResult.id,
+                name: cls.name,
+                classNumber: cls.classNumber || undefined,
+                description: cls.description || undefined,
+                isNanQualifying: cls.isNanQualifying,
+                maxEntries: cls.maxEntries || undefined,
+                sortOrder: cls.sortOrder,
+            });
+            classCount++;
+        }
+    }
+
+    revalidatePath(`/community/events/${targetEventId}`);
+    return { success: true, count: classCount };
 }

@@ -13,9 +13,7 @@ interface CollectionHorse {
   condition_grade: string;
   created_at: string;
   trade_status: string;
-  reference_molds: { mold_name: string; manufacturer: string } | null;
-  artist_resins: { resin_name: string; sculptor_alias: string } | null;
-  reference_releases: { release_name: string; model_number: string | null } | null;
+  catalog_items: { title: string; maker: string; item_type: string } | null;
   horse_images: { image_url: string; angle_profile: string }[];
 }
 
@@ -86,9 +84,7 @@ export default async function CollectionPage({
     .select(
       `
       id, custom_name, finish_type, condition_grade, created_at, trade_status,
-      reference_molds(mold_name, manufacturer),
-      artist_resins(resin_name, sculptor_alias),
-      reference_releases(release_name, model_number),
+      catalog_items:catalog_id(title, maker, item_type),
       horse_images(image_url, angle_profile)
     `
     )
@@ -135,15 +131,11 @@ export default async function CollectionPage({
     const imageUrl = thumb?.image_url || firstImage?.image_url;
     const signedUrl = imageUrl ? signedUrlMap.get(imageUrl) : undefined;
 
-    const refName = horse.reference_molds
-      ? `${horse.reference_molds.manufacturer} ${horse.reference_molds.mold_name}`
-      : horse.artist_resins
-        ? `${horse.artist_resins.sculptor_alias} — ${horse.artist_resins.resin_name}`
-        : "Unlisted Mold";
+    const refName = horse.catalog_items
+      ? `${horse.catalog_items.maker} ${horse.catalog_items.title}`
+      : "Unlisted Mold";
 
-    const releaseLine = horse.reference_releases
-      ? `${horse.reference_releases.release_name}${horse.reference_releases.model_number ? ` (#${horse.reference_releases.model_number})` : ""}`
-      : null;
+    const releaseLine = null; // Now unified in catalog_items
 
     return {
       id: horse.id,

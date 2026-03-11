@@ -10,12 +10,7 @@ interface ExportHorse {
     trade_status: string | null;
     listing_price: number | null;
     created_at: string;
-    reference_molds: { mold_name: string; manufacturer: string } | null;
-    reference_releases: {
-        release_name: string;
-        model_number: string | null;
-        color_description: string | null;
-    } | null;
+    catalog_items: { title: string; maker: string; item_type: string; attributes: Record<string, unknown> } | null;
     user_collections: { name: string } | null;
     financial_vault: {
         purchase_price: number | null;
@@ -52,8 +47,7 @@ export async function GET() {
         .select(
             `
       id, custom_name, finish_type, condition_grade, sculptor, trade_status, listing_price, created_at,
-      reference_molds(mold_name, manufacturer),
-      reference_releases(release_name, model_number, color_description),
+      catalog_items:catalog_id(title, maker, item_type, attributes),
       user_collections(name),
       financial_vault(purchase_price, estimated_current_value, insurance_notes)
     `
@@ -96,11 +90,11 @@ export async function GET() {
 
         return [
             escapeCSV(horse.custom_name),
-            escapeCSV(horse.reference_molds?.mold_name),
-            escapeCSV(horse.reference_molds?.manufacturer),
-            escapeCSV(horse.reference_releases?.release_name),
-            escapeCSV(horse.reference_releases?.model_number),
-            escapeCSV(horse.reference_releases?.color_description),
+            escapeCSV(horse.catalog_items?.title),
+            escapeCSV(horse.catalog_items?.maker),
+            escapeCSV(horse.catalog_items?.item_type === "plastic_release" ? horse.catalog_items.title : ""),
+            escapeCSV(horse.catalog_items?.attributes?.model_number as string | null | undefined),
+            escapeCSV(horse.catalog_items?.attributes?.color_description as string | null | undefined),
             escapeCSV(horse.condition_grade),
             escapeCSV(horse.finish_type),
             escapeCSV(horse.sculptor),

@@ -353,9 +353,7 @@ export async function getCoaData(horseId: string): Promise<{
             .from("user_horses")
             .select(`
                 id, owner_id, custom_name, finish_type, condition_grade,
-                reference_molds(mold_name, manufacturer),
-                artist_resins(resin_name, sculptor_alias),
-                reference_releases(release_name, model_number),
+                catalog_items:catalog_id(title, maker, item_type),
                 horse_images(image_url, angle_profile)
             `)
             .eq("id", horseId)
@@ -365,9 +363,7 @@ export async function getCoaData(horseId: string): Promise<{
 
         interface HorseRow {
             id: string; owner_id: string; custom_name: string; finish_type: string; condition_grade: string;
-            reference_molds: { mold_name: string; manufacturer: string } | null;
-            artist_resins: { resin_name: string; sculptor_alias: string } | null;
-            reference_releases: { release_name: string; model_number: string | null } | null;
+            catalog_items: { title: string; maker: string; item_type: string } | null;
             horse_images: { image_url: string; angle_profile: string }[];
         }
         const h = horse as unknown as HorseRow;
@@ -394,14 +390,8 @@ export async function getCoaData(horseId: string): Promise<{
 
         // Build reference string
         let reference = "Unlisted";
-        if (h.reference_molds) {
-            reference = `${h.reference_molds.manufacturer} ${h.reference_molds.mold_name}`;
-            if (h.reference_releases) {
-                reference += ` — ${h.reference_releases.release_name}`;
-                if (h.reference_releases.model_number) reference += ` (#${h.reference_releases.model_number})`;
-            }
-        } else if (h.artist_resins) {
-            reference = `${h.artist_resins.sculptor_alias} — ${h.artist_resins.resin_name}`;
+        if (h.catalog_items) {
+            reference = `${h.catalog_items.maker} ${h.catalog_items.title}`;
         }
 
         // Counts

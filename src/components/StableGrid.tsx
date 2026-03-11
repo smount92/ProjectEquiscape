@@ -18,6 +18,7 @@ interface HorseCardData {
     tradeStatus: string;
     moldName: string | null;
     releaseName: string | null;
+    assetCategory?: string;
 }
 
 function getFinishBadgeClass(finishType: string): string {
@@ -146,9 +147,16 @@ export default function StableGrid({
                                         <span>No photo</span>
                                     </div>
                                 )}
-                                <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
-                                    {horse.finishType}
-                                </span>
+                                {horse.finishType && (
+                                    <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
+                                        {horse.finishType}
+                                    </span>
+                                )}
+                                {horse.assetCategory && horse.assetCategory !== "model" && (
+                                    <span className="horse-card-badge category-badge" style={{ background: "rgba(124, 109, 240, 0.85)", color: "#fff" }}>
+                                        {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
+                                    </span>
+                                )}
                                 {horse.tradeStatus === "For Sale" && (
                                     <span className="trade-badge trade-for-sale">💲 For Sale</span>
                                 )}
@@ -170,7 +178,7 @@ export default function StableGrid({
                                     </div>
                                 )}
                                 <div className="horse-card-meta">
-                                    <span>{horse.conditionGrade}</span>
+                                    {horse.conditionGrade && <span>{horse.conditionGrade}</span>}
                                     <span>{formatDate(horse.createdAt)}</span>
                                 </div>
                                 {horse.collectionName && (

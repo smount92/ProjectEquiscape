@@ -118,17 +118,34 @@ export default async function InboxPage() {
         }
     }
 
-    // Check which conversations the user has rated
+    // Check which conversations the user has rated (via reviews on linked transactions)
     const ratedConvoIds = new Set<string>();
     if (convoIds.length > 0) {
-        const { data: ratings } = await supabase
-            .from("user_ratings")
-            .select("conversation_id")
-            .eq("reviewer_id", user.id)
-            .in("conversation_id", convoIds);
-        ratings?.forEach((r: { conversation_id: string }) => {
-            ratedConvoIds.add(r.conversation_id);
-        });
+        // Look up transactions linked to these conversations
+        const { data: txns } = await supabase
+            .from("transactions")
+            .select("id, metadata")
+            .or(
+                convoIds.map(cid => `metadata->>conversation_id.eq.${cid}`).join(",")
+            );
+
+        if (txns && txns.length > 0) {
+            const txnIds = (txns as { id: string; metadata: Record<string, unknown> }[]).map(t => t.id);
+            const { data: reviews } = await supabase
+                .from("reviews")
+                .select("transaction_id")
+                .eq("reviewer_id", user.id)
+                .in("transaction_id", txnIds);
+
+            if (reviews) {
+                const reviewedTxnIds = new Set(reviews.map((r: { transaction_id: string }) => r.transaction_id));
+                for (const txn of txns as { id: string; metadata: Record<string, unknown> }[]) {
+                    if (reviewedTxnIds.has(txn.id) && txn.metadata?.conversation_id) {
+                        ratedConvoIds.add(txn.metadata.conversation_id as string);
+                    }
+                }
+            }
+        }
     }
 
     // Build display data

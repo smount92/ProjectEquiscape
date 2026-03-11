@@ -27,7 +27,7 @@ interface CommunityCardData {
     moldName: string | null;
     releaseName: string | null;
     refMoldId: string | null;
-    refReleaseId: string | null;
+    catalogId: string | null;
     favoriteCount: number;
     isFavorited: boolean;
     scale: string | null;
@@ -262,7 +262,7 @@ export default function ShowRingGrid({
                                             initialIsFavorited={horse.isFavorited}
                                             initialCount={horse.favoriteCount}
                                         />
-                                        <WishlistButton moldId={horse.refMoldId} releaseId={horse.refReleaseId} />
+                                        <WishlistButton catalogId={horse.catalogId} />
                                         <span className="community-card-time">{timeAgo(horse.createdAt)}</span>
                                     </div>
                                 </div>

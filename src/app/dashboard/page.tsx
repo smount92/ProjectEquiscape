@@ -22,9 +22,8 @@ interface HorseWithDetails {
     collection_id: string | null;
     sculptor: string | null;
     trade_status: string;
-    reference_molds: { mold_name: string; manufacturer: string } | null;
-    artist_resins: { resin_name: string; sculptor_alias: string } | null;
-    reference_releases: { release_name: string; model_number: string | null } | null;
+    asset_category: string;
+    catalog_items: { title: string; maker: string; item_type: string } | null;
     horse_images: { image_url: string; angle_profile: string }[];
 }
 
@@ -48,10 +47,8 @@ export default async function DashboardPage() {
     const [profileResult, horsesResult, collectionsResult, showRecordsResult, convosResult] = await Promise.all([
         supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>(),
         supabase.from("user_horses").select(`
-            id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor, trade_status,
-            reference_molds(mold_name, manufacturer),
-            artist_resins(resin_name, sculptor_alias),
-            reference_releases(release_name, model_number),
+            id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor, trade_status, asset_category,
+            catalog_items:catalog_id(title, maker, item_type),
             horse_images(image_url, angle_profile)
         `).eq("owner_id", user.id).order("created_at", { ascending: false }),
         supabase.from("user_collections").select("id, name, description").eq("user_id", user.id).order("name"),
@@ -126,15 +123,11 @@ export default async function DashboardPage() {
         const imageUrl = thumb?.image_url || firstImage?.image_url;
         const signedUrl = imageUrl ? signedUrlMap.get(imageUrl) : undefined;
 
-        const refName = horse.reference_molds
-            ? `${horse.reference_molds.manufacturer} ${horse.reference_molds.mold_name}`
-            : horse.artist_resins
-                ? `${horse.artist_resins.sculptor_alias} — ${horse.artist_resins.resin_name}`
-                : "Unlisted Mold";
+        const refName = horse.catalog_items
+            ? `${horse.catalog_items.maker} ${horse.catalog_items.title}`
+            : "Unlisted Mold";
 
-        const releaseLine = horse.reference_releases
-            ? `${horse.reference_releases.release_name}${horse.reference_releases.model_number ? ` (#${horse.reference_releases.model_number})` : ""}`
-            : null;
+        const releaseLine = null; // Now unified in catalog_items
 
         return {
             id: horse.id,
@@ -148,9 +141,10 @@ export default async function DashboardPage() {
             collectionName: horse.collection_id ? collectionNameMap.get(horse.collection_id) || null : null,
             sculptor: horse.sculptor || null,
             tradeStatus: horse.trade_status || "Not for Sale",
-            // Search fields from reference data
-            moldName: horse.reference_molds?.mold_name || null,
-            releaseName: horse.reference_releases?.release_name || null,
+            assetCategory: horse.asset_category || "model",
+            // Search fields from catalog data
+            moldName: horse.catalog_items?.title || null,
+            releaseName: horse.catalog_items?.title || null,
         };
     });
 

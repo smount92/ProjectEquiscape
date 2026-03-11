@@ -10,15 +10,14 @@ import {
   createImagePreviewUrl,
   revokeImagePreviewUrl,
 } from "@/lib/utils/imageCompression";
-import type { AngleProfile, FinishType } from "@/lib/types/database";
+import type { AngleProfile, FinishType, AssetCategory } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
-import { getReleasesForMoldAction } from "@/app/actions/reference";
+import type { CatalogItem } from "@/app/actions/reference";
 import CollectionPicker from "@/components/CollectionPicker";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { initializeHoofprint } from "@/app/actions/hoofprint";
 import { createHorseRecord, finalizeHorseImages } from "@/app/actions/horse";
 import { submitSuggestion } from "@/app/actions/suggestions";
-import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -93,11 +92,8 @@ export default function AddHorsePage() {
   const toastIdRef = useRef(0);
 
   // Step 2 (index 1): Reference
-  const [selectedMoldId, setSelectedMoldId] = useState<string | null>(null);
-  const [selectedResinId, setSelectedResinId] = useState<string | null>(null);
-  const [selectedReleaseId, setSelectedReleaseId] = useState<string | null>(null);
-  const [releases, setReleases] = useState<ReleaseDetail[]>([]);
-  const [loadingReleases, setLoadingReleases] = useState(false);
+  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
+  const [selectedCatalogItem, setSelectedCatalogItem] = useState<CatalogItem | null>(null);
   const [nameAutoFilled, setNameAutoFilled] = useState(false);
   const [aiSearchQuery, setAiSearchQuery] = useState<string | undefined>(undefined);
 
@@ -115,6 +111,9 @@ export default function AddHorsePage() {
   const [listingPrice, setListingPrice] = useState("");
   const [marketplaceNotes, setMarketplaceNotes] = useState("");
   const [lifeStage, setLifeStage] = useState("completed");
+  const [assetCategory, setAssetCategory] = useState<AssetCategory>("model");
+
+  const isModel = assetCategory === "model";
 
   // Step 4 (index 3): Financial Vault
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -122,45 +121,14 @@ export default function AddHorsePage() {
   const [estimatedValue, setEstimatedValue] = useState("");
   const [insuranceNotes, setInsuranceNotes] = useState("");
 
-  // ---- Fetch releases when a mold is selected (cascading dropdown) ----
-
-  // Fetch releases when a mold is selected (cascading dropdown)
+  // Auto-fill custom_name when a catalog item is selected
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!selectedMoldId) {
-      setReleases([]);
-      return;
+    if (selectedCatalogItem && (!customName.trim() || nameAutoFilled)) {
+      setCustomName(selectedCatalogItem.title);
+      setNameAutoFilled(true);
     }
-
-    let cancelled = false;
-    const fetchReleases = async () => {
-      setLoadingReleases(true);
-      try {
-        const data = await getReleasesForMoldAction(selectedMoldId);
-        if (!cancelled) {
-          setReleases((data as ReleaseDetail[]) ?? []);
-        }
-      } catch (err) {
-        console.error("Failed to load releases:", err);
-      } finally {
-        if (!cancelled) setLoadingReleases(false);
-      }
-    };
-
-    fetchReleases();
-    return () => { cancelled = true; };
-  }, [selectedMoldId]);
-
-  // Auto-fill custom_name when a release is selected
-  useEffect(() => {
-    if (selectedReleaseId) {
-      const release = releases.find((r) => r.id === selectedReleaseId);
-      if (release && (!customName.trim() || nameAutoFilled)) {
-        setCustomName(release.release_name);
-        setNameAutoFilled(true);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedReleaseId]);
+  }, [selectedCatalogItem]);
 
   // Clean up preview URLs on unmount
   useEffect(() => {
@@ -226,22 +194,17 @@ export default function AddHorsePage() {
       setCurrentStep(1); // Reference is step index 1
       window.scrollTo({ top: 0, behavior: "smooth" });
 
-      // Give the search a moment to execute, then try to auto-select the mold
+      // Give the search a moment to execute, then try to auto-select from catalog
       setTimeout(async () => {
-        const { data: matchedMolds } = await supabase
-          .from("reference_molds")
-          .select("id, manufacturer, mold_name, scale, release_year_start")
-          .ilike("mold_name", `%${result.mold_name}%`)
-          .limit(10);
-
-        if (matchedMolds && matchedMolds.length > 0) {
-          const exactMatch = matchedMolds.find(
-            (m: { id: string; mold_name: string }) =>
-              m.mold_name.toLowerCase() === result.mold_name.toLowerCase()
+        const { searchCatalogAction } = await import("@/app/actions/reference");
+        const items = await searchCatalogAction(result.mold_name);
+        if (items.length > 0) {
+          const exactMatch = items.find(
+            (m) => m.title.toLowerCase() === result.mold_name.toLowerCase()
           );
-          const bestMatch = exactMatch || matchedMolds[0];
-          setSelectedMoldId(bestMatch.id);
-          setSelectedResinId(null);
+          const bestMatch = exactMatch || items[0];
+          setSelectedCatalogId(bestMatch.id);
+          setSelectedCatalogItem(bestMatch);
         }
       }, 600);
     } catch (err) {
@@ -250,7 +213,7 @@ export default function AddHorsePage() {
     } finally {
       setAiDetecting(false);
     }
-  }, [imageSlots, showToast, supabase]);
+  }, [imageSlots, showToast]);
 
   // ---- Handlers ----
 
@@ -289,7 +252,7 @@ export default function AddHorsePage() {
       case 1:
         return true; // Reference is optional — users can use "Custom Entry" escape hatch
       case 2:
-        return customName.trim().length > 0 && finishType !== "" && conditionGrade !== "";
+        return customName.trim().length > 0 && (isModel ? finishType !== "" && conditionGrade !== "" : true);
       case 3:
         return true; // Financial vault is optional
       default:
@@ -325,25 +288,24 @@ export default function AddHorsePage() {
       // Step 1: Create DB record (no files through server)
       const result = await createHorseRecord({
         customName: customName.trim(),
-        finishType,
-        conditionGrade: conditionGrade || undefined,
+        finishType: isModel ? finishType : "",
+        conditionGrade: isModel ? conditionGrade || undefined : undefined,
         isPublic,
         tradeStatus: tradeStatus || undefined,
-        lifeStage: lifeStage || undefined,
-        selectedMoldId: selectedMoldId || undefined,
-        selectedResinId: selectedResinId || undefined,
-        selectedReleaseId: selectedReleaseId || undefined,
+        lifeStage: isModel ? lifeStage || undefined : undefined,
+        catalogId: selectedCatalogId || undefined,
         selectedCollectionId: selectedCollectionId || undefined,
         sculptor: sculptor.trim() || undefined,
         finishingArtist: finishingArtist.trim() || undefined,
-        editionNumber: editionNumber ? parseInt(editionNumber) : undefined,
-        editionSize: editionSize ? parseInt(editionSize) : undefined,
+        editionNumber: isModel && editionNumber ? parseInt(editionNumber) : undefined,
+        editionSize: isModel && editionSize ? parseInt(editionSize) : undefined,
         listingPrice: (tradeStatus !== "Not for Sale" && listingPrice) ? parseFloat(listingPrice) : undefined,
         marketplaceNotes: (tradeStatus !== "Not for Sale" && marketplaceNotes.trim()) ? marketplaceNotes.trim() : undefined,
         purchasePrice: purchasePrice ? parseFloat(purchasePrice) : undefined,
         purchaseDate: purchaseDate || undefined,
         estimatedValue: estimatedValue ? parseFloat(estimatedValue) : undefined,
         insuranceNotes: insuranceNotes.trim() || undefined,
+        assetCategory,
       });
 
       if (!result.success || !result.horseId) {
@@ -395,8 +357,7 @@ export default function AddHorsePage() {
           horseName: customName.trim(),
           finishType: finishType as string,
           tradeStatus: tradeStatus as string,
-          moldId: selectedMoldId || null,
-          releaseId: selectedReleaseId || null,
+          catalogId: selectedCatalogId || null,
         });
       }
 
@@ -429,7 +390,7 @@ export default function AddHorsePage() {
             <span className="text-gradient">{savedHorseName}</span> Added!
           </h2>
           <p>
-            Your model has been successfully cataloged in your Digital Stable.
+            Your {assetCategory === "model" ? "model" : assetCategory} has been successfully cataloged in your Digital Stable.
           </p>
           <div className="success-actions">
             <Link href="/add-horse" className="btn btn-primary" onClick={() => window.location.reload()}>
@@ -451,7 +412,31 @@ export default function AddHorsePage() {
         <h1>
           Add to <span className="text-gradient">Stable</span>
         </h1>
-        <p>Catalog a new model horse in your digital collection</p>
+        <p>{isModel ? "Catalog a new model horse in your digital collection" :
+          assetCategory === "tack" ? "Catalog tack & gear for your collection" :
+            assetCategory === "prop" ? "Add a prop to your collection" :
+              "Document a diorama setup"}</p>
+      </div>
+
+      {/* Asset Category Toggle */}
+      <div className="asset-category-toggle animate-fade-in-up">
+        {([
+          { value: "model" as const, icon: "🐎", label: "Model Horse" },
+          { value: "tack" as const, icon: "🏇", label: "Tack & Gear" },
+          { value: "prop" as const, icon: "🌲", label: "Prop" },
+          { value: "diorama" as const, icon: "🎭", label: "Diorama" },
+        ]).map((cat) => (
+          <button
+            key={cat.value}
+            type="button"
+            className={`category-card ${assetCategory === cat.value ? "active" : ""}`}
+            onClick={() => setAssetCategory(cat.value)}
+            id={`category-${cat.value}`}
+          >
+            <span className="category-icon">{cat.icon}</span>
+            <span className="category-label">{cat.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Step Indicator */}
@@ -677,29 +662,24 @@ export default function AddHorsePage() {
           </div>
 
           <UnifiedReferenceSearch
-            selectedMoldId={selectedMoldId}
-            selectedResinId={selectedResinId}
-            selectedReleaseId={selectedReleaseId}
-            onSelectionChange={(sel) => {
-              setSelectedMoldId(sel.moldId);
-              setSelectedResinId(sel.resinId);
-              setSelectedReleaseId(sel.releaseId);
-              // Auto-fill sculptor when a resin is selected
-              if (sel.sculptorAlias && !sculptor.trim()) {
-                setSculptor(sel.sculptorAlias);
+            selectedCatalogId={selectedCatalogId}
+            onCatalogSelect={(id, item) => {
+              setSelectedCatalogId(id);
+              setSelectedCatalogItem(item);
+              // Auto-fill sculptor for resins
+              if (item?.itemType === "artist_resin" && item.maker && !sculptor.trim()) {
+                setSculptor(item.maker);
               }
             }}
             onCustomEntry={(searchTerm) => {
               // Guard: confirm if reference was already selected
-              if (selectedMoldId || selectedResinId) {
+              if (selectedCatalogId) {
                 if (!confirm("This will clear your current reference link. Continue?")) {
                   return;
                 }
               }
-              // Clear any existing reference selections
-              setSelectedMoldId(null);
-              setSelectedResinId(null);
-              setSelectedReleaseId(null);
+              setSelectedCatalogId(null);
+              setSelectedCatalogItem(null);
               // Drop the search term into custom_name
               if (!customName.trim() || nameAutoFilled) {
                 setCustomName(searchTerm);
@@ -727,15 +707,6 @@ export default function AddHorsePage() {
                 </div>
               ) : undefined
             }
-            releases={releases}
-            loadingReleases={loadingReleases}
-            releaseHint={
-              selectedReleaseId ? (
-                <span className="form-hint" style={{ marginTop: "var(--space-xs)", display: "block", color: "var(--color-accent-primary)" }}>
-                  ✨ This will auto-fill the Custom Name in the Identity step
-                </span>
-              ) : undefined
-            }
           />
         </div>
 
@@ -749,7 +720,7 @@ export default function AddHorsePage() {
             disabled={!canProceedStep(1)}
             id="step-2-next"
           >
-            {selectedMoldId || selectedResinId ? "Next: Identity →" : "Skip → No Reference"}
+            {selectedCatalogId ? "Next: Identity →" : "Skip → No Reference"}
           </button>
         </div>
       </div>
@@ -762,18 +733,17 @@ export default function AddHorsePage() {
           <div className="step-card">
 
             {/* Reference summary badge */}
-            {(selectedMoldId || selectedResinId) && (
+            {selectedCatalogItem && (
               <div className="getting-started-tip" style={{ marginBottom: "var(--space-lg)" }}>
-                🔗 Linked to: <strong>{selectedMoldId ? "Mold" : "Resin"} selected</strong>
-                {selectedReleaseId && <> · Release selected</>}
+                🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
               </div>
             )}
 
             <div className="step-card-header">
               <div className="step-card-icon">🏷️</div>
               <div>
-                <h2>Model Identity</h2>
-                <p>Give your model a name and describe its characteristics</p>
+                <h2>{isModel ? "Model Identity" : `${assetCategory.charAt(0).toUpperCase() + assetCategory.slice(1)} Details`}</h2>
+                <p>{isModel ? "Give your model a name and describe its characteristics" : `Name and describe your ${assetCategory}`}</p>
               </div>
             </div>
 
@@ -858,68 +828,77 @@ export default function AddHorsePage() {
               <span className="form-hint">
                 e.g., &quot;3 of 50&quot; for limited edition runs.
               </span>
-            </div>            <div className="form-group">
-              <label htmlFor="finish-type" className="form-label">
-                Finish Type *
-              </label>
-              <select
-                id="finish-type"
-                className="form-select"
-                value={finishType}
-                onChange={(e) => {
-                  setFinishType(e.target.value as FinishType);
-                  // Reset reference selection when finish type changes
-                  setSelectedMoldId(null);
-                  setSelectedResinId(null);
-                  setSelectedReleaseId(null);
-                }}
-              >
-                <option value="">Select finish type…</option>
-                <option value="OF">OF (Original Finish)</option>
-                <option value="Custom">Custom (Repaint / Body Mod)</option>
-                <option value="Artist Resin">Artist Resin</option>
-              </select>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="condition-grade" className="form-label">
-                Condition Grade *
-              </label>
-              <select
-                id="condition-grade"
-                className="form-select"
-                value={conditionGrade}
-                onChange={(e) => setConditionGrade(e.target.value)}
-              >
-                <option value="">Select condition…</option>
-                {CONDITION_GRADES.map((grade) => (
-                  <option key={grade.value} value={grade.value}>
-                    {grade.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Finish Type — model only */}
+            {isModel && (
+              <div className="form-group">
+                <label htmlFor="finish-type" className="form-label">
+                  Finish Type *
+                </label>
+                <select
+                  id="finish-type"
+                  className="form-select"
+                  value={finishType}
+                  onChange={(e) => {
+                    setFinishType(e.target.value as FinishType);
+                    // Reset reference selection when finish type changes
+                    setSelectedCatalogId(null);
+                    setSelectedCatalogItem(null);
+                  }}
+                >
+                  <option value="">Select finish type…</option>
+                  <option value="OF">OF (Original Finish)</option>
+                  <option value="Custom">Custom (Repaint / Body Mod)</option>
+                  <option value="Artist Resin">Artist Resin</option>
+                </select>
+              </div>
+            )}
 
-            {/* Life Stage (Hoofprint) */}
-            <div className="form-group">
-              <label htmlFor="life-stage" className="form-label">
-                🐾 Life Stage
-              </label>
-              <select
-                id="life-stage"
-                className="form-select"
-                value={lifeStage}
-                onChange={(e) => setLifeStage(e.target.value)}
-              >
-                <option value="blank">🎨 Blank / Unpainted</option>
-                <option value="in_progress">🔧 Work in Progress</option>
-                <option value="completed">✅ Completed</option>
-                <option value="for_sale">💲 For Sale</option>
-              </select>
-              <span className="form-hint">
-                This sets the life stage on your Hoofprint™ timeline.
-              </span>
-            </div>
+            {/* Condition Grade — model only */}
+            {isModel && (
+              <div className="form-group">
+                <label htmlFor="condition-grade" className="form-label">
+                  Condition Grade *
+                </label>
+                <select
+                  id="condition-grade"
+                  className="form-select"
+                  value={conditionGrade}
+                  onChange={(e) => setConditionGrade(e.target.value)}
+                >
+                  <option value="">Select condition…</option>
+                  {CONDITION_GRADES.map((grade) => (
+                    <option key={grade.value} value={grade.value}>
+                      {grade.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Life Stage — model only */}
+            {isModel && (
+              <div className="form-group">
+                <label htmlFor="life-stage" className="form-label">
+                  🐾 Life Stage
+                </label>
+                <select
+                  id="life-stage"
+                  className="form-select"
+                  value={lifeStage}
+                  onChange={(e) => setLifeStage(e.target.value)}
+                >
+                  <option value="blank">🎨 Blank / Unpainted</option>
+                  <option value="in_progress">🔧 Work in Progress</option>
+                  <option value="completed">✅ Completed</option>
+                  <option value="for_sale">💲 For Sale</option>
+                </select>
+                <span className="form-hint">
+                  This sets the life stage on your Hoofprint™ timeline.
+                </span>
+              </div>
+            )}
 
             <CollectionPicker
               selectedCollectionId={selectedCollectionId}
@@ -1030,10 +1009,9 @@ export default function AddHorsePage() {
           <div className="step-content" key="step-3">
 
             {/* Reference summary badge */}
-            {(selectedMoldId || selectedResinId) && (
+            {selectedCatalogItem && (
               <div className="getting-started-tip" style={{ marginBottom: "var(--space-lg)" }}>
-                🔗 Linked to: <strong>{selectedMoldId ? "Mold" : "Resin"} selected</strong>
-                {selectedReleaseId && <> · Release selected</>}
+                🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
               </div>
             )}
 

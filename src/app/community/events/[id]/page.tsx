@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getEvent, getEventAttendees } from "@/app/actions/events";
+import { getEventDivisions } from "@/app/actions/competition";
 import { getPosts, getEventMedia } from "@/app/actions/posts";
 import EventRsvpButton from "@/components/EventRsvpButton";
 import EventDeleteButton from "@/components/EventDeleteButton";
@@ -31,10 +32,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     if (!event) notFound();
 
     // Parallel data fetches
-    const [attendees, comments, photos] = await Promise.all([
+    const [attendees, comments, photos, divisions] = await Promise.all([
         getEventAttendees(id),
         getPosts({ eventId: id }, { includeReplies: true }),
         getEventMedia(id),
+        getEventDivisions(id),
     ]);
 
     const date = new Date(event.startsAt);
@@ -123,8 +125,37 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Creator Actions */}
                 {user.id === event.createdBy && (
-                    <div style={{ marginTop: "var(--space-lg)", textAlign: "right" }}>
+                    <div style={{ marginTop: "var(--space-lg)", display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end", flexWrap: "wrap" }}>
+                        <Link href={`/community/events/${event.id}/manage`} className="btn btn-ghost">
+                            ⚙️ Manage Classes
+                        </Link>
                         <EventDeleteButton eventId={event.id} />
+                    </div>
+                )}
+
+                {/* Division / Class Tree */}
+                {divisions.length > 0 && (
+                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                        <h3 style={{ marginBottom: "var(--space-md)" }}>📋 Class List ({divisions.reduce((s, d) => s + d.classes.length, 0)} classes)</h3>
+                        {divisions.map((div) => (
+                            <div key={div.id} style={{ marginBottom: "var(--space-md)" }}>
+                                <div style={{ fontWeight: 700, marginBottom: "var(--space-xs)", color: "var(--color-text-primary)" }}>
+                                    {div.name}
+                                </div>
+                                <div style={{ paddingLeft: "var(--space-lg)" }}>
+                                    {div.classes.map((cls) => (
+                                        <div key={cls.id} style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", padding: "var(--space-xs) 0", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-secondary)" }}>
+                                            <span style={{ color: "var(--color-text-muted)", minWidth: "40px" }}>{cls.classNumber || "—"}</span>
+                                            <span>{cls.name}</span>
+                                            {cls.isNanQualifying && <span style={{ color: "#f59e0b" }} title="NAN Qualifying">⭐</span>}
+                                            {(cls.entryCount || 0) > 0 && (
+                                                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>({cls.entryCount})</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
 

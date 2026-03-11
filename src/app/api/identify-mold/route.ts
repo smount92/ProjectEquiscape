@@ -6,7 +6,7 @@ import { checkRateLimit } from "@/lib/utils/rateLimit";
  * POST /api/identify-mold
  *
  * "Answer Key" protocol:
- *   1. Query ALL valid mold names from reference_molds
+ *   1. Query ALL valid mold names from catalog_items
  *   2. Inject them into the Gemini system prompt as the only allowed answers
  *   3. Call Gemini with temperature 0.0 for maximum determinism
  *   4. Return { manufacturer, mold_name, scale, confidence_score }
@@ -90,14 +90,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ── 3. Fetch the Answer Key from reference_molds ──────────────────
+    // ── 3. Fetch the Answer Key from catalog_items ──────────────────
     const { data: moldRows, error: dbError } = await supabase
-      .from("reference_molds")
-      .select("mold_name")
-      .order("mold_name");
+      .from("catalog_items")
+      .select("title")
+      .eq("item_type", "plastic_mold")
+      .order("title");
 
     if (dbError) {
-      console.error("Failed to fetch reference_molds:", dbError);
+      console.error("Failed to fetch catalog_items:", dbError);
       return NextResponse.json(
         { error: "Could not load reference mold data." },
         { status: 500 }
@@ -105,7 +106,7 @@ export async function POST(req: NextRequest) {
     }
 
     const validMoldNames = (moldRows ?? []).map(
-      (r: { mold_name: string }) => r.mold_name
+      (r: { title: string }) => r.title
     );
 
     // ── 4. Convert image to base64 ────────────────────────────────────

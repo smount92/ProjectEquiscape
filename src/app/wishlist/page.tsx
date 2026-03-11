@@ -17,17 +17,12 @@ interface WishlistItem {
     id: string;
     notes: string | null;
     created_at: string;
-    mold_id: string | null;
-    release_id: string | null;
-    reference_molds: {
-        mold_name: string;
-        manufacturer: string;
-        scale: string;
-    } | null;
-    reference_releases: {
-        release_name: string;
-        model_number: string | null;
-        color_description: string | null;
+    catalog_id: string | null;
+    catalog_items: {
+        title: string;
+        maker: string;
+        scale: string | null;
+        item_type: string;
     } | null;
 }
 
@@ -52,59 +47,39 @@ export default async function WishlistPage() {
         redirect("/login");
     }
 
-    // 1. Fetch wishlist items
+    // 1. Fetch wishlist items with catalog_items join
     const { data: rawItems } = await supabase
         .from("user_wishlists")
-        .select(
-            `
-      id, notes, created_at, mold_id, release_id,
-      reference_molds(mold_name, manufacturer, scale),
-      reference_releases(release_name, model_number, color_description)
-    `
-        )
+        .select(`
+            id, notes, created_at, catalog_id,
+            catalog_items:catalog_id(title, maker, scale, item_type)
+        `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
     const items = (rawItems as unknown as WishlistItem[]) ?? [];
 
     // 2. THE MATCHMAKER ENGINE
-    // For each wishlist item, find public horses that match the mold/release AND are for sale/trade
+    // For each wishlist item, find public horses that match the catalog_id AND are for sale/trade
     const matchMap = new Map<string, MarketplaceMatch[]>();
 
     if (items.length > 0) {
-        // Collect unique mold_ids and release_ids from wishlist
-        const moldIds = [...new Set(items.map((i) => i.mold_id).filter(Boolean))] as string[];
-        const releaseIds = [...new Set(items.map((i) => i.release_id).filter(Boolean))] as string[];
+        const catalogIds = [...new Set(items.map((i) => i.catalog_id).filter(Boolean))] as string[];
 
-        // Query ALL public horses that are for sale/trade and match any wishlist mold or release
-        // We do a single efficient query rather than N+1
-        if (moldIds.length > 0 || releaseIds.length > 0) {
-            let query = supabase
+        if (catalogIds.length > 0) {
+            const { data: rawMatches } = await supabase
                 .from("user_horses")
-                .select(
-                    `
-          id, custom_name, trade_status, listing_price, marketplace_notes,
-          reference_mold_id, release_id, owner_id,
-          users!inner(alias_name),
-          horse_images(image_url, angle_profile)
-        `
-                )
+                .select(`
+                    id, custom_name, trade_status, listing_price, marketplace_notes,
+                    catalog_id, owner_id,
+                    users!inner(alias_name),
+                    horse_images(image_url, angle_profile)
+                `)
                 .eq("is_public", true)
-                .neq("owner_id", user.id) // Don't match your own horses
-                .in("trade_status", ["For Sale", "Open to Offers"]);
-
-            // Filter by matching mold_ids OR release_ids
-            if (moldIds.length > 0 && releaseIds.length > 0) {
-                query = query.or(
-                    `reference_mold_id.in.(${moldIds.join(",")}),release_id.in.(${releaseIds.join(",")})`
-                );
-            } else if (moldIds.length > 0) {
-                query = query.in("reference_mold_id", moldIds);
-            } else {
-                query = query.in("release_id", releaseIds);
-            }
-
-            const { data: rawMatches } = await query.limit(200);
+                .neq("owner_id", user.id)
+                .in("trade_status", ["For Sale", "Open to Offers"])
+                .in("catalog_id", catalogIds)
+                .limit(200);
 
             interface RawMatch {
                 id: string;
@@ -112,8 +87,7 @@ export default async function WishlistPage() {
                 trade_status: string;
                 listing_price: number | null;
                 marketplace_notes: string | null;
-                reference_mold_id: string | null;
-                release_id: string | null;
+                catalog_id: string | null;
                 owner_id: string;
                 users: { alias_name: string } | null;
                 horse_images: { image_url: string; angle_profile: string }[];
@@ -137,11 +111,7 @@ export default async function WishlistPage() {
                 const itemMatches: MarketplaceMatch[] = [];
 
                 for (const match of matches) {
-                    // Match logic: exact mold_id AND (release_id match OR wishlist has no release_id)
-                    const moldMatch = item.mold_id && match.reference_mold_id === item.mold_id;
-                    const releaseMatch = item.release_id ? match.release_id === item.release_id : true;
-
-                    if (moldMatch && releaseMatch) {
+                    if (item.catalog_id && match.catalog_id === item.catalog_id) {
                         const thumb = match.horse_images?.find(
                             (img) => img.angle_profile === "Primary_Thumbnail"
                         );
@@ -211,28 +181,23 @@ export default async function WishlistPage() {
                 ) : (
                     <div className="wishlist-grid animate-fade-in-up">
                         {items.map((item) => {
-                            const moldName = item.reference_molds
-                                ? `${item.reference_molds.manufacturer} ${item.reference_molds.mold_name}`
-                                : "Unknown Mold";
-                            const scale = item.reference_molds?.scale || null;
-                            const releaseName = item.reference_releases?.release_name || null;
-                            const modelNumber = item.reference_releases?.model_number || null;
-                            const color = item.reference_releases?.color_description || null;
+                            const catalogItem = item.catalog_items;
+                            const title = catalogItem?.title || "Custom Entry";
+                            const maker = catalogItem?.maker || null;
+                            const scale = catalogItem?.scale || null;
+                            const typeIcon = catalogItem?.item_type === "artist_resin" ? "🎨" :
+                                catalogItem?.item_type === "plastic_release" ? "📦" : "🏭";
                             const matches = matchMap.get(item.id) ?? [];
 
                             return (
                                 <div key={item.id} className="wishlist-card" id={`wishlist-${item.id}`}>
                                     <div className="wishlist-card-icon">🐴</div>
                                     <div className="wishlist-card-info">
-                                        <div className="wishlist-card-mold">{moldName}</div>
-                                        {releaseName && (
+                                        <div className="wishlist-card-mold">{typeIcon} {title}</div>
+                                        {maker && (
                                             <div className="wishlist-card-release">
-                                                🎨 {releaseName}
-                                                {modelNumber ? ` (#${modelNumber})` : ""}
+                                                {maker}
                                             </div>
-                                        )}
-                                        {color && (
-                                            <div className="wishlist-card-detail">{color}</div>
                                         )}
                                         {scale && (
                                             <div className="wishlist-card-detail">📏 {scale}</div>

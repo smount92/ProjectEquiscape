@@ -4,14 +4,13 @@ import { useState } from "react";
 import { addToWishlist } from "@/app/actions/wishlist";
 
 interface WishlistButtonProps {
-    moldId: string | null;
-    releaseId: string | null;
+    catalogId: string | null;
 }
 
-export default function WishlistButton({ moldId, releaseId }: WishlistButtonProps) {
+export default function WishlistButton({ catalogId }: WishlistButtonProps) {
     const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
-    if (!moldId && !releaseId) return null;
+    if (!catalogId) return null;
 
     const handleClick = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -19,7 +18,7 @@ export default function WishlistButton({ moldId, releaseId }: WishlistButtonProp
         if (status === "saving" || status === "saved") return;
 
         setStatus("saving");
-        const result = await addToWishlist(moldId, releaseId);
+        const result = await addToWishlist(catalogId);
 
         if (result.success) {
             setStatus("saved");

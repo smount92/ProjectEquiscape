@@ -38,7 +38,7 @@ export default async function HoofprintReportPage({
     // Verify horse is public
     const { data: horse } = await supabase
         .from("user_horses")
-        .select("id, custom_name, finish_type, condition_grade, is_public, reference_molds(mold_name, manufacturer), artist_resins(resin_name, sculptor_alias)")
+        .select("id, custom_name, finish_type, condition_grade, is_public, catalog_items:catalog_id(title, maker, item_type)")
         .eq("id", horseId)
         .eq("is_public", true)
         .single();
@@ -50,8 +50,7 @@ export default async function HoofprintReportPage({
         custom_name: string;
         finish_type: string;
         condition_grade: string;
-        reference_molds: { mold_name: string; manufacturer: string } | null;
-        artist_resins: { resin_name: string; sculptor_alias: string } | null;
+        catalog_items: { title: string; maker: string; item_type: string } | null;
     };
 
     const { timeline, ownershipChain, lifeStage } = await getHoofprint(horseId);
@@ -71,11 +70,9 @@ export default async function HoofprintReportPage({
         ribbon_color: string | null;
     }[];
 
-    const refName = h.reference_molds
-        ? `${h.reference_molds.manufacturer} ${h.reference_molds.mold_name}`
-        : h.artist_resins
-            ? `${h.artist_resins.sculptor_alias} — ${h.artist_resins.resin_name}`
-            : null;
+    const refName = h.catalog_items
+        ? `${h.catalog_items.maker} ${h.catalog_items.title}`
+        : null;
 
     return (
         <div className="page-container">

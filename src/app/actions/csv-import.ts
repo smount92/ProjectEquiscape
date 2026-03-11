@@ -37,22 +37,14 @@ export async function executeBatchImport(
                 custom_name: row.customName || "Unnamed Import",
                 finish_type: row.finishType || "OF",
                 condition_grade: row.condition || "Not Graded",
-                reference_mold_id: null,
-                artist_resin_id: null,
-                release_id: null,
+                asset_category: "model",
                 catalog_id: null,
                 purchase_price: row.purchasePrice || null,
                 estimated_value: row.estimatedValue || null,
             };
 
             if (row.selectedMatch) {
-                if (row.selectedMatch.table === "reference_releases") {
-                    horse.release_id = row.selectedMatch.id;
-                    horse.catalog_id = row.selectedMatch.id;
-                } else if (row.selectedMatch.table === "artist_resins") {
-                    horse.artist_resin_id = row.selectedMatch.id;
-                    horse.catalog_id = row.selectedMatch.id;
-                }
+                horse.catalog_id = row.selectedMatch.id;
             }
 
             return horse;

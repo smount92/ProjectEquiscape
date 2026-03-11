@@ -59,16 +59,18 @@ export async function reviewSuggestion(
         try {
             const details = (s.details as string) || "";
             if (s.suggestion_type === "mold") {
-                await admin.from("reference_molds").insert({
-                    mold_name: s.name as string,
-                    manufacturer: details || "Unknown",
+                await admin.from("catalog_items").insert({
+                    item_type: "plastic_mold",
+                    title: s.name as string,
+                    maker: details || "Unknown",
                 });
             } else if (s.suggestion_type === "release") {
-                return { success: false, error: "Releases require a specific mold_id. Please insert this release manually via the Supabase Dashboard, then mark as Approved." };
+                return { success: false, error: "Releases require a specific parent_id. Please insert this release manually via the Supabase Dashboard, then mark as Approved." };
             } else if (s.suggestion_type === "resin") {
-                await admin.from("artist_resins").insert({
-                    resin_name: s.name as string,
-                    sculptor_alias: details || "Unknown",
+                await admin.from("catalog_items").insert({
+                    item_type: "artist_resin",
+                    title: s.name as string,
+                    maker: details || "Unknown",
                 });
             }
         } catch (insertError) {

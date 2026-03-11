@@ -33,5 +33,5 @@ export interface ReferenceMatch {
   manufacturer: string;
   mold_name: string;
   release_name: string;
-  table: 'reference_releases' | 'artist_resins';
+  table: 'catalog_items';
 }

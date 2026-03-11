@@ -1,38 +1,24 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { searchCatalogAction, type CatalogItem } from "@/app/actions/reference";
 import { addToWishlist } from "@/app/actions/wishlist";
 import { useRouter } from "next/navigation";
 
-interface MoldResult {
-    id: string;
-    manufacturer: string;
-    mold_name: string;
-    scale: string;
-}
-
-interface ReleaseResult {
-    id: string;
-    mold_id: string;
-    release_name: string;
-    model_number: string | null;
-    color_description: string | null;
-    release_year_start: number | null;
-    release_year_end: number | null;
-    reference_molds: { mold_name: string; manufacturer: string } | null;
-}
+const TYPE_ICONS: Record<string, string> = {
+    plastic_mold: "🏭",
+    plastic_release: "📦",
+    artist_resin: "🎨",
+};
 
 export default function WishlistSearch() {
     const [query, setQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [adding, setAdding] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-    const [moldResults, setMoldResults] = useState<MoldResult[]>([]);
-    const [releaseResults, setReleaseResults] = useState<ReleaseResult[]>([]);
+    const [results, setResults] = useState<CatalogItem[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);
 
-    const supabase = createClient();
     const router = useRouter();
     const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -58,46 +44,25 @@ export default function WishlistSearch() {
     const runSearch = useCallback(
         async (q: string) => {
             if (!q.trim()) {
-                setMoldResults([]);
-                setReleaseResults([]);
+                setResults([]);
                 setShowDropdown(false);
                 return;
             }
 
             setLoading(true);
-
-            const [moldRes, releaseRes] = await Promise.all([
-                supabase
-                    .from("reference_molds")
-                    .select("id, manufacturer, mold_name, scale")
-                    .or(`mold_name.ilike.%${q}%,manufacturer.ilike.%${q}%`)
-                    .order("mold_name")
-                    .limit(10),
-                supabase
-                    .from("reference_releases")
-                    .select(
-                        `id, mold_id, release_name, model_number, color_description,
-             release_year_start, release_year_end,
-             reference_molds(mold_name, manufacturer)`
-                    )
-                    .or(`release_name.ilike.%${q}%,color_description.ilike.%${q}%,model_number.ilike.%${q}%`)
-                    .limit(10),
-            ]);
-
-            setMoldResults((moldRes.data as MoldResult[]) ?? []);
-            setReleaseResults((releaseRes.data as unknown as ReleaseResult[]) ?? []);
+            const items = await searchCatalogAction(q.trim());
+            setResults(items);
             setLoading(false);
             setShowDropdown(true);
         },
-        [supabase]
+        []
     );
 
     // Debounced search
     useEffect(() => {
         if (fetchTimeoutRef.current) clearTimeout(fetchTimeoutRef.current);
         if (!query.trim()) {
-            setMoldResults([]);
-            setReleaseResults([]);
+            setResults([]);
             setShowDropdown(false);
             return;
         }
@@ -107,27 +72,12 @@ export default function WishlistSearch() {
         };
     }, [query, runSearch]);
 
-    const handleAddMold = async (mold: MoldResult) => {
+    const handleAdd = async (item: CatalogItem) => {
         if (adding) return;
         setAdding(true);
-        const result = await addToWishlist(mold.id, null);
+        const result = await addToWishlist(item.id);
         if (result.success) {
-            setToast({ message: `✅ "${mold.mold_name}" added to Wishlist!`, type: "success" });
-            setQuery("");
-            setShowDropdown(false);
-            router.refresh();
-        } else {
-            setToast({ message: result.error || "Failed to add", type: "error" });
-        }
-        setAdding(false);
-    };
-
-    const handleAddRelease = async (release: ReleaseResult) => {
-        if (adding) return;
-        setAdding(true);
-        const result = await addToWishlist(release.mold_id, release.id);
-        if (result.success) {
-            setToast({ message: `✅ "${release.release_name}" added to Wishlist!`, type: "success" });
+            setToast({ message: `✅ "${item.title}" added to Wishlist!`, type: "success" });
             setQuery("");
             setShowDropdown(false);
             router.refresh();
@@ -141,7 +91,7 @@ export default function WishlistSearch() {
         if (adding || !query.trim()) return;
         setAdding(true);
         const searchTerm = query.trim();
-        const result = await addToWishlist(null, null, `Searching for: ${searchTerm}`);
+        const result = await addToWishlist(null, `Searching for: ${searchTerm}`);
         if (result.success) {
             setToast({ message: `✅ "${searchTerm}" added to Wishlist as custom entry!`, type: "success" });
             setQuery("");
@@ -153,8 +103,13 @@ export default function WishlistSearch() {
         setAdding(false);
     };
 
-    const hasResults = moldResults.length > 0 || releaseResults.length > 0;
+    const hasResults = results.length > 0;
     const noResults = query.trim() && !loading && !hasResults;
+
+    // Group by type
+    const molds = results.filter(r => r.itemType === "plastic_mold");
+    const releases = results.filter(r => r.itemType === "plastic_release");
+    const resins = results.filter(r => r.itemType === "artist_resin");
 
     return (
         <div className="wishlist-search-container" ref={containerRef}>
@@ -185,7 +140,7 @@ export default function WishlistSearch() {
                 <input
                     type="text"
                     className="wishlist-search-input"
-                    placeholder="Search molds & releases to add to your wishlist…"
+                    placeholder="Search molds, releases & resins to add to your wishlist…"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => { if (query.trim() && hasResults) setShowDropdown(true); }}
@@ -211,20 +166,20 @@ export default function WishlistSearch() {
                         <div className="wishlist-search-status">Searching…</div>
                     ) : (
                         <>
-                            {/* Base Molds */}
-                            {moldResults.length > 0 && (
+                            {/* Molds */}
+                            {molds.length > 0 && (
                                 <>
                                     <div className="wishlist-search-group-header">🏭 Base Molds</div>
-                                    {moldResults.map((mold) => (
+                                    {molds.map((item) => (
                                         <button
-                                            key={`mold-${mold.id}`}
+                                            key={item.id}
                                             className="wishlist-search-result"
-                                            onClick={() => handleAddMold(mold)}
+                                            onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
                                             <div className="wishlist-search-result-info">
-                                                <span className="wishlist-search-result-name">{mold.mold_name}</span>
-                                                <span className="wishlist-search-result-meta"> · {mold.manufacturer} · {mold.scale}</span>
+                                                <span className="wishlist-search-result-name">{item.title}</span>
+                                                <span className="wishlist-search-result-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                                             </div>
                                             <span className="wishlist-search-add-badge">+ Add</span>
                                         </button>
@@ -232,48 +187,55 @@ export default function WishlistSearch() {
                                 </>
                             )}
 
-                            {/* Specific Releases */}
-                            {releaseResults.length > 0 && (
+                            {/* Releases */}
+                            {releases.length > 0 && (
                                 <>
-                                    <div className="wishlist-search-group-header">🎨 Specific Releases</div>
-                                    {releaseResults.map((release) => {
-                                        const parentMold = release.reference_molds?.mold_name ?? "Unknown mold";
-                                        const parentMfg = release.reference_molds?.manufacturer ?? "";
-                                        return (
-                                            <button
-                                                key={`release-${release.id}`}
-                                                className="wishlist-search-result"
-                                                onClick={() => handleAddRelease(release)}
-                                                disabled={adding}
-                                            >
-                                                <div className="wishlist-search-result-info">
-                                                    <span className="wishlist-search-result-name">{release.release_name}</span>
-                                                    {release.model_number && (
-                                                        <span className="wishlist-search-result-meta"> (#{release.model_number})</span>
-                                                    )}
-                                                    <div className="wishlist-search-result-context">
-                                                        on <strong>{parentMold}</strong>
-                                                        {parentMfg && <> · {parentMfg}</>}
-                                                        {release.release_year_start && (
-                                                            <> · {release.release_year_start}
-                                                                {release.release_year_end &&
-                                                                    release.release_year_end !== release.release_year_start &&
-                                                                    `–${release.release_year_end}`}
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <span className="wishlist-search-add-badge">+ Add</span>
-                                            </button>
-                                        );
-                                    })}
+                                    <div className="wishlist-search-group-header">📦 Releases</div>
+                                    {releases.map((item) => (
+                                        <button
+                                            key={item.id}
+                                            className="wishlist-search-result"
+                                            onClick={() => handleAdd(item)}
+                                            disabled={adding}
+                                        >
+                                            <div className="wishlist-search-result-info">
+                                                <span className="wishlist-search-result-name">{item.title}</span>
+                                                {!!item.attributes.model_number && (
+                                                    <span className="wishlist-search-result-meta"> (#{String(item.attributes.model_number)})</span>
+                                                )}
+                                                <span className="wishlist-search-result-meta"> · {item.maker}</span>
+                                            </div>
+                                            <span className="wishlist-search-add-badge">+ Add</span>
+                                        </button>
+                                    ))}
+                                </>
+                            )}
+
+                            {/* Resins */}
+                            {resins.length > 0 && (
+                                <>
+                                    <div className="wishlist-search-group-header">🎨 Artist Resins</div>
+                                    {resins.map((item) => (
+                                        <button
+                                            key={item.id}
+                                            className="wishlist-search-result"
+                                            onClick={() => handleAdd(item)}
+                                            disabled={adding}
+                                        >
+                                            <div className="wishlist-search-result-info">
+                                                <span className="wishlist-search-result-name">{item.title}</span>
+                                                <span className="wishlist-search-result-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                                            </div>
+                                            <span className="wishlist-search-add-badge">+ Add</span>
+                                        </button>
+                                    ))}
                                 </>
                             )}
 
                             {/* No results — escape hatch */}
                             {noResults && (
                                 <div className="wishlist-search-empty">
-                                    <p>No molds or releases match &ldquo;{query}&rdquo;</p>
+                                    <p>No references match &ldquo;{query}&rdquo;</p>
                                     <button
                                         className="wishlist-search-custom-btn"
                                         onClick={handleCustomAdd}

@@ -85,9 +85,8 @@ export async function updateHorseAction(horseId: string, data: {
         const HORSE_ALLOWED = [
             'custom_name', 'sculptor', 'finishing_artist', 'finish_type',
             'condition_grade', 'is_public', 'trade_status', 'listing_price',
-            'marketplace_notes', 'collection_id', 'reference_mold_id',
-            'artist_resin_id', 'release_id', 'catalog_id', 'life_stage',
-            'edition_number', 'edition_size',
+            'marketplace_notes', 'collection_id', 'catalog_id', 'life_stage',
+            'edition_number', 'edition_size', 'asset_category',
         ];
         const VAULT_ALLOWED = [
             'purchase_price', 'purchase_date', 'estimated_current_value',
@@ -147,9 +146,7 @@ export async function createHorseRecord(data: {
     isPublic: boolean;
     tradeStatus?: string;
     lifeStage?: string;
-    selectedMoldId?: string;
-    selectedResinId?: string;
-    selectedReleaseId?: string;
+    catalogId?: string;
     selectedCollectionId?: string;
     sculptor?: string;
     finishingArtist?: string;
@@ -161,38 +158,36 @@ export async function createHorseRecord(data: {
     purchaseDate?: string;
     estimatedValue?: number;
     insuranceNotes?: string;
+    assetCategory?: string;
 }): Promise<{ success: boolean; horseId?: string; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
 
-    if (!data.customName?.trim() || !data.finishType) {
+    if (!data.customName?.trim()) {
         return { success: false, error: "Missing required fields." };
+    }
+
+    // Non-model categories don't require finishType
+    const category = data.assetCategory || 'model';
+    if (category === 'model' && !data.finishType) {
+        return { success: false, error: "Finish type is required for model horses." };
     }
 
     const horseInsert: Record<string, unknown> = {
         owner_id: user.id,
         custom_name: data.customName.trim(),
-        finish_type: data.finishType,
+        asset_category: category,
+        finish_type: data.finishType || null,
         condition_grade: data.conditionGrade || null,
         is_public: data.isPublic,
         trade_status: data.tradeStatus || null,
         life_stage: data.lifeStage || "Living",
     };
 
-    // Map legacy fields + set unified catalog_id
-    // A release always implies its parent mold, so set both
-    if (data.selectedMoldId) {
-        horseInsert.reference_mold_id = data.selectedMoldId;
-        horseInsert.catalog_id = data.selectedMoldId;
-    }
-    if (data.selectedReleaseId) {
-        horseInsert.release_id = data.selectedReleaseId;
-        horseInsert.catalog_id = data.selectedReleaseId; // most specific wins
-    }
-    if (data.selectedResinId) {
-        horseInsert.artist_resin_id = data.selectedResinId;
-        horseInsert.catalog_id = data.selectedResinId;
+    // Set unified catalog_id
+    if (data.catalogId) {
+        horseInsert.catalog_id = data.catalogId;
     }
     if (data.selectedCollectionId) horseInsert.collection_id = data.selectedCollectionId;
     if (data.sculptor) horseInsert.sculptor = data.sculptor;

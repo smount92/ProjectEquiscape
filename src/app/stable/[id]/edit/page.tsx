@@ -4,13 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import type { FinishType, AngleProfile } from "@/lib/types/database";
+import type { FinishType, AngleProfile, AssetCategory } from "@/lib/types/database";
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
-import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
+import type { CatalogItem } from "@/app/actions/reference";
 import CollectionPicker from "@/components/CollectionPicker";
 import { compressImage } from "@/lib/utils/imageCompression";
 import { updateLifeStage } from "@/app/actions/hoofprint";
-import { getReleasesForMoldAction } from "@/app/actions/reference";
 import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages } from "@/app/actions/horse";
 
 // ---- Types ----
@@ -75,14 +74,13 @@ export default function EditHorsePage() {
   const [listingPrice, setListingPrice] = useState("");
   const [marketplaceNotes, setMarketplaceNotes] = useState("");
   const [lifeStage, setLifeStage] = useState("completed");
+  const [assetCategory, setAssetCategory] = useState<AssetCategory>("model");
+
+  const isModel = assetCategory === "model";
 
   // Reference fields (controlled by UnifiedReferenceSearch)
-  const [selectedMoldId, setSelectedMoldId] = useState<string | null>(null);
-  const [selectedResinId, setSelectedResinId] = useState<string | null>(null);
-  const [selectedReleaseId, setSelectedReleaseId] = useState<string | null>(null);
-  const [releases, setReleases] = useState<ReleaseDetail[]>([]);
-  const [loadingReleases, setLoadingReleases] = useState(false);
-  const [defaultTab, setDefaultTab] = useState<"mold" | "resin">("mold");
+  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
+  const [selectedCatalogItem, setSelectedCatalogItem] = useState<CatalogItem | null>(null);
 
   // Financial Vault
   const [purchasePrice, setPurchasePrice] = useState("");
@@ -119,7 +117,7 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, collection_id, reference_mold_id, artist_resin_id, release_id, trade_status, listing_price, marketplace_notes, life_stage")
+        .select("id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, collection_id, catalog_id, trade_status, listing_price, marketplace_notes, life_stage, asset_category")
         .eq("id", horseId)
         .single<{
           id: string;
@@ -129,17 +127,16 @@ export default function EditHorsePage() {
           finishing_artist: string | null;
           edition_number: number | null;
           edition_size: number | null;
-          finish_type: FinishType;
-          condition_grade: string;
+          finish_type: FinishType | null;
+          condition_grade: string | null;
           is_public: boolean;
           collection_id: string | null;
-          reference_mold_id: string | null;
-          artist_resin_id: string | null;
-          release_id: string | null;
+          catalog_id: string | null;
           trade_status: string;
           listing_price: number | null;
           marketplace_notes: string | null;
           life_stage: string | null;
+          asset_category: AssetCategory | null;
         }>();
 
       if (horseErr || !horse || horse.owner_id !== user.id) {
@@ -153,9 +150,10 @@ export default function EditHorsePage() {
       setFinishingArtist(horse.finishing_artist || "");
       setEditionNumber(horse.edition_number ? String(horse.edition_number) : "");
       setEditionSize(horse.edition_size ? String(horse.edition_size) : "");
-      setFinishType(horse.finish_type);
-      setConditionGrade(horse.condition_grade);
-      setOriginalCondition(horse.condition_grade);
+      setFinishType(horse.finish_type || "");
+      setConditionGrade(horse.condition_grade || "");
+      setOriginalCondition(horse.condition_grade || "");
+      setAssetCategory(horse.asset_category || "model");
       setIsPublic(horse.is_public);
       setSelectedCollectionId(horse.collection_id);
       setTradeStatus(horse.trade_status || "Not for Sale");
@@ -163,15 +161,14 @@ export default function EditHorsePage() {
       setMarketplaceNotes(horse.marketplace_notes || "");
       setLifeStage(horse.life_stage || "completed");
 
-      if (horse.reference_mold_id) {
-        setSelectedMoldId(horse.reference_mold_id);
-        setDefaultTab("mold");
-      } else if (horse.artist_resin_id) {
-        setSelectedResinId(horse.artist_resin_id);
-        setDefaultTab("resin");
-      }
-      if (horse.release_id) {
-        setSelectedReleaseId(horse.release_id);
+      if (horse.catalog_id) {
+        setSelectedCatalogId(horse.catalog_id);
+        // Load the catalog item details for display
+        import("@/app/actions/reference").then(({ getCatalogItem }) => {
+          getCatalogItem(horse.catalog_id!).then((item) => {
+            if (item) setSelectedCatalogItem(item);
+          });
+        });
       }
 
       const { data: vault } = await supabase
@@ -230,29 +227,7 @@ export default function EditHorsePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [horseId]);
 
-  // ---- Fetch releases cascade ----
-  useEffect(() => {
-    if (!selectedMoldId) {
-      setReleases([]);
-      return;
-    }
-    let cancelled = false;
-    const load = async () => {
-      setLoadingReleases(true);
-      try {
-        const data = await getReleasesForMoldAction(selectedMoldId);
-        if (!cancelled) {
-          setReleases((data as ReleaseDetail[]) ?? []);
-        }
-      } catch (err) {
-        console.error("Failed to load releases:", err);
-      } finally {
-        if (!cancelled) setLoadingReleases(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [selectedMoldId]);
+
 
   // ---- Photo Studio handlers ----
   const handleSlotSelect = (angle: AngleProfile, file: File) => {
@@ -293,7 +268,11 @@ export default function EditHorsePage() {
 
   // ---- Save handler ----
   const handleSave = async () => {
-    if (!customName.trim() || !finishType || !conditionGrade) {
+    if (!customName.trim()) {
+      setSaveError("Please enter a name.");
+      return;
+    }
+    if (isModel && (!finishType || !conditionGrade)) {
       setSaveError("Please fill in all required identity fields.");
       return;
     }
@@ -309,20 +288,18 @@ export default function EditHorsePage() {
         custom_name: customName.trim(),
         sculptor: sculptor.trim() || null,
         finishing_artist: finishingArtist.trim() || null,
-        edition_number: editionNumber ? parseInt(editionNumber) : null,
-        edition_size: editionSize ? parseInt(editionSize) : null,
-        finish_type: finishType,
-        condition_grade: conditionGrade,
+        edition_number: isModel && editionNumber ? parseInt(editionNumber) : null,
+        edition_size: isModel && editionSize ? parseInt(editionSize) : null,
+        finish_type: isModel ? finishType : null,
+        condition_grade: isModel ? conditionGrade : null,
+        asset_category: assetCategory,
         is_public: isPublic,
         trade_status: tradeStatus,
         listing_price: tradeStatus !== "Not for Sale" && listingPrice ? parseFloat(listingPrice) : null,
         marketplace_notes: tradeStatus !== "Not for Sale" && marketplaceNotes.trim() ? marketplaceNotes.trim() : null,
         collection_id: selectedCollectionId,
-        reference_mold_id: selectedMoldId,
-        artist_resin_id: selectedResinId,
-        release_id: selectedReleaseId,
-        catalog_id: selectedReleaseId || selectedMoldId || selectedResinId || null,
-        life_stage: lifeStage,
+        catalog_id: selectedCatalogId,
+        life_stage: isModel ? lifeStage : null,
       };
 
       const hasVaultData = purchasePrice || purchaseDate || estimatedValue || insuranceNotes;
@@ -409,8 +386,7 @@ export default function EditHorsePage() {
             horseName: customName.trim(),
             finishType: finishType as string,
             tradeStatus: tradeStatus as string,
-            moldId: selectedMoldId || null,
-            releaseId: selectedReleaseId || null,
+            catalogId: selectedCatalogId || null,
           });
         }).catch(() => { });
       }
@@ -698,78 +674,83 @@ export default function EditHorsePage() {
             <span className="form-hint">e.g., &quot;3 of 50&quot; for limited edition runs.</span>
           </div>
 
-          <div className="edit-row">
-            <div className="form-group">
-              <label htmlFor="edit-finish" className="form-label">Finish Type *</label>
-              <select id="edit-finish" className="form-select" value={finishType}
-                onChange={(e) => setFinishType(e.target.value as FinishType)}>
-                <option value="">Select finish type…</option>
-                <option value="OF">OF (Original Finish)</option>
-                <option value="Custom">Custom (Repaint / Body Mod)</option>
-                <option value="Artist Resin">Artist Resin</option>
-              </select>
-            </div>
+          {/* Finish Type & Condition — model only */}
+          {isModel && (
+            <div className="edit-row">
+              <div className="form-group">
+                <label htmlFor="edit-finish" className="form-label">Finish Type *</label>
+                <select id="edit-finish" className="form-select" value={finishType}
+                  onChange={(e) => setFinishType(e.target.value as FinishType)}>
+                  <option value="">Select finish type…</option>
+                  <option value="OF">OF (Original Finish)</option>
+                  <option value="Custom">Custom (Repaint / Body Mod)</option>
+                  <option value="Artist Resin">Artist Resin</option>
+                </select>
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="edit-condition" className="form-label">Condition Grade *</label>
-              <select id="edit-condition" className="form-select" value={conditionGrade}
-                onChange={(e) => setConditionGrade(e.target.value)}>
-                <option value="">Select condition…</option>
-                {CONDITION_GRADES.map((g) => (
-                  <option key={g.value} value={g.value}>{g.label}</option>
-                ))}
-              </select>
+              <div className="form-group">
+                <label htmlFor="edit-condition" className="form-label">Condition Grade *</label>
+                <select id="edit-condition" className="form-select" value={conditionGrade}
+                  onChange={(e) => setConditionGrade(e.target.value)}>
+                  <option value="">Select condition…</option>
+                  {CONDITION_GRADES.map((g) => (
+                    <option key={g.value} value={g.value}>{g.label}</option>
+                  ))}
+                </select>
 
-              {/* Condition Change Note - shows when condition was changed */}
-              {originalCondition && conditionGrade && conditionGrade !== originalCondition && (
-                <div className="condition-change-note animate-fade-in-up" style={{ marginTop: "var(--space-sm)" }}>
-                  <div style={{
-                    fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
-                    color: "var(--color-accent-warning, #f59e0b)",
-                    marginBottom: "var(--space-xs)",
-                    fontWeight: 600,
-                  }}>
-                    📝 Condition changed: {originalCondition} → {conditionGrade}
+                {/* Condition Change Note - shows when condition was changed */}
+                {originalCondition && conditionGrade && conditionGrade !== originalCondition && (
+                  <div className="condition-change-note animate-fade-in-up" style={{ marginTop: "var(--space-sm)" }}>
+                    <div style={{
+                      fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+                      color: "var(--color-accent-warning, #f59e0b)",
+                      marginBottom: "var(--space-xs)",
+                      fontWeight: 600,
+                    }}>
+                      📝 Condition changed: {originalCondition} → {conditionGrade}
+                    </div>
+                    <textarea
+                      className="form-textarea"
+                      rows={2}
+                      maxLength={300}
+                      placeholder="What happened? (optional — visible on Hoofprint™)"
+                      value={conditionNote}
+                      onChange={(e) => setConditionNote(e.target.value)}
+                      style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
+                    />
+                    <span className="form-hint">
+                      e.g., &quot;Minor rub discovered on left hip during cleaning&quot;
+                    </span>
                   </div>
-                  <textarea
-                    className="form-textarea"
-                    rows={2}
-                    maxLength={300}
-                    placeholder="What happened? (optional — visible on Hoofprint™)"
-                    value={conditionNote}
-                    onChange={(e) => setConditionNote(e.target.value)}
-                    style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
-                  />
-                  <span className="form-hint">
-                    e.g., &quot;Minor rub discovered on left hip during cleaning&quot;
-                  </span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Life Stage (Hoofprint) */}
-          <div className="form-group">
-            <label htmlFor="edit-life-stage" className="form-label">🐾 Life Stage</label>
-            <select
-              id="edit-life-stage"
-              className="form-select"
-              value={lifeStage}
-              onChange={(e) => {
-                setLifeStage(e.target.value);
-                // Auto-create timeline event for stage changes
-                updateLifeStage(horseId, e.target.value as "blank" | "in_progress" | "completed" | "for_sale");
-              }}
-            >
-              <option value="blank">🎨 Blank / Unpainted</option>
-              <option value="in_progress">🔧 Work in Progress</option>
-              <option value="completed">✅ Completed</option>
-              <option value="for_sale">💲 For Sale</option>
-            </select>
-            <span className="form-hint">
-              Changing this will add a stage update to the Hoofprint™ timeline.
-            </span>
-          </div>
+          {/* Life Stage — model only */}
+          {isModel && (
+            <div className="form-group">
+              <label htmlFor="edit-life-stage" className="form-label">🐾 Life Stage</label>
+              <select
+                id="edit-life-stage"
+                className="form-select"
+                value={lifeStage}
+                onChange={(e) => {
+                  setLifeStage(e.target.value);
+                  // Auto-create timeline event for stage changes
+                  updateLifeStage(horseId, e.target.value as "blank" | "in_progress" | "completed" | "for_sale");
+                }}
+              >
+                <option value="blank">🎨 Blank / Unpainted</option>
+                <option value="in_progress">🔧 Work in Progress</option>
+                <option value="completed">✅ Completed</option>
+                <option value="for_sale">💲 For Sale</option>
+              </select>
+              <span className="form-hint">
+                Changing this will add a stage update to the Hoofprint™ timeline.
+              </span>
+            </div>
+          )}
 
           <CollectionPicker
             selectedCollectionId={selectedCollectionId}
@@ -838,27 +819,20 @@ export default function EditHorsePage() {
           </div>
 
           <UnifiedReferenceSearch
-            selectedMoldId={selectedMoldId}
-            selectedResinId={selectedResinId}
-            selectedReleaseId={selectedReleaseId}
-            onSelectionChange={(sel) => {
-              setSelectedMoldId(sel.moldId);
-              setSelectedResinId(sel.resinId);
-              setSelectedReleaseId(sel.releaseId);
-              // Auto-fill sculptor when a resin is selected
-              if (sel.sculptorAlias && !sculptor.trim()) {
-                setSculptor(sel.sculptorAlias);
+            selectedCatalogId={selectedCatalogId}
+            onCatalogSelect={(id, item) => {
+              setSelectedCatalogId(id);
+              setSelectedCatalogItem(item);
+              // Auto-fill sculptor for resins
+              if (item?.itemType === "artist_resin" && item.maker && !sculptor.trim()) {
+                setSculptor(item.maker);
               }
             }}
             onCustomEntry={(searchTerm) => {
-              setSelectedMoldId(null);
-              setSelectedResinId(null);
-              setSelectedReleaseId(null);
+              setSelectedCatalogId(null);
+              setSelectedCatalogItem(null);
               setCustomName(searchTerm);
             }}
-            defaultTab={defaultTab}
-            releases={releases}
-            loadingReleases={loadingReleases}
           />
         </div>
 

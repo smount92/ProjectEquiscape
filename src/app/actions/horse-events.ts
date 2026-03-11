@@ -13,8 +13,7 @@ export async function notifyHorsePublic(data: {
     horseName: string;
     finishType: string;
     tradeStatus?: string;
-    moldId?: string | null;
-    releaseId?: string | null;
+    catalogId?: string | null;
 }): Promise<void> {
     // Log the activity event
     await createActivityEvent({
@@ -27,7 +26,7 @@ export async function notifyHorsePublic(data: {
     // Check for wishlist matches if horse is listed for sale
     if (
         (data.tradeStatus === "For Sale" || data.tradeStatus === "Open to Offers") &&
-        (data.moldId || data.releaseId)
+        data.catalogId
     ) {
         try {
             await checkWishlistMatches(data);
@@ -46,27 +45,22 @@ async function checkWishlistMatches(data: {
     horseId: string;
     horseName: string;
     tradeStatus?: string;
-    moldId?: string | null;
-    releaseId?: string | null;
+    catalogId?: string | null;
 }): Promise<void> {
     try {
         const supabaseAdmin = getAdminClient();
 
-        // Build OR filter for mold_id and release_id matches
-        const orConditions: string[] = [];
-        if (data.moldId) orConditions.push(`mold_id.eq.${data.moldId}`);
-        if (data.releaseId) orConditions.push(`release_id.eq.${data.releaseId}`);
-        if (orConditions.length === 0) return;
+        if (!data.catalogId) return;
 
         const { data: wishlistMatches } = await supabaseAdmin
             .from("user_wishlists")
             .select("user_id")
-            .or(orConditions.join(","))
+            .eq("catalog_id", data.catalogId)
             .neq("user_id", data.userId); // Don't notify the seller
 
         if (!wishlistMatches || wishlistMatches.length === 0) return;
 
-        // Deduplicate user IDs (a user might have both mold and release wishlisted)
+        // Deduplicate user IDs
         const uniqueUserIds = [...new Set(wishlistMatches.map((m: { user_id: string }) => m.user_id))];
 
         // Create a notification for each matching user

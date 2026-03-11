@@ -17,23 +17,15 @@ interface CommunityHorse {
   trade_status: string;
   listing_price: number | null;
   marketplace_notes: string | null;
-  reference_mold_id: string | null;
-  release_id: string | null;
+  catalog_id: string | null;
   users: {
     alias_name: string;
   } | null;
-  reference_molds: {
-    mold_name: string;
-    manufacturer: string;
+  catalog_items: {
+    title: string;
+    maker: string;
     scale: string | null;
-  } | null;
-  artist_resins: {
-    resin_name: string;
-    sculptor_alias: string;
-  } | null;
-  reference_releases: {
-    release_name: string;
-    model_number: string | null;
+    item_type: string;
   } | null;
   horse_images: {
     image_url: string;
@@ -73,11 +65,9 @@ export default async function CommunityPage({
     .from("user_horses")
     .select(
       `
-      id, owner_id, custom_name, finish_type, condition_grade, created_at, sculptor, trade_status, listing_price, marketplace_notes, reference_mold_id, release_id,
+      id, owner_id, custom_name, finish_type, condition_grade, created_at, sculptor, trade_status, listing_price, marketplace_notes, catalog_id,
       users!inner(alias_name),
-      reference_molds(mold_name, manufacturer, scale),
-      artist_resins(resin_name, sculptor_alias),
-      reference_releases(release_name, model_number),
+      catalog_items:catalog_id(title, maker, scale, item_type),
       horse_images(image_url, angle_profile)
     `
     )
@@ -174,15 +164,11 @@ export default async function CommunityPage({
     const imageUrl = thumb?.image_url || firstImage?.image_url;
     const signedUrl = imageUrl ? signedUrlMap.get(imageUrl) : undefined;
 
-    const refName = horse.reference_molds
-      ? `${horse.reference_molds.manufacturer} ${horse.reference_molds.mold_name}`
-      : horse.artist_resins
-        ? `${horse.artist_resins.sculptor_alias} — ${horse.artist_resins.resin_name}`
-        : "Unlisted Mold";
+    const refName = horse.catalog_items
+      ? `${horse.catalog_items.maker} ${horse.catalog_items.title}`
+      : "Unlisted Mold";
 
-    const releaseLine = horse.reference_releases
-      ? `${horse.reference_releases.release_name}${horse.reference_releases.model_number ? ` (#${horse.reference_releases.model_number})` : ""}`
-      : null;
+    const releaseLine = null; // Now unified in catalog_items
 
     const ownerAlias = horse.users?.alias_name ?? "Unknown";
 
@@ -201,13 +187,13 @@ export default async function CommunityPage({
       tradeStatus: horse.trade_status || "Not for Sale",
       listingPrice: horse.listing_price ?? null,
       marketplaceNotes: horse.marketplace_notes || null,
-      moldName: horse.reference_molds?.mold_name || null,
-      releaseName: horse.reference_releases?.release_name || null,
-      refMoldId: horse.reference_mold_id || null,
-      refReleaseId: horse.release_id || null,
+      moldName: horse.catalog_items?.title || null,
+      releaseName: horse.catalog_items?.title || null,
+      refMoldId: horse.catalog_id || null,
+      catalogId: horse.catalog_id || null,
       favoriteCount: favCountMap.get(horse.id) || 0,
       isFavorited: userFavSet.has(horse.id),
-      scale: horse.reference_molds?.scale || null,
+      scale: horse.catalog_items?.scale || null,
       hoofprintCount: hoofprintCountMap.get(horse.id) || 0,
     };
   });

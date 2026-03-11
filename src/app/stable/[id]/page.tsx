@@ -19,8 +19,9 @@ interface HorseDetail {
   id: string;
   owner_id: string;
   custom_name: string;
-  finish_type: string;
-  condition_grade: string;
+  finish_type: string | null;
+  condition_grade: string | null;
+  asset_category: string;
   is_for_sale: boolean;
   is_public: boolean;
   created_at: string;
@@ -28,24 +29,12 @@ interface HorseDetail {
   finishing_artist: string | null;
   edition_number: number | null;
   edition_size: number | null;
-  reference_molds: {
-    mold_name: string;
-    manufacturer: string;
-    scale: string;
-    release_year_start: number | null;
-  } | null;
-  artist_resins: {
-    resin_name: string;
-    sculptor_alias: string;
-    scale: string;
-    cast_medium: string | null;
-  } | null;
-  reference_releases: {
-    release_name: string;
-    model_number: string | null;
-    color_description: string | null;
-    release_year_start: number | null;
-    release_year_end: number | null;
+  catalog_items: {
+    title: string;
+    maker: string;
+    scale: string | null;
+    item_type: string;
+    attributes: Record<string, unknown>;
   } | null;
 }
 
@@ -112,11 +101,9 @@ export default async function HorsePassportPage({
     .from("user_horses")
     .select(
       `
-      id, owner_id, custom_name, finish_type, condition_grade,
+      id, owner_id, custom_name, finish_type, condition_grade, asset_category,
       is_for_sale, is_public, created_at, sculptor, finishing_artist, edition_number, edition_size,
-      reference_molds(mold_name, manufacturer, scale, release_year_start),
-      artist_resins(resin_name, sculptor_alias, scale, cast_medium),
-      reference_releases(release_name, model_number, color_description, release_year_start, release_year_end)
+      catalog_items:catalog_id(title, maker, scale, item_type, attributes)
     `
     )
     .eq("id", horseId)
@@ -239,33 +226,28 @@ export default async function HorsePassportPage({
   }
 
   // Reference display info
-  const refInfo = horse.reference_molds
+  const cat = horse.catalog_items;
+  const refInfo = cat
     ? {
-      type: "Mold",
-      name: horse.reference_molds.mold_name,
-      maker: horse.reference_molds.manufacturer,
-      scale: horse.reference_molds.scale,
-      extra: horse.reference_molds.release_year_start
-        ? `First released ${horse.reference_molds.release_year_start}`
-        : null,
+      type: cat.item_type === "artist_resin" ? "Artist Resin" : "Mold",
+      name: cat.title,
+      maker: cat.maker,
+      scale: cat.scale || "Unknown",
+      extra: cat.item_type === "artist_resin"
+        ? (cat.attributes?.cast_medium as string | null)
+        : (cat.attributes?.release_year_start
+          ? `First released ${cat.attributes.release_year_start}`
+          : null),
     }
-    : horse.artist_resins
-      ? {
-        type: "Artist Resin",
-        name: horse.artist_resins.resin_name,
-        maker: horse.artist_resins.sculptor_alias,
-        scale: horse.artist_resins.scale,
-        extra: horse.artist_resins.cast_medium,
-      }
-      : null;
+    : null;
 
-  const releaseInfo = horse.reference_releases
+  const releaseInfo = (cat && cat.item_type === "plastic_release")
     ? {
-      name: horse.reference_releases.release_name,
-      modelNumber: horse.reference_releases.model_number,
-      color: horse.reference_releases.color_description,
-      yearStart: horse.reference_releases.release_year_start,
-      yearEnd: horse.reference_releases.release_year_end,
+      name: cat.title,
+      modelNumber: (cat.attributes?.model_number as string | null),
+      color: (cat.attributes?.color_description as string | null),
+      yearStart: (cat.attributes?.release_year_start as number | null),
+      yearEnd: (cat.attributes?.release_year_end as number | null),
     }
     : null;
 
@@ -306,20 +288,33 @@ export default async function HorsePassportPage({
           {/* Model Details Card */}
           <div className="passport-detail-card">
             <h3>
-              <span aria-hidden="true">📋</span> Model Details
+              <span aria-hidden="true">📋</span> {(horse.asset_category || "model") === "model" ? "Model Details" : `${(horse.asset_category || "model").charAt(0).toUpperCase() + (horse.asset_category || "model").slice(1)} Details`}
             </h3>
 
-            <div className="passport-detail-row">
-              <span className="passport-detail-label">Finish Type</span>
-              <span className="passport-detail-value">{horse.finish_type}</span>
-            </div>
+            {horse.asset_category && horse.asset_category !== "model" && (
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">Category</span>
+                <span className="passport-detail-value">
+                  {horse.asset_category === "tack" ? "🏇 Tack & Gear" : horse.asset_category === "prop" ? "🌲 Prop" : "🎭 Diorama"}
+                </span>
+              </div>
+            )}
 
-            <div className="passport-detail-row">
-              <span className="passport-detail-label">Condition</span>
-              <span className="passport-condition-badge">
-                {horse.condition_grade}
-              </span>
-            </div>
+            {horse.finish_type && (
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">Finish Type</span>
+                <span className="passport-detail-value">{horse.finish_type}</span>
+              </div>
+            )}
+
+            {horse.condition_grade && (
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">Condition</span>
+                <span className="passport-condition-badge">
+                  {horse.condition_grade}
+                </span>
+              </div>
+            )}
 
             {refInfo ? (
               <>

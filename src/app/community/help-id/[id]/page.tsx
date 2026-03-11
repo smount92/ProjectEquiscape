@@ -60,15 +60,14 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     // Fetch suggestions — NO PostgREST join for same reason
     const { data: rawSuggestions } = await supabase
         .from("id_suggestions")
-        .select("id, user_id, reference_release_id, artist_resin_id, free_text, upvotes, created_at")
+        .select("id, user_id, catalog_id, free_text, upvotes, created_at")
         .eq("request_id", id)
         .order("upvotes", { ascending: false });
 
     const sugRows = (rawSuggestions ?? []) as {
         id: string;
         user_id: string;
-        reference_release_id: string | null;
-        artist_resin_id: string | null;
+        catalog_id: string | null;
         free_text: string | null;
         upvotes: number;
         created_at: string;
@@ -89,38 +88,19 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
         }
     }
 
-    // Enrich suggestions with reference display names
-    const releaseIds = sugRows.filter((s) => s.reference_release_id).map((s) => s.reference_release_id!);
-    const resinIds = sugRows.filter((s) => s.artist_resin_id).map((s) => s.artist_resin_id!);
+    // Enrich suggestions with catalog item display names
+    const catalogIds = sugRows.filter((s) => s.catalog_id).map((s) => s.catalog_id!);
+    const catalogDisplayMap = new Map<string, string>();
 
-    let releaseMap = new Map<string, string>();
-    let resinMap = new Map<string, string>();
+    if (catalogIds.length > 0) {
+        const { data: catalogItems } = await supabase
+            .from("catalog_items")
+            .select("id, title, maker, item_type")
+            .in("id", catalogIds);
 
-    if (releaseIds.length > 0) {
-        const { data: releases } = await supabase
-            .from("reference_releases")
-            .select("id, release_name, model_number, reference_molds(mold_name, manufacturer)")
-            .in("id", releaseIds);
-
-        if (releases) {
-            for (const r of releases as unknown as { id: string; release_name: string; model_number: string | null; reference_molds: { mold_name: string; manufacturer: string } | null }[]) {
-                const display = r.reference_molds
-                    ? `${r.reference_molds.manufacturer} ${r.reference_molds.mold_name} — ${r.release_name}${r.model_number ? ` (#${r.model_number})` : ""}`
-                    : r.release_name;
-                releaseMap.set(r.id, display);
-            }
-        }
-    }
-
-    if (resinIds.length > 0) {
-        const { data: resins } = await supabase
-            .from("artist_resins")
-            .select("id, resin_name, sculptor_alias")
-            .in("id", resinIds);
-
-        if (resins) {
-            for (const r of resins as { id: string; resin_name: string; sculptor_alias: string }[]) {
-                resinMap.set(r.id, `${r.sculptor_alias} — ${r.resin_name}`);
+        if (catalogItems) {
+            for (const c of catalogItems as { id: string; title: string; maker: string; item_type: string }[]) {
+                catalogDisplayMap.set(c.id, `${c.maker} ${c.title}`);
             }
         }
     }
@@ -132,8 +112,8 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
         upvotes: s.upvotes,
         created_at: s.created_at,
         userName: sugUserMap.get(s.user_id) ?? "Unknown",
-        releaseDisplay: s.reference_release_id ? releaseMap.get(s.reference_release_id) || null : null,
-        resinDisplay: s.artist_resin_id ? resinMap.get(s.artist_resin_id) || null : null,
+        releaseDisplay: s.catalog_id ? catalogDisplayMap.get(s.catalog_id) || null : null,
+        resinDisplay: null as string | null,
         isAccepted: s.id === req.accepted_suggestion_id,
     }));
 

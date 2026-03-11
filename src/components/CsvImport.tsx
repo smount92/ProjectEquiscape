@@ -218,12 +218,12 @@ export default function CsvImport() {
             for (const res of releaseResults) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const obj = res.obj as any;
-                allMatches.push({ id: obj.id, score: res.score, display: obj.display, manufacturer: obj.manufacturer, mold_name: obj.mold_name, release_name: obj.release_name, table: "reference_releases" });
+                allMatches.push({ id: obj.id, score: res.score, display: obj.display, manufacturer: obj.manufacturer, mold_name: obj.mold_name, release_name: obj.release_name, table: "catalog_items" });
             }
             for (const res of resinResults) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const obj = res.obj as any;
-                allMatches.push({ id: obj.id, score: res.score, display: obj.display, manufacturer: obj.sculptor_alias, mold_name: obj.resin_name, release_name: obj.resin_name, table: "artist_resins" });
+                allMatches.push({ id: obj.id, score: res.score, display: obj.display, manufacturer: obj.sculptor_alias, mold_name: obj.resin_name, release_name: obj.resin_name, table: "catalog_items" });
             }
 
             allMatches.sort((a, b) => b.score - a.score);

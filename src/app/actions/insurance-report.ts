@@ -51,9 +51,7 @@ export async function getInsuranceReportData(): Promise<{
             .from("user_horses")
             .select(
                 `id, custom_name, finish_type, condition_grade,
-         reference_molds(mold_name, manufacturer),
-         artist_resins(resin_name, sculptor_alias),
-         reference_releases(release_name, model_number),
+         catalog_items:catalog_id(title, maker, item_type),
          horse_images(image_url, angle_profile)`
             )
             .eq("owner_id", user.id)
@@ -64,9 +62,7 @@ export async function getInsuranceReportData(): Promise<{
             custom_name: string;
             finish_type: string;
             condition_grade: string;
-            reference_molds: { mold_name: string; manufacturer: string } | null;
-            artist_resins: { resin_name: string; sculptor_alias: string } | null;
-            reference_releases: { release_name: string; model_number: string | null } | null;
+            catalog_items: { title: string; maker: string; item_type: string } | null;
             horse_images: { image_url: string; angle_profile: string }[];
         }
 
@@ -134,16 +130,8 @@ export async function getInsuranceReportData(): Promise<{
 
             // Build reference display name
             let reference = "Unlisted";
-            if (horse.reference_molds) {
-                reference = `${horse.reference_molds.manufacturer} ${horse.reference_molds.mold_name}`;
-                if (horse.reference_releases) {
-                    reference += ` — ${horse.reference_releases.release_name}`;
-                    if (horse.reference_releases.model_number) {
-                        reference += ` (#${horse.reference_releases.model_number})`;
-                    }
-                }
-            } else if (horse.artist_resins) {
-                reference = `${horse.artist_resins.sculptor_alias} — ${horse.artist_resins.resin_name}`;
+            if (horse.catalog_items) {
+                reference = `${horse.catalog_items.maker} ${horse.catalog_items.title}`;
             }
 
             reportHorses.push({
