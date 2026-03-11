@@ -528,6 +528,17 @@ export interface Database {
           metadata: Record<string, unknown> | null;
         };
       };
+      mv_market_prices: {
+        Row: {
+          catalog_id: string;
+          lowest_price: number;
+          highest_price: number;
+          average_price: number;
+          median_price: number;
+          transaction_volume: number;
+          last_sold_at: string | null;
+        };
+      };
     };
     Functions: {
       [_ in never]: never;

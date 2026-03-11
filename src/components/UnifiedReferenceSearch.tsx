@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { searchCatalogAction, getReleasesForMold, getCatalogItem, type CatalogItem } from "@/app/actions/reference";
+import MarketValueBadge from "@/components/MarketValueBadge";
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -160,6 +161,7 @@ export default function UnifiedReferenceSearch({
             {selectedItem.scale && (
               <span className="ref-selected-scale"> · {selectedItem.scale}</span>
             )}
+            <MarketValueBadge catalogId={selectedCatalogId} compact />
           </div>
           <button className="btn btn-ghost ref-clear-btn" onClick={handleClear} aria-label="Clear selection">
             ✕

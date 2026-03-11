@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import MarketValueBadge from "@/components/MarketValueBadge";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import PassportGallery from "@/components/PassportGallery";
 import VaultReveal from "@/components/VaultReveal";
@@ -29,6 +30,7 @@ interface HorseDetail {
   finishing_artist: string | null;
   edition_number: number | null;
   edition_size: number | null;
+  catalog_id: string | null;
   catalog_items: {
     title: string;
     maker: string;
@@ -102,7 +104,7 @@ export default async function HorsePassportPage({
     .select(
       `
       id, owner_id, custom_name, finish_type, condition_grade, asset_category,
-      is_for_sale, is_public, created_at, sculptor, finishing_artist, edition_number, edition_size,
+      is_for_sale, is_public, created_at, sculptor, finishing_artist, edition_number, edition_size, catalog_id,
       catalog_items:catalog_id(title, maker, scale, item_type, attributes)
     `
     )
@@ -435,6 +437,9 @@ export default async function HorsePassportPage({
               </div>
             )}
           </div>
+
+          {/* Market Value Badge */}
+          {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
           {/* Show Records */}
           <ShowRecordTimeline

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getSignedImageUrls } from "@/lib/utils/storage";
+import MarketValueBadge from "@/components/MarketValueBadge";
 import PassportGallery from "@/components/PassportGallery";
 import ShareButton from "@/components/ShareButton";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -28,6 +29,7 @@ interface PublicHorseDetail {
   finishing_artist: string | null;
   edition_number: number | null;
   edition_size: number | null;
+  catalog_id: string | null;
   users: {
     alias_name: string;
   } | null;
@@ -128,7 +130,7 @@ export default async function PublicPassportPage({
     .select(
       `
       id, owner_id, custom_name, finish_type, condition_grade, asset_category,
-      is_public, created_at, finishing_artist, edition_number, edition_size,
+      is_public, created_at, finishing_artist, edition_number, edition_size, catalog_id,
       users!inner(alias_name),
       catalog_items:catalog_id(title, maker, scale, item_type, attributes)
     `
@@ -497,6 +499,9 @@ export default async function PublicPassportPage({
           </div>
 
           {/* 🔒 NO Financial Vault section — this is a PUBLIC view */}
+
+          {/* Market Value Badge */}
+          {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
           {/* Actions */}
           <div className="passport-actions" style={{ marginTop: "var(--space-lg)" }}>
