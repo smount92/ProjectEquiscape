@@ -33,7 +33,13 @@ interface UserCollection {
     description: string | null;
 }
 
-export default async function DashboardPage() {
+const HORSES_PER_PAGE = 48;
+
+export default async function DashboardPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ page?: string }>;
+}) {
     const supabase = await createClient();
     const {
         data: { user },
@@ -43,27 +49,40 @@ export default async function DashboardPage() {
         redirect("/login");
     }
 
+    const params = await searchParams;
+    const page = Math.max(1, parseInt(params.page || "1"));
+    const offset = (page - 1) * HORSES_PER_PAGE;
+
     // ── Round 1: Independent queries in parallel ──
-    const [profileResult, horsesResult, collectionsResult, showRecordsResult, convosResult] = await Promise.all([
+    // Lightweight summary query — no horse_images (the OOM driver)
+    // + paginated display query with images
+    const [profileResult, summaryResult, horsesResult, collectionsResult, showRecordsResult, convosResult] = await Promise.all([
         supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>(),
+        supabase.from("user_horses").select(`
+            id, collection_id, catalog_items:catalog_id(title, maker, item_type)
+        `, { count: "exact" }).eq("owner_id", user.id),
         supabase.from("user_horses").select(`
             id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor, trade_status, asset_category,
             catalog_items:catalog_id(title, maker, item_type),
             horse_images(image_url, angle_profile)
-        `).eq("owner_id", user.id).order("created_at", { ascending: false }),
+        `).eq("owner_id", user.id).order("created_at", { ascending: false }).range(offset, offset + HORSES_PER_PAGE - 1),
         supabase.from("user_collections").select("id, name, description").eq("user_id", user.id).order("name"),
         supabase.from("show_records").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("conversations").select("id").or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`),
     ]);
 
     const profile = profileResult.data;
+    const totalHorseCount = summaryResult.count ?? 0;
+    const allHorsesSummary = (summaryResult.data as unknown as { id: string; collection_id: string | null; catalog_items: { title: string; maker: string; item_type: string } | null }[]) ?? [];
     const horses = (horsesResult.data as unknown as HorseWithDetails[]) ?? [];
     const collections = (collectionsResult.data as unknown as UserCollection[]) ?? [];
     const totalShowRecords = showRecordsResult.count;
     const convoIds = (convosResult.data ?? []).map((c: { id: string }) => c.id);
+    const totalPages = Math.ceil(totalHorseCount / HORSES_PER_PAGE);
 
     // ── Round 2: Dependent queries in parallel ──
-    const horseIds = horses.map(h => h.id);
+    const horseIds = horses.map(h => h.id);  // only paginated horses
+    const allHorseIds = allHorsesSummary.map(h => h.id);  // all horses for vault
     const thumbnailUrls: string[] = [];
     horses.forEach((horse) => {
         const thumb = horse.horse_images?.find(
@@ -73,8 +92,8 @@ export default async function DashboardPage() {
     });
 
     const [vaultsResult, unreadResult, signedUrlMap] = await Promise.all([
-        horseIds.length > 0
-            ? supabase.from("financial_vault").select("purchase_price, estimated_current_value, horse_id").in("horse_id", horseIds)
+        allHorseIds.length > 0
+            ? supabase.from("financial_vault").select("purchase_price, estimated_current_value, horse_id").in("horse_id", allHorseIds)
             : Promise.resolve({ data: [] as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[] }),
         convoIds.length > 0
             ? supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).eq("is_read", false).in("conversation_id", convoIds)
@@ -91,16 +110,16 @@ export default async function DashboardPage() {
         totalVaultValue += v.estimated_current_value ?? v.purchase_price ?? 0;
     });
 
-    // Count horses per collection and compute vault value per collection
+    // Count horses per collection and compute vault value per collection (using lightweight summary)
     const collectionCounts = new Map<string, number>();
     const collectionValues = new Map<string, number>();
-    horses.forEach((h) => {
+    allHorsesSummary.forEach((h) => {
         if (h.collection_id) {
             collectionCounts.set(h.collection_id, (collectionCounts.get(h.collection_id) || 0) + 1);
         }
     });
     const horseCollectionMap = new Map<string, string>();
-    horses.forEach((h) => {
+    allHorsesSummary.forEach((h) => {
         if (h.collection_id) horseCollectionMap.set(h.id, h.collection_id);
     });
     vaults.forEach((v) => {
@@ -196,13 +215,13 @@ export default async function DashboardPage() {
                         </h1>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)" }}>
-                        {horses.length > 0 && (
+                        {totalHorseCount > 0 && (
                             <span className="shelf-stats">
-                                {horses.length} model{horses.length === 1 ? "" : "s"}
+                                {totalHorseCount} model{totalHorseCount === 1 ? "" : "s"}
                             </span>
                         )}
-                        {horses.length > 0 && <ExportButton />}
-                        {horses.length > 0 && <InsuranceReportButton />}
+                        {totalHorseCount > 0 && <ExportButton />}
+                        {totalHorseCount > 0 && <InsuranceReportButton />}
                         <Link href="/stable/import" className="btn btn-ghost" id="batch-import-button">
                             📄 Batch Import
                         </Link>
@@ -218,11 +237,11 @@ export default async function DashboardPage() {
                 </Suspense>
 
                 {/* 🔒 Stable Overview — PRIVATE analytics (never exposed publicly) */}
-                {horses.length > 0 && (
+                {totalHorseCount > 0 && (
                     <div className="analytics-row">
                         <div className="analytics-card">
                             <div className="analytics-icon">🐴</div>
-                            <div className="analytics-value">{horses.length}</div>
+                            <div className="analytics-value">{totalHorseCount}</div>
                             <div className="analytics-label">Total Models</div>
                         </div>
                         <div className="analytics-card">
@@ -287,6 +306,25 @@ export default async function DashboardPage() {
 
                 {/* Horse Grid with Search */}
                 <StableGrid horseCards={horseCards} />
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="market-pagination" style={{ marginTop: "var(--space-lg)" }}>
+                        {page > 1 ? (
+                            <Link href={`/dashboard?page=${page - 1}`} className="btn btn-ghost">← Previous</Link>
+                        ) : (
+                            <button className="btn btn-ghost" disabled>← Previous</button>
+                        )}
+                        <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                            Page {page} of {totalPages}
+                        </span>
+                        {page < totalPages ? (
+                            <Link href={`/dashboard?page=${page + 1}`} className="btn btn-ghost">Next →</Link>
+                        ) : (
+                            <button className="btn btn-ghost" disabled>Next →</button>
+                        )}
+                    </div>
+                )}
 
                 {/* Transfer History (Ghost Cards) */}
                 <TransferHistorySection />

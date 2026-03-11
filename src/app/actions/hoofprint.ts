@@ -343,6 +343,7 @@ export async function claimTransfer(transferCode: string): Promise<{
         sender_id?: string;
         sender_alias?: string;
         receiver_alias?: string;
+        sale_price?: number;
     };
 
     if (!result.success) {
@@ -358,7 +359,10 @@ export async function claimTransfer(transferCode: string): Promise<{
             partyBId: user.id,
             horseId: result.horse_id,
             status: "completed",
-            metadata: { transfer_code: transferCode },
+            metadata: {
+                transfer_code: transferCode,
+                sale_price: result.sale_price || null,
+            },
         });
     } catch { /* Non-blocking */ }
 

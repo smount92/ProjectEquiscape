@@ -1,26 +1,7 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { searchMarketPrices } from "@/app/actions/market";
-import type { MarketPrice } from "@/app/actions/market";
-
-const ITEM_TYPE_LABELS: Record<string, string> = {
-    all: "All Types",
-    plastic_mold: "Plastic Molds",
-    plastic_release: "Plastic Releases",
-    artist_resin: "Artist Resins",
-    tack: "Tack",
-    prop: "Props",
-};
-
-const SORT_OPTIONS = [
-    { value: "transaction_volume:desc", label: "Most Traded" },
-    { value: "average_price:desc", label: "Highest Value" },
-    { value: "average_price:asc", label: "Lowest Value" },
-    { value: "last_sold_at:desc", label: "Recently Sold" },
-    { value: "title:asc", label: "A – Z" },
-];
+import MarketFilters from "@/components/MarketFilters";
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
@@ -37,56 +18,59 @@ const formatRelativeTime = (dateStr: string | null) => {
     return `${Math.floor(days / 365)}y ago`;
 };
 
+const typeIcon = (type: string) => {
+    switch (type) {
+        case "plastic_mold":
+        case "plastic_release": return "🐎";
+        case "artist_resin": return "🎨";
+        case "tack": return "🏇";
+        case "prop": return "🌲";
+        case "diorama": return "🎭";
+        default: return "📦";
+    }
+};
+
 const PAGE_SIZE = 20;
 
-export default function MarketPricePage() {
-    const [items, setItems] = useState<MarketPrice[]>([]);
-    const [total, setTotal] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [debouncedQuery, setDebouncedQuery] = useState("");
-    const [itemType, setItemType] = useState("all");
-    const [sortValue, setSortValue] = useState("transaction_volume:desc");
-    const [offset, setOffset] = useState(0);
+export default async function MarketPricePage({
+    searchParams,
+}: {
+    searchParams: Promise<{ q?: string; type?: string; sort?: string; page?: string }>;
+}) {
+    const params = await searchParams;
+    const query = params.q || "";
+    const itemType = params.type || "all";
+    const sortValue = params.sort || "transaction_volume:desc";
+    const page = Math.max(1, parseInt(params.page || "1"));
+    const offset = (page - 1) * PAGE_SIZE;
 
-    // Debounce search
-    useEffect(() => {
-        const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+    const [sortBy, sortDirection] = sortValue.split(":") as [
+        "average_price" | "transaction_volume" | "last_sold_at" | "title",
+        "asc" | "desc"
+    ];
 
-    // Reset offset when filters change
-    useEffect(() => { setOffset(0); }, [debouncedQuery, itemType, sortValue]);
-
-    const loadData = useCallback(async () => {
-        setIsLoading(true);
-        const [sortBy, sortDirection] = sortValue.split(":") as [
-            "average_price" | "transaction_volume" | "last_sold_at" | "title",
-            "asc" | "desc"
-        ];
-
-        const result = await searchMarketPrices(
-            debouncedQuery || undefined,
-            { itemType: itemType !== "all" ? itemType : undefined, sortBy, sortDirection, limit: PAGE_SIZE, offset }
-        );
-
-        setItems(result.items);
-        setTotal(result.total);
-        setIsLoading(false);
-    }, [debouncedQuery, itemType, sortValue, offset]);
-
-    useEffect(() => { loadData(); }, [loadData]);
-
-    const typeIcon = (type: string) => {
-        switch (type) {
-            case "plastic_mold":
-            case "plastic_release": return "🐎";
-            case "artist_resin": return "🎨";
-            case "tack": return "🏇";
-            case "prop": return "🌲";
-            case "diorama": return "🎭";
-            default: return "📦";
+    const { items, total } = await searchMarketPrices(
+        query || undefined,
+        {
+            itemType: itemType !== "all" ? itemType : undefined,
+            sortBy,
+            sortDirection,
+            limit: PAGE_SIZE,
+            offset,
         }
+    );
+
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+
+    // Build pagination URLs
+    const buildPageUrl = (p: number) => {
+        const newParams = new URLSearchParams();
+        if (query) newParams.set("q", query);
+        if (itemType !== "all") newParams.set("type", itemType);
+        if (sortValue !== "transaction_volume:desc") newParams.set("sort", sortValue);
+        if (p > 1) newParams.set("page", String(p));
+        const qs = newParams.toString();
+        return `/market${qs ? `?${qs}` : ""}`;
     };
 
     return (
@@ -101,57 +85,22 @@ export default function MarketPricePage() {
                         </p>
                     </div>
 
-                    {/* Search & Filters */}
-                    <div className="market-filters">
-                        <div className="market-search-row">
-                            <input
-                                className="form-input market-search-input"
-                                type="search"
-                                placeholder="Search by mold, release, or artist resin…"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                        <div className="market-filter-row">
-                            <div className="market-type-filters">
-                                {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
-                                    <button
-                                        key={value}
-                                        className={`market-filter-chip ${itemType === value ? "active" : ""}`}
-                                        onClick={() => setItemType(value)}
-                                    >
-                                        {label}
-                                    </button>
-                                ))}
-                            </div>
-                            <select
-                                className="form-select market-sort-select"
-                                value={sortValue}
-                                onChange={(e) => setSortValue(e.target.value)}
-                            >
-                                {SORT_OPTIONS.map((opt) => (
-                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
+                    {/* Filters (Client Component) */}
+                    <Suspense fallback={null}>
+                        <MarketFilters />
+                    </Suspense>
 
-                    {/* Results */}
-                    {isLoading ? (
-                        <div style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
-                            <div className="btn-spinner" style={{ margin: "0 auto var(--space-md)", borderTopColor: "var(--color-accent-primary)" }} />
-                            <p style={{ color: "var(--color-text-muted)" }}>Loading price data…</p>
-                        </div>
-                    ) : items.length === 0 ? (
+                    {/* Results (Server-rendered) */}
+                    {items.length === 0 ? (
                         <div className="glass-card" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
                             <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>📊</div>
                             <h3 style={{ marginBottom: "var(--space-sm)" }}>
-                                {debouncedQuery || itemType !== "all"
+                                {query || itemType !== "all"
                                     ? "No matching price data"
                                     : "The Blue Book Grows With Every Sale"}
                             </h3>
                             <p style={{ color: "var(--color-text-secondary)", maxWidth: 400, margin: "0 auto" }}>
-                                {debouncedQuery || itemType !== "all"
+                                {query || itemType !== "all"
                                     ? "Try broadening your search or changing the filter."
                                     : "Complete a transaction to contribute market data. Prices appear here after verified sales."}
                             </p>
@@ -201,25 +150,25 @@ export default function MarketPricePage() {
                             </div>
 
                             {/* Pagination */}
-                            {total > PAGE_SIZE && (
+                            {totalPages > 1 && (
                                 <div className="market-pagination">
-                                    <button
-                                        className="btn btn-ghost"
-                                        onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
-                                        disabled={offset === 0}
-                                    >
-                                        ← Previous
-                                    </button>
+                                    {page > 1 ? (
+                                        <Link href={buildPageUrl(page - 1)} className="btn btn-ghost">
+                                            ← Previous
+                                        </Link>
+                                    ) : (
+                                        <button className="btn btn-ghost" disabled>← Previous</button>
+                                    )}
                                     <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
-                                        {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
+                                        Page {page} of {totalPages} ({total} items)
                                     </span>
-                                    <button
-                                        className="btn btn-ghost"
-                                        onClick={() => setOffset(offset + PAGE_SIZE)}
-                                        disabled={offset + PAGE_SIZE >= total}
-                                    >
-                                        Next →
-                                    </button>
+                                    {page < totalPages ? (
+                                        <Link href={buildPageUrl(page + 1)} className="btn btn-ghost">
+                                            Next →
+                                        </Link>
+                                    ) : (
+                                        <button className="btn btn-ghost" disabled>Next →</button>
+                                    )}
                                 </div>
                             )}
                         </>

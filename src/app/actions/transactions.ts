@@ -62,9 +62,7 @@ export async function completeTransaction(
 
     if (error) return { success: false, error: error.message };
 
-    // Fire-and-forget: refresh market prices materialized view
-    // Don't await — user shouldn't wait for REFRESH MATERIALIZED VIEW CONCURRENTLY
-    void (async () => { try { await supabase.rpc("refresh_market_prices" as string); } catch { } })();
+    // Market price refresh handled by Vercel cron (/api/cron/refresh-market)
 
     return { success: true };
 }

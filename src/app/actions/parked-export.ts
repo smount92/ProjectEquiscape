@@ -280,6 +280,7 @@ export async function claimParkedHorse(pin: string): Promise<{
             sender_id?: string;
             sender_alias?: string;
             receiver_alias?: string;
+            sale_price?: number;
         };
 
         if (!result.success) {
@@ -295,7 +296,10 @@ export async function claimParkedHorse(pin: string): Promise<{
                 partyBId: user.id,
                 horseId: result.horse_id,
                 status: "completed",
-                metadata: { pin },
+                metadata: {
+                    pin,
+                    sale_price: result.sale_price || null,
+                },
             });
         } catch { /* Non-blocking */ }
 

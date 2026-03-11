@@ -393,8 +393,8 @@ export default function EditHorsePage() {
 
       // ⚡ REMOVED: addTimelineEvent for listed status — now derived from view
 
-      // Hard redirect — clears all client state including isSaving
-      window.location.href = "/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim());
+      // Redirect — use Next.js router instead of window.location for serverless safety
+      router.push("/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim()));
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to save changes.");
     } finally {
