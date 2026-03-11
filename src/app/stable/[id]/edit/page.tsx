@@ -9,7 +9,7 @@ import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { ReleaseDetail } from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { compressImage } from "@/lib/utils/imageCompression";
-import { updateLifeStage, addTimelineEvent } from "@/app/actions/hoofprint";
+import { updateLifeStage } from "@/app/actions/hoofprint";
 import { getReleasesForMoldAction } from "@/app/actions/reference";
 import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages } from "@/app/actions/horse";
 
@@ -415,15 +415,7 @@ export default function EditHorsePage() {
         }).catch(() => { });
       }
 
-      // Auto-create Hoofprint™ listed event (fire-and-forget)
-      if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
-        addTimelineEvent({
-          horseId: horseId,
-          eventType: "listed",
-          title: `Listed: ${tradeStatus}`,
-          description: listingPrice ? `Listed at $${listingPrice}` : undefined,
-        }).catch(() => { /* Non-blocking */ });
-      }
+      // ⚡ REMOVED: addTimelineEvent for listed status — now derived from view
 
       // Hard redirect — clears all client state including isSaving
       window.location.href = "/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim());

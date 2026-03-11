@@ -155,7 +155,7 @@ export default async function CommunityPage({
 
   // Hoofprint counts (for badge)
   const { data: hoofprintData } = await supabase
-    .from("horse_timeline")
+    .from("v_horse_hoofprint")
     .select("horse_id")
     .in("horse_id", horseIds)
     .eq("is_public", true);

@@ -53,18 +53,8 @@ export async function addShowRecord(data: {
         metadata: { showName: data.showName, placing: data.placing || null },
     });
 
-    // Hoofprint timeline event
-    try {
-        const { addTimelineEvent } = await import("@/app/actions/hoofprint");
-        await addTimelineEvent({
-            horseId: data.horseId,
-            eventType: "show_result",
-            title: `${data.showName}${data.placing ? ` — ${data.placing}` : ""}`,
-            description: [data.division, data.ribbonColor ? `${data.ribbonColor} ribbon` : null, data.judgeName ? `Judge: ${data.judgeName}` : null]
-                .filter(Boolean).join(" · ") || undefined,
-            eventDate: data.showDate,
-        });
-    } catch { /* non-blocking */ }
+    // ⚡ REMOVED: addTimelineEvent call — show results are now derived
+    // automatically by v_horse_hoofprint from the show_records table.
 
     return { success: true };
 }

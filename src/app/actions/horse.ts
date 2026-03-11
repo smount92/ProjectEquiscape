@@ -119,19 +119,9 @@ export async function updateHorseAction(horseId: string, data: {
         }
 
         // ── Condition History Ledger ──
-        // NOTE: condition_history INSERT is now handled by Postgres trigger
-        // (trg_user_horses_condition). We only add the Hoofprint timeline event.
-        if (data.conditionChange) {
-            try {
-                await supabase.from("horse_timeline").insert({
-                    horse_id: horseId,
-                    user_id: user.id,
-                    event_type: "condition_change",
-                    title: `Condition updated to ${data.conditionChange.newCondition}`,
-                    description: data.conditionChange.note || undefined,
-                });
-            } catch { /* Non-blocking — don't fail the save */ }
-        }
+        // condition_history INSERT is handled by Postgres trigger (trg_user_horses_condition).
+        // v_horse_hoofprint view derives timeline events from condition_history automatically.
+        // No manual timeline insert needed.
 
         revalidatePath(`/stable/${horseId}`);
         return { success: true };

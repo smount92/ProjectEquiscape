@@ -518,24 +518,19 @@ export async function updateCommissionStatus(
                         .single();
                     const artistAlias = (artistUser as { alias_name: string } | null)?.alias_name || "Artist";
 
-                    // Insert each WIP as a timeline event
-                    const timelineEntries = (wipUpdates as { title: string | null; body: string | null; image_urls: string[]; created_at: string }[]).map((wip, i) => ({
-                        horse_id: c.horse_id,
-                        user_id: c.artist_id,
-                        event_type: "customization",
-                        title: wip.title || `${c.commission_type} — WIP ${i + 1}`,
-                        description: wip.body || `Work-in-progress by @${artistAlias}`,
-                        event_date: wip.created_at.split("T")[0],
-                        metadata: {
-                            artist: artistAlias,
-                            commissionType: c.commission_type,
-                            commissionId,
-                            imageUrls: wip.image_urls || [],
-                        },
-                        is_public: true,
-                    }));
-
-                    await supabase.from("horse_timeline").insert(timelineEntries);
+                    // ⚡ REMOVED: horse_timeline INSERT — WIP events now derived by v_horse_hoofprint
+                    // from customization_logs table. Insert customization_log entries instead.
+                    for (const wip of (wipUpdates as { title: string | null; body: string | null; image_urls: string[]; created_at: string }[])) {
+                        try {
+                            await supabase.from("customization_logs").insert({
+                                horse_id: c.horse_id,
+                                work_type: c.commission_type,
+                                artist_alias: artistAlias,
+                                materials_used: wip.body || wip.title || `${c.commission_type} — WIP`,
+                                date_completed: wip.created_at.split("T")[0],
+                            });
+                        } catch { /* best-effort */ }
+                    }
                 }
             } catch {
                 // Non-blocking: Hoofprint injection is best-effort

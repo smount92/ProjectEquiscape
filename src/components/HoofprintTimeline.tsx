@@ -60,11 +60,8 @@ export default function HoofprintTimeline({
     const router = useRouter();
     const [showForm, setShowForm] = useState(false);
     const [formState, setFormState] = useState({
-        eventType: "note",
         title: "",
         description: "",
-        eventDate: new Date().toISOString().split("T")[0],
-        isPublic: true,
     });
     const [saving, setSaving] = useState(false);
     const [stageUpdating, setStageUpdating] = useState(false);
@@ -75,14 +72,12 @@ export default function HoofprintTimeline({
         setSaving(true);
         const result = await addTimelineEvent({
             horseId,
-            eventType: formState.eventType,
+            eventType: "note",
             title: formState.title.trim(),
             description: formState.description.trim() || undefined,
-            eventDate: formState.eventDate || undefined,
-            isPublic: formState.isPublic,
         });
         if (result.success) {
-            setFormState({ eventType: "note", title: "", description: "", eventDate: new Date().toISOString().split("T")[0], isPublic: true });
+            setFormState({ title: "", description: "" });
             setShowForm(false);
             router.refresh();
         }
@@ -134,7 +129,7 @@ export default function HoofprintTimeline({
                                 onClick={() => setShowForm(!showForm)}
                                 style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}
                             >
-                                {showForm ? "Cancel" : "＋ Add Event"}
+                                {showForm ? "Cancel" : "📝 Add Note"}
                             </button>
                         </>
                     )}
@@ -173,33 +168,6 @@ export default function HoofprintTimeline({
             {/* Add Event Form */}
             {showForm && (
                 <form onSubmit={handleAddEvent} className="timeline-add-form">
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-sm)" }}>
-                        <div className="form-group">
-                            <label className="form-label">Event Type</label>
-                            <select
-                                className="form-input"
-                                value={formState.eventType}
-                                onChange={(e) => setFormState({ ...formState, eventType: e.target.value })}
-                            >
-                                <option value="note">📝 Note</option>
-                                <option value="customization">✂️ Customization</option>
-                                <option value="photo_update">📸 Photo Update</option>
-                                <option value="show_result">🏆 Show Result</option>
-                                <option value="acquired">🏠 Acquired</option>
-                                <option value="listed">💲 Listed</option>
-                                <option value="sold">🤝 Sold</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Date</label>
-                            <input
-                                type="date"
-                                className="form-input"
-                                value={formState.eventDate}
-                                onChange={(e) => setFormState({ ...formState, eventDate: e.target.value })}
-                            />
-                        </div>
-                    </div>
                     <div className="form-group">
                         <label className="form-label">Title</label>
                         <input
@@ -222,16 +190,11 @@ export default function HoofprintTimeline({
                         />
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", marginTop: "var(--space-sm)" }}>
-                        <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "calc(0.8rem * var(--font-scale))", cursor: "pointer" }}>
-                            <input
-                                type="checkbox"
-                                checked={formState.isPublic}
-                                onChange={(e) => setFormState({ ...formState, isPublic: e.target.checked })}
-                            />
-                            Public (visible on community passport)
-                        </label>
+                        <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                            📝 Notes appear on the Hoofprint™ timeline
+                        </span>
                         <button type="submit" className="btn btn-primary" disabled={saving} style={{ marginLeft: "auto" }}>
-                            {saving ? "Saving…" : "Add to Timeline"}
+                            {saving ? "Saving…" : "Add Note"}
                         </button>
                     </div>
                 </form>
@@ -270,12 +233,13 @@ export default function HoofprintTimeline({
                                         <div className="timeline-event-desc">{event.description}</div>
                                     )}
                                 </div>
-                                {isOwner && currentUserId && event.userId === currentUserId && (
+                                {/* Only user-authored notes (from posts) can be deleted */}
+                                {isOwner && currentUserId && event.userId === currentUserId && event.sourceTable === "posts" && (
                                     <button
                                         className="btn btn-ghost"
                                         onClick={() => handleDelete(event.id)}
                                         style={{ fontSize: "0.7rem", padding: "2px 6px", opacity: 0.5 }}
-                                        title="Delete event"
+                                        title="Delete note"
                                     >
                                         🗑
                                     </button>

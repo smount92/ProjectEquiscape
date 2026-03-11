@@ -91,15 +91,7 @@ export async function parkHorse(horseId: string): Promise<{
 
         if (transferError) return { success: false, error: transferError.message };
 
-        // Add timeline event
-        await supabase.from("horse_timeline").insert({
-            horse_id: horseId,
-            user_id: user.id,
-            event_type: "status_change",
-            title: "Parked for off-platform sale",
-            description: `${h.custom_name} was parked for an off-platform sale. A Certificate of Authenticity with claim PIN was generated.`,
-            metadata: { action: "parked", pin },
-        });
+        // ⚡ REMOVED: horse_timeline INSERT — now derived from v_horse_hoofprint view
 
         revalidatePath(`/stable/${horseId}`);
         revalidatePath("/dashboard");
@@ -223,8 +215,8 @@ export async function getParkedHorseByPin(pin: string): Promise<{
         let ownerCount = 1;
         try {
             const { count: tc } = await admin
-                .from("horse_timeline")
-                .select("id", { count: "exact", head: true })
+                .from("v_horse_hoofprint")
+                .select("source_id", { count: "exact", head: true })
                 .eq("horse_id", t.horse_id)
                 .eq("is_public", true);
             timelineCount = tc || 0;
@@ -414,8 +406,8 @@ export async function getCoaData(horseId: string): Promise<{
 
         // Counts
         const { count: timelineCount } = await supabase
-            .from("horse_timeline")
-            .select("id", { count: "exact", head: true })
+            .from("v_horse_hoofprint")
+            .select("source_id", { count: "exact", head: true })
             .eq("horse_id", horseId)
             .eq("is_public", true);
 

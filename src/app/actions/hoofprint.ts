@@ -21,6 +21,7 @@ export interface TimelineEvent {
     createdAt: string;
     userAlias: string;
     userId: string;
+    sourceTable?: string;
 }
 
 export interface OwnershipRecord {
@@ -35,7 +36,7 @@ export interface OwnershipRecord {
     notes: string | null;
 }
 
-// ── Get Timeline ──
+// ── Get Timeline (reads from v_horse_hoofprint view) ──
 
 export async function getHoofprint(horseId: string): Promise<{
     timeline: TimelineEvent[];
@@ -44,22 +45,31 @@ export async function getHoofprint(horseId: string): Promise<{
 }> {
     const supabase = await createClient();
 
-    // Fetch timeline events with user alias via PostgREST join
+    // Single query → the view does all the UNION ALL work
     const { data: rawTimeline } = await supabase
-        .from("horse_timeline")
-        .select("id, event_type, title, description, event_date, metadata, is_public, created_at, user_id, users!user_id(alias_name)")
+        .from("v_horse_hoofprint")
+        .select("source_id, horse_id, user_id, event_type, title, description, event_date, metadata, is_public, created_at, source_table")
         .eq("horse_id", horseId)
-        .order("event_date", { ascending: false, nullsFirst: false });
+        .order("event_date", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false });
 
-    const events = (rawTimeline as unknown as {
-        id: string; event_type: string; title: string; description: string | null;
+    // Fetch user aliases for all unique user IDs in the results
+    const userIds = [...new Set((rawTimeline ?? []).map((e: { user_id: string }) => e.user_id).filter(Boolean))];
+    let aliasMap = new Map<string, string>();
+    if (userIds.length > 0) {
+        const { data: users } = await supabase
+            .from("users")
+            .select("id, alias_name")
+            .in("id", userIds);
+        (users ?? []).forEach((u: { id: string; alias_name: string }) => aliasMap.set(u.id, u.alias_name));
+    }
+
+    const timeline: TimelineEvent[] = (rawTimeline ?? []).map((e: {
+        source_id: string; event_type: string; title: string; description: string | null;
         event_date: string | null; metadata: Record<string, unknown>; is_public: boolean;
-        created_at: string; user_id: string;
-        users: { alias_name: string } | null;
-    }[]) ?? [];
-
-    const timeline: TimelineEvent[] = events.map(e => ({
-        id: e.id,
+        created_at: string; user_id: string; source_table: string;
+    }) => ({
+        id: e.source_id,
         eventType: e.event_type,
         title: e.title,
         description: e.description,
@@ -67,11 +77,12 @@ export async function getHoofprint(horseId: string): Promise<{
         metadata: e.metadata || {},
         isPublic: e.is_public,
         createdAt: e.created_at,
-        userAlias: e.users?.alias_name || "Unknown",
+        userAlias: aliasMap.get(e.user_id) || "Unknown",
         userId: e.user_id,
+        sourceTable: e.source_table,
     }));
 
-    // Fetch ownership chain
+    // Fetch ownership chain (direct table query — unchanged)
     const { data: rawOwnership } = await supabase
         .from("horse_ownership_history")
         .select("id, owner_alias, owner_id, acquired_at, released_at, acquisition_type, sale_price, is_price_public, notes")
@@ -108,7 +119,9 @@ export async function getHoofprint(horseId: string): Promise<{
     };
 }
 
-// ── Add Timeline Event ──
+// ── Add Timeline Event → creates a Post (user notes only) ──
+// System events (condition changes, transfers, etc.) are now
+// derived automatically from the v_horse_hoofprint view.
 
 export async function addTimelineEvent(data: {
     horseId: string;
@@ -123,15 +136,15 @@ export async function addTimelineEvent(data: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
 
-    const { error } = await supabase.from("horse_timeline").insert({
+    // Build post content from title + description
+    const content = data.description
+        ? data.title + "\n\n" + data.description
+        : data.title;
+
+    const { error } = await supabase.from("posts").insert({
+        author_id: user.id,
         horse_id: data.horseId,
-        user_id: user.id,
-        event_type: data.eventType,
-        title: data.title,
-        description: data.description || null,
-        event_date: data.eventDate || new Date().toISOString().split("T")[0],
-        metadata: data.metadata || {},
-        is_public: data.isPublic ?? true,
+        content,
     });
 
     if (error) return { success: false, error: error.message };
@@ -141,13 +154,20 @@ export async function addTimelineEvent(data: {
 }
 
 // ── Delete Timeline Event ──
+// Only user notes (source_table = 'posts') can be deleted.
+// System events are immutable — derived from reality.
 
 export async function deleteTimelineEvent(eventId: string, horseId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Delete the post (RLS ensures only author or horse owner can delete)
     const { error } = await supabase
-        .from("horse_timeline")
+        .from("posts")
         .delete()
-        .eq("id", eventId);
+        .eq("id", eventId)
+        .eq("author_id", user.id);
 
     if (error) return { success: false, error: error.message };
     revalidatePath(`/stable/${horseId}`);
@@ -156,6 +176,8 @@ export async function deleteTimelineEvent(eventId: string, horseId: string): Pro
 }
 
 // ── Update Life Stage ──
+// No longer writes to horse_timeline — condition_history trigger
+// and v_horse_hoofprint view handle the timeline automatically.
 
 export async function updateLifeStage(
     horseId: string,
@@ -165,21 +187,19 @@ export async function updateLifeStage(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
 
-    // Get current stage for timeline entry
+    // Get current stage
     const { data: horse } = await supabase
         .from("user_horses")
-        .select("life_stage, custom_name")
+        .select("life_stage")
         .eq("id", horseId)
         .eq("owner_id", user.id)
         .single();
 
     if (!horse) return { success: false, error: "Horse not found." };
     const current = (horse as { life_stage: string }).life_stage;
-    const horseName = (horse as { custom_name: string }).custom_name;
-
     if (current === newStage) return { success: true };
 
-    // Update the horse
+    // Update the horse — that's it! No timeline insert needed.
     const { error } = await supabase
         .from("user_horses")
         .update({ life_stage: newStage })
@@ -188,29 +208,14 @@ export async function updateLifeStage(
 
     if (error) return { success: false, error: error.message };
 
-    // Create timeline event
-    const stageLabels: Record<string, string> = {
-        blank: "Blank / Unpainted",
-        in_progress: "Work in Progress",
-        completed: "Completed",
-        for_sale: "Listed for Sale",
-    };
-
-    await supabase.from("horse_timeline").insert({
-        horse_id: horseId,
-        user_id: user.id,
-        event_type: "stage_update",
-        title: `Stage: ${stageLabels[newStage] || newStage}`,
-        description: `${horseName} moved from ${stageLabels[current] || current} to ${stageLabels[newStage] || newStage}.`,
-        metadata: { from_stage: current, to_stage: newStage },
-    });
-
     revalidatePath(`/stable/${horseId}`);
     revalidatePath(`/community/${horseId}`);
     return { success: true };
 }
 
 // ── Initialize Hoofprint (called when adding a horse) ──
+// No longer writes to horse_timeline — the v_horse_hoofprint view
+// derives the "Added to stable" event from the user_horses row itself.
 
 export async function initializeHoofprint(data: {
     horseId: string;
@@ -230,7 +235,7 @@ export async function initializeHoofprint(data: {
         .single();
     const alias = (profile as { alias_name: string } | null)?.alias_name || "Unknown";
 
-    // Create initial ownership record
+    // Create initial ownership record (the only real insert needed)
     await supabase.from("horse_ownership_history").insert({
         horse_id: data.horseId,
         owner_id: user.id,
@@ -239,15 +244,7 @@ export async function initializeHoofprint(data: {
         notes: data.acquisitionNotes || null,
     });
 
-    // Create initial timeline event
-    await supabase.from("horse_timeline").insert({
-        horse_id: data.horseId,
-        user_id: user.id,
-        event_type: "acquired",
-        title: `Added to ${alias}'s stable`,
-        description: `${data.horseName} was registered on Model Horse Hub.`,
-        metadata: { life_stage: data.lifeStage || "completed" },
-    });
+    // ⚡ REMOVED: horse_timeline INSERT — now derived from v_horse_hoofprint view
 }
 
 // ============================================================
@@ -327,7 +324,7 @@ export async function claimTransfer(transferCode: string): Promise<{
         return { success: false, error: "Too many attempts. Please wait 15 minutes before trying again." };
     }
 
-    // Single atomic RPC — handles locking, validation, ownership swap, timeline, vault clearing
+    // Single atomic RPC — handles locking, validation, ownership swap, vault clearing
     const admin = getAdminClient();
     const { data, error } = await admin.rpc("claim_transfer_atomic", {
         p_code: transferCode,
