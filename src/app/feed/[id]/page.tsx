@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import RichText from "@/components/RichText";
 import LikeToggle from "@/components/LikeToggle";
-import { toggleActivityLike } from "@/app/actions/likes";
+import { togglePostLike } from "@/app/actions/posts";
 
 export const dynamic = "force-dynamic";
 
@@ -11,17 +11,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const { id } = await params;
     const supabase = await createClient();
     const { data: post } = await supabase
-        .from("activity_events")
-        .select("metadata, users!activity_events_actor_id_fkey(alias_name)")
+        .from("posts")
+        .select("content, users!posts_author_id_fkey(alias_name)")
         .eq("id", id)
         .single();
 
-    const text = ((post as Record<string, unknown>)?.metadata as { text?: string })?.text || "";
-    const alias = ((post as Record<string, unknown>)?.users as { alias_name: string } | null)?.alias_name ?? "Unknown";
+    const p = post as Record<string, unknown> | null;
+    const content = (p?.content as string) || "";
+    const alias = (p?.users as { alias_name: string } | null)?.alias_name ?? "Unknown";
 
     return {
-        title: text ? `${alias}: ${text.slice(0, 60)}… — Model Horse Hub` : "Post — Model Horse Hub",
-        description: text.slice(0, 160) || "A post on Model Horse Hub",
+        title: content ? `${alias}: ${content.slice(0, 60)}… — Model Horse Hub` : "Post — Model Horse Hub",
+        description: content.slice(0, 160) || "A post on Model Horse Hub",
     };
 }
 
@@ -32,8 +33,8 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
     if (!user) redirect("/login");
 
     const { data: post } = await supabase
-        .from("activity_events")
-        .select("id, actor_id, event_type, metadata, image_urls, likes_count, created_at, users!activity_events_actor_id_fkey(alias_name)")
+        .from("posts")
+        .select("id, author_id, content, likes_count, created_at, users!posts_author_id_fkey(alias_name)")
         .eq("id", id)
         .single();
 
@@ -41,22 +42,30 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
 
     const p = post as Record<string, unknown>;
     const actorAlias = (p.users as { alias_name: string } | null)?.alias_name ?? "Unknown";
-    const text = ((p.metadata as { text?: string })?.text) || "";
-    const imageUrls = (p.image_urls as string[]) || [];
+    const content = (p.content as string) || "";
 
     // Check if user liked
     const { data: liked } = await supabase
-        .from("activity_likes")
+        .from("likes")
         .select("user_id")
         .eq("user_id", user.id)
-        .eq("activity_id", id)
+        .eq("post_id", id)
         .maybeSingle();
 
-    // Sign image URLs
-    let signedUrls: string[] = [];
-    if (imageUrls.length > 0) {
-        const { data: batch } = await supabase.storage.from("horse-images").createSignedUrls(imageUrls, 3600);
-        signedUrls = batch?.map(b => b.signedUrl || "") || [];
+    // Fetch media
+    const { data: media } = await supabase
+        .from("media_attachments")
+        .select("id, storage_path, caption")
+        .eq("post_id", id);
+
+    let signedUrls: { url: string; caption: string | null }[] = [];
+    if (media && media.length > 0) {
+        const paths = (media as { storage_path: string }[]).map(m => m.storage_path);
+        const { data: batch } = await supabase.storage.from("horse-images").createSignedUrls(paths, 3600);
+        signedUrls = (media as { storage_path: string; caption: string | null }[]).map((m, i) => ({
+            url: batch?.[i]?.signedUrl || "",
+            caption: m.caption,
+        }));
     }
 
     return (
@@ -74,13 +83,13 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
                         </span>
                     </div>
 
-                    {text && <div style={{ marginTop: "var(--space-md)" }}><RichText content={text} /></div>}
+                    {content && <div style={{ marginTop: "var(--space-md)" }}><RichText content={content} /></div>}
 
                     {signedUrls.length > 0 && (
                         <div className="feed-image-collage" data-count={Math.min(signedUrls.length, 4)} style={{ marginTop: "var(--space-md)" }}>
-                            {signedUrls.slice(0, 4).map((url, i) => (
+                            {signedUrls.slice(0, 4).map((item, i) => (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img key={i} src={url} alt={`Image ${i + 1}`} loading="lazy" />
+                                <img key={i} src={item.url} alt={item.caption || `Image ${i + 1}`} loading="lazy" />
                             ))}
                         </div>
                     )}
@@ -89,7 +98,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
                         <LikeToggle
                             initialLiked={!!liked}
                             initialCount={(p.likes_count as number) || 0}
-                            onToggle={() => toggleActivityLike(id)}
+                            onToggle={() => togglePostLike(id)}
                         />
                     </div>
                 </div>

@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { addEventPhoto, deleteEventPhoto } from "@/app/actions/events";
+import { addEventMedia, deleteEventMedia } from "@/app/actions/posts";
 import { createClient } from "@/lib/supabase/client";
 
 interface EventPhoto {
@@ -63,7 +63,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
 
             // Create DB record via server action
             startTransition(async () => {
-                const result = await addEventPhoto(eventId, storagePath);
+                const result = await addEventMedia(eventId, storagePath);
                 if (result.success) {
                     // Optimistic — add with object URL for immediate preview
                     const previewUrl = URL.createObjectURL(file);
@@ -91,7 +91,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
     async function handleDelete(photoId: string) {
         if (!confirm("Delete this photo?")) return;
         startTransition(async () => {
-            const result = await deleteEventPhoto(photoId);
+            const result = await deleteEventMedia(photoId);
             if (result.success) {
                 setPhotos(prev => prev.filter(p => p.id !== photoId));
                 router.refresh();

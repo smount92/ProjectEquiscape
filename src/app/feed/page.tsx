@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { getActivityFeed, getFollowingFeed } from "@/app/actions/activity";
+import { getFollowingFeed } from "@/app/actions/activity";
+import { getPosts } from "@/app/actions/posts";
+import UniversalFeed from "@/components/UniversalFeed";
 import LoadMoreFeed from "@/components/LoadMoreFeed";
-import FeedComposeBar from "@/components/FeedComposeBar";
 import Link from "next/link";
 
 export const metadata = {
@@ -27,10 +28,16 @@ export default async function FeedPage({
     const { tab } = await searchParams;
     const activeTab = tab === "following" ? "following" : "global";
 
-    const { items: feedItems, nextCursor } =
-        activeTab === "following"
-            ? await getFollowingFeed(30)
-            : await getActivityFeed(30);
+    // Global tab → unified posts table
+    // Following tab → legacy activity_events (system events from followed users)
+    let followingData: { items: Awaited<ReturnType<typeof getFollowingFeed>>["items"]; nextCursor: string | null } | null = null;
+    let globalPosts: Awaited<ReturnType<typeof getPosts>> = [];
+
+    if (activeTab === "following") {
+        followingData = await getFollowingFeed(30);
+    } else {
+        globalPosts = await getPosts({ globalFeed: true }, { includeReplies: true, limit: 30 });
+    }
 
     return (
         <div className="page-container">
@@ -62,21 +69,26 @@ export default async function FeedPage({
                 </Link>
             </div>
 
-            {/* Compose */}
-            <FeedComposeBar />
-
-            {/* Feed with Load More */}
-            <LoadMoreFeed
-                initialItems={feedItems}
-                initialCursor={nextCursor}
-                feedType={activeTab}
-                currentUserId={user.id}
-                emptyMessage={
-                    activeTab === "following"
-                        ? "Follow collectors on the Discover page to see their activity!"
-                        : "No activity yet. Be the first to add a horse!"
-                }
-            />
+            {activeTab === "global" ? (
+                /* ── Global Tab: UniversalFeed (posts table) ── */
+                <UniversalFeed
+                    initialPosts={globalPosts}
+                    context={{ globalFeed: true }}
+                    currentUserId={user.id}
+                    showComposer={true}
+                    composerPlaceholder="Share an update with the community… (supports @mentions)"
+                    label="Community Posts"
+                />
+            ) : (
+                /* ── Following Tab: Legacy system events feed ── */
+                <LoadMoreFeed
+                    initialItems={followingData?.items ?? []}
+                    initialCursor={followingData?.nextCursor ?? null}
+                    feedType="following"
+                    currentUserId={user.id}
+                    emptyMessage="Follow collectors on the Discover page to see their activity!"
+                />
+            )}
         </div>
     );
 }

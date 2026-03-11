@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { getEvent, getEventComments, getEventAttendees, getEventPhotos } from "@/app/actions/events";
+import { getEvent, getEventAttendees } from "@/app/actions/events";
+import { getPosts, getEventMedia } from "@/app/actions/posts";
 import EventRsvpButton from "@/components/EventRsvpButton";
 import EventDeleteButton from "@/components/EventDeleteButton";
-import EventCommentSection from "@/components/EventCommentSection";
 import EventPhotoGallery from "@/components/EventPhotoGallery";
+import UniversalFeed from "@/components/UniversalFeed";
 
 import { EVENT_TYPE_LABELS } from "@/lib/constants/events";
 
@@ -32,8 +33,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     // Parallel data fetches
     const [attendees, comments, photos] = await Promise.all([
         getEventAttendees(id),
-        getEventComments(id),
-        getEventPhotos(id),
+        getPosts({ eventId: id }, { includeReplies: true }),
+        getEventMedia(id),
     ]);
 
     const date = new Date(event.startsAt);
@@ -156,8 +157,15 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {/* Photo Gallery */}
                 <EventPhotoGallery eventId={event.id} currentUserId={user.id} initialPhotos={photos} />
 
-                {/* Comments */}
-                <EventCommentSection eventId={event.id} currentUserId={user.id} creatorId={event.createdBy} initialComments={comments} />
+                {/* Comments — now via UniversalFeed */}
+                <UniversalFeed
+                    initialPosts={comments}
+                    context={{ eventId: event.id }}
+                    currentUserId={user.id}
+                    showComposer={true}
+                    composerPlaceholder="Add a comment on this event…"
+                    label="Comments"
+                />
             </div>
         </div>
     );

@@ -1,10 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { getShowEntries } from "@/app/actions/shows";
+import { getPosts } from "@/app/actions/posts";
 import Link from "next/link";
 import VoteButton from "@/components/VoteButton";
 import ShowEntryForm from "@/components/ShowEntryForm";
 import WithdrawButton from "@/components/WithdrawButton";
+import UniversalFeed from "@/components/UniversalFeed";
 
 export async function generateMetadata({
     params,
@@ -32,6 +34,8 @@ export default async function ShowDetailPage({
 
     const { show, entries } = await getShowEntries(showId);
     if (!show) notFound();
+
+    const showComments = await getPosts({ showId }, { includeReplies: true });
 
     // Fetch user's public horses for entry form
     const { data: userHorses } = await supabase
@@ -207,6 +211,16 @@ export default async function ShowDetailPage({
                     ))}
                 </div>
             )}
+
+            {/* Show Discussion */}
+            <UniversalFeed
+                initialPosts={showComments}
+                context={{ showId }}
+                currentUserId={user.id}
+                showComposer={true}
+                composerPlaceholder="Discuss this show…"
+                label="Discussion"
+            />
         </div>
     );
 }
