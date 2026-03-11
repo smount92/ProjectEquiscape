@@ -6,6 +6,7 @@ import RatingForm from "@/components/RatingForm";
 import TransactionActions from "@/components/TransactionActions";
 import BlockButton from "@/components/BlockButton";
 import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
+import { getTransactionByConversation } from "@/app/actions/transactions";
 
 export async function generateMetadata({
     params,
@@ -95,12 +96,12 @@ export default async function ChatPage({
         .eq("status", "claimed")
         .or(`sender_id.eq.${otherId},claimed_by.eq.${otherId}`);
 
-    // Average rating
-    const { data: ratingsData } = await supabase
-        .from("user_ratings")
+    // Average rating (from universal reviews table)
+    const { data: reviewsData } = await supabase
+        .from("reviews")
         .select("stars")
-        .eq("reviewed_id", otherId);
-    const ratingsArr = (ratingsData ?? []) as { stars: number }[];
+        .eq("target_id", otherId);
+    const ratingsArr = (reviewsData ?? []) as { stars: number }[];
     const avgRating = ratingsArr.length > 0
         ? Math.round((ratingsArr.reduce((s, r) => s + r.stars, 0) / ratingsArr.length) * 10) / 10
         : null;
@@ -158,22 +159,32 @@ export default async function ChatPage({
 
     const isBuyer = conversation.buyer_id === user.id;
 
-    // Check if user has already rated the other party in this conversation
-    const { data: rawRating } = await supabase
-        .from("user_ratings")
-        .select("id, stars, review_text, created_at")
-        .eq("conversation_id", conversationId)
-        .eq("reviewer_id", user.id)
-        .maybeSingle();
+    // Look up or find the transaction for this conversation
+    const txn = await getTransactionByConversation(conversationId);
+    const transactionId = txn?.transactionId ?? null;
 
-    const existingRating = rawRating ? {
-        id: (rawRating as { id: string }).id,
-        stars: (rawRating as { stars: number }).stars,
-        reviewText: (rawRating as { review_text: string | null }).review_text,
-        createdAt: (rawRating as { created_at: string }).created_at,
-    } : null;
+    // Check if user has already reviewed via the new reviews table
+    let existingRating: { id: string; stars: number; reviewText: string | null; createdAt: string } | null = null;
+    if (transactionId) {
+        const { data: rawReview } = await supabase
+            .from("reviews")
+            .select("id, stars, content, created_at")
+            .eq("transaction_id", transactionId)
+            .eq("reviewer_id", user.id)
+            .maybeSingle();
 
-    // Check for completed transfer between these two users
+        if (rawReview) {
+            const rv = rawReview as { id: string; stars: number; content: string | null; created_at: string };
+            existingRating = {
+                id: rv.id,
+                stars: rv.stars,
+                reviewText: rv.content,
+                createdAt: rv.created_at,
+            };
+        }
+    }
+
+    // Check for completed transfer between these two users (trust signal)
     const { count: mutualTransfers } = await supabase
         .from("horse_transfers")
         .select("id", { count: "exact", head: true })
@@ -289,14 +300,16 @@ export default async function ChatPage({
                 hasRating={!!existingRating}
             />
 
-            {/* Rating Form */}
-            <RatingForm
-                conversationId={conversationId}
-                reviewedId={otherId}
-                reviewedAlias={otherAlias}
-                existingRating={existingRating}
-                hasVerifiedTransfer={(mutualTransfers || 0) > 0}
-            />
+            {/* Rating Form — only show if a transaction exists (conversation marked complete) */}
+            {transactionId && (
+                <RatingForm
+                    transactionId={transactionId}
+                    targetId={otherId}
+                    targetAlias={otherAlias}
+                    existingRating={existingRating}
+                    hasVerifiedTransfer={(mutualTransfers || 0) > 0}
+                />
+            )}
         </div>
     );
 }

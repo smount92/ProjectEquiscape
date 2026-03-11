@@ -255,12 +255,12 @@ export async function markTransactionComplete(
     // Verify user is part of this conversation
     const { data: convo } = await supabase
         .from("conversations")
-        .select("buyer_id, seller_id")
+        .select("buyer_id, seller_id, horse_id")
         .eq("id", conversationId)
         .single();
 
     if (!convo) return { success: false, error: "Conversation not found." };
-    const c = convo as { buyer_id: string; seller_id: string };
+    const c = convo as { buyer_id: string; seller_id: string; horse_id: string | null };
     if (c.buyer_id !== user.id && c.seller_id !== user.id) {
         return { success: false, error: "Unauthorized." };
     }
@@ -271,6 +271,20 @@ export async function markTransactionComplete(
         .eq("id", conversationId);
 
     if (error) return { success: false, error: error.message };
+
+    // Create a completed transaction for this marketplace sale (enables reviews)
+    try {
+        const { createTransaction } = await import("@/app/actions/transactions");
+        await createTransaction({
+            type: "marketplace_sale",
+            partyAId: c.seller_id,
+            partyBId: c.buyer_id,
+            conversationId,
+            horseId: c.horse_id || undefined,
+            status: "completed",
+        });
+    } catch { /* Non-blocking */ }
+
     return { success: true };
 }
 

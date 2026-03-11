@@ -294,6 +294,19 @@ export async function claimParkedHorse(pin: string): Promise<{
             return { success: false, error: result.error || "Claim failed." };
         }
 
+        // Create a completed transaction for this parked sale (enables reviews)
+        try {
+            const { createTransaction } = await import("@/app/actions/transactions");
+            await createTransaction({
+                type: "parked_sale",
+                partyAId: result.sender_id!,
+                partyBId: user.id,
+                horseId: result.horse_id,
+                status: "completed",
+                metadata: { pin },
+            });
+        } catch { /* Non-blocking */ }
+
         // Notification (non-critical)
         try {
             await admin.from("notifications").insert({

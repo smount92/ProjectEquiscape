@@ -6,7 +6,7 @@ import ShareButton from "@/components/ShareButton";
 import MessageSellerButton from "@/components/MessageSellerButton";
 import RatingBadge from "@/components/RatingBadge";
 import FollowButton from "@/components/FollowButton";
-import { getUserRatingSummary } from "@/app/actions/ratings";
+import { getUserReviewSummary } from "@/app/actions/transactions";
 import { getFollowStats } from "@/app/actions/follows";
 import EditBioButton from "@/components/EditBioButton";
 import BlockButton from "@/components/BlockButton";
@@ -117,7 +117,7 @@ export default async function ProfilePage({
   const isOwnProfile = profileUser.id === user.id;
 
   // Fetch rating summary for this profile user
-  const ratingSummary = await getUserRatingSummary(profileUser.id);
+  const ratingSummary = await getUserReviewSummary(profileUser.id);
 
   // Count completed transactions
   const { count: completedTxCount } = await supabase

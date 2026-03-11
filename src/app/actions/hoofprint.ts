@@ -352,6 +352,19 @@ export async function claimTransfer(transferCode: string): Promise<{
         return { success: false, error: result.error || "Transfer failed." };
     }
 
+    // Create a completed transaction for this transfer (enables reviews)
+    try {
+        const { createTransaction } = await import("@/app/actions/transactions");
+        await createTransaction({
+            type: "transfer",
+            partyAId: result.sender_id!,
+            partyBId: user.id,
+            horseId: result.horse_id,
+            status: "completed",
+            metadata: { transfer_code: transferCode },
+        });
+    } catch { /* Non-blocking */ }
+
     // Background: Send notifications (non-critical — OK to fail)
     try {
         await admin.from("notifications").insert({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { leaveRating, deleteRating } from "@/app/actions/ratings";
+import { leaveReview, deleteReview } from "@/app/actions/transactions";
 import RatingStars from "@/components/RatingStars";
 
 interface ExistingRating {
@@ -12,17 +12,17 @@ interface ExistingRating {
 }
 
 interface RatingFormProps {
-    conversationId: string;
-    reviewedId: string;
-    reviewedAlias: string;
+    transactionId: string;
+    targetId: string;
+    targetAlias: string;
     existingRating: ExistingRating | null;
     hasVerifiedTransfer?: boolean;
 }
 
 export default function RatingForm({
-    conversationId,
-    reviewedId,
-    reviewedAlias,
+    transactionId,
+    targetId,
+    targetAlias,
     existingRating,
     hasVerifiedTransfer,
 }: RatingFormProps) {
@@ -40,11 +40,11 @@ export default function RatingForm({
         setStatus("saving");
         setErrorMsg("");
 
-        const result = await leaveRating({
-            conversationId,
-            reviewedId,
+        const result = await leaveReview({
+            transactionId,
+            targetId,
             stars,
-            reviewText: reviewText || undefined,
+            content: reviewText || undefined,
         });
 
         if (result.success) {
@@ -56,7 +56,7 @@ export default function RatingForm({
                 createdAt: new Date().toISOString(),
             });
         } else {
-            setErrorMsg(result.error || "Failed to submit rating.");
+            setErrorMsg(result.error || "Failed to submit review.");
             setStatus("error");
         }
     };
@@ -65,7 +65,7 @@ export default function RatingForm({
         if (!rating || status === "retracting") return;
 
         setStatus("retracting");
-        const result = await deleteRating(rating.id);
+        const result = await deleteReview(rating.id);
 
         if (result.success) {
             setRating(null);
@@ -83,7 +83,7 @@ export default function RatingForm({
         return (
             <div className="rating-form-card" id="rating-section">
                 <div className="rating-form-header">
-                    <span>⭐ Your Rating for @{reviewedAlias}</span>
+                    <span>⭐ Your Rating for @{targetAlias}</span>
                 </div>
                 <div className="rating-existing">
                     <RatingStars rating={rating.stars} size="md" />
@@ -109,7 +109,7 @@ export default function RatingForm({
     return (
         <div className="rating-form-card" id="rating-section">
             <div className="rating-form-header">
-                <span>⭐ Rate your experience with @{reviewedAlias}</span>
+                <span>⭐ Rate your experience with @{targetAlias}</span>
             </div>
 
             {hasVerifiedTransfer === false && (

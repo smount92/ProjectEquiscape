@@ -482,47 +482,64 @@ export async function updateCommissionStatus(
     });
 
     // ── Hoofprint Pipeline: inject WIP photos on delivery ──
-    if (newStatus === "delivered" && c.horse_id) {
-        try {
-            // Get all visible WIP photo updates
-            const { data: wipUpdates } = await supabase
-                .from("commission_updates")
-                .select("title, body, image_urls, created_at")
-                .eq("commission_id", commissionId)
-                .eq("update_type", "wip_photo")
-                .eq("is_visible_to_client", true)
-                .order("created_at", { ascending: true });
+    if (newStatus === "delivered") {
+        // Create a completed transaction for this commission (enables reviews)
+        if (c.client_id) {
+            try {
+                const { createTransaction } = await import("@/app/actions/transactions");
+                await createTransaction({
+                    type: "commission",
+                    partyAId: c.artist_id,
+                    partyBId: c.client_id,
+                    commissionId,
+                    horseId: c.horse_id || undefined,
+                    status: "completed",
+                });
+            } catch { /* Non-blocking */ }
+        }
 
-            if (wipUpdates && wipUpdates.length > 0) {
-                // Fetch artist alias for timeline entries
-                const { data: artistUser } = await supabase
-                    .from("users")
-                    .select("alias_name")
-                    .eq("id", c.artist_id)
-                    .single();
-                const artistAlias = (artistUser as { alias_name: string } | null)?.alias_name || "Artist";
+        if (c.horse_id) {
+            try {
+                // Get all visible WIP photo updates
+                const { data: wipUpdates } = await supabase
+                    .from("commission_updates")
+                    .select("title, body, image_urls, created_at")
+                    .eq("commission_id", commissionId)
+                    .eq("update_type", "wip_photo")
+                    .eq("is_visible_to_client", true)
+                    .order("created_at", { ascending: true });
 
-                // Insert each WIP as a timeline event
-                const timelineEntries = (wipUpdates as { title: string | null; body: string | null; image_urls: string[]; created_at: string }[]).map((wip, i) => ({
-                    horse_id: c.horse_id,
-                    user_id: c.artist_id,
-                    event_type: "customization",
-                    title: wip.title || `${c.commission_type} — WIP ${i + 1}`,
-                    description: wip.body || `Work-in-progress by @${artistAlias}`,
-                    event_date: wip.created_at.split("T")[0],
-                    metadata: {
-                        artist: artistAlias,
-                        commissionType: c.commission_type,
-                        commissionId,
-                        imageUrls: wip.image_urls || [],
-                    },
-                    is_public: true,
-                }));
+                if (wipUpdates && wipUpdates.length > 0) {
+                    // Fetch artist alias for timeline entries
+                    const { data: artistUser } = await supabase
+                        .from("users")
+                        .select("alias_name")
+                        .eq("id", c.artist_id)
+                        .single();
+                    const artistAlias = (artistUser as { alias_name: string } | null)?.alias_name || "Artist";
 
-                await supabase.from("horse_timeline").insert(timelineEntries);
+                    // Insert each WIP as a timeline event
+                    const timelineEntries = (wipUpdates as { title: string | null; body: string | null; image_urls: string[]; created_at: string }[]).map((wip, i) => ({
+                        horse_id: c.horse_id,
+                        user_id: c.artist_id,
+                        event_type: "customization",
+                        title: wip.title || `${c.commission_type} — WIP ${i + 1}`,
+                        description: wip.body || `Work-in-progress by @${artistAlias}`,
+                        event_date: wip.created_at.split("T")[0],
+                        metadata: {
+                            artist: artistAlias,
+                            commissionType: c.commission_type,
+                            commissionId,
+                            imageUrls: wip.image_urls || [],
+                        },
+                        is_public: true,
+                    }));
+
+                    await supabase.from("horse_timeline").insert(timelineEntries);
+                }
+            } catch {
+                // Non-blocking: Hoofprint injection is best-effort
             }
-        } catch {
-            // Non-blocking: Hoofprint injection is best-effort
         }
     }
 
