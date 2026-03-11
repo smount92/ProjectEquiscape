@@ -82,6 +82,7 @@ export async function createSuggestion(
             user_id: user.id,
             reference_release_id: data.referenceReleaseId || null,
             artist_resin_id: data.artistResinId || null,
+            catalog_id: data.referenceReleaseId || data.artistResinId || null,
             free_text: data.freeText || null,
         });
 
@@ -195,12 +196,14 @@ export async function addIdentifiedHorse(
         if (s.reference_release_id && s.reference_releases) {
             customName = s.reference_releases.release_name;
             horseInsert.release_id = s.reference_release_id;
+            horseInsert.catalog_id = s.reference_release_id;
             if (s.reference_releases.mold_id) {
                 horseInsert.reference_mold_id = s.reference_releases.mold_id;
             }
         } else if (s.artist_resin_id && s.artist_resins) {
             customName = s.artist_resins.resin_name;
             horseInsert.artist_resin_id = s.artist_resin_id;
+            horseInsert.catalog_id = s.artist_resin_id;
         } else if (s.free_text) {
             customName = s.free_text;
         }

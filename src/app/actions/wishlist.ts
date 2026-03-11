@@ -25,6 +25,7 @@ export async function addToWishlist(
         user_id: user.id,
         mold_id: moldId || null,
         release_id: releaseId || null,
+        catalog_id: releaseId || moldId || null,
         notes: notes?.trim() || null,
     });
 
