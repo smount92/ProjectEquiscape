@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import DashboardToast from "@/components/DashboardToast";
-import StableGrid from "@/components/StableGrid";
+import DashboardShell from "@/components/DashboardShell";
 import ExportButton from "@/components/ExportButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
@@ -148,6 +148,13 @@ export default async function DashboardPage({
 
         const releaseLine = null; // Now unified in catalog_items
 
+        // Build vault map per horse
+        const vaultMap = new Map<string, number>();
+        vaults.forEach((v) => {
+            const val = v.estimated_current_value ?? v.purchase_price ?? 0;
+            if (val > 0) vaultMap.set(v.horse_id, val);
+        });
+
         return {
             id: horse.id,
             customName: horse.custom_name,
@@ -161,7 +168,7 @@ export default async function DashboardPage({
             sculptor: horse.sculptor || null,
             tradeStatus: horse.trade_status || "Not for Sale",
             assetCategory: horse.asset_category || "model",
-            // Search fields from catalog data
+            vaultValue: vaultMap.get(horse.id) || null,
             moldName: horse.catalog_items?.title || null,
             releaseName: horse.catalog_items?.title || null,
         };
@@ -224,6 +231,9 @@ export default async function DashboardPage({
                         {totalHorseCount > 0 && <InsuranceReportButton />}
                         <Link href="/stable/import" className="btn btn-ghost" id="batch-import-button">
                             📄 Batch Import
+                        </Link>
+                        <Link href="/add-horse/quick" className="btn btn-ghost" id="quick-add-button">
+                            ⚡ Quick Add
                         </Link>
                         <Link href="/add-horse" className="btn btn-primary" id="add-horse-button">
                             🐴 Add to Stable
@@ -304,8 +314,8 @@ export default async function DashboardPage({
                     <NanDashboardWidget />
                 </Suspense>
 
-                {/* Horse Grid with Search */}
-                <StableGrid horseCards={horseCards} />
+                {/* Horse Grid/Ledger with Search + View Toggle */}
+                <DashboardShell horseCards={horseCards} />
 
                 {/* Pagination */}
                 {totalPages > 1 && (

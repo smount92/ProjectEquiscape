@@ -263,3 +263,157 @@ export async function finalizeHorseImages(
     revalidatePath(`/stable/${horseId}`);
     return { success: true };
 }
+
+// ============================================================
+// BULK OPERATIONS
+// ============================================================
+
+export async function bulkUpdateHorses(
+    horseIds: string[],
+    updates: {
+        collectionId?: string | null;
+        tradeStatus?: string;
+    }
+): Promise<{ success: boolean; count?: number; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+    if (horseIds.length === 0) return { success: false, error: "No horses selected." };
+    if (horseIds.length > 200) return { success: false, error: "Too many items (max 200)." };
+
+    // Verify ownership of ALL horses
+    const { data: owned } = await supabase
+        .from("user_horses")
+        .select("id")
+        .eq("owner_id", user.id)
+        .in("id", horseIds);
+
+    const ownedIds = (owned ?? []).map((h: { id: string }) => h.id);
+    if (ownedIds.length !== horseIds.length) {
+        return { success: false, error: "Some horses not found or not yours." };
+    }
+
+    const updateObj: Record<string, unknown> = {};
+    if (updates.collectionId !== undefined) updateObj.collection_id = updates.collectionId;
+    if (updates.tradeStatus) updateObj.trade_status = updates.tradeStatus;
+
+    if (Object.keys(updateObj).length === 0) {
+        return { success: false, error: "No updates specified." };
+    }
+
+    const { error } = await supabase
+        .from("user_horses")
+        .update(updateObj)
+        .in("id", horseIds)
+        .eq("owner_id", user.id);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/dashboard");
+    return { success: true, count: horseIds.length };
+}
+
+export async function bulkDeleteHorses(
+    horseIds: string[]
+): Promise<{ success: boolean; count?: number; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+    if (horseIds.length === 0) return { success: false, error: "No horses selected." };
+    if (horseIds.length > 100) return { success: false, error: "Too many items (max 100)." };
+
+    // Verify ownership
+    const { data: owned } = await supabase
+        .from("user_horses")
+        .select("id")
+        .eq("owner_id", user.id)
+        .in("id", horseIds);
+
+    const ownedIds = (owned ?? []).map((h: { id: string }) => h.id);
+    if (ownedIds.length !== horseIds.length) {
+        return { success: false, error: "Some horses not found or not yours." };
+    }
+
+    // Clean up storage for all images
+    const { data: images } = await supabase
+        .from("horse_images")
+        .select("image_url")
+        .in("horse_id", horseIds);
+
+    if (images && images.length > 0) {
+        const paths = images
+            .map((img: { image_url: string }) => {
+                const match = img.image_url.match(/horse-images\/(.+?)(\?|$)/);
+                return match ? match[1] : null;
+            })
+            .filter(Boolean) as string[];
+        if (paths.length > 0) {
+            await supabase.storage.from("horse-images").remove(paths);
+        }
+    }
+
+    const { error } = await supabase
+        .from("user_horses")
+        .delete()
+        .in("id", horseIds)
+        .eq("owner_id", user.id);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/dashboard");
+    return { success: true, count: horseIds.length };
+}
+
+// ============================================================
+// QUICK ADD (Frictionless Intake)
+// ============================================================
+
+export async function quickAddHorse(data: {
+    catalogId?: string;
+    customName?: string;
+    finishType: string;
+    conditionGrade: string;
+    collectionId?: string;
+}): Promise<{ success: boolean; horseId?: string; horseName?: string; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // If catalogId provided, auto-name from catalog
+    let horseName = data.customName?.trim() || "";
+    if (data.catalogId && !horseName) {
+        const { data: catalog } = await supabase
+            .from("catalog_items")
+            .select("title, maker")
+            .eq("id", data.catalogId)
+            .single<{ title: string; maker: string }>();
+        if (catalog) {
+            horseName = `${catalog.maker} ${catalog.title}`;
+        }
+    }
+    if (!horseName) horseName = "Unnamed Horse";
+
+    const horseInsert: Record<string, unknown> = {
+        owner_id: user.id,
+        custom_name: horseName,
+        finish_type: data.finishType,
+        condition_grade: data.conditionGrade,
+        is_public: false,
+        trade_status: "Not for Sale",
+        asset_category: "model",
+    };
+    if (data.catalogId) horseInsert.catalog_id = data.catalogId;
+    if (data.collectionId) horseInsert.collection_id = data.collectionId;
+
+    const { data: horse, error } = await supabase
+        .from("user_horses")
+        .insert(horseInsert)
+        .select("id")
+        .single<{ id: string }>();
+
+    if (error || !horse) return { success: false, error: error?.message || "Failed to add." };
+
+    revalidatePath("/dashboard");
+    return { success: true, horseId: horse.id, horseName };
+}
+

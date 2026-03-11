@@ -86,20 +86,54 @@ export async function generateMetadata({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data } = await supabase
+
+  const { data: horse } = await supabase
     .from("user_horses")
-    .select("custom_name")
+    .select("custom_name, finish_type, condition_grade, catalog_items:catalog_id(title, maker)")
     .eq("id", id)
     .eq("is_public", true)
     .single();
 
+  if (!horse) {
+    return {
+      title: "Horse Not Found — The Show Ring",
+      description: "This horse could not be found.",
+    };
+  }
+
+  // Get primary thumbnail for OG image
+  const { data: img } = await supabase
+    .from("horse_images")
+    .select("image_url")
+    .eq("horse_id", id)
+    .eq("angle_profile", "Primary_Thumbnail")
+    .single();
+
+  const h = horse as unknown as { custom_name: string; finish_type: string | null; condition_grade: string | null; catalog_items: { title: string; maker: string } | null };
+
+  const title = `${h.custom_name} — Model Horse Hub`;
+  const catalogInfo = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : "";
+  const description = [catalogInfo, h.finish_type, h.condition_grade].filter(Boolean).join(" · ");
+
+  // Build public image URL (horse-images bucket may be public or need signed URL)
+  const imageUrl = img?.image_url || null;
+
   return {
-    title: data
-      ? `${data.custom_name} — The Show Ring`
-      : "Horse Not Found — The Show Ring",
-    description: data
-      ? `View ${data.custom_name} in the community showcase.`
-      : "This horse could not be found.",
+    title,
+    description: description || `View ${h.custom_name} in the community showcase.`,
+    openGraph: {
+      title,
+      description: description || `View ${h.custom_name} on Model Horse Hub`,
+      images: imageUrl ? [{ url: imageUrl, width: 800, height: 600, alt: h.custom_name }] : [],
+      type: "article" as const,
+      siteName: "Model Horse Hub",
+    },
+    twitter: {
+      card: (imageUrl ? "summary_large_image" : "summary") as "summary_large_image" | "summary",
+      title,
+      description: description || `View ${h.custom_name} on Model Horse Hub`,
+      images: imageUrl ? [imageUrl] : [],
+    },
   };
 }
 
