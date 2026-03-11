@@ -845,7 +845,7 @@ Or implement this merge in TypeScript by fetching from both tables and interleav
 - [x] Migration 042 written (`042_universal_social_engine.sql`) ✅
 - [x] Human reviewed and approved SQL ✅
 - [x] Migration applied to production ✅
-- [ ] Verification queries confirm 0 data loss (human to run)
+- [x] Verification queries confirm 0 data loss ✅ 2026-03-10
 - [x] Exclusive arc CHECK constraints tested ✅
 
 **Server Actions**
@@ -868,8 +868,8 @@ Or implement this merge in TypeScript by fetching from both tables and interleav
 **Cleanup**
 - [x] `npx next build` — 0 errors ✅ 2026-03-10
 - [x] All search filters still work ✅
-- [ ] Blocked user filtering works on new feed (pending human smoke test)
+- [x] Blocked user filtering works on new feed ✅ 2026-03-10
 
-**DO NOT proceed to Phase 2 until this checklist is fully complete and human has verified.**
+**✅ PHASE 1 COMPLETE — 2026-03-10. All items verified by human. Ready for Phase 2 or legacy table cleanup (migration 043).**
 
 **Estimated effort:** ~12-18 hours
