@@ -86,7 +86,7 @@ export async function updateHorseAction(horseId: string, data: {
             'custom_name', 'sculptor', 'finishing_artist', 'finish_type',
             'condition_grade', 'is_public', 'trade_status', 'listing_price',
             'marketplace_notes', 'collection_id', 'reference_mold_id',
-            'artist_resin_id', 'release_id', 'life_stage',
+            'artist_resin_id', 'release_id', 'catalog_id', 'life_stage',
             'edition_number', 'edition_size',
         ];
         const VAULT_ALLOWED = [
@@ -190,9 +190,17 @@ export async function createHorseRecord(data: {
         life_stage: data.lifeStage || "Living",
     };
 
-    if (data.selectedMoldId) horseInsert.reference_mold_id = data.selectedMoldId;
-    if (data.selectedResinId) horseInsert.artist_resin_id = data.selectedResinId;
-    if (data.selectedReleaseId) horseInsert.release_id = data.selectedReleaseId;
+    // Map legacy fields + set unified catalog_id
+    if (data.selectedReleaseId) {
+        horseInsert.release_id = data.selectedReleaseId;
+        horseInsert.catalog_id = data.selectedReleaseId;
+    } else if (data.selectedMoldId) {
+        horseInsert.reference_mold_id = data.selectedMoldId;
+        horseInsert.catalog_id = data.selectedMoldId;
+    } else if (data.selectedResinId) {
+        horseInsert.artist_resin_id = data.selectedResinId;
+        horseInsert.catalog_id = data.selectedResinId;
+    }
     if (data.selectedCollectionId) horseInsert.collection_id = data.selectedCollectionId;
     if (data.sculptor) horseInsert.sculptor = data.sculptor;
     if (data.finishingArtist) horseInsert.finishing_artist = data.finishingArtist;
