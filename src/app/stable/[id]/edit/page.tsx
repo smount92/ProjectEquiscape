@@ -321,6 +321,7 @@ export default function EditHorsePage() {
         reference_mold_id: selectedMoldId,
         artist_resin_id: selectedResinId,
         release_id: selectedReleaseId,
+        catalog_id: selectedReleaseId || selectedMoldId || selectedResinId || null,
         life_stage: lifeStage,
       };
 

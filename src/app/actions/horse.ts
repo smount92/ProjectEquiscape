@@ -191,13 +191,16 @@ export async function createHorseRecord(data: {
     };
 
     // Map legacy fields + set unified catalog_id
-    if (data.selectedReleaseId) {
-        horseInsert.release_id = data.selectedReleaseId;
-        horseInsert.catalog_id = data.selectedReleaseId;
-    } else if (data.selectedMoldId) {
+    // A release always implies its parent mold, so set both
+    if (data.selectedMoldId) {
         horseInsert.reference_mold_id = data.selectedMoldId;
         horseInsert.catalog_id = data.selectedMoldId;
-    } else if (data.selectedResinId) {
+    }
+    if (data.selectedReleaseId) {
+        horseInsert.release_id = data.selectedReleaseId;
+        horseInsert.catalog_id = data.selectedReleaseId; // most specific wins
+    }
+    if (data.selectedResinId) {
         horseInsert.artist_resin_id = data.selectedResinId;
         horseInsert.catalog_id = data.selectedResinId;
     }
