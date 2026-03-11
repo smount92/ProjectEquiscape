@@ -140,11 +140,11 @@ ALTER TABLE user_wishlists ADD COLUMN IF NOT EXISTS catalog_id UUID REFERENCES c
 UPDATE user_wishlists SET catalog_id = release_id WHERE release_id IS NOT NULL AND catalog_id IS NULL;
 UPDATE user_wishlists SET catalog_id = mold_id WHERE mold_id IS NOT NULL AND catalog_id IS NULL;
 
--- 4c: help_requests
-ALTER TABLE help_requests ADD COLUMN IF NOT EXISTS catalog_id UUID REFERENCES catalog_items(id) ON DELETE SET NULL;
+-- 4c: id_suggestions (Help ID feature)
+ALTER TABLE id_suggestions ADD COLUMN IF NOT EXISTS catalog_id UUID REFERENCES catalog_items(id) ON DELETE SET NULL;
 
-UPDATE help_requests SET catalog_id = reference_release_id WHERE reference_release_id IS NOT NULL AND catalog_id IS NULL;
-UPDATE help_requests SET catalog_id = artist_resin_id WHERE artist_resin_id IS NOT NULL AND catalog_id IS NULL;
+UPDATE id_suggestions SET catalog_id = reference_release_id WHERE reference_release_id IS NOT NULL AND catalog_id IS NULL;
+UPDATE id_suggestions SET catalog_id = artist_resin_id WHERE artist_resin_id IS NOT NULL AND catalog_id IS NULL;
 
 -- ══════════════════════════════════════════════════════════════
 -- STEP 5: VERIFICATION (run manually)
@@ -168,8 +168,8 @@ UPDATE help_requests SET catalog_id = artist_resin_id WHERE artist_resin_id IS N
 -- ALTER TABLE user_horses DROP COLUMN IF EXISTS release_id;
 -- ALTER TABLE user_wishlists DROP COLUMN IF EXISTS mold_id;
 -- ALTER TABLE user_wishlists DROP COLUMN IF EXISTS release_id;
--- ALTER TABLE help_requests DROP COLUMN IF EXISTS reference_release_id;
--- ALTER TABLE help_requests DROP COLUMN IF EXISTS artist_resin_id;
+-- ALTER TABLE id_suggestions DROP COLUMN IF EXISTS reference_release_id;
+-- ALTER TABLE id_suggestions DROP COLUMN IF EXISTS artist_resin_id;
 -- DROP TABLE IF EXISTS reference_releases CASCADE;
 -- DROP TABLE IF EXISTS reference_molds CASCADE;
 -- DROP TABLE IF EXISTS artist_resins CASCADE;

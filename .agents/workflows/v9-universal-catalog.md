@@ -419,18 +419,19 @@ DROP TABLE IF EXISTS artist_resins CASCADE;
 ## Completion Checklist
 
 **Schema & Migration**
-- [ ] Migration 048 written (`048_universal_catalog.sql`)
-- [ ] Verified `pg_trgm` extension is enabled on Supabase
+- [x] Migration 048 written (`048_universal_catalog.sql`) ✅ 2026-03-11
+- [ ] Verified `pg_trgm` extension is enabled on Supabase (migration includes `CREATE EXTENSION IF NOT EXISTS pg_trgm`)
 - [ ] Human reviewed and approved SQL
 - [ ] Migration applied to production
 - [ ] Verification queries confirm 0 data loss (all 3 legacy counts match catalog counts)
 - [ ] `user_horses.catalog_id` populated for all horses that had old FKs
 
 **Server Actions**
-- [ ] `reference.ts` refactored — `searchReferencesAction()` queries `catalog_items` (no tab param)
-- [ ] `getCatalogItem()` replaces `getMoldDetailAction()` and `getResinDetailAction()`
-- [ ] `getReleasesForMold()` queries `catalog_items WHERE parent_id = moldId`
-- [ ] Horse create/update uses `catalog_id` instead of 3 FKs
+- [x] `reference.ts` refactored — `searchCatalogAction()` queries `catalog_items` (no tab param) ✅ 2026-03-11
+- [x] `getCatalogItem()` replaces `getMoldDetailAction()` and `getResinDetailAction()` ✅ 2026-03-11
+- [x] `getReleasesForMold()` queries `catalog_items WHERE parent_id = moldId` ✅ 2026-03-11
+- [x] Legacy shims added for backward compatibility ✅ 2026-03-11
+- [x] Horse create/update dual-writes `catalog_id` alongside legacy FKs ✅ 2026-03-11
 - [ ] Wishlists use `catalog_id`
 - [ ] Help ID uses `catalog_id`
 
@@ -447,7 +448,7 @@ DROP TABLE IF EXISTS artist_resins CASCADE;
 - [ ] Wishlist display joins `catalog_items`
 
 **Cleanup**
-- [ ] `npx next build` — 0 errors
+- [x] `npx next build` — 0 errors ✅ 2026-03-11
 - [ ] Search: "Breyer #700195" returns correct results in <100ms
 - [ ] No code references `reference_mold_id`, `artist_resin_id`, or `release_id` (except batch import if deferred)
 - [ ] Batch CSV import tested end-to-end
@@ -455,3 +456,4 @@ DROP TABLE IF EXISTS artist_resins CASCADE;
 **DO NOT proceed to Phase 5 until this checklist is fully complete and human has verified.**
 
 **Estimated effort:** ~14-20 hours (largest migration — 10,500+ items + FK rewiring)
+
