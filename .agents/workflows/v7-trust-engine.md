@@ -499,9 +499,9 @@ DROP TABLE IF EXISTS user_ratings CASCADE;
 
 **UI Components**
 - [x] `RatingForm.tsx` updated to accept `transactionId` ✅ 2026-03-11
-- [ ] Review prompt on `/claim` page after successful claim
-- [ ] Review prompt on `/studio/commission/[id]` after delivery
-- [ ] Review prompt on `/profile/[alias_name]` for unreviewed transactions
+- [x] Review prompt on `/claim` page after successful claim ✅ 2026-03-11
+- [x] Review prompt on `/studio/commission/[id]` after delivery ✅ 2026-03-11
+- [x] Review prompt on `/profile/[alias_name]` for unreviewed transactions ✅ 2026-03-11
 - [x] `getUserReviewSummary()` used on profile page ✅ 2026-03-11
 - [x] Inbox reads reviews from `reviews` table ✅ 2026-03-11
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { markTransactionComplete } from "@/app/actions/messaging";
 
 interface TransactionActionsProps {
@@ -17,6 +18,7 @@ export default function TransactionActions({
     const [status, setStatus] = useState(initialStatus);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    const router = useRouter();
 
     const handleComplete = async () => {
         setSaving(true);
@@ -24,6 +26,7 @@ export default function TransactionActions({
         const result = await markTransactionComplete(conversationId);
         if (result.success) {
             setStatus("completed");
+            router.refresh(); // Re-renders page so RatingForm appears
         } else {
             setError(result.error || "Failed to mark as complete.");
         }

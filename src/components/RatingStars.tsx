@@ -21,7 +21,7 @@ export default function RatingStars({
     onHover,
     onHoverEnd,
 }: RatingStarsProps) {
-    const displayValue = hoverValue ?? rating;
+    const displayValue = (hoverValue && hoverValue > 0) ? hoverValue : rating;
 
     return (
         <div
