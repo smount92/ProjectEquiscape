@@ -391,11 +391,12 @@ Since this is a new platform with few completed transactions, the market page wi
 
 **Schema**
 - [x] Migration 055 written (`055_market_price_guide.sql`)
-- [ ] Human reviewed and approved SQL
-- [ ] Migration applied to production
-- [ ] `mv_market_prices` materialized view exists
-- [ ] `refresh_market_prices()` function exists
-- [ ] READ grants in place for anon + authenticated
+- [x] Human reviewed and approved SQL
+- [x] Migration applied to production (March 11, 2026)
+- [x] `mv_market_prices` materialized view exists
+- [x] `refresh_market_prices()` function exists
+- [x] READ grants in place for anon + authenticated
+- ⚠️ `pg_cron` not available — nightly refresh (Step 3) skipped. Refresh manually via `refreshMarketPrices()` admin action or external trigger.
 
 **Server Actions**
 - [x] `market.ts` created with `getMarketPrice()`, `searchMarketPrices()`, `getTopTraded()`
