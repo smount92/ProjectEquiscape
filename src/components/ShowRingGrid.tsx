@@ -32,6 +32,7 @@ interface CommunityCardData {
     isFavorited: boolean;
     scale: string | null;
     hoofprintCount?: number;
+    assetCategory?: string;
 }
 
 function getFinishBadgeClass(finish: string): string {
@@ -200,6 +201,11 @@ export default function ShowRingGrid({
                                         </span>
                                         {(Date.now() - new Date(horse.createdAt).getTime()) < 48 * 60 * 60 * 1000 && (
                                             <span className="new-badge">NEW</span>
+                                        )}
+                                        {horse.assetCategory && horse.assetCategory !== "model" && (
+                                            <span className="category-badge">
+                                                {horse.assetCategory === "tack" ? "🏇" : horse.assetCategory === "prop" ? "🌲" : "🎭"}
+                                            </span>
                                         )}
                                         {horse.tradeStatus === "For Sale" && (
                                             <span className="trade-badge trade-for-sale">

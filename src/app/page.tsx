@@ -381,11 +381,11 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="persona-card">
-              <div className="persona-emoji">📄</div>
-              <h3>Insurance Reports</h3>
+              <div className="persona-emoji">📈</div>
+              <h3>Price Guide</h3>
               <p>
-                One-click PDF with photos, values, and condition grades for every model.
-                Formatted for insurance companies. Always up to date.
+                Real sale data from real collectors. Search market values for 10,500+
+                models based on completed transactions. The Blue Book for model horses.
               </p>
             </div>
           </div>
@@ -421,6 +421,7 @@ export default function LandingPage() {
             <Link href="/contact" className="footer-link" id="footer-contact">Contact</Link>
             <Link href="/community" className="footer-link" id="footer-showring">Show Ring</Link>
             <Link href="/discover" className="footer-link" id="footer-discover">Discover Collectors</Link>
+            <Link href="/market" className="footer-link" id="footer-market">Price Guide</Link>
           </nav>
           <p className="footer-copy">
             &copy; {new Date().getFullYear()} Model Horse Hub. All rights reserved.

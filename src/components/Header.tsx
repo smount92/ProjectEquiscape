@@ -165,6 +165,9 @@ export default function Header() {
             <Link href="/community/events" className="header-nav-link" id="nav-events">
               📅 Events
             </Link>
+            <Link href="/market" className="header-nav-link" id="nav-market">
+              📈 Market
+            </Link>
           </nav>
 
           {/* Icon action buttons */}
@@ -284,6 +287,9 @@ export default function Header() {
           </Link>
           <Link href="/community/events" className="header-nav-link" id="nav-events-m" onClick={closeMobileMenu}>
             📅 Events
+          </Link>
+          <Link href="/market" className="header-nav-link" id="nav-market-m" onClick={closeMobileMenu}>
+            📈 Price Guide
           </Link>
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist-m" onClick={closeMobileMenu}>
             ❤️ Wishlist

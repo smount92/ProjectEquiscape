@@ -12,6 +12,7 @@ interface CommunityHorse {
   custom_name: string;
   finish_type: string;
   condition_grade: string;
+  asset_category: string;
   created_at: string;
   sculptor: string | null;
   trade_status: string;
@@ -65,7 +66,7 @@ export default async function CommunityPage({
     .from("user_horses")
     .select(
       `
-      id, owner_id, custom_name, finish_type, condition_grade, created_at, sculptor, trade_status, listing_price, marketplace_notes, catalog_id,
+      id, owner_id, custom_name, finish_type, condition_grade, asset_category, created_at, sculptor, trade_status, listing_price, marketplace_notes, catalog_id,
       users!inner(alias_name),
       catalog_items:catalog_id(title, maker, scale, item_type),
       horse_images(image_url, angle_profile)
@@ -195,6 +196,7 @@ export default async function CommunityPage({
       isFavorited: userFavSet.has(horse.id),
       scale: horse.catalog_items?.scale || null,
       hoofprintCount: hoofprintCountMap.get(horse.id) || 0,
+      assetCategory: horse.asset_category || "model",
     };
   });
 

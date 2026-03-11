@@ -61,6 +61,11 @@ export async function completeTransaction(
         .eq("id", transactionId);
 
     if (error) return { success: false, error: error.message };
+
+    // Fire-and-forget: refresh market prices materialized view
+    // Don't await — user shouldn't wait for REFRESH MATERIALIZED VIEW CONCURRENTLY
+    void (async () => { try { await supabase.rpc("refresh_market_prices" as string); } catch { } })();
+
     return { success: true };
 }
 

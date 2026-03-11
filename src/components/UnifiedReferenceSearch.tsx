@@ -254,6 +254,9 @@ export default function UnifiedReferenceSearch({
                   {noResults && (
                     <div className="ref-no-results">
                       <p>No references found for &ldquo;{query}&rdquo;</p>
+                      <p style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
+                        Check the <a href="/market" style={{ color: "var(--color-accent-primary)" }}>📈 Price Guide</a> for market data, or use the button below.
+                      </p>
                       {onCustomEntry && (
                         <button className="btn btn-ghost" onClick={() => { onCustomEntry(query.trim()); setShowDropdown(false); }}>
                           ✍️ Can&apos;t find it? Suggest adding it
