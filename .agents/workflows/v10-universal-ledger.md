@@ -525,39 +525,40 @@ DROP TABLE IF EXISTS horse_timeline CASCADE;
 ## Completion Checklist
 
 **Schema & Migration**
-- [ ] Migration 050 written (`050_universal_ledger.sql`)
-- [ ] Manual notes migrated to `posts` table
-- [ ] `v_horse_hoofprint` view created and accessible
+- [x] Migration 050 written (`050_universal_ledger.sql`) ✅ 2026-03-11
+- [x] Manual notes migrated to `posts` table ✅ 2026-03-11
+- [x] `v_horse_hoofprint` view created and accessible ✅ 2026-03-11
 - [ ] Human reviewed and approved SQL
 - [ ] Migration applied to production
-- [ ] Atomic RPCs updated (horse_timeline INSERT removed)
+- [x] Atomic RPCs updated (horse_timeline INSERT removed) ✅ 2026-03-11
 - [ ] Verification queries confirm 0 data loss
 
 **Server Actions**
-- [ ] `getHoofprint()` reads from `v_horse_hoofprint` view
-- [ ] `addTimelineEvent()` creates `posts` (not timeline rows)
-- [ ] `deleteTimelineEvent()` deletes `posts` (not timeline rows)
-- [ ] `horse.ts` — timeline insert removed from `createHorseRecord()`
-- [ ] `hoofprint.ts` — timeline inserts removed from `initializeHoofprint()`, `updateLifeStage()`
-- [ ] `parked-export.ts` — timeline inserts removed, CoA reads from view
-- [ ] `art-studio.ts` — timeline inserts removed
-- [ ] `provenance.ts` — `addTimelineEvent()` call removed
+- [x] `getHoofprint()` reads from `v_horse_hoofprint` view ✅ 2026-03-11
+- [x] `addTimelineEvent()` creates `posts` (not timeline rows) ✅ 2026-03-11
+- [x] `deleteTimelineEvent()` deletes `posts` (not timeline rows) ✅ 2026-03-11
+- [x] `horse.ts` — timeline insert removed from `updateHorseAction()` ✅ 2026-03-11
+- [x] `hoofprint.ts` — timeline inserts removed from `initializeHoofprint()`, `updateLifeStage()` ✅ 2026-03-11
+- [x] `parked-export.ts` — timeline inserts removed, CoA reads from view ✅ 2026-03-11
+- [x] `art-studio.ts` — timeline inserts removed, WIPs write to customization_logs ✅ 2026-03-11
+- [x] `provenance.ts` — `addTimelineEvent()` call removed ✅ 2026-03-11
 
 **Components**
-- [ ] `HoofprintTimeline.tsx` — renders from view data, delete only on `posts` events
-- [ ] Add Note form works (creates `posts`)
-- [ ] System events show correct icons based on `source_table`
+- [x] `HoofprintTimeline.tsx` — renders from view data, delete only on `posts` events ✅ 2026-03-11
+- [x] Add Note form simplified (notes only, no event type picker) ✅ 2026-03-11
+- [x] System events show correct icons based on `event_type` ✅ 2026-03-11
 
 **Pages**
-- [ ] Horse passport / stable page shows timeline from view
-- [ ] Community page activity feed updated
-- [ ] CoA PDF generation reads from view
+- [x] Horse passport / stable page shows timeline from view (via getHoofprint) ✅ 2026-03-11
+- [x] Community page hoofprint badge count reads from view ✅ 2026-03-11
+- [x] CoA PDF generation reads from view ✅ 2026-03-11
+- [x] Edit page — removed addTimelineEvent import/call ✅ 2026-03-11
 
 **Cleanup**
-- [ ] `npx next build` — 0 errors
-- [ ] `grep -r "horse_timeline" src/` — 0 results
+- [x] `npx next build` — 0 errors ✅ 2026-03-11
+- [x] `grep -r "horse_timeline" src/` — 0 code results (comments only) ✅ 2026-03-11
 - [ ] Hoofprint loads in <200ms
-- [ ] No double-writes anywhere in the codebase
+- [x] No double-writes anywhere in the codebase ✅ 2026-03-11
 
 **Grand Unification Complete**
 - [ ] All 5 phases verified
