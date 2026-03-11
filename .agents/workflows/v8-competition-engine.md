@@ -562,8 +562,8 @@ When a virtual show's `ends_at` passes and it's still `status = 'open'`:
 
 **Schema & Migration**
 - [x] Migration 046 written (`046_unified_competition_engine.sql`) ✅ 2026-03-11
-- [ ] Human reviewed and approved SQL ← `placing` reserved-word fix applied
-- [ ] Migration applied to production
+- [x] Human reviewed and approved SQL ✅ 2026-03-11 (`placing` reserved-word fix applied)
+- [x] Migration applied to production ✅ 2026-03-11
 - [ ] Verification queries confirm 0 data loss
 - [ ] `close_virtual_show` RPC tested
 - [ ] `vote_for_entry` RPC tested
@@ -579,12 +579,13 @@ When a virtual show's `ends_at` passes and it's still `status = 'open'`:
 **Pages Wired**
 - [x] `/shows/page.tsx` — lists events where `event_type = 'photo_show'` (via `getPhotoShows`) ✅ 2026-03-11
 - [x] `/shows/[id]/page.tsx` — uses `eventId` not `showId`, `<UniversalFeed context={{ eventId }}>` ✅ 2026-03-11
+- [x] `CloseShowButton` renders for creator/admin when show expired ✅ 2026-03-11
 - [ ] `/shows/planner/page.tsx` — show strings still read from `show_string_entries` (deferred)
 - [x] Virtual shows visible on community event calendar (auto — they're events now) ✅ 2026-03-11
 
 **Cleanup**
 - [x] `npx next build` — 0 errors ✅ 2026-03-11
-- [ ] `posts.show_id` has 0 rows (verify after migration)
+- [ ] `posts.show_id` has 0 rows (verify with queries)
 - [x] `showId` removed from `UniversalFeed` context type ✅ 2026-03-11
 - [x] `showId` removed from `getPosts()` context ✅ 2026-03-11
 - [ ] Auto-generated `show_records` appear on horse passports (verify after first virtual show close)
@@ -592,4 +593,5 @@ When a virtual show's `ends_at` passes and it's still `status = 'open'`:
 **DO NOT proceed to Phase 4 until this checklist is fully complete and human has verified.**
 
 **Estimated effort:** ~10-14 hours
+
 

@@ -69,19 +69,6 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
         countMap.set(e.event_id, (countMap.get(e.event_id) || 0) + 1);
     });
 
-    // Auto-transition expired open shows to judging
-    const expiredShows = (shows as EventRow[]).filter(
-        s => s.show_status === "open" && s.ends_at && new Date(s.ends_at) < new Date()
-    );
-    if (expiredShows.length > 0) {
-        const admin = getAdminClient();
-        for (const expired of expiredShows) {
-            await admin.from("events")
-                .update({ show_status: "judging" })
-                .eq("id", expired.id);
-            expired.show_status = "judging";
-        }
-    }
 
     return (shows as EventRow[]).map(s => ({
         id: s.id,
