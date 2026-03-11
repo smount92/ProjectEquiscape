@@ -40,8 +40,14 @@ function formatDate(dateStr: string): string {
 
 export default function StableGrid({
     horseCards,
+    selectMode = false,
+    selectedIds = new Set(),
+    onToggleSelect,
 }: {
     horseCards: HorseCardData[];
+    selectMode?: boolean;
+    selectedIds?: Set<string>;
+    onToggleSelect?: (id: string) => void;
 }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name-az" | "name-za" | "condition">("newest");
@@ -135,58 +141,71 @@ export default function StableGrid({
                 </div>
             ) : (
                 <div className="shelf-grid">
-                    {filteredCards.map((horse) => (
-                        <Link key={horse.id} href={`/stable/${horse.id}`} className="horse-card" id={`horse-card-${horse.id}`}>
-                            <div className="horse-card-image">
-                                {horse.thumbnailUrl ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
-                                ) : (
-                                    <div className="horse-card-placeholder">
-                                        <span className="horse-card-placeholder-icon">🐴</span>
-                                        <span>No photo</span>
+                    {filteredCards.map((horse) => {
+                        const isSelected = selectedIds.has(horse.id);
+                        const CardWrapper = selectMode ? "div" : Link;
+                        const wrapperProps = selectMode
+                            ? { onClick: () => onToggleSelect?.(horse.id), className: `horse-card ${isSelected ? "horse-card-selected" : ""}`, id: `horse-card-${horse.id}` }
+                            : { href: `/stable/${horse.id}`, className: "horse-card", id: `horse-card-${horse.id}` };
+                        return (
+                            // @ts-expect-error — dynamic component type
+                            <CardWrapper key={horse.id} {...wrapperProps}>
+                                {selectMode && (
+                                    <div className="horse-card-checkbox">
+                                        <input type="checkbox" checked={isSelected} readOnly />
                                     </div>
                                 )}
-                                {horse.finishType && (
-                                    <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
-                                        {horse.finishType}
-                                    </span>
-                                )}
-                                {horse.assetCategory && horse.assetCategory !== "model" && (
-                                    <span className="horse-card-badge category-badge" style={{ background: "rgba(124, 109, 240, 0.85)", color: "#fff" }}>
-                                        {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
-                                    </span>
-                                )}
-                                {horse.tradeStatus === "For Sale" && (
-                                    <span className="trade-badge trade-for-sale">💲 For Sale</span>
-                                )}
-                                {horse.tradeStatus === "Open to Offers" && (
-                                    <span className="trade-badge trade-open-offers">🤝 Open to Offers</span>
-                                )}
-                            </div>
-                            <div className="horse-card-info">
-                                <div className="horse-card-name">{horse.customName}</div>
-                                <div className="horse-card-ref">{horse.refName}</div>
-                                {horse.releaseLine && (
-                                    <div className="horse-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
-                                        🎨 {horse.releaseLine}
-                                    </div>
-                                )}
-                                {horse.sculptor && (
-                                    <div className="horse-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
-                                        ✂️ {horse.sculptor}
-                                    </div>
-                                )}
-                                <div className="horse-card-meta">
-                                    {horse.conditionGrade && <span>{horse.conditionGrade}</span>}
-                                    <span>{formatDate(horse.createdAt)}</span>
+                                <div className="horse-card-image">
+                                    {horse.thumbnailUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
+                                    ) : (
+                                        <div className="horse-card-placeholder">
+                                            <span className="horse-card-placeholder-icon">🐴</span>
+                                            <span>No photo</span>
+                                        </div>
+                                    )}
+                                    {horse.finishType && (
+                                        <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
+                                            {horse.finishType}
+                                        </span>
+                                    )}
+                                    {horse.assetCategory && horse.assetCategory !== "model" && (
+                                        <span className="horse-card-badge category-badge" style={{ background: "rgba(124, 109, 240, 0.85)", color: "#fff" }}>
+                                            {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
+                                        </span>
+                                    )}
+                                    {horse.tradeStatus === "For Sale" && (
+                                        <span className="trade-badge trade-for-sale">💲 For Sale</span>
+                                    )}
+                                    {horse.tradeStatus === "Open to Offers" && (
+                                        <span className="trade-badge trade-open-offers">🤝 Open to Offers</span>
+                                    )}
                                 </div>
-                                {horse.collectionName && (
-                                    <div className="horse-card-collection">📁 {horse.collectionName}</div>
-                                )}
-                            </div>
-                        </Link>
-                    ))}
+                                <div className="horse-card-info">
+                                    <div className="horse-card-name">{horse.customName}</div>
+                                    <div className="horse-card-ref">{horse.refName}</div>
+                                    {horse.releaseLine && (
+                                        <div className="horse-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                            🎨 {horse.releaseLine}
+                                        </div>
+                                    )}
+                                    {horse.sculptor && (
+                                        <div className="horse-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                            ✂️ {horse.sculptor}
+                                        </div>
+                                    )}
+                                    <div className="horse-card-meta">
+                                        {horse.conditionGrade && <span>{horse.conditionGrade}</span>}
+                                        <span>{formatDate(horse.createdAt)}</span>
+                                    </div>
+                                    {horse.collectionName && (
+                                        <div className="horse-card-collection">📁 {horse.collectionName}</div>
+                                    )}
+                                </div>
+                            </CardWrapper>
+                        );
+                    })}
                 </div>
             )}
         </>

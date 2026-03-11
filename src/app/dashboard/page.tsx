@@ -315,7 +315,7 @@ export default async function DashboardPage({
                 </Suspense>
 
                 {/* Horse Grid/Ledger with Search + View Toggle */}
-                <DashboardShell horseCards={horseCards} />
+                <DashboardShell horseCards={horseCards} collections={collections.map(c => ({ id: c.id, name: c.name }))} />
 
                 {/* Pagination */}
                 {totalPages > 1 && (

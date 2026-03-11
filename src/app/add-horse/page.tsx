@@ -105,7 +105,7 @@ export default function AddHorsePage() {
   const [editionSize, setEditionSize] = useState("");
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
-  const [isPublic, setIsPublic] = useState(true);
+  const [visibility, setVisibility] = useState<"public" | "unlisted" | "private">("public");
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
   const [listingPrice, setListingPrice] = useState("");
@@ -290,7 +290,7 @@ export default function AddHorsePage() {
         customName: customName.trim(),
         finishType: isModel ? finishType : "",
         conditionGrade: isModel ? conditionGrade || undefined : undefined,
-        isPublic,
+        isPublic: visibility === "public" || visibility === "unlisted",
         tradeStatus: tradeStatus || undefined,
         lifeStage: isModel ? lifeStage || undefined : undefined,
         catalogId: selectedCatalogId || undefined,
@@ -350,7 +350,7 @@ export default function AddHorsePage() {
       }
 
       // 4. Activity event if public
-      if (isPublic) {
+      if (visibility === "public") {
         notifyHorsePublic({
           userId: user.id,
           horseId,
@@ -975,26 +975,29 @@ export default function AddHorsePage() {
             </button>
           </div>
 
-          {/* Community visibility toggle */}
+          {/* Community visibility selector */}
           <div className="community-toggle-section">
-            <div className="community-toggle-row">
-              <div className="community-toggle-info">
-                <span className="community-toggle-label">🏆 Show in Public Community Feed</span>
-                <span className="community-toggle-hint">
-                  When enabled, this model will appear in the Show Ring for
-                  other collectors to admire. Your financial data is always private.
-                </span>
+            <div className="community-toggle-row" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
+              <span className="community-toggle-label">👁️ Visibility</span>
+              <div className="visibility-options">
+                {([
+                  { value: "public" as const, icon: "🌐", label: "Public", hint: "Visible in the Show Ring" },
+                  { value: "unlisted" as const, icon: "🔗", label: "Unlisted", hint: "Anyone with the link can see it" },
+                  { value: "private" as const, icon: "🔒", label: "Private", hint: "Only you can see it" },
+                ]).map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`visibility-option ${visibility === opt.value ? "active" : ""}`}
+                    onClick={() => setVisibility(opt.value)}
+                    id={`visibility-${opt.value}`}
+                  >
+                    <span className="visibility-icon">{opt.icon}</span>
+                    <span className="visibility-label">{opt.label}</span>
+                    <span className="visibility-hint">{opt.hint}</span>
+                  </button>
+                ))}
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={isPublic}
-                className={`toggle-switch ${isPublic ? "toggle-on" : "toggle-off"}`}
-                onClick={() => setIsPublic(!isPublic)}
-                id="is-public-toggle"
-              >
-                <span className="toggle-knob" />
-              </button>
             </div>
           </div>
         </div>

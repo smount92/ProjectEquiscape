@@ -417,3 +417,41 @@ export async function quickAddHorse(data: {
     return { success: true, horseId: horse.id, horseName };
 }
 
+// ============================================================
+// PHOTO REORDERING
+// ============================================================
+
+export async function reorderHorseImages(
+    horseId: string,
+    imageIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+    if (imageIds.length === 0) return { success: false, error: "No images." };
+
+    // Verify ownership
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("id")
+        .eq("id", horseId)
+        .eq("owner_id", user.id)
+        .single();
+    if (!horse) return { success: false, error: "Horse not found or not yours." };
+
+    // Update sort_order for each image
+    const updates = imageIds.map((id, index) =>
+        supabase.from("horse_images")
+            .update({ sort_order: index })
+            .eq("id", id)
+            .eq("horse_id", horseId)
+    );
+
+    const results = await Promise.all(updates);
+    const failed = results.find(r => r.error);
+    if (failed?.error) return { success: false, error: failed.error.message };
+
+    revalidatePath(`/stable/${horseId}/edit`);
+    revalidatePath(`/stable/${horseId}`);
+    return { success: true };
+}

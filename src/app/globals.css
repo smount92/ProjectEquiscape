@@ -10716,3 +10716,186 @@ p {
 .quick-add-recent-item:last-child {
   border-bottom: none;
 }
+
+/* ══════════════════════════════════════════════════════════════ */
+/* V17: Bulk Operations                                           */
+/* ══════════════════════════════════════════════════════════════ */
+
+.bulk-select-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  padding: 6px 12px;
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-md);
+}
+
+.bulk-action-bar {
+  position: fixed;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 12px 20px;
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  max-width: 90vw;
+  flex-wrap: wrap;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+}
+
+.bulk-action-count {
+  font-weight: 600;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-accent-primary);
+  white-space: nowrap;
+}
+
+.bulk-action-buttons {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bulk-select {
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn-danger {
+  background: rgb(239, 68, 68);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 6px 14px;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-danger:hover {
+  background: rgb(220, 38, 38);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+}
+
+/* Selection highlights */
+.horse-card-selected {
+  outline: 3px solid var(--color-accent-primary);
+  outline-offset: -3px;
+  opacity: 0.85;
+}
+
+.horse-card-checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.horse-card-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-accent-primary);
+}
+
+.ledger-row-selected {
+  background: rgba(124, 109, 240, 0.1) !important;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  max-width: 480px;
+  width: 90%;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* V17: Visibility Selector (3-option)                            */
+/* ══════════════════════════════════════════════════════════════ */
+
+.visibility-options {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.visibility-option {
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  color: var(--color-text-primary);
+}
+
+.visibility-option:hover {
+  border-color: var(--color-accent-primary);
+  background: var(--color-surface-secondary);
+}
+
+.visibility-option.active {
+  border-color: var(--color-accent-primary);
+  background: rgba(124, 109, 240, 0.1);
+}
+
+.visibility-icon {
+  font-size: 1.5rem;
+}
+
+.visibility-label {
+  font-weight: 600;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.visibility-hint {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  color: var(--color-text-muted);
+  text-align: center;
+}

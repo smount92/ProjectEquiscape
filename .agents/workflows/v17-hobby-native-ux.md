@@ -415,18 +415,19 @@ CREATE TABLE registry_entries (
 - [x] `DashboardShell.tsx` — wraps StableGrid + StableLedger with view toggle
 - [x] Dashboard view toggle (Gallery/Ledger) with localStorage persistence
 - [x] `bulkUpdateHorses()` + `bulkDeleteHorses()` server actions (ownership verified)
-- [ ] Bulk Operations UI — select mode + floating action bar (server actions ready, UI deferred)
+- [x] Bulk Operations UI — select mode + floating action bar + delete confirmation modal ✅ DONE 2026-03-11
 - [x] Quick Add route (`/add-horse/quick`) with "Duplicate to New" + success log
 - [x] `quickAddHorse()` server action (auto-names from catalog)
 - [x] Quick Add link added to dashboard header
-- [ ] Photo reordering (deferred — needs `sort_order` column migration)
-- [ ] `reorderHorseImages()` server action (deferred)
+- [x] `reorderHorseImages()` server action ✅ DONE 2026-03-11
+- [ ] Photo reordering drag-and-drop UI (needs migration 057 applied first)
 
 ### Phase 2: Sharing & Social Pillar
-- [ ] `visibility` column migration (public/private/unlisted) — needs migration
-- [ ] 3-option visibility selector on Add + Edit forms (depends on migration)
-- [ ] Show Ring query updated to filter `visibility = 'public'`
-- [x] OpenGraph metadata with images on `/community/[id]` — full `og:image`, `og:title`, `og:description`
+- [x] `visibility` column migration written (`057_ux_enhancements.sql`) — needs to be applied
+- [x] 3-option visibility selector on Add Horse form (Public/Unlisted/Private) ✅ DONE 2026-03-11
+- [ ] 3-option visibility selector on Edit Horse form (after migration applied)
+- [ ] Show Ring query updated to filter `visibility = 'public'` (after migration applied)
+- [x] OpenGraph metadata with images on `/community/[id]`
 - [x] Twitter card metadata (`summary_large_image` when photo exists)
 - [ ] Rich media embed preview in feed posts (lower priority)
 
@@ -439,9 +440,11 @@ CREATE TABLE registry_entries (
 ### Build & Verification
 - [x] `npx next build` — 0 errors (March 11, 2026)
 - [x] `/add-horse/quick` route registered
+- [x] Migration 057 written (visibility + sort_order)
+- [ ] Migration 057 applied (user action needed)
 - [ ] Dashboard toggle works (Gallery ↔ Ledger) — visual check needed
+- [ ] Bulk operations tested (select, move collection, delete)
 - [ ] Quick Add flow tested (catalog → finish → done in <10 seconds)
 - [ ] OpenGraph preview tested (share URL to Discord/iMessage)
 
 **Estimated effort:** ~12-16 hours across 3 phases
-

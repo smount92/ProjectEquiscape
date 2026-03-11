@@ -49,8 +49,14 @@ function formatRelDate(dateStr: string): string {
 
 export default function StableLedger({
     horseCards,
+    selectMode = false,
+    selectedIds = new Set(),
+    onToggleSelect,
 }: {
     horseCards: HorseCardData[];
+    selectMode?: boolean;
+    selectedIds?: Set<string>;
+    onToggleSelect?: (id: string) => void;
 }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortKey, setSortKey] = useState<SortKey>("added");
@@ -141,6 +147,7 @@ export default function StableLedger({
                     <table className="stable-ledger">
                         <thead>
                             <tr>
+                                {selectMode && <th style={{ width: 36 }}>☑</th>}
                                 <th style={{ width: 50 }}>📷</th>
                                 <th onClick={() => toggleSort("name")} className="sortable-th">
                                     Name{sortIndicator("name")}
@@ -170,7 +177,17 @@ export default function StableLedger({
                         </thead>
                         <tbody>
                             {filteredCards.map((horse) => (
-                                <tr key={horse.id} className="ledger-row">
+                                <tr
+                                    key={horse.id}
+                                    className={`ledger-row ${selectMode && selectedIds.has(horse.id) ? "ledger-row-selected" : ""}`}
+                                    onClick={selectMode ? () => onToggleSelect?.(horse.id) : undefined}
+                                    style={selectMode ? { cursor: "pointer" } : undefined}
+                                >
+                                    {selectMode && (
+                                        <td style={{ width: 36, textAlign: "center" }}>
+                                            <input type="checkbox" checked={selectedIds.has(horse.id)} readOnly />
+                                        </td>
+                                    )}
                                     <td className="ledger-thumb-cell">
                                         <Link href={`/stable/${horse.id}`}>
                                             {horse.thumbnailUrl ? (
