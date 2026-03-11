@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getCommission, getCommissionUpdates } from "@/app/actions/art-studio";
 import CommissionTimeline from "@/components/CommissionTimeline";
+import RatingForm from "@/components/RatingForm";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,42 @@ export default async function CommissionDetailPage({
     if (!isArtist && !isClient) notFound();
 
     const updates = await getCommissionUpdates(commissionId);
+
+    // Review prompt: if delivered, look up the transaction for this commission
+    let transactionId: string | null = null;
+    let existingRating: { id: string; stars: number; reviewText: string | null; createdAt: string } | null = null;
+    const targetId = isArtist ? commission.clientId : commission.artistId;
+    const targetAlias = isArtist ? (commission.clientAlias || "Client") : commission.artistAlias;
+
+    if (commission.status === "delivered" && targetId) {
+        const { data: txn } = await supabase
+            .from("transactions")
+            .select("id")
+            .eq("commission_id", commissionId)
+            .eq("type", "commission")
+            .maybeSingle();
+
+        if (txn) {
+            transactionId = (txn as { id: string }).id;
+
+            const { data: rawReview } = await supabase
+                .from("reviews")
+                .select("id, stars, content, created_at")
+                .eq("transaction_id", transactionId)
+                .eq("reviewer_id", user.id)
+                .maybeSingle();
+
+            if (rawReview) {
+                const rv = rawReview as { id: string; stars: number; content: string | null; created_at: string };
+                existingRating = {
+                    id: rv.id,
+                    stars: rv.stars,
+                    reviewText: rv.content,
+                    createdAt: rv.created_at,
+                };
+            }
+        }
+    }
 
     return (
         <div className="page-container">
@@ -121,6 +158,18 @@ export default async function CommissionDetailPage({
                 isClient={isClient}
                 commissionStatus={commission.status}
             />
+
+            {/* Review Prompt (after delivery) */}
+            {transactionId && targetId && (
+                <div className="animate-fade-in-up" style={{ marginTop: "var(--space-lg)" }}>
+                    <RatingForm
+                        transactionId={transactionId}
+                        targetId={targetId}
+                        targetAlias={targetAlias}
+                        existingRating={existingRating}
+                    />
+                </div>
+            )}
 
             {/* Navigation */}
             <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)", flexWrap: "wrap" }}>

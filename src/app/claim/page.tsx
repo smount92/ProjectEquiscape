@@ -122,7 +122,7 @@ export default function ClaimPage() {
                         <strong>{success.horseName}</strong> has been successfully transferred to your account.
                         The full Hoofprint™ history has been preserved.
                     </p>
-                    <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "center" }}>
+                    <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "center", flexWrap: "wrap" }}>
                         <Link href={`/stable/${success.horseId}`} className="btn btn-primary">
                             🐴 View Passport
                         </Link>
@@ -130,6 +130,16 @@ export default function ClaimPage() {
                             ← Dashboard
                         </Link>
                     </div>
+                    <p style={{
+                        textAlign: "center",
+                        fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                        color: "var(--color-text-muted)",
+                        marginTop: "var(--space-lg)",
+                        borderTop: "1px solid var(--color-border)",
+                        paddingTop: "var(--space-md)",
+                    }}>
+                        ⭐ Had a good experience? You can leave a review from the seller&apos;s profile.
+                    </p>
                 </div>
             </div>
         );

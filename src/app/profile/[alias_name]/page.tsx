@@ -10,6 +10,7 @@ import { getUserReviewSummary } from "@/app/actions/transactions";
 import { getFollowStats } from "@/app/actions/follows";
 import EditBioButton from "@/components/EditBioButton";
 import BlockButton from "@/components/BlockButton";
+import RatingForm from "@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
 
 export const dynamic = "force-dynamic";
@@ -125,6 +126,34 @@ export default async function ProfilePage({
     .select("id", { count: "exact", head: true })
     .or(`buyer_id.eq.${profileUser.id},seller_id.eq.${profileUser.id}`)
     .eq("transaction_status", "completed");
+
+  // Check for unreviewed transactions between viewer and profile owner
+  let unreviewedTxn: { id: string } | null = null;
+  if (!isOwnProfile) {
+    // Find a completed transaction between these two users where viewer hasn't reviewed
+    const { data: txns } = await supabase
+      .from("transactions")
+      .select("id")
+      .eq("status", "completed")
+      .or(`and(party_a_id.eq.${user.id},party_b_id.eq.${profileUser.id}),and(party_a_id.eq.${profileUser.id},party_b_id.eq.${user.id})`)
+      .order("completed_at", { ascending: false })
+      .limit(10);
+
+    if (txns && txns.length > 0) {
+      const txnIds = (txns as { id: string }[]).map(t => t.id);
+      const { data: existingReviews } = await supabase
+        .from("reviews")
+        .select("transaction_id")
+        .eq("reviewer_id", user.id)
+        .in("transaction_id", txnIds);
+
+      const reviewedIds = new Set((existingReviews ?? []).map((r: { transaction_id: string }) => r.transaction_id));
+      const unreviewed = (txns as { id: string }[]).find(t => !reviewedIds.has(t.id));
+      if (unreviewed) {
+        unreviewedTxn = unreviewed;
+      }
+    }
+  }
 
   // Fetch follow stats
   const followStats = await getFollowStats(profileUser.id);
@@ -338,6 +367,18 @@ export default async function ProfilePage({
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Unreviewed Transaction Prompt */}
+      {unreviewedTxn && (
+        <div className="animate-fade-in-up" style={{ marginBottom: "var(--space-lg)" }}>
+          <RatingForm
+            transactionId={unreviewedTxn.id}
+            targetId={profileUser.id}
+            targetAlias={profileUser.alias_name}
+            existingRating={null}
+          />
         </div>
       )}
 

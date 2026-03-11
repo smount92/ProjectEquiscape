@@ -482,29 +482,31 @@ DROP TABLE IF EXISTS user_ratings CASCADE;
 ## Completion Checklist
 
 **Schema & Migration**
-- [ ] Migration 044 written (`044_universal_trust_engine.sql`)
-- [ ] Human reviewed and approved SQL
-- [ ] Migration applied to production
+- [x] Migration 044 written (`044_universal_trust_engine.sql`) ✅ 2026-03-11
+- [x] Human reviewed and approved SQL ✅ 2026-03-11
+- [x] Migration applied to production ✅ 2026-03-11
 - [ ] Verification queries confirm 0 data loss
-- [ ] Retroactive transactions created for past transfers + parked sales
+- [x] Retroactive transactions created for past transfers + parked sales ✅ 2026-03-11
+- [x] `discover_users_view` updated to read from `reviews` ✅ 2026-03-11
 
 **Server Actions**
-- [ ] `src/app/actions/transactions.ts` — createTransaction, completeTransaction, leaveReview, deleteReview, getUserReviewSummary, getReviewableTransactions
-- [ ] `claimTransfer()` → auto-creates transaction
-- [ ] `claimParkedHorse()` → auto-creates transaction
-- [ ] `updateCommissionStatus("delivered")` → auto-creates transaction
-- [ ] `markTransactionComplete()` → auto-creates transaction
-- [ ] Legacy `ratings.ts` redirected to new functions
+- [x] `src/app/actions/transactions.ts` — createTransaction, completeTransaction, leaveReview, deleteReview, getUserReviewSummary, getReviewableTransactions, getTransactionByConversation ✅ 2026-03-11
+- [x] `claimTransfer()` → auto-creates transaction ✅ 2026-03-11
+- [x] `claimParkedHorse()` → auto-creates transaction ✅ 2026-03-11
+- [x] `updateCommissionStatus("delivered")` → auto-creates transaction ✅ 2026-03-11
+- [x] `markTransactionComplete()` → auto-creates transaction ✅ 2026-03-11
+- [x] Legacy `ratings.ts` redirected to new functions ✅ 2026-03-11
 
 **UI Components**
-- [ ] `RatingForm.tsx` updated to accept `transactionId`
+- [x] `RatingForm.tsx` updated to accept `transactionId` ✅ 2026-03-11
 - [ ] Review prompt on `/claim` page after successful claim
 - [ ] Review prompt on `/studio/commission/[id]` after delivery
 - [ ] Review prompt on `/profile/[alias_name]` for unreviewed transactions
-- [ ] `getUserReviewSummary()` used on profile page
+- [x] `getUserReviewSummary()` used on profile page ✅ 2026-03-11
+- [x] Inbox reads reviews from `reviews` table ✅ 2026-03-11
 
 **Cleanup**
-- [ ] `npx next build` — 0 errors
+- [x] `npx next build` — 0 errors ✅ 2026-03-11
 - [ ] Existing ratings display correctly on profiles
 - [ ] New review flow works end-to-end (all 4 transaction types)
 
