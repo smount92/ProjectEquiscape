@@ -19,6 +19,7 @@ interface ShowDisplay {
     entryCount: number;
     createdAt: string;
     endAt: string | null;
+    createdBy?: string;
 }
 
 interface ShowEntryDisplay {
@@ -135,7 +136,7 @@ export async function getShowEntries(showId: string): Promise<{
 
     if (entryList.length === 0) {
         return {
-            show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: 0, createdAt: s.created_at, endAt: s.ends_at },
+            show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: 0, createdAt: s.created_at, endAt: s.ends_at, createdBy: s.created_by },
             entries: [],
         };
     }
@@ -184,7 +185,7 @@ export async function getShowEntries(showId: string): Promise<{
     const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
 
     return {
-        show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: entryList.length, createdAt: s.created_at, endAt: s.ends_at },
+        show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: entryList.length, createdAt: s.created_at, endAt: s.ends_at, createdBy: s.created_by },
         entries: entryList.map(e => ({
             id: e.id,
             horseName: horseMap.get(e.horse_id)?.name || "Unknown",

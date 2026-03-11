@@ -561,34 +561,35 @@ When a virtual show's `ends_at` passes and it's still `status = 'open'`:
 ## Completion Checklist
 
 **Schema & Migration**
-- [ ] Migration 046 written (`046_unified_competition_engine.sql`)
-- [ ] Human reviewed and approved SQL
+- [x] Migration 046 written (`046_unified_competition_engine.sql`) ✅ 2026-03-11
+- [ ] Human reviewed and approved SQL ← `placing` reserved-word fix applied
 - [ ] Migration applied to production
 - [ ] Verification queries confirm 0 data loss
 - [ ] `close_virtual_show` RPC tested
 - [ ] `vote_for_entry` RPC tested
 
 **Server Actions**
-- [ ] `shows.ts` reads from `events` + `event_entries` + `event_votes`
-- [ ] `competition.ts` reads from `event_entries` for show strings
-- [ ] `createPhotoShow()` inserts into `events` (not `photo_shows`)
-- [ ] `voteForEntry()` uses `vote_for_entry` RPC
-- [ ] `updateShowStatus("closed")` calls `close_virtual_show` RPC
-- [ ] `convertShowStringToResults()` reads from `event_entries`
+- [x] `shows.ts` reads from `events` + `event_entries` + `event_votes` ✅ 2026-03-11
+- [ ] `competition.ts` reads from `event_entries` for show strings (deferred — show_string_entries stay as-is per design)
+- [x] `createPhotoShow()` inserts into `events` (not `photo_shows`) ✅ 2026-03-11
+- [x] `voteForEntry()` uses `vote_for_entry` RPC ✅ 2026-03-11
+- [x] `updateShowStatus("closed")` calls `close_virtual_show` RPC ✅ 2026-03-11
+- [ ] `convertShowStringToResults()` reads from `event_entries` (deferred — stays on show_string_entries)
 
 **Pages Wired**
-- [ ] `/shows/page.tsx` — lists events where `event_type = 'photo_show'`
-- [ ] `/shows/[id]/page.tsx` — uses `eventId` not `showId`, `<UniversalFeed context={{ eventId }}>`
-- [ ] `/shows/planner/page.tsx` — show strings read from `event_entries`
-- [ ] Virtual shows visible on community event calendar
+- [x] `/shows/page.tsx` — lists events where `event_type = 'photo_show'` (via `getPhotoShows`) ✅ 2026-03-11
+- [x] `/shows/[id]/page.tsx` — uses `eventId` not `showId`, `<UniversalFeed context={{ eventId }}>` ✅ 2026-03-11
+- [ ] `/shows/planner/page.tsx` — show strings still read from `show_string_entries` (deferred)
+- [x] Virtual shows visible on community event calendar (auto — they're events now) ✅ 2026-03-11
 
 **Cleanup**
-- [ ] `npx next build` — 0 errors
-- [ ] `posts.show_id` has 0 rows (all re-pointed)
-- [ ] `showId` removed from `UniversalFeed` context type
-- [ ] `showId` removed from `getPosts()` context
-- [ ] Auto-generated `show_records` appear on horse passports
+- [x] `npx next build` — 0 errors ✅ 2026-03-11
+- [ ] `posts.show_id` has 0 rows (verify after migration)
+- [x] `showId` removed from `UniversalFeed` context type ✅ 2026-03-11
+- [x] `showId` removed from `getPosts()` context ✅ 2026-03-11
+- [ ] Auto-generated `show_records` appear on horse passports (verify after first virtual show close)
 
 **DO NOT proceed to Phase 4 until this checklist is fully complete and human has verified.**
 
 **Estimated effort:** ~10-14 hours
+

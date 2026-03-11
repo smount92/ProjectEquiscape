@@ -7,6 +7,7 @@ import VoteButton from "@/components/VoteButton";
 import ShowEntryForm from "@/components/ShowEntryForm";
 import WithdrawButton from "@/components/WithdrawButton";
 import UniversalFeed from "@/components/UniversalFeed";
+import CloseShowButton from "@/components/CloseShowButton";
 
 export async function generateMetadata({
     params,
@@ -50,6 +51,10 @@ export default async function ShowDetailPage({
     }));
 
     const isOpen = show.status === "open";
+    const isCreator = show.createdBy === user.id;
+    const isAdmin = user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase();
+    const isExpired = show.endAt ? new Date(show.endAt) < new Date() : false;
+    const canClose = (isCreator || isAdmin) && show.status !== "closed" && (isExpired || show.status === "judging");
 
     return (
         <div className="page-container">
@@ -161,6 +166,11 @@ export default async function ShowDetailPage({
                     <h3>Judging in Progress</h3>
                     <p style={{ color: "var(--color-text-muted)" }}>Voting is closed. Results will be announced soon!</p>
                 </div>
+            )}
+
+            {/* Close Show Button — creator/admin only, when expired */}
+            {canClose && (
+                <CloseShowButton showId={showId} />
             )}
 
             {/* Entries Grid */}
