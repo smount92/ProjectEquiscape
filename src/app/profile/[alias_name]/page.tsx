@@ -474,7 +474,13 @@ export default async function ProfilePage({
                 )}
                 {!isOwnProfile && (horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") && (
                   <div style={{ marginTop: "var(--space-sm)" }}>
-                    <MessageSellerButton sellerId={profileUser.id} horseId={horse.id} />
+                    <MessageSellerButton
+                      sellerId={profileUser.id}
+                      horseId={horse.id}
+                      horseName={horse.customName}
+                      tradeStatus={horse.tradeStatus}
+                      askingPrice={horse.listingPrice}
+                    />
                   </div>
                 )}
               </div>

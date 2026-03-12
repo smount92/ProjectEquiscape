@@ -261,7 +261,7 @@ export default function ShowRingGrid({
                                     </Link>
                                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
                                         {isListed && (
-                                            <MessageSellerButton sellerId={horse.ownerId} horseId={horse.id} compact />
+                                            <MessageSellerButton sellerId={horse.ownerId} horseId={horse.id} horseName={horse.customName} tradeStatus={horse.tradeStatus} askingPrice={horse.listingPrice} compact />
                                         )}
                                         <FavoriteButton
                                             horseId={horse.id}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import ChatThread from "@/components/ChatThread";
 import RatingForm from "@/components/RatingForm";
 import TransactionActions from "@/components/TransactionActions";
+import OfferCard from "@/components/OfferCard";
 import BlockButton from "@/components/BlockButton";
 import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
 import { getTransactionByConversation } from "@/app/actions/transactions";
@@ -159,9 +160,9 @@ export default async function ChatPage({
 
     const isBuyer = conversation.buyer_id === user.id;
 
-    // Look up or find the transaction for this conversation
     const txn = await getTransactionByConversation(conversationId);
     const transactionId = txn?.transactionId ?? null;
+    const isCommerceFlow = txn && ["offer_made", "pending_payment", "funds_verified"].includes(txn.status);
 
     // Check if user has already reviewed via the new reviews table
     let existingRating: { id: string; stars: number; reviewText: string | null; createdAt: string } | null = null;
@@ -279,6 +280,14 @@ export default async function ChatPage({
                 />
             </div>
 
+            {/* Offer Card — Commerce State Machine */}
+            {txn && isCommerceFlow && (
+                <OfferCard
+                    transaction={txn}
+                    currentUserId={user.id}
+                />
+            )}
+
             {/* Chat Thread (Client Component) */}
             <ChatThread
                 conversationId={conversationId}
@@ -293,12 +302,14 @@ export default async function ChatPage({
                 }))}
             />
 
-            {/* Transaction Actions */}
-            <TransactionActions
-                conversationId={conversationId}
-                initialStatus={conversation.transaction_status || "open"}
-                hasRating={!!existingRating}
-            />
+            {/* Transaction Actions — only show legacy flow if no active commerce state machine */}
+            {!isCommerceFlow && (
+                <TransactionActions
+                    conversationId={conversationId}
+                    initialStatus={conversation.transaction_status || "open"}
+                    hasRating={!!existingRating}
+                />
+            )}
 
             {/* Rating Form — only show if a transaction exists (conversation marked complete) */}
             {transactionId && (

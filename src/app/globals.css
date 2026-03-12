@@ -7307,6 +7307,159 @@ p {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════
+   Commerce State Machine — OfferCard, MakeOfferModal, PIN
+   ══════════════════════════════════════════════════════════════ */
+
+.offer-card {
+  background: rgba(124, 109, 240, 0.08);
+  border: 1px solid rgba(124, 109, 240, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  animation: fadeInUp 0.3s ease;
+}
+
+.offer-card-cancelled {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.2);
+  opacity: 0.7;
+}
+
+.offer-card-completed {
+  background: rgba(34, 197, 94, 0.06);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.offer-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.offer-badge {
+  font-weight: 600;
+  font-size: calc(0.85rem * var(--font-scale));
+  color: var(--color-accent-secondary, #7c6df0);
+}
+
+.offer-badge-cancelled {
+  color: #ef4444;
+}
+
+.offer-badge-completed {
+  color: #22c55e;
+}
+
+.offer-amount {
+  font-size: calc(var(--font-size-xl) * var(--font-scale));
+  font-weight: 700;
+  color: var(--color-accent-secondary, #7c6df0);
+}
+
+.offer-message {
+  margin-top: var(--space-sm);
+  font-size: calc(0.85rem * var(--font-scale));
+  color: var(--color-text-muted);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.offer-state {
+  margin-top: var(--space-md);
+}
+
+.offer-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.offer-status-text {
+  font-size: calc(0.85rem * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+.offer-status-text.offer-accepted {
+  color: #22c55e;
+  font-weight: 500;
+}
+
+/* PIN Reveal */
+.pin-reveal {
+  background: rgba(92, 224, 160, 0.1);
+  border: 2px solid var(--color-accent-success, #22c55e);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  text-align: center;
+  margin-top: var(--space-sm);
+}
+
+.pin-label {
+  display: block;
+  font-size: calc(0.8rem * var(--font-scale));
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.pin-code {
+  display: block;
+  font-size: calc(var(--font-size-2xl) * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: #22c55e;
+  font-family: var(--font-mono, monospace);
+}
+
+/* Make Offer Modal */
+.offer-modal {
+  max-width: 420px;
+}
+
+.offer-modal-horse {
+  font-size: calc(0.9rem * var(--font-scale));
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.offer-amount-input {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.offer-currency {
+  font-size: calc(var(--font-size-lg) * var(--font-scale));
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.offer-modal-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-lg);
+}
+
+@media (max-width: 600px) {
+  .offer-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+
+  .offer-modal-actions {
+    flex-direction: column;
+  }
+
+  .offer-modal-actions .btn {
+    width: 100%;
+  }
+}
+
 
 /* ============================================================
    SOCIAL EXPANSION — Phase 3: Follows + Activity Feed

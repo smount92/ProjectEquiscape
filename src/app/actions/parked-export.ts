@@ -303,6 +303,25 @@ export async function claimParkedHorse(pin: string): Promise<{
             });
         } catch { /* Non-blocking */ }
 
+        // Close state machine: if this claim came from a commerce offer flow,
+        // complete the funds_verified transaction
+        try {
+            const admin2 = getAdminClient();
+            const { data: offerTxn } = await admin2
+                .from("transactions")
+                .select("id")
+                .eq("horse_id", result.horse_id)
+                .eq("status", "funds_verified")
+                .maybeSingle();
+
+            if (offerTxn) {
+                await admin2
+                    .from("transactions")
+                    .update({ status: "completed", completed_at: new Date().toISOString() })
+                    .eq("id", (offerTxn as { id: string }).id);
+            }
+        } catch { /* Non-blocking: state machine closure is best-effort */ }
+
         // Notification (non-critical)
         try {
             await admin.from("notifications").insert({

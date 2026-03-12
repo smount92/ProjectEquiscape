@@ -97,6 +97,9 @@ export default function MatchmakerMatches({
                                     <MessageSellerButton
                                         sellerId={match.ownerId}
                                         horseId={match.id}
+                                        horseName={match.custom_name}
+                                        tradeStatus={match.trade_status}
+                                        askingPrice={match.listing_price}
                                     />
                                 </div>
                             </div>

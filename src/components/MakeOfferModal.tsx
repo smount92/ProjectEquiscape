@@ -1,0 +1,124 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { makeOffer } from "@/app/actions/transactions";
+
+interface MakeOfferModalProps {
+    horseId: string;
+    horseName: string;
+    sellerId: string;
+    askingPrice?: number | null;
+    onClose: () => void;
+}
+
+export default function MakeOfferModal({
+    horseId,
+    horseName,
+    sellerId,
+    askingPrice,
+    onClose,
+}: MakeOfferModalProps) {
+    const [amount, setAmount] = useState(askingPrice ? String(askingPrice) : "");
+    const [message, setMessage] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const numAmount = parseFloat(amount);
+        if (!numAmount || numAmount <= 0) {
+            setError("Please enter a valid amount.");
+            return;
+        }
+
+        setSaving(true);
+        setError("");
+        const result = await makeOffer({
+            horseId,
+            sellerId,
+            amount: numAmount,
+            message: message.trim() || undefined,
+        });
+
+        if (result.success && result.conversationId) {
+            router.push(`/inbox/${result.conversationId}`);
+        } else {
+            setError(result.error || "Failed to submit offer.");
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content offer-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>💰 Make an Offer</h3>
+                    <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
+                </div>
+
+                <p className="offer-modal-horse">
+                    🐴 <strong>{horseName}</strong>
+                </p>
+
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="form-label">Your Offer</label>
+                        <div className="offer-amount-input">
+                            <span className="offer-currency">$</span>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                placeholder="0.00"
+                                className="form-input"
+                                required
+                                autoFocus
+                            />
+                        </div>
+                        {askingPrice && (
+                            <span className="form-hint">
+                                Asking price: ${askingPrice.toLocaleString("en-US")}
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Message (optional)</label>
+                        <textarea
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Tell the seller about your interest…"
+                            className="form-input"
+                            rows={3}
+                            maxLength={500}
+                        />
+                    </div>
+
+                    {error && <div className="comment-error">{error}</div>}
+
+                    <div className="offer-modal-actions">
+                        <button
+                            type="button"
+                            className="btn btn-ghost"
+                            onClick={onClose}
+                            disabled={saving}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={saving}
+                        >
+                            {saving ? "Submitting…" : "Submit Offer"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
