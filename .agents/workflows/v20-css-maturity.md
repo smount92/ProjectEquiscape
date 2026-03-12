@@ -182,22 +182,37 @@ Open every major page at 1440px and 375px:
 
 ## Completion Checklist
 
-**Phase 1 — Token Extraction**
-- [ ] Boundary comment added to globals.css
-- [ ] Verified which sections stay vs extract
-- [ ] `npx next build` passes
+**Phase 1 — Token Extraction** ✅ DONE 2026-03-12
+- [x] Boundary comment added to globals.css (line 917)
+- [x] Verified which sections stay vs extract
+- [x] `npx next build` passes
 
-**Phase 2 — Component Extraction (Batches 1-3)**
-- [ ] Batch 1: StableGrid, StableLedger, ShowRingGrid modules created
-- [ ] Batch 2: UniversalFeed, RichEmbed, GroupDetailClient, GroupFiles modules created
-- [ ] Batch 3: DashboardShell, BulkOperationsBar, NanDashboardWidget, TransferHistory modules created
-- [ ] All batches: `npx next build` passes after each
+**Phase 2 — Component Extraction (Batches 1-4)** 🟡 IN PROGRESS
+- [x] Batch 1: StableLedger module created + verified
+- [x] Batch 2: GroupDetailClient, GroupFiles, GroupAdminPanel modules created + verified
+- [x] Batch 3: ChatThread, OfferCard, MakeOfferModal modules created + verified
+- [x] Batch 4: DashboardShell (view toggle + bulk ops) module created + verified
+- [ ] StableGrid — skipped (shares horse-card-* with ShowRingGrid, profile; needs shared primitives approach)
+- [ ] UniversalFeed — skipped (feed-image-collage, feed-action-row shared across 3 files)
+- [x] All batches: `npx next build` passes after each
 - [ ] Visual check at 1440px + 375px after each batch
 
-**Phase 3 — Page-Level Extraction (Batches 4-6)**
-- [ ] Batch 4: Dashboard page module created
-- [ ] Batch 5: Community page module created
-- [ ] Batch 6: Profile, Discover, Market page modules created
+**Modules Created So Far (8 total):**
+| Module | Lines Extracted | Source |
+|---|---|---|
+| `StableLedger.module.css` | ~190 | globals.css 10659-10824, 10988-10990 |
+| `GroupDetailClient.module.css` | ~130 | globals.css 11637-11709, 11760-11815 |
+| `GroupFiles.module.css` | ~55 | globals.css 11710-11758 |
+| `GroupAdminPanel.module.css` | ~50 | globals.css 11760-11800 |
+| `ChatThread.module.css` | ~180 | globals.css 5098-5271 |
+| `OfferCard.module.css` | ~120 | globals.css 7324-7456 |
+| `MakeOfferModal.module.css` | ~45 | globals.css 7428-7470 |
+| `DashboardShell.module.css` | ~105 | globals.css 10621-10655, 10889-10942 |
+
+**Phase 3 — Page-Level Extraction (Batches 5-7)**
+- [ ] Batch 5: Dashboard page module created
+- [ ] Batch 6: Community page module created
+- [ ] Batch 7: Profile, Discover, Market page modules created
 
 **Phase 4 — Cleanup**
 - [ ] All extracted rules removed from globals.css
@@ -206,3 +221,4 @@ Open every major page at 1440px and 375px:
 - [ ] Full regression test — all 9 pages verified
 
 **Estimated effort:** ~12-16 hours across 4 phases (do NOT rush this)
+
