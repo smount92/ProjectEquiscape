@@ -333,30 +333,39 @@ The V16 sprint should have removed the problematic hard redirect in the edit pag
 
 ## Completion Checklist
 
-**Task 1 — Opt-In Watermarking**
-- [ ] Migration 059 created with `watermark_photos` column
-- [ ] `getProfile()` returns `watermarkPhotos`
-- [ ] `updateProfile()` accepts `watermarkPhotos`
-- [ ] Settings UI toggle added
-- [ ] `compressImageWithWatermark()` function created
-- [ ] Add Horse form uses watermark if enabled
-- [ ] Edit Horse form uses watermark if enabled
-- [ ] Watermark is tasteful and semi-transparent
-- [ ] `npx next build` passes
+**Task 1 — Opt-In Watermarking** ✅ DONE 2026-03-12
+- [x] Migration 059 created with `watermark_photos` column
+- [x] `getProfile()` returns `watermarkPhotos`
+- [x] `updateProfile()` accepts `watermarkPhotos`
+- [x] Settings UI toggle added
+- [x] `compressImageWithWatermark()` function created
+- [x] Add Horse form uses watermark if enabled
+- [x] Edit Horse form uses watermark if enabled
+- [x] Watermark is tasteful and semi-transparent
+- [x] `npx next build` passes
 
-**Task 2 — No Photo, No Feed**
-- [ ] `notifyHorsePublic()` accepts `photoCount` parameter
-- [ ] Guard: `photoCount === 0` → skip activity event
-- [ ] Add Horse form passes `photoCount`
-- [ ] Edit Horse form passes `photoCount`
-- [ ] CSV Import has `publishToFeed` toggle (defaults to false)
-- [ ] CSV Import respects the toggle
-- [ ] `npx next build` passes
+**Task 2 — No Photo, No Feed** ✅ DONE 2026-03-12
+- [x] `notifyHorsePublic()` accepts `photoCount` parameter
+- [x] Guard: `photoCount === 0` → skip activity event
+- [x] Add Horse form passes `photoCount`
+- [x] Edit Horse form passes `photoCount` (counts existing + new)
+- [x] CSV Import has `publishToFeed` toggle (defaults to false)
+- [x] CSV Import respects the toggle (server-side guard blocks 0-photo horses regardless)
+- [x] `npx next build` passes
 
-**Task 3 — Serverless Safety**
-- [ ] All 10+ action files audited for fire-and-forget patterns
-- [ ] All background tasks wrapped in `after()`
-- [ ] No `window.location.href` in server contexts
-- [ ] `npx next build` passes
+**Task 3 — Serverless Safety** ✅ DONE 2026-03-12
+- [x] All 10 action files audited for fire-and-forget patterns
+- [x] `activity.ts` — wrapped mention notify in `after()`
+- [x] `posts.ts` — wrapped mention notify in `after()`
+- [x] `groups.ts` — wrapped mention notify in `after()`
+- [x] `events.ts` — wrapped event comment notify in `after()`
+- [x] `horse-events.ts` — already properly awaited (no change needed)
+- [x] `art-studio.ts` — already properly awaited (no change needed)
+- [x] `notifications.ts` — self-contained with try/catch (no change needed)
+- [x] `mentions.ts` — self-contained with try/catch (no change needed)
+- [x] No `window.location.href` in server contexts (all client-side only)
+- [x] `npx next build` passes
 
 **Estimated effort:** ~4-6 hours across 3 tasks
+**Actual effort:** Completed in single session 2026-03-12
+
