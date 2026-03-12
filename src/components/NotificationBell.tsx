@@ -26,34 +26,11 @@ export default function NotificationBell() {
     useEffect(() => {
         fetchCount();
 
-        // Subscribe to new notifications via Realtime
-        let channel: ReturnType<typeof supabase.channel> | null = null;
-
-        (async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            channel = supabase
-                .channel("notifications-bell")
-                .on(
-                    "postgres_changes",
-                    {
-                        event: "INSERT",
-                        schema: "public",
-                        table: "notifications",
-                        filter: `user_id=eq.${user.id}`,
-                    },
-                    () => {
-                        setUnreadCount((prev) => prev + 1);
-                    }
-                )
-                .subscribe();
-        })();
-
-        return () => {
-            if (channel) supabase.removeChannel(channel);
-        };
-    }, [fetchCount, supabase]);
+        // Poll every 60 seconds instead of Realtime WebSocket
+        // Realtime was a connection pool black hole on Vercel serverless
+        const interval = setInterval(fetchCount, 60_000);
+        return () => clearInterval(interval);
+    }, [fetchCount]);
 
     return (
         <Link

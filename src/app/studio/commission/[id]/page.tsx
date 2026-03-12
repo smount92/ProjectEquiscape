@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getCommission, getCommissionUpdates } from "@/app/actions/art-studio";
 import CommissionTimeline from "@/components/CommissionTimeline";
 import RatingForm from "@/components/RatingForm";
+import LinkHorseToCommission from "@/components/LinkHorseToCommission";
 
 export const dynamic = "force-dynamic";
 
@@ -149,6 +150,11 @@ export default async function CommissionDetailPage({
                     )}
                 </div>
             </div>
+
+            {/* Link Horse (for artist when no horse is linked) */}
+            {!commission.horseId && isArtist && (
+                <LinkHorseToCommission commissionId={commission.id} />
+            )}
 
             {/* Timeline */}
             <CommissionTimeline

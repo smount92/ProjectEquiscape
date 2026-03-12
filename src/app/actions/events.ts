@@ -33,6 +33,7 @@ export interface MHHEvent {
     rsvpCount: number;
     createdAt: string;
     userRsvp: string | null;
+    judgingMethod: string;
 }
 
 // ── CRUD ──
@@ -52,6 +53,7 @@ export async function createEvent(data: {
     region?: string;
     virtualUrl?: string;
     groupId?: string;
+    judgingMethod?: "community_vote" | "expert_judge";
 }): Promise<{ success: boolean; eventId?: string; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -75,6 +77,7 @@ export async function createEvent(data: {
             region: data.region?.trim() || null,
             virtual_url: data.virtualUrl?.trim() || null,
             group_id: data.groupId || null,
+            judging_method: data.judgingMethod || "community_vote",
             created_by: user.id,
             rsvp_count: 1, // Creator auto-RSVPs
         })
@@ -182,6 +185,7 @@ export async function getEvents(filters?: {
         rsvpCount: e.rsvp_count as number,
         createdAt: e.created_at as string,
         userRsvp: rsvpMap.get(e.id as string) || null,
+        judgingMethod: (e.judging_method as string) || "community_vote",
     }));
 }
 
@@ -252,6 +256,7 @@ export async function getEvent(eventId: string): Promise<MHHEvent | null> {
         rsvpCount: e.rsvp_count as number,
         createdAt: e.created_at as string,
         userRsvp,
+        judgingMethod: (e.judging_method as string) || "community_vote",
     };
 }
 
@@ -343,6 +348,7 @@ export async function getUpcomingEvents(): Promise<MHHEvent[]> {
         rsvpCount: e.rsvp_count as number,
         createdAt: e.created_at as string,
         userRsvp: rsvpMap.get(e.id as string) || null,
+        judgingMethod: (e.judging_method as string) || "community_vote",
     }));
 }
 

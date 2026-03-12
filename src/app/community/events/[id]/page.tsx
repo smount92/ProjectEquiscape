@@ -58,6 +58,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                             <span>{EVENT_TYPE_LABELS[event.eventType] || event.eventType}</span>
                             <span>👥 {event.rsvpCount} attending</span>
                             {event.isOfficial && <span style={{ color: "#f59e0b" }}>⭐ Official</span>}
+                            {event.judgingMethod === "expert_judge" && <span style={{ color: "#8b5cf6" }}>🏅 Expert Judged</span>}
                         </div>
                     </div>
                 </div>

@@ -357,6 +357,7 @@ export async function createCommission(data: {
     description: string;
     referenceImages?: string[];
     budget?: number;
+    horseId?: string;
 }): Promise<{ success: boolean; commissionId?: string; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -388,6 +389,7 @@ export async function createCommission(data: {
             description: data.description,
             reference_images: data.referenceImages || [],
             price_quoted: data.budget || null,
+            horse_id: data.horseId || null,
         })
         .select("id")
         .single();
@@ -781,4 +783,35 @@ function mapCommissionJoined(c: Record<string, unknown>): Commission {
         clientAlias,
         artistAlias,
     };
+}
+
+/** Artist links a horse to a commission (for WIP→Hoofprint pipeline) */
+export async function linkHorseToCommission(
+    commissionId: string,
+    horseId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify user is the artist on this commission
+    const { data: commission } = await supabase
+        .from("commissions")
+        .select("artist_id")
+        .eq("id", commissionId)
+        .single();
+
+    if (!commission || (commission as { artist_id: string }).artist_id !== user.id) {
+        return { success: false, error: "Only the artist can link a horse." };
+    }
+
+    const { error } = await supabase
+        .from("commissions")
+        .update({ horse_id: horseId })
+        .eq("id", commissionId);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath(`/studio/commission/${commissionId}`);
+    return { success: true };
 }

@@ -9,6 +9,8 @@ import AdminShowManager from "@/components/AdminShowManager";
 import AdminSuggestionsPanel from "@/components/AdminSuggestionsPanel";
 import { getPhotoShows } from "@/app/actions/shows";
 import { getPendingSuggestions } from "@/app/actions/suggestions";
+import { getOpenReports } from "@/app/actions/moderation";
+import ReportActions from "@/components/ReportActions";
 
 export const metadata = {
     title: "Admin Console — Model Horse Hub",
@@ -74,6 +76,7 @@ export default async function AdminPage() {
 
     const allShows = await getPhotoShows();
     const pendingSuggestions = await getPendingSuggestions();
+    const reports = await getOpenReports();
 
     function formatDate(dateStr: string): string {
         return new Date(dateStr).toLocaleDateString("en-US", {
@@ -245,6 +248,37 @@ export default async function AdminPage() {
                         </span>
                     </h2>
                     <AdminSuggestionsPanel suggestions={pendingSuggestions} />
+                </div>
+
+                {/* Open Reports */}
+                <div className="admin-section">
+                    <h2 className="admin-section-title">
+                        🚩 Open Reports
+                        <span className="admin-section-count">{reports.length}</span>
+                    </h2>
+                    {reports.length === 0 ? (
+                        <p style={{ color: "var(--color-text-muted)" }}>No open reports. 🎉</p>
+                    ) : (
+                        reports.map(report => (
+                            <div key={report.id} className="admin-message" style={{ marginBottom: "var(--space-sm)" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--space-xs)" }}>
+                                    <strong>{report.reason}</strong>
+                                    <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                        {report.targetType} · {new Date(report.createdAt).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-xs)" }}>
+                                    Reported by: {report.reporterAlias} · Target: {report.targetId.slice(0, 8)}…
+                                </p>
+                                {report.details && (
+                                    <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                        {report.details}
+                                    </p>
+                                )}
+                                <ReportActions reportId={report.id} />
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

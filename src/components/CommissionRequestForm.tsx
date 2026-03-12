@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { createCommission } from "@/app/actions/art-studio";
 import type { ArtistProfile } from "@/app/actions/art-studio";
 
@@ -16,6 +17,28 @@ export default function CommissionRequestForm({
     const [budget, setBudget] = useState("");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [horses, setHorses] = useState<{ id: string; name: string }[]>([]);
+    const [selectedHorseId, setSelectedHorseId] = useState<string>("");
+
+    useEffect(() => {
+        const supabase = createClient();
+        (async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { data } = await supabase
+                .from("user_horses")
+                .select("id, custom_name")
+                .eq("owner_id", user.id)
+                .order("custom_name")
+                .limit(200);
+            if (data) {
+                setHorses((data as { id: string; custom_name: string }[]).map(h => ({
+                    id: h.id,
+                    name: h.custom_name,
+                })));
+            }
+        })();
+    }, []);
 
     const typeOptions = artist.acceptingTypes.length > 0
         ? artist.acceptingTypes
@@ -38,6 +61,7 @@ export default function CommissionRequestForm({
             commissionType,
             description: description.trim(),
             budget: budget ? parseFloat(budget) : undefined,
+            horseId: selectedHorseId || undefined,
         });
 
         if (result.success && result.commissionId) {
@@ -63,6 +87,23 @@ export default function CommissionRequestForm({
                         <option key={t} value={t}>{t}</option>
                     ))}
                 </select>
+            </div>
+
+            <div className="form-group">
+                <label className="form-label">Link a Horse (optional)</label>
+                <select
+                    className="form-input"
+                    value={selectedHorseId}
+                    onChange={e => setSelectedHorseId(e.target.value)}
+                >
+                    <option value="">No horse — artist will create or I&apos;ll send one later</option>
+                    {horses.map(h => (
+                        <option key={h.id} value={h.id}>{h.name}</option>
+                    ))}
+                </select>
+                <span className="form-hint">
+                    Select the model you&apos;re sending in for this commission.
+                </span>
             </div>
 
             <div className="form-group">

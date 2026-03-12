@@ -193,7 +193,19 @@ export async function getParkedHorseByPin(pin: string): Promise<{
 
         // 2. Check expiration
         if (new Date(t.expires_at) < new Date()) {
+            // Expire the transfer AND revert the horse
             await admin.from("horse_transfers").update({ status: "expired" }).eq("id", t.id);
+            await admin.from("user_horses").update({ life_stage: "completed" }).eq("id", t.horse_id);
+
+            // System note about expired transfer
+            try {
+                await admin.from("posts").insert({
+                    author_id: t.sender_id,
+                    horse_id: t.horse_id,
+                    content: "⏰ Parked transfer expired. Horse has been automatically unparked and returned to your stable.",
+                });
+            } catch { /* best effort */ }
+
             return { success: false, error: "This claim PIN has expired." };
         }
 

@@ -21,6 +21,7 @@ export default function CreateEventPage() {
     const [virtualUrl, setVirtualUrl] = useState("");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    const [judgingMethod, setJudgingMethod] = useState<"community_vote" | "expert_judge">("community_vote");
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -40,6 +41,7 @@ export default function CreateEventPage() {
             locationAddress: locationAddress.trim() || undefined,
             region: region.trim() || undefined,
             virtualUrl: virtualUrl.trim() || undefined,
+            judgingMethod,
         });
 
         if (result.success && result.eventId) {
@@ -68,6 +70,37 @@ export default function CreateEventPage() {
                                 <option key={key} value={key}>{label}</option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Judging Method</label>
+                        <div style={{ display: "flex", gap: "var(--space-md)" }}>
+                            <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer" }}>
+                                <input
+                                    type="radio"
+                                    name="judgingMethod"
+                                    value="community_vote"
+                                    checked={judgingMethod === "community_vote"}
+                                    onChange={() => setJudgingMethod("community_vote")}
+                                />
+                                🗳️ Community Vote
+                            </label>
+                            <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer" }}>
+                                <input
+                                    type="radio"
+                                    name="judgingMethod"
+                                    value="expert_judge"
+                                    checked={judgingMethod === "expert_judge"}
+                                    onChange={() => setJudgingMethod("expert_judge")}
+                                />
+                                🏅 Expert Judge
+                            </label>
+                        </div>
+                        <span className="form-hint">
+                            {judgingMethod === "community_vote"
+                                ? "Attendees can vote on entries."
+                                : "Only the event creator (or assigned judge) can assign placings."}
+                        </span>
                     </div>
 
                     <div className="form-group">

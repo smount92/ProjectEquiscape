@@ -12,6 +12,7 @@ import ShowRecordTimeline from "@/components/ShowRecordTimeline";
 import PedigreeCard from "@/components/PedigreeCard";
 import HoofprintTimeline from "@/components/HoofprintTimeline";
 import { getHoofprint } from "@/app/actions/hoofprint";
+import ReportButton from "@/components/ReportButton";
 
 // Force fresh data on every request — prevents stale comments/favorites
 export const dynamic = "force-dynamic";
@@ -563,6 +564,9 @@ export default async function PublicPassportPage({
                 label="Share"
                 variant="full"
               />
+              {!isOwnHorse && (
+                <ReportButton targetType="horse" targetId={horseId} />
+              )}
               {isOwnHorse && (
                 <Link
                   href={`/stable/${horse.id}`}
