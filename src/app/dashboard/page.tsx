@@ -54,8 +54,6 @@ export default async function DashboardPage({
     const offset = (page - 1) * HORSES_PER_PAGE;
 
     // ── Round 1: Independent queries in parallel ──
-    // Lightweight summary query — no horse_images (the OOM driver)
-    // + paginated display query with images
     const [profileResult, summaryResult, horsesResult, collectionsResult, showRecordsResult, convosResult] = await Promise.all([
         supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>(),
         supabase.from("user_horses").select(`
@@ -81,8 +79,7 @@ export default async function DashboardPage({
     const totalPages = Math.ceil(totalHorseCount / HORSES_PER_PAGE);
 
     // ── Round 2: Dependent queries in parallel ──
-    const horseIds = horses.map(h => h.id);  // only paginated horses
-    const allHorseIds = allHorsesSummary.map(h => h.id);  // all horses for vault
+    const allHorseIds = allHorsesSummary.map(h => h.id);
     const thumbnailUrls: string[] = [];
     horses.forEach((horse) => {
         const thumb = horse.horse_images?.find(
@@ -104,13 +101,13 @@ export default async function DashboardPage({
     const vaults = (vaultsResult.data as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[]) ?? [];
     const unreadMsgCount = (unreadResult as { count: number | null }).count ?? 0;
 
-    // Compute total vault value: prefer estimated_current_value, fall back to purchase_price
+    // Compute total vault value
     let totalVaultValue = 0;
     vaults.forEach((v) => {
         totalVaultValue += v.estimated_current_value ?? v.purchase_price ?? 0;
     });
 
-    // Count horses per collection and compute vault value per collection (using lightweight summary)
+    // Count horses per collection and compute vault value per collection
     const collectionCounts = new Map<string, number>();
     const collectionValues = new Map<string, number>();
     allHorsesSummary.forEach((h) => {
@@ -146,9 +143,8 @@ export default async function DashboardPage({
             ? `${horse.catalog_items.maker} ${horse.catalog_items.title}`
             : "Unlisted Mold";
 
-        const releaseLine = null; // Now unified in catalog_items
+        const releaseLine = null;
 
-        // Build vault map per horse
         const vaultMap = new Map<string, number>();
         vaults.forEach((v) => {
             const val = v.estimated_current_value ?? v.purchase_price ?? 0;
@@ -175,9 +171,9 @@ export default async function DashboardPage({
     });
 
     return (
-        <div className="page-container form-page">
+        <div className="dashboard-layout">
             <div className="animate-fade-in-up">
-                {/* Welcome Card for new users */}
+                {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
                     <div className="welcome-card card animate-fade-in-up">
                         <h2>👋 Welcome to Model Horse Hub!</h2>
@@ -202,8 +198,8 @@ export default async function DashboardPage({
                     </div>
                 )}
 
-                {/* Shelf Header */}
-                <div className="shelf-header">
+                {/* Shelf Header — FULL WIDTH */}
+                <div className="shelf-header dashboard-header-full">
                     <div>
                         <h1>
                             <span className="text-gradient">Digital Stable</span>
@@ -221,7 +217,7 @@ export default async function DashboardPage({
                             )}
                         </h1>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
                         {totalHorseCount > 0 && (
                             <span className="shelf-stats">
                                 {totalHorseCount} model{totalHorseCount === 1 ? "" : "s"}
@@ -241,103 +237,113 @@ export default async function DashboardPage({
                     </div>
                 </div>
 
-                {/* Success toast (reads URL ?toast= param) */}
+                {/* Success toast */}
                 <Suspense fallback={null}>
                     <DashboardToast />
                 </Suspense>
 
-                {/* 🔒 Stable Overview — PRIVATE analytics (never exposed publicly) */}
-                {totalHorseCount > 0 && (
-                    <div className="analytics-row">
-                        <div className="analytics-card">
-                            <div className="analytics-icon">🐴</div>
-                            <div className="analytics-value">{totalHorseCount}</div>
-                            <div className="analytics-label">Total Models</div>
-                        </div>
-                        <div className="analytics-card">
-                            <div className="analytics-icon">📁</div>
-                            <div className="analytics-value">{collections.length}</div>
-                            <div className="analytics-label">Collections</div>
-                        </div>
-                        <div className="analytics-card">
-                            <div className="analytics-icon">💰</div>
-                            <div className="analytics-value">
-                                {totalVaultValue > 0
-                                    ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-                                    : "—"}
+                {/* ══════════════════════════════════════════════════════════════
+                    TWO-COLUMN GRID: Main (horses) + Sidebar (widgets)
+                   ══════════════════════════════════════════════════════════════ */}
+                <div className="dashboard-grid">
+                    {/* ── MAIN COLUMN: Horse Grid ── */}
+                    <main className="dashboard-main">
+                        <DashboardShell
+                            horseCards={horseCards}
+                            collections={collections.map(c => ({ id: c.id, name: c.name }))}
+                        />
+
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="market-pagination" style={{ marginTop: "var(--space-lg)" }}>
+                                {page > 1 ? (
+                                    <Link href={`/dashboard?page=${page - 1}`} className="btn btn-ghost">← Previous</Link>
+                                ) : (
+                                    <button className="btn btn-ghost" disabled>← Previous</button>
+                                )}
+                                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                    Page {page} of {totalPages}
+                                </span>
+                                {page < totalPages ? (
+                                    <Link href={`/dashboard?page=${page + 1}`} className="btn btn-ghost">Next →</Link>
+                                ) : (
+                                    <button className="btn btn-ghost" disabled>Next →</button>
+                                )}
                             </div>
-                            <div className="analytics-label">Vault Value</div>
-                        </div>
-                        <div className="analytics-card">
-                            <div className="analytics-icon">🏅</div>
-                            <div className="analytics-value">{totalShowRecords ?? 0}</div>
-                            <div className="analytics-label">Show Placings</div>
-                        </div>
-                        {unreadMsgCount > 0 && (
-                            <Link href="/inbox" className="analytics-card" style={{ textDecoration: "none", cursor: "pointer" }}>
-                                <div className="analytics-icon">✉️</div>
-                                <div className="analytics-value">{unreadMsgCount}</div>
-                                <div className="analytics-label">Unread Messages</div>
-                            </Link>
                         )}
-                    </div>
-                )}
+                    </main>
 
-                {/* Collection Folders Row */}
-                {collections.length > 0 && (
-                    <div className="collections-row">
-                        <h2 className="collections-row-title">📁 Collections</h2>
-                        <div className="collections-scroll">
-                            {collections.map((col) => (
-                                <Link
-                                    key={col.id}
-                                    href={`/stable/collection/${col.id}`}
-                                    className="collection-folder"
-                                    id={`collection-${col.id}`}
-                                >
-                                    <span className="collection-folder-icon">📁</span>
-                                    <span className="collection-folder-name">{col.name}</span>
-                                    <span className="collection-folder-count">
-                                        {collectionCounts.get(col.id) || 0} model{(collectionCounts.get(col.id) || 0) !== 1 ? "s" : ""}
-                                        {(collectionValues.get(col.id) || 0) > 0 && (
-                                            <> · ${(collectionValues.get(col.id) || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>
-                                        )}
-                                    </span>
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* NAN Qualification Dashboard */}
-                <Suspense fallback={null}>
-                    <NanDashboardWidget />
-                </Suspense>
-
-                {/* Horse Grid/Ledger with Search + View Toggle */}
-                <DashboardShell horseCards={horseCards} collections={collections.map(c => ({ id: c.id, name: c.name }))} />
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="market-pagination" style={{ marginTop: "var(--space-lg)" }}>
-                        {page > 1 ? (
-                            <Link href={`/dashboard?page=${page - 1}`} className="btn btn-ghost">← Previous</Link>
-                        ) : (
-                            <button className="btn btn-ghost" disabled>← Previous</button>
+                    {/* ── SIDEBAR: Widgets ── */}
+                    <aside className="dashboard-sidebar">
+                        {/* Analytics — Compact stat rows */}
+                        {totalHorseCount > 0 && (
+                            <div className="sidebar-section">
+                                <h3 className="sidebar-section-title">📊 Stable Overview</h3>
+                                <div className="sidebar-stats">
+                                    <div className="sidebar-stat-row">
+                                        <span className="sidebar-stat-label">🐴 Total Models</span>
+                                        <span className="sidebar-stat-value">{totalHorseCount}</span>
+                                    </div>
+                                    <div className="sidebar-stat-row">
+                                        <span className="sidebar-stat-label">📁 Collections</span>
+                                        <span className="sidebar-stat-value">{collections.length}</span>
+                                    </div>
+                                    <div className="sidebar-stat-row">
+                                        <span className="sidebar-stat-label">💰 Vault Value</span>
+                                        <span className="sidebar-stat-value">
+                                            {totalVaultValue > 0
+                                                ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                                                : "—"}
+                                        </span>
+                                    </div>
+                                    <div className="sidebar-stat-row">
+                                        <span className="sidebar-stat-label">🏅 Show Placings</span>
+                                        <span className="sidebar-stat-value">{totalShowRecords ?? 0}</span>
+                                    </div>
+                                    {unreadMsgCount > 0 && (
+                                        <Link href="/inbox" className="sidebar-stat-row" style={{ textDecoration: "none" }}>
+                                            <span className="sidebar-stat-label">✉️ Unread Messages</span>
+                                            <span className="sidebar-stat-value" style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
                         )}
-                        <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
-                            Page {page} of {totalPages}
-                        </span>
-                        {page < totalPages ? (
-                            <Link href={`/dashboard?page=${page + 1}`} className="btn btn-ghost">Next →</Link>
-                        ) : (
-                            <button className="btn btn-ghost" disabled>Next →</button>
-                        )}
-                    </div>
-                )}
 
-                {/* Transfer History (Ghost Cards) */}
-                <TransferHistorySection />
+                        {/* Collections — Vertical list */}
+                        {collections.length > 0 && (
+                            <div className="sidebar-section">
+                                <h3 className="sidebar-section-title">📁 Collections</h3>
+                                <div className="sidebar-collections">
+                                    {collections.map((col) => (
+                                        <Link
+                                            key={col.id}
+                                            href={`/stable/collection/${col.id}`}
+                                            className="sidebar-collection-link"
+                                            id={`collection-${col.id}`}
+                                        >
+                                            <span>{col.name}</span>
+                                            <span className="sidebar-collection-count">
+                                                {collectionCounts.get(col.id) || 0}
+                                                {(collectionValues.get(col.id) || 0) > 0 && (
+                                                    <> · ${(collectionValues.get(col.id) || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>
+                                                )}
+                                            </span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* NAN Qualification Dashboard */}
+                        <Suspense fallback={null}>
+                            <NanDashboardWidget />
+                        </Suspense>
+
+                        {/* Transfer History */}
+                        <TransferHistorySection />
+                    </aside>
+                </div>
             </div>
         </div>
     );
