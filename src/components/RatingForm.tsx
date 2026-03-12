@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { leaveReview, deleteReview } from "@/app/actions/transactions";
 import RatingStars from "@/components/RatingStars";
+import styles from "./RatingForm.module.css";
 
 interface ExistingRating {
     id: string;
@@ -81,17 +82,17 @@ export default function RatingForm({
     // Already rated — show the existing rating
     if (rating) {
         return (
-            <div className="rating-form-card" id="rating-section">
-                <div className="rating-form-header">
+            <div className={styles.card} id="rating-section">
+                <div className={styles.header}>
                     <span>⭐ Your Rating for @{targetAlias}</span>
                 </div>
-                <div className="rating-existing">
+                <div className={styles.existing}>
                     <RatingStars rating={rating.stars} size="md" />
                     {rating.reviewText && (
-                        <p className="rating-existing-text">&ldquo;{rating.reviewText}&rdquo;</p>
+                        <p className={styles.existingText}>&ldquo;{rating.reviewText}&rdquo;</p>
                     )}
                     <button
-                        className="btn btn-ghost rating-retract-btn"
+                        className={`btn btn-ghost ${styles.retractBtn}`}
                         onClick={handleRetract}
                         disabled={status === "retracting"}
                     >
@@ -107,28 +108,30 @@ export default function RatingForm({
 
     // Rating form
     return (
-        <div className="rating-form-card" id="rating-section">
-            <div className="rating-form-header">
+        <div className={styles.card} id="rating-section">
+            <div className={styles.header}>
                 <span>⭐ Rate your experience with @{targetAlias}</span>
             </div>
 
-            {hasVerifiedTransfer === false && (
-                <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "var(--space-xs)",
-                    padding: "var(--space-xs) var(--space-sm)",
-                    background: "var(--color-bg-elevated)",
-                    borderRadius: "var(--radius-sm)",
-                    fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
-                    color: "var(--color-text-muted)",
-                    marginBottom: "var(--space-md)",
-                }}>
-                    ℹ️ No verified Hoofprint™ transfer found between you and this user.
-                </div>
-            )}
+            {
+                hasVerifiedTransfer === false && (
+                    <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "var(--space-xs)",
+                        padding: "var(--space-xs) var(--space-sm)",
+                        background: "var(--color-bg-elevated)",
+                        borderRadius: "var(--radius-sm)",
+                        fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+                        color: "var(--color-text-muted)",
+                        marginBottom: "var(--space-md)",
+                    }}>
+                        ℹ️ No verified Hoofprint™ transfer found between you and this user.
+                    </div>
+                )
+            }
             <form onSubmit={handleSubmit}>
-                <div className="rating-form-stars">
+                <div className={styles.stars}>
                     <RatingStars
                         rating={stars}
                         size="lg"
@@ -150,7 +153,7 @@ export default function RatingForm({
                         rows={2}
                         id="rating-review-text"
                     />
-                    <div className="rating-char-counter">
+                    <div className={styles.charCounter}>
                         {reviewText.length}/300
                     </div>
                 </div>
@@ -177,6 +180,6 @@ export default function RatingForm({
                     </button>
                 </div>
             </form>
-        </div>
+        </div >
     );
 }

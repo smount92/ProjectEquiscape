@@ -4657,6 +4657,7 @@ p {
   gap: var(--space-sm);
 }
 
+/* EXTRACTED → MatchmakerMatches.module.css */
 .matchmaker-card {
   display: flex;
   gap: var(--space-sm);
@@ -6785,6 +6786,7 @@ p {
 }
 
 /* Rating Form Card */
+/* EXTRACTED → RatingForm.module.css */
 .rating-form-card {
   background: var(--color-card-bg, rgba(255, 255, 255, 0.05));
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
@@ -7075,7 +7077,7 @@ p {
   color: var(--color-text-muted);
 }
 
-/* Featured Horse Card */
+/* EXTRACTED → FeaturedHorseCard.module.css */
 .featured-horse-card {
   display: flex;
   gap: var(--space-xl);

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import MessageSellerButton from "@/components/MessageSellerButton";
+import styles from "./MatchmakerMatches.module.css";
 
 interface MarketplaceMatch {
     id: string;
@@ -54,8 +55,8 @@ export default function MatchmakerMatches({
             {expanded && (
                 <div className="matchmaker-results animate-fade-in-up">
                     {matches.map((match) => (
-                        <div key={match.id} className="matchmaker-card">
-                            <div className="matchmaker-card-thumb">
+                        <div key={match.id} className={styles.card}>
+                            <div className={styles.thumb}>
                                 {match.thumbnailUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
@@ -64,18 +65,18 @@ export default function MatchmakerMatches({
                                         loading="lazy"
                                     />
                                 ) : (
-                                    <div className="matchmaker-card-placeholder">🐴</div>
+                                    <div className={styles.placeholder}>🐴</div>
                                 )}
                             </div>
-                            <div className="matchmaker-card-info">
+                            <div className={styles.info}>
                                 <Link
                                     href={`/community/${match.id}`}
-                                    className="matchmaker-card-name"
+                                    className={styles.name}
                                 >
                                     {match.custom_name}
                                 </Link>
-                                <div className="matchmaker-card-meta">
-                                    <span className={`matchmaker-status ${match.trade_status === "For Sale" ? "status-sale" : "status-offers"}`}>
+                                <div className={styles.meta}>
+                                    <span className={match.trade_status === "For Sale" ? styles.statusSale : styles.statusOffers}>
                                         {match.trade_status === "For Sale" ? "💲" : "🤝"}{" "}
                                         {match.listing_price
                                             ? `$${match.listing_price.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
@@ -83,13 +84,13 @@ export default function MatchmakerMatches({
                                     </span>
                                     <Link
                                         href={`/profile/${encodeURIComponent(match.ownerAlias)}`}
-                                        className="matchmaker-card-seller"
+                                        className={styles.seller}
                                     >
                                         @{match.ownerAlias}
                                     </Link>
                                 </div>
                                 {match.marketplace_notes && (
-                                    <div className="matchmaker-card-notes">
+                                    <div className={styles.notes}>
                                         {match.marketplace_notes}
                                     </div>
                                 )}

@@ -1,0 +1,56 @@
+/* ── RatingForm.module.css ──
+   Extracted from globals.css lines 6788-6840
+   Rating form card, stars, existing rating */
+
+.card {
+    background: var(--color-card-bg, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    backdrop-filter: blur(12px);
+    margin-top: var(--space-lg);
+}
+
+.header {
+    font-size: calc(1rem * var(--font-scale));
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.stars {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-md) 0;
+}
+
+.charCounter {
+    text-align: right;
+    font-size: calc(0.75rem * var(--font-scale));
+    color: var(--color-text-muted);
+    margin-top: var(--space-xs);
+}
+
+.existing {
+    text-align: center;
+    padding: var(--space-md) 0;
+}
+
+.existingText {
+    margin-top: var(--space-md);
+    font-style: italic;
+    color: var(--color-text-muted);
+    font-size: calc(0.9rem * var(--font-scale));
+}
+
+.retractBtn {
+    margin-top: var(--space-md);
+    font-size: calc(0.8rem * var(--font-scale)) !important;
+    color: var(--color-text-muted) !important;
+}
+
+.retractBtn:hover {
+    color: #e74c6f !important;
+}

@@ -1,0 +1,111 @@
+/* ── MatchmakerMatches.module.css ──
+   Extracted from globals.css lines 4660-4758
+   Wishlist matchmaker result cards */
+
+.card {
+    display: flex;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    border-color: rgba(251, 146, 60, 0.4);
+    box-shadow: 0 2px 12px rgba(251, 146, 60, 0.1);
+}
+
+.thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    opacity: 0.4;
+}
+
+.info {
+    flex: 1;
+    min-width: 0;
+}
+
+.name {
+    font-weight: 600;
+    font-size: calc(var(--font-size-sm) * var(--font-scale));
+    color: var(--color-primary);
+    text-decoration: none;
+    display: block;
+}
+
+.name:hover {
+    text-decoration: underline;
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: 2px;
+}
+
+.status {
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.statusSale {
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.statusOffers {
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+}
+
+.seller {
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.seller:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.notes {
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
+    color: var(--color-text-muted);
+    margin-top: 4px;
+    font-style: italic;
+    line-height: 1.3;
+}
