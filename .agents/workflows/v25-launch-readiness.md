@@ -1046,8 +1046,8 @@ After all 5 tasks are done:
 
 | Task | Description | Status | Date |
 |------|-------------|--------|------|
-| 1 | WebSocket black hole (NotificationBell polling) | ⬜ TODO | |
-| 2 | Art Studio missing link (horse picker + link UI) | ⬜ TODO | |
-| 3 | Expired transfer auto-unpark | ⬜ TODO | |
-| 4 | Expert-judged shows | ⬜ TODO | |
-| 5 | Community moderation (flagging + admin queue) | ⬜ TODO | |
+| 1 | WebSocket black hole (NotificationBell polling) | ✅ DONE | 2026-03-13 |
+| 2 | Art Studio missing link (horse picker + link UI) | ✅ DONE | 2026-03-13 |
+| 3 | Expired transfer auto-unpark | ✅ DONE | 2026-03-13 |
+| 4 | Expert-judged shows | ✅ DONE | 2026-03-13 |
+| 5 | Community moderation (flagging + admin queue) | ✅ DONE | 2026-03-13 |
