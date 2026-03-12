@@ -187,17 +187,22 @@ Open every major page at 1440px and 375px:
 - [x] Verified which sections stay vs extract
 - [x] `npx next build` passes
 
-**Phase 2 — Component Extraction (Batches 1-4)** 🟡 IN PROGRESS
+**Phase 2 — Component Extraction (Batches 1-6)** ✅ DONE 2026-03-12
 - [x] Batch 1: StableLedger module created + verified
 - [x] Batch 2: GroupDetailClient, GroupFiles, GroupAdminPanel modules created + verified
 - [x] Batch 3: ChatThread, OfferCard, MakeOfferModal modules created + verified
 - [x] Batch 4: DashboardShell (view toggle + bulk ops) module created + verified
-- [ ] StableGrid — skipped (shares horse-card-* with ShowRingGrid, profile; needs shared primitives approach)
-- [ ] UniversalFeed — skipped (feed-image-collage, feed-action-row shared across 3 files)
+- [x] Batch 5: RatingForm, FeaturedHorseCard, MatchmakerMatches modules created + verified
+- [x] Batch 6: Inbox page module (list, items, avatars, status badges) created + verified
 - [x] All batches: `npx next build` passes after each
-- [ ] Visual check at 1440px + 375px after each batch
 
-**Modules Created So Far (8 total):**
+**Decision: Keep in globals.css (shared primitives):**
+- `horse-card-*` — used across 7+ files (StableGrid, ShowRingGrid, profile, collection, community, FeaturedHorseCard, events)
+- `feed-*` — shared across UniversalFeed, ActivityFeed, feed detail page
+- `btn-*`, `form-*`, `modal-*`, `card` — universal utilities
+- `passport-*` — shared between passport page and gallery component
+
+**Modules Created So Far (12 total):**
 | Module | Lines Extracted | Source |
 |---|---|---|
 | `StableLedger.module.css` | ~190 | globals.css 10659-10824, 10988-10990 |
@@ -208,11 +213,16 @@ Open every major page at 1440px and 375px:
 | `OfferCard.module.css` | ~120 | globals.css 7324-7456 |
 | `MakeOfferModal.module.css` | ~45 | globals.css 7428-7470 |
 | `DashboardShell.module.css` | ~105 | globals.css 10621-10655, 10889-10942 |
+| `RatingForm.module.css` | ~55 | globals.css 6788-6840 |
+| `FeaturedHorseCard.module.css` | ~90 | globals.css 7079-7182 |
+| `MatchmakerMatches.module.css` | ~110 | globals.css 4660-4758 |
+| `inbox/inbox.module.css` | ~200 | globals.css 4860-4990 |
 
-**Phase 3 — Page-Level Extraction (Batches 5-7)**
-- [ ] Batch 5: Dashboard page module created
-- [ ] Batch 6: Community page module created
-- [ ] Batch 7: Profile, Discover, Market page modules created
+**Phase 3 — Page-Level Extraction**
+- [ ] Dashboard page layout (sidebar, grid, stats)
+- [ ] Settings page styles
+- [ ] Community/Show Ring page styles
+- [ ] Profile, Discover, Market page styles
 
 **Phase 4 — Cleanup**
 - [ ] All extracted rules removed from globals.css
@@ -220,5 +230,5 @@ Open every major page at 1440px and 375px:
 - [ ] globals.css under 400 lines
 - [ ] Full regression test — all 9 pages verified
 
-**Estimated effort:** ~12-16 hours across 4 phases (do NOT rush this)
+**Estimated effort:** ~8-12 hours remaining (Phase 3-4)
 
