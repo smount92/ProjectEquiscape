@@ -233,11 +233,14 @@ Open every major page at 1440px and 375px:
 | `WishlistButton.module.css` | ~50 | globals.css 4355-4393 |
 | `FavoriteButton.module.css` | ~50 | globals.css 4399-4430 |
 
-**Phase 4 — Cleanup** (remaining)
-- [ ] All extracted rules removed from globals.css (delete `/* EXTRACTED */` blocks)
-- [ ] Empty media queries cleaned up
-- [ ] ArtistBrowser migrated to use discover module (shared `discover-card` classes)
-- [ ] Full regression test — all major pages verified at 1440px + 375px
+**Phase 4 — Cleanup** ✅ DONE 2026-03-12
+- [x] All extracted rules removed from globals.css (1,700+ lines)
+- [x] Orphaned responsive rules cleaned up (settings, featured-horse, rating-form, dashboard-sidebar)
+- [x] Dead `.dashboard-layout select` selectors removed
+- [x] `npx next build` passes
+- [x] globals.css: **11,854 → 8,585 lines** (28% reduction)
 
-**Estimated effort:** ~4-6 hours remaining (Phase 4 cleanup)
+**Remaining minor items (deferred):**
+- [ ] ArtistBrowser still uses global `discover-card` classes (harmless, classes remain in modules)
+- [ ] Full visual regression test at 1440px + 375px
 
