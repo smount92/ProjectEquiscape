@@ -11235,8 +11235,8 @@ p {
 @media (min-width: 1024px) {
   .dashboard-sidebar {
     position: sticky;
-    top: 80px;
-    max-height: calc(100vh - 100px);
+    top: calc(var(--header-height, 64px) + var(--space-lg));
+    max-height: calc(100vh - var(--header-height, 64px) - var(--space-2xl));
     overflow-y: auto;
     scrollbar-width: thin;
   }
@@ -11256,6 +11256,11 @@ p {
 }
 
 /* Sidebar sections */
+.sidebar-section+.sidebar-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-lg);
+}
+
 .sidebar-section {
   background: rgba(20, 20, 34, 0.5);
   backdrop-filter: blur(16px);
@@ -11369,16 +11374,18 @@ p {
 /* Allow more grid columns on wide screens */
 @media (min-width: 1200px) {
 
-  .stable-grid,
-  .show-ring-grid {
+  .shelf-grid,
+  .community-grid,
+  .discover-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   }
 }
 
 @media (min-width: 1600px) {
 
-  .stable-grid,
-  .show-ring-grid {
+  .shelf-grid,
+  .community-grid,
+  .discover-grid {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
 }
@@ -11640,4 +11647,31 @@ p {
   color: #ffc107;
   font-size: calc(var(--font-size-xs) * var(--font-scale));
   font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* V18 Hardening: Modal select safety net                        */
+/* ══════════════════════════════════════════════════════════════ */
+
+.modal-overlay select,
+.modal-card select,
+.modal-content select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0a0b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  cursor: pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* V18 Hardening: Sidebar overflow containment                   */
+/* ══════════════════════════════════════════════════════════════ */
+
+.dashboard-sidebar>* {
+  max-width: 100%;
+  overflow-x: hidden;
 }
