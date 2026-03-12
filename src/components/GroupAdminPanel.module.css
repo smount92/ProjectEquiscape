@@ -1,0 +1,45 @@
+/* ── GroupAdminPanel.module.css ──
+   Extracted from globals.css lines 11760-11800
+   Group admin member list */
+
+.memberList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.memberRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) var(--space-xs);
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.memberRow:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.memberInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.memberAlias {
+    font-size: calc(var(--font-size-sm) * var(--font-scale));
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.memberRoleBadge {
+    font-size: calc(var(--font-size-xs) * var(--font-scale));
+    color: var(--color-text-muted);
+}
+
+.memberActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}

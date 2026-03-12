@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
+import styles from "./StableLedger.module.css";
 
 interface HorseCardData {
     id: string;
@@ -25,12 +26,12 @@ interface HorseCardData {
 type SortKey = "name" | "ref" | "finish" | "condition" | "collection" | "trade" | "value" | "added";
 type SortDir = "asc" | "desc";
 
-function getFinishBadgeClass(finishType: string): string {
+function getFinishBadgeStyle(finishType: string): string {
     switch (finishType) {
-        case "OF": return "of";
-        case "Custom": return "custom";
-        case "Artist Resin": return "resin";
-        default: return "";
+        case "OF": return styles.finishBadgeOf;
+        case "Custom": return styles.finishBadgeCustom;
+        case "Artist Resin": return styles.finishBadgeResin;
+        default: return styles.finishBadge;
     }
 }
 
@@ -143,34 +144,34 @@ export default function StableLedger({
                     <p>Click the button above to add your first horse.</p>
                 </div>
             ) : filteredCards.length > 0 ? (
-                <div className="stable-ledger-wrapper">
-                    <table className="stable-ledger">
+                <div className={styles.wrapper}>
+                    <table className={styles.table}>
                         <thead>
                             <tr>
                                 {selectMode && <th style={{ width: 36 }}>☑</th>}
                                 <th style={{ width: 50 }}>📷</th>
-                                <th onClick={() => toggleSort("name")} className="sortable-th">
+                                <th onClick={() => toggleSort("name")} className={styles.sortableTh}>
                                     Name{sortIndicator("name")}
                                 </th>
-                                <th onClick={() => toggleSort("ref")} className="sortable-th hide-mobile">
+                                <th onClick={() => toggleSort("ref")} className={`${styles.sortableTh} ${styles.hideMobile}`}>
                                     Reference{sortIndicator("ref")}
                                 </th>
-                                <th onClick={() => toggleSort("finish")} className="sortable-th">
+                                <th onClick={() => toggleSort("finish")} className={styles.sortableTh}>
                                     Finish{sortIndicator("finish")}
                                 </th>
-                                <th onClick={() => toggleSort("condition")} className="sortable-th hide-mobile">
+                                <th onClick={() => toggleSort("condition")} className={`${styles.sortableTh} ${styles.hideMobile}`}>
                                     Condition{sortIndicator("condition")}
                                 </th>
-                                <th onClick={() => toggleSort("collection")} className="sortable-th hide-mobile">
+                                <th onClick={() => toggleSort("collection")} className={`${styles.sortableTh} ${styles.hideMobile}`}>
                                     Collection{sortIndicator("collection")}
                                 </th>
-                                <th onClick={() => toggleSort("trade")} className="sortable-th hide-mobile">
+                                <th onClick={() => toggleSort("trade")} className={`${styles.sortableTh} ${styles.hideMobile}`}>
                                     Status{sortIndicator("trade")}
                                 </th>
-                                <th onClick={() => toggleSort("value")} className="sortable-th hide-mobile">
+                                <th onClick={() => toggleSort("value")} className={`${styles.sortableTh} ${styles.hideMobile}`}>
                                     Value{sortIndicator("value")}
                                 </th>
-                                <th onClick={() => toggleSort("added")} className="sortable-th">
+                                <th onClick={() => toggleSort("added")} className={styles.sortableTh}>
                                     Added{sortIndicator("added")}
                                 </th>
                             </tr>
@@ -179,7 +180,7 @@ export default function StableLedger({
                             {filteredCards.map((horse) => (
                                 <tr
                                     key={horse.id}
-                                    className={`ledger-row ${selectMode && selectedIds.has(horse.id) ? "ledger-row-selected" : ""}`}
+                                    className={`${styles.row} ${selectMode && selectedIds.has(horse.id) ? styles.rowSelected : ""}`}
                                     onClick={selectMode ? () => onToggleSelect?.(horse.id) : undefined}
                                     style={selectMode ? { cursor: "pointer" } : undefined}
                                 >
@@ -188,45 +189,45 @@ export default function StableLedger({
                                             <input type="checkbox" checked={selectedIds.has(horse.id)} readOnly />
                                         </td>
                                     )}
-                                    <td className="ledger-thumb-cell">
+                                    <td className={styles.thumbCell}>
                                         <Link href={`/stable/${horse.id}`}>
                                             {horse.thumbnailUrl ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
                                                 <img
                                                     src={horse.thumbnailUrl}
                                                     alt=""
-                                                    className="ledger-thumb"
+                                                    className={styles.thumb}
                                                     loading="lazy"
                                                 />
                                             ) : (
-                                                <span className="ledger-thumb-placeholder">🐴</span>
+                                                <span className={styles.thumbPlaceholder}>🐴</span>
                                             )}
                                         </Link>
                                     </td>
                                     <td>
-                                        <Link href={`/stable/${horse.id}`} className="ledger-name-link">
+                                        <Link href={`/stable/${horse.id}`} className={styles.nameLink}>
                                             {horse.customName}
                                         </Link>
                                     </td>
-                                    <td className="hide-mobile ledger-ref">{horse.refName}</td>
+                                    <td className={`${styles.hideMobile} ${styles.ref}`}>{horse.refName}</td>
                                     <td>
-                                        <span className={`finish-badge-sm ${getFinishBadgeClass(horse.finishType)}`}>
+                                        <span className={getFinishBadgeStyle(horse.finishType)}>
                                             {horse.finishType || "—"}
                                         </span>
                                     </td>
-                                    <td className="hide-mobile">{horse.conditionGrade || "—"}</td>
-                                    <td className="hide-mobile ledger-collection">
+                                    <td className={styles.hideMobile}>{horse.conditionGrade || "—"}</td>
+                                    <td className={`${styles.hideMobile} ${styles.collection}`}>
                                         {horse.collectionName ? `📁 ${horse.collectionName}` : "—"}
                                     </td>
-                                    <td className="hide-mobile">
-                                        {horse.tradeStatus === "For Sale" && <span className="ledger-trade-badge sale">💲 For Sale</span>}
-                                        {horse.tradeStatus === "Open to Offers" && <span className="ledger-trade-badge offers">🤝 Offers</span>}
+                                    <td className={styles.hideMobile}>
+                                        {horse.tradeStatus === "For Sale" && <span className={styles.tradeBadgeSale}>💲 For Sale</span>}
+                                        {horse.tradeStatus === "Open to Offers" && <span className={styles.tradeBadgeOffers}>🤝 Offers</span>}
                                         {horse.tradeStatus === "Not for Sale" && <span style={{ color: "var(--color-text-muted)" }}>—</span>}
                                     </td>
-                                    <td className="hide-mobile">
+                                    <td className={styles.hideMobile}>
                                         {horse.vaultValue ? `$${horse.vaultValue.toLocaleString()}` : "—"}
                                     </td>
-                                    <td className="ledger-date">{formatRelDate(horse.createdAt)}</td>
+                                    <td className={styles.date}>{formatRelDate(horse.createdAt)}</td>
                                 </tr>
                             ))}
                         </tbody>

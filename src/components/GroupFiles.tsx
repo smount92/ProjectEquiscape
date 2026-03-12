@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getGroupFiles, uploadGroupFile, deleteGroupFile, type GroupFile } from "@/app/actions/groups";
+import styles from "./GroupFiles.module.css";
 
 interface Props {
     groupId: string;
@@ -122,13 +123,13 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
                     <p>No files uploaded yet.</p>
                 </div>
             ) : (
-                <div className="group-file-list">
+                <div className={styles.fileList}>
                     {files.map(f => (
-                        <div key={f.id} className="group-file-item">
-                            <div className="group-file-icon">{fileIcon(f.fileType)}</div>
-                            <div className="group-file-info">
-                                <span className="group-file-name">{f.fileName}</span>
-                                <span className="group-file-meta">
+                        <div key={f.id} className={styles.fileItem}>
+                            <div className={styles.fileIcon}>{fileIcon(f.fileType)}</div>
+                            <div className={styles.fileInfo}>
+                                <span className={styles.fileName}>{f.fileName}</span>
+                                <span className={styles.fileMeta}>
                                     {formatSize(f.fileSize)}
                                     {f.description && <> · {f.description}</>}
                                     {" · "}@{f.uploaderAlias} · {timeAgo(f.createdAt)}

@@ -6,6 +6,7 @@ import GroupRegistry from "@/components/GroupRegistry";
 import GroupFiles from "@/components/GroupFiles";
 import GroupAdminPanel from "@/components/GroupAdminPanel";
 import type { Group, GroupChannel } from "@/app/actions/groups";
+import styles from "./GroupDetailClient.module.css";
 
 interface Props {
     group: Group;
@@ -24,21 +25,21 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
     return (
         <>
             {/* Tab Bar */}
-            <div className="group-tabs">
+            <div className={styles.tabs}>
                 <button
-                    className={`group-tab ${activeTab === "feed" ? "active" : ""}`}
+                    className={`${styles.tab} ${activeTab === "feed" ? styles.tabActive : ""}`}
                     onClick={() => setActiveTab("feed")}
                 >
                     💬 Feed
                 </button>
                 <button
-                    className={`group-tab ${activeTab === "files" ? "active" : ""}`}
+                    className={`${styles.tab} ${activeTab === "files" ? styles.tabActive : ""}`}
                     onClick={() => setActiveTab("files")}
                 >
                     📁 Files
                 </button>
                 <button
-                    className={`group-tab ${activeTab === "registry" ? "active" : ""}`}
+                    className={`${styles.tab} ${activeTab === "registry" ? styles.tabActive : ""}`}
                     onClick={() => setActiveTab("registry")}
                 >
                     📋 Registry
@@ -47,9 +48,9 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
 
             {/* Channel Pills (only on Feed tab) */}
             {activeTab === "feed" && channels.length > 1 && (
-                <div className="group-channels">
+                <div className={styles.channels}>
                     <button
-                        className={`group-channel-pill ${activeChannel === null ? "active" : ""}`}
+                        className={`${styles.channelPill} ${activeChannel === null ? styles.channelPillActive : ""}`}
                         onClick={() => setActiveChannel(null)}
                     >
                         # all
@@ -57,7 +58,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
                     {channels.map(ch => (
                         <button
                             key={ch.id}
-                            className={`group-channel-pill ${activeChannel === ch.id ? "active" : ""}`}
+                            className={`${styles.channelPill} ${activeChannel === ch.id ? styles.channelPillActive : ""}`}
                             onClick={() => setActiveChannel(ch.id)}
                         >
                             # {ch.name.toLowerCase()}

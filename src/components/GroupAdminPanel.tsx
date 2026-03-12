@@ -5,6 +5,7 @@ import {
     getGroupMembers, updateMemberRole, removeMember, togglePinPost,
     type GroupMember
 } from "@/app/actions/groups";
+import styles from "./GroupAdminPanel.module.css";
 
 interface Props {
     groupId: string;
@@ -88,15 +89,15 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
                             <div style={{ marginBottom: "var(--space-sm)", color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>
                                 👥 {members.length} member{members.length !== 1 ? "s" : ""}
                             </div>
-                            <div className="group-member-list">
+                            <div className={styles.memberList}>
                                 {members.map(m => (
-                                    <div key={m.userId} className="group-member-row">
-                                        <div className="group-member-info">
-                                            <span className="group-member-alias">@{m.alias}</span>
-                                            <span className="group-member-role-badge">{roleBadge(m.role)}</span>
+                                    <div key={m.userId} className={styles.memberRow}>
+                                        <div className={styles.memberInfo}>
+                                            <span className={styles.memberAlias}>@{m.alias}</span>
+                                            <span className={styles.memberRoleBadge}>{roleBadge(m.role)}</span>
                                         </div>
                                         {m.userId !== currentUserId && m.role !== "owner" && (
-                                            <div className="group-member-actions">
+                                            <div className={styles.memberActions}>
                                                 {isOwner && (
                                                     <select
                                                         className="form-select"

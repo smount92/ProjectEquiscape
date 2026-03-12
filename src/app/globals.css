@@ -915,6 +915,15 @@ p {
 }
 
 
+/* ══════════════════════════════════════════════════════════════
+   END OF GLOBAL DESIGN SYSTEM
+   Everything below this line is scheduled for extraction into
+   CSS Modules. Do not add new styles below this boundary.
+   Lines above: ~917 (tokens, resets, typography, layout, header,
+   cards, forms, buttons, animations, responsive base)
+   ══════════════════════════════════════════════════════════════ */
+
+
 /* ============================================================
    MULTI-STEP FORM WIZARD
    ============================================================ */
@@ -10647,6 +10656,7 @@ p {
 /* V17: StableLedger (High-Density Table)                        */
 /* ══════════════════════════════════════════════════════════════ */
 
+/* EXTRACTED → StableLedger.module.css */
 .stable-ledger-wrapper {
   overflow-x: auto;
   border-radius: var(--radius-lg);
@@ -10976,6 +10986,7 @@ p {
   accent-color: var(--color-accent-primary);
 }
 
+/* EXTRACTED → StableLedger.module.css */
 .ledger-row-selected {
   background: rgba(124, 109, 240, 0.1) !important;
 }
@@ -11623,7 +11634,7 @@ p {
 /* V19: Group Enrichment — Tabs, Channels, Files, Admin Panel    */
 /* ══════════════════════════════════════════════════════════════ */
 
-/* Group Tabs */
+/* EXTRACTED → GroupDetailClient.module.css, GroupFiles.module.css, GroupAdminPanel.module.css */
 .group-tabs {
   display: flex;
   gap: 2px;
