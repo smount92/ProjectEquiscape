@@ -264,6 +264,9 @@ export default function CsvImport() {
     const reviewCount = matchResults.filter((r) => r.status === "review").length;
     const noMatchCount = matchResults.filter((r) => r.status === "no_match").length;
 
+    // Publish to feed toggle — defaults to off for batch imports
+    const [publishToFeed, setPublishToFeed] = useState(false);
+
     // ── Step 4: Import ──────────────────────────────────────────
     const handleImport = async () => {
         setIsImporting(true);
@@ -533,20 +536,33 @@ export default function CsvImport() {
                         <button className="btn btn-ghost" onClick={() => setStep(2)}>
                             ← Back
                         </button>
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleImport}
-                            disabled={isImporting}
-                            id="import-btn"
-                        >
-                            {isImporting ? (
-                                <>
-                                    <span className="spinner-inline" /> Importing…
-                                </>
-                            ) : (
-                                `Import ${matchResults.length} Models →`
-                            )}
-                        </button>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)", alignItems: "flex-end" }}>
+                            <label style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", cursor: "pointer", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                <input
+                                    type="checkbox"
+                                    checked={publishToFeed}
+                                    onChange={(e) => setPublishToFeed(e.target.checked)}
+                                />
+                                <span>Publish imported models to the community feed</span>
+                            </label>
+                            <span className="form-hint" style={{ textAlign: "right" }}>
+                                Models without photos will be excluded regardless.
+                            </span>
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleImport}
+                                disabled={isImporting}
+                                id="import-btn"
+                            >
+                                {isImporting ? (
+                                    <>
+                                        <span className="spinner-inline" /> Importing…
+                                    </>
+                                ) : (
+                                    `Import ${matchResults.length} Models →`
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

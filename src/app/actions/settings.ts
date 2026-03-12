@@ -16,6 +16,7 @@ export async function getProfile(): Promise<{
     email: string;
     notificationPrefs: Record<string, boolean>;
     defaultHorsePublic: boolean;
+    watermarkPhotos: boolean;
 } | null> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -23,7 +24,7 @@ export async function getProfile(): Promise<{
 
     const { data } = await supabase
         .from("users")
-        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public")
+        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos")
         .eq("id", user.id)
         .single();
 
@@ -34,6 +35,7 @@ export async function getProfile(): Promise<{
         avatar_url: string | null;
         notification_prefs: Record<string, boolean> | null;
         default_horse_public: boolean | null;
+        watermark_photos: boolean | null;
     };
 
     // Generate signed URL for avatar if stored as a storage path
@@ -60,6 +62,7 @@ export async function getProfile(): Promise<{
             transfers: true,
         },
         defaultHorsePublic: d.default_horse_public ?? true,
+        watermarkPhotos: d.watermark_photos ?? false,
     };
 }
 
@@ -69,6 +72,7 @@ export async function updateProfile(data: {
     aliasName?: string;
     bio?: string;
     defaultHorsePublic?: boolean;
+    watermarkPhotos?: boolean;
 }): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -98,6 +102,10 @@ export async function updateProfile(data: {
 
     if (data.defaultHorsePublic !== undefined) {
         updates.default_horse_public = data.defaultHorsePublic;
+    }
+
+    if (data.watermarkPhotos !== undefined) {
+        updates.watermark_photos = data.watermarkPhotos;
     }
 
     if (Object.keys(updates).length === 0) return { success: true };

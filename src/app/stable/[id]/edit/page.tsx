@@ -8,9 +8,10 @@ import type { FinishType, AngleProfile, AssetCategory } from "@/lib/types/databa
 import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from "@/app/actions/reference";
 import CollectionPicker from "@/components/CollectionPicker";
-import { compressImage } from "@/lib/utils/imageCompression";
+import { compressImage, compressImageWithWatermark } from "@/lib/utils/imageCompression";
 import { updateLifeStage } from "@/app/actions/hoofprint";
 import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages } from "@/app/actions/horse";
+import { getProfile } from "@/app/actions/settings";
 
 // ---- Types ----
 
@@ -104,6 +105,10 @@ export default function EditHorsePage() {
 
   // Deferred image deletions (only executed on save)
   const [pendingImageDeletes, setPendingImageDeletes] = useState<{ recordId: string, path: string | null }[]>([]);
+
+  // Watermark preference
+  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
+  const [userAlias, setUserAlias] = useState("");
 
   // ---- Load existing data ----
   useEffect(() => {
@@ -232,6 +237,13 @@ export default function EditHorsePage() {
     }
 
     loadHorse();
+    // Fetch watermark preference
+    getProfile().then((profile) => {
+      if (profile) {
+        setWatermarkEnabled(profile.watermarkPhotos);
+        setUserAlias(profile.aliasName);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [horseId]);
 
@@ -346,7 +358,9 @@ export default function EditHorsePage() {
       for (const slot of PHOTO_STUDIO_SLOTS) {
         const angle = slot.angle;
         if (newFiles[angle]) {
-          const compressed = await compressImage(newFiles[angle]);
+          const compressed = watermarkEnabled && userAlias
+            ? await compressImageWithWatermark(newFiles[angle], userAlias)
+            : await compressImage(newFiles[angle]);
 
           // Delete old image from storage + DB if it exists
           const existing = existingImages[angle];
@@ -370,7 +384,9 @@ export default function EditHorsePage() {
 
       // Upload new extra detail images
       for (let i = 0; i < newExtraFiles.length; i++) {
-        const compressed = await compressImage(newExtraFiles[i].file);
+        const compressed = watermarkEnabled && userAlias
+          ? await compressImageWithWatermark(newExtraFiles[i].file, userAlias)
+          : await compressImage(newExtraFiles[i].file);
         const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
         const { error: uploadError } = await supabase.storage
           .from("horse-images")
@@ -386,8 +402,14 @@ export default function EditHorsePage() {
         await finalizeHorseImages(horseId, uploadedImages);
       }
 
-      // Activity event if public (fire-and-forget)
+      // Activity event if public
       if (visibility === "public") {
+        // Count total photos: remaining existing (minus pending deletes) + newly uploaded
+        const remainingExisting = Object.keys(existingImages).length
+          + existingExtras.length
+          - pendingImageDeletes.length;
+        const totalPhotos = Math.max(0, remainingExisting) + uploadedImages.length;
+
         import("@/app/actions/horse-events").then((m) => {
           m.notifyHorsePublic({
             userId: user.id,
@@ -396,6 +418,7 @@ export default function EditHorsePage() {
             finishType: finishType as string,
             tradeStatus: tradeStatus as string,
             catalogId: selectedCatalogId || null,
+            photoCount: totalPhotos,
           });
         }).catch(() => { });
       }

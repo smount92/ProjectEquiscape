@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 // ============================================================
 // UNIVERSAL POSTS — Server Actions
@@ -77,13 +78,18 @@ export async function createPost(data: {
     if (data.eventId) revalidatePath(`/shows/${data.eventId}`);
     revalidatePath("/feed");
 
-    // Fire-and-forget: mention notifications
-    try {
-        const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
-        const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-        const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
-        parseAndNotifyMentions(data.content.trim(), user.id, alias, `/feed/${post!.id}`);
-    } catch { /* non-blocking */ }
+    // Deferred: notify mentions after response is sent
+    const userId = user.id;
+    const content = data.content.trim();
+    const postIdFinal = post!.id;
+    after(async () => {
+        try {
+            const { data: actor } = await (await import("@/lib/supabase/server")).createClient().then(s => s.from("users").select("alias_name").eq("id", userId).single());
+            const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+            const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
+            await parseAndNotifyMentions(content, userId, alias, `/feed/${postIdFinal}`);
+        } catch { /* non-blocking */ }
+    });
 
     return { success: true, postId: post!.id };
 }

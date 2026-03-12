@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 // ============================================================
 // EVENTS — Server Actions
@@ -395,23 +396,28 @@ export async function addEventComment(
     if (error) return { success: false, error: error.message };
     revalidatePath(`/community/events/${eventId}`);
 
-    // Fire-and-forget: notify event creator + mention notifications
-    try {
-        const { data: event } = await supabase.from("events").select("created_by, name").eq("id", eventId).single();
-        if (event && (event as { created_by: string }).created_by !== user.id) {
-            const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
-            const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-            const { createNotification } = await import("@/app/actions/notifications");
-            await createNotification({
-                userId: (event as { created_by: string }).created_by,
-                type: "comment",
-                actorId: user.id,
-                content: `@${alias} commented on your event "${(event as { name: string }).name}"`,
-            });
-            const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
-            parseAndNotifyMentions(content.trim(), user.id, alias, `/community/events/${eventId}`);
-        }
-    } catch { /* non-blocking */ }
+    // Deferred: notify event creator + mentions after response is sent
+    const userId = user.id;
+    const trimmedContent = content.trim();
+    after(async () => {
+        try {
+            const supabaseDeferred = await createClient();
+            const { data: event } = await supabaseDeferred.from("events").select("created_by, name").eq("id", eventId).single();
+            if (event && (event as { created_by: string }).created_by !== userId) {
+                const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
+                const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+                const { createNotification } = await import("@/app/actions/notifications");
+                await createNotification({
+                    userId: (event as { created_by: string }).created_by,
+                    type: "comment",
+                    actorId: userId,
+                    content: `@${alias} commented on your event "${(event as { name: string }).name}"`,
+                });
+                const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
+                await parseAndNotifyMentions(trimmedContent, userId, alias, `/community/events/${eventId}`);
+            }
+        } catch { /* non-blocking */ }
+    });
 
     return { success: true };
 }

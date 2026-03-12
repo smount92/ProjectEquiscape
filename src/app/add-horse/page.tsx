@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import {
   compressImage,
+  compressImageWithWatermark,
   validateImageFile,
   createImagePreviewUrl,
   revokeImagePreviewUrl,
@@ -18,6 +19,7 @@ import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { initializeHoofprint } from "@/app/actions/hoofprint";
 import { createHorseRecord, finalizeHorseImages } from "@/app/actions/horse";
 import { submitSuggestion } from "@/app/actions/suggestions";
+import { getProfile } from "@/app/actions/settings";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -113,6 +115,10 @@ export default function AddHorsePage() {
   const [lifeStage, setLifeStage] = useState("completed");
   const [assetCategory, setAssetCategory] = useState<AssetCategory>("model");
 
+  // Watermark preference
+  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
+  const [userAlias, setUserAlias] = useState("");
+
   const isModel = assetCategory === "model";
 
   // Step 4 (index 3): Financial Vault
@@ -129,6 +135,16 @@ export default function AddHorsePage() {
       setNameAutoFilled(true);
     }
   }, [selectedCatalogItem]);
+
+  // Fetch watermark preference
+  useEffect(() => {
+    getProfile().then((profile) => {
+      if (profile) {
+        setWatermarkEnabled(profile.watermarkPhotos);
+        setUserAlias(profile.aliasName);
+      }
+    });
+  }, []);
 
   // Clean up preview URLs on unmount
   useEffect(() => {
@@ -320,7 +336,9 @@ export default function AddHorsePage() {
       // Compress and upload slot images
       const imageEntries = Object.entries(imageSlots) as [AngleProfile, ImageSlot][];
       for (const [angle, slot] of imageEntries) {
-        const compressed = await compressImage(slot.file);
+        const compressed = watermarkEnabled && userAlias
+          ? await compressImageWithWatermark(slot.file, userAlias)
+          : await compressImage(slot.file);
         const filePath = `horses/${horseId}/${angle}_${Date.now()}.webp`;
         const { error: uploadError } = await supabase.storage
           .from("horse-images")
@@ -333,7 +351,9 @@ export default function AddHorsePage() {
 
       // Compress and upload extra detail images
       for (let i = 0; i < extraFiles.length; i++) {
-        const compressed = await compressImage(extraFiles[i].file);
+        const compressed = watermarkEnabled && userAlias
+          ? await compressImageWithWatermark(extraFiles[i].file, userAlias)
+          : await compressImage(extraFiles[i].file);
         const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
         const { error: uploadError } = await supabase.storage
           .from("horse-images")
@@ -358,6 +378,7 @@ export default function AddHorsePage() {
           finishType: finishType as string,
           tradeStatus: tradeStatus as string,
           catalogId: selectedCatalogId || null,
+          photoCount: uploadedImages.length,
         });
       }
 

@@ -90,3 +90,76 @@ export function createImagePreviewUrl(file: File): string {
 export function revokeImagePreviewUrl(url: string): void {
   URL.revokeObjectURL(url);
 }
+
+/**
+ * Compress + resize an image, adding a semi-transparent watermark in the bottom-right.
+ * Uses the same MAX_DIMENSION / QUALITY constants as compressImage.
+ */
+export async function compressImageWithWatermark(
+  file: File,
+  aliasName: string
+): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+
+        // Scale down if larger than MAX_DIMENSION
+        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIMENSION) / width);
+            width = MAX_DIMENSION;
+          } else {
+            width = Math.round((width * MAX_DIMENSION) / height);
+            height = MAX_DIMENSION;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { resolve(file); return; }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // ── WATERMARK ──
+        const text = `© @${aliasName} — ModelHorseHub`;
+        const fontSize = Math.max(12, Math.floor(width * 0.02));
+        ctx.font = `${fontSize}px Inter, sans-serif`;
+        ctx.textAlign = "right";
+        ctx.textBaseline = "bottom";
+
+        // Semi-transparent background pill
+        const textMetrics = ctx.measureText(text);
+        const padding = 6;
+        const bgX = width - textMetrics.width - padding * 3;
+        const bgY = height - fontSize - padding * 3;
+        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+        ctx.fillRect(bgX, bgY, textMetrics.width + padding * 2, fontSize + padding * 2);
+
+        // White text at 70% opacity
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.fillText(text, width - padding * 2, height - padding * 2);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { resolve(file); return; }
+            resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), {
+              type: "image/webp",
+              lastModified: Date.now(),
+            }));
+          },
+          "image/webp",
+          QUALITY
+        );
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+    };
+    reader.onerror = () => reject(new Error("Failed to read file"));
+  });
+}

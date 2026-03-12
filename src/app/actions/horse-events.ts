@@ -4,8 +4,8 @@ import { createActivityEvent } from "@/app/actions/activity";
 import { getAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Fire-and-forget activity event when a horse is made public.
- * Called from client-side add/edit forms after successful insert/update.
+ * Activity event when a horse is made public.
+ * Rule: No photo, no feed — silently skip horses with 0 photos.
  */
 export async function notifyHorsePublic(data: {
     userId: string;
@@ -14,7 +14,13 @@ export async function notifyHorsePublic(data: {
     finishType: string;
     tradeStatus?: string;
     catalogId?: string | null;
+    photoCount?: number;
 }): Promise<void> {
+    // Rule A: No photo, no feed — don't pollute the feed with empty cards
+    if (!data.photoCount || data.photoCount === 0) {
+        return;
+    }
+
     // Log the activity event
     await createActivityEvent({
         actorId: data.userId,

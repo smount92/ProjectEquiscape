@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getSignedImageUrls } from "@/lib/utils/storage";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 interface FeedItem {
     id: string;
@@ -75,10 +76,15 @@ export async function createTextPost(text: string, imageUrls?: string[]): Promis
 
     if (error) return { success: false, error: error.message };
 
-    // Fire-and-forget: notify mentions
+    // Deferred: notify mentions after response is sent
     if (trimmed) {
-        import("@/app/actions/mentions").then((m) => {
-            m.parseAndNotifyMentions(trimmed, user.id, actorAlias, "/feed");
+        const userId = user.id;
+        const actorName = actorAlias;
+        after(async () => {
+            try {
+                const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
+                await parseAndNotifyMentions(trimmed, userId, actorName, "/feed");
+            } catch { /* non-blocking */ }
         });
     }
 

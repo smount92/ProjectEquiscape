@@ -35,6 +35,7 @@ export default function SettingsPage() {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [email, setEmail] = useState("");
     const [defaultHorsePublic, setDefaultHorsePublic] = useState(true);
+    const [watermarkPhotos, setWatermarkPhotos] = useState(false);
     const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
 
@@ -68,6 +69,7 @@ export default function SettingsPage() {
             setEmail(profile.email);
             setNotifPrefs(profile.notificationPrefs);
             setDefaultHorsePublic(profile.defaultHorsePublic);
+            setWatermarkPhotos(profile.watermarkPhotos);
             setIsLoading(false);
         }
         load();
@@ -77,7 +79,7 @@ export default function SettingsPage() {
     const handleSaveProfile = async () => {
         setIsSavingProfile(true);
         setProfileMsg(null);
-        const result = await updateProfile({ aliasName, bio, defaultHorsePublic });
+        const result = await updateProfile({ aliasName, bio, defaultHorsePublic, watermarkPhotos });
         if (result.success) {
             setProfileMsg({ type: "success", text: "Profile updated!" });
         } else {
@@ -237,6 +239,24 @@ export default function SettingsPage() {
                                 className={`settings-toggle ${defaultHorsePublic ? "active" : ""}`}
                                 onClick={() => setDefaultHorsePublic(!defaultHorsePublic)}
                                 aria-pressed={defaultHorsePublic}
+                            />
+                        </div>
+
+                        {/* Photo watermarking */}
+                        <div className="settings-toggle-row">
+                            <div>
+                                <span className="settings-toggle-label">
+                                    📸 Watermark uploaded photos
+                                </span>
+                                <span className="form-hint" style={{ display: "block", marginTop: 2 }}>
+                                    Adds &ldquo;© @{aliasName} — ModelHorseHub&rdquo; to new uploads
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                className={`settings-toggle ${watermarkPhotos ? "active" : ""}`}
+                                onClick={() => setWatermarkPhotos(!watermarkPhotos)}
+                                aria-pressed={watermarkPhotos}
                             />
                         </div>
 

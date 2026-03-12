@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 // ============================================================
 // GROUPS — Server Actions
@@ -370,11 +371,16 @@ export async function createGroupPost(
 
     if (error) return { success: false, error: error.message };
 
-    // Fire-and-forget: notify mentions
+    // Deferred: notify mentions after response is sent
     const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
     const actorAlias = (profile as { alias_name: string } | null)?.alias_name || "Someone";
-    import("@/app/actions/mentions").then((m) => {
-        m.parseAndNotifyMentions(content.trim(), user.id, actorAlias, `/community/groups`);
+    const userId = user.id;
+    const trimmed = content.trim();
+    after(async () => {
+        try {
+            const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
+            await parseAndNotifyMentions(trimmed, userId, actorAlias, `/community/groups`);
+        } catch { /* non-blocking */ }
     });
 
     revalidatePath(`/community/groups`);
