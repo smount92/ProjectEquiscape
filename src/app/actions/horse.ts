@@ -2,6 +2,26 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getAdminClient } from "@/lib/supabase/admin";
+
+const ACTIVE_TRANSACTION_STATUSES = ["offer_made", "pending_payment", "funds_verified"];
+
+/** Check if a horse has an active transaction that blocks mutations */
+async function checkActiveTransaction(horseId: string): Promise<string | null> {
+    const admin = getAdminClient();
+    const { data } = await admin
+        .from("transactions")
+        .select("id")
+        .eq("horse_id", horseId)
+        .in("status", ACTIVE_TRANSACTION_STATUSES)
+        .limit(1)
+        .maybeSingle();
+
+    if (data) {
+        return "Cannot modify or delete a horse while an active transaction is pending. Please cancel the transaction first.";
+    }
+    return null;
+}
 
 export async function deleteHorse(horseId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
@@ -17,6 +37,10 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
         .single();
 
     if (!horse) return { success: false, error: "Horse not found or not yours." };
+
+    // Guard: check for active transactions (rug-pull prevention)
+    const txnError = await checkActiveTransaction(horseId);
+    if (txnError) return { success: false, error: txnError };
 
     // Get images to clean up storage
     const { data: images } = await supabase
@@ -81,9 +105,13 @@ export async function updateHorseAction(horseId: string, data: {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not logged in" };
 
+        // Guard: check for active transactions (rug-pull prevention)
+        const txnError = await checkActiveTransaction(horseId);
+        if (txnError) return { success: false, error: txnError };
+
         // ── Security: whitelist allowed fields to prevent column injection ──
         const HORSE_ALLOWED = [
-            'custom_name', 'sculptor', 'finishing_artist', 'finish_type',
+            'custom_name', 'sculptor', 'finishing_artist', 'finishing_artist_verified', 'finish_type',
             'condition_grade', 'is_public', 'visibility', 'trade_status', 'listing_price',
             'marketplace_notes', 'collection_id', 'catalog_id', 'life_stage',
             'edition_number', 'edition_size', 'asset_category',
@@ -333,6 +361,19 @@ export async function bulkDeleteHorses(
     const ownedIds = (owned ?? []).map((h: { id: string }) => h.id);
     if (ownedIds.length !== horseIds.length) {
         return { success: false, error: "Some horses not found or not yours." };
+    }
+
+    // Guard: check for active transactions on any horse in the batch
+    const admin = getAdminClient();
+    const { data: activeTxns } = await admin
+        .from("transactions")
+        .select("horse_id")
+        .in("horse_id", horseIds)
+        .in("status", ACTIVE_TRANSACTION_STATUSES)
+        .limit(1);
+
+    if (activeTxns && activeTxns.length > 0) {
+        return { success: false, error: "One or more horses have active transactions. Cancel them before deleting." };
     }
 
     // Clean up storage for all images

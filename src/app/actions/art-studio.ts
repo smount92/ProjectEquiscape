@@ -498,6 +498,28 @@ export async function updateCommissionStatus(
             } catch { /* Non-blocking */ }
         }
 
+        // ── Verified Artist Stamp ──
+        // When a commission is delivered, stamp the finishing artist on the horse
+        if (c.horse_id) {
+            try {
+                const { data: artistUser } = await supabase
+                    .from("users")
+                    .select("alias_name")
+                    .eq("id", c.artist_id)
+                    .single();
+                const artistAlias = (artistUser as { alias_name: string } | null)?.alias_name || null;
+                if (artistAlias) {
+                    await supabase
+                        .from("user_horses")
+                        .update({
+                            finishing_artist: artistAlias,
+                            finishing_artist_verified: true,
+                        } as Record<string, unknown>)
+                        .eq("id", c.horse_id);
+                }
+            } catch { /* non-blocking */ }
+        }
+
         if (c.horse_id) {
             try {
                 // Get all visible WIP photo updates

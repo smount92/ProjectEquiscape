@@ -19,6 +19,13 @@ const FINISH_TYPE_LABELS: Record<string, string> = {
     "Artist Resin": "Artist Resin",
 };
 
+const LIFE_STAGE_LABELS: Record<string, string> = {
+    all: "All Stages",
+    blank: "Blank",
+    in_progress: "In Progress",
+    completed: "Completed",
+};
+
 const SORT_OPTIONS = [
     { value: "transaction_volume:desc", label: "Most Traded" },
     { value: "average_price:desc", label: "Highest Value" },
@@ -34,6 +41,7 @@ export default function MarketFilters() {
 
     const currentType = params.get("type") || "all";
     const currentFinish = params.get("finish") || "all";
+    const currentStage = params.get("stage") || "all";
     const currentSort = params.get("sort") || "transaction_volume:desc";
 
     const pushParams = useCallback((updates: Record<string, string | null>) => {
@@ -93,6 +101,16 @@ export default function MarketFilters() {
                         id="market-finish"
                     >
                         {Object.entries(FINISH_TYPE_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                        ))}
+                    </select>
+                    <select
+                        className="form-select market-stage-select"
+                        value={currentStage}
+                        onChange={(e) => pushParams({ stage: e.target.value === "all" ? null : e.target.value })}
+                        id="market-stage"
+                    >
+                        {Object.entries(LIFE_STAGE_LABELS).map(([value, label]) => (
                             <option key={value} value={value}>{label}</option>
                         ))}
                     </select>

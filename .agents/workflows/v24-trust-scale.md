@@ -625,8 +625,8 @@ After all 5 tasks are done:
 
 | Task | Description | Status | Date |
 |------|-------------|--------|------|
-| 1 | Verified provenance (fake artist prevention) | ⬜ TODO | |
-| 2 | Blue Book resin blanks (life stage split) | ⬜ TODO | |
-| 3 | Commerce rug-pull lock | ⬜ TODO | |
-| 4 | Handler show string conflicts | ⬜ TODO | |
-| 5 | Storage ghost file GC | ⬜ TODO | |
+| 1 | Verified provenance (fake artist prevention) | ✅ DONE | 2026-03-12 |
+| 2 | Blue Book resin blanks (life stage split) | ✅ DONE | 2026-03-12 |
+| 3 | Commerce rug-pull lock | ✅ DONE | 2026-03-12 |
+| 4 | Handler show string conflicts | ✅ DONE | 2026-03-12 |
+| 5 | Storage ghost file GC | ✅ DONE | 2026-03-12 |

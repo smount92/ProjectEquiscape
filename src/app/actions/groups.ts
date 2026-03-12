@@ -656,6 +656,23 @@ export async function deleteGroupFile(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
 
+    // Fetch the file URL before deleting the row
+    try {
+        const { data: file } = await supabase
+            .from("group_files")
+            .select("file_url")
+            .eq("id", fileId)
+            .maybeSingle();
+
+        if (file) {
+            const url = (file as { file_url: string }).file_url;
+            const match = url.match(/horse-images\/(.+?)(\?|$)/);
+            if (match) {
+                await supabase.storage.from("horse-images").remove([match[1]]);
+            }
+        }
+    } catch { /* best effort */ }
+
     const { error } = await supabase.from("group_files").delete().eq("id", fileId);
     if (error) return { success: false, error: error.message };
 

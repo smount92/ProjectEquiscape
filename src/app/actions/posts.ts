@@ -124,6 +124,27 @@ export async function deletePost(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
 
+    // Clean up storage files for attached media
+    try {
+        const { data: media } = await supabase
+            .from("media_attachments")
+            .select("image_url")
+            .eq("post_id", postId);
+
+        if (media && media.length > 0) {
+            const paths = (media as { image_url: string }[])
+                .map(m => {
+                    const match = m.image_url.match(/horse-images\/(.+?)(\?|$)/);
+                    return match ? match[1] : null;
+                })
+                .filter(Boolean) as string[];
+
+            if (paths.length > 0) {
+                await supabase.storage.from("horse-images").remove(paths);
+            }
+        }
+    } catch { /* best effort — don't block deletion */ }
+
     const { error } = await supabase.from("posts").delete().eq("id", postId);
     if (error) return { success: false, error: error.message };
     revalidatePath("/feed");
@@ -335,6 +356,23 @@ export async function deleteEventMedia(
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
+
+    // Fetch the image URL before deleting the row
+    try {
+        const { data: media } = await supabase
+            .from("media_attachments")
+            .select("image_url")
+            .eq("id", mediaId)
+            .maybeSingle();
+
+        if (media) {
+            const url = (media as { image_url: string }).image_url;
+            const match = url.match(/horse-images\/(.+?)(\?|$)/);
+            if (match) {
+                await supabase.storage.from("horse-images").remove([match[1]]);
+            }
+        }
+    } catch { /* best effort */ }
 
     const { error } = await supabase.from("media_attachments").delete().eq("id", mediaId);
     if (error) return { success: false, error: error.message };

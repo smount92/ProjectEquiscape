@@ -517,6 +517,16 @@ export async function detectConflicts(showStringId: string): Promise<{
                     reason: `Same horse entered twice in "${a.class_name}"`,
                 });
             }
+
+            // Handler time conflict: ANY two entries in the same time slot
+            // (even different horses, because the handler can only be in one ring)
+            if (a.time_slot && a.time_slot === b.time_slot && a.horse_id !== b.horse_id) {
+                conflicts.push({
+                    entryA: a.id,
+                    entryB: b.id,
+                    reason: `Handler Time Conflict: Two entries scheduled in time slot "${a.time_slot}". You can only handle one horse at a time.`,
+                });
+            }
         }
     }
 

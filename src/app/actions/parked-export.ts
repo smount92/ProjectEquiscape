@@ -123,6 +123,20 @@ export async function unparkHorse(horseId: string): Promise<{
             return { success: false, error: "You don't own this horse." };
         }
 
+        // Guard: check for active commerce transactions (rug-pull prevention)
+        const admin = getAdminClient();
+        const { data: activeTxn } = await admin
+            .from("transactions")
+            .select("id")
+            .eq("horse_id", horseId)
+            .in("status", ["offer_made", "pending_payment", "funds_verified"])
+            .limit(1)
+            .maybeSingle();
+
+        if (activeTxn) {
+            return { success: false, error: "Cannot unpark a horse while an active transaction is pending. Please cancel the transaction first." };
+        }
+
         // Cancel pending transfers with claim_pin
         await supabase
             .from("horse_transfers")

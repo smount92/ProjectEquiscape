@@ -532,6 +532,7 @@ export interface Database {
         Row: {
           catalog_id: string;
           finish_type: string;
+          life_stage: string;
           lowest_price: number;
           highest_price: number;
           average_price: number;

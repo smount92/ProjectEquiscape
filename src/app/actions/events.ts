@@ -361,6 +361,54 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
 
     if (!event) return { success: false, error: "Event not found or not yours." };
 
+    // Clean up event photos from storage
+    try {
+        const { data: photos } = await supabase
+            .from("event_photos")
+            .select("image_url")
+            .eq("event_id", eventId);
+
+        if (photos && photos.length > 0) {
+            const paths = (photos as { image_url: string }[])
+                .map(p => {
+                    const match = p.image_url.match(/horse-images\/(.+?)(\?|$)/);
+                    return match ? match[1] : null;
+                })
+                .filter(Boolean) as string[];
+
+            if (paths.length > 0) {
+                await supabase.storage.from("horse-images").remove(paths);
+            }
+        }
+
+        // Also clean up any media_attachments (posts within this event)
+        const { data: eventPosts } = await supabase
+            .from("posts")
+            .select("id")
+            .eq("event_id", eventId);
+
+        if (eventPosts && eventPosts.length > 0) {
+            const postIds = (eventPosts as { id: string }[]).map(p => p.id);
+            const { data: media } = await supabase
+                .from("media_attachments")
+                .select("image_url")
+                .in("post_id", postIds);
+
+            if (media && media.length > 0) {
+                const mediaPaths = (media as { image_url: string }[])
+                    .map(m => {
+                        const match = m.image_url.match(/horse-images\/(.+?)(\?|$)/);
+                        return match ? match[1] : null;
+                    })
+                    .filter(Boolean) as string[];
+
+                if (mediaPaths.length > 0) {
+                    await supabase.storage.from("horse-images").remove(mediaPaths);
+                }
+            }
+        }
+    } catch { /* best effort */ }
+
     // Delete RSVPs first
     await supabase.from("event_rsvps").delete().eq("event_id", eventId);
     const { error } = await supabase.from("events").delete().eq("id", eventId);
@@ -559,6 +607,23 @@ export async function deleteEventPhoto(
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
+
+    // Fetch the photo URL before deleting
+    try {
+        const { data: photo } = await supabase
+            .from("event_photos")
+            .select("image_url")
+            .eq("id", photoId)
+            .maybeSingle();
+
+        if (photo) {
+            const url = (photo as { image_url: string }).image_url;
+            const match = url.match(/horse-images\/(.+?)(\?|$)/);
+            if (match) {
+                await supabase.storage.from("horse-images").remove([match[1]]);
+            }
+        }
+    } catch { /* best effort */ }
 
     const { error } = await supabase.from("event_photos").delete().eq("id", photoId);
     if (error) return { success: false, error: error.message };

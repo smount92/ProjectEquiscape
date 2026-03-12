@@ -27,6 +27,7 @@ interface PublicHorseDetail {
   is_public: boolean;
   created_at: string;
   finishing_artist: string | null;
+  finishing_artist_verified: boolean;
   edition_number: number | null;
   edition_size: number | null;
   catalog_id: string | null;
@@ -164,7 +165,7 @@ export default async function PublicPassportPage({
     .select(
       `
       id, owner_id, custom_name, finish_type, condition_grade, asset_category,
-      is_public, created_at, finishing_artist, edition_number, edition_size, catalog_id,
+      is_public, created_at, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id,
       users!inner(alias_name),
       catalog_items:catalog_id(title, maker, scale, item_type, attributes)
     `
@@ -503,7 +504,15 @@ export default async function PublicPassportPage({
             {horse.finishing_artist && (
               <div className="passport-detail-row">
                 <span className="passport-detail-label">🎨 Finished by</span>
-                <span className="passport-detail-value">{horse.finishing_artist}</span>
+                <span className="passport-detail-value">
+                  {horse.finishing_artist}
+                  {horse.finishing_artist_verified && (
+                    <span className="verified-badge" title="Verified via commission delivery"
+                      style={{ marginLeft: 6, color: "var(--color-accent-success, #22c55e)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>
+                      ✅ Verified
+                    </span>
+                  )}
+                </span>
               </div>
             )}
 

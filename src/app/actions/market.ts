@@ -13,6 +13,7 @@ export interface MarketPrice {
     maker: string;
     itemType: string;
     finishType: string;
+    lifeStage: string;
     scale: string | null;
     lowestPrice: number;
     highestPrice: number;
@@ -38,7 +39,7 @@ export async function getMarketPrice(catalogId: string, finishType?: string): Pr
         query = query.eq("finish_type", finishType);
     }
 
-    const { data } = await query.maybeSingle();
+    const { data } = await query.limit(1).maybeSingle();
 
     if (!data) return null;
 
@@ -59,6 +60,7 @@ export async function getMarketPrice(catalogId: string, finishType?: string): Pr
         maker: cat?.maker || "Unknown",
         itemType: cat?.item_type || "unknown",
         finishType: (row.finish_type as string) || "OF",
+        lifeStage: (row.life_stage as string) || "completed",
         scale: cat?.scale || null,
         lowestPrice: Number(row.lowest_price) || 0,
         highestPrice: Number(row.highest_price) || 0,
@@ -76,6 +78,7 @@ export async function getMarketPrice(catalogId: string, finishType?: string): Pr
 export async function searchMarketPrices(query?: string, options?: {
     itemType?: string;
     finishType?: string;
+    lifeStage?: string;
     sortBy?: "average_price" | "transaction_volume" | "last_sold_at" | "title";
     sortDirection?: "asc" | "desc";
     limit?: number;
@@ -94,6 +97,10 @@ export async function searchMarketPrices(query?: string, options?: {
         priceQuery = priceQuery.eq("finish_type", options.finishType);
     }
 
+    if (options?.lifeStage) {
+        priceQuery = priceQuery.eq("life_stage", options.lifeStage);
+    }
+
     const { data: priceData } = await priceQuery;
 
     if (!priceData || priceData.length === 0) {
@@ -102,10 +109,10 @@ export async function searchMarketPrices(query?: string, options?: {
 
     const priceRows = priceData as Record<string, unknown>[];
 
-    // Build price map using composite key (catalog_id::finish_type)
+    // Build price map using composite key (catalog_id::finish_type::life_stage)
     const priceMap = new Map<string, Record<string, unknown>>();
     for (const row of priceRows) {
-        priceMap.set(`${row.catalog_id}::${row.finish_type || "OF"}`, row);
+        priceMap.set(`${row.catalog_id}::${row.finish_type || "OF"}::${row.life_stage || "completed"}`, row);
     }
 
     // Unique catalog IDs for catalog lookup
@@ -145,6 +152,7 @@ export async function searchMarketPrices(query?: string, options?: {
                     maker: cat.maker,
                     itemType: cat.item_type,
                     finishType: (price.finish_type as string) || "OF",
+                    lifeStage: (price.life_stage as string) || "completed",
                     scale: cat.scale,
                     lowestPrice: Number(price.lowest_price) || 0,
                     highestPrice: Number(price.highest_price) || 0,
