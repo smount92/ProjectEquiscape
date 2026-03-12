@@ -11,6 +11,7 @@ import {
     uploadAvatar,
     deleteAccount,
 } from "@/app/actions/settings";
+import styles from "./settings.module.css";
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
     { key: "show_votes", emoji: "📸", label: "Show votes on your entries" },
@@ -160,12 +161,12 @@ export default function SettingsPage() {
                 </h1>
 
                 {/* ═══ Profile ═══ */}
-                <div className="settings-section">
-                    <h2 className="settings-section-title">👤 Profile</h2>
-                    <div className="settings-card">
+                <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}>👤 Profile</h2>
+                    <div className={styles.card}>
                         {/* Avatar */}
-                        <div className="settings-avatar-row">
-                            <div className="settings-avatar">
+                        <div className={styles.avatarRow}>
+                            <div className={styles.avatar}>
                                 {avatarUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={avatarUrl} alt="Your avatar" />
@@ -230,22 +231,22 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Default horse visibility */}
-                        <div className="settings-toggle-row">
-                            <span className="settings-toggle-label">
+                        <div className={styles.toggleRow}>
+                            <span className={styles.toggleLabel}>
                                 🏆 Default new horses to public
                             </span>
                             <button
                                 type="button"
-                                className={`settings-toggle ${defaultHorsePublic ? "active" : ""}`}
+                                className={defaultHorsePublic ? styles.toggleActive : styles.toggle}
                                 onClick={() => setDefaultHorsePublic(!defaultHorsePublic)}
                                 aria-pressed={defaultHorsePublic}
                             />
                         </div>
 
                         {/* Photo watermarking */}
-                        <div className="settings-toggle-row">
+                        <div className={styles.toggleRow}>
                             <div>
-                                <span className="settings-toggle-label">
+                                <span className={styles.toggleLabel}>
                                     📸 Watermark uploaded photos
                                 </span>
                                 <span className="form-hint" style={{ display: "block", marginTop: 2 }}>
@@ -254,7 +255,7 @@ export default function SettingsPage() {
                             </div>
                             <button
                                 type="button"
-                                className={`settings-toggle ${watermarkPhotos ? "active" : ""}`}
+                                className={watermarkPhotos ? styles.toggleActive : styles.toggle}
                                 onClick={() => setWatermarkPhotos(!watermarkPhotos)}
                                 aria-pressed={watermarkPhotos}
                             />
@@ -270,7 +271,7 @@ export default function SettingsPage() {
                         </button>
 
                         {profileMsg && (
-                            <p className={profileMsg.type === "success" ? "settings-success" : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
+                            <p className={profileMsg.type === "success" ? styles.success : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
                                 {profileMsg.text}
                             </p>
                         )}
@@ -278,9 +279,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Security ═══ */}
-                <div className="settings-section">
-                    <h2 className="settings-section-title">🔒 Security</h2>
-                    <div className="settings-card">
+                <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}>🔒 Security</h2>
+                    <div className={styles.card}>
                         <div className="form-group">
                             <label className="form-label">Email</label>
                             <input
@@ -331,7 +332,7 @@ export default function SettingsPage() {
                         </button>
 
                         {passwordMsg && (
-                            <p className={passwordMsg.type === "success" ? "settings-success" : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
+                            <p className={passwordMsg.type === "success" ? styles.success : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
                                 {passwordMsg.text}
                             </p>
                         )}
@@ -339,17 +340,17 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Notifications ═══ */}
-                <div className="settings-section">
-                    <h2 className="settings-section-title">🔔 Notifications</h2>
-                    <div className="settings-card">
+                <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}>🔔 Notifications</h2>
+                    <div className={styles.card}>
                         {NOTIF_LABELS.map((n) => (
-                            <div key={n.key} className="settings-toggle-row">
-                                <span className="settings-toggle-label">
+                            <div key={n.key} className={styles.toggleRow}>
+                                <span className={styles.toggleLabel}>
                                     {n.emoji} {n.label}
                                 </span>
                                 <button
                                     type="button"
-                                    className={`settings-toggle ${notifPrefs[n.key] ? "active" : ""}`}
+                                    className={notifPrefs[n.key] ? styles.toggleActive : styles.toggle}
                                     onClick={() => handleToggleNotif(n.key)}
                                     aria-pressed={notifPrefs[n.key]}
                                 />
@@ -359,9 +360,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Danger Zone ═══ */}
-                <div className="settings-section">
-                    <h2 className="settings-section-title" style={{ color: "#ef4444" }}>⚠️ Danger Zone</h2>
-                    <div className="settings-card" style={{ border: "1px solid #ef4444", borderRadius: "var(--radius-lg)" }}>
+                <div className={styles.section}>
+                    <h2 className={styles.sectionTitle} style={{ color: "#ef4444" }}>⚠️ Danger Zone</h2>
+                    <div className={styles.card} style={{ border: "1px solid #ef4444", borderRadius: "var(--radius-lg)" }}>
                         <p style={{ marginBottom: "var(--space-md)", lineHeight: 1.6 }}>
                             Permanently delete your account. This action <strong>cannot be undone</strong>.
                         </p>

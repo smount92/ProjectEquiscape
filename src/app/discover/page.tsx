@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import RatingBadge from "@/components/RatingBadge";
 import UserAvatar from "@/components/UserAvatar";
+import styles from "./discover.module.css";
 
 export const metadata = {
     title: "Discover Collectors — Model Horse Hub",
@@ -81,7 +82,7 @@ export default async function DiscoverPage() {
                     <p>Be the first to make your models public!</p>
                 </div>
             ) : (
-                <div className="discover-grid animate-fade-in-up">
+                <div className={`${styles.grid} animate-fade-in-up`}>
                     {activeUsers.map((u) => {
                         const publicCount = u.public_horse_count;
                         const isMe = u.id === user.id;
@@ -90,14 +91,14 @@ export default async function DiscoverPage() {
                             <Link
                                 key={u.id}
                                 href={`/profile/${encodeURIComponent(u.alias_name)}`}
-                                className="discover-card"
+                                className={styles.card}
                                 id={`discover-${u.id}`}
                             >
-                                <div className="discover-card-avatar">
+                                <div className={styles.avatar}>
                                     <UserAvatar avatarUrl={u.avatar_url} aliasName={u.alias_name} size={40} />
                                 </div>
-                                <div className="discover-card-info">
-                                    <div className="discover-card-alias">
+                                <div className={styles.info}>
+                                    <div className={styles.alias}>
                                         @{u.alias_name}
                                         {isMe && (
                                             <span
@@ -108,7 +109,7 @@ export default async function DiscoverPage() {
                                             </span>
                                         )}
                                     </div>
-                                    <div className="discover-card-stats">
+                                    <div className={styles.stats}>
                                         <span>
                                             🐴 {publicCount} model{publicCount !== 1 ? "s" : ""}
                                         </span>

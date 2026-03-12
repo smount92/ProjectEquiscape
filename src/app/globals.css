@@ -7022,6 +7022,7 @@ p {
 }
 
 /* Discover Page */
+/* EXTRACTED → discover/discover.module.css */
 .discover-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -8404,6 +8405,7 @@ p {
 }
 
 /* ===== Settings Page ===== */
+/* EXTRACTED → settings/settings.module.css */
 .settings-section {
   margin-bottom: var(--space-2xl);
 }
@@ -11364,6 +11366,7 @@ p {
 /* V18: Dashboard Two-Column Layout                              */
 /* ══════════════════════════════════════════════════════════════ */
 
+/* EXTRACTED → dashboard/dashboard.module.css */
 .dashboard-layout {
   max-width: 1600px;
   margin: 0 auto;

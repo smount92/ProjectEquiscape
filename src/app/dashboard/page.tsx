@@ -9,6 +9,7 @@ import ExportButton from "@/components/ExportButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
 import NanDashboardWidget from "@/components/NanDashboardWidget";
+import styles from "./dashboard.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -171,7 +172,7 @@ export default async function DashboardPage({
     });
 
     return (
-        <div className="dashboard-layout">
+        <div className={styles.layout}>
             <div className="animate-fade-in-up">
                 {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
@@ -199,7 +200,7 @@ export default async function DashboardPage({
                 )}
 
                 {/* Shelf Header — FULL WIDTH */}
-                <div className="shelf-header dashboard-header-full">
+                <div className={`shelf-header ${styles.headerFull}`}>
                     <div>
                         <h1>
                             <span className="text-gradient">Digital Stable</span>
@@ -245,9 +246,9 @@ export default async function DashboardPage({
                 {/* ══════════════════════════════════════════════════════════════
                     TWO-COLUMN GRID: Main (horses) + Sidebar (widgets)
                    ══════════════════════════════════════════════════════════════ */}
-                <div className="dashboard-grid">
+                <div className={styles.grid}>
                     {/* ── MAIN COLUMN: Horse Grid ── */}
-                    <main className="dashboard-main">
+                    <main className={styles.main}>
                         <DashboardShell
                             horseCards={horseCards}
                             collections={collections.map(c => ({ id: c.id, name: c.name }))}
@@ -274,36 +275,36 @@ export default async function DashboardPage({
                     </main>
 
                     {/* ── SIDEBAR: Widgets ── */}
-                    <aside className="dashboard-sidebar">
+                    <aside className={styles.sidebar}>
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
                             <div className="sidebar-section">
                                 <h3 className="sidebar-section-title">📊 Stable Overview</h3>
-                                <div className="sidebar-stats">
-                                    <div className="sidebar-stat-row">
-                                        <span className="sidebar-stat-label">🐴 Total Models</span>
-                                        <span className="sidebar-stat-value">{totalHorseCount}</span>
+                                <div className={styles.stats}>
+                                    <div className={styles.statRow}>
+                                        <span className={styles.statLabel}>🐴 Total Models</span>
+                                        <span className={styles.statValue}>{totalHorseCount}</span>
                                     </div>
-                                    <div className="sidebar-stat-row">
-                                        <span className="sidebar-stat-label">📁 Collections</span>
-                                        <span className="sidebar-stat-value">{collections.length}</span>
+                                    <div className={styles.statRow}>
+                                        <span className={styles.statLabel}>📁 Collections</span>
+                                        <span className={styles.statValue}>{collections.length}</span>
                                     </div>
-                                    <div className="sidebar-stat-row">
-                                        <span className="sidebar-stat-label">💰 Vault Value</span>
-                                        <span className="sidebar-stat-value">
+                                    <div className={styles.statRow}>
+                                        <span className={styles.statLabel}>💰 Vault Value</span>
+                                        <span className={styles.statValue}>
                                             {totalVaultValue > 0
                                                 ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
                                                 : "—"}
                                         </span>
                                     </div>
-                                    <div className="sidebar-stat-row">
-                                        <span className="sidebar-stat-label">🏅 Show Placings</span>
-                                        <span className="sidebar-stat-value">{totalShowRecords ?? 0}</span>
+                                    <div className={styles.statRow}>
+                                        <span className={styles.statLabel}>🏅 Show Placings</span>
+                                        <span className={styles.statValue}>{totalShowRecords ?? 0}</span>
                                     </div>
                                     {unreadMsgCount > 0 && (
-                                        <Link href="/inbox" className="sidebar-stat-row" style={{ textDecoration: "none" }}>
-                                            <span className="sidebar-stat-label">✉️ Unread Messages</span>
-                                            <span className="sidebar-stat-value" style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
+                                        <Link href="/inbox" className={styles.statRow} style={{ textDecoration: "none" }}>
+                                            <span className={styles.statLabel}>✉️ Unread Messages</span>
+                                            <span className={styles.statValue} style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
                                         </Link>
                                     )}
                                 </div>
@@ -314,16 +315,16 @@ export default async function DashboardPage({
                         {collections.length > 0 && (
                             <div className="sidebar-section">
                                 <h3 className="sidebar-section-title">📁 Collections</h3>
-                                <div className="sidebar-collections">
+                                <div className={styles.collections}>
                                     {collections.map((col) => (
                                         <Link
                                             key={col.id}
                                             href={`/stable/collection/${col.id}`}
-                                            className="sidebar-collection-link"
+                                            className={styles.collectionLink}
                                             id={`collection-${col.id}`}
                                         >
                                             <span>{col.name}</span>
-                                            <span className="sidebar-collection-count">
+                                            <span className={styles.collectionCount}>
                                                 {collectionCounts.get(col.id) || 0}
                                                 {(collectionValues.get(col.id) || 0) > 0 && (
                                                     <> · ${(collectionValues.get(col.id) || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>
