@@ -359,31 +359,35 @@ Add to `globals.css` (or create `OfferCard.module.css` if Epic 2 is done):
 
 ## Completion Checklist
 
-**Task 1 — Schema**
-- [ ] Migration 060 created
-- [ ] Status CHECK constraint updated (6 states)
-- [ ] `offer_amount`, `offer_message`, `accepted_at`, `paid_at`, `verified_at` columns added
-- [ ] Index on active offers created
-- [ ] Existing data unaffected
-- [ ] `npx next build` passes
+**Task 1 — Schema** ✅ DONE 2026-03-12
+- [x] Migration 060 created
+- [x] Status CHECK constraint updated (6 states)
+- [x] `offer_amount`, `offer_message`, `accepted_at`, `paid_at`, `verified_at` columns added
+- [x] Index on active offers created
+- [x] Existing data unaffected (superset constraint)
+- [x] `npx next build` passes
 
-**Task 2 — Server Actions**
-- [ ] `makeOffer()` — creates transaction + conversation
-- [ ] `respondToOffer()` — accept (locks horse) or decline
-- [ ] `markPaymentSent()` — buyer signals payment
-- [ ] `verifyFundsAndRelease()` — seller confirms, calls `parkHorse()`, returns PIN
-- [ ] `claimParkedHorse()` updated to close state machine
-- [ ] All notifications sent at each state transition
-- [ ] `npx next build` passes
+**Task 2 — Server Actions** ✅ DONE 2026-03-12
+- [x] `makeOffer()` — creates transaction + conversation + notification
+- [x] `respondToOffer()` — accept (locks horse to "Pending Sale") or decline
+- [x] `markPaymentSent()` — buyer signals payment, notifies seller
+- [x] `verifyFundsAndRelease()` — seller confirms, calls `parkHorse()`, returns PIN
+- [x] `claimParkedHorse()` updated to close state machine (funds_verified → completed)
+- [x] All notifications sent at each state transition
+- [x] `getTransactionByConversation()` enhanced to return full state for OfferCard
+- [x] `npx next build` passes
 
-**Task 3 — UI Components**
-- [ ] `MakeOfferModal.tsx` created (amount + message + submit)
-- [ ] `MessageSellerButton` shows "Make Offer" for tradeable horses
-- [ ] `OfferCard.tsx` created with 4 state renderings
-- [ ] `OfferCard` wired into `ChatThread`
-- [ ] `TransactionActions` updated for state-aware buttons
-- [ ] PIN reveal component styled and functional
-- [ ] CSS for offer card, amount, actions, pin reveal
-- [ ] `npx next build` passes
+**Task 3 — UI Components** ✅ DONE 2026-03-12
+- [x] `MakeOfferModal.tsx` created (amount + message + submit)
+- [x] `MessageSellerButton` shows "💰 Make Offer" for tradeable horses
+- [x] All 3 callers updated (profile page, MatchmakerMatches, ShowRingGrid)
+- [x] `OfferCard.tsx` created with 4 state renderings (offer_made, pending_payment, funds_verified, completed/cancelled)
+- [x] `OfferCard` wired into inbox `[id]/page.tsx` above ChatThread
+- [x] `TransactionActions` hidden when commerce flow is active (no duplicate controls)
+- [x] PIN reveal component styled and functional
+- [x] CSS for offer card, amount, actions, pin reveal, modal, responsive
+- [x] `npx next build` passes
 
 **Estimated effort:** ~8-12 hours across 3 tasks
+**Actual effort:** Completed in single session 2026-03-12
+
