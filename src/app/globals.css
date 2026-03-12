@@ -2558,6 +2558,7 @@ p {
 /* ============================================================
    DASHBOARD SUCCESS TOAST BAR
    ============================================================ */
+/* EXTRACTED → DashboardToast.module.css */
 .dashboard-toast {
   padding: var(--space-md) var(--space-xl);
   border-radius: var(--radius-md);
@@ -4352,6 +4353,7 @@ p {
    WISHLIST BUTTON (Heart on community cards)
    ============================================================ */
 
+/* EXTRACTED → WishlistButton.module.css */
 .wishlist-btn {
   display: flex;
   align-items: center;
@@ -4396,6 +4398,7 @@ p {
 /* ============================================================
    Favorite Button
    ============================================================ */
+/* EXTRACTED → FavoriteButton.module.css */
 .favorite-btn {
   display: inline-flex;
   align-items: center;

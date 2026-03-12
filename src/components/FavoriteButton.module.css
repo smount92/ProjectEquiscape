@@ -1,0 +1,47 @@
+/* ── FavoriteButton.module.css ──
+   Extracted from globals.css lines 4399-4430
+   Favorite heart + count on passport cards */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: var(--radius-sm);
+    transition: color 0.2s ease, transform 0.15s ease;
+    font-size: calc(0.75rem * var(--font-scale));
+}
+
+.btn:hover {
+    color: #e74c6f;
+    transform: scale(1.1);
+}
+
+.favorited {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: #e74c6f;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: var(--radius-sm);
+    transition: color 0.2s ease, transform 0.15s ease;
+    font-size: calc(0.75rem * var(--font-scale));
+}
+
+.btn:disabled,
+.favorited:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.count {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}

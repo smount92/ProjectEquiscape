@@ -1,0 +1,54 @@
+/* ── WishlistButton.module.css ──
+   Extracted from globals.css lines 4355-4393
+   Heart button on community cards */
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.btn:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.15);
+}
+
+.wishlisted {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #ef4444;
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    transition: all 0.2s ease;
+    padding: 0;
+    animation: wishlistPop 0.3s ease;
+}
+
+@keyframes wishlistPop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.35);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

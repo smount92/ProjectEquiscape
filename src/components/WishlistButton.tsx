@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { addToWishlist } from "@/app/actions/wishlist";
+import styles from "./WishlistButton.module.css";
 
 interface WishlistButtonProps {
     catalogId: string | null;
@@ -32,7 +33,7 @@ export default function WishlistButton({ catalogId }: WishlistButtonProps) {
 
     return (
         <button
-            className={`wishlist-btn ${status === "saved" ? "wishlisted" : ""}`}
+            className={status === "saved" ? styles.wishlisted : styles.btn}
             onClick={handleClick}
             disabled={status === "saving"}
             title={status === "saved" ? "In your wishlist" : "Add to wishlist"}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toggleFavorite } from "@/app/actions/social";
+import styles from "./FavoriteButton.module.css";
 
 interface FavoriteButtonProps {
     horseId: string;
@@ -46,7 +47,7 @@ export default function FavoriteButton({
 
     return (
         <button
-            className={`favorite-btn ${isFavorited ? "favorited" : ""}`}
+            className={isFavorited ? styles.favorited : styles.btn}
             onClick={handleClick}
             disabled={status === "saving"}
             title={isFavorited ? "Unfavorite" : "Favorite"}
@@ -66,7 +67,7 @@ export default function FavoriteButton({
             >
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            {count > 0 && <span className="favorite-count">{count}</span>}
+            {count > 0 && <span className={styles.count}>{count}</span>}
         </button>
     );
 }
