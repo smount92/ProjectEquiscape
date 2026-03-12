@@ -420,31 +420,34 @@ CREATE TABLE registry_entries (
 - [x] `quickAddHorse()` server action (auto-names from catalog)
 - [x] Quick Add link added to dashboard header
 - [x] `reorderHorseImages()` server action ✅ DONE 2026-03-11
-- [ ] Photo reordering drag-and-drop UI (needs migration 057 applied first)
+- [x] Photo reordering drag-and-drop UI ✅ DONE 2026-03-11 — HTML5 DnD on extra detail images
 
 ### Phase 2: Sharing & Social Pillar
-- [x] `visibility` column migration written (`057_ux_enhancements.sql`) — needs to be applied
+- [x] `visibility` column migration written (`057_ux_enhancements.sql`) ✅ Applied
 - [x] 3-option visibility selector on Add Horse form (Public/Unlisted/Private) ✅ DONE 2026-03-11
-- [ ] 3-option visibility selector on Edit Horse form (after migration applied)
-- [ ] Show Ring query updated to filter `visibility = 'public'` (after migration applied)
+- [x] 3-option visibility selector on Edit Horse form ✅ DONE 2026-03-11
+- [x] Show Ring query updated to filter `visibility = 'public'` ✅ DONE 2026-03-11
+- [x] Profile page updated to filter `visibility = 'public'` ✅ DONE 2026-03-11
+- [x] Hoofprint page allows `public + unlisted` ✅ DONE 2026-03-11
 - [x] OpenGraph metadata with images on `/community/[id]`
 - [x] Twitter card metadata (`summary_large_image` when photo exists)
-- [ ] Rich media embed preview in feed posts (lower priority)
+- [x] Rich media embed preview in feed posts ✅ DONE 2026-03-11 — detects /community/ URLs
 
 ### Phase 3: Groups & Events Pillar
-- [ ] Post-Show Results Grid (`/shows/planner/[id]/results`)
-- [ ] Tab-through input UX with NAN rollup
-- [ ] Ring Conflict visual timeline (lower priority)
-- [ ] Group Registries — schema + UI (lower priority)
+- [x] Post-Show Batch Results Grid ✅ DONE 2026-03-11 — in ShowStringManager
+- [x] Tab-through input UX with NAN rollup ✅ DONE 2026-03-11 — Champion/Reserve/TopTen points
+- [x] Ring Conflict visual timeline ✅ DONE 2026-03-11 — colored blocks with pulse animation
+- [x] Group Registries — `getGroupRegistry()` + `GroupRegistry.tsx` ✅ DONE 2026-03-11
+- [x] `batchRecordResults()` server action ✅ DONE 2026-03-11
 
 ### Build & Verification
-- [x] `npx next build` — 0 errors (March 11, 2026)
+- [x] `npx next build` — 0 errors ✅ (March 11, 2026)
 - [x] `/add-horse/quick` route registered
 - [x] Migration 057 written (visibility + sort_order)
-- [ ] Migration 057 applied (user action needed)
+- [x] Migration 057 applied ✅
 - [ ] Dashboard toggle works (Gallery ↔ Ledger) — visual check needed
 - [ ] Bulk operations tested (select, move collection, delete)
 - [ ] Quick Add flow tested (catalog → finish → done in <10 seconds)
 - [ ] OpenGraph preview tested (share URL to Discord/iMessage)
 
-**Estimated effort:** ~12-16 hours across 3 phases
+**All code shipped.** Remaining items are manual QA/visual checks.
