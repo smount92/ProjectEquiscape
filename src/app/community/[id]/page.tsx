@@ -91,7 +91,7 @@ export async function generateMetadata({
     .from("user_horses")
     .select("custom_name, finish_type, condition_grade, catalog_items:catalog_id(title, maker)")
     .eq("id", id)
-    .eq("is_public", true)
+    .in("visibility", ["public", "unlisted"])
     .single();
 
   if (!horse) {
@@ -155,7 +155,7 @@ export default async function PublicPassportPage({
   }
 
   // ================================================================
-  // PUBLIC QUERY: Fetch horse ONLY if is_public = TRUE
+  // PUBLIC QUERY: Fetch horse if visibility = 'public' or 'unlisted'
   // 🔒 financial_vault is NEVER queried here.
   // 🔒 Only alias_name from users — never email or full_name.
   // ================================================================
@@ -170,7 +170,7 @@ export default async function PublicPassportPage({
     `
     )
     .eq("id", horseId)
-    .eq("is_public", true)
+    .in("visibility", ["public", "unlisted"])
     .single();
 
   if (!rawHorse) {

@@ -18,7 +18,7 @@ export async function generateMetadata({
         .from("user_horses")
         .select("custom_name")
         .eq("id", id)
-        .eq("is_public", true)
+        .in("visibility", ["public", "unlisted"])
         .single();
     return {
         title: horse
@@ -35,12 +35,12 @@ export default async function HoofprintReportPage({
     const { id: horseId } = await params;
     const supabase = await createClient();
 
-    // Verify horse is public
+    // Verify horse is public or unlisted
     const { data: horse } = await supabase
         .from("user_horses")
         .select("id, custom_name, finish_type, condition_grade, is_public, catalog_items:catalog_id(title, maker, item_type)")
         .eq("id", horseId)
-        .eq("is_public", true)
+        .in("visibility", ["public", "unlisted"])
         .single();
 
     if (!horse) notFound();

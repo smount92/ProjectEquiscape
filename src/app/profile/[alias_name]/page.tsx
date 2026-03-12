@@ -177,7 +177,7 @@ export default async function ProfilePage({
     `
     )
     .eq("owner_id", profileUser.id)
-    .eq("is_public", true)
+    .eq("visibility", "public")
     .order("created_at", { ascending: false });
 
   const horses = (rawHorses as unknown as ProfileHorse[]) ?? [];

@@ -68,7 +68,7 @@ export default function EditHorsePage() {
   const [conditionGrade, setConditionGrade] = useState("");
   const [originalCondition, setOriginalCondition] = useState("");
   const [conditionNote, setConditionNote] = useState("");
-  const [isPublic, setIsPublic] = useState(true);
+  const [visibility, setVisibility] = useState<"public" | "unlisted" | "private">("public");
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
   const [listingPrice, setListingPrice] = useState("");
@@ -117,7 +117,7 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, collection_id, catalog_id, trade_status, listing_price, marketplace_notes, life_stage, asset_category")
+        .select("id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, visibility, collection_id, catalog_id, trade_status, listing_price, marketplace_notes, life_stage, asset_category")
         .eq("id", horseId)
         .single<{
           id: string;
@@ -130,6 +130,7 @@ export default function EditHorsePage() {
           finish_type: FinishType | null;
           condition_grade: string | null;
           is_public: boolean;
+          visibility: string | null;
           collection_id: string | null;
           catalog_id: string | null;
           trade_status: string;
@@ -154,7 +155,13 @@ export default function EditHorsePage() {
       setConditionGrade(horse.condition_grade || "");
       setOriginalCondition(horse.condition_grade || "");
       setAssetCategory(horse.asset_category || "model");
-      setIsPublic(horse.is_public);
+      // Map visibility from DB (fallback to is_public for pre-migration data)
+      const vis = horse.visibility as "public" | "unlisted" | "private" | null;
+      if (vis) {
+        setVisibility(vis);
+      } else {
+        setVisibility(horse.is_public ? "public" : "private");
+      }
       setSelectedCollectionId(horse.collection_id);
       setTradeStatus(horse.trade_status || "Not for Sale");
       if (horse.listing_price !== null) setListingPrice(String(horse.listing_price));
@@ -293,7 +300,8 @@ export default function EditHorsePage() {
         finish_type: isModel ? finishType : null,
         condition_grade: isModel ? conditionGrade : null,
         asset_category: assetCategory,
-        is_public: isPublic,
+        is_public: visibility === "public" || visibility === "unlisted",
+        visibility,
         trade_status: tradeStatus,
         listing_price: tradeStatus !== "Not for Sale" && listingPrice ? parseFloat(listingPrice) : null,
         marketplace_notes: tradeStatus !== "Not for Sale" && marketplaceNotes.trim() ? marketplaceNotes.trim() : null,
@@ -378,7 +386,7 @@ export default function EditHorsePage() {
       }
 
       // Activity event if public (fire-and-forget)
-      if (isPublic) {
+      if (visibility === "public") {
         import("@/app/actions/horse-events").then((m) => {
           m.notifyHorsePublic({
             userId: user.id,
@@ -788,26 +796,29 @@ export default function EditHorsePage() {
           )}
         </div>
 
-        {/* Community visibility toggle */}
+        {/* Community visibility selector */}
         <div className="community-toggle-section">
-          <div className="community-toggle-row">
-            <div className="community-toggle-info">
-              <span className="community-toggle-label">🏆 Show in Public Community Feed</span>
-              <span className="community-toggle-hint">
-                When enabled, this model appears in the Show Ring.
-                Your financial data is always private.
-              </span>
+          <div className="community-toggle-row" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
+            <span className="community-toggle-label">👁️ Visibility</span>
+            <div className="visibility-options">
+              {([
+                { value: "public" as const, icon: "🌐", label: "Public", hint: "Visible in the Show Ring" },
+                { value: "unlisted" as const, icon: "🔗", label: "Unlisted", hint: "Anyone with the link can see it" },
+                { value: "private" as const, icon: "🔒", label: "Private", hint: "Only you can see it" },
+              ]).map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`visibility-option ${visibility === opt.value ? "active" : ""}`}
+                  onClick={() => setVisibility(opt.value)}
+                  id={`edit-visibility-${opt.value}`}
+                >
+                  <span className="visibility-icon">{opt.icon}</span>
+                  <span className="visibility-label">{opt.label}</span>
+                  <span className="visibility-hint">{opt.hint}</span>
+                </button>
+              ))}
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={isPublic}
-              className={`toggle-switch ${isPublic ? "toggle-on" : "toggle-off"}`}
-              onClick={() => setIsPublic(!isPublic)}
-              id="edit-is-public-toggle"
-            >
-              <span className="toggle-knob" />
-            </button>
           </div>
         </div>
 

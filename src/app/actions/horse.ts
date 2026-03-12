@@ -84,7 +84,7 @@ export async function updateHorseAction(horseId: string, data: {
         // ── Security: whitelist allowed fields to prevent column injection ──
         const HORSE_ALLOWED = [
             'custom_name', 'sculptor', 'finishing_artist', 'finish_type',
-            'condition_grade', 'is_public', 'trade_status', 'listing_price',
+            'condition_grade', 'is_public', 'visibility', 'trade_status', 'listing_price',
             'marketplace_notes', 'collection_id', 'catalog_id', 'life_stage',
             'edition_number', 'edition_size', 'asset_category',
         ];
@@ -181,6 +181,7 @@ export async function createHorseRecord(data: {
         finish_type: data.finishType || null,
         condition_grade: data.conditionGrade || null,
         is_public: data.isPublic,
+        visibility: data.isPublic ? "public" : "private",
         trade_status: data.tradeStatus || null,
         life_stage: data.lifeStage || "Living",
     };

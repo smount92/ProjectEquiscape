@@ -22,10 +22,10 @@ UPDATE user_horses SET visibility = CASE WHEN is_public THEN 'public' ELSE 'priv
 ALTER TABLE horse_images
     ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0;
 
--- Set initial sort order based on creation time
+-- Set initial sort order based on insertion order (id)
 UPDATE horse_images SET sort_order = sub.rn
 FROM (
-    SELECT id, ROW_NUMBER() OVER (PARTITION BY horse_id ORDER BY created_at) AS rn
+    SELECT id, ROW_NUMBER() OVER (PARTITION BY horse_id ORDER BY id) AS rn
     FROM horse_images
 ) sub
 WHERE horse_images.id = sub.id;

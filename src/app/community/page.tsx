@@ -72,7 +72,7 @@ export default async function CommunityPage({
       horse_images(image_url, angle_profile)
     `
     )
-    .eq("is_public", true);
+    .eq("visibility", "public");
 
   // Apply server-side filters
   if (params.q) {
@@ -149,7 +149,7 @@ export default async function CommunityPage({
     .from("v_horse_hoofprint")
     .select("horse_id")
     .in("horse_id", horseIds)
-    .eq("is_public", true);
+    .eq("is_public", true);  // v_horse_hoofprint uses is_public from source tables
 
   const hoofprintCountMap = new Map<string, number>();
   (hoofprintData ?? []).forEach((e: { horse_id: string }) => {
