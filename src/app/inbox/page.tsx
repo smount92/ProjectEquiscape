@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import styles from "./inbox.module.css";
 
 export const metadata = {
     title: "Inbox — Model Horse Hub",
@@ -224,15 +225,15 @@ export default async function InboxPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="inbox-list animate-fade-in-up">
+                    <div className={`${styles.list} animate-fade-in-up`}>
                         {inboxItems.map((item) => (
                             <Link
                                 key={item.id}
                                 href={`/inbox/${item.id}`}
-                                className={`inbox-item ${item.unreadCount > 0 ? "inbox-item-unread" : ""}`}
+                                className={`${styles.item} ${item.unreadCount > 0 ? styles.itemUnread : ""}`}
                                 id={`inbox-item-${item.id}`}
                             >
-                                <div className="inbox-item-avatar">
+                                <div className={styles.avatar}>
                                     <svg
                                         width="24"
                                         height="24"
@@ -248,26 +249,26 @@ export default async function InboxPage() {
                                         <circle cx="12" cy="7" r="4" />
                                     </svg>
                                 </div>
-                                <div className="inbox-item-info">
-                                    <div className="inbox-item-top">
-                                        <span className="inbox-item-alias">@{item.otherAlias}</span>
+                                <div className={styles.info}>
+                                    <div className={styles.top}>
+                                        <span className={styles.alias}>@{item.otherAlias}</span>
                                         {item.isRated && (
                                             <span className="inbox-item-rated">⭐ Rated</span>
                                         )}
-                                        <span className="inbox-item-time">
+                                        <span className={styles.time}>
                                             {timeAgo(item.latestTime)}
                                         </span>
                                     </div>
                                     {item.horseName && (
-                                        <div className="inbox-item-horse">
+                                        <div className={styles.horse}>
                                             🐴 Re: {item.horseName}
                                             {item.horseTradeStatus &&
                                                 item.horseTradeStatus !== "Not for Sale" && (
                                                     <span
-                                                        className={`inbox-item-status ${item.horseTradeStatus === "For Sale"
-                                                            ? "status-sale"
-                                                            : "status-offers"
-                                                            }`}
+                                                        className={item.horseTradeStatus === "For Sale"
+                                                            ? styles.statusSale
+                                                            : styles.statusOffers
+                                                        }
                                                     >
                                                         {item.horseTradeStatus === "For Sale"
                                                             ? "💲 For Sale"
@@ -276,11 +277,11 @@ export default async function InboxPage() {
                                                 )}
                                         </div>
                                     )}
-                                    <div className="inbox-item-preview">
+                                    <div className={styles.preview}>
                                         {item.latestMessage ? (
                                             <>
                                                 {item.latestSenderIsMe && (
-                                                    <span className="inbox-item-you">You: </span>
+                                                    <span className={styles.you}>You: </span>
                                                 )}
                                                 {item.latestMessage.length > 80
                                                     ? item.latestMessage.slice(0, 80) + "…"
@@ -292,7 +293,7 @@ export default async function InboxPage() {
                                     </div>
                                 </div>
                                 {item.unreadCount > 0 && (
-                                    <div className="inbox-item-badge">{item.unreadCount}</div>
+                                    <div className={styles.badge}>{item.unreadCount}</div>
                                 )}
                             </Link>
                         ))}

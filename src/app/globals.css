@@ -4857,6 +4857,7 @@ p {
    INBOX LIST
    ============================================================ */
 
+/* EXTRACTED → inbox/inbox.module.css */
 .inbox-list {
   display: flex;
   flex-direction: column;
