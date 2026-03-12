@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import StableGrid from "@/components/StableGrid";
 import StableLedger from "@/components/StableLedger";
 import { bulkUpdateHorses, bulkDeleteHorses } from "@/app/actions/horse";
+import styles from "./DashboardShell.module.css";
 
 interface HorseCardData {
     id: string;
@@ -108,23 +109,23 @@ export default function DashboardShell({
         <>
             {/* View Toggle + Select Mode */}
             {horseCards.length > 0 && (
-                <div className="view-toggle-row">
-                    <div className="view-toggle" id="dashboard-view-toggle">
+                <div className={styles.viewToggleRow}>
+                    <div className={styles.viewToggle} id="dashboard-view-toggle">
                         <button
-                            className={`view-toggle-btn ${view === "grid" ? "active" : ""}`}
+                            className={`${styles.viewToggleBtn} ${view === "grid" ? styles.viewToggleBtnActive : ""}`}
                             onClick={() => handleViewChange("grid")}
                         >
                             🖼️ Gallery
                         </button>
                         <button
-                            className={`view-toggle-btn ${view === "ledger" ? "active" : ""}`}
+                            className={`${styles.viewToggleBtn} ${view === "ledger" ? styles.viewToggleBtnActive : ""}`}
                             onClick={() => handleViewChange("ledger")}
                         >
                             📋 Ledger
                         </button>
                     </div>
                     <button
-                        className={`view-toggle-btn ${selectMode ? "active" : ""}`}
+                        className={`${styles.viewToggleBtn} ${selectMode ? styles.viewToggleBtnActive : ""}`}
                         onClick={() => {
                             if (selectMode) clearSelection();
                             else setSelectMode(true);
@@ -139,7 +140,7 @@ export default function DashboardShell({
 
             {/* Select All / Clear */}
             {selectMode && horseCards.length > 0 && (
-                <div className="bulk-select-bar">
+                <div className={styles.bulkSelectBar}>
                     <button className="btn btn-ghost btn-sm" onClick={selectAll}>
                         Select All ({horseCards.length})
                     </button>
@@ -170,13 +171,13 @@ export default function DashboardShell({
 
             {/* Floating Bulk Action Bar */}
             {selectMode && selectedIds.size > 0 && (
-                <div className="bulk-action-bar">
-                    <span className="bulk-action-count">✅ {selectedIds.size} selected</span>
+                <div className={styles.bulkActionBar}>
+                    <span className={styles.bulkActionCount}>✅ {selectedIds.size} selected</span>
 
-                    <div className="bulk-action-buttons">
+                    <div className={styles.bulkActionButtons}>
                         {/* Move to Collection */}
                         <select
-                            className="form-select bulk-select"
+                            className={`form-select ${styles.bulkSelect}`}
                             value=""
                             onChange={(e) => {
                                 const val = e.target.value;
@@ -194,7 +195,7 @@ export default function DashboardShell({
 
                         {/* Trade Status */}
                         <select
-                            className="form-select bulk-select"
+                            className={`form-select ${styles.bulkSelect}`}
                             value=""
                             onChange={(e) => { if (e.target.value) handleBulkTradeStatus(e.target.value); }}
                             disabled={isProcessing}

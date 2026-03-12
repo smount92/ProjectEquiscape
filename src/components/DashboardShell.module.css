@@ -1,0 +1,101 @@
+/* ── DashboardShell.module.css ──
+   Extracted from globals.css lines 10621-10655, 10889-10942
+   View toggle + bulk operations bar */
+
+.viewToggleRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--space-md);
+}
+
+.viewToggle {
+    display: inline-flex;
+    background: var(--color-surface-secondary);
+    border-radius: var(--radius-full);
+    padding: 3px;
+    gap: 2px;
+}
+
+.viewToggleBtn {
+    padding: 6px 16px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: calc(var(--font-size-sm) * var(--font-scale));
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.viewToggleBtn:hover {
+    color: var(--color-text-primary);
+}
+
+.viewToggleBtnActive {
+    background: var(--color-accent-primary);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Bulk Operations */
+.bulkSelectBar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+    padding: 6px 12px;
+    background: var(--color-surface-secondary);
+    border-radius: var(--radius-md);
+}
+
+.bulkActionBar {
+    position: fixed;
+    bottom: var(--space-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: 12px 20px;
+    background: var(--color-surface-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    z-index: 100;
+    max-width: 90vw;
+    flex-wrap: wrap;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+}
+
+.bulkActionCount {
+    font-weight: 600;
+    font-size: calc(var(--font-size-sm) * var(--font-scale));
+    color: var(--color-accent-primary);
+    white-space: nowrap;
+}
+
+.bulkActionButtons {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.bulkSelect {
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-secondary);
+    color: var(--color-text-primary);
+    font-size: calc(var(--font-size-sm) * var(--font-scale));
+    font-family: inherit;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .viewToggleRow {
+        justify-content: center;
+    }
+}

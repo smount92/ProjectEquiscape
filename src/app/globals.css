@@ -10618,6 +10618,7 @@ p {
 /* V17: Dashboard View Toggle                                     */
 /* ══════════════════════════════════════════════════════════════ */
 
+/* EXTRACTED → DashboardShell.module.css */
 .view-toggle-row {
   display: flex;
   justify-content: flex-end;
@@ -10886,6 +10887,7 @@ p {
 /* V17: Bulk Operations                                           */
 /* ══════════════════════════════════════════════════════════════ */
 
+/* EXTRACTED → DashboardShell.module.css */
 .bulk-select-bar {
   display: flex;
   align-items: center;
