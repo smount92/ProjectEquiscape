@@ -5,6 +5,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { getSignedImageUrl } from "@/lib/utils/storage";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
+import { randomInt } from "crypto";
 
 // ============================================================
 // PARKED EXPORT — Server Actions
@@ -15,7 +16,7 @@ function generatePin(): string {
     const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     let pin = "";
     for (let i = 0; i < 6; i++) {
-        pin += chars[Math.floor(Math.random() * chars.length)];
+        pin += chars[randomInt(chars.length)];
     }
     return pin;
 }

@@ -531,6 +531,7 @@ export interface Database {
       mv_market_prices: {
         Row: {
           catalog_id: string;
+          finish_type: string;
           lowest_price: number;
           highest_price: number;
           average_price: number;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { respondToOffer, markPaymentSent, verifyFundsAndRelease } from "@/app/actions/transactions";
+import { respondToOffer, markPaymentSent, verifyFundsAndRelease, cancelTransaction } from "@/app/actions/transactions";
 import styles from "./OfferCard.module.css";
 
 interface OfferCardProps {
@@ -71,6 +71,20 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
             router.refresh();
         } else {
             setError(result.error || "Failed.");
+        }
+        setSaving(false);
+    };
+
+    const handleCancel = async () => {
+        if (!confirm("Are you sure you want to cancel this transaction? The horse will be relisted.")) return;
+        setSaving(true);
+        setError("");
+        const result = await cancelTransaction(transaction.transactionId);
+        if (result.success) {
+            setStatus("cancelled");
+            router.refresh();
+        } else {
+            setError(result.error || "Failed to cancel.");
         }
         setSaving(false);
     };
@@ -166,10 +180,28 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                             >
                                 {saving ? "Verifying…" : "✅ Confirm Funds & Release"}
                             </button>
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={handleCancel}
+                                disabled={saving}
+                                style={{ color: "#ef4444" }}
+                            >
+                                {saving ? "…" : "🚫 Cancel / Dispute"}
+                            </button>
                         </div>
                     )}
                     {isSeller && !hasPaid && (
-                        <p className={styles.statusText}>⏳ Waiting for buyer to send payment…</p>
+                        <div className={styles.actions}>
+                            <p className={styles.statusText}>⏳ Waiting for buyer to send payment…</p>
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={handleCancel}
+                                disabled={saving}
+                                style={{ color: "#ef4444" }}
+                            >
+                                {saving ? "…" : "🚫 Cancel / Dispute"}
+                            </button>
+                        </div>
                     )}
                 </div>
             )}

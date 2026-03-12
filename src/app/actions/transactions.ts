@@ -531,6 +531,28 @@ export async function respondToOffer(
         conversationId: t.conversation_id,
     });
 
+    // Auto-cancel all other active offers on this horse
+    const { data: otherOffers } = await admin
+        .from("transactions")
+        .select("id, party_b_id, conversation_id")
+        .eq("horse_id", t.horse_id)
+        .eq("status", "offer_made")
+        .neq("id", transactionId);
+
+    if (otherOffers && otherOffers.length > 0) {
+        for (const other of otherOffers as { id: string; party_b_id: string; conversation_id: string }[]) {
+            await admin.from("transactions").update({ status: "cancelled" }).eq("id", other.id);
+            // Notify the losing buyer
+            await createNotification({
+                userId: other.party_b_id,
+                type: "offer",
+                actorId: user.id,
+                content: `Another offer on ${horseName} was accepted. Your offer has been cancelled.`,
+                conversationId: other.conversation_id,
+            });
+        }
+    }
+
     revalidatePath(`/inbox/${t.conversation_id}`);
     revalidatePath(`/community/${t.horse_id}`);
     return { success: true };
@@ -631,3 +653,46 @@ export async function verifyFundsAndRelease(
     return { success: true, pin: parkResult.pin };
 }
 
+// ── Cancel Transaction ──
+// Seller can cancel when buyer ghosts during pending_payment
+export async function cancelTransaction(
+    transactionId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const admin = getAdminClient();
+    const { data: txn } = await admin
+        .from("transactions")
+        .select("id, status, party_a_id, party_b_id, horse_id, conversation_id")
+        .eq("id", transactionId)
+        .single();
+
+    if (!txn) return { success: false, error: "Transaction not found." };
+    const t = txn as { id: string; status: string; party_a_id: string; party_b_id: string; horse_id: string; conversation_id: string };
+
+    // Only seller can cancel; only from pending_payment
+    if (t.party_a_id !== user.id) return { success: false, error: "Only the seller can cancel." };
+    if (t.status !== "pending_payment") return { success: false, error: "Transaction cannot be cancelled in this state." };
+
+    // 1. Cancel the transaction
+    await admin.from("transactions").update({ status: "cancelled" }).eq("id", transactionId);
+
+    // 2. Revert horse trade_status — since we set it to "Pending Sale" on accept, revert to "Open to Offers"
+    await admin.from("user_horses").update({ trade_status: "Open to Offers" }).eq("id", t.horse_id);
+
+    // 3. Notify the buyer
+    const { data: sellerProfile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
+    const sellerAlias = (sellerProfile as { alias_name: string } | null)?.alias_name || "Seller";
+    await createNotification({
+        userId: t.party_b_id,
+        type: "offer",
+        actorId: user.id,
+        content: `@${sellerAlias} cancelled the transaction.`,
+        conversationId: t.conversation_id,
+    });
+
+    revalidatePath(`/inbox/${t.conversation_id}`);
+    return { success: true };
+}

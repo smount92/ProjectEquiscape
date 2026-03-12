@@ -9,7 +9,7 @@ import type { CatalogItem } from "@/app/actions/reference";
 import { createClient } from "@/lib/supabase/client";
 
 const FINISH_TYPES = ["OF", "Custom", "Artist Resin"];
-const CONDITION_GRADES = ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Fair", "Poor", "Play Grade", "Not Graded"];
+const CONDITION_GRADES = ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Body Quality", "Fair", "Poor", "Play Grade", "Not Graded"];
 
 interface RecentAdd {
     id: string;

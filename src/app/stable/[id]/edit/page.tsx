@@ -42,6 +42,7 @@ const CONDITION_GRADES = [
   { value: "Excellent", label: "Excellent — Very light wear, no breaks" },
   { value: "Very Good", label: "Very Good — Minor rubs or scuffs" },
   { value: "Good", label: "Good — Noticeable wear, still displays well" },
+  { value: "Body Quality", label: "Body Quality — Suitable for customizing" },
   { value: "Fair", label: "Fair — Visible flaws, repairs, or damage" },
   { value: "Poor", label: "Poor — Significant damage or missing parts" },
 ];

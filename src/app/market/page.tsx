@@ -35,11 +35,12 @@ const PAGE_SIZE = 20;
 export default async function MarketPricePage({
     searchParams,
 }: {
-    searchParams: Promise<{ q?: string; type?: string; sort?: string; page?: string }>;
+    searchParams: Promise<{ q?: string; type?: string; finish?: string; sort?: string; page?: string }>;
 }) {
     const params = await searchParams;
     const query = params.q || "";
     const itemType = params.type || "all";
+    const finishType = params.finish || "";
     const sortValue = params.sort || "transaction_volume:desc";
     const page = Math.max(1, parseInt(params.page || "1"));
     const offset = (page - 1) * PAGE_SIZE;
@@ -53,6 +54,7 @@ export default async function MarketPricePage({
         query || undefined,
         {
             itemType: itemType !== "all" ? itemType : undefined,
+            finishType: finishType || undefined,
             sortBy,
             sortDirection,
             limit: PAGE_SIZE,
@@ -115,12 +117,15 @@ export default async function MarketPricePage({
 
                             <div className="market-results-grid">
                                 {items.map((item) => (
-                                    <div key={item.catalogId} className="market-card">
+                                    <div key={`${item.catalogId}::${item.finishType}`} className="market-card">
                                         <div className="market-card-header">
                                             <span className="market-card-icon">{typeIcon(item.itemType)}</span>
                                             <div className="market-card-info">
                                                 <span className="market-card-title">{item.title}</span>
-                                                <span className="market-card-maker">{item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                                                <span className="market-card-maker">
+                                                    {item.maker}{item.scale ? ` · ${item.scale}` : ""}
+                                                    {item.finishType ? ` · ${item.finishType}` : ""}
+                                                </span>
                                             </div>
                                         </div>
 

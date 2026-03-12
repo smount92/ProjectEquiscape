@@ -27,7 +27,7 @@ export interface InsuranceReportPayload {
     totalValue: number;
 }
 
-export async function getInsuranceReportData(): Promise<{
+export async function getInsuranceReportData(collectionId?: string): Promise<{
     success: boolean;
     data?: InsuranceReportPayload;
     error?: string;
@@ -47,7 +47,7 @@ export async function getInsuranceReportData(): Promise<{
             .single<{ alias_name: string; full_name: string | null }>();
 
         // Fetch horses with reference data
-        const { data: rawHorses } = await supabase
+        let horseQuery = supabase
             .from("user_horses")
             .select(
                 `id, custom_name, finish_type, condition_grade,
@@ -56,6 +56,13 @@ export async function getInsuranceReportData(): Promise<{
             )
             .eq("owner_id", user.id)
             .order("custom_name");
+
+        // Filter by collection if provided (OOM prevention for large herds)
+        if (collectionId) {
+            horseQuery = horseQuery.eq("collection_id", collectionId);
+        }
+
+        const { data: rawHorses } = await horseQuery;
 
         interface HorseRow {
             id: string;

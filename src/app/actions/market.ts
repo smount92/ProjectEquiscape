@@ -12,6 +12,7 @@ export interface MarketPrice {
     title: string;
     maker: string;
     itemType: string;
+    finishType: string;
     scale: string | null;
     lowestPrice: number;
     highestPrice: number;
@@ -25,14 +26,19 @@ export interface MarketPrice {
  * Get market price for a specific catalog item.
  * Used for badges on passports and reference search.
  */
-export async function getMarketPrice(catalogId: string): Promise<MarketPrice | null> {
+export async function getMarketPrice(catalogId: string, finishType?: string): Promise<MarketPrice | null> {
     const supabase = await createClient();
 
-    const { data } = await supabase
+    let query = supabase
         .from("mv_market_prices" as string)
         .select("*")
-        .eq("catalog_id", catalogId)
-        .single();
+        .eq("catalog_id", catalogId);
+
+    if (finishType) {
+        query = query.eq("finish_type", finishType);
+    }
+
+    const { data } = await query.maybeSingle();
 
     if (!data) return null;
 
@@ -52,6 +58,7 @@ export async function getMarketPrice(catalogId: string): Promise<MarketPrice | n
         title: cat?.title || "Unknown",
         maker: cat?.maker || "Unknown",
         itemType: cat?.item_type || "unknown",
+        finishType: (row.finish_type as string) || "OF",
         scale: cat?.scale || null,
         lowestPrice: Number(row.lowest_price) || 0,
         highestPrice: Number(row.highest_price) || 0,
@@ -68,6 +75,7 @@ export async function getMarketPrice(catalogId: string): Promise<MarketPrice | n
  */
 export async function searchMarketPrices(query?: string, options?: {
     itemType?: string;
+    finishType?: string;
     sortBy?: "average_price" | "transaction_volume" | "last_sold_at" | "title";
     sortDirection?: "asc" | "desc";
     limit?: number;
@@ -77,17 +85,31 @@ export async function searchMarketPrices(query?: string, options?: {
     const limit = options?.limit || 20;
     const offset = options?.offset || 0;
 
-    // First get all catalog IDs that have market data
-    const { data: priceData } = await supabase
+    // First get all market data rows (now keyed by catalog_id + finish_type)
+    let priceQuery = supabase
         .from("mv_market_prices" as string)
         .select("*");
+
+    if (options?.finishType) {
+        priceQuery = priceQuery.eq("finish_type", options.finishType);
+    }
+
+    const { data: priceData } = await priceQuery;
 
     if (!priceData || priceData.length === 0) {
         return { items: [], total: 0 };
     }
 
     const priceRows = priceData as Record<string, unknown>[];
-    const catalogIds = priceRows.map(r => r.catalog_id as string);
+
+    // Build price map using composite key (catalog_id::finish_type)
+    const priceMap = new Map<string, Record<string, unknown>>();
+    for (const row of priceRows) {
+        priceMap.set(`${row.catalog_id}::${row.finish_type || "OF"}`, row);
+    }
+
+    // Unique catalog IDs for catalog lookup
+    const catalogIds = [...new Set(priceRows.map(r => r.catalog_id as string))];
 
     // Get catalog items for those IDs
     let catalogQuery = supabase
@@ -109,32 +131,31 @@ export async function searchMarketPrices(query?: string, options?: {
         return { items: [], total: 0 };
     }
 
-    // Build price map
-    const priceMap = new Map<string, Record<string, unknown>>();
-    for (const row of priceRows) {
-        priceMap.set(row.catalog_id as string, row);
-    }
-
-    // Merge and sort
+    // Merge: one catalog item may have multiple finish types
     const catalogRows = catalogData as { id: string; title: string; maker: string; item_type: string; scale: string | null }[];
-    let merged: MarketPrice[] = catalogRows
-        .filter(cat => priceMap.has(cat.id))
-        .map(cat => {
-            const price = priceMap.get(cat.id)!;
-            return {
-                catalogId: cat.id,
-                title: cat.title,
-                maker: cat.maker,
-                itemType: cat.item_type,
-                scale: cat.scale,
-                lowestPrice: Number(price.lowest_price) || 0,
-                highestPrice: Number(price.highest_price) || 0,
-                averagePrice: Number(price.average_price) || 0,
-                medianPrice: Number(price.median_price) || 0,
-                transactionVolume: Number(price.transaction_volume) || 0,
-                lastSoldAt: price.last_sold_at as string | null,
-            };
-        });
+    let merged: MarketPrice[] = [];
+
+    for (const cat of catalogRows) {
+        // Find all price rows for this catalog item
+        for (const [key, price] of priceMap) {
+            if (key.startsWith(`${cat.id}::`)) {
+                merged.push({
+                    catalogId: cat.id,
+                    title: cat.title,
+                    maker: cat.maker,
+                    itemType: cat.item_type,
+                    finishType: (price.finish_type as string) || "OF",
+                    scale: cat.scale,
+                    lowestPrice: Number(price.lowest_price) || 0,
+                    highestPrice: Number(price.highest_price) || 0,
+                    averagePrice: Number(price.average_price) || 0,
+                    medianPrice: Number(price.median_price) || 0,
+                    transactionVolume: Number(price.transaction_volume) || 0,
+                    lastSoldAt: price.last_sold_at as string | null,
+                });
+            }
+        }
+    }
 
     // Sort
     const sortBy = options?.sortBy || "transaction_volume";

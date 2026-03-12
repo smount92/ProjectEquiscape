@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
+import { randomInt } from "crypto";
 
 // ============================================================
 // HOOFPRINT™ — Living Model Horse Provenance Actions
@@ -257,7 +258,7 @@ function generateCode(): string {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O, 1/I
     let code = "";
     for (let i = 0; i < 6; i++) {
-        code += chars[Math.floor(Math.random() * chars.length)];
+        code += chars[randomInt(chars.length)];
     }
     return code;
 }
