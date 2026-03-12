@@ -196,13 +196,22 @@ Open every major page at 1440px and 375px:
 - [x] Batch 6: Inbox page module (list, items, avatars, status badges) created + verified
 - [x] All batches: `npx next build` passes after each
 
+**Phase 3 — Page-Level + Component Extraction (Batches 7-8)** ✅ DONE 2026-03-12
+- [x] Batch 7: Dashboard layout, Settings page, Discover page modules created + verified
+- [x] Batch 8: DashboardToast, WishlistButton, FavoriteButton modules created + verified
+- [x] All batches: `npx next build` passes after each
+
 **Decision: Keep in globals.css (shared primitives):**
-- `horse-card-*` — used across 7+ files (StableGrid, ShowRingGrid, profile, collection, community, FeaturedHorseCard, events)
+- `horse-card-*` — used across 7+ files (StableGrid, ShowRingGrid, profile, collection, community, events)
 - `feed-*` — shared across UniversalFeed, ActivityFeed, feed detail page
 - `btn-*`, `form-*`, `modal-*`, `card` — universal utilities
 - `passport-*` — shared between passport page and gallery component
+- `sidebar-section` — shared between dashboard and GroupAdminPanel
+- `market-pagination` — shared between market and dashboard pages
+- `help-id-*` — shared across 5 files
+- `community-hero-*` — shared across community and discover pages
 
-**Modules Created So Far (12 total):**
+**Modules Created (18 total):**
 | Module | Lines Extracted | Source |
 |---|---|---|
 | `StableLedger.module.css` | ~190 | globals.css 10659-10824, 10988-10990 |
@@ -217,18 +226,18 @@ Open every major page at 1440px and 375px:
 | `FeaturedHorseCard.module.css` | ~90 | globals.css 7079-7182 |
 | `MatchmakerMatches.module.css` | ~110 | globals.css 4660-4758 |
 | `inbox/inbox.module.css` | ~200 | globals.css 4860-4990 |
+| `dashboard/dashboard.module.css` | ~140 | globals.css 11367-11526 |
+| `settings/settings.module.css` | ~120 | globals.css 8407-8510 |
+| `discover/discover.module.css` | ~75 | globals.css 7025-7079 |
+| `DashboardToast.module.css` | ~70 | globals.css 2561-2607 |
+| `WishlistButton.module.css` | ~50 | globals.css 4355-4393 |
+| `FavoriteButton.module.css` | ~50 | globals.css 4399-4430 |
 
-**Phase 3 — Page-Level Extraction**
-- [ ] Dashboard page layout (sidebar, grid, stats)
-- [ ] Settings page styles
-- [ ] Community/Show Ring page styles
-- [ ] Profile, Discover, Market page styles
-
-**Phase 4 — Cleanup**
-- [ ] All extracted rules removed from globals.css
+**Phase 4 — Cleanup** (remaining)
+- [ ] All extracted rules removed from globals.css (delete `/* EXTRACTED */` blocks)
 - [ ] Empty media queries cleaned up
-- [ ] globals.css under 400 lines
-- [ ] Full regression test — all 9 pages verified
+- [ ] ArtistBrowser migrated to use discover module (shared `discover-card` classes)
+- [ ] Full regression test — all major pages verified at 1440px + 375px
 
-**Estimated effort:** ~8-12 hours remaining (Phase 3-4)
+**Estimated effort:** ~4-6 hours remaining (Phase 4 cleanup)
 
