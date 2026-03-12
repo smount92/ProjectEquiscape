@@ -556,3 +556,378 @@ export async function getGroupRegistry(groupId: string): Promise<RegistryEntry[]
         addedAt: h.created_at,
     }));
 }
+
+// ── Group Files ──
+
+export interface GroupFile {
+    id: string;
+    fileName: string;
+    fileUrl: string;
+    fileSize: number | null;
+    fileType: string;
+    description: string | null;
+    uploadedBy: string;
+    uploaderAlias: string;
+    createdAt: string;
+}
+
+/** Get files uploaded to a group */
+export async function getGroupFiles(groupId: string): Promise<GroupFile[]> {
+    const supabase = await createClient();
+
+    const { data } = await supabase
+        .from("group_files")
+        .select("*, users!group_files_uploaded_by_fkey(alias_name)")
+        .eq("group_id", groupId)
+        .order("created_at", { ascending: false });
+
+    if (!data || data.length === 0) return [];
+
+    return (data as Record<string, unknown>[]).map(f => ({
+        id: f.id as string,
+        fileName: f.file_name as string,
+        fileUrl: f.file_url as string,
+        fileSize: f.file_size as number | null,
+        fileType: f.file_type as string,
+        description: f.description as string | null,
+        uploadedBy: f.uploaded_by as string,
+        uploaderAlias: (f as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
+        createdAt: f.created_at as string,
+    }));
+}
+
+/** Upload a file to a group (admin/owner/mod only) */
+export async function uploadGroupFile(
+    groupId: string,
+    filePath: string,
+    fileName: string,
+    fileSize: number,
+    description?: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify admin/owner/mod role
+    const { data: membership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", groupId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    const role = (membership as { role: string } | null)?.role;
+    if (!role || !["owner", "admin", "moderator"].includes(role)) {
+        return { success: false, error: "Only admins and moderators can upload files." };
+    }
+
+    const ext = fileName.split(".").pop()?.toLowerCase() || "file";
+    const fileType = ["pdf"].includes(ext) ? "pdf"
+        : ["jpg", "jpeg", "png", "gif", "webp"].includes(ext) ? "image"
+            : ["doc", "docx"].includes(ext) ? "doc"
+                : "other";
+
+    const { error } = await supabase.from("group_files").insert({
+        group_id: groupId,
+        uploaded_by: user.id,
+        file_name: fileName,
+        file_url: filePath,
+        file_size: fileSize,
+        file_type: fileType,
+        description: description?.trim() || null,
+    });
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/community/groups");
+    return { success: true };
+}
+
+/** Delete a group file */
+export async function deleteGroupFile(
+    fileId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const { error } = await supabase.from("group_files").delete().eq("id", fileId);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/community/groups");
+    return { success: true };
+}
+
+// ── Admin Moderation ──
+
+export interface GroupMember {
+    userId: string;
+    alias: string;
+    role: string;
+    joinedAt: string;
+}
+
+/** Get all members of a group with roles */
+export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
+    const supabase = await createClient();
+
+    const { data } = await supabase
+        .from("group_memberships")
+        .select("user_id, role, joined_at, users!group_memberships_user_id_fkey(alias_name)")
+        .eq("group_id", groupId)
+        .order("joined_at", { ascending: true });
+
+    if (!data || data.length === 0) return [];
+
+    const rolePriority: Record<string, number> = { owner: 0, admin: 1, moderator: 2, judge: 3, member: 4 };
+
+    return (data as Record<string, unknown>[])
+        .map(m => ({
+            userId: m.user_id as string,
+            alias: (m as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
+            role: m.role as string,
+            joinedAt: m.joined_at as string,
+        }))
+        .sort((a, b) => (rolePriority[a.role] ?? 9) - (rolePriority[b.role] ?? 9));
+}
+
+/** Update a member's role (owner-only) */
+export async function updateMemberRole(
+    groupId: string,
+    targetUserId: string,
+    newRole: "admin" | "moderator" | "member"
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    if (user.id === targetUserId) return { success: false, error: "Cannot change your own role." };
+
+    // Only owner can promote/demote
+    const { data: callerMembership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", groupId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if ((callerMembership as { role: string } | null)?.role !== "owner") {
+        return { success: false, error: "Only the group owner can change roles." };
+    }
+
+    const { error } = await supabase
+        .from("group_memberships")
+        .update({ role: newRole })
+        .eq("group_id", groupId)
+        .eq("user_id", targetUserId);
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/community/groups");
+    return { success: true };
+}
+
+/** Remove a member from a group (admin/owner) */
+export async function removeMember(
+    groupId: string,
+    targetUserId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    if (user.id === targetUserId) return { success: false, error: "Use leaveGroup to remove yourself." };
+
+    // Verify caller is owner or admin
+    const { data: callerMembership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", groupId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    const callerRole = (callerMembership as { role: string } | null)?.role;
+    if (!callerRole || !["owner", "admin"].includes(callerRole)) {
+        return { success: false, error: "Insufficient permissions." };
+    }
+
+    // Cannot remove someone of equal or higher role
+    const { data: targetMembership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", groupId)
+        .eq("user_id", targetUserId)
+        .maybeSingle();
+
+    const targetRole = (targetMembership as { role: string } | null)?.role;
+    if (targetRole === "owner") return { success: false, error: "Cannot remove the owner." };
+    if (targetRole === "admin" && callerRole !== "owner") return { success: false, error: "Only the owner can remove admins." };
+
+    const { error } = await supabase
+        .from("group_memberships")
+        .delete()
+        .eq("group_id", groupId)
+        .eq("user_id", targetUserId);
+
+    if (error) return { success: false, error: error.message };
+
+    // Decrement member count
+    try {
+        const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
+        if (g) await supabase.from("groups").update({ member_count: Math.max(0, ((g as { member_count: number }).member_count || 1) - 1) }).eq("id", groupId);
+    } catch { /* best effort */ }
+
+    revalidatePath("/community/groups");
+    return { success: true };
+}
+
+/** Toggle pin on a group post */
+export async function togglePinPost(
+    postId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Get the post's group_id and current pin state
+    const { data: post } = await supabase
+        .from("posts")
+        .select("group_id, is_pinned")
+        .eq("id", postId)
+        .maybeSingle();
+
+    if (!post) return { success: false, error: "Post not found." };
+    const p = post as { group_id: string | null; is_pinned: boolean };
+    if (!p.group_id) return { success: false, error: "Not a group post." };
+
+    // Verify admin/owner/mod role
+    const { data: membership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", p.group_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    const role = (membership as { role: string } | null)?.role;
+    if (!role || !["owner", "admin", "moderator"].includes(role)) {
+        return { success: false, error: "Only admins can pin posts." };
+    }
+
+    const { error } = await supabase
+        .from("posts")
+        .update({ is_pinned: !p.is_pinned })
+        .eq("id", postId);
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/community/groups");
+    return { success: true };
+}
+
+// ── Sub-Channels ──
+
+export interface GroupChannel {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    sortOrder: number;
+}
+
+/** Get channels for a group */
+export async function getGroupChannels(groupId: string): Promise<GroupChannel[]> {
+    const supabase = await createClient();
+
+    const { data } = await supabase
+        .from("group_channels")
+        .select("id, name, slug, description, sort_order")
+        .eq("group_id", groupId)
+        .order("sort_order")
+        .order("name");
+
+    if (!data || data.length === 0) return [];
+
+    return (data as { id: string; name: string; slug: string; description: string | null; sort_order: number }[]).map(ch => ({
+        id: ch.id,
+        name: ch.name,
+        slug: ch.slug,
+        description: ch.description,
+        sortOrder: ch.sort_order,
+    }));
+}
+
+/** Create a channel in a group (admin/owner only) */
+export async function createGroupChannel(
+    groupId: string,
+    name: string,
+    description?: string
+): Promise<{ success: boolean; channelId?: string; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    if (!name.trim()) return { success: false, error: "Channel name is required." };
+
+    // Verify admin/owner
+    const { data: membership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", groupId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    const role = (membership as { role: string } | null)?.role;
+    if (!role || !["owner", "admin"].includes(role)) {
+        return { success: false, error: "Only admins can create channels." };
+    }
+
+    const slug = name.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+
+    const { data: channel, error } = await supabase
+        .from("group_channels")
+        .insert({
+            group_id: groupId,
+            name: name.trim(),
+            slug: slug || "channel",
+            description: description?.trim() || null,
+        })
+        .select("id")
+        .single();
+
+    if (error) {
+        if (error.code === "23505") return { success: false, error: "A channel with that name already exists." };
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath("/community/groups");
+    return { success: true, channelId: (channel as { id: string }).id };
+}
+
+/** Delete a channel (admin/owner only) */
+export async function deleteGroupChannel(
+    channelId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Get channel's group and check how many channels exist
+    const { data: channel } = await supabase
+        .from("group_channels")
+        .select("group_id")
+        .eq("id", channelId)
+        .maybeSingle();
+
+    if (!channel) return { success: false, error: "Channel not found." };
+    const groupId = (channel as { group_id: string }).group_id;
+
+    const { count } = await supabase
+        .from("group_channels")
+        .select("id", { count: "exact", head: true })
+        .eq("group_id", groupId);
+
+    if ((count ?? 0) <= 1) return { success: false, error: "Cannot delete the last channel." };
+
+    const { error } = await supabase.from("group_channels").delete().eq("id", channelId);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/community/groups");
+    return { success: true };
+}

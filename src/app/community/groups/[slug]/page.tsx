@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { getGroup } from "@/app/actions/groups";
+import { getGroup, getGroupChannels } from "@/app/actions/groups";
 import { GROUP_TYPE_LABELS } from "@/lib/constants/groups";
 import { getPosts } from "@/app/actions/posts";
-import UniversalFeed from "@/components/UniversalFeed";
-import GroupRegistry from "@/components/GroupRegistry";
+import GroupDetailClient from "@/components/GroupDetailClient";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +26,10 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
     const group = await getGroup(slug);
     if (!group) notFound();
 
-    const posts = group.isMember ? await getPosts({ groupId: group.id }, { includeReplies: true }) : [];
+    const [posts, channels] = await Promise.all([
+        group.isMember ? getPosts({ groupId: group.id }, { includeReplies: true }) : Promise.resolve([]),
+        group.isMember ? getGroupChannels(group.id) : Promise.resolve([]),
+    ]);
 
     return (
         <div className="page-container">
@@ -49,18 +51,12 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
 
                 {/* Content */}
                 {group.isMember ? (
-                    <>
-                        <UniversalFeed
-                            initialPosts={posts}
-                            context={{ groupId: group.id }}
-                            currentUserId={user.id}
-                            showComposer={true}
-                            composerPlaceholder="Share with the group…"
-                            label="Group Posts"
-                        />
-                        {/* Group Registry — shared catalog of member horses */}
-                        <GroupRegistry groupId={group.id} isMember={group.isMember} />
-                    </>
+                    <GroupDetailClient
+                        group={group}
+                        initialPosts={posts}
+                        channels={channels}
+                        currentUserId={user.id}
+                    />
                 ) : (
                     <div className="empty-state" style={{ marginTop: "var(--space-xl)" }}>
                         <p>Join this group to see posts and participate.</p>
