@@ -291,6 +291,25 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
             {/* Content */}
             <div style={{ marginTop: 4 }}>
                 <RichText content={post.content} />
+                {/* Rich embed for /community/ horse links */}
+                {/\/community\/[0-9a-f]{8}-/.test(post.content) && (() => {
+                    const match = post.content.match(/\/community\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+                    if (!match) return null;
+                    const horseId = match[1];
+                    return (
+                        <Link
+                            href={`/community/${horseId}`}
+                            className="embed-card"
+                            style={{ marginTop: "var(--space-sm)" }}
+                        >
+                            <div className="embed-card-body">
+                                <div className="embed-card-title">🐴 View Horse Passport</div>
+                                <div className="embed-card-desc">Click to view this model on Model Horse Hub</div>
+                                <div className="embed-card-domain">modelhorsehub.com/community/{horseId.slice(0, 8)}…</div>
+                            </div>
+                        </Link>
+                    );
+                })()}
             </div>
 
             {/* Media Collage */}

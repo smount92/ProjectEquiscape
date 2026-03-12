@@ -502,3 +502,57 @@ export async function deleteGroupPost(postId: string): Promise<{ success: boolea
     revalidatePath("/community/groups");
     return { success: true };
 }
+
+// ── Group Registry ──
+
+export interface RegistryEntry {
+    horseId: string;
+    horseName: string;
+    ownerAlias: string;
+    finishType: string;
+    addedAt: string;
+}
+
+/** Get the shared horse registry for a group */
+export async function getGroupRegistry(groupId: string): Promise<RegistryEntry[]> {
+    const supabase = await createClient();
+
+    // Get group members
+    const { data: members } = await supabase
+        .from("group_memberships")
+        .select("user_id")
+        .eq("group_id", groupId);
+
+    if (!members || members.length === 0) return [];
+
+    const memberIds = (members as { user_id: string }[]).map(m => m.user_id);
+
+    // Get public horses owned by group members
+    const { data: horses } = await supabase
+        .from("user_horses")
+        .select("id, custom_name, finish_type, owner_id, created_at")
+        .in("owner_id", memberIds)
+        .eq("visibility", "public")
+        .order("created_at", { ascending: false })
+        .limit(100);
+
+    if (!horses || horses.length === 0) return [];
+
+    // Batch fetch owner aliases
+    const ownerIds = [...new Set((horses as { owner_id: string }[]).map(h => h.owner_id))];
+    const { data: users } = await supabase
+        .from("users")
+        .select("id, alias_name")
+        .in("id", ownerIds);
+
+    const aliasMap = new Map<string, string>();
+    (users ?? []).forEach((u: { id: string; alias_name: string }) => aliasMap.set(u.id, u.alias_name));
+
+    return (horses as { id: string; custom_name: string; finish_type: string; owner_id: string; created_at: string }[]).map(h => ({
+        horseId: h.id,
+        horseName: h.custom_name,
+        ownerAlias: aliasMap.get(h.owner_id) || "Unknown",
+        finishType: h.finish_type,
+        addedAt: h.created_at,
+    }));
+}

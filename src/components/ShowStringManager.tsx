@@ -13,6 +13,7 @@ import {
     type ShowString,
     type ShowStringEntry,
 } from "@/app/actions/competition";
+import { batchRecordResults } from "@/app/actions/shows";
 
 interface Props {
     showStrings: ShowString[];
@@ -36,6 +37,12 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
     const [entryTimeSlot, setEntryTimeSlot] = useState("");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+
+    // Batch results state
+    const [showResults, setShowResults] = useState(false);
+    const [results, setResults] = useState<Record<string, { placing: string; ribbon: string }>>({});
+    const [savingResults, setSavingResults] = useState(false);
+    const [resultsSaved, setResultsSaved] = useState(false);
 
     async function handleCreate() {
         if (!newName.trim()) return;
@@ -178,12 +185,36 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                         <p style={{ color: "var(--color-text-muted)" }}>Loading entries...</p>
                                     ) : (
                                         <>
-                                            {/* Conflicts */}
+                                            {/* Ring Conflict Visual Timeline */}
                                             {conflicts.length > 0 && (
-                                                <div className="conflict-warnings">
-                                                    {conflicts.map((c, i) => (
-                                                        <div key={i} className="conflict-warning">⚠️ {c.reason}</div>
-                                                    ))}
+                                                <div style={{ marginBottom: "var(--space-md)" }}>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginBottom: "var(--space-xs)" }}>
+                                                        <span className="ring-conflict-badge">⚠️ {conflicts.length} Conflict{conflicts.length !== 1 ? "s" : ""}</span>
+                                                    </div>
+                                                    {/* Timeline visualization */}
+                                                    <div className="ring-timeline">
+                                                        {entries.map(entry => {
+                                                            const isConflict = conflicts.some(
+                                                                c => c.entryA === entry.id || c.entryB === entry.id
+                                                            );
+                                                            return (
+                                                                <div
+                                                                    key={entry.id}
+                                                                    className={`ring-block ${isConflict ? "conflict" : "scheduled"}`}
+                                                                    title={`${entry.horseName} — ${entry.className}${entry.timeSlot ? ` @ ${entry.timeSlot}` : ""}`}
+                                                                >
+                                                                    {entry.className.slice(0, 3)}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    <div style={{ marginTop: "var(--space-xs)" }}>
+                                                        {conflicts.map((c, i) => (
+                                                            <div key={i} className="conflict-warning" style={{ fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                                                ⚠️ {c.reason}
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -234,6 +265,141 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                     {saving ? "Adding..." : "+ Add Entry"}
                                                 </button>
                                             </div>
+
+                                            {/* ── Batch Results Section ── */}
+                                            {entries.length > 0 && (
+                                                <div style={{ marginTop: "var(--space-lg)", borderTop: "1px solid var(--color-border)", paddingTop: "var(--space-md)" }}>
+                                                    {!showResults ? (
+                                                        <button
+                                                            className="btn btn-ghost"
+                                                            onClick={() => {
+                                                                setShowResults(true);
+                                                                setResultsSaved(false);
+                                                                // Initialize results map
+                                                                const init: Record<string, { placing: string; ribbon: string }> = {};
+                                                                entries.forEach(e => { init[e.id] = { placing: "", ribbon: "" }; });
+                                                                setResults(init);
+                                                            }}
+                                                        >
+                                                            🏆 Enter Results
+                                                        </button>
+                                                    ) : (
+                                                        <div>
+                                                            <h4 style={{ marginBottom: "var(--space-sm)" }}>🏆 Batch Results</h4>
+                                                            <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))", marginBottom: "var(--space-sm)" }}>
+                                                                Tab through to enter placing and ribbon for each entry. Results will be saved as show records.
+                                                            </p>
+                                                            <table className="results-grid">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Horse</th>
+                                                                        <th>Class</th>
+                                                                        <th style={{ width: 100 }}>Placing</th>
+                                                                        <th style={{ width: 120 }}>Ribbon</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {entries.map(entry => (
+                                                                        <tr key={entry.id}>
+                                                                            <td>{entry.horseName}</td>
+                                                                            <td>{entry.className}{entry.division ? ` (${entry.division})` : ""}</td>
+                                                                            <td>
+                                                                                <input
+                                                                                    type="text"
+                                                                                    placeholder="1st"
+                                                                                    value={results[entry.id]?.placing || ""}
+                                                                                    onChange={e => setResults(prev => ({
+                                                                                        ...prev,
+                                                                                        [entry.id]: { ...prev[entry.id], placing: e.target.value }
+                                                                                    }))}
+                                                                                />
+                                                                            </td>
+                                                                            <td>
+                                                                                <select
+                                                                                    value={results[entry.id]?.ribbon || ""}
+                                                                                    onChange={e => setResults(prev => ({
+                                                                                        ...prev,
+                                                                                        [entry.id]: { ...prev[entry.id], ribbon: e.target.value }
+                                                                                    }))}
+                                                                                >
+                                                                                    <option value="">—</option>
+                                                                                    <option value="Blue">🥇 Blue</option>
+                                                                                    <option value="Red">🥈 Red</option>
+                                                                                    <option value="Yellow">🥉 Yellow</option>
+                                                                                    <option value="White">⬜ White</option>
+                                                                                    <option value="Pink">🩷 Pink</option>
+                                                                                    <option value="Green">💚 Green</option>
+                                                                                    <option value="Champion">🏆 Champion</option>
+                                                                                    <option value="Reserve">🎖️ Reserve</option>
+                                                                                    <option value="Top Ten">🔟 Top Ten</option>
+                                                                                </select>
+                                                                            </td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+
+                                                            {/* NAN Rollup Summary */}
+                                                            {(() => {
+                                                                const filled = Object.values(results).filter(r => r.placing || r.ribbon);
+                                                                const champs = Object.values(results).filter(r => r.ribbon === "Champion").length;
+                                                                const reserves = Object.values(results).filter(r => r.ribbon === "Reserve").length;
+                                                                const topTens = Object.values(results).filter(r => r.ribbon === "Top Ten").length;
+                                                                const points = champs * 4 + reserves * 3 + topTens * 2 + (filled.length - champs - reserves - topTens);
+                                                                if (filled.length === 0) return null;
+                                                                return (
+                                                                    <div className="results-summary">
+                                                                        <div className="results-summary-stat">
+                                                                            <span className="stat-value">{filled.length}</span>
+                                                                            <span className="stat-label">Results</span>
+                                                                        </div>
+                                                                        <div className="results-summary-stat">
+                                                                            <span className="stat-value">{champs}🏆 {reserves}🎖️ {topTens}🔟</span>
+                                                                            <span className="stat-label">Major Ribbons</span>
+                                                                        </div>
+                                                                        <div className="results-summary-stat">
+                                                                            <span className="stat-value">~{points}</span>
+                                                                            <span className="stat-label">Est. NAN Points</span>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })()}
+
+                                                            <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)" }}>
+                                                                <button
+                                                                    className="btn btn-primary"
+                                                                    disabled={savingResults}
+                                                                    onClick={async () => {
+                                                                        setSavingResults(true);
+                                                                        const activeStr = showStrings.find(s => s.id === activeStringId);
+                                                                        const records = entries
+                                                                            .filter(e => results[e.id]?.placing || results[e.id]?.ribbon)
+                                                                            .map(e => ({
+                                                                                horseId: e.horseId,
+                                                                                showName: activeStr?.name || "Unknown Show",
+                                                                                showDate: activeStr?.showDate || null,
+                                                                                division: e.division || null,
+                                                                                className: e.className,
+                                                                                placing: results[e.id]?.placing || null,
+                                                                                ribbonColor: results[e.id]?.ribbon || null,
+                                                                            }));
+                                                                        if (records.length > 0) {
+                                                                            await batchRecordResults(records);
+                                                                        }
+                                                                        setSavingResults(false);
+                                                                        setResultsSaved(true);
+                                                                        router.refresh();
+                                                                    }}
+                                                                >
+                                                                    {savingResults ? "Saving..." : `💾 Save ${Object.values(results).filter(r => r.placing || r.ribbon).length} Results`}
+                                                                </button>
+                                                                <button className="btn btn-ghost" onClick={() => setShowResults(false)}>Cancel</button>
+                                                                {resultsSaved && <span style={{ color: "var(--color-accent-primary)", fontWeight: 600 }}>✅ Saved!</span>}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                 </div>

@@ -99,6 +99,7 @@ export default function EditHorsePage() {
   // Extra detail images (unlimited)
   const [existingExtras, setExistingExtras] = useState<ExistingImage[]>([]);
   const [newExtraFiles, setNewExtraFiles] = useState<{ file: File; previewUrl: string }[]>([]);
+  const [dragExtraIdx, setDragExtraIdx] = useState<number | null>(null);
   const extraInputRef = useRef<HTMLInputElement>(null);
 
   // Deferred image deletions (only executed on save)
@@ -592,18 +593,43 @@ export default function EditHorsePage() {
               <span>Click or drag multiple files</span>
             </div>
 
-            {/* Existing extras */}
+            {/* Existing extras — drag to reorder */}
             {(existingExtras.length > 0 || newExtraFiles.length > 0) && (
               <div className="extras-preview-grid">
-                {existingExtras.map((ex) => (
-                  <div key={ex.recordId} className="extras-preview-item">
+                {existingExtras.map((ex, idx) => (
+                  <div
+                    key={ex.recordId}
+                    className={`extras-preview-item ${dragExtraIdx === idx ? "dragging" : ""}`}
+                    draggable
+                    onDragStart={(e) => {
+                      setDragExtraIdx(idx);
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                    }}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      if (dragExtraIdx === null || dragExtraIdx === idx) return;
+                      const reordered = [...existingExtras];
+                      const [moved] = reordered.splice(dragExtraIdx, 1);
+                      reordered.splice(idx, 0, moved);
+                      setExistingExtras(reordered);
+                      setDragExtraIdx(null);
+                      // Persist reorder
+                      const { reorderHorseImages } = await import("@/app/actions/horse");
+                      await reorderHorseImages(horseId, reordered.map(r => r.recordId));
+                    }}
+                    onDragEnd={() => setDragExtraIdx(null)}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={ex.imageUrl} alt="Extra detail" />
+                    <div className="extras-drag-handle" title="Drag to reorder">⠿</div>
                     <button
                       className="gallery-remove"
                       onClick={async (e) => {
                         e.stopPropagation();
-                        // Delete from server storage + DB
                         await deleteHorseImageAction(ex.recordId, ex.storagePath || null);
                         setExistingExtras(prev => prev.filter(item => item.recordId !== ex.recordId));
                       }}

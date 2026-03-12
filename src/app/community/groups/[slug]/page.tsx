@@ -5,6 +5,7 @@ import { getGroup } from "@/app/actions/groups";
 import { GROUP_TYPE_LABELS } from "@/lib/constants/groups";
 import { getPosts } from "@/app/actions/posts";
 import UniversalFeed from "@/components/UniversalFeed";
+import GroupRegistry from "@/components/GroupRegistry";
 
 export const dynamic = "force-dynamic";
 
@@ -48,14 +49,18 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
 
                 {/* Content */}
                 {group.isMember ? (
-                    <UniversalFeed
-                        initialPosts={posts}
-                        context={{ groupId: group.id }}
-                        currentUserId={user.id}
-                        showComposer={true}
-                        composerPlaceholder="Share with the group…"
-                        label="Group Posts"
-                    />
+                    <>
+                        <UniversalFeed
+                            initialPosts={posts}
+                            context={{ groupId: group.id }}
+                            currentUserId={user.id}
+                            showComposer={true}
+                            composerPlaceholder="Share with the group…"
+                            label="Group Posts"
+                        />
+                        {/* Group Registry — shared catalog of member horses */}
+                        <GroupRegistry groupId={group.id} isMember={group.isMember} />
+                    </>
                 ) : (
                     <div className="empty-state" style={{ marginTop: "var(--space-xl)" }}>
                         <p>Join this group to see posts and participate.</p>

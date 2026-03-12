@@ -425,3 +425,53 @@ export async function withdrawEntry(
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
+
+/**
+ * Batch-record show results from the Show String Planner.
+ * Creates show_records entries for each result.
+ */
+export async function batchRecordResults(records: {
+    horseId: string;
+    showName: string;
+    showDate: string | null;
+    division: string | null;
+    className: string;
+    placing: string | null;
+    ribbonColor: string | null;
+}[]): Promise<{ success: boolean; error?: string; count?: number }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not logged in." };
+
+    if (records.length === 0) return { success: true, count: 0 };
+
+    // Verify all horses belong to user
+    const horseIds = [...new Set(records.map(r => r.horseId))];
+    const { data: ownedHorses } = await supabase
+        .from("user_horses")
+        .select("id")
+        .eq("owner_id", user.id)
+        .in("id", horseIds);
+
+    const ownedSet = new Set((ownedHorses ?? []).map((h: { id: string }) => h.id));
+    const validRecords = records.filter(r => ownedSet.has(r.horseId));
+
+    if (validRecords.length === 0) {
+        return { success: false, error: "No valid horses found." };
+    }
+
+    const inserts = validRecords.map(r => ({
+        horse_id: r.horseId,
+        show_name: r.showName,
+        show_date: r.showDate,
+        division: r.division,
+        placing: r.placing,
+        ribbon_color: r.ribbonColor,
+    }));
+
+    const { error } = await supabase.from("show_records").insert(inserts);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/shows/planner");
+    return { success: true, count: validRecords.length };
+}
