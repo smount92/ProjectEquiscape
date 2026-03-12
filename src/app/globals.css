@@ -5095,6 +5095,7 @@ p {
 
 /* Chat Messages Area */
 
+/* EXTRACTED → ChatThread.module.css */
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -7317,6 +7318,7 @@ p {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   EXTRACTED → OfferCard.module.css, MakeOfferModal.module.css
    Commerce State Machine — OfferCard, MakeOfferModal, PIN
    ══════════════════════════════════════════════════════════════ */
 

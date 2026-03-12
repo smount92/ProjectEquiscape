@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { sendMessage } from "@/app/actions/messaging";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import styles from "./ChatThread.module.css";
 
 interface ChatMessage {
     id: string;
@@ -149,10 +150,10 @@ export default function ChatThread({
     return (
         <>
             {/* Message area */}
-            <div className="chat-messages">
+            <div className={styles.messages}>
                 {messages.length === 0 ? (
-                    <div className="chat-empty">
-                        <div className="chat-empty-icon">💬</div>
+                    <div className={styles.empty}>
+                        <div className={styles.emptyIcon}>💬</div>
                         <p>
                             Start the conversation! Say hello to <strong>@{otherAlias}</strong>.
                         </p>
@@ -168,7 +169,7 @@ export default function ChatThread({
                         return (
                             <div key={msg.id}>
                                 {showDate && (
-                                    <div className="chat-date-separator">
+                                    <div className={styles.dateSeparator}>
                                         {new Date(msg.createdAt).toLocaleDateString("en-US", {
                                             weekday: "short",
                                             month: "short",
@@ -177,11 +178,11 @@ export default function ChatThread({
                                     </div>
                                 )}
                                 <div
-                                    className={`chat-bubble-row ${msg.isMe ? "chat-bubble-me" : "chat-bubble-them"}`}
+                                    className={`${styles.bubbleRow} ${msg.isMe ? styles.bubbleMe : styles.bubbleThem}`}
                                 >
-                                    <div className="chat-bubble">
-                                        <div className="chat-bubble-content">{msg.content}</div>
-                                        <div className="chat-bubble-time">{formatTime(msg.createdAt)}</div>
+                                    <div className={styles.bubble}>
+                                        <div className={styles.bubbleContent}>{msg.content}</div>
+                                        <div className={styles.bubbleTime}>{formatTime(msg.createdAt)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -204,11 +205,11 @@ export default function ChatThread({
             )}
 
             {/* Input area */}
-            <div className="chat-input-area">
-                <div className="chat-input-container">
+            <div className={styles.inputArea}>
+                <div className={styles.inputContainer}>
                     <textarea
                         ref={inputRef}
-                        className="chat-input"
+                        className={styles.input}
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -219,7 +220,7 @@ export default function ChatThread({
                         id="chat-message-input"
                     />
                     <button
-                        className="chat-send-btn"
+                        className={styles.sendBtn}
                         onClick={handleSend}
                         disabled={!newMessage.trim() || sending}
                         aria-label="Send message"
@@ -245,7 +246,7 @@ export default function ChatThread({
                         )}
                     </button>
                 </div>
-                <div className="chat-input-hint">
+                <div className={styles.inputHint}>
                     Press Enter to send · Shift+Enter for new line
                 </div>
             </div>

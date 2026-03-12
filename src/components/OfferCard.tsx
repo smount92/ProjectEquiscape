@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { respondToOffer, markPaymentSent, verifyFundsAndRelease } from "@/app/actions/transactions";
+import styles from "./OfferCard.module.css";
 
 interface OfferCardProps {
     transaction: {
@@ -77,10 +78,10 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
     // ── Cancelled / Completed ──
     if (status === "cancelled") {
         return (
-            <div className="offer-card offer-card-cancelled" id="offer-card">
-                <div className="offer-card-header">
-                    <span className="offer-badge offer-badge-cancelled">❌ Offer Declined</span>
-                    {amount && <span className="offer-amount">${amount.toFixed(2)}</span>}
+            <div className={`${styles.card} ${styles.cardCancelled}`} id="offer-card">
+                <div className={styles.header}>
+                    <span className={`${styles.badge} ${styles.badgeCancelled}`}>❌ Offer Declined</span>
+                    {amount && <span className={styles.amount}>${amount.toFixed(2)}</span>}
                 </div>
             </div>
         );
@@ -88,10 +89,10 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
 
     if (status === "completed") {
         return (
-            <div className="offer-card offer-card-completed" id="offer-card">
-                <div className="offer-card-header">
-                    <span className="offer-badge offer-badge-completed">✅ Transaction Complete</span>
-                    {amount && <span className="offer-amount">${amount.toFixed(2)}</span>}
+            <div className={`${styles.card} ${styles.cardCompleted}`} id="offer-card">
+                <div className={styles.header}>
+                    <span className={`${styles.badge} ${styles.badgeCompleted}`}>✅ Transaction Complete</span>
+                    {amount && <span className={styles.amount}>${amount.toFixed(2)}</span>}
                 </div>
             </div>
         );
@@ -99,21 +100,21 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
 
     // ── Active states ──
     return (
-        <div className="offer-card" id="offer-card">
-            <div className="offer-card-header">
-                <span className="offer-badge">💰 Offer</span>
-                {amount && <span className="offer-amount">${amount.toFixed(2)}</span>}
+        <div className={styles.card} id="offer-card">
+            <div className={styles.header}>
+                <span className={styles.badge}>💰 Offer</span>
+                {amount && <span className={styles.amount}>${amount.toFixed(2)}</span>}
             </div>
 
             {transaction.offerMessage && (
-                <p className="offer-message">&ldquo;{transaction.offerMessage}&rdquo;</p>
+                <p className={styles.message}>&ldquo;{transaction.offerMessage}&rdquo;</p>
             )}
 
             {/* offer_made */}
             {status === "offer_made" && (
-                <div className="offer-state">
+                <div className={styles.state}>
                     {isSeller ? (
-                        <div className="offer-actions">
+                        <div className={styles.actions}>
                             <button
                                 className="btn btn-primary btn-sm"
                                 onClick={() => handleRespond("accept")}
@@ -130,19 +131,19 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                             </button>
                         </div>
                     ) : (
-                        <p className="offer-status-text">⏳ Waiting for seller response…</p>
+                        <p className={styles.statusText}>⏳ Waiting for seller response…</p>
                     )}
                 </div>
             )}
 
             {/* pending_payment */}
             {status === "pending_payment" && (
-                <div className="offer-state">
-                    <p className="offer-status-text offer-accepted">
+                <div className={styles.state}>
+                    <p className={`${styles.statusText} ${styles.statusAccepted}`}>
                         ✅ Offer accepted! {isBuyer ? "Please send payment to the seller." : "Waiting for buyer to send payment."}
                     </p>
                     {isBuyer && !hasPaid && (
-                        <div className="offer-actions">
+                        <div className={styles.actions}>
                             <button
                                 className="btn btn-primary btn-sm"
                                 onClick={handleMarkPaid}
@@ -153,11 +154,11 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         </div>
                     )}
                     {isBuyer && hasPaid && (
-                        <p className="offer-status-text">💳 Payment marked as sent. Waiting for seller to verify…</p>
+                        <p className={styles.statusText}>💳 Payment marked as sent. Waiting for seller to verify…</p>
                     )}
                     {isSeller && hasPaid && (
-                        <div className="offer-actions">
-                            <p className="offer-status-text">💳 Buyer says they&apos;ve paid.</p>
+                        <div className={styles.actions}>
+                            <p className={styles.statusText}>💳 Buyer says they&apos;ve paid.</p>
                             <button
                                 className="btn btn-primary btn-sm"
                                 onClick={handleVerify}
@@ -168,26 +169,26 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         </div>
                     )}
                     {isSeller && !hasPaid && (
-                        <p className="offer-status-text">⏳ Waiting for buyer to send payment…</p>
+                        <p className={styles.statusText}>⏳ Waiting for buyer to send payment…</p>
                     )}
                 </div>
             )}
 
             {/* funds_verified */}
             {status === "funds_verified" && (
-                <div className="offer-state">
+                <div className={styles.state}>
                     {isBuyer && pin ? (
-                        <div className="pin-reveal">
-                            <span className="pin-label">🔑 Your Claim PIN</span>
-                            <strong className="pin-code">{pin}</strong>
+                        <div className={styles.pinReveal}>
+                            <span className={styles.pinLabel}>🔑 Your Claim PIN</span>
+                            <strong className={styles.pinCode}>{pin}</strong>
                             <Link href="/claim" className="btn btn-primary btn-sm" style={{ marginTop: "var(--space-sm)" }}>
                                 Go to Claim Page →
                             </Link>
                         </div>
                     ) : isBuyer ? (
-                        <p className="offer-status-text">✅ Funds verified. Check notifications for your claim PIN.</p>
+                        <p className={styles.statusText}>✅ Funds verified. Check notifications for your claim PIN.</p>
                     ) : (
-                        <p className="offer-status-text">✅ PIN released to buyer. Transfer in progress…</p>
+                        <p className={styles.statusText}>✅ PIN released to buyer. Transfer in progress…</p>
                     )}
                 </div>
             )}

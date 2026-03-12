@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { makeOffer } from "@/app/actions/transactions";
+import styles from "./MakeOfferModal.module.css";
 
 interface MakeOfferModalProps {
     horseId: string;
@@ -52,21 +53,21 @@ export default function MakeOfferModal({
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content offer-modal" onClick={(e) => e.stopPropagation()}>
+            <div className={`modal-content ${styles.modal}`} onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3>💰 Make an Offer</h3>
                     <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
                 </div>
 
-                <p className="offer-modal-horse">
+                <p className={styles.horse}>
                     🐴 <strong>{horseName}</strong>
                 </p>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="form-label">Your Offer</label>
-                        <div className="offer-amount-input">
-                            <span className="offer-currency">$</span>
+                        <div className={styles.amountInput}>
+                            <span className={styles.currency}>$</span>
                             <input
                                 type="number"
                                 step="0.01"
@@ -100,7 +101,7 @@ export default function MakeOfferModal({
 
                     {error && <div className="comment-error">{error}</div>}
 
-                    <div className="offer-modal-actions">
+                    <div className={styles.actions}>
                         <button
                             type="button"
                             className="btn btn-ghost"

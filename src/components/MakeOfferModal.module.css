@@ -1,0 +1,41 @@
+/* ── MakeOfferModal.module.css ──
+   Extracted from globals.css V22 Commerce State Machine */
+
+.modal {
+    max-width: 420px;
+}
+
+.horse {
+    font-size: calc(0.9rem * var(--font-scale));
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+}
+
+.amountInput {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.currency {
+    font-size: calc(var(--font-size-lg) * var(--font-scale));
+    font-weight: 700;
+    color: var(--color-text-muted);
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+    margin-top: var(--space-lg);
+}
+
+@media (max-width: 600px) {
+    .actions {
+        flex-direction: column;
+    }
+
+    .actions .btn {
+        width: 100%;
+    }
+}
