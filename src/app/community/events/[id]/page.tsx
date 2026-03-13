@@ -4,10 +4,12 @@ import Link from "next/link";
 import { getEvent, getEventAttendees } from "@/app/actions/events";
 import { getEventDivisions } from "@/app/actions/competition";
 import { getPosts, getEventMedia } from "@/app/actions/posts";
+import { getShowEntries } from "@/app/actions/shows";
 import EventRsvpButton from "@/components/EventRsvpButton";
 import EventDeleteButton from "@/components/EventDeleteButton";
 import EventPhotoGallery from "@/components/EventPhotoGallery";
 import UniversalFeed from "@/components/UniversalFeed";
+import AssignPlacings from "@/components/AssignPlacings";
 
 import { EVENT_TYPE_LABELS } from "@/lib/constants/events";
 
@@ -38,6 +40,19 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         getEventMedia(id),
         getEventDivisions(id),
     ]);
+
+    // For expert-judged events, fetch entries so the host can assign placings
+    const isExpertJudged = event.judgingMethod === "expert_judge";
+    const isHost = user.id === event.createdBy;
+    let expertEntries: { id: string; horseName: string; ownerAlias: string; placing?: string }[] = [];
+    if (isExpertJudged && isHost) {
+        const { entries } = await getShowEntries(id);
+        expertEntries = entries.map(e => ({
+            id: e.id,
+            horseName: e.horseName,
+            ownerAlias: e.ownerAlias,
+        }));
+    }
 
     const date = new Date(event.startsAt);
     const endDate = event.endsAt ? new Date(event.endsAt) : null;
@@ -158,6 +173,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                             </div>
                         ))}
                     </div>
+                )}
+
+                {/* Expert Judge — Assign Placings */}
+                {isExpertJudged && isHost && expertEntries.length > 0 && (
+                    <AssignPlacings eventId={event.id} entries={expertEntries} />
                 )}
 
                 {/* Attendees */}

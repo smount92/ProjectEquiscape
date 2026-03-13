@@ -475,3 +475,46 @@ export async function batchRecordResults(records: {
     revalidatePath("/shows/planner");
     return { success: true, count: validRecords.length };
 }
+
+/**
+ * Save expert-judged placings for event entries.
+ * Only the event creator (show host) can assign placings.
+ */
+export async function saveExpertPlacings(
+    eventId: string,
+    placings: { entryId: string; placing: string }[]
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not logged in." };
+
+    // Verify user is the event creator
+    const { data: event } = await supabase
+        .from("events")
+        .select("created_by, judging_method")
+        .eq("id", eventId)
+        .single();
+
+    if (!event) return { success: false, error: "Event not found." };
+    const ev = event as { created_by: string; judging_method: string | null };
+    if (ev.created_by !== user.id) {
+        return { success: false, error: "Only the event host can assign placings." };
+    }
+    if (ev.judging_method !== "expert_judge") {
+        return { success: false, error: "This event uses community voting, not expert judging." };
+    }
+
+    // Update each entry's placing
+    for (const p of placings) {
+        const { error } = await supabase
+            .from("event_entries")
+            .update({ placing: p.placing })
+            .eq("id", p.entryId)
+            .eq("event_id", eventId);
+
+        if (error) return { success: false, error: error.message };
+    }
+
+    revalidatePath(`/community/events/${eventId}`);
+    return { success: true };
+}
