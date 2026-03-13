@@ -192,6 +192,11 @@ export default function AddHorsePage() {
         throw new Error(data.error || "AI detection failed.");
       }
 
+      // Non-equine image detection
+      if (data.error && data.not_equine) {
+        throw new Error("This doesn't appear to be a model horse. Please upload a photo of an equine model or figurine.");
+      }
+
       const result = data as AiDetectionResult;
       setAiResult(result);
 
@@ -597,6 +602,10 @@ export default function AddHorsePage() {
                 onDrop={(e) => {
                   e.preventDefault();
                   const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+                  if (extraFiles.length + files.length > 10) {
+                    alert("Maximum 10 extra detail photos allowed.");
+                    return;
+                  }
                   const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
                   setExtraFiles(prev => [...prev, ...newExtras]);
                 }}
@@ -610,6 +619,11 @@ export default function AddHorsePage() {
                   multiple
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []).filter(f => f.type.startsWith("image/"));
+                    if (extraFiles.length + files.length > 10) {
+                      alert("Maximum 10 extra detail photos allowed.");
+                      e.target.value = "";
+                      return;
+                    }
                     const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
                     setExtraFiles(prev => [...prev, ...newExtras]);
                     e.target.value = "";
@@ -621,8 +635,8 @@ export default function AddHorsePage() {
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
-                <span><strong>Extra Details & Flaws</strong> — Upload as many as needed</span>
-                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>Click or drag multiple files here</span>
+                <span><strong>Extra Details & Flaws</strong> — Upload up to 10</span>
+                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>{extraFiles.length}/10 photos · Click or drag files here</span>
               </div>
               {extraFiles.length > 0 && (
                 <div className="extras-preview-grid">

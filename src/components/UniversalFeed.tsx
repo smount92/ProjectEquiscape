@@ -3,7 +3,7 @@
 import { useState, useRef, useTransition, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createPost, replyToPost, deletePost, togglePostLike, getPosts } from "@/app/actions/posts";
+import { createPost, replyToPost, deletePost, updatePost, togglePostLike, getPosts } from "@/app/actions/posts";
 import type { Post } from "@/app/actions/posts";
 import { createClient } from "@/lib/supabase/client";
 import RichText from "@/components/RichText";
@@ -148,6 +148,7 @@ export default function UniversalFeed({
                     repliesCount: 0,
                     isPinned: false,
                     createdAt: new Date().toISOString(),
+                    updatedAt: null,
                     media: imagePreviews.map((url, i) => ({ id: `temp-${i}`, imageUrl: url, caption: null })),
                     isLikedByMe: false,
                     replies: [],
@@ -240,6 +241,10 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
     const [replies, setReplies] = useState(post.replies);
     const [replyText, setReplyText] = useState("");
     const [isPending, startTransition] = useTransition();
+    const [isEditing, setIsEditing] = useState(false);
+    const [editText, setEditText] = useState(post.content);
+    const [displayContent, setDisplayContent] = useState(post.content);
+    const [wasEdited, setWasEdited] = useState(!!post.updatedAt && post.updatedAt !== post.createdAt);
 
     const handleReply = () => {
         if (!replyText.trim()) return;
@@ -254,7 +259,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                     parentId: post.id,
                     horseId: null, groupId: null, eventId: null, studioId: null, helpRequestId: null,
                     likesCount: 0, repliesCount: 0, isPinned: false,
-                    createdAt: new Date().toISOString(), media: [], isLikedByMe: false, replies: [],
+                    createdAt: new Date().toISOString(), updatedAt: null, media: [], isLikedByMe: false, replies: [],
                 }]);
                 setReplyText("");
                 router.refresh();
@@ -270,6 +275,18 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
         });
     };
 
+    const handleEdit = () => {
+        startTransition(async () => {
+            const result = await updatePost(post.id, editText.trim());
+            if (result.success) {
+                setDisplayContent(editText.trim());
+                setIsEditing(false);
+                setWasEdited(true);
+                router.refresh();
+            }
+        });
+    };
+
     return (
         <div style={{ borderBottom: "1px solid var(--color-border)", paddingBottom: "var(--space-sm)" }}>
             {/* Header */}
@@ -280,17 +297,35 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                 <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
                     <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
                         {timeAgo(post.createdAt)}
+                        {wasEdited && <span title="This post was edited" style={{ opacity: 0.6 }}> (edited)</span>}
                     </span>
                     {post.authorId === currentUserId && (
-                        <button className="btn btn-ghost btn-sm" onClick={handleDelete} disabled={isPending}
-                            style={{ fontSize: "0.75rem", padding: "2px 6px" }}>🗑️</button>
+                        <>
+                            <button className="btn btn-ghost btn-sm" onClick={() => { setIsEditing(!isEditing); setEditText(displayContent); }} disabled={isPending}
+                                style={{ fontSize: "0.75rem", padding: "2px 6px" }}>✏️</button>
+                            <button className="btn btn-ghost btn-sm" onClick={handleDelete} disabled={isPending}
+                                style={{ fontSize: "0.75rem", padding: "2px 6px" }}>🗑️</button>
+                        </>
                     )}
                 </div>
             </div>
 
             {/* Content */}
             <div style={{ marginTop: 4 }}>
-                <RichText content={post.content} />
+                {isEditing ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-xs)" }}>
+                        <textarea className="form-textarea" value={editText} onChange={e => setEditText(e.target.value)}
+                            rows={3} maxLength={2000} style={{ fontSize: "calc(0.85rem * var(--font-scale))" }} />
+                        <div style={{ display: "flex", gap: "var(--space-xs)" }}>
+                            <button className="btn btn-primary btn-sm" onClick={handleEdit} disabled={isPending || !editText.trim()}>
+                                {isPending ? "Saving…" : "Save"}
+                            </button>
+                            <button className="btn btn-ghost btn-sm" onClick={() => setIsEditing(false)}>Cancel</button>
+                        </div>
+                    </div>
+                ) : (
+                    <RichText content={displayContent} />
+                )}
                 {/* Rich embed for /community/ horse links */}
                 {/\/community\/[0-9a-f]{8}-/.test(post.content) && (() => {
                     const match = post.content.match(/\/community\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);

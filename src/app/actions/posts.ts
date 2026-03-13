@@ -24,6 +24,7 @@ export interface Post {
     repliesCount: number;
     isPinned: boolean;
     createdAt: string;
+    updatedAt: string | null;
     media: { id: string; imageUrl: string; caption: string | null }[];
     isLikedByMe: boolean;
     replies: Post[];
@@ -151,6 +152,32 @@ export async function deletePost(
     return { success: true };
 }
 
+// ── Update a post (author only) ──
+export async function updatePost(
+    postId: string,
+    newContent: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    if (!newContent.trim()) return { success: false, error: "Content cannot be empty." };
+    if (newContent.length > 10000) return { success: false, error: "Content is too long." };
+
+    const { error } = await supabase
+        .from("posts")
+        .update({
+            content: newContent.trim(),
+            updated_at: new Date().toISOString(),
+        })
+        .eq("id", postId)
+        .eq("author_id", user.id);
+
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/feed");
+    return { success: true };
+}
+
 // ── Toggle like (atomic RPC) ──
 export async function togglePostLike(
     postId: string
@@ -185,7 +212,7 @@ export async function getPosts(context: {
 
     let query = supabase
         .from("posts")
-        .select("id, author_id, content, parent_id, horse_id, group_id, event_id, likes_count, replies_count, is_pinned, created_at, users!posts_author_id_fkey(alias_name)")
+        .select("id, author_id, content, parent_id, horse_id, group_id, event_id, likes_count, replies_count, is_pinned, created_at, updated_at, users!posts_author_id_fkey(alias_name)")
         .is("parent_id", null)
         .order("created_at", { ascending: false })
         .limit(options?.limit || 25);
@@ -262,6 +289,7 @@ export async function getPosts(context: {
                 repliesCount: 0,
                 isPinned: false,
                 createdAt: r.created_at as string,
+                updatedAt: null,
                 media: [],
                 isLikedByMe: false,
                 replies: [],
@@ -284,6 +312,7 @@ export async function getPosts(context: {
         repliesCount: (p.replies_count as number) || 0,
         isPinned: (p.is_pinned as boolean) || false,
         createdAt: p.created_at as string,
+        updatedAt: (p.updated_at as string | null) || null,
         media: (media ?? [])
             .filter((m: { post_id: string }) => m.post_id === p.id)
             .map((m: { id: string; storage_path: string; caption: string | null }) => ({

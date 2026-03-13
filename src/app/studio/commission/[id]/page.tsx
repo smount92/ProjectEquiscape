@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getCommission, getCommissionUpdates } from "@/app/actions/art-studio";
 import CommissionTimeline from "@/components/CommissionTimeline";
 import RatingForm from "@/components/RatingForm";
+import GuestLinkButton from "@/components/GuestLinkButton";
 import LinkHorseToCommission from "@/components/LinkHorseToCommission";
 
 export const dynamic = "force-dynamic";
@@ -22,21 +23,46 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function CommissionDetailPage({
     params,
+    searchParams,
 }: {
     params: Promise<{ id: string }>;
+    searchParams: Promise<{ token?: string }>;
 }) {
     const { id: commissionId } = await params;
+    const { token } = await searchParams;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/login");
+
+    let isGuestMode = false;
+    let isArtist = false;
+    let isClient = false;
+    let userId: string | null = null;
+
+    if (token) {
+        // Guest mode — verify token
+        const { data: guestCheck } = await supabase
+            .from("commissions")
+            .select("id, guest_token")
+            .eq("id", commissionId)
+            .eq("guest_token", token)
+            .maybeSingle();
+
+        if (!guestCheck) notFound();
+        isGuestMode = true;
+    } else {
+        // Normal auth flow
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) redirect("/login");
+        userId = user.id;
+    }
 
     const commission = await getCommission(commissionId);
     if (!commission) notFound();
 
-    // Only artist or client can view
-    const isArtist = commission.artistId === user.id;
-    const isClient = commission.clientId === user.id;
-    if (!isArtist && !isClient) notFound();
+    if (!isGuestMode && userId) {
+        isArtist = commission.artistId === userId;
+        isClient = commission.clientId === userId;
+        if (!isArtist && !isClient) notFound();
+    }
 
     const updates = await getCommissionUpdates(commissionId);
 
@@ -46,7 +72,7 @@ export default async function CommissionDetailPage({
     const targetId = isArtist ? commission.clientId : commission.artistId;
     const targetAlias = isArtist ? (commission.clientAlias || "Client") : commission.artistAlias;
 
-    if (commission.status === "delivered" && targetId) {
+    if (!isGuestMode && commission.status === "delivered" && targetId && userId) {
         const { data: txn } = await supabase
             .from("transactions")
             .select("id")
@@ -61,7 +87,7 @@ export default async function CommissionDetailPage({
                 .from("reviews")
                 .select("id, stars, content, created_at")
                 .eq("transaction_id", transactionId)
-                .eq("reviewer_id", user.id)
+                .eq("reviewer_id", userId)
                 .maybeSingle();
 
             if (rawReview) {
@@ -152,8 +178,15 @@ export default async function CommissionDetailPage({
             </div>
 
             {/* Link Horse (for artist when no horse is linked) */}
-            {!commission.horseId && isArtist && (
+            {!isGuestMode && !commission.horseId && isArtist && (
                 <LinkHorseToCommission commissionId={commission.id} />
+            )}
+
+            {/* Guest Link (for artist) */}
+            {!isGuestMode && isArtist && (commission as unknown as { guest_token?: string }).guest_token && (
+                <div style={{ marginBottom: "var(--space-md)" }}>
+                    <GuestLinkButton commissionId={commission.id} guestToken={(commission as unknown as { guest_token: string }).guest_token} />
+                </div>
             )}
 
             {/* Timeline */}

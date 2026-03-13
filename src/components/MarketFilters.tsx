@@ -22,6 +22,7 @@ const FINISH_TYPE_LABELS: Record<string, string> = {
 const LIFE_STAGE_LABELS: Record<string, string> = {
     all: "All Stages",
     blank: "Blank",
+    stripped: "Stripped / Body",
     in_progress: "In Progress",
     completed: "Completed",
 };

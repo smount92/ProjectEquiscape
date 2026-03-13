@@ -17,7 +17,13 @@ import { checkRateLimit } from "@/lib/utils/rateLimit";
 const GEMINI_PRIMARY = "gemini-3.1-pro-preview";
 const GEMINI_FALLBACK = "gemini-2.5-flash";
 
-const BASE_SYSTEM_PROMPT = `You are an expert equine model appraiser. Analyze this image to identify the specific physical Mold. Ignore the coat color. Output strictly in JSON format with keys: manufacturer, mold_name, scale, and confidence_score.`;
+const BASE_SYSTEM_PROMPT = `You are an expert equine model appraiser. 
+
+STEP 1: Determine if the image contains a model horse, model equine, or equine statue/figurine.
+If the image does NOT contain any equine model or statue, you MUST respond with ONLY this JSON:
+{"error": "Not a model horse"}
+
+STEP 2: If it IS a model horse, identify the specific physical Mold. Ignore the coat color. Output strictly in JSON format with keys: manufacturer, mold_name, scale, and confidence_score.`;
 
 /** Build the full system prompt with the Answer Key injected. */
 function buildSystemPrompt(validMoldNames: string[]): string {
@@ -181,6 +187,7 @@ export async function POST(req: NextRequest) {
       mold_name?: string;
       scale?: string;
       confidence_score?: number;
+      error?: string;
     };
 
     try {
@@ -194,6 +201,14 @@ export async function POST(req: NextRequest) {
           raw: rawText,
         },
         { status: 422 }
+      );
+    }
+
+    // Check if AI detected a non-equine image
+    if (parsed.error) {
+      return NextResponse.json(
+        { error: parsed.error, not_equine: true },
+        { status: 200 }
       );
     }
 

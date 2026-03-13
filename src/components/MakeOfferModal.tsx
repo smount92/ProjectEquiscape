@@ -22,6 +22,7 @@ export default function MakeOfferModal({
 }: MakeOfferModalProps) {
     const [amount, setAmount] = useState(askingPrice ? String(askingPrice) : "");
     const [message, setMessage] = useState("");
+    const [isBundle, setIsBundle] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const router = useRouter();
@@ -41,6 +42,7 @@ export default function MakeOfferModal({
             sellerId,
             amount: numAmount,
             message: message.trim() || undefined,
+            isBundle,
         });
 
         if (result.success && result.conversationId) {
@@ -98,6 +100,11 @@ export default function MakeOfferModal({
                             maxLength={500}
                         />
                     </div>
+
+                    <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer", marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <input type="checkbox" checked={isBundle} onChange={e => setIsBundle(e.target.checked)} />
+                        This is a bundle/lot sale (excluded from market price index)
+                    </label>
 
                     {error && <div className="comment-error">{error}</div>}
 

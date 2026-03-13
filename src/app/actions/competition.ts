@@ -852,3 +852,59 @@ export async function copyDivisionsFromEvent(
     revalidatePath(`/community/events/${targetEventId}`);
     return { success: true, count: classCount };
 }
+
+/** Duplicate a show string with all its entries */
+export async function duplicateShowString(
+    stringId: string
+): Promise<{ success: boolean; newStringId?: string; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Fetch original
+    const { data: original } = await supabase
+        .from("show_strings")
+        .select("name, notes, user_id")
+        .eq("id", stringId)
+        .eq("user_id", user.id)
+        .single();
+
+    if (!original) return { success: false, error: "Show string not found or not yours." };
+    const o = original as { name: string; notes: string | null };
+
+    // Create copy
+    const { data: newString, error } = await supabase
+        .from("show_strings")
+        .insert({
+            user_id: user.id,
+            name: `${o.name} (copy)`,
+            notes: o.notes,
+        })
+        .select("id")
+        .single();
+
+    if (error || !newString) return { success: false, error: error?.message || "Failed to create copy." };
+    const newId = (newString as { id: string }).id;
+
+    // Copy entries
+    const { data: entries } = await supabase
+        .from("show_string_entries")
+        .select("horse_id, class_name, class_id, division, time_slot, notes")
+        .eq("show_string_id", stringId);
+
+    if (entries && entries.length > 0) {
+        const inserts = (entries as { horse_id: string; class_name: string; class_id: string | null; division: string | null; time_slot: string | null; notes: string | null }[]).map(e => ({
+            show_string_id: newId,
+            horse_id: e.horse_id,
+            class_name: e.class_name,
+            class_id: e.class_id,
+            division: e.division,
+            time_slot: e.time_slot,
+            notes: e.notes,
+        }));
+        await supabase.from("show_string_entries").insert(inserts);
+    }
+
+    revalidatePath("/shows/planner");
+    return { success: true, newStringId: newId };
+}

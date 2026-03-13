@@ -26,7 +26,19 @@ export async function GET(request: NextRequest) {
     try {
         const admin = getAdminClient();
         await admin.rpc("refresh_market_prices" as string);
-        return NextResponse.json({ success: true, refreshedAt: new Date().toISOString() });
+
+        // System garbage collection
+        let gcResult = null;
+        try {
+            const { data } = await admin.rpc("cleanup_system_garbage" as string);
+            gcResult = data;
+        } catch { /* non-blocking */ }
+
+        return NextResponse.json({
+            success: true,
+            refreshedAt: new Date().toISOString(),
+            gc: gcResult,
+        });
     } catch (error) {
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
     }

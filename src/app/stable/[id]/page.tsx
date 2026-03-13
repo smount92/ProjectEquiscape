@@ -32,6 +32,7 @@ interface HorseDetail {
   edition_number: number | null;
   edition_size: number | null;
   catalog_id: string | null;
+  trade_status: string | null;
   catalog_items: {
     title: string;
     maker: string;
@@ -105,7 +106,7 @@ export default async function HorsePassportPage({
     .select(
       `
       id, owner_id, custom_name, finish_type, condition_grade, asset_category,
-      is_for_sale, is_public, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id,
+      is_for_sale, is_public, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id, trade_status,
       catalog_items:catalog_id(title, maker, scale, item_type, attributes)
     `
     )
@@ -121,6 +122,17 @@ export default async function HorsePassportPage({
   // Only the owner can see the full passport for now
   if (horse.owner_id !== user.id) {
     notFound();
+  }
+
+  // Check wishlist demand (only for owner, unlisted horses with catalog_id)
+  let wishlistDemand = 0;
+  if (horse.trade_status === "Not for Sale" && horse.catalog_id) {
+    const { count } = await supabase
+      .from("user_wishlists")
+      .select("id", { count: "exact", head: true })
+      .eq("catalog_id", horse.catalog_id)
+      .neq("user_id", user.id);
+    wishlistDemand = count || 0;
   }
 
   // Fetch all images
@@ -264,6 +276,13 @@ export default async function HorsePassportPage({
         </span>
         <span>{horse.custom_name}</span>
       </nav>
+
+      {/* Wishlist demand banner */}
+      {wishlistDemand > 0 && (
+        <div className="getting-started-tip animate-fade-in-up" style={{ marginBottom: "var(--space-lg)", background: "rgba(239, 68, 68, 0.1)", borderColor: "rgba(239, 68, 68, 0.3)" }}>
+          🔥 <strong>{wishlistDemand} collector{wishlistDemand > 1 ? "s" : ""}</strong> {wishlistDemand > 1 ? "are" : "is"} looking for this model! List it for sale to notify them.
+        </div>
+      )}
 
       {/* Two-column layout: Gallery | Info */}
       <div className="passport-layout animate-fade-in-up">

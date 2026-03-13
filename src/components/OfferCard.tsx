@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { respondToOffer, markPaymentSent, verifyFundsAndRelease, cancelTransaction } from "@/app/actions/transactions";
+import { respondToOffer, markPaymentSent, verifyFundsAndRelease, cancelTransaction, retractOffer } from "@/app/actions/transactions";
 import styles from "./OfferCard.module.css";
 
 interface OfferCardProps {
@@ -145,7 +145,27 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                             </button>
                         </div>
                     ) : (
-                        <p className={styles.statusText}>⏳ Waiting for seller response…</p>
+                        <div>
+                            <p className={styles.statusText}>⏳ Waiting for seller response…</p>
+                            <button
+                                className="btn btn-ghost btn-sm"
+                                onClick={async () => {
+                                    setSaving(true);
+                                    const result = await retractOffer(transaction.transactionId);
+                                    if (result.success) {
+                                        setStatus("cancelled");
+                                        router.refresh();
+                                    } else {
+                                        setError(result.error || "Failed to retract.");
+                                    }
+                                    setSaving(false);
+                                }}
+                                disabled={saving}
+                                style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}
+                            >
+                                ↩️ Retract Offer
+                            </button>
+                        </div>
                     )}
                 </div>
             )}

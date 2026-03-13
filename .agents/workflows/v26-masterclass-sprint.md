@@ -983,18 +983,19 @@ After all tasks are complete:
 
 | Phase | Task | Description | Status | Date |
 |-------|------|-------------|--------|------|
-| A | 1 | Breyer Adios search bug (multi-word) | ⬜ TODO | |
-| A | 2 | AI vision guardrails (non-equine rejection) | ⬜ TODO | |
-| A | 3 | Reference bait & switch log | ⬜ TODO | |
-| A | 4 | Blue Book bundle skew prevention | ⬜ TODO | |
+| A | 1 | Breyer Adios search bug (multi-word) | ✅ DONE | 2026-03-13 |
+| A | 2 | AI vision guardrails (non-equine rejection) | ✅ DONE | 2026-03-13 |
+| A | 3 | Reference bait & switch log | ✅ DONE | 2026-03-13 |
+| A | 4 | Blue Book bundle skew prevention | ✅ DONE | 2026-03-13 |
 | B | 5 | WebSocket black hole | ✅ DONE (V25) | 2026-03-12 |
-| B | 6 | System garbage collection (notifications + stale offers) | ⬜ TODO | |
-| B | 7 | Extra detail photo abuse limits | ⬜ TODO | |
-| C | 8 | Buyer offer retraction | ⬜ TODO | |
-| C | 9 | Guest client portal (commission timeline sharing) | ⬜ TODO | |
+| B | 6 | System garbage collection (notifications + stale offers) | ✅ DONE | 2026-03-13 |
+| B | 7 | Extra detail photo abuse limits | ✅ DONE | 2026-03-13 |
+| C | 8 | Buyer offer retraction | ✅ DONE | 2026-03-13 |
+| C | 9 | Guest client portal (commission timeline sharing) | ✅ DONE | 2026-03-13 |
 | C | 10 | Expired transfer auto-recovery | ✅ DONE (V25) | 2026-03-12 |
-| D | 11 | Reverse matchmaker (seller hype banner) | ⬜ TODO | |
-| D | 12 | Show string duplication | ⬜ TODO | |
-| D | 13 | Bulk visibility panic button | ⬜ TODO | |
-| D | 14 | "Stripped" life stage | ⬜ TODO | |
-| D | 15 | Universal post editing | ⬜ TODO | |
+| D | 11 | Reverse matchmaker (seller hype banner) | ✅ DONE | 2026-03-13 |
+| D | 12 | Show string duplication | ✅ DONE | 2026-03-13 |
+| D | 13 | Bulk visibility panic button | ✅ DONE | 2026-03-13 |
+| D | 14 | "Stripped" life stage | ✅ DONE | 2026-03-13 |
+| D | 15 | Universal post editing | ✅ DONE | 2026-03-13 |
+

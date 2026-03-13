@@ -394,6 +394,7 @@ export async function makeOffer(data: {
     sellerId: string;
     amount: number;
     message?: string;
+    isBundle?: boolean;
 }): Promise<{ success: boolean; transactionId?: string; conversationId?: string; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -446,6 +447,7 @@ export async function makeOffer(data: {
             conversation_id: convoResult.conversationId,
             offer_amount: data.amount,
             offer_message: data.message?.trim() || null,
+            metadata: data.isBundle ? { is_bundle_sale: true } : null,
         })
         .select("id")
         .single();
@@ -690,6 +692,46 @@ export async function cancelTransaction(
         type: "offer",
         actorId: user.id,
         content: `@${sellerAlias} cancelled the transaction.`,
+        conversationId: t.conversation_id,
+    });
+
+    revalidatePath(`/inbox/${t.conversation_id}`);
+    return { success: true };
+}
+
+/** Buyer retracts their offer while still in offer_made state */
+export async function retractOffer(
+    transactionId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    const admin = getAdminClient();
+    const { data: txn } = await admin
+        .from("transactions")
+        .select("id, status, party_a_id, party_b_id, horse_id, conversation_id")
+        .eq("id", transactionId)
+        .single();
+
+    if (!txn) return { success: false, error: "Transaction not found." };
+    const t = txn as { id: string; status: string; party_a_id: string; party_b_id: string; horse_id: string; conversation_id: string };
+
+    // Only buyer (party_b) can retract; only from offer_made
+    if (t.party_b_id !== user.id) return { success: false, error: "Only the buyer can retract an offer." };
+    if (t.status !== "offer_made") return { success: false, error: "Offer can only be retracted while pending." };
+
+    // Cancel the transaction
+    await admin.from("transactions").update({ status: "cancelled" }).eq("id", transactionId);
+
+    // Notify seller
+    const { data: buyerProfile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
+    const buyerAlias = (buyerProfile as { alias_name: string } | null)?.alias_name || "Buyer";
+    await createNotification({
+        userId: t.party_a_id,
+        type: "offer",
+        actorId: user.id,
+        content: `@${buyerAlias} retracted their offer.`,
         conversationId: t.conversation_id,
     });
 

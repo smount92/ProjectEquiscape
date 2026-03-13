@@ -130,6 +130,49 @@ export async function updateHorseAction(horseId: string, data: {
             : null;
 
         if (horseUpdate) {
+            // ── Bait & Switch detection: log catalog_id changes ──
+            if (horseUpdate.catalog_id !== undefined) {
+                try {
+                    const { data: existing } = await supabase
+                        .from("user_horses")
+                        .select("catalog_id")
+                        .eq("id", horseId)
+                        .eq("owner_id", user.id)
+                        .single();
+
+                    const oldCatalogId = (existing as { catalog_id: string | null } | null)?.catalog_id;
+                    const newCatalogId = horseUpdate.catalog_id as string | null;
+
+                    if (oldCatalogId !== newCatalogId && (oldCatalogId || newCatalogId)) {
+                        let oldName = "Unlinked";
+                        let newName = "Unlinked";
+
+                        if (oldCatalogId) {
+                            const { data: oldItem } = await supabase
+                                .from("catalog_items")
+                                .select("title, maker")
+                                .eq("id", oldCatalogId)
+                                .maybeSingle();
+                            if (oldItem) oldName = `${(oldItem as { maker: string }).maker} ${(oldItem as { title: string }).title}`;
+                        }
+                        if (newCatalogId) {
+                            const { data: newItem } = await supabase
+                                .from("catalog_items")
+                                .select("title, maker")
+                                .eq("id", newCatalogId)
+                                .maybeSingle();
+                            if (newItem) newName = `${(newItem as { maker: string }).maker} ${(newItem as { title: string }).title}`;
+                        }
+
+                        await supabase.from("posts").insert({
+                            author_id: user.id,
+                            horse_id: horseId,
+                            content: `📋 Reference identity updated from "${oldName}" to "${newName}".`,
+                        });
+                    }
+                } catch { /* non-blocking audit log */ }
+            }
+
             const { error: updErr } = await supabase.from("user_horses").update(horseUpdate).eq("id", horseId).eq("owner_id", user.id);
             if (updErr) throw new Error(updErr.message);
         }
@@ -302,6 +345,7 @@ export async function bulkUpdateHorses(
     updates: {
         collectionId?: string | null;
         tradeStatus?: string;
+        visibility?: "public" | "unlisted" | "private";
     }
 ): Promise<{ success: boolean; count?: number; error?: string }> {
     const supabase = await createClient();
@@ -325,6 +369,7 @@ export async function bulkUpdateHorses(
     const updateObj: Record<string, unknown> = {};
     if (updates.collectionId !== undefined) updateObj.collection_id = updates.collectionId;
     if (updates.tradeStatus) updateObj.trade_status = updates.tradeStatus;
+    if (updates.visibility) updateObj.visibility = updates.visibility;
 
     if (Object.keys(updateObj).length === 0) {
         return { success: false, error: "No updates specified." };

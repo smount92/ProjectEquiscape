@@ -28,35 +28,33 @@ function sanitizeSearchQuery(raw: string): string {
 
 /**
  * Search all catalog items (molds, releases, resins) in one query.
- * No more tab parameter — returns unified results.
+ * Multi-word: "Breyer Adios" splits into ["Breyer", "Adios"] and
+ * chains .or() so ALL words must appear across title/maker/model_number.
  */
 export async function searchCatalogAction(query: string): Promise<CatalogItem[]> {
     const supabase = await createClient();
     const q = sanitizeSearchQuery(query);
     if (!q) return [];
 
-    // Search across title, maker, and model_number (in attributes)
-    const { data } = await supabase
+    const words = q.split(/\s+/).filter(w => w.length > 0);
+
+    // Build a query where ALL words must appear across title, maker, or model_number
+    let queryBuilder = supabase
         .from("catalog_items")
-        .select("id, item_type, parent_id, title, maker, scale, attributes")
-        .or(`title.ilike.%${q}%,maker.ilike.%${q}%`)
+        .select("id, item_type, parent_id, title, maker, scale, attributes");
+
+    for (const word of words) {
+        queryBuilder = queryBuilder.or(
+            `title.ilike.%${word}%,maker.ilike.%${word}%,attributes->>model_number.ilike.%${word}%`
+        );
+    }
+
+    const { data } = await queryBuilder
         .order("item_type")
         .order("title")
         .limit(50);
 
-    if (!data || data.length === 0) {
-        // Fallback: search model_number in attributes for releases
-        const { data: attrData } = await supabase
-            .from("catalog_items")
-            .select("id, item_type, parent_id, title, maker, scale, attributes")
-            .eq("item_type", "plastic_release")
-            .ilike("attributes->>model_number", `%${q}%`)
-            .limit(20);
-
-        return (attrData ?? []).map(mapCatalogRow);
-    }
-
-    return data.map(mapCatalogRow);
+    return (data ?? []).map(mapCatalogRow);
 }
 
 /**
