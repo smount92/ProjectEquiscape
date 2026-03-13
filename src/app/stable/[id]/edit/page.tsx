@@ -581,7 +581,7 @@ export default function EditHorsePage() {
           <div className="extras-upload-zone">
             <div className="photo-studio-label" style={{ marginBottom: "var(--space-xs)" }}>
               Extra Details & Flaws
-              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>Unlimited</span>
+              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>{existingExtras.length + newExtraFiles.length}/10</span>
             </div>
             <div
               className="extras-dropzone"
@@ -590,6 +590,10 @@ export default function EditHorsePage() {
               onDrop={(e) => {
                 e.preventDefault();
                 const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+                if (existingExtras.length + newExtraFiles.length + files.length > 10) {
+                  alert("Maximum 10 extra detail photos allowed.");
+                  return;
+                }
                 const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
                 setNewExtraFiles(prev => [...prev, ...newExtras]);
               }}
@@ -603,6 +607,11 @@ export default function EditHorsePage() {
                 multiple
                 onChange={(e) => {
                   const files = Array.from(e.target.files || []).filter(f => f.type.startsWith("image/"));
+                  if (existingExtras.length + newExtraFiles.length + files.length > 10) {
+                    alert("Maximum 10 extra detail photos allowed.");
+                    e.target.value = "";
+                    return;
+                  }
                   const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
                   setNewExtraFiles(prev => [...prev, ...newExtras]);
                   e.target.value = "";
@@ -614,7 +623,7 @@ export default function EditHorsePage() {
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              <span>Click or drag multiple files</span>
+              <span>Upload up to 10 · Click or drag files here</span>
             </div>
 
             {/* Existing extras — drag to reorder */}

@@ -9,6 +9,7 @@ import {
     removeShowStringEntry,
     getShowStringEntries,
     deleteShowString,
+    duplicateShowString,
     detectConflicts,
     type ShowString,
     type ShowStringEntry,
@@ -174,6 +175,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
                                     <span className="studio-tab-badge">{ss.entryCount}</span>
+                                    <button className="btn btn-ghost btn-sm" onClick={async (e) => { e.stopPropagation(); setSaving(true); await duplicateShowString(ss.id); setSaving(false); router.refresh(); }} title="Duplicate" disabled={saving}>📋</button>
                                     <button className="btn btn-ghost btn-sm" onClick={e => { e.stopPropagation(); handleDeleteString(ss.id); }} title="Delete">🗑️</button>
                                 </div>
                             </div>
