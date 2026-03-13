@@ -127,7 +127,7 @@ export default async function MarketPricePage({
                                                 <span className="market-card-maker">
                                                     {item.maker}{item.scale ? ` · ${item.scale}` : ""}
                                                     {item.finishType ? ` · ${item.finishType}` : ""}
-                                                    {item.lifeStage && item.lifeStage !== "completed" ? ` · ${item.lifeStage === "blank" ? "Blank" : "In Progress"}` : ""}
+                                                    {item.lifeStage && item.lifeStage !== "completed" ? ` · ${item.lifeStage === "blank" ? "Blank" : item.lifeStage === "stripped" ? "Stripped" : "In Progress"}` : ""}
                                                 </span>
                                             </div>
                                         </div>

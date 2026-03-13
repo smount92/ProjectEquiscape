@@ -183,9 +183,9 @@ export default async function CommissionDetailPage({
             )}
 
             {/* Guest Link (for artist) */}
-            {!isGuestMode && isArtist && (commission as unknown as { guest_token?: string }).guest_token && (
+            {!isGuestMode && isArtist && commission.guestToken && (
                 <div style={{ marginBottom: "var(--space-md)" }}>
-                    <GuestLinkButton commissionId={commission.id} guestToken={(commission as unknown as { guest_token: string }).guest_token} />
+                    <GuestLinkButton commissionId={commission.id} guestToken={commission.guestToken} />
                 </div>
             )}
 

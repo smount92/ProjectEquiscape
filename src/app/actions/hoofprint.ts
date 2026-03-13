@@ -182,7 +182,7 @@ export async function deleteTimelineEvent(eventId: string, horseId: string): Pro
 
 export async function updateLifeStage(
     horseId: string,
-    newStage: "blank" | "in_progress" | "completed" | "for_sale"
+    newStage: "blank" | "stripped" | "in_progress" | "completed" | "for_sale"
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

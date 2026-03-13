@@ -796,10 +796,11 @@ export default function EditHorsePage() {
                 onChange={(e) => {
                   setLifeStage(e.target.value);
                   // Auto-create timeline event for stage changes
-                  updateLifeStage(horseId, e.target.value as "blank" | "in_progress" | "completed" | "for_sale");
+                  updateLifeStage(horseId, e.target.value as "blank" | "stripped" | "in_progress" | "completed" | "for_sale");
                 }}
               >
                 <option value="blank">🎨 Blank / Unpainted</option>
+                <option value="stripped">🛁 Stripped / Body</option>
                 <option value="in_progress">🔧 Work in Progress</option>
                 <option value="completed">✅ Completed</option>
                 <option value="for_sale">💲 For Sale</option>

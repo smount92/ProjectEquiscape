@@ -77,6 +77,7 @@ export interface Commission {
     createdAt: string;
     clientAlias: string | null;
     artistAlias: string;
+    guestToken: string | null;
 }
 
 export interface CommissionUpdate {
@@ -782,6 +783,7 @@ function mapCommissionJoined(c: Record<string, unknown>): Commission {
         createdAt: c.created_at as string,
         clientAlias,
         artistAlias,
+        guestToken: (c.guest_token as string | null) || null,
     };
 }
 

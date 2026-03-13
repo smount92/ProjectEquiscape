@@ -35,6 +35,7 @@ const EVENT_ICONS: Record<string, string> = {
 
 const STAGE_LABELS: Record<string, string> = {
     blank: "Blank / Unpainted",
+    stripped: "Stripped / Body",
     in_progress: "Work in Progress",
     completed: "Completed",
     for_sale: "Listed for Sale",
@@ -43,6 +44,7 @@ const STAGE_LABELS: Record<string, string> = {
 
 const STAGE_ICONS: Record<string, string> = {
     blank: "🎨",
+    stripped: "🛁",
     in_progress: "🔧",
     completed: "✅",
     for_sale: "💲",
@@ -92,7 +94,7 @@ export default function HoofprintTimeline({
 
     const handleStageChange = async (newStage: string) => {
         setStageUpdating(true);
-        await updateLifeStage(horseId, newStage as "blank" | "in_progress" | "completed" | "for_sale");
+        await updateLifeStage(horseId, newStage as "blank" | "stripped" | "in_progress" | "completed" | "for_sale");
         router.refresh();
         setStageUpdating(false);
     };
@@ -120,6 +122,7 @@ export default function HoofprintTimeline({
                                 disabled={stageUpdating}
                             >
                                 <option value="blank">🎨 Blank</option>
+                                <option value="stripped">🛁 Stripped / Body</option>
                                 <option value="in_progress">🔧 In Progress</option>
                                 <option value="completed">✅ Completed</option>
                                 <option value="for_sale">💲 For Sale</option>

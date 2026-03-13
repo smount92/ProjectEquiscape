@@ -379,11 +379,11 @@ After all 8 fixes:
 
 | # | Fix | Severity | Status |
 |---|-----|----------|--------|
-| 1 | `linkHorseToCommission` action | 🟡 Important | ⬜ TODO |
-| 2 | `createEvent` judging method | 🟡 Important | ⬜ TODO |
-| 3 | Admin reports section | 🟡 Important | ⬜ TODO |
-| 4 | Buyer offer retraction | 🔴 Critical | ⬜ TODO |
-| 5 | Guest portal `guest_token` query | 🟢 Nice-to-have | ⬜ TODO |
-| 6 | Show string duplication | 🟢 Nice-to-have | ⬜ TODO |
-| 7 | Stripped life stage UI | 🟡 Important | ⬜ TODO |
-| 8 | Reverse matchmaker banner | 🟢 Nice-to-have | ⬜ TODO |
+| 1 | `linkHorseToCommission` action | 🟡 Important | ✅ Already existed (line 788) |
+| 2 | `createEvent` judging method | 🟡 Important | ✅ Already existed (accepts + inserts judging_method) |
+| 3 | Admin reports section | 🟡 Important | ✅ Already existed (imports, fetch, JSX lines 253-282) |
+| 4 | Buyer offer retraction | 🔴 Critical | ✅ Done in V26 Sprint Task 8 |
+| 5 | Guest portal `guest_token` query | 🟢 Nice-to-have | ✅ Fixed — added to Commission type + mapCommissionJoined |
+| 6 | Show string duplication | 🟢 Nice-to-have | ✅ Done in V26 Sprint Task 12 |
+| 7 | Stripped life stage UI | 🟡 Important | ✅ Fixed — all 4 dropdowns, labels, icons, type union, market page |
+| 8 | Reverse matchmaker banner | 🟢 Nice-to-have | ✅ Done in V26 Sprint Task 11 |

@@ -926,6 +926,7 @@ export default function AddHorsePage() {
                   onChange={(e) => setLifeStage(e.target.value)}
                 >
                   <option value="blank">🎨 Blank / Unpainted</option>
+                  <option value="stripped">🛁 Stripped / Body</option>
                   <option value="in_progress">🔧 Work in Progress</option>
                   <option value="completed">✅ Completed</option>
                   <option value="for_sale">💲 For Sale</option>
