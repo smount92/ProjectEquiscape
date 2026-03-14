@@ -4356,6 +4356,45 @@ p {
   margin-bottom: 0;
 }
 
+.static-section h3 {
+  font-size: calc(var(--font-size-md) * var(--font-scale));
+  font-weight: 700;
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-primary);
+}
+
+.static-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-lg) 0;
+}
+
+.static-list li {
+  position: relative;
+  padding-left: var(--space-xl);
+  margin-bottom: var(--space-sm);
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.static-list li::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent-primary);
+  opacity: 0.6;
+}
+
+.static-list li:last-child {
+  margin-bottom: 0;
+}
+
 
 /* ── About Values Grid ── */
 .about-values-grid {

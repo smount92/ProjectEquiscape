@@ -44,9 +44,9 @@ export default function Footer() {
             <div className="footer-bottom">
                 <span>© {currentYear} Model Horse Hub. All rights reserved.</span>
                 <span className="footer-bottom-links">
-                    <Link href="/about">Privacy</Link>
+                    <Link href="/privacy">Privacy</Link>
                     <span className="footer-dot">·</span>
-                    <Link href="/about">Terms</Link>
+                    <Link href="/terms">Terms</Link>
                 </span>
             </div>
         </footer>
