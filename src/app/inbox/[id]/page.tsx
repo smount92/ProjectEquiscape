@@ -8,6 +8,7 @@ import OfferCard from "@/components/OfferCard";
 import BlockButton from "@/components/BlockButton";
 import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
 import { getTransactionByConversation } from "@/app/actions/transactions";
+import { getSignedImageUrls } from "@/lib/utils/storage";
 
 export async function generateMetadata({
     params,
@@ -113,26 +114,52 @@ export default async function ChatPage({
         name: string;
         tradeStatus: string;
         price: number | null;
+        thumbnailUrl: string | null;
+        refLine: string | null;
     } | null = null;
 
     if (conversation.horse_id) {
         const { data: horse } = await supabase
             .from("user_horses")
-            .select("id, custom_name, trade_status, listing_price")
+            .select(`
+                id, custom_name, trade_status, listing_price,
+                catalog_items:catalog_id(title, maker),
+                horse_images(image_url, angle_profile)
+            `)
             .eq("id", conversation.horse_id)
             .single<{
                 id: string;
                 custom_name: string;
                 trade_status: string;
                 listing_price: number | null;
+                catalog_items: { title: string; maker: string } | null;
+                horse_images: { image_url: string; angle_profile: string }[];
             }>();
 
         if (horse) {
+            // Get thumbnail (Primary_Thumbnail or first image)
+            const thumb = horse.horse_images?.find(
+                (img) => img.angle_profile === "Primary_Thumbnail"
+            );
+            const firstImg = horse.horse_images?.[0];
+            const imgPath = thumb?.image_url || firstImg?.image_url;
+
+            // Sign the URL
+            let signedThumb: string | null = null;
+            if (imgPath) {
+                const urlMap = await getSignedImageUrls(supabase, [imgPath]);
+                signedThumb = urlMap.get(imgPath) || null;
+            }
+
             horseContext = {
                 id: horse.id,
                 name: horse.custom_name,
                 tradeStatus: horse.trade_status,
                 price: horse.listing_price,
+                thumbnailUrl: signedThumb,
+                refLine: horse.catalog_items
+                    ? `${horse.catalog_items.maker} — ${horse.catalog_items.title}`
+                    : null,
             };
         }
     }
@@ -218,25 +245,14 @@ export default async function ChatPage({
                         </Link>
                         <span className="chat-role-badge">{isBuyer ? "Seller" : "Buyer"}</span>
                     </div>
-                    {horseContext && (
-                        <Link
-                            href={`/community/${horseContext.id}`}
-                            className="chat-header-horse"
-                        >
-                            🐴 {horseContext.name}
-                            {horseContext.tradeStatus !== "Not for Sale" && (
-                                <span
-                                    className={`inbox-item-status ${horseContext.tradeStatus === "For Sale"
-                                        ? "status-sale"
-                                        : "status-offers"
-                                        }`}
-                                >
-                                    {horseContext.price
-                                        ? `$${horseContext.price.toLocaleString("en-US")}`
-                                        : horseContext.tradeStatus}
-                                </span>
-                            )}
-                        </Link>
+                    {horseContext ? (
+                        <span className="chat-header-horse-label">
+                            🐴 Re: {horseContext.name}
+                        </span>
+                    ) : (
+                        <span className="chat-header-dm-label">
+                            💬 Direct Message
+                        </span>
                     )}
                 </div>
 
@@ -279,6 +295,44 @@ export default async function ChatPage({
                     initialBlocked={isBlockedUser}
                 />
             </div>
+
+            {/* Horse Context Card — visual banner for horse-linked conversations */}
+            {horseContext && (
+                <Link
+                    href={`/community/${horseContext.id}`}
+                    className="chat-horse-context-card animate-fade-in-up"
+                    id="chat-horse-link"
+                >
+                    {horseContext.thumbnailUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            src={horseContext.thumbnailUrl}
+                            alt={horseContext.name}
+                            className="chat-horse-thumb"
+                        />
+                    ) : (
+                        <div className="chat-horse-thumb chat-horse-thumb-placeholder">
+                            🐴
+                        </div>
+                    )}
+                    <div className="chat-horse-context-info">
+                        <span className="chat-horse-context-name">{horseContext.name}</span>
+                        {horseContext.refLine && (
+                            <span className="chat-horse-context-ref">{horseContext.refLine}</span>
+                        )}
+                        {horseContext.tradeStatus !== "Not for Sale" && (
+                            <span className={`chat-horse-context-status ${horseContext.tradeStatus === "For Sale" ? "status-sale" : "status-offers"
+                                }`}>
+                                {horseContext.tradeStatus === "For Sale" ? "💲" : "🤝"}{" "}
+                                {horseContext.price
+                                    ? `$${horseContext.price.toLocaleString("en-US")}`
+                                    : horseContext.tradeStatus}
+                            </span>
+                        )}
+                    </div>
+                    <span className="chat-horse-context-arrow">→</span>
+                </Link>
+            )}
 
             {/* Offer Card — Commerce State Machine (show for ALL transaction states) */}
             {txn && (

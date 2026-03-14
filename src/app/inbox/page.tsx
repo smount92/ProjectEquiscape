@@ -259,7 +259,7 @@ export default async function InboxPage() {
                                             {timeAgo(item.latestTime)}
                                         </span>
                                     </div>
-                                    {item.horseName && (
+                                    {item.horseName ? (
                                         <div className={styles.horse}>
                                             🐴 Re: {item.horseName}
                                             {item.horseTradeStatus &&
@@ -275,6 +275,10 @@ export default async function InboxPage() {
                                                             : "🤝 Offers"}
                                                     </span>
                                                 )}
+                                        </div>
+                                    ) : (
+                                        <div className={styles.horse}>
+                                            💬 Direct Message
                                         </div>
                                     )}
                                     <div className={styles.preview}>
