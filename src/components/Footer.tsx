@@ -36,6 +36,8 @@ export default function Footer() {
                         <h4 className="footer-column-title">Company</h4>
                         <Link href="/about">About Us</Link>
                         <Link href="/contact">Contact Us</Link>
+                        <Link href="/faq">FAQ</Link>
+                        <Link href="/getting-started">Getting Started</Link>
                     </div>
                 </div>
             </div>
