@@ -27,6 +27,13 @@ export async function GET(request: NextRequest) {
         const admin = getAdminClient();
         await admin.rpc("refresh_market_prices" as string);
 
+        // Auto-unpark horses with expired transfer PINs (Trn-04 fix)
+        let unparkResult = null;
+        try {
+            const { data } = await admin.rpc("auto_unpark_expired_transfers" as string);
+            unparkResult = data;
+        } catch { /* non-blocking */ }
+
         // System garbage collection
         let gcResult = null;
         try {

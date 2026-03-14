@@ -8,6 +8,7 @@ import ShowEntryForm from "@/components/ShowEntryForm";
 import WithdrawButton from "@/components/WithdrawButton";
 import UniversalFeed from "@/components/UniversalFeed";
 import CloseShowButton from "@/components/CloseShowButton";
+import ExpertJudgingPanel from "@/components/ExpertJudgingPanel";
 
 export async function generateMetadata({
     params,
@@ -56,6 +57,10 @@ export default async function ShowDetailPage({
     const isExpired = show.endAt ? new Date(show.endAt) < new Date() : false;
     const canClose = (isCreator || isAdmin) && show.status !== "closed" && (isExpired || show.status === "judging");
 
+    // Expert judge flags
+    const isExpertJudged = show.judgingMethod === "expert_judge";
+    const isJudging = show.status === "judging";
+
     return (
         <div className="page-container">
             {/* Hero */}
@@ -96,6 +101,14 @@ export default async function ShowDetailPage({
                         </span>
                         <span className="community-stat-label">{show.status.charAt(0).toUpperCase() + show.status.slice(1)}</span>
                     </div>
+                    <div className="community-stat">
+                        <span className="community-stat-number">
+                            {isExpertJudged ? "🏅" : "🗳️"}
+                        </span>
+                        <span className="community-stat-label">
+                            {isExpertJudged ? "Expert Judge" : "Community Vote"}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -125,36 +138,64 @@ export default async function ShowDetailPage({
                         🏆 <span className="text-gradient">Results</span>
                     </h2>
                     <div style={{ display: "flex", justifyContent: "center", gap: "var(--space-xl)", flexWrap: "wrap" }}>
-                        {entries.slice(0, 3).map((entry, i) => {
-                            const medals = ["🥇", "🥈", "🥉"];
-                            const labels = ["1st Place", "2nd Place", "3rd Place"];
-                            return (
-                                <div key={entry.id} style={{ textAlign: "center", minWidth: "120px" }}>
-                                    <div style={{ fontSize: "2.5rem" }}>{medals[i]}</div>
-                                    {entry.thumbnailUrl && (
-                                        <div className="show-entry-thumb" style={{ width: "80px", height: "80px", margin: "var(--space-sm) auto" }}>
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={entry.thumbnailUrl} alt={entry.horseName} />
+                        {isExpertJudged ? (
+                            // Expert-judged: show entries that have a placing assigned
+                            entries.filter(e => e.placing).slice(0, 5).map((entry) => {
+                                const medals: Record<string, string> = { "1st": "🥇", "2nd": "🥈", "3rd": "🥉", "HM": "🎗️" };
+                                return (
+                                    <div key={entry.id} style={{ textAlign: "center", minWidth: "120px" }}>
+                                        <div style={{ fontSize: "2.5rem" }}>{medals[entry.placing!] || "🏅"}</div>
+                                        {entry.thumbnailUrl && (
+                                            <div className="show-entry-thumb" style={{ width: "80px", height: "80px", margin: "var(--space-sm) auto" }}>
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={entry.thumbnailUrl} alt={entry.horseName} />
+                                            </div>
+                                        )}
+                                        <div style={{ fontWeight: 600, fontSize: "calc(0.9rem * var(--font-scale))" }}>
+                                            {entry.horseName}
                                         </div>
-                                    )}
-                                    <div style={{ fontWeight: 600, fontSize: "calc(0.9rem * var(--font-scale))" }}>
-                                        {entry.horseName}
+                                        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                            by @{entry.ownerAlias}
+                                        </div>
+                                        <div style={{ fontWeight: 700, color: "var(--color-accent, #f59e0b)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                            {entry.placing}
+                                        </div>
                                     </div>
-                                    <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
-                                        by @{entry.ownerAlias} · {entry.votes} vote{entry.votes !== 1 ? "s" : ""}
+                                );
+                            })
+                        ) : (
+                            // Community vote: show top 3 by vote count
+                            entries.slice(0, 3).map((entry, i) => {
+                                const medals = ["🥇", "🥈", "🥉"];
+                                const labels = ["1st Place", "2nd Place", "3rd Place"];
+                                return (
+                                    <div key={entry.id} style={{ textAlign: "center", minWidth: "120px" }}>
+                                        <div style={{ fontSize: "2.5rem" }}>{medals[i]}</div>
+                                        {entry.thumbnailUrl && (
+                                            <div className="show-entry-thumb" style={{ width: "80px", height: "80px", margin: "var(--space-sm) auto" }}>
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={entry.thumbnailUrl} alt={entry.horseName} />
+                                            </div>
+                                        )}
+                                        <div style={{ fontWeight: 600, fontSize: "calc(0.9rem * var(--font-scale))" }}>
+                                            {entry.horseName}
+                                        </div>
+                                        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                            by @{entry.ownerAlias} · {entry.votes} vote{entry.votes !== 1 ? "s" : ""}
+                                        </div>
+                                        <div style={{ fontWeight: 700, color: "var(--color-accent, #f59e0b)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                            {labels[i]}
+                                        </div>
                                     </div>
-                                    <div style={{ fontWeight: 700, color: "var(--color-accent, #f59e0b)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
-                                        {labels[i]}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
                 </div>
             )}
 
             {/* Judging Banner */}
-            {show.status === "judging" && (
+            {isJudging && (
                 <div className="card animate-fade-in-up" style={{
                     textAlign: "center",
                     padding: "var(--space-lg)",
@@ -164,8 +205,29 @@ export default async function ShowDetailPage({
                 }}>
                     <div style={{ fontSize: "2rem" }}>🟡</div>
                     <h3>Judging in Progress</h3>
-                    <p style={{ color: "var(--color-text-muted)" }}>Voting is closed. Results will be announced soon!</p>
+                    <p style={{ color: "var(--color-text-muted)" }}>
+                        {isExpertJudged
+                            ? (isCreator
+                                ? "Use the judging panel below to assign placings."
+                                : "The show host is reviewing entries. Results will be announced soon!")
+                            : "Voting is closed. Results will be announced soon!"
+                        }
+                    </p>
                 </div>
+            )}
+
+            {/* Expert Judging Panel — host only, during judging */}
+            {isExpertJudged && isJudging && isCreator && (
+                <ExpertJudgingPanel
+                    showId={showId}
+                    entries={entries.map(e => ({
+                        id: e.id,
+                        horseName: e.horseName,
+                        ownerAlias: e.ownerAlias,
+                        thumbnailUrl: e.thumbnailUrl,
+                        placing: e.placing,
+                    }))}
+                />
             )}
 
             {/* Close Show Button — creator/admin only, when expired */}
@@ -184,7 +246,12 @@ export default async function ShowDetailPage({
                 <div className="show-entries-grid animate-fade-in-up">
                     {entries.map((entry, index) => (
                         <div key={entry.id} className="show-entry-card">
-                            <div className="show-entry-rank">#{index + 1}</div>
+                            <div className="show-entry-rank">
+                                {isExpertJudged && show.status === "closed" && entry.placing
+                                    ? entry.placing
+                                    : `#${index + 1}`
+                                }
+                            </div>
                             {entry.thumbnailUrl && (
                                 <div className="show-entry-thumb">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -207,12 +274,31 @@ export default async function ShowDetailPage({
                                 </span>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
-                                <VoteButton
-                                    entryId={entry.id}
-                                    initialVotes={entry.votes}
-                                    initialHasVoted={entry.hasVoted}
-                                    disabled={show.status !== "open"}
-                                />
+                                {isExpertJudged ? (
+                                    entry.placing && show.status === "closed" ? (
+                                        <span style={{
+                                            fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                                            padding: "var(--space-xs) var(--space-sm)",
+                                            borderRadius: "var(--radius-sm)",
+                                            background: "rgba(245, 158, 11, 0.15)",
+                                            color: "var(--color-accent, #f59e0b)",
+                                            fontWeight: 600,
+                                        }}>
+                                            {entry.placing}
+                                        </span>
+                                    ) : isJudging ? (
+                                        <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                            🏅 Expert judging
+                                        </span>
+                                    ) : null
+                                ) : (
+                                    <VoteButton
+                                        entryId={entry.id}
+                                        initialVotes={entry.votes}
+                                        initialHasVoted={entry.hasVoted}
+                                        disabled={show.status !== "open"}
+                                    />
+                                )}
                                 {entry.ownerId === user.id && show.status === "open" && (
                                     <WithdrawButton entryId={entry.id} />
                                 )}

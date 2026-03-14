@@ -1,20 +1,34 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { signupAction, type AuthFormState } from "@/app/auth/actions";
 
-const initialState: AuthFormState = {
-  error: null,
-  success: false,
-};
-
 export default function SignupPage() {
-  const [state, formAction, isPending] = useActionState(signupAction, initialState);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleSubmit = async (formData: FormData) => {
+    setIsPending(true);
+    setError(null);
+
+    const result: AuthFormState = await signupAction(
+      { error: null, success: false },
+      formData
+    );
+
+    if (result.success) {
+      setSuccess(true);
+    } else {
+      setError(result.error);
+    }
+    setIsPending(false);
+  };
+
   // Success state — show confirmation message
-  if (state.success) {
+  if (success) {
     return (
       <div className="auth-page">
         <div className="card card-auth animate-fade-in-up">
@@ -54,7 +68,7 @@ export default function SignupPage() {
           <p>Create your account and start cataloging your collection</p>
         </div>
 
-        {state.error && (
+        {error && (
           <div className="form-error" role="alert" id="signup-error">
             <svg
               width="16"
@@ -69,7 +83,7 @@ export default function SignupPage() {
               <line x1="15" y1="9" x2="9" y2="15" />
               <line x1="9" y1="9" x2="15" y2="15" />
             </svg>
-            {state.error}
+            {error}
           </div>
         )}
 
@@ -85,7 +99,7 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <form action={formAction} noValidate>
+        <form action={handleSubmit} noValidate>
           {/* Alias Name */}
           <div className="form-group">
             <label htmlFor="signup-alias" className="form-label">

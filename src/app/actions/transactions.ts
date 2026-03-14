@@ -62,7 +62,14 @@ export async function completeTransaction(
 
     if (error) return { success: false, error: error.message };
 
-    // Market price refresh handled by Vercel cron (/api/cron/refresh-market)
+    // Immediately refresh Blue Book prices so the sale appears in /market
+    try {
+        const admin = getAdminClient();
+        await admin.rpc("refresh_market_prices" as string);
+    } catch {
+        // Non-blocking — cron will catch it within 6 hours
+        console.warn("[completeTransaction] Market price refresh failed (non-blocking)");
+    }
 
     return { success: true };
 }
@@ -657,12 +664,13 @@ export async function verifyFundsAndRelease(
 
 // ── Cancel Transaction ──
 // Seller can cancel when buyer ghosts during pending_payment
+// Also handles funds_verified (PIN released but not claimed)
 export async function cancelTransaction(
     transactionId: string
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    if (!user) return { success: false, error: "Not authenticated. Please refresh the page and try again." };
 
     const admin = getAdminClient();
     const { data: txn } = await admin
@@ -674,17 +682,33 @@ export async function cancelTransaction(
     if (!txn) return { success: false, error: "Transaction not found." };
     const t = txn as { id: string; status: string; party_a_id: string; party_b_id: string; horse_id: string; conversation_id: string };
 
-    // Only seller can cancel; only from pending_payment
+    // Only seller can cancel; allowed from pending_payment, funds_verified, or offer_made
     if (t.party_a_id !== user.id) return { success: false, error: "Only the seller can cancel." };
-    if (t.status !== "pending_payment") return { success: false, error: "Transaction cannot be cancelled in this state." };
+    const cancellableStates = ["pending_payment", "funds_verified", "offer_made"];
+    if (!cancellableStates.includes(t.status)) return { success: false, error: `Transaction cannot be cancelled in "${t.status}" state.` };
 
     // 1. Cancel the transaction
-    await admin.from("transactions").update({ status: "cancelled" }).eq("id", transactionId);
+    const { error: cancelErr } = await admin.from("transactions").update({ status: "cancelled" }).eq("id", transactionId);
+    if (cancelErr) return { success: false, error: `Database error: ${cancelErr.message}` };
 
-    // 2. Revert horse trade_status — since we set it to "Pending Sale" on accept, revert to "Open to Offers"
+    // 2. Revert horse trade_status to "Open to Offers"
     await admin.from("user_horses").update({ trade_status: "Open to Offers" }).eq("id", t.horse_id);
 
-    // 3. Notify the buyer
+    // 3. If horse was parked (funds_verified state), unpark it
+    if (t.status === "funds_verified") {
+        await admin.from("user_horses")
+            .update({ life_stage: "completed" })
+            .eq("id", t.horse_id)
+            .eq("life_stage", "parked");
+
+        // Cancel any pending transfer PINs for this horse
+        await admin.from("horse_transfers")
+            .update({ status: "cancelled" })
+            .eq("horse_id", t.horse_id)
+            .eq("status", "pending");
+    }
+
+    // 4. Notify the buyer
     const { data: sellerProfile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
     const sellerAlias = (sellerProfile as { alias_name: string } | null)?.alias_name || "Seller";
     await createNotification({

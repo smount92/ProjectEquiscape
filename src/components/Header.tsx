@@ -35,13 +35,24 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    // Initial fetch
-    fetchHeaderInfo();
+    // Use the browser client's local session as the primary source of truth.
+    // This is instant (reads from localStorage) and never flashes "Log In".
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        // Immediately show authenticated UI
+        setUser({ id: session.user.id, email: session.user.email ?? undefined });
+        // Then enrich with profile data from server (alias, unread count, etc.)
+        fetchHeaderInfo();
+      }
+    };
+    initAuth();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email ?? undefined });
         fetchHeaderInfo();
       } else {
         setUser(null);

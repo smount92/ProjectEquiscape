@@ -29,7 +29,7 @@ export default function DeleteHorseModal({
         throw new Error(result.error || "Failed to delete.");
       }
       // Redirect to dashboard with success toast
-      router.push("/?toast=deleted&name=" + encodeURIComponent(horseName));
+      router.push("/dashboard?toast=deleted&name=" + encodeURIComponent(horseName));
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to delete. Please try again."

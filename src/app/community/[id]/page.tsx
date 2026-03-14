@@ -13,6 +13,7 @@ import PedigreeCard from "@/components/PedigreeCard";
 import HoofprintTimeline from "@/components/HoofprintTimeline";
 import { getHoofprint } from "@/app/actions/hoofprint";
 import ReportButton from "@/components/ReportButton";
+import MessageSellerButton from "@/components/MessageSellerButton";
 
 // Force fresh data on every request — prevents stale comments/favorites
 export const dynamic = "force-dynamic";
@@ -31,6 +32,8 @@ interface PublicHorseDetail {
   finishing_artist_verified: boolean;
   edition_number: number | null;
   edition_size: number | null;
+  trade_status: string | null;
+  listing_price: number | null;
   catalog_id: string | null;
   users: {
     alias_name: string;
@@ -167,6 +170,7 @@ export default async function PublicPassportPage({
       `
       id, owner_id, custom_name, finish_type, condition_grade, asset_category,
       is_public, created_at, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id,
+      trade_status, listing_price,
       users!inner(alias_name),
       catalog_items:catalog_id(title, maker, scale, item_type, attributes)
     `
@@ -566,6 +570,15 @@ export default async function PublicPassportPage({
               />
               {!isOwnHorse && (
                 <ReportButton targetType="horse" targetId={horseId} />
+              )}
+              {!isOwnHorse && (horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
+                <MessageSellerButton
+                  sellerId={horse.owner_id}
+                  horseId={horseId}
+                  horseName={horse.custom_name}
+                  tradeStatus={horse.trade_status}
+                  askingPrice={horse.listing_price}
+                />
               )}
               {isOwnHorse && (
                 <Link

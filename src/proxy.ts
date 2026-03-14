@@ -30,12 +30,16 @@ export async function proxy(request: NextRequest) {
     );
 
     // IMPORTANT: Do not add logic between createServerClient and
-    // supabase.auth.getUser(). A simple mistake could make it very hard to
+    // supabase.auth.getClaims(). A simple mistake could make it very hard to
     // debug issues with users being randomly logged out.
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    // getClaims() validates the JWT locally using the project's public keys.
+    // It never hits the Supabase auth server and never silently consumes a
+    // refresh token — eliminating the root cause of "ghost logout" where a
+    // token refresh in the old getUser() call would succeed but setAll on
+    // the response would fail silently, leaving the session cookie stale.
+    const { data, error } = await supabase.auth.getClaims();
+    const user = !error && data?.claims ? { id: data.claims.sub as string } : null;
 
     // Public routes that do NOT require authentication
     const publicPaths = [

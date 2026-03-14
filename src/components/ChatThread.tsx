@@ -21,7 +21,7 @@ interface ChatThreadProps {
     initialMessages: ChatMessage[];
 }
 
-const RISKY_PAYMENT_REGEX = /(venmo|zelle|paypal\s*f\s*(&|and)\s*f|friends\s*and\s*family|cash\s*app|wire\s*transfer)/i;
+import { RISKY_PAYMENT_REGEX } from "@/lib/safety";
 
 export default function ChatThread({
     conversationId,

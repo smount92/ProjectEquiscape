@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { makeOffer } from "@/app/actions/transactions";
+import { RISKY_PAYMENT_REGEX, RISKY_PAYMENT_WARNING } from "@/lib/safety";
 import styles from "./MakeOfferModal.module.css";
 
 interface MakeOfferModalProps {
@@ -26,6 +28,9 @@ export default function MakeOfferModal({
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const router = useRouter();
+
+    // Risky payment detection
+    const showPaymentWarning = useMemo(() => RISKY_PAYMENT_REGEX.test(message), [message]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,7 +58,7 @@ export default function MakeOfferModal({
         }
     };
 
-    return (
+    return createPortal(
         <div className="modal-overlay" onClick={onClose}>
             <div className={`modal-content ${styles.modal}`} onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
@@ -99,6 +104,11 @@ export default function MakeOfferModal({
                             rows={3}
                             maxLength={500}
                         />
+                        {showPaymentWarning && (
+                            <div className="comment-error" style={{ marginTop: "var(--space-xs)", background: "rgba(234, 179, 8, 0.15)", color: "var(--color-warning, #eab308)", border: "1px solid rgba(234, 179, 8, 0.3)", borderRadius: "var(--radius-sm)", padding: "var(--space-xs) var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                {RISKY_PAYMENT_WARNING}
+                            </div>
+                        )}
                     </div>
 
                     <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer", marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
@@ -127,6 +137,7 @@ export default function MakeOfferModal({
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

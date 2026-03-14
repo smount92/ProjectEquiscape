@@ -107,7 +107,35 @@ export async function updateHorseAction(horseId: string, data: {
 
         // Guard: check for active transactions (rug-pull prevention)
         const txnError = await checkActiveTransaction(horseId);
-        if (txnError) return { success: false, error: txnError };
+        if (txnError) {
+            // If the only change is trade_status, give a specific error
+            if (data.horseUpdate && Object.keys(data.horseUpdate).length === 1 && data.horseUpdate.trade_status) {
+                return { success: false, error: "This horse is locked in an active transaction. Cancel the transaction before changing its marketplace status." };
+            }
+            return { success: false, error: txnError };
+        }
+
+        // Auto-unpark: if horse has an expired transfer, revert it so it's editable
+        try {
+            const admin = getAdminClient();
+            const { data: expiredTransfer } = await admin
+                .from("horse_transfers")
+                .select("id")
+                .eq("horse_id", horseId)
+                .eq("status", "pending")
+                .lt("expires_at", new Date().toISOString())
+                .maybeSingle();
+
+            if (expiredTransfer) {
+                await admin.from("horse_transfers")
+                    .update({ status: "expired" })
+                    .eq("id", (expiredTransfer as { id: string }).id);
+                await admin.from("user_horses")
+                    .update({ life_stage: "completed" })
+                    .eq("id", horseId)
+                    .eq("life_stage", "parked");
+            }
+        } catch { /* non-blocking cleanup */ }
 
         // ── Security: whitelist allowed fields to prevent column injection ──
         const HORSE_ALLOWED = [

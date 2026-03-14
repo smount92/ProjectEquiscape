@@ -20,6 +20,7 @@ interface ShowDisplay {
     createdAt: string;
     endAt: string | null;
     createdBy?: string;
+    judgingMethod?: string;
 }
 
 interface ShowEntryDisplay {
@@ -33,6 +34,7 @@ interface ShowEntryDisplay {
     votes: number;
     hasVoted: boolean;
     createdAt: string;
+    placing: string | null;
 }
 
 /**
@@ -92,10 +94,10 @@ export async function getShowEntries(showId: string): Promise<{
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Fetch event
+    // Fetch event (include judging_method for expert judge flow)
     const { data: eventData } = await supabase
         .from("events")
-        .select("id, name, description, show_status, show_theme, ends_at, created_at, created_by")
+        .select("id, name, description, show_status, show_theme, ends_at, created_at, created_by, judging_method")
         .eq("id", showId)
         .single();
 
@@ -105,7 +107,10 @@ export async function getShowEntries(showId: string): Promise<{
         id: string; name: string; description: string | null;
         show_status: string; show_theme: string | null;
         ends_at: string | null; created_at: string; created_by: string;
+        judging_method: string | null;
     };
+
+    const isExpertJudged = s.judging_method === "expert_judge";
 
     // Fetch entries with user alias via PostgREST join
     const { data: rawEntries } = await supabase
@@ -123,7 +128,7 @@ export async function getShowEntries(showId: string): Promise<{
 
     if (entryList.length === 0) {
         return {
-            show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: 0, createdAt: s.created_at, endAt: s.ends_at, createdBy: s.created_by },
+            show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: 0, createdAt: s.created_at, endAt: s.ends_at, createdBy: s.created_by, judgingMethod: s.judging_method || "community_vote" },
             entries: [],
         };
     }
@@ -171,20 +176,34 @@ export async function getShowEntries(showId: string): Promise<{
     }
     const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
 
+    // Build entries list
+    let finalEntries = entryList.map(e => ({
+        id: e.id,
+        horseName: horseMap.get(e.horse_id)?.name || "Unknown",
+        horseId: e.horse_id,
+        ownerAlias: e.users?.alias_name || "Unknown",
+        ownerId: e.user_id,
+        thumbnailUrl: thumbUrlMap.has(e.horse_id) ? (signedUrls.get(thumbUrlMap.get(e.horse_id)!) ?? null) : null,
+        finishType: horseMap.get(e.horse_id)?.finish || "OF",
+        votes: e.votes_count,
+        hasVoted: votedSet.has(e.id),
+        createdAt: e.created_at,
+        placing: e.placing,
+    }));
+
+    // For expert-judged closed shows, sort by placing (1st, 2nd, 3rd...) instead of votes
+    if (isExpertJudged && s.show_status === "closed") {
+        const placingOrder: Record<string, number> = { "1st": 1, "2nd": 2, "3rd": 3, "HM": 4 };
+        finalEntries = finalEntries.sort((a, b) => {
+            const aOrder = a.placing ? (placingOrder[a.placing] ?? 99) : 99;
+            const bOrder = b.placing ? (placingOrder[b.placing] ?? 99) : 99;
+            return aOrder - bOrder;
+        });
+    }
+
     return {
-        show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: entryList.length, createdAt: s.created_at, endAt: s.ends_at, createdBy: s.created_by },
-        entries: entryList.map(e => ({
-            id: e.id,
-            horseName: horseMap.get(e.horse_id)?.name || "Unknown",
-            horseId: e.horse_id,
-            ownerAlias: e.users?.alias_name || "Unknown",
-            ownerId: e.user_id,
-            thumbnailUrl: thumbUrlMap.has(e.horse_id) ? (signedUrls.get(thumbUrlMap.get(e.horse_id)!) ?? null) : null,
-            finishType: horseMap.get(e.horse_id)?.finish || "OF",
-            votes: e.votes_count,
-            hasVoted: votedSet.has(e.id),
-            createdAt: e.created_at,
-        })),
+        show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: entryList.length, createdAt: s.created_at, endAt: s.ends_at, createdBy: s.created_by, judgingMethod: s.judging_method || "community_vote" },
+        entries: finalEntries,
     };
 }
 

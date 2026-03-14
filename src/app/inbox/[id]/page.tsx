@@ -162,7 +162,7 @@ export default async function ChatPage({
 
     const txn = await getTransactionByConversation(conversationId);
     const transactionId = txn?.transactionId ?? null;
-    const isCommerceFlow = txn && ["offer_made", "pending_payment", "funds_verified"].includes(txn.status);
+    const hasCommerceTransaction = !!txn; // Any Safe-Trade transaction exists
 
     // Check if user has already reviewed via the new reviews table
     let existingRating: { id: string; stars: number; reviewText: string | null; createdAt: string } | null = null;
@@ -280,8 +280,8 @@ export default async function ChatPage({
                 />
             </div>
 
-            {/* Offer Card — Commerce State Machine */}
-            {txn && isCommerceFlow && (
+            {/* Offer Card — Commerce State Machine (show for ALL transaction states) */}
+            {txn && (
                 <OfferCard
                     transaction={txn}
                     currentUserId={user.id}
@@ -302,8 +302,8 @@ export default async function ChatPage({
                 }))}
             />
 
-            {/* Transaction Actions — only show legacy flow if no active commerce state machine */}
-            {!isCommerceFlow && (
+            {/* Transaction Actions — only show legacy flow if NO Safe-Trade transaction exists */}
+            {!hasCommerceTransaction && (
                 <TransactionActions
                     conversationId={conversationId}
                     initialStatus={conversation.transaction_status || "open"}
