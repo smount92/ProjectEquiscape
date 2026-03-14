@@ -10,6 +10,7 @@ import { getUserReviewSummary } from "@/app/actions/transactions";
 import { getFollowStats } from "@/app/actions/follows";
 import EditBioButton from "@/components/EditBioButton";
 import BlockButton from "@/components/BlockButton";
+import MessageUserButton from "@/components/MessageUserButton";
 import RatingForm from "@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
 
@@ -328,11 +329,17 @@ export default async function ProfilePage({
             </div>
           )}
           {!isOwnProfile && (
-            <BlockButton
-              targetId={profileUser.id}
-              targetAlias={profileUser.alias_name}
-              initialBlocked={blocked}
-            />
+            <div className="profile-action-row">
+              <MessageUserButton
+                targetUserId={profileUser.id}
+                targetAlias={profileUser.alias_name}
+              />
+              <BlockButton
+                targetId={profileUser.id}
+                targetAlias={profileUser.alias_name}
+                initialBlocked={blocked}
+              />
+            </div>
           )}
         </div>
       </div>

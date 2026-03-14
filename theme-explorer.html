@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Horse Hub — Theme Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── Theme Switcher Chrome ── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0d0d14;
+  color: #f0f0f5;
+  min-height: 100vh;
+}
+
+.theme-selector {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.theme-selector-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.theme-btn {
+  padding: 8px 18px;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-btn:hover {
+  transform: translateY(-1px);
+}
+
+.theme-btn.active {
+  box-shadow: 0 0 16px rgba(255,255,255,0.15);
+}
+
+.theme-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ── Demo Container ── */
+.demo-container {
+  margin-top: 64px;
+  padding: 0;
+}
+
+/* ── All theme variables ── */
+.demo-container {
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* ─────────────────────────────────────────── */
+/*  THEME 0 — Current (Violet)                */
+/* ─────────────────────────────────────────── */
+.theme-current {
+  --color-bg-primary: #0a0a12;
+  --color-bg-secondary: #12121e;
+  --color-bg-card: #1a1a2e;
+  --color-bg-card-hover: #222240;
+  --color-bg-input: #16162a;
+  --color-text-primary: #f0f0f5;
+  --color-text-secondary: #a0a0b8;
+  --color-text-muted: #6b6b80;
+  --color-accent-primary: #7c6df0;
+  --color-accent-primary-hover: #9180ff;
+  --color-accent-primary-glow: rgba(124, 109, 240, 0.25);
+  --color-accent-secondary: #f0a06c;
+  --color-accent-success: #5ce0a0;
+  --color-accent-danger: #f06c7e;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --gradient-text: linear-gradient(135deg, #7c6df0 0%, #b794f6 50%, #f0a06c 100%);
+  --gradient-hero: radial-gradient(600px circle at 30% 20%, rgba(124, 109, 240, 0.12), transparent 60%);
+}
+
+/* ─────────────────────────────────────────── */
+/*  THEME 1 — Emerald Ranch                   */
+/*  Deep forest greens + warm gold accents     */
+/* ─────────────────────────────────────────── */
+.theme-emerald {
+  --color-bg-primary: #0a100e;
+  --color-bg-secondary: #111c18;
+  --color-bg-card: #172822;
+  --color-bg-card-hover: #1f342c;
+  --color-bg-input: #132018;
+  --color-text-primary: #eaf5f0;
+  --color-text-secondary: #9ab8a8;
+  --color-text-muted: #637a6e;
+  --color-accent-primary: #2ecc71;
+  --color-accent-primary-hover: #4ae88d;
+  --color-accent-primary-glow: rgba(46, 204, 113, 0.25);
+  --color-accent-secondary: #d4a847;
+  --color-accent-success: #2ecc71;
+  --color-accent-danger: #e74c3c;
+  --color-border: rgba(255, 255, 255, 0.07);
+  --gradient-text: linear-gradient(135deg, #2ecc71 0%, #a8e6cf 50%, #d4a847 100%);
+  --gradient-hero: radial-gradient(600px circle at 30% 20%, rgba(46, 204, 113, 0.1), transparent 60%);
+}
+
+/* ─────────────────────────────────────────── */
+/*  THEME 2 — Copper Canyon                    */
+/*  Warm terracotta + desert sand tones        */
+/* ─────────────────────────────────────────── */
+.theme-copper {
+  --color-bg-primary: #110d0a;
+  --color-bg-secondary: #1a1410;
+  --color-bg-card: #241c16;
+  --color-bg-card-hover: #2e241c;
+  --color-bg-input: #1e1812;
+  --color-text-primary: #f5ede6;
+  --color-text-secondary: #bfa78f;
+  --color-text-muted: #8a7560;
+  --color-accent-primary: #c47a3f;
+  --color-accent-primary-hover: #e09050;
+  --color-accent-primary-glow: rgba(196, 122, 63, 0.25);
+  --color-accent-secondary: #d4a847;
+  --color-accent-success: #6dbd7a;
+  --color-accent-danger: #d45858;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --gradient-text: linear-gradient(135deg, #c47a3f 0%, #f0c888 50%, #d4a847 100%);
+  --gradient-hero: radial-gradient(600px circle at 30% 20%, rgba(196, 122, 63, 0.1), transparent 60%);
+}
+
+/* ─────────────────────────────────────────── */
+/*  THEME 3 — Midnight Sapphire                */
+/*  Deep navy + ocean blue accents             */
+/* ─────────────────────────────────────────── */
+.theme-sapphire {
+  --color-bg-primary: #080c14;
+  --color-bg-secondary: #0e1420;
+  --color-bg-card: #141e30;
+  --color-bg-card-hover: #1a283c;
+  --color-bg-input: #111a28;
+  --color-text-primary: #e8f0fa;
+  --color-text-secondary: #8ea8c8;
+  --color-text-muted: #5a7492;
+  --color-accent-primary: #3b82f6;
+  --color-accent-primary-hover: #5b9cf8;
+  --color-accent-primary-glow: rgba(59, 130, 246, 0.25);
+  --color-accent-secondary: #f59e0b;
+  --color-accent-success: #34d399;
+  --color-accent-danger: #ef4444;
+  --color-border: rgba(255, 255, 255, 0.07);
+  --gradient-text: linear-gradient(135deg, #3b82f6 0%, #93c5fd 50%, #f59e0b 100%);
+  --gradient-hero: radial-gradient(600px circle at 30% 20%, rgba(59, 130, 246, 0.1), transparent 60%);
+}
+
+/* ─────────────────────────────────────────── */
+/*  THEME 4 — Rose Gold                        */
+/*  Elegant blush pink + warm rose accents     */
+/* ─────────────────────────────────────────── */
+.theme-rosegold {
+  --color-bg-primary: #100a0c;
+  --color-bg-secondary: #1a1214;
+  --color-bg-card: #261a1e;
+  --color-bg-card-hover: #302228;
+  --color-bg-input: #201618;
+  --color-text-primary: #f5eaed;
+  --color-text-secondary: #c89aa6;
+  --color-text-muted: #8a6470;
+  --color-accent-primary: #e4728a;
+  --color-accent-primary-hover: #f08ca2;
+  --color-accent-primary-glow: rgba(228, 114, 138, 0.25);
+  --color-accent-secondary: #d4a060;
+  --color-accent-success: #5ec4a0;
+  --color-accent-danger: #e05858;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --gradient-text: linear-gradient(135deg, #e4728a 0%, #f5b8c4 50%, #d4a060 100%);
+  --gradient-hero: radial-gradient(600px circle at 30% 20%, rgba(228, 114, 138, 0.1), transparent 60%);
+}
+
+/* ─────────────────────────────────────────── */
+/*  THEME 5 — Teal Stable                      */
+/*  Cool teal + warm ochre accents             */
+/* ─────────────────────────────────────────── */
+.theme-teal {
+  --color-bg-primary: #080e10;
+  --color-bg-secondary: #0e181c;
+  --color-bg-card: #142226;
+  --color-bg-card-hover: #1c2e32;
+  --color-bg-input: #101c20;
+  --color-text-primary: #e6f2f5;
+  --color-text-secondary: #8ab8c4;
+  --color-text-muted: #5a8490;
+  --color-accent-primary: #14b8a6;
+  --color-accent-primary-hover: #2dd4bf;
+  --color-accent-primary-glow: rgba(20, 184, 166, 0.25);
+  --color-accent-secondary: #e0a040;
+  --color-accent-success: #22c55e;
+  --color-accent-danger: #ef4444;
+  --color-border: rgba(255, 255, 255, 0.07);
+  --gradient-text: linear-gradient(135deg, #14b8a6 0%, #5eead4 50%, #e0a040 100%);
+  --gradient-hero: radial-gradient(600px circle at 30% 20%, rgba(20, 184, 166, 0.1), transparent 60%);
+}
+
+/* ─────────────────────────────────────────── */
+/*  THEME 6 — Barn Red                         */
+/*  Classic red barn + cream & mahogany        */
+/* ─────────────────────────────────────────── */
+.theme-barnred {
+  --color-bg-primary: #0e0a0a;
+  --color-bg-secondary: #181010;
+  --color-bg-card: #241818;
+  --color-bg-card-hover: #2e2020;
+  --color-bg-input: #1e1414;
+  --color-text-primary: #f5ece8;
+  --color-text-secondary: #c4a89a;
+  --color-text-muted: #8a6e60;
+  --color-accent-primary: #c0392b;
+  --color-accent-primary-hover: #e04838;
+  --color-accent-primary-glow: rgba(192, 57, 43, 0.25);
+  --color-accent-secondary: #d4a847;
+  --color-accent-success: #27ae60;
+  --color-accent-danger: #e74c3c;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --gradient-text: linear-gradient(135deg, #c0392b 0%, #f0a898 50%, #d4a847 100%);
+  --gradient-hero: radial-gradient(600px circle at 30% 20%, rgba(192, 57, 43, 0.1), transparent 60%);
+}
+
+/* ─────────────────────────────────────────── */
+/*  THEME 7 — Warm Slate                       */
+/*  Neutral sophisticated slate + amber        */
+/* ─────────────────────────────────────────── */
+.theme-slate {
+  --color-bg-primary: #0e0e12;
+  --color-bg-secondary: #161618;
+  --color-bg-card: #1e1e22;
+  --color-bg-card-hover: #28282e;
+  --color-bg-input: #1a1a1e;
+  --color-text-primary: #ededf0;
+  --color-text-secondary: #9898a8;
+  --color-text-muted: #64647a;
+  --color-accent-primary: #8b8bff;
+  --color-accent-primary-hover: #a5a5ff;
+  --color-accent-primary-glow: rgba(139, 139, 255, 0.2);
+  --color-accent-secondary: #e8a850;
+  --color-accent-success: #4ade80;
+  --color-accent-danger: #f87171;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --gradient-text: linear-gradient(135deg, #8b8bff 0%, #cdcdff 50%, #e8a850 100%);
+  --gradient-hero: radial-gradient(600px circle at 30% 20%, rgba(139, 139, 255, 0.08), transparent 60%);
+}
+
+
+/* ─────────────────────────────────────────── */
+/*  Demo UI Styles                             */
+/* ─────────────────────────────────────────── */
+
+.demo-container {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: background 400ms ease, color 400ms ease;
+}
+
+/* Header */
+.demo-header {
+  padding: 14px 32px;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.demo-header-brand {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.demo-header-nav {
+  display: flex;
+  gap: 24px;
+}
+
+.demo-header-nav a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 150ms;
+}
+
+.demo-header-nav a:hover {
+  color: var(--color-accent-primary);
+}
+
+/* Hero */
+.demo-hero {
+  padding: 80px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-hero);
+  pointer-events: none;
+}
+
+.demo-hero-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent-primary);
+  background: var(--color-bg-card);
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.demo-hero h1 {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.text-gradient {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.demo-hero p {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  margin: 0 auto 32px;
+  line-height: 1.7;
+  position: relative;
+}
+
+.demo-hero-cta {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+}
+
+.demo-hero-trust {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin-top: 20px;
+  position: relative;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease;
+  text-decoration: none;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--color-accent-primary);
+  color: #fff;
+  box-shadow: 0 2px 12px var(--color-accent-primary-glow);
+}
+
+.btn-primary:hover {
+  background: var(--color-accent-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px var(--color-accent-primary-glow);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-ghost:hover {
+  color: var(--color-accent-primary);
+  border-color: var(--color-accent-primary);
+}
+
+/* Features Section */
+.demo-features {
+  padding: 64px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.demo-features-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.demo-features-sub {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin-bottom: 40px;
+  font-size: 16px;
+}
+
+.demo-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.demo-feature-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  transition: all 250ms ease;
+}
+
+.demo-feature-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+.demo-feature-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-input);
+  color: var(--color-accent-primary);
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.demo-feature-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.demo-feature-card p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* Horse Cards Section */
+.demo-horses {
+  padding: 64px 32px;
+  background: var(--color-bg-secondary);
+}
+
+.demo-horses-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.demo-horses-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 32px;
+  letter-spacing: -0.02em;
+}
+
+.demo-horse-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.demo-horse-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 250ms ease;
+}
+
+.demo-horse-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  border-color: var(--color-accent-primary);
+}
+
+.demo-horse-img {
+  width: 100%;
+  height: 180px;
+  background: var(--color-bg-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: var(--color-text-muted);
+  opacity: 0.4;
+}
+
+.demo-horse-info {
+  padding: 16px;
+}
+
+.demo-horse-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.demo-horse-ref {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+.demo-horse-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.demo-badge {
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.demo-badge-finish {
+  background: rgba(46, 204, 113, 0.12);
+  color: var(--color-accent-success);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+}
+
+.demo-badge-condition {
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.demo-badge-accent {
+  background: rgba(0,0,0,0.15);
+  color: var(--color-accent-primary);
+  border: 1px solid var(--color-accent-primary);
+  opacity: 0.7;
+}
+
+/* Form Section */
+.demo-form-section {
+  padding: 64px 32px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.demo-form-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.demo-form-group {
+  margin-bottom: 20px;
+}
+
+.demo-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.demo-form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 150ms;
+}
+
+.demo-form-input:focus {
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px var(--color-accent-primary-glow);
+}
+
+.demo-form-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.demo-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Color Palette Display */
+.demo-palette {
+  padding: 40px 32px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.demo-palette-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.demo-palette-grid {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.demo-palette-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.demo-palette-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+}
+
+.demo-palette-label {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-align: center;
+  max-width: 60px;
+}
+
+/* Footer */
+.demo-footer {
+  padding: 40px 32px 24px;
+  border-top: 1px solid var(--color-border);
+  background: rgba(0,0,0,0.2);
+}
+
+.demo-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.demo-footer-brand {
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.demo-footer-tagline {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.demo-footer-links {
+  display: flex;
+  gap: 40px;
+}
+
+.demo-footer-col h4 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.demo-footer-col a {
+  display: block;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 6px;
+  transition: color 150ms;
+}
+
+.demo-footer-col a:hover {
+  color: var(--color-accent-primary);
+}
+
+.demo-footer-bottom {
+  max-width: 1200px;
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.demo-footer-bottom a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.demo-footer-bottom a:hover {
+  color: var(--color-accent-primary);
+}
+
+/* Stats bar */
+.demo-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  padding: 40px 32px;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.demo-stat {
+  text-align: center;
+}
+
+.demo-stat-value {
+  display: block;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-accent-primary);
+}
+
+.demo-stat-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* Toast example */
+.demo-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-accent-success);
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.demo-toast span:first-child {
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .demo-features-grid { grid-template-columns: repeat(2, 1fr); }
+  .demo-horse-grid { grid-template-columns: repeat(2, 1fr); }
+  .demo-hero h1 { font-size: 36px; }
+}
+
+@media (max-width: 600px) {
+  .demo-features-grid { grid-template-columns: 1fr; }
+  .demo-horse-grid { grid-template-columns: 1fr 1fr; }
+  .demo-hero h1 { font-size: 28px; }
+  .demo-footer-inner { flex-direction: column; gap: 24px; }
+  .demo-stats { gap: 24px; flex-wrap: wrap; }
+  .theme-selector { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Theme Switcher Bar ── -->
+<div class="theme-selector">
+  <span class="theme-selector-label">🎨 Theme:</span>
+  <button class="theme-btn active" onclick="setTheme('current')" data-theme="current">
+    <span class="theme-swatch" style="background: #7c6df0;"></span>Current (Violet)
+  </button>
+  <button class="theme-btn" onclick="setTheme('emerald')" data-theme="emerald">
+    <span class="theme-swatch" style="background: #2ecc71;"></span>Emerald Ranch
+  </button>
+  <button class="theme-btn" onclick="setTheme('copper')" data-theme="copper">
+    <span class="theme-swatch" style="background: #c47a3f;"></span>Copper Canyon
+  </button>
+  <button class="theme-btn" onclick="setTheme('sapphire')" data-theme="sapphire">
+    <span class="theme-swatch" style="background: #3b82f6;"></span>Midnight Sapphire
+  </button>
+  <button class="theme-btn" onclick="setTheme('rosegold')" data-theme="rosegold">
+    <span class="theme-swatch" style="background: #e4728a;"></span>Rose Gold
+  </button>
+  <button class="theme-btn" onclick="setTheme('teal')" data-theme="teal">
+    <span class="theme-swatch" style="background: #14b8a6;"></span>Teal Stable
+  </button>
+  <button class="theme-btn" onclick="setTheme('barnred')" data-theme="barnred">
+    <span class="theme-swatch" style="background: #c0392b;"></span>Barn Red
+  </button>
+  <button class="theme-btn" onclick="setTheme('slate')" data-theme="slate">
+    <span class="theme-swatch" style="background: #8b8bff;"></span>Warm Slate
+  </button>
+</div>
+
+<!-- ── Demo Page ── -->
+<div class="demo-container theme-current" id="demo">
+
+  <!-- Header -->
+  <div class="demo-header">
+    <span class="demo-header-brand">🐴 Model Horse Hub</span>
+    <nav class="demo-header-nav">
+      <a href="#">Dashboard</a>
+      <a href="#">Show Ring</a>
+      <a href="#">Market</a>
+      <a href="#">Shows</a>
+      <a href="#">Feed</a>
+    </nav>
+  </div>
+
+  <!-- Hero -->
+  <section class="demo-hero">
+    <div class="demo-hero-badge">🐾 Hoofprint™ — The First Living Provenance System for Model Horses</div>
+    <h1>
+      The Only Platform Built <span class="text-gradient">for This Hobby</span>
+    </h1>
+    <p>
+      Catalog your herd with a 10,500+ reference database. Track provenance from blank resin to finished custom.
+      Sell with verified trust signals. Built by collectors, for collectors.
+    </p>
+    <div class="demo-hero-cta">
+      <button class="btn btn-primary">Create Free Account</button>
+      <button class="btn btn-ghost">Explore the Show Ring</button>
+    </div>
+    <div class="demo-hero-trust">
+      ✦ No credit card required &nbsp;·&nbsp; ✦ Privacy-first &nbsp;·&nbsp; ✦ Free forever tier
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="demo-stats">
+    <div class="demo-stat">
+      <span class="demo-stat-value">10,500+</span>
+      <span class="demo-stat-label">Releases & Resins</span>
+    </div>
+    <div class="demo-stat">
+      <span class="demo-stat-value">🐾</span>
+      <span class="demo-stat-label">Hoofprint™ Tracking</span>
+    </div>
+    <div class="demo-stat">
+      <span class="demo-stat-value">🔒</span>
+      <span class="demo-stat-label">Privacy-First</span>
+    </div>
+    <div class="demo-stat">
+      <span class="demo-stat-value">100%</span>
+      <span class="demo-stat-label">Free to Start</span>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section class="demo-features">
+    <h2 class="demo-features-title">
+      Everything You Need. <span class="text-gradient">Nothing You Don't.</span>
+    </h2>
+    <p class="demo-features-sub">Every feature exists because a real collector said "I wish this existed."</p>
+    <div class="demo-features-grid">
+      <div class="demo-feature-card">
+        <div class="demo-feature-icon">⭐</div>
+        <h3>10,500+ Reference Releases</h3>
+        <p>Search by mold, sculptor, scale, or year — identify any model in seconds with our hand-verified database.</p>
+      </div>
+      <div class="demo-feature-card">
+        <div class="demo-feature-icon">🔒</div>
+        <h3>Private Financial Vault</h3>
+        <p>Track purchase prices, estimated values, and insurance notes in a vault that only you can access.</p>
+      </div>
+      <div class="demo-feature-card">
+        <div class="demo-feature-icon">🏆</div>
+        <h3>Community Show Ring</h3>
+        <p>Your proudest models deserve an audience. Browse other collectors' herds and discover your next obsession.</p>
+      </div>
+      <div class="demo-feature-card">
+        <div class="demo-feature-icon">👥</div>
+        <h3>Follow Collectors</h3>
+        <p>Follow the collectors you care about, see their new additions, and build real hobby connections.</p>
+      </div>
+      <div class="demo-feature-card">
+        <div class="demo-feature-icon">📸</div>
+        <h3>Virtual Photo Shows</h3>
+        <p>Enter themed virtual shows, vote for favorites, and compete for placement — all from home.</p>
+      </div>
+      <div class="demo-feature-card">
+        <div class="demo-feature-icon">💫</div>
+        <h3>Trusted Marketplace</h3>
+        <p>List models for sale, message buyers, and build your reputation with verified seller ratings.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Horse Cards -->
+  <section class="demo-horses">
+    <div class="demo-horses-inner">
+      <h2 class="demo-horses-title">Show Ring — <span class="text-gradient">Community Showcase</span></h2>
+      <div class="demo-horse-grid">
+        <div class="demo-horse-card">
+          <div class="demo-horse-img">🐴</div>
+          <div class="demo-horse-info">
+            <div class="demo-horse-name">Midnight Eclipse</div>
+            <div class="demo-horse-ref">Breyer Traditional — Esprit Mold</div>
+            <div class="demo-horse-badges">
+              <span class="demo-badge demo-badge-finish">OF</span>
+              <span class="demo-badge demo-badge-condition">LSQ</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo-horse-card">
+          <div class="demo-horse-img">🐴</div>
+          <div class="demo-horse-info">
+            <div class="demo-horse-name">Desert Rose</div>
+            <div class="demo-horse-ref">Stone — Ideal Stock Horse</div>
+            <div class="demo-horse-badges">
+              <span class="demo-badge demo-badge-finish">CM</span>
+              <span class="demo-badge demo-badge-condition">Mint</span>
+              <span class="demo-badge demo-badge-accent">For Sale</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo-horse-card">
+          <div class="demo-horse-img">🐴</div>
+          <div class="demo-horse-info">
+            <div class="demo-horse-name">Brambleberry</div>
+            <div class="demo-horse-ref">Artist Resin — Valentino</div>
+            <div class="demo-horse-badges">
+              <span class="demo-badge demo-badge-finish">AR</span>
+              <span class="demo-badge demo-badge-condition">Excellent</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo-horse-card">
+          <div class="demo-horse-img">🐴</div>
+          <div class="demo-horse-info">
+            <div class="demo-horse-name">Storm Chaser</div>
+            <div class="demo-horse-ref">Breyer Classic — Silky Sullivan</div>
+            <div class="demo-horse-badges">
+              <span class="demo-badge demo-badge-finish">OF</span>
+              <span class="demo-badge demo-badge-condition">Good</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Preview -->
+  <section class="demo-form-section">
+    <h2 class="demo-form-title">Add Your Horse</h2>
+    <div class="demo-form-group">
+      <label class="demo-form-label">Horse Name</label>
+      <input class="demo-form-input" type="text" placeholder="e.g. Midnight Eclipse" />
+    </div>
+    <div class="demo-form-row">
+      <div class="demo-form-group">
+        <label class="demo-form-label">Finish Type</label>
+        <input class="demo-form-input" type="text" placeholder="OF, CM, AR…" />
+      </div>
+      <div class="demo-form-group">
+        <label class="demo-form-label">Condition</label>
+        <input class="demo-form-input" type="text" placeholder="Mint, LSQ, Good…" />
+      </div>
+    </div>
+    <div class="demo-form-group">
+      <label class="demo-form-label">Notes</label>
+      <input class="demo-form-input" type="text" placeholder="Any details about this model…" />
+    </div>
+    <div style="display: flex; gap: 12px; margin-top: 8px;">
+      <button class="btn btn-primary" style="flex: 1;">Save Horse</button>
+      <button class="btn btn-ghost">Cancel</button>
+    </div>
+    <div style="text-align: center;">
+      <div class="demo-toast">
+        <span>✅</span>
+        <span style="color: var(--color-text-primary);">Horse saved successfully!</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Color Palette Display -->
+  <div class="demo-palette">
+    <h3 class="demo-palette-title">Active Color Palette</h3>
+    <div class="demo-palette-grid" id="palette-display">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="demo-footer">
+    <div class="demo-footer-inner">
+      <div>
+        <div class="demo-footer-brand">🐴 Model Horse Hub</div>
+        <div class="demo-footer-tagline">Built by collectors, for collectors.</div>
+      </div>
+      <div class="demo-footer-links">
+        <div class="demo-footer-col">
+          <h4>Platform</h4>
+          <a href="#">Show Ring</a>
+          <a href="#">Price Guide</a>
+          <a href="#">Art Studio</a>
+          <a href="#">Photo Shows</a>
+        </div>
+        <div class="demo-footer-col">
+          <h4>Community</h4>
+          <a href="#">Groups</a>
+          <a href="#">Events</a>
+          <a href="#">Activity Feed</a>
+          <a href="#">Help ID</a>
+        </div>
+        <div class="demo-footer-col">
+          <h4>Company</h4>
+          <a href="#">About Us</a>
+          <a href="#">Contact Us</a>
+          <a href="#">FAQ</a>
+          <a href="#">Getting Started</a>
+        </div>
+      </div>
+    </div>
+    <div class="demo-footer-bottom">
+      <span>© 2026 Model Horse Hub. All rights reserved.</span>
+      <span>
+        <a href="#">Privacy</a> · <a href="#">Terms</a>
+      </span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PALETTE_KEYS = [
+  { var: '--color-accent-primary', label: 'Primary' },
+  { var: '--color-accent-primary-hover', label: 'Primary Hover' },
+  { var: '--color-accent-secondary', label: 'Secondary' },
+  { var: '--color-accent-success', label: 'Success' },
+  { var: '--color-accent-danger', label: 'Danger' },
+  { var: '--color-bg-primary', label: 'BG' },
+  { var: '--color-bg-card', label: 'Card' },
+  { var: '--color-bg-input', label: 'Input' },
+  { var: '--color-text-primary', label: 'Text' },
+  { var: '--color-text-secondary', label: 'Text 2' },
+  { var: '--color-text-muted', label: 'Muted' },
+];
+
+function setTheme(name) {
+  const demo = document.getElementById('demo');
+  // Remove all theme classes
+  demo.className = 'demo-container theme-' + name;
+
+  // Update buttons
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === name);
+  });
+
+  // Update button styling
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    const isActive = btn.dataset.theme === name;
+    if (isActive) {
+      btn.style.background = 'rgba(255,255,255,0.15)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'rgba(255,255,255,0.3)';
+    } else {
+      btn.style.background = 'rgba(255,255,255,0.05)';
+      btn.style.color = '#aaa';
+      btn.style.borderColor = 'rgba(255,255,255,0.1)';
+    }
+  });
+
+  // Update palette display after CSS transition
+  setTimeout(updatePalette, 50);
+}
+
+function updatePalette() {
+  const demo = document.getElementById('demo');
+  const container = document.getElementById('palette-display');
+  const styles = getComputedStyle(demo);
+
+  container.innerHTML = PALETTE_KEYS.map(key => {
+    const color = styles.getPropertyValue(key.var).trim();
+    return `
+      <div class="demo-palette-item">
+        <div class="demo-palette-circle" style="background: ${color};"></div>
+        <div class="demo-palette-label">${key.label}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Initialize
+setTheme('current');
+</script>
+
+</body>
+</html>
