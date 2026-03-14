@@ -5,6 +5,7 @@ import "./studio.css";
 import "./competition.css";
 import { SimpleModeProvider } from "@/lib/context/SimpleModeContext";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const GA_MEASUREMENT_ID = "G-7DWKBT1JV9";
 
@@ -39,6 +40,7 @@ export default function RootLayout({
         <SimpleModeProvider>
           <Header />
           <main>{children}</main>
+          <Footer />
         </SimpleModeProvider>
       </body>
     </html>
