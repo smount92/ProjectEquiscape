@@ -1108,9 +1108,9 @@ p {
   right: 0;
   height: 3px;
   background: linear-gradient(90deg,
-    var(--color-accent-primary),
-    rgba(74, 222, 222, 0.6),
-    var(--color-accent-primary));
+      var(--color-accent-primary),
+      rgba(74, 222, 222, 0.6),
+      var(--color-accent-primary));
   opacity: 0.7;
 }
 
@@ -1854,8 +1854,7 @@ p {
 .horse-card-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center 20%;
+  object-fit: contain;
   transition: transform var(--transition-slow);
 }
 
@@ -2649,6 +2648,237 @@ p {
   min-height: var(--btn-min-h);
 }
 
+/* ── UnifiedReferenceSearch — Search Bar & Dropdown ── */
+
+.ref-search-container {
+  position: relative;
+}
+
+.ref-search-bar {
+  position: relative;
+  margin-bottom: var(--space-md);
+}
+
+.ref-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ref-search-input {
+  width: 100%;
+  padding: var(--space-md) var(--space-xl) var(--space-md) 44px;
+  font-family: var(--font-family);
+  font-size: calc(var(--font-size-md) * var(--font-scale));
+  color: var(--color-text-primary);
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  outline: none;
+  transition: all var(--transition-fast);
+  min-height: 52px;
+}
+
+.ref-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.ref-search-input:focus {
+  border-color: var(--color-accent-primary);
+  box-shadow:
+    0 0 0 3px var(--color-accent-primary-glow),
+    0 4px 20px rgba(124, 109, 240, 0.1);
+}
+
+.ref-search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all var(--transition-fast);
+}
+
+.ref-search-clear:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-text-primary);
+}
+
+.ref-dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  right: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--color-bg-card);
+  border: 1px solid rgba(124, 109, 240, 0.25);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(124, 109, 240, 0.1);
+  z-index: 100;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.ref-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ref-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ref-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.ref-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  text-align: left;
+  transition: background var(--transition-fast);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.ref-result-item:hover {
+  background: rgba(124, 109, 240, 0.08);
+}
+
+.ref-result-item:last-child {
+  border-bottom: none;
+}
+
+.ref-result-name {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.ref-result-meta {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+.ref-result-action {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-weight: 600;
+  color: var(--color-accent-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-left: var(--space-sm);
+}
+
+.ref-search-status {
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.ref-no-results {
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.ref-selected-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(124, 109, 240, 0.06);
+  border: 1px solid rgba(124, 109, 240, 0.2);
+  border-radius: var(--radius-lg);
+}
+
+.ref-selected-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ref-selected-title {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.ref-selected-maker {
+  color: var(--color-text-secondary);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.ref-selected-parent,
+.ref-selected-scale {
+  color: var(--color-text-muted);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.ref-clear-btn {
+  flex-shrink: 0;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.ref-releases-panel {
+  margin-top: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-bg-card);
+}
+
+.ref-releases-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(124, 109, 240, 0.06);
+  border-bottom: 1px solid var(--color-border);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  color: var(--color-text-secondary);
+}
+
+.ref-mold-direct {
+  background: rgba(92, 224, 160, 0.04);
+  border-bottom: 1px solid var(--color-border) !important;
+}
+
+.ref-mold-direct:hover {
+  background: rgba(92, 224, 160, 0.1);
+}
+
 .ref-custom-entry-btn {
   width: 100%;
   justify-content: center;
@@ -2787,8 +3017,7 @@ p {
 .community-card-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center 20%;
+  object-fit: contain;
   transition: transform var(--transition-base);
 }
 
