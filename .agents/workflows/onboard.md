@@ -17,12 +17,12 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | Database | Supabase (PostgreSQL + Row Level Security) |
 | Auth | Supabase Auth (PKCE flow, cookie-based SSR) |
 | Hosting | Vercel (serverless) |
-| CSS | Vanilla CSS design system (`globals.css` + 19 CSS Modules + `studio.css` + `competition.css`) |
+| CSS | Vanilla CSS design system (`globals.css` ~11K lines + 19 CSS Modules + `studio.css` + `competition.css`) |
 | Email | Resend |
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **56 routes**, **81 components**, **34 server action files**, and **56 database migrations** (001–060).
+The platform has **56+ routes**, **80+ components**, **34 server action files**, and **70 database migrations** (001–070).
 
 ## Step 2 — Read the Current State Report
 
@@ -32,17 +32,27 @@ The most up-to-date overview of the entire project (every route, component, serv
 View file: c:\Project Equispace\model-horse-hub\.agents\docs\model_horse_hub_state_report.md
 ```
 
-If this file is stale, check the brain artifacts directory for a newer `model_horse_hub_full_state_report.md`.
-
-## Step 3 — Read the Active Blueprint
-
-The current active blueprint is the **Phase 6.5 Deep Polish & Hardening** workflow:
+For deep architecture understanding:
 
 ```
-View file: c:\Project Equispace\model-horse-hub\.agents\workflows\v23-deep-polish.md
+View file: c:\Project Equispace\model-horse-hub\.agents\docs\platform_architecture_deep_dive.md
 ```
 
-For historical context on the schema unification that brought us here:
+## Step 3 — Read the Active Blueprint / Dev Queue
+
+The current active development queue:
+
+```
+View file: c:\Project Equispace\model-horse-hub\.agents\workflows\dev-nextsteps.md
+```
+
+For the Phase 6 blueprint (the most recent major planning document):
+
+```
+View file: c:\Project Equispace\model-horse-hub\.agents\docs\Phase6_master_blueprint.md
+```
+
+For historical context on the schema unification that shaped the database:
 
 ```
 View file: c:\Project Equispace\model-horse-hub\.agents\docs\Grand_Unification_Plan.md
@@ -55,13 +65,13 @@ View file: c:\Project Equispace\model-horse-hub\.agents\docs\Grand_Unification_P
 src/
 ├── app/
 │   ├── layout.tsx          # Root layout — Inter font, GA, SimpleModeProvider, Header
-│   ├── globals.css         # 10,145 lines — design system tokens + shared component styles
+│   ├── globals.css         # ~11,000 lines — design system tokens + shared component styles
 │   ├── studio.css          # Art Studio styles
 │   ├── competition.css     # Show/competition styles
 │   ├── actions/            # 34 "use server" action files — ALL backend logic
-│   ├── api/                # 5 API routes (auth, cron, export, identify-mold, reference-dictionary)
-│   └── [route folders]/    # 50 page.tsx files across ~30 route groups
-├── components/             # 81 client components + 19 CSS Modules
+│   ├── api/                # API routes (auth, cron, export, identify-mold, reference-dictionary)
+│   └── [route folders]/    # 50+ page.tsx files across ~30 route groups
+├── components/             # 80+ client components + 19 CSS Modules
 └── lib/
     ├── supabase/           # admin.ts (service role), client.ts (browser), server.ts (SSR)
     ├── types/              # database.ts (manual types), csv-import.ts
@@ -88,20 +98,21 @@ src/
 - Use `useState` for loading/error states
 - Import server actions directly — Next.js handles serialization
 - Prefer CSS Modules (`styles.className`) for new components; shared classes stay in globals
+- **Modals MUST use `createPortal(overlay, document.body)`** from `react-dom` to avoid CSS containment issues from parent transforms
 
 **CSS Architecture:**
 - Design tokens in `:root` of `globals.css` — colors, spacing, radii, shadows, transitions
-- Dark theme by default — deep purples/indigos (`#0a0a12`), violet accent (`#7c6df0`)
+- Warm earth-toned theme — cream/parchment background (`#faf6f0`), sage green accent (`#3d5a3e`), brown/leather tones
 - Simple Mode: `[data-simple-mode="true"]` — 130% font scale, 60px min buttons
 - **19 CSS Modules** for component-specific styles (ChatThread, OfferCard, DashboardShell, etc.)
 - Shared primitives (`horse-card-*`, `btn-*`, `form-*`, `modal-*`, `feed-*`) stay in globals
 - New components should use CSS Modules, not add to globals
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 060)
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 070)
 - Universal Catalog (`catalog_items`) — 10,500+ entries for molds, releases, artist resins, tack
 - Universal Ledger — `v_horse_hoofprint` materialized view (UNION ALL across 5 source tables)
-- Commerce State Machine — `transactions.status` has 6 states: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
+- Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
 - Market Price Guide — `mv_market_prices` materialized view refreshed by cron
 
 **Privacy Rules:**
@@ -109,6 +120,11 @@ src/
 - Horse images in private `horse-images` bucket — use `getSignedImageUrl()` for rendering
 - Watermark opt-in (`watermark_photos` boolean on users)
 - Block system prevents interaction between blocked users
+
+### Header Navigation
+- **Priority+ pattern** — items progressively collapse into a "More" dropdown as viewport shrinks
+- Uses `ResizeObserver` to detect overflow and move items to hamburger menu
+- Order: Stable, Show Ring, Feed, Discover, Shows, Art Studio → More (Market, Events, Groups, About, FAQ, etc.)
 
 ### Security
 - Rate limiting via `checkRateLimit()` from `src/lib/utils/rateLimit.ts`
@@ -122,15 +138,17 @@ src/
 Key entry points for understanding the code:
 
 | Area | Start Here |
-|------|-----------|
+|------|-----------
 | Dashboard | `src/app/dashboard/page.tsx` |
 | Add Horse (multi-step form) | `src/app/add-horse/page.tsx` |
+| Horse Passport (private) | `src/app/stable/[id]/page.tsx` |
 | Public Passport | `src/app/community/[id]/page.tsx` |
-| Commerce Flow | `src/app/actions/transactions.ts` (makeOffer → respondToOffer → markPaymentSent → verifyFundsAndRelease) |
+| Commerce Flow | `src/app/actions/transactions.ts` |
 | Chat + OfferCard | `src/app/inbox/[id]/page.tsx` + `src/components/OfferCard.tsx` |
 | Horse CRUD | `src/app/actions/horse.ts` |
 | Reference Search | `src/components/UnifiedReferenceSearch.tsx` |
 | Feed | `src/app/feed/page.tsx` + `src/app/actions/activity.ts` |
+| Header Nav | `src/components/Header.tsx` |
 | Design Tokens | `src/app/globals.css` lines 1–120 |
 
 ## Step 6 — Documentation Responsibility
@@ -143,4 +161,4 @@ This project maintains living documentation. After completing any feature work:
 
 ## Step 7 — You're Ready
 
-You are now oriented. Ask the user what they'd like to do, or check the active workflow (`/v23-deep-polish`) for pending tasks.
+You are now oriented. Ask the user what they'd like to do, or check the dev queue (`/dev-nextsteps`) for pending tasks.

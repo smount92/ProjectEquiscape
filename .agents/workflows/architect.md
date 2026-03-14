@@ -35,6 +35,8 @@ Before making ANY architectural decisions, you must understand the model horse c
 | **Photo Show** | Online competitions using photographs. LSQ photo standards matter here. |
 | **Show String** | A collector's set of models they bring to shows. Like a "roster" in sports. |
 | **Provenance** | The documented history of a model — who owned it, where it placed, its lineage (for resins). Provenance increases value dramatically. |
+| **Hoofprint™** | Model Horse Hub's provenance feature — a living digital identity that follows a model through its lifecycle across owners. |
+| **Catalog Item** | A unified reference entry in the `catalog_items` table — covers plastic molds, plastic releases, and artist resins in a single polymorphic schema. |
 
 ### Community Mindset
 
@@ -50,22 +52,23 @@ When evaluating features, think like a collector:
 
 ## Part 2: Onboarding — Load Full Context
 
-1. Read the **Master Architecture Report** for the complete tech stack, project structure, database schema, established patterns, all completed features, and the current roadmap:
+1. Read the **Master Architecture & State Report** for the complete tech stack, project structure, database schema, and current state:
 
 ```
-View: 00_master_architecture.md (in brain artifacts directory)
+View: .agents/docs/model_horse_hub_state_report.md
+View: .agents/docs/platform_architecture_deep_dive.md
 ```
 
-2. Read the **Developer Conventions** to understand the strict coding patterns all agents must follow:
+2. Read the **Master Implementation Blueprint** for the full implementation history and established patterns:
 
 ```
-View: 02_developer_conventions.md (in brain artifacts directory)
+View: .agents/docs/master_implementation_blueprint.md
 ```
 
-3. Read the **Future Roadmap** for feature outlines and prioritization:
+3. Check the **Phase 6 Blueprint** for the current active development phase:
 
 ```
-View: 03_future_roadmap.md (in brain artifacts directory)
+View: .agents/docs/Phase6_master_blueprint.md
 ```
 
 4. Scan the codebase structure to understand current state:
@@ -79,12 +82,62 @@ cd c:\Project Equispace\model-horse-hub && dir src\app\actions\ && dir src\compo
 
 // turbo
 ```
-cd c:\Project Equispace\model-horse-hub && git log --oneline -15
+cd c:\Project Equispace\model-horse-hub && git log --oneline -20
+```
+
+6. Check the existing workflow library to understand what has been built:
+
+// turbo
+```
+cd c:\Project Equispace\model-horse-hub && dir .agents\workflows\
 ```
 
 ---
 
-## Part 3: What You Can Do
+## Part 3: Current Project State (as of 2026-03-14)
+
+### Tech Stack
+- **Framework:** Next.js 16.1.6 (App Router, Turbopack)
+- **Database:** Supabase (PostgreSQL + Auth + Storage + RLS)
+- **Styling:** CSS Modules + globals.css (partial extraction — ~11K lines remaining)
+- **Deployment:** Vercel (auto-deploy on push to main)
+- **Domain:** modelhorsehub.com
+
+### Completed Milestones (V1–V27)
+- V1: Core CRUD — horses, collections, photos, financial vault
+- V2: Enterprise refactor — atomic RPCs, direct-to-storage uploads, N+1 fixes
+- V3: CRUD completion — edit horse, parked horse, admin suggestions
+- V4: Final cleanup — aliasMap eradication, dead code removal
+- V5: Modern Social — likes, @mentions, threaded comments, real-time DMs, notifications, block system
+- V6: Community enrichment — events, groups, Art Studio, feed post details
+- V6-V9: Universal engines — social engine (posts/media/likes), trust engine (transactions/reviews), competition engine (events/entries), universal catalog (catalog_items)
+- V10: Universal ledger — hoofprint materialized view
+- V11: The Great Purge — legacy table removal
+- V12: Asset expansion — tack, props, dioramas
+- V13: Live show tree — event divisions/classes/entries
+- V14: Market Price Guide ("Blue Book")
+- V15-V16: Post-epic cleanup + integrity sprint
+- V17: Hobby-native UX — binder view, bulk ops, rapid intake, photo reorder, privacy, OpenGraph
+- V18: Pro Dashboard & UI glow-up
+- V19: Group enrichment — files/docs, admin panel, pinned posts
+- V20: CSS architecture maturity — module extraction
+- V21: Feed quality — watermarking, no-photo-no-feed rules
+- V22: Commerce engine — safe-trade state machine
+- V23-V26: Deep polish, trust & scale, launch readiness, masterclass sprint
+- V27: QA sprint — 13 fixes, SEO, legal pages, footer, DM improvements
+- **Current:** Bug fixes, UX polish (reference link fix, delete modal portal, Priority+ header nav)
+
+### Database
+- **70 migrations** deployed
+- Key tables: `user_horses`, `catalog_items`, `horse_images`, `financial_vault`, `posts`, `media_attachments`, `likes`, `comments`, `transactions`, `reviews`, `events`, `event_entries`, `horse_transfers`, `notifications`, `direct_messages`
+- All tables use Row Level Security (RLS)
+
+### Active Workflows
+See `.agents/workflows/` for 48 workflow files covering all implemented features.
+
+---
+
+## Part 4: What You Can Do
 
 Based on what the user asks, perform one or more of the following roles:
 
@@ -97,25 +150,26 @@ Produce a comprehensive status report covering:
 - ⚠️ Any drift from established patterns (review recent files for convention violations)
 - 📈 Recommendations: what would have the most impact next
 
-Format as a markdown artifact saved to the brain artifacts directory.
+Format as a markdown artifact saved to `.agents/docs/`.
 
 ### Role B: Feature Scoping
 
 When asked to scope a new feature:
 1. Evaluate the feature through the lens of the model horse community (does it serve manage/show/sell/admire?)
-2. Create a **full implementation plan** (following the template in `01_social_layer_plan.md` or `04_provenance_tracking_plan.md`)
-3. Break the plan into **4-5 atomic task files** (following `task_*.md` naming)
+2. Create a **full implementation plan** with schema, server actions, UI components, and testing checklist
+3. Break the plan into **atomic tasks** that can be executed independently
 4. Create a **workflow file** in `.agents/workflows/` so an agent can execute it via slash command
-5. Update the **roadmap** to reflect the new feature's position
+5. Update the roadmap to reflect the new feature's position
 
 ### Role C: Code Audit
 
 Review the actual source code for:
-- **Pattern compliance:** Do recent files follow the conventions in `02_developer_conventions.md`?
+- **Pattern compliance:** Do recent files follow established conventions?
 - **Security:** Is `financial_vault` ever queried on public routes? Are all tables using RLS?
-- **Type safety:** Are types properly defined in `database.ts` for all tables?
-- **Component structure:** Do client components follow the `"use client"` / status state / `e.stopPropagation()` patterns?
+- **Type safety:** Are types properly defined for all tables?
+- **Component structure:** Do client components follow the `"use client"` / status state / portal patterns?
 - **CSS consistency:** Are new styles using design token variables? Is there dead CSS?
+- **Portal pattern:** All modals should use `createPortal(overlay, document.body)` to avoid CSS containment issues
 
 Read files with `view_file` and report findings. Do NOT edit any source files.
 
@@ -124,11 +178,8 @@ Read files with `view_file` and report findings. Do NOT edit any source files.
 When reprioritizing:
 1. **Never delete features from the roadmap** — move them down, mark as "Deferred", or "Needs Reassessment"
 2. **Always document the reasoning** — why was the priority changed?
-3. **Update ALL affected docs:**
-   - `00_master_architecture.md` — roadmap section
-   - `03_future_roadmap.md` — priority queue and feature outlines
-   - Any existing feature plans or task files
-4. **Create a change log entry** — add a dated note at the top of `03_future_roadmap.md` explaining what changed and why
+3. **Update ALL affected docs** in `.agents/docs/`
+4. **Create a change log entry** explaining what changed and why
 
 ### Role E: Brainstorming
 
@@ -140,12 +191,11 @@ When the user wants to explore new ideas:
 
 ---
 
-## Part 4: Output Standards
+## Part 5: Output Standards
 
 ### Document Naming
 - Status reports: `status_report_YYYY_MM_DD.md`
 - Feature plans: `NN_feature_name_plan.md` (sequential numbering)
-- Task files: `task_N_short_name.md` (sequential numbering, continuing from existing)
 - Workflows: `.agents/workflows/feature-name.md` (kebab-case)
 
 ### Quality Bar
@@ -164,14 +214,14 @@ Every document you produce must be detailed enough that:
 
 ---
 
-## Part 5: Getting Started
+## Part 6: Getting Started
 
 After loading all context, ask the user:
 
 > "I've reviewed the full architecture, codebase, and roadmap. Here's a quick status snapshot:
 >
-> **Completed:** [X] features
-> **Current Roadmap:** [Next feature] is fully spec'd and ready
+> **Completed:** [X] features across V1–V27 + current fixes
+> **Current Roadmap:** [Next feature/phase] is ready
 > **Recent Activity:** [Last few commits]
 >
 > What would you like to focus on today?
