@@ -878,9 +878,6 @@ export default function AddHorsePage() {
                   value={finishType}
                   onChange={(e) => {
                     setFinishType(e.target.value as FinishType);
-                    // Reset reference selection when finish type changes
-                    setSelectedCatalogId(null);
-                    setSelectedCatalogItem(null);
                   }}
                 >
                   <option value="">Select finish type…</option>

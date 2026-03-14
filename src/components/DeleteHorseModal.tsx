@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { deleteHorse } from "@/app/actions/horse";
 
@@ -64,8 +65,8 @@ export default function DeleteHorseModal({
         Delete from Stable
       </button>
 
-      {/* Modal overlay */}
-      {showModal && (
+      {/* Modal overlay — portaled to body to escape CSS containment */}
+      {showModal && createPortal(
         <div
           className="modal-overlay"
           onClick={(e) => {
@@ -132,7 +133,8 @@ export default function DeleteHorseModal({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

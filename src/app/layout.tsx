@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import "./studio.css";
@@ -40,13 +41,16 @@ export const metadata: Metadata = {
   },
 };
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif-theme" });
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-simple-mode="false">
+    <html lang="en" data-simple-mode="false" className={`${inter.variable} ${playfair.variable}`}>
       <head>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
@@ -72,7 +76,7 @@ export default function RootLayout({
           </ToastProvider>
         </SimpleModeProvider>
       </body>
-    </html>
+    </html >
   );
 }
 

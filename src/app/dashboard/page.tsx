@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { getSignedImageUrls } from "@/lib/utils/storage";
+import {
+    Camera, Trophy, Users, FileText, Zap, Plus,
+    BarChart3, FolderOpen, DollarSign, Award, Mail
+} from "lucide-react";
 import DashboardToast from "@/components/DashboardToast";
 import DashboardShell from "@/components/DashboardShell";
 import ExportButton from "@/components/ExportButton";
@@ -177,24 +181,24 @@ export default async function DashboardPage({
                 {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
                     <div className="welcome-card card animate-fade-in-up">
-                        <h2>👋 Welcome to Model Horse Hub!</h2>
+                        <h2>Welcome to Model Horse Hub!</h2>
                         <p>Let&apos;s get started by adding your first model to your digital stable.</p>
                         <div className="welcome-steps">
                             <div className="welcome-step">
                                 <span className="welcome-step-number">1</span>
-                                <span>📸 Add your first horse with photos</span>
+                                <span><Camera size={16} strokeWidth={1.5} /> Add your first horse with photos</span>
                             </div>
                             <div className="welcome-step">
                                 <span className="welcome-step-number">2</span>
-                                <span>🏆 Make it public for the Show Ring</span>
+                                <span><Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring</span>
                             </div>
                             <div className="welcome-step">
                                 <span className="welcome-step-number">3</span>
-                                <span>👥 Discover and follow other collectors</span>
+                                <span><Users size={16} strokeWidth={1.5} /> Discover and follow other collectors</span>
                             </div>
                         </div>
                         <Link href="/add-horse" className="btn btn-primary btn-lg">
-                            🐴 Add Your First Horse
+                            <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
                         </Link>
                     </div>
                 )}
@@ -227,13 +231,13 @@ export default async function DashboardPage({
                         {totalHorseCount > 0 && <ExportButton />}
                         {totalHorseCount > 0 && <InsuranceReportButton />}
                         <Link href="/stable/import" className="btn btn-ghost" id="batch-import-button">
-                            📄 Batch Import
+                            <FileText size={16} strokeWidth={1.5} /> Batch Import
                         </Link>
                         <Link href="/add-horse/quick" className="btn btn-ghost" id="quick-add-button">
-                            ⚡ Quick Add
+                            <Zap size={16} strokeWidth={1.5} /> Quick Add
                         </Link>
                         <Link href="/add-horse" className="btn btn-primary" id="add-horse-button">
-                            🐴 Add to Stable
+                            <Plus size={16} strokeWidth={1.5} /> Add to Stable
                         </Link>
                     </div>
                 </div>
@@ -279,18 +283,18 @@ export default async function DashboardPage({
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
                             <div className="sidebar-section">
-                                <h3 className="sidebar-section-title">📊 Stable Overview</h3>
+                                <h3 className="sidebar-section-title"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
                                 <div className={styles.stats}>
                                     <div className={styles.statRow}>
-                                        <span className={styles.statLabel}>🐴 Total Models</span>
+                                        <span className={styles.statLabel}><Plus size={14} strokeWidth={1.5} /> Total Models</span>
                                         <span className={styles.statValue}>{totalHorseCount}</span>
                                     </div>
                                     <div className={styles.statRow}>
-                                        <span className={styles.statLabel}>📁 Collections</span>
+                                        <span className={styles.statLabel}><FolderOpen size={14} strokeWidth={1.5} /> Collections</span>
                                         <span className={styles.statValue}>{collections.length}</span>
                                     </div>
                                     <div className={styles.statRow}>
-                                        <span className={styles.statLabel}>💰 Vault Value</span>
+                                        <span className={styles.statLabel}><DollarSign size={14} strokeWidth={1.5} /> Vault Value</span>
                                         <span className={styles.statValue}>
                                             {totalVaultValue > 0
                                                 ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
@@ -298,12 +302,12 @@ export default async function DashboardPage({
                                         </span>
                                     </div>
                                     <div className={styles.statRow}>
-                                        <span className={styles.statLabel}>🏅 Show Placings</span>
+                                        <span className={styles.statLabel}><Award size={14} strokeWidth={1.5} /> Show Placings</span>
                                         <span className={styles.statValue}>{totalShowRecords ?? 0}</span>
                                     </div>
                                     {unreadMsgCount > 0 && (
                                         <Link href="/inbox" className={styles.statRow} style={{ textDecoration: "none" }}>
-                                            <span className={styles.statLabel}>✉️ Unread Messages</span>
+                                            <span className={styles.statLabel}><Mail size={14} strokeWidth={1.5} /> Unread Messages</span>
                                             <span className={styles.statValue} style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
                                         </Link>
                                     )}
@@ -314,7 +318,7 @@ export default async function DashboardPage({
                         {/* Collections — Vertical list */}
                         {collections.length > 0 && (
                             <div className="sidebar-section">
-                                <h3 className="sidebar-section-title">📁 Collections</h3>
+                                <h3 className="sidebar-section-title"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
                                 <div className={styles.collections}>
                                     {collections.map((col) => (
                                         <Link

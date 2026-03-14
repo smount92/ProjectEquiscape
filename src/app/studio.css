@@ -41,9 +41,9 @@
 }
 
 .studio-tag.tag-secondary {
-    background: rgba(99, 102, 241, 0.1);
-    color: #818cf8;
-    border-color: rgba(99, 102, 241, 0.2);
+    background: rgba(44, 85, 69, 0.1);
+    color: #2C5545;
+    border-color: rgba(44, 85, 69, 0.2);
 }
 
 /* ── Studio Status Badges ── */
@@ -164,7 +164,7 @@
     gap: var(--space-lg);
     margin-top: var(--space-lg);
     padding-top: var(--space-lg);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     flex-wrap: wrap;
 }
 
@@ -321,7 +321,7 @@
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.03);
 }
 
 .studio-queue-slot {
@@ -371,7 +371,7 @@
     gap: var(--space-md);
     padding: var(--space-md);
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.02);
     border-left: 3px solid rgba(139, 92, 246, 0.3);
 }
 
@@ -445,7 +445,7 @@
     height: 20px;
     padding: 0 6px;
     border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.06);
     font-size: calc(0.7rem * var(--font-scale));
     font-weight: 600;
 }
@@ -462,8 +462,8 @@
     gap: var(--space-md);
     padding: var(--space-md);
     border-radius: var(--radius-lg);
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px dashed rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px dashed rgba(0, 0, 0, 0.08);
     opacity: 0.6;
     text-decoration: none;
     color: inherit;
@@ -488,7 +488,7 @@
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(0, 0, 0, 0.04);
     filter: grayscale(1);
 }
 

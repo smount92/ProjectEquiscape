@@ -43,7 +43,7 @@
     left: var(--space-sm);
     padding: 4px 10px;
     background: linear-gradient(135deg, #F59E0B, #D97706);
-    color: #1a1a2e;
+    color: #FFFFFF;
     font-size: calc(0.7rem * var(--font-scale));
     font-weight: 700;
     border-radius: var(--radius-sm);

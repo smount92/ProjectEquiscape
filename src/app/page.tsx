@@ -1,5 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import {
+  Camera, Trophy, PawPrint, Handshake, Package,
+  Home, Palette, TrendingUp, Shield, Fingerprint
+} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Model Horse Hub — The Digital Home for the Model Horse Hobby",
@@ -15,7 +19,7 @@ export default function LandingPage() {
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-glow hero-glow-secondary" aria-hidden="true" />
         <div className="hero-content animate-fade-in-up">
-          <span className="hero-badge">🐾 Hoofprint™ — The First Living Provenance System for Model Horses</span>
+          <span className="hero-badge"><Fingerprint size={16} strokeWidth={1.5} /> Hoofprint™ — The First Living Provenance System for Model Horses</span>
           <h1 className="hero-headline">
             The Only Platform Built{" "}
             <span className="text-gradient">for This Hobby</span>
@@ -52,7 +56,7 @@ export default function LandingPage() {
           <div className="how-steps">
             <div className="how-step">
               <div className="how-step-number">1</div>
-              <div className="how-step-icon">📸</div>
+              <div className="how-step-icon"><Camera size={28} strokeWidth={1.5} /></div>
               <h3>Add Your Horse</h3>
               <p>
                 Search our 10,500+ reference database to instantly identify your model.
@@ -63,7 +67,7 @@ export default function LandingPage() {
             <div className="how-step-arrow" aria-hidden="true">→</div>
             <div className="how-step">
               <div className="how-step-number">2</div>
-              <div className="how-step-icon">🏆</div>
+              <div className="how-step-icon"><Trophy size={28} strokeWidth={1.5} /></div>
               <h3>Join the Community</h3>
               <p>
                 Publish your best models to the Show Ring for the community to discover.
@@ -74,7 +78,7 @@ export default function LandingPage() {
             <div className="how-step-arrow" aria-hidden="true">→</div>
             <div className="how-step">
               <div className="how-step-number">3</div>
-              <div className="how-step-icon">🐾</div>
+              <div className="how-step-icon"><PawPrint size={28} strokeWidth={1.5} /></div>
               <h3>Build Your Hoofprint</h3>
               <p>
                 Every horse gets a permanent digital identity. Track it from blank resin
@@ -220,7 +224,7 @@ export default function LandingPage() {
               <h3 className="feature-card-title">Virtual Photo Shows</h3>
               <p className="feature-card-desc">
                 Can&apos;t make it to a live show? Enter themed virtual shows, vote for your favorites,
-                and compete for 🥇🥈🥉 placement — all from home. Shows run on deadlines with
+                and compete for placement — all from home. Shows run on deadlines with
                 real results.
               </p>
             </div>
@@ -255,7 +259,7 @@ export default function LandingPage() {
       {/* ─── Hoofprint™ Teaser ─── */}
       <section className="hoofprint-teaser-section" id="hoofprint-teaser">
         <div className="hoofprint-teaser-inner">
-          <div className="hoofprint-teaser-badge">🐾 Now Live</div>
+          <div className="hoofprint-teaser-badge"><PawPrint size={16} strokeWidth={1.5} /> Now Live</div>
           <h2 className="hoofprint-teaser-title">
             Every Horse Has a Story.{" "}
             <span className="text-gradient">Hoofprint™ Tells It.</span>
@@ -272,17 +276,17 @@ export default function LandingPage() {
           </p>
           <div className="hoofprint-teaser-features">
             <div className="hoofprint-teaser-feature">
-              <span>📸</span>
+              <span><Camera size={20} strokeWidth={1.5} /></span>
               <strong>Photo Timeline</strong>
               <span>Track every stage from blank to finished</span>
             </div>
             <div className="hoofprint-teaser-feature">
-              <span>🤝</span>
+              <span><Handshake size={20} strokeWidth={1.5} /></span>
               <strong>Ownership Chain</strong>
               <span>Verified history follows the horse forever</span>
             </div>
             <div className="hoofprint-teaser-feature">
-              <span>📦</span>
+              <span><Package size={20} strokeWidth={1.5} /></span>
               <strong>One-Click Transfer</strong>
               <span>Sell a horse and pass its entire history along</span>
             </div>
@@ -298,7 +302,7 @@ export default function LandingPage() {
           </h2>
           <div className="personas-grid">
             <div className="persona-card">
-              <div className="persona-emoji">🏡</div>
+              <div className="persona-emoji"><Home size={32} strokeWidth={1.5} /></div>
               <h3>The Collector</h3>
               <p>
                 From 20 models to 2,000+. Catalog your herd with reference data,
@@ -307,7 +311,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="persona-card">
-              <div className="persona-emoji">🎨</div>
+              <div className="persona-emoji"><Palette size={32} strokeWidth={1.5} /></div>
               <h3>The Artist &amp; Customizer</h3>
               <p>
                 Manage commissions, share WIP progress with clients, and build
@@ -316,7 +320,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="persona-card">
-              <div className="persona-emoji">🏆</div>
+              <div className="persona-emoji"><Trophy size={32} strokeWidth={1.5} /></div>
               <h3>The Shower &amp; Competitor</h3>
               <p>
                 Log show records, track NAN qualifications digitally, and plan
@@ -337,12 +341,12 @@ export default function LandingPage() {
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
-            <span className="stat-value">🐾</span>
+            <span className="stat-value"><PawPrint size={28} strokeWidth={1.5} /></span>
             <span className="stat-label">Hoofprint™ Tracking</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
           <div className="stat-item">
-            <span className="stat-value">🔒</span>
+            <span className="stat-value"><Shield size={28} strokeWidth={1.5} /></span>
             <span className="stat-label">Privacy-First</span>
           </div>
           <div className="stat-divider" aria-hidden="true" />
@@ -364,7 +368,7 @@ export default function LandingPage() {
           </p>
           <div className="personas-grid">
             <div className="persona-card">
-              <div className="persona-emoji">🎨</div>
+              <div className="persona-emoji"><Palette size={32} strokeWidth={1.5} /></div>
               <h3>Art Studio</h3>
               <p>
                 Commission tracking, WIP photo portals, and artist portfolios.
@@ -373,7 +377,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="persona-card">
-              <div className="persona-emoji">📦</div>
+              <div className="persona-emoji"><Package size={32} strokeWidth={1.5} /></div>
               <h3>Bulk Import</h3>
               <p>
                 Upload your entire spreadsheet and we&apos;ll fuzzy-match every row against
@@ -381,7 +385,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="persona-card">
-              <div className="persona-emoji">📈</div>
+              <div className="persona-emoji"><TrendingUp size={32} strokeWidth={1.5} /></div>
               <h3>Price Guide</h3>
               <p>
                 Real sale data from real collectors. Search market values for 10,500+
@@ -407,27 +411,6 @@ export default function LandingPage() {
           </Link>
         </div>
       </section>
-
-      {/* ─── Footer ─── */}
-      <footer className="landing-footer" id="site-footer">
-        <div className="footer-inner">
-          <div className="footer-brand">
-            <span className="footer-logo-icon" aria-hidden="true">🐴</span>
-            <span className="footer-logo-text">Model Horse Hub</span>
-          </div>
-          <nav className="footer-nav" aria-label="Footer navigation">
-            <Link href="/about" className="footer-link" id="footer-about">About</Link>
-            <Link href="/getting-started" className="footer-link" id="footer-getting-started">Getting Started</Link>
-            <Link href="/contact" className="footer-link" id="footer-contact">Contact</Link>
-            <Link href="/community" className="footer-link" id="footer-showring">Show Ring</Link>
-            <Link href="/discover" className="footer-link" id="footer-discover">Discover Collectors</Link>
-            <Link href="/market" className="footer-link" id="footer-market">Price Guide</Link>
-          </nav>
-          <p className="footer-copy">
-            &copy; {new Date().getFullYear()} Model Horse Hub. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -103,6 +103,11 @@ export default function UnifiedReferenceSearch({
 
   // When a mold is clicked, expand its releases
   const handleMoldClick = async (item: CatalogItem) => {
+    // Immediately select the mold so catalog_id is persisted even if
+    // the user doesn't explicitly click "Select Mold" in the releases panel
+    setSelectedItem(item);
+    onCatalogSelect(item.id, item);
+
     setLoadingReleases(true);
     setReleases([]);
     const moldReleases = await getReleasesForMold(item.id);
@@ -110,11 +115,11 @@ export default function UnifiedReferenceSearch({
     setLoadingReleases(false);
 
     if (moldReleases.length === 0) {
-      // No releases — select the mold directly
-      handleSelect(item);
+      // No releases — mold is already selected above, just close dropdown
+      setShowDropdown(false);
+      setQuery("");
     }
-    // If releases exist, show them so user can pick mold or a specific release
-    setSelectedItem(item);
+    // If releases exist, show them so user can pick a specific release (overrides the mold)
   };
 
   const handleSelect = (item: CatalogItem) => {
@@ -145,8 +150,8 @@ export default function UnifiedReferenceSearch({
       {/* AI Detection Notice */}
       {aiNotice}
 
-      {/* Selected Item Display */}
-      {selectedItem && selectedCatalogId ? (
+      {/* Selected Item Display (hide when browsing releases) */}
+      {selectedItem && selectedCatalogId && releases.length === 0 ? (
         <div className="ref-selected-item">
           <div className="ref-selected-info">
             <span className="ref-type-badge">

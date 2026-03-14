@@ -7,17 +7,60 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import NotificationBell from "@/components/NotificationBell";
 import { getHeaderData } from "@/app/actions/header";
+import {
+  Home, Trophy, Newspaper, Users, Camera, Palette, Search,
+  Building2, Calendar, TrendingUp, Heart, Package, Settings,
+  User, Zap, LogOut, Eye, EyeOff, Mail, ChevronDown, MoreHorizontal
+} from "lucide-react";
+
+// Priority-ordered nav links — highest priority first
+const NAV_LINKS = [
+  { href: "/dashboard", label: "Stable", Icon: Home, id: "nav-stable" },
+  { href: "/community", label: "Show Ring", Icon: Trophy, id: "nav-community" },
+  { href: "/feed", label: "Feed", Icon: Newspaper, id: "nav-feed" },
+  { href: "/discover", label: "Discover", Icon: Users, id: "nav-discover" },
+  { href: "/shows", label: "Shows", Icon: Camera, id: "nav-shows" },
+  { href: "/market", label: "Market", Icon: TrendingUp, id: "nav-market" },
+  { href: "/community/groups", label: "Groups", Icon: Building2, id: "nav-groups" },
+  { href: "/community/events", label: "Events", Icon: Calendar, id: "nav-events" },
+  { href: "/community/help-id", label: "Help ID", Icon: Search, id: "nav-helpid" },
+];
+
+// Dynamic link that depends on artist slug
+const getStudioLink = (artistSlug: string | null) => ({
+  href: artistSlug ? "/studio/dashboard" : "/studio/setup",
+  label: "Art Studio",
+  Icon: Palette,
+  id: "nav-studio",
+});
+
 export default function Header() {
   const { isSimpleMode, toggleSimpleMode } = useSimpleMode();
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  // Immediately check localStorage for auth token to prevent flash
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(() => {
+    if (typeof window !== "undefined") {
+      const storageKey = Object.keys(localStorage).find((k) => k.startsWith("sb-") && k.endsWith("-auth-token"));
+      if (storageKey) {
+        try {
+          const stored = JSON.parse(localStorage.getItem(storageKey) || "{}");
+          if (stored?.user?.id) return { id: stored.user.id, email: stored.user.email };
+        } catch { /* ignore */ }
+      }
+    }
+    return null;
+  });
   const [unreadCount, setUnreadCount] = useState(0);
   const [aliasName, setAliasName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [artistSlug, setArtistSlug] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(NAV_LINKS.length + 1); // +1 for Art Studio
   const navRef = useRef<HTMLElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const primaryNavRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -35,14 +78,10 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    // Use the browser client's local session as the primary source of truth.
-    // This is instant (reads from localStorage) and never flashes "Log In".
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        // Immediately show authenticated UI
         setUser({ id: session.user.id, email: session.user.email ?? undefined });
-        // Then enrich with profile data from server (alias, unread count, etc.)
         fetchHeaderInfo();
       }
     };
@@ -102,7 +141,63 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [userMenuOpen]);
 
+  // Close "More" menu on outside click
+  useEffect(() => {
+    if (!moreMenuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [moreMenuOpen]);
+
+  // ── Priority+ nav: measure available space and progressively collapse ──
+  useEffect(() => {
+    if (!user) return;
+    const container = primaryNavRef.current;
+    if (!container) return;
+
+    const measure = () => {
+      const containerWidth = container.offsetWidth;
+      const children = Array.from(container.children) as HTMLElement[];
+      let usedWidth = 0;
+      let fitCount = 0;
+      const moreButtonWidth = 80; // reserve space for "More" button
+
+      for (const child of children) {
+        if (child.dataset.navItem !== "true") continue;
+        // Temporarily make it visible to measure
+        const w = child.scrollWidth;
+        usedWidth += w + 2; // 2px gap
+        if (usedWidth < containerWidth - moreButtonWidth) {
+          fitCount++;
+        } else {
+          break;
+        }
+      }
+      setVisibleCount(fitCount);
+    };
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    // Measure on mount
+    requestAnimationFrame(measure);
+
+    return () => observer.disconnect();
+  }, [user]);
+
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  // Build full nav list including Art Studio
+  const allLinks = [...NAV_LINKS];
+  // Insert Art Studio after Shows (index 5)
+  allLinks.splice(5, 0, getStudioLink(artistSlug));
+  const totalLinks = allLinks.length;
+  const hasOverflow = visibleCount < totalLinks;
+  const visibleLinks = allLinks.slice(0, visibleCount);
+  const overflowLinks = allLinks.slice(visibleCount);
 
   return (
     <header className="header" role="banner">
@@ -142,44 +237,55 @@ export default function Header() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* DESKTOP NAVIGATION — Primary links + icon actions + user  */}
-      {/* Hidden on mobile (mobile uses the hamburger nav below)     */}
+      {/* DESKTOP NAVIGATION — Priority+ progressive collapse       */}
       {/* ═══════════════════════════════════════════════════════════ */}
       {user && (
         <div className="header-desktop-nav">
-          {/* Primary text links */}
-          <nav className="header-nav-primary" aria-label="Main navigation">
-            <Link href="/dashboard" className="header-nav-link" id="nav-stable">
-              🏠 Stable
-            </Link>
-            <Link href="/community" className="header-nav-link" id="nav-community">
-              🏆 Show Ring
-            </Link>
-            <Link href="/feed" className="header-nav-link" id="nav-feed">
-              📰 Feed
-            </Link>
-            <Link href="/discover" className="header-nav-link" id="nav-discover">
-              👥 Discover
-            </Link>
-            <Link href="/shows" className="header-nav-link" id="nav-shows">
-              📸 Shows
-            </Link>
-            <Link href={artistSlug ? "/studio/dashboard" : "/studio/setup"} className="header-nav-link" id="nav-studio">
-              🎨 Art Studio
-            </Link>
-            <Link href="/community/help-id" className="header-nav-link" id="nav-helpid">
-              🔍 Help ID
-            </Link>
-            <Link href="/community/groups" className="header-nav-link" id="nav-groups">
-              🏛️ Groups
-            </Link>
-            <Link href="/community/events" className="header-nav-link" id="nav-events">
-              📅 Events
-            </Link>
-            <Link href="/market" className="header-nav-link" id="nav-market">
-              📈 Market
-            </Link>
+          {/* Primary text links — measured by ResizeObserver */}
+          <nav className="header-nav-primary" aria-label="Main navigation" ref={primaryNavRef}>
+            {allLinks.map((link, i) => (
+              <Link
+                key={link.id}
+                href={link.href}
+                className="header-nav-link"
+                id={link.id}
+                data-nav-item="true"
+                style={i >= visibleCount ? { position: "absolute", visibility: "hidden", pointerEvents: "none" } : undefined}
+              >
+                <link.Icon size={16} strokeWidth={1.5} /> {link.label}
+              </Link>
+            ))}
           </nav>
+
+          {/* "More" dropdown for overflow items */}
+          {hasOverflow && (
+            <div className="header-user-menu" ref={moreMenuRef} style={{ flexShrink: 0 }}>
+              <button
+                className="header-nav-link"
+                onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                aria-expanded={moreMenuOpen}
+                aria-label="More navigation links"
+                style={{ cursor: "pointer", background: "none", border: "none", fontFamily: "inherit" }}
+              >
+                <MoreHorizontal size={16} strokeWidth={1.5} /> More
+                <ChevronDown size={12} strokeWidth={2} style={{ marginLeft: 2 }} />
+              </button>
+              {moreMenuOpen && (
+                <div className="header-user-dropdown">
+                  {overflowLinks.map((link) => (
+                    <Link
+                      key={link.id}
+                      href={link.href}
+                      className="header-dropdown-link"
+                      onClick={() => setMoreMenuOpen(false)}
+                    >
+                      <link.Icon size={16} strokeWidth={1.5} /> {link.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Icon action buttons */}
           <div className="header-icon-actions">
@@ -195,7 +301,7 @@ export default function Header() {
               )}
             </Link>
             <Link href="/wishlist" className="header-icon-btn" title="Wishlist" id="nav-wishlist-icon">
-              ❤️
+              <Heart size={18} strokeWidth={1.5} />
             </Link>
           </div>
 
@@ -223,20 +329,20 @@ export default function Header() {
                   className="header-dropdown-link"
                   onClick={() => setUserMenuOpen(false)}
                 >
-                  👤 My Profile
+                  <User size={16} strokeWidth={1.5} /> My Profile
                 </Link>
                 <Link href="/settings" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
-                  ⚙️ Settings
+                  <Settings size={16} strokeWidth={1.5} /> Settings
                 </Link>
                 <Link href="/claim" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
-                  📦 Claim
+                  <Package size={16} strokeWidth={1.5} /> Claim
                 </Link>
                 <Link href="/studio/my-commissions" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
-                  🎨 My Commissions
+                  <Palette size={16} strokeWidth={1.5} /> My Commissions
                 </Link>
                 {isAdmin && (
                   <Link href="/admin" className="header-dropdown-link header-dropdown-admin" onClick={() => setUserMenuOpen(false)}>
-                    ⚡ Admin
+                    <Zap size={16} strokeWidth={1.5} /> Admin
                   </Link>
                 )}
                 <div className="header-dropdown-divider" />
@@ -244,13 +350,13 @@ export default function Header() {
                   className="header-dropdown-link"
                   onClick={() => { setUserMenuOpen(false); toggleSimpleMode(); }}
                 >
-                  {isSimpleMode ? "👁 Simple Mode: ON" : "👁‍🗨 Simple Mode"}
+                  {isSimpleMode ? <><Eye size={16} strokeWidth={1.5} /> Simple Mode: ON</> : <><EyeOff size={16} strokeWidth={1.5} /> Simple Mode</>}
                 </button>
                 <button
                   className="header-dropdown-link header-dropdown-signout"
                   onClick={() => { setUserMenuOpen(false); handleSignOut(); }}
                 >
-                  🚪 Sign Out
+                  <LogOut size={16} strokeWidth={1.5} /> Sign Out
                 </button>
               </div>
             )}
@@ -260,12 +366,11 @@ export default function Header() {
 
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* MOBILE NAVIGATION — Full menu in hamburger dropdown       */}
-      {/* Hidden on desktop                                          */}
       {/* ═══════════════════════════════════════════════════════════ */}
       {user && (
         <nav ref={navRef} className={`header-nav header-nav-mobile ${mobileMenuOpen ? "header-nav-open" : ""}`} aria-label="Mobile navigation">
           <Link href="/dashboard" className="header-nav-link" id="nav-stable-m" onClick={closeMobileMenu}>
-            🏠 Digital Stable
+            <Home size={16} strokeWidth={1.5} /> Digital Stable
           </Link>
           <Link
             href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
@@ -273,50 +378,46 @@ export default function Header() {
             id="nav-profile-m"
             onClick={closeMobileMenu}
           >
-            👤 My Profile
+            <User size={16} strokeWidth={1.5} /> My Profile
           </Link>
           <Link href="/community" className="header-nav-link" id="nav-community-m" onClick={closeMobileMenu}>
-            🏆 Show Ring
+            <Trophy size={16} strokeWidth={1.5} /> Show Ring
           </Link>
           <Link href="/discover" className="header-nav-link" id="nav-discover-m" onClick={closeMobileMenu}>
-            👥 Discover
+            <Users size={16} strokeWidth={1.5} /> Discover
           </Link>
           <Link href="/feed" className="header-nav-link" id="nav-feed-m" onClick={closeMobileMenu}>
-            📰 Feed
+            <Newspaper size={16} strokeWidth={1.5} /> Feed
           </Link>
           <Link href="/shows" className="header-nav-link" id="nav-shows-m" onClick={closeMobileMenu}>
-            📸 Shows
+            <Camera size={16} strokeWidth={1.5} /> Shows
           </Link>
           <Link href={artistSlug ? "/studio/dashboard" : "/studio/setup"} className="header-nav-link" id="nav-studio-m" onClick={closeMobileMenu}>
-            🎨 Art Studio
+            <Palette size={16} strokeWidth={1.5} /> Art Studio
           </Link>
           <Link href="/community/help-id" className="header-nav-link" id="nav-helpid-m" onClick={closeMobileMenu}>
-            🔍 Help ID
+            <Search size={16} strokeWidth={1.5} /> Help ID
           </Link>
           <Link href="/community/groups" className="header-nav-link" id="nav-groups-m" onClick={closeMobileMenu}>
-            🏛️ Groups
+            <Building2 size={16} strokeWidth={1.5} /> Groups
           </Link>
           <Link href="/community/events" className="header-nav-link" id="nav-events-m" onClick={closeMobileMenu}>
-            📅 Events
+            <Calendar size={16} strokeWidth={1.5} /> Events
           </Link>
           <Link href="/market" className="header-nav-link" id="nav-market-m" onClick={closeMobileMenu}>
-            📈 Price Guide
+            <TrendingUp size={16} strokeWidth={1.5} /> Price Guide
           </Link>
           <Link href="/wishlist" className="header-nav-link" id="nav-wishlist-m" onClick={closeMobileMenu}>
-            ❤️ Wishlist
+            <Heart size={16} strokeWidth={1.5} /> Wishlist
           </Link>
           <Link href="/claim" className="header-nav-link" id="nav-claim-m" onClick={closeMobileMenu}>
-            📦 Claim
+            <Package size={16} strokeWidth={1.5} /> Claim
           </Link>
           <Link href="/settings" className="header-nav-link" id="nav-settings-m" onClick={closeMobileMenu}>
-            ⚙️ Settings
+            <Settings size={16} strokeWidth={1.5} /> Settings
           </Link>
           <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox-m" onClick={closeMobileMenu}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
+            <Mail size={16} strokeWidth={1.5} />
             Inbox
             {unreadCount > 0 && (
               <span className="inbox-unread-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
@@ -325,7 +426,7 @@ export default function Header() {
           <NotificationBell />
           {isAdmin && (
             <Link href="/admin" className="header-nav-link admin-nav-link" id="nav-admin-m">
-              Admin ⚡
+              Admin <Zap size={16} strokeWidth={1.5} />
             </Link>
           )}
           {/* ── Mobile-only: Sign Out + Simple Mode ── */}
@@ -335,7 +436,7 @@ export default function Header() {
               onClick={() => { closeMobileMenu(); handleSignOut(); }}
               style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", width: "100%", justifyContent: "flex-start" }}
             >
-              🚪 Sign Out
+              <LogOut size={16} strokeWidth={1.5} /> Sign Out
             </button>
             <button
               className="simple-mode-toggle"
@@ -343,7 +444,7 @@ export default function Header() {
               aria-pressed={isSimpleMode}
               style={{ justifyContent: "flex-start", gap: "var(--space-sm)", width: "100%" }}
             >
-              {isSimpleMode ? "👁 Simple Mode: ON" : "👁‍🗨 Simple Mode: OFF"}
+              {isSimpleMode ? <><Eye size={16} strokeWidth={1.5} /> Simple Mode: ON</> : <><EyeOff size={16} strokeWidth={1.5} /> Simple Mode: OFF</>}
             </button>
           </div>
         </nav>

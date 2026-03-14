@@ -58,7 +58,7 @@
     }
 
     .sidebar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.08);
         border-radius: 4px;
     }
 }
@@ -80,7 +80,7 @@
 }
 
 .statRow:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.03);
 }
 
 .statLabel {
@@ -107,7 +107,7 @@
     align-items: center;
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(0, 0, 0, 0.02);
     border: 1px solid transparent;
     text-decoration: none;
     color: var(--color-text-primary);
@@ -116,7 +116,7 @@
 }
 
 .collectionLink:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.06);
     border-color: var(--color-border);
     text-decoration: none;
 }

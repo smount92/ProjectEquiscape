@@ -13,17 +13,16 @@
     align-items: flex-start;
     gap: var(--space-md);
     padding: var(--space-lg);
-    background: var(--color-card-bg, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+    background: var(--color-card-bg, rgba(0, 0, 0, 0.05));
+    border: 1px solid var(--color-border, rgba(0, 0, 0, 0.06));
     border-radius: var(--radius-lg);
     text-decoration: none;
     color: inherit;
     transition: all 0.25s ease;
-    backdrop-filter: blur(12px);
 }
 
 .card:hover {
-    border-color: var(--color-primary, #818cf8);
+    border-color: var(--color-accent-primary);
     box-shadow: 0 4px 20px rgba(129, 140, 248, 0.12);
     transform: translateY(-2px);
 }
@@ -37,7 +36,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    color: var(--color-primary, #818cf8);
+    color: var(--color-accent-primary);
 }
 
 .info {
