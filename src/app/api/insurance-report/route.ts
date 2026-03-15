@@ -1,0 +1,86 @@
+import { createClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
+import { renderToBuffer } from "@react-pdf/renderer";
+import { InsuranceReportDocument } from "@/lib/pdf/InsuranceReport";
+
+export async function GET() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    try {
+        // Fetch all horses with vault data
+        const { data: horses } = await supabase
+            .from("user_horses")
+            .select(`
+                id, custom_name, finish_type, condition_grade, trade_status, created_at,
+                catalog_items:catalog_id(title, maker, scale),
+                financial_vault(purchase_price, purchase_date, estimated_current_value, insurance_notes)
+            `)
+            .eq("owner_id", user.id)
+            .order("custom_name");
+
+        // Fetch owner profile for report header
+        const { data: profile } = await supabase
+            .from("users")
+            .select("alias_name, full_name, email")
+            .eq("id", user.id)
+            .single();
+
+        // Fetch primary thumbnail URLs for each horse
+        const horseIds = (horses || []).map((h: { id: string }) => h.id);
+        const { data: images } = await supabase
+            .from("horse_images")
+            .select("horse_id, image_url")
+            .in("horse_id", horseIds.length > 0 ? horseIds : ["__none__"])
+            .eq("angle_profile", "Primary_Thumbnail");
+
+        const thumbnailMap = new Map<string, string>();
+        (images || []).forEach((img: { horse_id: string; image_url: string }) => {
+            thumbnailMap.set(img.horse_id, img.image_url);
+        });
+
+        // Render PDF
+        const buffer = await renderToBuffer(
+            InsuranceReportDocument({
+                owner: (profile as { alias_name: string; full_name: string | null; email: string }) || {
+                    alias_name: "Unknown",
+                    full_name: null,
+                    email: user.email || "",
+                },
+                horses: (horses || []) as unknown as Array<{
+                    id: string;
+                    custom_name: string;
+                    finish_type: string;
+                    condition_grade: string;
+                    trade_status: string | null;
+                    created_at: string;
+                    catalog_items: { title: string; maker: string; scale: string | null } | null;
+                    financial_vault: {
+                        purchase_price: number | null;
+                        purchase_date: string | null;
+                        estimated_current_value: number | null;
+                        insurance_notes: string | null;
+                    }[];
+                }>,
+                thumbnailMap,
+                generatedAt: new Date().toISOString(),
+            })
+        );
+
+        return new NextResponse(new Uint8Array(buffer), {
+            status: 200,
+            headers: {
+                "Content-Type": "application/pdf",
+                "Content-Disposition": `attachment; filename="insurance_report_${new Date().toISOString().split("T")[0]}.pdf"`,
+                "Cache-Control": "no-cache, no-store",
+            },
+        });
+    } catch (err) {
+        console.error("Insurance report generation error:", err);
+        return NextResponse.json(
+            { error: "Failed to generate insurance report." },
+            { status: 500 }
+        );
+    }
+}

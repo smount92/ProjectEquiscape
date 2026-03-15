@@ -389,6 +389,34 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
+                {/* ═══ Data & Reports ═══ */}
+                <div className={styles.section}>
+                    <h2 className={styles.sectionTitle}>📊 Data & Reports</h2>
+                    <div className={styles.card}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-lg)" }}>
+                            {/* CSV Export */}
+                            <div>
+                                <a href="/api/export" className="btn btn-ghost" download>
+                                    📄 Download Collection (CSV)
+                                </a>
+                                <p className="form-hint" style={{ marginTop: 4 }}>
+                                    Spreadsheet format — compatible with Excel, Google Sheets.
+                                </p>
+                            </div>
+
+                            {/* Insurance PDF */}
+                            <div>
+                                <a href="/api/insurance-report" className="btn btn-primary" download>
+                                    🛡️ Download Insurance Report (PDF)
+                                </a>
+                                <p className="form-hint" style={{ marginTop: 4 }}>
+                                    Professional PDF with photos and values — share with your insurance agent.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* ═══ Danger Zone ═══ */}
                 <div className={styles.section}>
                     <h2 className={styles.sectionTitle} style={{ color: "#ef4444" }}>⚠️ Danger Zone</h2>
