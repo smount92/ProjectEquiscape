@@ -9,12 +9,13 @@ interface ShowRecordDisplay {
     showName: string;
     showDate: string | null;
     division: string | null;
+    className: string | null;
     placing: string | null;
     ribbonColor: string | null;
     judgeName: string | null;
     isNan: boolean;
     notes: string | null;
-    // NEW: Beta feedback fields
+    // Beta feedback fields
     showLocation: string | null;
     sectionName: string | null;
     awardCategory: string | null;
@@ -171,6 +172,7 @@ export default function ShowRecordTimeline({
                                         <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
                                         {record.placing && <span>🎖️ {record.placing}</span>}
                                         {record.division && <span>📂 {record.division}</span>}
+                                        {record.className && <span>📋 {record.className}</span>}
                                         {record.judgeName && <span>👤 {record.judgeName}</span>}
                                         {record.showLocation && <span>📍 {record.showLocation}</span>}
                                     </div>

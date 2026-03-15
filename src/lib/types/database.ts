@@ -143,6 +143,7 @@ export interface ShowRecord {
   judge_name: string | null;
   is_nan: boolean;
   notes: string | null;
+  class_name: string | null;
   created_at: string;
   show_location: string | null;
   section_name: string | null;

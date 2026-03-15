@@ -14,19 +14,19 @@ import { createActivityEvent } from "@/app/actions/activity";
 export async function addShowRecord(data: {
     horseId: string;
     showName: string;
-    showDate?: string;
-    division?: string;
-    placing?: string;
-    ribbonColor?: string;
-    judgeName?: string;
+    showDate?: string | null;
+    division?: string | null;
+    className?: string | null;
+    placing?: string | null;
+    ribbonColor?: string | null;
+    judgeName?: string | null;
     isNan?: boolean;
-    notes?: string;
-    // NEW: Beta feedback fields
-    showLocation?: string;
-    sectionName?: string;
-    awardCategory?: string;
-    competitionLevel?: string;
-    showDateText?: string;
+    notes?: string | null;
+    showLocation?: string | null;
+    sectionName?: string | null;
+    awardCategory?: string | null;
+    competitionLevel?: string | null;
+    showDateText?: string | null;
 }): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const {
@@ -56,6 +56,7 @@ export async function addShowRecord(data: {
         judge_name: data.judgeName?.trim() || null,
         is_nan: data.isNan ?? false,
         notes: data.notes?.trim() || null,
+        class_name: data.className?.trim() || null,
         show_location: data.showLocation?.trim() || null,
         section_name: data.sectionName?.trim() || null,
         award_category: data.awardCategory?.trim() || null,
@@ -85,20 +86,20 @@ export async function addShowRecord(data: {
 export async function updateShowRecord(
     recordId: string,
     data: {
-        showName?: string;
-        showDate?: string;
-        division?: string;
-        placing?: string;
-        ribbonColor?: string;
-        judgeName?: string;
+        showName?: string | null;
+        showDate?: string | null;
+        division?: string | null;
+        className?: string | null;
+        placing?: string | null;
+        ribbonColor?: string | null;
+        judgeName?: string | null;
         isNan?: boolean;
-        notes?: string;
-        // NEW: Beta feedback fields
-        showLocation?: string;
-        sectionName?: string;
-        awardCategory?: string;
-        competitionLevel?: string;
-        showDateText?: string;
+        notes?: string | null;
+        showLocation?: string | null;
+        sectionName?: string | null;
+        awardCategory?: string | null;
+        competitionLevel?: string | null;
+        showDateText?: string | null;
     }
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
@@ -109,23 +110,24 @@ export async function updateShowRecord(
     if (!user) return { success: false, error: "You must be logged in." };
 
     const updateData: Record<string, unknown> = {};
-    if (data.showName !== undefined) updateData.show_name = data.showName.trim();
+    if (data.showName !== undefined) updateData.show_name = data.showName?.trim();
     if (data.showDate !== undefined) updateData.show_date = data.showDate || null;
-    if (data.division !== undefined) updateData.division = data.division.trim() || null;
-    if (data.placing !== undefined) updateData.placing = data.placing.trim() || null;
+    if (data.division !== undefined) updateData.division = data.division?.trim() || null;
+    if (data.placing !== undefined) updateData.placing = data.placing?.trim() || null;
     if (data.ribbonColor !== undefined) updateData.ribbon_color = data.ribbonColor || null;
-    if (data.judgeName !== undefined) updateData.judge_name = data.judgeName.trim() || null;
+    if (data.judgeName !== undefined) updateData.judge_name = data.judgeName?.trim() || null;
     if (data.isNan !== undefined) updateData.is_nan = data.isNan;
-    if (data.notes !== undefined) updateData.notes = data.notes.trim() || null;
-    if (data.showLocation !== undefined) updateData.show_location = data.showLocation.trim() || null;
-    if (data.sectionName !== undefined) updateData.section_name = data.sectionName.trim() || null;
-    if (data.awardCategory !== undefined) updateData.award_category = data.awardCategory.trim() || null;
-    if (data.competitionLevel !== undefined) updateData.competition_level = data.competitionLevel.trim() || null;
-    if (data.showDateText !== undefined) updateData.show_date_text = data.showDateText.trim() || null;
+    if (data.notes !== undefined) updateData.notes = data.notes?.trim() || null;
+    if (data.className !== undefined) updateData.class_name = data.className?.trim() || null;
+    if (data.showLocation !== undefined) updateData.show_location = data.showLocation?.trim() || null;
+    if (data.sectionName !== undefined) updateData.section_name = data.sectionName?.trim() || null;
+    if (data.awardCategory !== undefined) updateData.award_category = data.awardCategory?.trim() || null;
+    if (data.competitionLevel !== undefined) updateData.competition_level = data.competitionLevel?.trim() || null;
+    if (data.showDateText !== undefined) updateData.show_date_text = data.showDateText?.trim() || null;
 
     // Fuzzy date fallback for updates
     if (data.showDateText !== undefined && !data.showDate) {
-        const yearMatch = data.showDateText.match(/\b(19|20)\d{2}\b/);
+        const yearMatch = data.showDateText?.match(/\b(19|20)\d{2}\b/);
         if (yearMatch && !updateData.show_date) {
             updateData.show_date = `${yearMatch[0]}-01-01`;
         }

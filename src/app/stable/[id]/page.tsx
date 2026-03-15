@@ -194,7 +194,7 @@ export default async function HorsePassportPage({
 
   const { data: rawRecords } = await supabase
     .from("show_records")
-    .select("id, show_name, show_date, division, \"placing\", ribbon_color, judge_name, is_nan, notes, show_location, section_name, award_category, competition_level, show_date_text")
+    .select("id, show_name, show_date, division, class_name, \"placing\", ribbon_color, judge_name, is_nan, notes, show_location, section_name, award_category, competition_level, show_date_text")
     .eq("horse_id", horseId)
     .order("show_date", { ascending: false, nullsFirst: false });
 
@@ -203,6 +203,7 @@ export default async function HorsePassportPage({
     show_name: string;
     show_date: string | null;
     division: string | null;
+    class_name: string | null;
     placing: string | null;
     ribbon_color: string | null;
     judge_name: string | null;
@@ -218,6 +219,7 @@ export default async function HorsePassportPage({
     showName: r.show_name,
     showDate: r.show_date,
     division: r.division,
+    className: r.class_name,
     placing: r.placing,
     ribbonColor: r.ribbon_color,
     judgeName: r.judge_name,

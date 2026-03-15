@@ -34,12 +34,13 @@ interface ShowRecordFormProps {
         showName: string;
         showDate: string | null;
         division: string | null;
+        className: string | null;
         placing: string | null;
         ribbonColor: string | null;
         judgeName: string | null;
         isNan: boolean;
         notes: string | null;
-        // NEW: Beta feedback fields
+        // Beta feedback fields
         showLocation: string | null;
         sectionName: string | null;
         awardCategory: string | null;
@@ -61,6 +62,7 @@ export default function ShowRecordForm({
     const [showName, setShowName] = useState(existingRecord?.showName ?? "");
     const [showDate, setShowDate] = useState(existingRecord?.showDate ?? "");
     const [division, setDivision] = useState(existingRecord?.division ?? "");
+    const [className, setClassName] = useState(existingRecord?.className ?? "");
     const [placing, setPlacing] = useState(existingRecord?.placing ?? "");
     const [ribbonColor, setRibbonColor] = useState(existingRecord?.ribbonColor ?? "");
     const [judgeName, setJudgeName] = useState(existingRecord?.judgeName ?? "");
@@ -89,19 +91,19 @@ export default function ShowRecordForm({
 
         const formData = {
             showName,
-            showDate: showDate || undefined,
-            division: division || undefined,
-            placing: placing || undefined,
-            ribbonColor: ribbonColor || undefined,
-            judgeName: judgeName || undefined,
+            showDate: showDate || null,
+            division: division.trim() || null,
+            className: className.trim() || null,
+            placing: placing.trim() || null,
+            ribbonColor: ribbonColor || null,
+            judgeName: judgeName.trim() || null,
             isNan,
-            notes: notes || undefined,
-            // NEW fields
-            showLocation: showLocation || undefined,
-            sectionName: sectionName || undefined,
-            awardCategory: awardCategory || undefined,
-            competitionLevel: competitionLevel || undefined,
-            showDateText: showDateText || undefined,
+            notes: notes.trim() || null,
+            showLocation: showLocation.trim() || null,
+            sectionName: sectionName.trim() || null,
+            awardCategory: awardCategory.trim() || null,
+            competitionLevel: competitionLevel.trim() || null,
+            showDateText: showDateText.trim() || null,
         };
 
         const result = isEdit
@@ -150,7 +152,7 @@ export default function ShowRecordForm({
                         />
                     </div>
                     <div className="form-group">
-                        <label className="form-label">Division</label>
+                        <label className="form-label">Division / Section</label>
                         <input
                             className="form-input"
                             type="text"
@@ -160,6 +162,22 @@ export default function ShowRecordForm({
                             id="show-record-division"
                         />
                     </div>
+                </div>
+
+                {/* Class Name — between Division and Placing */}
+                <div className="form-group">
+                    <label className="form-label">Class Name</label>
+                    <input
+                        className="form-input"
+                        type="text"
+                        value={className}
+                        onChange={(e) => setClassName(e.target.value)}
+                        placeholder="e.g. OF Stock Horse Mare, CM Decorator"
+                        id="show-record-class-name"
+                    />
+                    <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+                        Individual class name (not division or section callbacks).
+                    </small>
                 </div>
 
                 {/* Fuzzy Date fallback */}
