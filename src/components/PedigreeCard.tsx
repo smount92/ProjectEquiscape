@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { savePedigree } from "@/app/actions/provenance";
+import { searchPublicHorses } from "@/app/actions/horse";
 
 interface PedigreeData {
     id: string;
     sireName: string | null;
     damName: string | null;
+    sireId: string | null;
+    damId: string | null;
     sculptor: string | null;
     castNumber: string | null;
     editionSize: string | null;
@@ -18,6 +22,12 @@ interface PedigreeCardProps {
     horseId: string;
     pedigree: PedigreeData | null;
     isOwner: boolean;
+}
+
+interface HorseSearchResult {
+    id: string;
+    custom_name: string;
+    finish_type: string;
 }
 
 export default function PedigreeCard({
@@ -32,10 +42,62 @@ export default function PedigreeCard({
 
     const [sireName, setSireName] = useState(pedigree?.sireName ?? "");
     const [damName, setDamName] = useState(pedigree?.damName ?? "");
+    const [sireId, setSireId] = useState<string | null>(pedigree?.sireId ?? null);
+    const [damId, setDamId] = useState<string | null>(pedigree?.damId ?? null);
     const [sculptor, setSculptor] = useState(pedigree?.sculptor ?? "");
     const [castNumber, setCastNumber] = useState(pedigree?.castNumber ?? "");
     const [editionSize, setEditionSize] = useState(pedigree?.editionSize ?? "");
     const [lineageNotes, setLineageNotes] = useState(pedigree?.lineageNotes ?? "");
+
+    // Search state for sire/dam lookups
+    const [sireResults, setSireResults] = useState<HorseSearchResult[]>([]);
+    const [damResults, setDamResults] = useState<HorseSearchResult[]>([]);
+    const [showSireDropdown, setShowSireDropdown] = useState(false);
+    const [showDamDropdown, setShowDamDropdown] = useState(false);
+    const sireRef = useRef<HTMLDivElement>(null);
+    const damRef = useRef<HTMLDivElement>(null);
+
+    // Debounced search for sire
+    useEffect(() => {
+        if (!sireName || sireName.length < 2 || sireId) {
+            setSireResults([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            const results = await searchPublicHorses(sireName);
+            setSireResults(results);
+            setShowSireDropdown(results.length > 0);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [sireName, sireId]);
+
+    // Debounced search for dam
+    useEffect(() => {
+        if (!damName || damName.length < 2 || damId) {
+            setDamResults([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            const results = await searchPublicHorses(damName);
+            setDamResults(results);
+            setShowDamDropdown(results.length > 0);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [damName, damId]);
+
+    // Close dropdowns on outside click
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (sireRef.current && !sireRef.current.contains(e.target as Node)) {
+                setShowSireDropdown(false);
+            }
+            if (damRef.current && !damRef.current.contains(e.target as Node)) {
+                setShowDamDropdown(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, []);
 
     // Non-owner + no data = don't render at all
     if (!isOwner && !pedigree) return null;
@@ -51,6 +113,8 @@ export default function PedigreeCard({
             horseId,
             sireName: sireName || undefined,
             damName: damName || undefined,
+            sireId: sireId || null,
+            damId: damId || null,
             sculptor: sculptor || undefined,
             castNumber: castNumber || undefined,
             editionSize: editionSize || undefined,
@@ -71,6 +135,8 @@ export default function PedigreeCard({
         // Revert to original values
         setSireName(pedigree?.sireName ?? "");
         setDamName(pedigree?.damName ?? "");
+        setSireId(pedigree?.sireId ?? null);
+        setDamId(pedigree?.damId ?? null);
         setSculptor(pedigree?.sculptor ?? "");
         setCastNumber(pedigree?.castNumber ?? "");
         setEditionSize(pedigree?.editionSize ?? "");
@@ -78,6 +144,26 @@ export default function PedigreeCard({
         setIsEditing(false);
         setErrorMsg("");
         setStatus("idle");
+    };
+
+    const selectSire = (horse: HorseSearchResult) => {
+        setSireId(horse.id);
+        setSireName(horse.custom_name);
+        setShowSireDropdown(false);
+    };
+
+    const selectDam = (horse: HorseSearchResult) => {
+        setDamId(horse.id);
+        setDamName(horse.custom_name);
+        setShowDamDropdown(false);
+    };
+
+    const clearSireLink = () => {
+        setSireId(null);
+    };
+
+    const clearDamLink = () => {
+        setDamId(null);
     };
 
     // CTA for owner when no pedigree exists
@@ -110,27 +196,97 @@ export default function PedigreeCard({
                 </div>
                 <form onSubmit={handleSave}>
                     <div className="show-record-form-row">
-                        <div className="form-group">
+                        {/* Sire with search */}
+                        <div className="form-group" ref={sireRef} style={{ position: "relative" }}>
                             <label className="form-label">Sire (Father)</label>
                             <input
                                 className="form-input"
                                 type="text"
                                 value={sireName}
-                                onChange={(e) => setSireName(e.target.value)}
-                                placeholder="Sire name"
+                                onChange={(e) => {
+                                    setSireName(e.target.value);
+                                    if (sireId) setSireId(null);
+                                }}
+                                placeholder="Search or type name…"
                                 id="pedigree-sire"
                             />
+                            {sireId && (
+                                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", marginTop: "4px" }}>
+                                    <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-accent-primary)" }}>
+                                        🔗 Linked to a horse in the system
+                                    </span>
+                                    <button type="button" onClick={clearSireLink} style={{
+                                        background: "none", border: "none", cursor: "pointer",
+                                        color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))",
+                                    }}>✕</button>
+                                </div>
+                            )}
+                            {showSireDropdown && sireResults.length > 0 && (
+                                <div style={{
+                                    position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
+                                    background: "var(--color-bg-card)", border: "1px solid var(--color-border)",
+                                    borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-lg)",
+                                    maxHeight: "200px", overflowY: "auto",
+                                }}>
+                                    {sireResults.map(h => (
+                                        <button key={h.id} type="button" onClick={() => selectSire(h)} style={{
+                                            display: "block", width: "100%", textAlign: "left",
+                                            padding: "var(--space-sm) var(--space-md)",
+                                            background: "none", border: "none", cursor: "pointer",
+                                            color: "var(--color-text-primary)",
+                                            fontSize: "calc(0.85rem * var(--font-scale))",
+                                        }}>
+                                            {h.custom_name} <span style={{ color: "var(--color-text-muted)" }}>({h.finish_type})</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        <div className="form-group">
+                        {/* Dam with search */}
+                        <div className="form-group" ref={damRef} style={{ position: "relative" }}>
                             <label className="form-label">Dam (Mother)</label>
                             <input
                                 className="form-input"
                                 type="text"
                                 value={damName}
-                                onChange={(e) => setDamName(e.target.value)}
-                                placeholder="Dam name"
+                                onChange={(e) => {
+                                    setDamName(e.target.value);
+                                    if (damId) setDamId(null);
+                                }}
+                                placeholder="Search or type name…"
                                 id="pedigree-dam"
                             />
+                            {damId && (
+                                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", marginTop: "4px" }}>
+                                    <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-accent-primary)" }}>
+                                        🔗 Linked to a horse in the system
+                                    </span>
+                                    <button type="button" onClick={clearDamLink} style={{
+                                        background: "none", border: "none", cursor: "pointer",
+                                        color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))",
+                                    }}>✕</button>
+                                </div>
+                            )}
+                            {showDamDropdown && damResults.length > 0 && (
+                                <div style={{
+                                    position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
+                                    background: "var(--color-bg-card)", border: "1px solid var(--color-border)",
+                                    borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-lg)",
+                                    maxHeight: "200px", overflowY: "auto",
+                                }}>
+                                    {damResults.map(h => (
+                                        <button key={h.id} type="button" onClick={() => selectDam(h)} style={{
+                                            display: "block", width: "100%", textAlign: "left",
+                                            padding: "var(--space-sm) var(--space-md)",
+                                            background: "none", border: "none", cursor: "pointer",
+                                            color: "var(--color-text-primary)",
+                                            fontSize: "calc(0.85rem * var(--font-scale))",
+                                        }}>
+                                            {h.custom_name} <span style={{ color: "var(--color-text-muted)" }}>({h.finish_type})</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -228,13 +384,25 @@ export default function PedigreeCard({
             {pedigree!.sireName && (
                 <div className="pedigree-row">
                     <span className="pedigree-label">Sire</span>
-                    <span className="pedigree-value">{pedigree!.sireName}</span>
+                    <span className="pedigree-value">
+                        {pedigree!.sireId ? (
+                            <Link href={`/community/${pedigree!.sireId}`} style={{ color: "var(--color-accent-primary)", textDecoration: "none" }}>
+                                {pedigree!.sireName} 🔗
+                            </Link>
+                        ) : pedigree!.sireName}
+                    </span>
                 </div>
             )}
             {pedigree!.damName && (
                 <div className="pedigree-row">
                     <span className="pedigree-label">Dam</span>
-                    <span className="pedigree-value">{pedigree!.damName}</span>
+                    <span className="pedigree-value">
+                        {pedigree!.damId ? (
+                            <Link href={`/community/${pedigree!.damId}`} style={{ color: "var(--color-accent-primary)", textDecoration: "none" }}>
+                                {pedigree!.damName} 🔗
+                            </Link>
+                        ) : pedigree!.damName}
+                    </span>
                 </div>
             )}
             {pedigree!.sculptor && (

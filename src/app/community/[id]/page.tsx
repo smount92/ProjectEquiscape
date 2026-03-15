@@ -283,7 +283,7 @@ export default async function PublicPassportPage({
 
   const { data: rawPedigree } = await supabase
     .from("horse_pedigrees")
-    .select("id, sire_name, dam_name, sculptor, cast_number, edition_size, lineage_notes")
+    .select("id, sire_name, dam_name, sire_id, dam_id, sculptor, cast_number, edition_size, lineage_notes")
     .eq("horse_id", horseId)
     .maybeSingle();
 
@@ -291,6 +291,8 @@ export default async function PublicPassportPage({
     id: rawPedigree.id as string,
     sireName: (rawPedigree as { sire_name: string | null }).sire_name,
     damName: (rawPedigree as { dam_name: string | null }).dam_name,
+    sireId: (rawPedigree as { sire_id: string | null }).sire_id,
+    damId: (rawPedigree as { dam_id: string | null }).dam_id,
     sculptor: (rawPedigree as { sculptor: string | null }).sculptor,
     castNumber: (rawPedigree as { cast_number: string | null }).cast_number,
     editionSize: (rawPedigree as { edition_size: string | null }).edition_size,

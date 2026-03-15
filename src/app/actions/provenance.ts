@@ -173,6 +173,8 @@ export async function savePedigree(data: {
     horseId: string;
     sireName?: string;
     damName?: string;
+    sireId?: string | null;
+    damId?: string | null;
     sculptor?: string;
     castNumber?: string;
     editionSize?: string;
@@ -195,6 +197,8 @@ export async function savePedigree(data: {
     const pedigreeData = {
         sire_name: data.sireName?.trim() || null,
         dam_name: data.damName?.trim() || null,
+        sire_id: data.sireId || null,
+        dam_id: data.damId || null,
         sculptor: data.sculptor?.trim() || null,
         cast_number: data.castNumber?.trim() || null,
         edition_size: data.editionSize?.trim() || null,

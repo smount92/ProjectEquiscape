@@ -587,3 +587,18 @@ export async function reorderHorseImages(
     revalidatePath(`/stable/${horseId}`);
     return { success: true };
 }
+
+/**
+ * Search public horses by name — used for relational pedigree lookups.
+ */
+export async function searchPublicHorses(query: string): Promise<{ id: string; custom_name: string; finish_type: string }[]> {
+    if (!query || query.length < 2) return [];
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from("user_horses")
+        .select("id, custom_name, finish_type")
+        .eq("is_public", true)
+        .ilike("custom_name", `%${query}%`)
+        .limit(10);
+    return (data ?? []) as { id: string; custom_name: string; finish_type: string }[];
+}

@@ -164,6 +164,8 @@ export interface HorsePedigree {
   user_id: string;
   sire_name: string | null;
   dam_name: string | null;
+  sire_id: string | null;
+  dam_id: string | null;
   sculptor: string | null;
   cast_number: string | null;
   edition_size: string | null;
