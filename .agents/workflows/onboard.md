@@ -22,7 +22,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **56+ routes**, **80+ components**, **34 server action files**, and **70 database migrations** (001–070).
+The platform has **37+ routes**, **94+ components**, **35 server action files**, and **77 database migrations** (001–077).
 
 ## Step 2 — Read the Current State Report
 
@@ -109,7 +109,7 @@ src/
 - New components should use CSS Modules, not add to globals
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 070)
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 077)
 - Universal Catalog (`catalog_items`) — 10,500+ entries for molds, releases, artist resins, tack
 - Universal Ledger — `v_horse_hoofprint` materialized view (UNION ALL across 5 source tables)
 - Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
@@ -158,6 +158,23 @@ This project maintains living documentation. After completing any feature work:
 1. **Update the workflow file** — mark tasks `✅ DONE` with the date, check off checklist items
 2. **Don't mark complete** unless `npx next build` passes with 0 errors
 3. **Add brief notes** about issues encountered or design decisions made
+
+## Step 6.5 — Testing Policy
+
+This project follows a **"test with each feature"** convention:
+
+- **Utility functions** (`src/lib/utils/`) — Write unit tests in `src/lib/utils/__tests__/`. Pure functions are the highest-ROI tests.
+- **Critical server actions** — When modifying `transactions.ts`, `hoofprint.ts`, `horse.ts`, `collections.ts`, or `competition.ts`, add or update integration tests using the Supabase mock factory (`src/__tests__/mocks/supabase.ts`).
+- **New features** — If a feature involves a state machine, complex validation, or financial data, it needs test coverage before merge.
+- **Don't test rendering** — Component tests (React Testing Library) are deferred in favor of E2E Playwright tests for user flows.
+
+**Commands:**
+```bash
+npm run test:unit          # Vitest unit/integration tests
+npm run test:unit:watch    # Watch mode during development
+npm run test:unit:coverage # Coverage report
+npm run test:e2e           # Playwright E2E (needs dev server)
+```
 
 ## Step 7 — You're Ready
 
