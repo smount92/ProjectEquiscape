@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { getPublicImageUrls } from "@/lib/utils/storage";
+import { sanitizeText } from "@/lib/utils/validation";
 
 // ============================================================
 // UNIVERSAL POSTS — Server Actions
@@ -53,7 +54,7 @@ export async function createPost(data: {
 
     const { data: post, error } = await supabase.from("posts").insert({
         author_id: user.id,
-        content: data.content.trim(),
+        content: sanitizeText(data.content),
         horse_id: data.horseId || null,
         group_id: data.groupId || null,
         event_id: data.eventId || null,
@@ -110,7 +111,7 @@ export async function replyToPost(
     const { error } = await supabase.rpc("add_post_reply", {
         p_parent_id: parentId,
         p_author_id: user.id,
-        p_content: content.trim(),
+        p_content: sanitizeText(content),
     });
 
     if (error) return { success: false, error: error.message };

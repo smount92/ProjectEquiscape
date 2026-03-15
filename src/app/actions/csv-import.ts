@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { ReferenceMatch } from "@/lib/types/csv-import";
+import { sanitizeText } from "@/lib/utils/validation";
 
 // ============================================================
 // CSV Import — Server Action (matching is now client-side)
@@ -34,7 +35,7 @@ export async function executeBatchImport(
         // Build the JSONB payload for the RPC function
         const horsesPayload = confirmedRows.map((row) => {
             const horse: Record<string, string | null> = {
-                custom_name: row.customName || "Unnamed Import",
+                custom_name: sanitizeText(row.customName) || "Unnamed Import",
                 finish_type: row.finishType || "OF",
                 condition_grade: row.condition || "Not Graded",
                 asset_category: "model",

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { sanitizeText } from "@/lib/utils/validation";
 
 const ACTIVE_TRANSACTION_STATUSES = ["offer_made", "pending_payment", "funds_verified"];
 
@@ -284,7 +285,7 @@ export async function createHorseRecord(data: {
 
     const horseInsert: Record<string, unknown> = {
         owner_id: user.id,
-        custom_name: data.customName.trim(),
+        custom_name: sanitizeText(data.customName),
         asset_category: category,
         finish_type: data.finishType || null,
         condition_grade: data.conditionGrade || null,

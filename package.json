@@ -13,6 +13,7 @@
     "@react-pdf/renderer": "^4.3.2",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.98.0",
+    "@types/sanitize-html": "^2.16.1",
     "fuzzysort": "^3.1.0",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",
@@ -22,7 +23,8 @@
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
-    "resend": "^6.9.3"
+    "resend": "^6.9.3",
+    "sanitize-html": "^2.17.1"
   },
   "devDependencies": {
     "@types/node": "^20",

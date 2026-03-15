@@ -39,3 +39,35 @@ export function getBoolean(formData: FormData, key: string, defaultValue = false
     if (val === null) return defaultValue;
     return String(val) === "true";
 }
+
+// ============================================================
+// INPUT SANITIZATION — XSS Prevention
+// Strip dangerous HTML/script content before database insertion.
+// ============================================================
+
+import sanitizeHtml from "sanitize-html";
+
+/**
+ * Sanitize plain-text input: strip ALL HTML tags.
+ * Use for names, titles, notes, descriptions, etc.
+ */
+export function sanitizeText(input: string): string {
+    return sanitizeHtml(input, {
+        allowedTags: [],
+        allowedAttributes: {},
+    }).trim();
+}
+
+/**
+ * Sanitize rich-text input: allow a safe subset of HTML.
+ * Use for bio fields, post content, etc.
+ */
+export function sanitizeRichText(input: string): string {
+    return sanitizeHtml(input, {
+        allowedTags: ["b", "i", "em", "strong", "a", "p", "br", "ul", "ol", "li"],
+        allowedAttributes: {
+            a: ["href", "target", "rel"],
+        },
+        allowedSchemes: ["https", "http", "mailto"],
+    }).trim();
+}

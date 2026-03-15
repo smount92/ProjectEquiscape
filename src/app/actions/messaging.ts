@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sendNewMessageNotification } from "@/lib/email";
+import { sanitizeText } from "@/lib/utils/validation";
 
 /**
  * Create or find an existing conversation between buyer and seller for a specific horse.
@@ -113,7 +114,7 @@ export async function sendMessage(
     const { error } = await supabase.from("messages").insert({
         conversation_id: conversationId,
         sender_id: user.id,
-        content: content.trim(),
+        content: sanitizeText(content),
     });
 
     if (error) return { success: false, error: error.message };

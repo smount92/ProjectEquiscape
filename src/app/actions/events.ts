@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
+import { sanitizeText } from "@/lib/utils/validation";
 
 // ============================================================
 // EVENTS — Server Actions
@@ -629,7 +630,7 @@ export async function addEventComment(
     const { error } = await supabase.from("event_comments").insert({
         event_id: eventId,
         user_id: user.id,
-        content: content.trim(),
+        content: sanitizeText(content),
     });
 
     if (error) return { success: false, error: error.message };

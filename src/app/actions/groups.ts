@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
+import { sanitizeText } from "@/lib/utils/validation";
 
 // ============================================================
 // GROUPS — Server Actions
@@ -89,7 +90,7 @@ export async function createGroup(data: {
     const { data: group, error } = await supabase
         .from("groups")
         .insert({
-            name: data.name.trim(),
+            name: sanitizeText(data.name),
             slug,
             description: data.description?.trim() || null,
             group_type: data.groupType,
@@ -365,7 +366,7 @@ export async function createGroupPost(
     const { error } = await supabase.from("group_posts").insert({
         group_id: groupId,
         user_id: user.id,
-        content: content.trim(),
+        content: sanitizeText(content),
         horse_id: horseId || null,
     });
 
@@ -468,7 +469,7 @@ export async function replyToPost(postId: string, content: string): Promise<{ su
     const { error } = await supabase.from("group_post_replies").insert({
         post_id: postId,
         user_id: user.id,
-        content: content.trim(),
+        content: sanitizeText(content),
     });
 
     if (error) return { success: false, error: error.message };
