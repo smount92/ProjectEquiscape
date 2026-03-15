@@ -1,9 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import RatingBadge from "@/components/RatingBadge";
-import UserAvatar from "@/components/UserAvatar";
-import styles from "./discover.module.css";
+import DiscoverGrid from "@/components/DiscoverGrid";
 
 export const metadata = {
     title: "Discover Collectors — Model Horse Hub",
@@ -47,12 +44,6 @@ export default async function DiscoverPage() {
         }
     }
 
-    const memberSince = (dateStr: string) =>
-        new Date(dateStr).toLocaleDateString("en-US", {
-            month: "short",
-            year: "numeric",
-        });
-
     return (
         <div className="page-container page-container-wide">
             {/* Hero */}
@@ -74,61 +65,8 @@ export default async function DiscoverPage() {
                 </div>
             </div>
 
-            {/* Grid */}
-            {activeUsers.length === 0 ? (
-                <div className="card shelf-empty animate-fade-in-up">
-                    <div className="shelf-empty-icon">👥</div>
-                    <h2>No Active Collectors Yet</h2>
-                    <p>Be the first to make your models public!</p>
-                </div>
-            ) : (
-                <div className={`${styles.grid} animate-fade-in-up`}>
-                    {activeUsers.map((u) => {
-                        const publicCount = u.public_horse_count;
-                        const isMe = u.id === user.id;
-
-                        return (
-                            <Link
-                                key={u.id}
-                                href={`/profile/${encodeURIComponent(u.alias_name)}`}
-                                className={styles.card}
-                                id={`discover-${u.id}`}
-                            >
-                                <div className={styles.avatar}>
-                                    <UserAvatar avatarUrl={u.avatar_url} aliasName={u.alias_name} size={40} />
-                                </div>
-                                <div className={styles.info}>
-                                    <div className={styles.alias}>
-                                        @{u.alias_name}
-                                        {isMe && (
-                                            <span
-                                                className="community-own-badge"
-                                                style={{ marginLeft: "6px" }}
-                                            >
-                                                You
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className={styles.stats}>
-                                        <span>
-                                            🐴 {publicCount} model{publicCount !== 1 ? "s" : ""}
-                                        </span>
-                                        <span>📅 {memberSince(u.created_at)}</span>
-                                    </div>
-                                    {u.rating_count > 0 && (
-                                        <div style={{ marginTop: "var(--space-xs)" }}>
-                                            <RatingBadge
-                                                average={Number(Number(u.avg_rating).toFixed(1))}
-                                                count={u.rating_count}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            </Link>
-                        );
-                    })}
-                </div>
-            )}
+            {/* Client-side searchable grid */}
+            <DiscoverGrid users={activeUsers} currentUserId={user.id} />
         </div>
     );
 }

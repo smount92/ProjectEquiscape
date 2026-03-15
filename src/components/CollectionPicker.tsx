@@ -10,12 +10,12 @@ interface Collection {
 }
 
 interface CollectionPickerProps {
-  selectedCollectionId: string | null;
-  onSelect: (id: string | null) => void;
+  selectedCollectionIds: string[];
+  onSelect: (ids: string[]) => void;
 }
 
 export default function CollectionPicker({
-  selectedCollectionId,
+  selectedCollectionIds,
   onSelect,
 }: CollectionPickerProps) {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -61,10 +61,12 @@ export default function CollectionPicker({
       );
 
       if (result.success && result.data) {
+        const newCollection = result.data as Collection;
         setCollections((prev) =>
-          [...prev, result.data as Collection].sort((a, b) => a.name.localeCompare(b.name))
+          [...prev, newCollection].sort((a, b) => a.name.localeCompare(b.name))
         );
-        onSelect(result.data.id);
+        // Auto-select the new collection
+        onSelect([...selectedCollectionIds, newCollection.id]);
         setShowModal(false);
         setNewName("");
         setNewDesc("");
@@ -79,28 +81,87 @@ export default function CollectionPicker({
     }
   };
 
+  const handleToggle = (collectionId: string) => {
+    if (selectedCollectionIds.includes(collectionId)) {
+      onSelect(selectedCollectionIds.filter((id) => id !== collectionId));
+    } else {
+      onSelect([...selectedCollectionIds, collectionId]);
+    }
+  };
+
+  const selectedNames = collections
+    .filter((c) => selectedCollectionIds.includes(c.id))
+    .map((c) => c.name);
+
   return (
     <div className="form-group">
-      <label htmlFor="collection-picker" className="form-label">
-        📁 Collection / Folder <span style={{ opacity: 0.6, fontWeight: 400 }}>(Optional)</span>
+      <label className="form-label">
+        📁 Collections <span style={{ opacity: 0.6, fontWeight: 400 }}>(Optional — multi-select)</span>
       </label>
 
-      <div className="collection-picker-row">
-        <select
-          id="collection-picker"
-          className="form-select"
-          value={selectedCollectionId ?? ""}
-          onChange={(e) => onSelect(e.target.value || null)}
-          disabled={loading}
-        >
-          <option value="">No Collection (Uncategorized)</option>
+      {loading ? (
+        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+          Loading collections…
+        </div>
+      ) : collections.length === 0 ? (
+        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-sm)" }}>
+          No collections yet. Create one to organize your models.
+        </div>
+      ) : (
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--space-xs)",
+          maxHeight: 180,
+          overflowY: "auto",
+          padding: "var(--space-sm)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "var(--radius-md)",
+          background: "var(--color-bg-input, rgba(0,0,0,0.03))",
+        }}>
           {collections.map((c) => (
-            <option key={c.id} value={c.id}>
-              📁 {c.name}
-            </option>
+            <label
+              key={c.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--space-sm)",
+                padding: "var(--space-xs) var(--space-sm)",
+                borderRadius: "var(--radius-sm)",
+                cursor: "pointer",
+                background: selectedCollectionIds.includes(c.id)
+                  ? "rgba(44, 85, 69, 0.12)"
+                  : "transparent",
+                transition: "background 0.15s ease",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={selectedCollectionIds.includes(c.id)}
+                onChange={() => handleToggle(c.id)}
+                style={{ width: 16, height: 16, flexShrink: 0, accentColor: "var(--color-accent-primary)" }}
+              />
+              <span style={{
+                fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                fontWeight: selectedCollectionIds.includes(c.id) ? 600 : 400,
+              }}>
+                📁 {c.name}
+              </span>
+            </label>
           ))}
-        </select>
+        </div>
+      )}
 
+      <div className="collection-picker-row" style={{ marginTop: "var(--space-sm)" }}>
+        {selectedNames.length > 0 && (
+          <div style={{
+            fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+            color: "var(--color-accent-primary)",
+            fontWeight: 500,
+          }}>
+            ✓ In: {selectedNames.join(", ")}
+          </div>
+        )}
         <button
           type="button"
           className="btn btn-ghost collection-create-btn"

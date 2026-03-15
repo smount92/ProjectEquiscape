@@ -1118,7 +1118,7 @@ p {
     0 0 40px rgba(44, 85, 69, 0.04),
     inset 0 1px 0 rgba(0, 0, 0, 0.03);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .step-card::before {

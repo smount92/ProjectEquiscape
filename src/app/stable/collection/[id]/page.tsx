@@ -78,19 +78,39 @@ export default async function CollectionPage({
     notFound();
   }
 
-  // Fetch horses in this collection
-  const { data: rawHorses } = await supabase
+  // Fetch horse IDs in this collection via junction table
+  const { data: junctionRows } = await supabase
+    .from("horse_collections")
+    .select("horse_id")
+    .eq("collection_id", collectionId);
+
+  const horseIdsInCollection = (junctionRows || []).map((r: { horse_id: string }) => r.horse_id);
+
+  // Fallback: also check legacy FK for horses not yet migrated
+  const { data: legacyHorses } = await supabase
     .from("user_horses")
-    .select(
-      `
+    .select("id")
+    .eq("owner_id", user.id)
+    .eq("collection_id", collectionId);
+
+  const legacyIds = (legacyHorses || []).map((h: { id: string }) => h.id);
+  const allHorseIds = [...new Set([...horseIdsInCollection, ...legacyIds])];
+
+  // Fetch full horse data for the resolved IDs
+  const { data: rawHorses } = allHorseIds.length > 0
+    ? await supabase
+      .from("user_horses")
+      .select(
+        `
       id, custom_name, finish_type, condition_grade, created_at, trade_status,
       catalog_items:catalog_id(title, maker, item_type),
       horse_images(image_url, angle_profile)
     `
-    )
-    .eq("owner_id", user.id)
-    .eq("collection_id", collectionId)
-    .order("created_at", { ascending: false });
+      )
+      .eq("owner_id", user.id)
+      .in("id", allHorseIds)
+      .order("created_at", { ascending: false })
+    : { data: [] };
 
   const horses = (rawHorses as unknown as CollectionHorse[]) ?? [];
 

@@ -14,16 +14,27 @@ export async function parseAndNotifyMentions(
     _sourceUrl: string
 ): Promise<void> {
     try {
-        const aliases = extractMentions(content);
-        if (aliases.length === 0) return;
+        const rawAliases = extractMentions(content);
+        if (rawAliases.length === 0) return;
 
         const admin = getAdminClient();
+
+        // For multi-word mentions, also try progressively shorter substrings
+        // e.g. "@John Smith is cool" → try ["John Smith is cool", "John Smith is", "John Smith", "John"]
+        const candidates = new Set<string>();
+        for (const alias of rawAliases) {
+            const words = alias.split(/\s+/);
+            for (let len = words.length; len >= 1; len--) {
+                const sub = words.slice(0, len).join(" ");
+                if (sub.length >= 3) candidates.add(sub);
+            }
+        }
 
         // Batch resolve aliases to user IDs
         const { data: users } = await admin
             .from("users")
             .select("id, alias_name")
-            .in("alias_name", aliases);
+            .in("alias_name", [...candidates]);
 
         if (!users || users.length === 0) return;
 

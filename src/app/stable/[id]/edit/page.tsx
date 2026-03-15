@@ -12,6 +12,7 @@ import { compressImage, compressImageWithWatermark } from "@/lib/utils/imageComp
 import { updateLifeStage } from "@/app/actions/hoofprint";
 import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages } from "@/app/actions/horse";
 import { getProfile } from "@/app/actions/settings";
+import { getHorseCollections, setHorseCollections } from "@/app/actions/collections";
 import ImageCropModal from "@/components/ImageCropModal";
 
 // ---- Types ----
@@ -73,7 +74,7 @@ export default function EditHorsePage() {
   const [originalCondition, setOriginalCondition] = useState("");
   const [conditionNote, setConditionNote] = useState("");
   const [visibility, setVisibility] = useState<"public" | "unlisted" | "private">("public");
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
   const [listingPrice, setListingPrice] = useState("");
   const [marketplaceNotes, setMarketplaceNotes] = useState("");
@@ -188,7 +189,15 @@ export default function EditHorsePage() {
       } else {
         setVisibility(horse.is_public ? "public" : "private");
       }
-      setSelectedCollectionId(horse.collection_id);
+      // Load collection IDs from junction table
+      getHorseCollections(horseId).then(ids => {
+        if (ids.length > 0) {
+          setSelectedCollectionIds(ids);
+        } else if (horse.collection_id) {
+          // Fallback to legacy FK
+          setSelectedCollectionIds([horse.collection_id]);
+        }
+      });
       setTradeStatus(horse.trade_status || "Not for Sale");
       if (horse.listing_price !== null) setListingPrice(String(horse.listing_price));
       setMarketplaceNotes(horse.marketplace_notes || "");
@@ -354,7 +363,7 @@ export default function EditHorsePage() {
         trade_status: tradeStatus,
         listing_price: tradeStatus !== "Not for Sale" && listingPrice ? parseFloat(listingPrice) : null,
         marketplace_notes: tradeStatus !== "Not for Sale" && marketplaceNotes.trim() ? marketplaceNotes.trim() : null,
-        collection_id: selectedCollectionId,
+        collection_id: selectedCollectionIds[0] || null,
         catalog_id: selectedCatalogId,
         life_stage: isModel ? lifeStage : null,
         finish_details: finishDetails.trim() || null,
@@ -389,6 +398,9 @@ export default function EditHorsePage() {
       });
 
       if (!result.success) throw new Error(result.error || "Failed to save.");
+
+      // Update multi-collection assignments via junction table
+      await setHorseCollections(horseId, selectedCollectionIds);
 
       // Process deferred image deletions (only now that save succeeded)
       for (const del of pendingImageDeletes) {
@@ -928,8 +940,8 @@ export default function EditHorsePage() {
           )}
 
           <CollectionPicker
-            selectedCollectionId={selectedCollectionId}
-            onSelect={setSelectedCollectionId}
+            selectedCollectionIds={selectedCollectionIds}
+            onSelect={setSelectedCollectionIds}
           />
 
           {/* Marketplace Status */}

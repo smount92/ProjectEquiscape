@@ -19,6 +19,7 @@ import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { initializeHoofprint } from "@/app/actions/hoofprint";
 import { createHorseRecord, finalizeHorseImages } from "@/app/actions/horse";
 import { getProfile } from "@/app/actions/settings";
+import { setHorseCollections } from "@/app/actions/collections";
 import ImageCropModal from "@/components/ImageCropModal";
 
 // ---- AI Detection types ----
@@ -113,7 +114,7 @@ export default function AddHorsePage() {
   const [finishType, setFinishType] = useState<FinishType | "">("");
   const [conditionGrade, setConditionGrade] = useState("");
   const [visibility, setVisibility] = useState<"public" | "unlisted" | "private">("public");
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([]);
   const [tradeStatus, setTradeStatus] = useState("Not for Sale");
   const [listingPrice, setListingPrice] = useState("");
   const [marketplaceNotes, setMarketplaceNotes] = useState("");
@@ -339,7 +340,7 @@ export default function AddHorsePage() {
         tradeStatus: tradeStatus || undefined,
         lifeStage: isModel ? lifeStage || undefined : undefined,
         catalogId: selectedCatalogId || undefined,
-        selectedCollectionId: selectedCollectionId || undefined,
+        selectedCollectionId: selectedCollectionIds[0] || undefined,
         sculptor: sculptor.trim() || undefined,
         finishingArtist: finishingArtist.trim() || undefined,
         editionNumber: isModel && editionNumber ? parseInt(editionNumber) : undefined,
@@ -365,6 +366,11 @@ export default function AddHorsePage() {
       }
 
       const horseId = result.horseId;
+
+      // Set multi-collection assignments via junction table
+      if (selectedCollectionIds.length > 0) {
+        await setHorseCollections(horseId, selectedCollectionIds);
+      }
 
       // Step 2: Upload images directly from browser to Supabase Storage
       const uploadedImages: { path: string; angle: string }[] = [];
@@ -1061,8 +1067,8 @@ export default function AddHorsePage() {
             )}
 
             <CollectionPicker
-              selectedCollectionId={selectedCollectionId}
-              onSelect={setSelectedCollectionId}
+              selectedCollectionIds={selectedCollectionIds}
+              onSelect={setSelectedCollectionIds}
             />
 
             {/* Trade / Marketplace Status */}

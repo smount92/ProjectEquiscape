@@ -68,7 +68,13 @@ export async function deleteCollectionAction(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not authenticated." };
 
-    // Unassign horses from collection first
+    // Clean up junction table (cascade should handle this, but be explicit)
+    await supabase
+        .from("horse_collections")
+        .delete()
+        .eq("collection_id", collectionId);
+
+    // Also unassign from legacy FK column
     await supabase
         .from("user_horses")
         .update({ collection_id: null })
@@ -82,6 +88,70 @@ export async function deleteCollectionAction(
         .eq("user_id", user.id);
 
     if (error) return { success: false, error: error.message };
+    revalidatePath("/dashboard");
+    return { success: true };
+}
+
+/**
+ * Get all collection IDs a horse belongs to (via junction table).
+ */
+export async function getHorseCollections(horseId: string): Promise<string[]> {
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from("horse_collections")
+        .select("collection_id")
+        .eq("horse_id", horseId);
+
+    return (data || []).map((r: { collection_id: string }) => r.collection_id);
+}
+
+/**
+ * Set the collections a horse belongs to (replaces all existing assignments).
+ */
+export async function setHorseCollections(
+    horseId: string,
+    collectionIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify horse ownership
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("id")
+        .eq("id", horseId)
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+    if (!horse) return { success: false, error: "Horse not found or not yours." };
+
+    // Delete all existing assignments
+    await supabase
+        .from("horse_collections")
+        .delete()
+        .eq("horse_id", horseId);
+
+    // Insert new assignments
+    if (collectionIds.length > 0) {
+        const inserts = collectionIds.map(cid => ({
+            horse_id: horseId,
+            collection_id: cid,
+        }));
+
+        const { error } = await supabase
+            .from("horse_collections")
+            .insert(inserts);
+
+        if (error) return { success: false, error: error.message };
+    }
+
+    // Also update legacy FK to first collection (for backward compat reads)
+    await supabase
+        .from("user_horses")
+        .update({ collection_id: collectionIds[0] || null })
+        .eq("id", horseId);
+
     revalidatePath("/dashboard");
     return { success: true };
 }
