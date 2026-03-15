@@ -9,7 +9,11 @@ import { vi } from "vitest";
  *   mock._mockQuery.select.mockResolvedValueOnce({ data: [...], error: null });
  */
 export function createMockSupabaseClient(overrides: Record<string, unknown> = {}) {
-    const mockQuery = {
+    // Default resolved value when the query chain is awaited implicitly
+    // (i.e., without calling .single() or .maybeSingle())
+    let _implicitResolve = { data: null as unknown, error: null as unknown };
+
+    const mockQuery: Record<string, unknown> = {
         select: vi.fn().mockReturnThis(),
         insert: vi.fn().mockReturnThis(),
         update: vi.fn().mockReturnThis(),
@@ -26,10 +30,19 @@ export function createMockSupabaseClient(overrides: Record<string, unknown> = {}
         range: vi.fn().mockReturnThis(),
         single: vi.fn().mockResolvedValue({ data: null, error: null }),
         maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-        then: undefined, // Prevent auto-await
+        // Allow implicit await — resolves with { data, error }
+        then: vi.fn((resolve: (value: unknown) => void) => {
+            return Promise.resolve(_implicitResolve).then(resolve);
+        }),
         data: null,
         error: null,
         ...overrides,
+    };
+
+    // Helper: set the value returned when the query chain is awaited implicitly
+    // (without .single() or .maybeSingle())
+    const setImplicitResolve = (val: { data: unknown; error: unknown }) => {
+        _implicitResolve = val;
     };
 
     return {
@@ -48,7 +61,9 @@ export function createMockSupabaseClient(overrides: Record<string, unknown> = {}
                 getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: "https://test.supabase.co/storage/v1/object/public/horse-images/test/path.webp" } }),
             })),
         },
+        rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
         _mockQuery: mockQuery, // Expose for per-test assertions
+        _setImplicitResolve: setImplicitResolve, // Expose for tests that need implicit await
     };
 }
 
