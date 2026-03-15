@@ -4,18 +4,26 @@ import { useState } from "react";
 import { addShowRecord, updateShowRecord } from "@/app/actions/provenance";
 
 const RIBBON_COLORS = [
-    { value: "", label: "Select ribbon…" },
-    { value: "Blue", label: "🔵 Blue (1st)" },
-    { value: "Red", label: "🔴 Red (2nd)" },
-    { value: "Yellow", label: "🟡 Yellow (3rd)" },
-    { value: "White", label: "⚪ White (4th)" },
-    { value: "Pink", label: "🩷 Pink (5th)" },
-    { value: "Green", label: "🟢 Green (6th)" },
-    { value: "Purple", label: "🟣 Purple (7th/8th)" },
+    { value: "", label: "Select ribbon/award…" },
+    { value: "Blue", label: "🔵 Blue" },
+    { value: "Red", label: "🔴 Red" },
+    { value: "Yellow", label: "🟡 Yellow" },
+    { value: "White", label: "⚪ White" },
+    { value: "Pink", label: "🩷 Pink" },
+    { value: "Green", label: "🟢 Green" },
+    { value: "Purple", label: "🟣 Purple" },
+    { value: "Brown", label: "🟤 Brown (8th)" },
+    { value: "Gray", label: "🔘 Gray (9th)" },
+    { value: "Light Blue", label: "🧊 Light Blue (10th)" },
     { value: "Grand Champion", label: "🏆 Grand Champion" },
     { value: "Reserve Grand Champion", label: "🥈 Reserve Grand Champion" },
-    { value: "NAN Top Ten", label: "⭐ NAN Top Ten" },
-    { value: "NAN Card", label: "🌟 NAN Card" },
+    { value: "Champion", label: "🏆 Champion" },
+    { value: "Reserve Champion", label: "🥈 Reserve Champion" },
+    { value: "Honorable Mention", label: "🎖️ Honorable Mention (HM)" },
+    { value: "Top 3", label: "🏅 Top 3" },
+    { value: "Top 5", label: "🏅 Top 5" },
+    { value: "Top 10", label: "🏅 Top 10" },
+    { value: "Participant", label: "🎀 Participant" },
     { value: "Other", label: "Other" },
 ];
 
@@ -31,6 +39,12 @@ interface ShowRecordFormProps {
         judgeName: string | null;
         isNan: boolean;
         notes: string | null;
+        // NEW: Beta feedback fields
+        showLocation: string | null;
+        sectionName: string | null;
+        awardCategory: string | null;
+        competitionLevel: string | null;
+        showDateText: string | null;
     };
     onSave: () => void;
     onCancel: () => void;
@@ -55,6 +69,17 @@ export default function ShowRecordForm({
     const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
     const [errorMsg, setErrorMsg] = useState("");
 
+    // NEW: Beta feedback state
+    const [showLocation, setShowLocation] = useState(existingRecord?.showLocation ?? "");
+    const [sectionName, setSectionName] = useState(existingRecord?.sectionName ?? "");
+    const [awardCategory, setAwardCategory] = useState(existingRecord?.awardCategory ?? "");
+    const [competitionLevel, setCompetitionLevel] = useState(existingRecord?.competitionLevel ?? "");
+    const [showDateText, setShowDateText] = useState(existingRecord?.showDateText ?? "");
+    const [showAdvanced, setShowAdvanced] = useState(
+        !!(existingRecord?.showLocation || existingRecord?.sectionName ||
+            existingRecord?.awardCategory || existingRecord?.competitionLevel)
+    );
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!showName.trim() || status === "saving") return;
@@ -71,6 +96,12 @@ export default function ShowRecordForm({
             judgeName: judgeName || undefined,
             isNan,
             notes: notes || undefined,
+            // NEW fields
+            showLocation: showLocation || undefined,
+            sectionName: sectionName || undefined,
+            awardCategory: awardCategory || undefined,
+            competitionLevel: competitionLevel || undefined,
+            showDateText: showDateText || undefined,
         };
 
         const result = isEdit
@@ -129,6 +160,22 @@ export default function ShowRecordForm({
                             id="show-record-division"
                         />
                     </div>
+                </div>
+
+                {/* Fuzzy Date fallback */}
+                <div className="form-group">
+                    <label className="form-label">Approximate Date</label>
+                    <input
+                        className="form-input"
+                        type="text"
+                        value={showDateText}
+                        onChange={(e) => setShowDateText(e.target.value)}
+                        placeholder="e.g. Spring 2023, BreyerFest 2015"
+                        id="show-record-date-text"
+                    />
+                    <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+                        Use this when you don&apos;t know the exact date.
+                    </small>
                 </div>
 
                 <div className="show-record-form-row">
@@ -197,6 +244,83 @@ export default function ShowRecordForm({
                         id="show-record-notes"
                     />
                 </div>
+
+                {/* Advanced Details Toggle */}
+                <div className="form-group">
+                    <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setShowAdvanced(!showAdvanced)}
+                        style={{ width: "100%" }}
+                        id="show-record-advanced-toggle"
+                    >
+                        {showAdvanced ? "▾ Hide" : "▸ Show"} Advanced Details
+                    </button>
+                </div>
+
+                {showAdvanced && (
+                    <>
+                        <div className="show-record-form-row">
+                            <div className="form-group">
+                                <label className="form-label">Location</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    value={showLocation}
+                                    onChange={(e) => setShowLocation(e.target.value)}
+                                    placeholder="e.g. Dallas TX, Ontario Canada"
+                                    id="show-record-location"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Section</label>
+                                <input
+                                    className="form-input"
+                                    type="text"
+                                    value={sectionName}
+                                    onChange={(e) => setSectionName(e.target.value)}
+                                    placeholder="e.g. Halter, Performance"
+                                    id="show-record-section"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="show-record-form-row">
+                            <div className="form-group">
+                                <label className="form-label">Award Category</label>
+                                <select
+                                    className="form-select"
+                                    value={awardCategory}
+                                    onChange={(e) => setAwardCategory(e.target.value)}
+                                    id="show-record-award-category"
+                                >
+                                    <option value="">Select category…</option>
+                                    <option value="Breed">Breed</option>
+                                    <option value="Collectibility">Collectibility</option>
+                                    <option value="Workmanship">Workmanship</option>
+                                    <option value="Color">Color</option>
+                                    <option value="Gender">Gender</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Competition Level</label>
+                                <select
+                                    className="form-select"
+                                    value={competitionLevel}
+                                    onChange={(e) => setCompetitionLevel(e.target.value)}
+                                    id="show-record-competition-level"
+                                >
+                                    <option value="">Select level…</option>
+                                    <option value="Open">Open</option>
+                                    <option value="Novice">Novice</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Youth">Youth</option>
+                                </select>
+                            </div>
+                        </div>
+                    </>
+                )}
 
                 {status === "error" && errorMsg && (
                     <div className="comment-error" style={{ marginBottom: "var(--space-md)" }}>

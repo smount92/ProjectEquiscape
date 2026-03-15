@@ -127,6 +127,13 @@ export default function AddHorsePage() {
   const [purchaseDate, setPurchaseDate] = useState("");
   const [estimatedValue, setEstimatedValue] = useState("");
   const [insuranceNotes, setInsuranceNotes] = useState("");
+  const [finishDetails, setFinishDetails] = useState("");
+  const [publicNotes, setPublicNotes] = useState("");
+  const [assignedBreed, setAssignedBreed] = useState("");
+  const [assignedGender, setAssignedGender] = useState("");
+  const [assignedAge, setAssignedAge] = useState("");
+  const [regionalId, setRegionalId] = useState("");
+  const [purchaseDateText, setPurchaseDateText] = useState("");
 
   // Auto-fill custom_name when a catalog item is selected
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -328,6 +335,13 @@ export default function AddHorsePage() {
         estimatedValue: estimatedValue ? parseFloat(estimatedValue) : undefined,
         insuranceNotes: insuranceNotes.trim() || undefined,
         assetCategory,
+        finishDetails: finishDetails.trim() || undefined,
+        publicNotes: publicNotes.trim() || undefined,
+        assignedBreed: assignedBreed.trim() || undefined,
+        assignedGender: assignedGender.trim() || undefined,
+        assignedAge: assignedAge.trim() || undefined,
+        regionalId: regionalId.trim() || undefined,
+        purchaseDateText: purchaseDateText.trim() || undefined,
       });
 
       if (!result.success || !result.horseId) {
@@ -888,6 +902,106 @@ export default function AddHorsePage() {
               </div>
             )}
 
+            {/* Finish Details */}
+            <div className="form-group">
+              <label className="form-label">Finish Details</label>
+              <input
+                className="form-input"
+                type="text"
+                value={finishDetails}
+                onChange={(e) => setFinishDetails(e.target.value)}
+                placeholder="e.g. Glossy, Matte, Satin, Chalky"
+                maxLength={100}
+                id="finish-details"
+              />
+            </div>
+
+            {/* Public Notes */}
+            <div className="form-group">
+              <label className="form-label">Public Notes</label>
+              <textarea
+                className="form-input"
+                value={publicNotes}
+                onChange={(e) => setPublicNotes(e.target.value)}
+                placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
+                maxLength={500}
+                rows={2}
+                id="public-notes"
+              />
+              <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+                These notes will be visible to anyone viewing this horse&apos;s passport.
+              </small>
+            </div>
+
+            {/* ── Show Bio (Optional) ── */}
+            <div className="form-divider" style={{ margin: "var(--space-lg) 0 var(--space-md)" }}>
+              <h4 style={{ fontSize: "var(--font-size-md)", fontWeight: 600, color: "var(--color-text-secondary)" }}>
+                🏅 Show Bio <span style={{ fontWeight: 400, fontSize: "var(--font-size-sm)" }}>(Optional)</span>
+              </h4>
+              <small style={{ color: "var(--color-text-muted)", display: "block", marginTop: "var(--space-xs)" }}>
+                The show identity you assign for competition — breed, gender, and age for show ring divisions.
+              </small>
+            </div>
+
+            <div className="form-row" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+              <div className="form-group" style={{ flex: "1 1 200px" }}>
+                <label className="form-label">Assigned Breed</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={assignedBreed}
+                  onChange={(e) => setAssignedBreed(e.target.value)}
+                  placeholder="e.g. Andalusian, Arabian, Quarter Horse"
+                  maxLength={100}
+                  id="assigned-breed"
+                />
+              </div>
+              <div className="form-group" style={{ flex: "1 1 150px" }}>
+                <label className="form-label">Assigned Gender</label>
+                <select
+                  className="form-select"
+                  value={assignedGender}
+                  onChange={(e) => setAssignedGender(e.target.value)}
+                  id="assigned-gender"
+                >
+                  <option value="">Select…</option>
+                  <option value="Stallion">Stallion</option>
+                  <option value="Mare">Mare</option>
+                  <option value="Gelding">Gelding</option>
+                  <option value="Foal">Foal</option>
+                  <option value="Colt">Colt</option>
+                  <option value="Filly">Filly</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+              <div className="form-group" style={{ flex: "1 1 150px" }}>
+                <label className="form-label">Assigned Age</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={assignedAge}
+                  onChange={(e) => setAssignedAge(e.target.value)}
+                  placeholder="e.g. Foal, Yearling, Adult, 5 years"
+                  maxLength={50}
+                  id="assigned-age"
+                />
+              </div>
+              <div className="form-group" style={{ flex: "1 1 200px" }}>
+                <label className="form-label">Regional Show ID</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={regionalId}
+                  onChange={(e) => setRegionalId(e.target.value)}
+                  placeholder="e.g. RX number, Texas System ID"
+                  maxLength={50}
+                  id="regional-id"
+                />
+              </div>
+            </div>
+
             {/* Condition Grade — model only */}
             {isModel && (
               <div className="form-group">
@@ -961,7 +1075,7 @@ export default function AddHorsePage() {
               <div className="marketplace-fields animate-fade-in-up">
                 <div className="form-group">
                   <label htmlFor="listing-price" className="form-label">
-                    💲 Listing Price ($)
+                    💲 Listing Price
                   </label>
                   <input
                     id="listing-price"
@@ -1077,7 +1191,7 @@ export default function AddHorsePage() {
               <div className="vault-row">
                 <div className="form-group">
                   <label htmlFor="purchase-price" className="form-label">
-                    Purchase Price ($)
+                    Purchase Price
                   </label>
                   <input
                     id="purchase-price"
@@ -1105,10 +1219,26 @@ export default function AddHorsePage() {
                 </div>
               </div>
 
+              {/* Fuzzy Purchase Date */}
+              <div className="form-group">
+                <label className="form-label">Approximate Purchase Date</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  value={purchaseDateText}
+                  onChange={(e) => setPurchaseDateText(e.target.value)}
+                  placeholder="e.g. BreyerFest 2017, Summer 2015, Christmas 2020"
+                  id="purchase-date-text"
+                />
+                <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+                  Use this when you don&apos;t remember the exact date.
+                </small>
+              </div>
+
               <div className="vault-row">
                 <div className="form-group">
                   <label htmlFor="estimated-value" className="form-label">
-                    Estimated Current Value ($)
+                    Estimated Current Value
                   </label>
                   <input
                     id="estimated-value"

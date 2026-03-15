@@ -7,17 +7,20 @@ interface VaultData {
   purchase_date: string | null;
   estimated_current_value: number | null;
   insurance_notes: string | null;
+  purchase_date_text: string | null;
 }
 
 interface VaultRevealProps {
   vault: VaultData | null;
+  currencySymbol?: string;
 }
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+function formatCurrency(value: number, symbol: string = "$"): string {
+  const formatted = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
+  return `${symbol}${formatted}`;
 }
 
 function formatDate(dateStr: string): string {
@@ -28,7 +31,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function VaultReveal({ vault }: VaultRevealProps) {
+export default function VaultReveal({ vault, currencySymbol = "$" }: VaultRevealProps) {
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   const hasData =
@@ -36,7 +39,8 @@ export default function VaultReveal({ vault }: VaultRevealProps) {
     (vault.purchase_price !== null ||
       vault.purchase_date !== null ||
       vault.estimated_current_value !== null ||
-      vault.insurance_notes !== null);
+      vault.insurance_notes !== null ||
+      vault.purchase_date_text !== null);
 
   return (
     <div className={`vault-reveal ${isUnlocked ? "unlocked" : ""}`}>
@@ -112,7 +116,7 @@ export default function VaultReveal({ vault }: VaultRevealProps) {
                 <div className="vault-data-item">
                   <div className="vault-data-label">Purchase Price</div>
                   <div className="vault-data-value money">
-                    {formatCurrency(vault.purchase_price)}
+                    {formatCurrency(vault.purchase_price, currencySymbol)}
                   </div>
                 </div>
               )}
@@ -121,7 +125,7 @@ export default function VaultReveal({ vault }: VaultRevealProps) {
                 <div className="vault-data-item">
                   <div className="vault-data-label">Estimated Value</div>
                   <div className="vault-data-value money">
-                    {formatCurrency(vault.estimated_current_value)}
+                    {formatCurrency(vault.estimated_current_value, currencySymbol)}
                   </div>
                 </div>
               )}
@@ -131,6 +135,15 @@ export default function VaultReveal({ vault }: VaultRevealProps) {
                   <div className="vault-data-label">Purchase Date</div>
                   <div className="vault-data-value">
                     {formatDate(vault.purchase_date)}
+                  </div>
+                </div>
+              )}
+
+              {vault.purchase_date_text && !vault.purchase_date && (
+                <div className="vault-data-item">
+                  <div className="vault-data-label">Purchase Date</div>
+                  <div className="vault-data-value">
+                    {vault.purchase_date_text}
                   </div>
                 </div>
               )}

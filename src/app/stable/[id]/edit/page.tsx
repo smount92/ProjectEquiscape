@@ -20,6 +20,7 @@ interface VaultData {
   purchase_date: string | null;
   estimated_current_value: number | null;
   insurance_notes: string | null;
+  purchase_date_text: string | null;
 }
 
 const PHOTO_STUDIO_SLOTS: { angle: AngleProfile; label: string; primary?: boolean }[] = [
@@ -90,6 +91,13 @@ export default function EditHorsePage() {
   const [estimatedValue, setEstimatedValue] = useState("");
   const [insuranceNotes, setInsuranceNotes] = useState("");
   const [hasExistingVault, setHasExistingVault] = useState(false);
+  const [finishDetails, setFinishDetails] = useState("");
+  const [publicNotes, setPublicNotes] = useState("");
+  const [assignedBreed, setAssignedBreed] = useState("");
+  const [assignedGender, setAssignedGender] = useState("");
+  const [assignedAge, setAssignedAge] = useState("");
+  const [regionalId, setRegionalId] = useState("");
+  const [purchaseDateText, setPurchaseDateText] = useState("");
 
   // Multi-angle image management
   const [existingImages, setExistingImages] = useState<Partial<Record<AngleProfile, ExistingImage>>>({});
@@ -124,7 +132,7 @@ export default function EditHorsePage() {
 
       const { data: horse, error: horseErr } = await supabase
         .from("user_horses")
-        .select("id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, visibility, collection_id, catalog_id, trade_status, listing_price, marketplace_notes, life_stage, asset_category")
+        .select("id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, visibility, collection_id, catalog_id, trade_status, listing_price, marketplace_notes, life_stage, asset_category, finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id")
         .eq("id", horseId)
         .single<{
           id: string;
@@ -145,6 +153,12 @@ export default function EditHorsePage() {
           marketplace_notes: string | null;
           life_stage: string | null;
           asset_category: AssetCategory | null;
+          finish_details: string | null;
+          public_notes: string | null;
+          assigned_breed: string | null;
+          assigned_gender: string | null;
+          assigned_age: string | null;
+          regional_id: string | null;
         }>();
 
       if (horseErr || !horse || horse.owner_id !== user.id) {
@@ -174,6 +188,12 @@ export default function EditHorsePage() {
       if (horse.listing_price !== null) setListingPrice(String(horse.listing_price));
       setMarketplaceNotes(horse.marketplace_notes || "");
       setLifeStage(horse.life_stage || "completed");
+      setFinishDetails(horse.finish_details || "");
+      setPublicNotes(horse.public_notes || "");
+      setAssignedBreed(horse.assigned_breed || "");
+      setAssignedGender(horse.assigned_gender || "");
+      setAssignedAge(horse.assigned_age || "");
+      setRegionalId(horse.regional_id || "");
 
       if (horse.catalog_id) {
         setSelectedCatalogId(horse.catalog_id);
@@ -187,7 +207,7 @@ export default function EditHorsePage() {
 
       const { data: vault } = await supabase
         .from("financial_vault")
-        .select("purchase_price, purchase_date, estimated_current_value, insurance_notes")
+        .select("purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text")
         .eq("horse_id", horseId)
         .single<VaultData>();
 
@@ -197,6 +217,7 @@ export default function EditHorsePage() {
         if (vault.purchase_date !== null) setPurchaseDate(vault.purchase_date);
         if (vault.estimated_current_value !== null) setEstimatedValue(String(vault.estimated_current_value));
         if (vault.insurance_notes !== null) setInsuranceNotes(vault.insurance_notes);
+        if (vault.purchase_date_text !== null) setPurchaseDateText(vault.purchase_date_text);
       }
 
       // Load all existing images for this horse
@@ -322,14 +343,21 @@ export default function EditHorsePage() {
         collection_id: selectedCollectionId,
         catalog_id: selectedCatalogId,
         life_stage: isModel ? lifeStage : null,
+        finish_details: finishDetails.trim() || null,
+        public_notes: publicNotes.trim() || null,
+        assigned_breed: assignedBreed.trim() || null,
+        assigned_gender: assignedGender.trim() || null,
+        assigned_age: assignedAge.trim() || null,
+        regional_id: regionalId.trim() || null,
       };
 
-      const hasVaultData = purchasePrice || purchaseDate || estimatedValue || insuranceNotes;
+      const hasVaultData = purchasePrice || purchaseDate || estimatedValue || insuranceNotes || purchaseDateText;
       const vaultData: Record<string, unknown> | null = hasVaultData ? {
         purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
         purchase_date: purchaseDate || null,
         estimated_current_value: estimatedValue ? parseFloat(estimatedValue) : null,
         insurance_notes: insuranceNotes || null,
+        purchase_date_text: purchaseDateText.trim() || null,
       } : null;
 
       const deleteVault = !hasVaultData && hasExistingVault;
@@ -741,6 +769,71 @@ export default function EditHorsePage() {
             <span className="form-hint">e.g., &quot;3 of 50&quot; for limited edition runs.</span>
           </div>
 
+          {/* Finish Details */}
+          <div className="form-group">
+            <label className="form-label">Finish Details</label>
+            <input className="form-input" type="text" value={finishDetails}
+              onChange={(e) => setFinishDetails(e.target.value)}
+              placeholder="e.g. Glossy, Matte, Satin, Chalky" maxLength={100} id="edit-finish-details" />
+          </div>
+
+          {/* Public Notes */}
+          <div className="form-group">
+            <label className="form-label">Public Notes</label>
+            <textarea className="form-input" value={publicNotes}
+              onChange={(e) => setPublicNotes(e.target.value)}
+              placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
+              maxLength={500} rows={2} id="edit-public-notes" />
+            <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+              These notes will be visible to anyone viewing this horse&apos;s passport.
+            </small>
+          </div>
+
+          {/* Show Bio */}
+          <div className="form-divider" style={{ margin: "var(--space-lg) 0 var(--space-md)" }}>
+            <h4 style={{ fontSize: "var(--font-size-md)", fontWeight: 600, color: "var(--color-text-secondary)" }}>
+              🏅 Show Bio <span style={{ fontWeight: 400, fontSize: "var(--font-size-sm)" }}>(Optional)</span>
+            </h4>
+            <small style={{ color: "var(--color-text-muted)", display: "block", marginTop: "var(--space-xs)" }}>
+              The show identity you assign for competition — breed, gender, and age for show ring divisions.
+            </small>
+          </div>
+          <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+            <div className="form-group" style={{ flex: "1 1 200px" }}>
+              <label className="form-label">Assigned Breed</label>
+              <input className="form-input" type="text" value={assignedBreed}
+                onChange={(e) => setAssignedBreed(e.target.value)}
+                placeholder="e.g. Andalusian, Arabian" maxLength={100} id="edit-assigned-breed" />
+            </div>
+            <div className="form-group" style={{ flex: "1 1 150px" }}>
+              <label className="form-label">Assigned Gender</label>
+              <select className="form-select" value={assignedGender}
+                onChange={(e) => setAssignedGender(e.target.value)} id="edit-assigned-gender">
+                <option value="">Select…</option>
+                <option value="Stallion">Stallion</option>
+                <option value="Mare">Mare</option>
+                <option value="Gelding">Gelding</option>
+                <option value="Foal">Foal</option>
+                <option value="Colt">Colt</option>
+                <option value="Filly">Filly</option>
+              </select>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+            <div className="form-group" style={{ flex: "1 1 150px" }}>
+              <label className="form-label">Assigned Age</label>
+              <input className="form-input" type="text" value={assignedAge}
+                onChange={(e) => setAssignedAge(e.target.value)}
+                placeholder="e.g. Foal, Yearling, Adult" maxLength={50} id="edit-assigned-age" />
+            </div>
+            <div className="form-group" style={{ flex: "1 1 200px" }}>
+              <label className="form-label">Regional Show ID</label>
+              <input className="form-input" type="text" value={regionalId}
+                onChange={(e) => setRegionalId(e.target.value)}
+                placeholder="e.g. RX number, Texas System ID" maxLength={50} id="edit-regional-id" />
+            </div>
+          </div>
+
           {/* Finish Type & Condition — model only */}
           {isModel && (
             <div className="edit-row">
@@ -840,7 +933,7 @@ export default function EditHorsePage() {
           {(tradeStatus === "For Sale" || tradeStatus === "Open to Offers") && (
             <div className="marketplace-fields animate-fade-in-up">
               <div className="form-group">
-                <label htmlFor="edit-listing-price" className="form-label">💲 Listing Price ($)</label>
+                <label htmlFor="edit-listing-price" className="form-label">💲 Listing Price</label>
                 <input id="edit-listing-price" type="number" className="form-input"
                   placeholder="0.00" min="0" step="0.01" value={listingPrice}
                   onChange={(e) => setListingPrice(e.target.value)} />
@@ -927,7 +1020,7 @@ export default function EditHorsePage() {
 
           <div className="vault-row">
             <div className="form-group">
-              <label htmlFor="edit-price" className="form-label">Purchase Price ($)</label>
+              <label htmlFor="edit-price" className="form-label">Purchase Price</label>
               <input id="edit-price" type="number" className="form-input" placeholder="0.00"
                 min="0" step="0.01" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)} />
             </div>
@@ -938,9 +1031,20 @@ export default function EditHorsePage() {
             </div>
           </div>
 
+          {/* Fuzzy Purchase Date */}
+          <div className="form-group">
+            <label className="form-label">Approximate Purchase Date</label>
+            <input className="form-input" type="text" value={purchaseDateText}
+              onChange={(e) => setPurchaseDateText(e.target.value)}
+              placeholder="e.g. BreyerFest 2017, Summer 2015" id="edit-purchase-date-text" />
+            <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+              Use this when you don&apos;t remember the exact date.
+            </small>
+          </div>
+
           <div className="vault-row">
             <div className="form-group">
-              <label htmlFor="edit-value" className="form-label">Estimated Current Value ($)</label>
+              <label htmlFor="edit-value" className="form-label">Estimated Current Value</label>
               <input id="edit-value" type="number" className="form-input" placeholder="0.00"
                 min="0" step="0.01" value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)} />
             </div>

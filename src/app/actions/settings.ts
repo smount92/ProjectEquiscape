@@ -17,6 +17,7 @@ export async function getProfile(): Promise<{
     notificationPrefs: Record<string, boolean>;
     defaultHorsePublic: boolean;
     watermarkPhotos: boolean;
+    currencySymbol: string;
 } | null> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -24,7 +25,7 @@ export async function getProfile(): Promise<{
 
     const { data } = await supabase
         .from("users")
-        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos")
+        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, currency_symbol")
         .eq("id", user.id)
         .single();
 
@@ -36,6 +37,7 @@ export async function getProfile(): Promise<{
         notification_prefs: Record<string, boolean> | null;
         default_horse_public: boolean | null;
         watermark_photos: boolean | null;
+        currency_symbol: string | null;
     };
 
     // Generate signed URL for avatar if stored as a storage path
@@ -63,6 +65,7 @@ export async function getProfile(): Promise<{
         },
         defaultHorsePublic: d.default_horse_public ?? true,
         watermarkPhotos: d.watermark_photos ?? false,
+        currencySymbol: d.currency_symbol || "$",
     };
 }
 
@@ -73,6 +76,7 @@ export async function updateProfile(data: {
     bio?: string;
     defaultHorsePublic?: boolean;
     watermarkPhotos?: boolean;
+    currencySymbol?: string;
 }): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -106,6 +110,12 @@ export async function updateProfile(data: {
 
     if (data.watermarkPhotos !== undefined) {
         updates.watermark_photos = data.watermarkPhotos;
+    }
+
+    if (data.currencySymbol !== undefined) {
+        const symbol = data.currencySymbol.trim().slice(0, 5);
+        if (!symbol) return { success: false, error: "Currency symbol cannot be empty." };
+        updates.currency_symbol = symbol;
     }
 
     if (Object.keys(updates).length === 0) return { success: true };

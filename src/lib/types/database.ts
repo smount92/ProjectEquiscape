@@ -39,6 +39,7 @@ export interface User {
   bio: string | null;
   avatar_url: string | null;
   created_at: string;
+  currency_symbol: string;
 }
 
 export interface CatalogItem {
@@ -71,6 +72,12 @@ export interface UserHorse {
   is_for_sale: boolean;
   is_public: boolean;
   created_at: string;
+  finish_details: string | null;
+  public_notes: string | null;
+  assigned_breed: string | null;
+  assigned_gender: string | null;
+  assigned_age: string | null;
+  regional_id: string | null;
 }
 
 export interface FinancialVault {
@@ -80,6 +87,7 @@ export interface FinancialVault {
   purchase_date: string | null;
   estimated_current_value: number | null;
   insurance_notes: string | null;
+  purchase_date_text: string | null;
 }
 
 export interface HorseImage {
@@ -136,6 +144,11 @@ export interface ShowRecord {
   is_nan: boolean;
   notes: string | null;
   created_at: string;
+  show_location: string | null;
+  section_name: string | null;
+  award_category: string | null;
+  competition_level: string | null;
+  show_date_text: string | null;
 }
 
 export interface HorsePedigree {

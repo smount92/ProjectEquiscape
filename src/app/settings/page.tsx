@@ -37,6 +37,7 @@ export default function SettingsPage() {
     const [email, setEmail] = useState("");
     const [defaultHorsePublic, setDefaultHorsePublic] = useState(true);
     const [watermarkPhotos, setWatermarkPhotos] = useState(false);
+    const [currencySymbol, setCurrencySymbol] = useState("$");
     const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
 
@@ -71,6 +72,7 @@ export default function SettingsPage() {
             setNotifPrefs(profile.notificationPrefs);
             setDefaultHorsePublic(profile.defaultHorsePublic);
             setWatermarkPhotos(profile.watermarkPhotos);
+            setCurrencySymbol(profile.currencySymbol);
             setIsLoading(false);
         }
         load();
@@ -80,7 +82,7 @@ export default function SettingsPage() {
     const handleSaveProfile = async () => {
         setIsSavingProfile(true);
         setProfileMsg(null);
-        const result = await updateProfile({ aliasName, bio, defaultHorsePublic, watermarkPhotos });
+        const result = await updateProfile({ aliasName, bio, defaultHorsePublic, watermarkPhotos, currencySymbol });
         if (result.success) {
             setProfileMsg({ type: "success", text: "Profile updated!" });
         } else {
@@ -259,6 +261,34 @@ export default function SettingsPage() {
                                 onClick={() => setWatermarkPhotos(!watermarkPhotos)}
                                 aria-pressed={watermarkPhotos}
                             />
+                        </div>
+
+                        {/* Currency symbol preference */}
+                        <div className="form-group">
+                            <label htmlFor="settings-currency" className="form-label">
+                                💱 Preferred Currency Symbol
+                            </label>
+                            <select
+                                id="settings-currency"
+                                className="form-select"
+                                value={currencySymbol}
+                                onChange={(e) => setCurrencySymbol(e.target.value)}
+                                style={{ maxWidth: 200 }}
+                            >
+                                <option value="$">$ — USD / CAD / AUD</option>
+                                <option value="£">£ — British Pound</option>
+                                <option value="€">€ — Euro</option>
+                                <option value="¥">¥ — Yen / Yuan</option>
+                                <option value="kr">kr — Krona / Krone</option>
+                                <option value="CHF">CHF — Swiss Franc</option>
+                                <option value="R$">R$ — Brazilian Real</option>
+                                <option value="₹">₹ — Indian Rupee</option>
+                                <option value="₩">₩ — Korean Won</option>
+                                <option value="zł">zł — Polish Zloty</option>
+                            </select>
+                            <span className="form-hint">
+                                Shown on your vault, offers, and listing prices. Market Value (Blue Book) always shows USD.
+                            </span>
                         </div>
 
                         <button

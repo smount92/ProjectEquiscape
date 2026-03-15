@@ -143,10 +143,12 @@ export async function updateHorseAction(horseId: string, data: {
             'condition_grade', 'is_public', 'visibility', 'trade_status', 'listing_price',
             'marketplace_notes', 'collection_id', 'catalog_id', 'life_stage',
             'edition_number', 'edition_size', 'asset_category',
+            'finish_details', 'public_notes', 'assigned_breed', 'assigned_gender',
+            'assigned_age', 'regional_id',
         ];
         const VAULT_ALLOWED = [
             'purchase_price', 'purchase_date', 'estimated_current_value',
-            'insurance_notes', 'horse_id',
+            'insurance_notes', 'horse_id', 'purchase_date_text',
         ];
 
         const horseUpdate = data.horseUpdate
@@ -258,6 +260,13 @@ export async function createHorseRecord(data: {
     estimatedValue?: number;
     insuranceNotes?: string;
     assetCategory?: string;
+    finishDetails?: string;
+    publicNotes?: string;
+    assignedBreed?: string;
+    assignedGender?: string;
+    assignedAge?: string;
+    regionalId?: string;
+    purchaseDateText?: string;
 }): Promise<{ success: boolean; horseId?: string; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -294,6 +303,12 @@ export async function createHorseRecord(data: {
     if (data.finishingArtist) horseInsert.finishing_artist = data.finishingArtist;
     if (data.editionNumber) horseInsert.edition_number = data.editionNumber;
     if (data.editionSize) horseInsert.edition_size = data.editionSize;
+    if (data.finishDetails) horseInsert.finish_details = data.finishDetails.trim();
+    if (data.publicNotes) horseInsert.public_notes = data.publicNotes.trim();
+    if (data.assignedBreed) horseInsert.assigned_breed = data.assignedBreed.trim();
+    if (data.assignedGender) horseInsert.assigned_gender = data.assignedGender.trim();
+    if (data.assignedAge) horseInsert.assigned_age = data.assignedAge.trim();
+    if (data.regionalId) horseInsert.regional_id = data.regionalId.trim();
 
     if (data.tradeStatus && data.tradeStatus !== "Not for Sale") {
         if (data.listingPrice) horseInsert.listing_price = data.listingPrice;
@@ -309,13 +324,14 @@ export async function createHorseRecord(data: {
     if (error || !horse) return { success: false, error: error?.message || "Failed to save horse." };
 
     // Insert financial vault if any data provided
-    const hasVault = data.purchasePrice || data.purchaseDate || data.estimatedValue || data.insuranceNotes;
+    const hasVault = data.purchasePrice || data.purchaseDate || data.estimatedValue || data.insuranceNotes || data.purchaseDateText;
     if (hasVault) {
         const vaultInsert: Record<string, unknown> = { horse_id: horse.id };
         if (data.purchasePrice) vaultInsert.purchase_price = data.purchasePrice;
         if (data.purchaseDate) vaultInsert.purchase_date = data.purchaseDate;
         if (data.estimatedValue) vaultInsert.estimated_current_value = data.estimatedValue;
         if (data.insuranceNotes) vaultInsert.insurance_notes = data.insuranceNotes;
+        if (data.purchaseDateText) vaultInsert.purchase_date_text = data.purchaseDateText.trim();
         await supabase.from("financial_vault").insert(vaultInsert);
     }
 

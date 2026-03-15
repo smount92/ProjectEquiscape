@@ -6235,6 +6235,33 @@ p {
   box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
 }
 
+.show-record-item.ribbon-reserve-grand::before {
+  background: linear-gradient(135deg, #D97706, #B45309);
+  box-shadow: 0 0 4px rgba(217, 119, 6, 0.4);
+}
+
+.show-record-item.ribbon-champion::before {
+  background: linear-gradient(135deg, #6366F1, #818CF8);
+  box-shadow: 0 0 6px rgba(99, 102, 241, 0.5);
+}
+
+.show-record-item.ribbon-reserve-champion::before {
+  background: linear-gradient(135deg, #8B5CF6, #A78BFA);
+  box-shadow: 0 0 4px rgba(139, 92, 246, 0.4);
+}
+
+.show-record-item.ribbon-brown::before {
+  background: #92400E;
+}
+
+.show-record-item.ribbon-gray::before {
+  background: #9CA3AF;
+}
+
+.show-record-item.ribbon-light-blue::before {
+  background: #60A5FA;
+}
+
 .show-record-title {
   font-weight: 600;
   font-size: calc(0.95rem * var(--font-scale));

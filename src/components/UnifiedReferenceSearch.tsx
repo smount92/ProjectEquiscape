@@ -152,26 +152,39 @@ export default function UnifiedReferenceSearch({
 
       {/* Selected Item Display (hide when browsing releases) */}
       {selectedItem && selectedCatalogId && releases.length === 0 ? (
-        <div className="ref-selected-item">
-          <div className="ref-selected-info">
-            <span className="ref-type-badge">
-              {TYPE_BADGES[selectedItem.itemType]?.icon || "📋"}{" "}
-              {TYPE_BADGES[selectedItem.itemType]?.label || selectedItem.itemType}
-            </span>
-            <span className="ref-selected-title">{selectedItem.title}</span>
-            <span className="ref-selected-maker">{selectedItem.maker}</span>
-            {selectedItem.parentTitle && (
-              <span className="ref-selected-parent"> on {selectedItem.parentTitle}</span>
-            )}
-            {selectedItem.scale && (
-              <span className="ref-selected-scale"> · {selectedItem.scale}</span>
-            )}
-            <MarketValueBadge catalogId={selectedCatalogId} compact />
+        <>
+          <div className="ref-selected-item">
+            <div className="ref-selected-info">
+              <span className="ref-type-badge">
+                {TYPE_BADGES[selectedItem.itemType]?.icon || "📋"}{" "}
+                {TYPE_BADGES[selectedItem.itemType]?.label || selectedItem.itemType}
+              </span>
+              <span className="ref-selected-title">{selectedItem.title}</span>
+              <span className="ref-selected-maker">{selectedItem.maker}</span>
+              {selectedItem.parentTitle && (
+                <span className="ref-selected-parent"> on {selectedItem.parentTitle}</span>
+              )}
+              {selectedItem.scale && (
+                <span className="ref-selected-scale"> · {selectedItem.scale}</span>
+              )}
+              <MarketValueBadge catalogId={selectedCatalogId} compact />
+            </div>
+            <button className="btn btn-ghost ref-clear-btn" onClick={handleClear} aria-label="Clear selection">
+              ✕
+            </button>
           </div>
-          <button className="btn btn-ghost ref-clear-btn" onClick={handleClear} aria-label="Clear selection">
-            ✕
-          </button>
-        </div>
+          <div style={{
+            background: "rgba(61, 90, 62, 0.08)",
+            border: "1px solid rgba(61, 90, 62, 0.25)",
+            borderRadius: "var(--radius-md)",
+            padding: "var(--space-sm) var(--space-md)",
+            fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+            color: "var(--color-text-secondary)",
+            marginTop: "var(--space-sm)",
+          }}>
+            🔗 <strong>Linked</strong> — Manufacturer, scale, and release info will auto-fill on your passport.
+          </div>
+        </>
       ) : (
         <>
           {/* Search Input */}

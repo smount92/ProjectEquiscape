@@ -40,6 +40,12 @@ interface HorseDetail {
     item_type: string;
     attributes: Record<string, unknown>;
   } | null;
+  finish_details: string | null;
+  public_notes: string | null;
+  assigned_breed: string | null;
+  assigned_gender: string | null;
+  assigned_age: string | null;
+  regional_id: string | null;
 }
 
 interface HorseImage {
@@ -54,6 +60,7 @@ interface VaultData {
   purchase_date: string | null;
   estimated_current_value: number | null;
   insurance_notes: string | null;
+  purchase_date_text: string | null;
 }
 
 const ANGLE_LABELS: Record<string, string> = {
@@ -107,6 +114,7 @@ export default async function HorsePassportPage({
       `
       id, owner_id, custom_name, finish_type, condition_grade, asset_category,
       is_for_sale, is_public, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id, trade_status,
+      finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id,
       catalog_items:catalog_id(title, maker, scale, item_type, attributes)
     `
     )
@@ -165,12 +173,20 @@ export default async function HorsePassportPage({
   const { data: rawVault } = await supabase
     .from("financial_vault")
     .select(
-      "purchase_price, purchase_date, estimated_current_value, insurance_notes"
+      "purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text"
     )
     .eq("horse_id", horseId)
     .single<VaultData>();
 
   const vault = rawVault ?? null;
+
+  // Fetch owner's currency symbol
+  const { data: ownerProfile } = await supabase
+    .from("users")
+    .select("currency_symbol")
+    .eq("id", user.id)
+    .single();
+  const currencySymbol = (ownerProfile as { currency_symbol: string } | null)?.currency_symbol || "$";
 
   // ================================================================
   // PROVENANCE: Show Records + Pedigree
@@ -178,7 +194,7 @@ export default async function HorsePassportPage({
 
   const { data: rawRecords } = await supabase
     .from("show_records")
-    .select("id, show_name, show_date, division, \"placing\", ribbon_color, judge_name, is_nan, notes")
+    .select("id, show_name, show_date, division, \"placing\", ribbon_color, judge_name, is_nan, notes, show_location, section_name, award_category, competition_level, show_date_text")
     .eq("horse_id", horseId)
     .order("show_date", { ascending: false, nullsFirst: false });
 
@@ -192,6 +208,11 @@ export default async function HorsePassportPage({
     judge_name: string | null;
     is_nan: boolean;
     notes: string | null;
+    show_location: string | null;
+    section_name: string | null;
+    award_category: string | null;
+    competition_level: string | null;
+    show_date_text: string | null;
   }) => ({
     id: r.id,
     showName: r.show_name,
@@ -202,6 +223,11 @@ export default async function HorsePassportPage({
     judgeName: r.judge_name,
     isNan: r.is_nan,
     notes: r.notes,
+    showLocation: r.show_location,
+    sectionName: r.section_name,
+    awardCategory: r.award_category,
+    competitionLevel: r.competition_level,
+    showDateText: r.show_date_text,
   }));
 
   const { data: rawPedigree } = await supabase
@@ -466,6 +492,58 @@ export default async function HorsePassportPage({
             )}
           </div>
 
+          {/* Finish Details */}
+          {horse.finish_details && (
+            <div className="passport-detail-card">
+              <h3><span aria-hidden="true">✨</span> Finish</h3>
+              <div className="passport-detail-row">
+                <span className="passport-detail-label">Finish Details</span>
+                <span className="passport-detail-value">{horse.finish_details}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Show Bio */}
+          {(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
+            <div className="passport-detail-card">
+              <h3><span aria-hidden="true">🏅</span> Show Identity</h3>
+              {horse.assigned_breed && (
+                <div className="passport-detail-row">
+                  <span className="passport-detail-label">Breed</span>
+                  <span className="passport-detail-value">{horse.assigned_breed}</span>
+                </div>
+              )}
+              {horse.assigned_gender && (
+                <div className="passport-detail-row">
+                  <span className="passport-detail-label">Gender</span>
+                  <span className="passport-detail-value">{horse.assigned_gender}</span>
+                </div>
+              )}
+              {horse.assigned_age && (
+                <div className="passport-detail-row">
+                  <span className="passport-detail-label">Age</span>
+                  <span className="passport-detail-value">{horse.assigned_age}</span>
+                </div>
+              )}
+              {horse.regional_id && (
+                <div className="passport-detail-row">
+                  <span className="passport-detail-label">Regional ID</span>
+                  <span className="passport-detail-value">{horse.regional_id}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Public Notes */}
+          {horse.public_notes && (
+            <div className="passport-detail-card">
+              <h3><span aria-hidden="true">📝</span> Notes</h3>
+              <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
+                {horse.public_notes}
+              </p>
+            </div>
+          )}
+
           {/* Market Value Badge */}
           {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
@@ -494,7 +572,7 @@ export default async function HorsePassportPage({
           />
 
           {/* Financial Vault */}
-          <VaultReveal vault={vault} />
+          <VaultReveal vault={vault} currencySymbol={currencySymbol} />
 
           {/* Actions */}
           <div className="passport-actions">

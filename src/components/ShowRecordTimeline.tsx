@@ -14,6 +14,12 @@ interface ShowRecordDisplay {
     judgeName: string | null;
     isNan: boolean;
     notes: string | null;
+    // NEW: Beta feedback fields
+    showLocation: string | null;
+    sectionName: string | null;
+    awardCategory: string | null;
+    competitionLevel: string | null;
+    showDateText: string | null;
 }
 
 interface ShowRecordTimelineProps {
@@ -22,7 +28,11 @@ interface ShowRecordTimelineProps {
     isOwner: boolean;
 }
 
-function formatShowDate(dateStr: string | null): string {
+function formatShowDate(dateStr: string | null, dateText: string | null): string {
+    // Prefer fuzzy text if no exact date is given (or if exact date looks like a year-start fallback)
+    if (dateText && (!dateStr || dateStr.endsWith("-01-01"))) {
+        return dateText;
+    }
     if (!dateStr) return "Date unknown";
     return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
         month: "short",
@@ -35,7 +45,9 @@ function getRibbonClass(ribbon: string | null): string {
     if (!ribbon) return "";
     const lower = ribbon.toLowerCase();
     if (lower.includes("grand champion")) return "ribbon-grand";
-    if (lower.includes("reserve grand")) return "ribbon-grand";
+    if (lower.includes("reserve grand")) return "ribbon-reserve-grand";
+    if (lower.includes("champion")) return "ribbon-champion";
+    if (lower.includes("reserve champion")) return "ribbon-reserve-champion";
     const map: Record<string, string> = {
         blue: "ribbon-blue",
         red: "ribbon-red",
@@ -44,6 +56,9 @@ function getRibbonClass(ribbon: string | null): string {
         pink: "ribbon-pink",
         green: "ribbon-green",
         purple: "ribbon-purple",
+        brown: "ribbon-brown",
+        gray: "ribbon-gray",
+        "light blue": "ribbon-light-blue",
     };
     return map[lower] || "";
 }
@@ -153,11 +168,21 @@ export default function ShowRecordTimeline({
                                     </div>
 
                                     <div className="show-record-meta">
-                                        <span>📅 {formatShowDate(record.showDate)}</span>
+                                        <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
                                         {record.placing && <span>🎖️ {record.placing}</span>}
                                         {record.division && <span>📂 {record.division}</span>}
                                         {record.judgeName && <span>👤 {record.judgeName}</span>}
+                                        {record.showLocation && <span>📍 {record.showLocation}</span>}
                                     </div>
+
+                                    {/* Advanced details row */}
+                                    {(record.sectionName || record.awardCategory || record.competitionLevel) && (
+                                        <div className="show-record-meta" style={{ marginTop: "var(--space-xs)" }}>
+                                            {record.sectionName && <span>🏷️ {record.sectionName}</span>}
+                                            {record.awardCategory && <span>🎯 {record.awardCategory}</span>}
+                                            {record.competitionLevel && <span>📊 {record.competitionLevel}</span>}
+                                        </div>
+                                    )}
 
                                     {record.notes && (
                                         <div className="show-record-notes">{record.notes}</div>
