@@ -291,6 +291,7 @@ export interface EventClass {
   description: string | null;
   is_nan_qualifying: boolean;
   max_entries: number | null;
+  allowed_scales: string[] | null;
   sort_order: number;
   created_at: string;
 }

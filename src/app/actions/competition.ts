@@ -567,6 +567,7 @@ export interface DivisionClass {
     description: string | null;
     isNanQualifying: boolean;
     maxEntries: number | null;
+    allowedScales: string[] | null;
     sortOrder: number;
     entryCount?: number;
 }
@@ -587,7 +588,7 @@ export async function getEventDivisions(eventId: string): Promise<Division[]> {
 
     const { data: classes } = await supabase
         .from("event_classes")
-        .select("id, division_id, name, class_number, description, is_nan_qualifying, max_entries, sort_order")
+        .select("id, division_id, name, class_number, description, is_nan_qualifying, max_entries, allowed_scales, sort_order")
         .in("division_id", divisionIds)
         .order("sort_order", { ascending: true });
 
@@ -616,6 +617,7 @@ export async function getEventDivisions(eventId: string): Promise<Division[]> {
             description: c.description as string | null,
             isNanQualifying: c.is_nan_qualifying as boolean,
             maxEntries: c.max_entries as number | null,
+            allowedScales: c.allowed_scales as string[] | null,
             sortOrder: c.sort_order as number,
             entryCount: entryCountMap.get(c.id as string) || 0,
         });
@@ -710,6 +712,7 @@ export async function createClass(data: {
     description?: string;
     isNanQualifying?: boolean;
     maxEntries?: number;
+    allowedScales?: string[];
     sortOrder?: number;
 }): Promise<{ success: boolean; id?: string; error?: string }> {
     const supabase = await createClient();
@@ -723,6 +726,7 @@ export async function createClass(data: {
             description: data.description?.trim() || null,
             is_nan_qualifying: data.isNanQualifying || false,
             max_entries: data.maxEntries || null,
+            allowed_scales: data.allowedScales && data.allowedScales.length > 0 ? data.allowedScales : null,
             sort_order: data.sortOrder ?? 0,
         })
         .select("id")
@@ -739,6 +743,7 @@ export async function updateClass(classId: string, data: {
     description?: string;
     isNanQualifying?: boolean;
     maxEntries?: number;
+    allowedScales?: string[] | null;
     sortOrder?: number;
 }): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
@@ -749,6 +754,7 @@ export async function updateClass(classId: string, data: {
     if (data.description !== undefined) update.description = data.description.trim() || null;
     if (data.isNanQualifying !== undefined) update.is_nan_qualifying = data.isNanQualifying;
     if (data.maxEntries !== undefined) update.max_entries = data.maxEntries || null;
+    if (data.allowedScales !== undefined) update.allowed_scales = data.allowedScales && data.allowedScales.length > 0 ? data.allowedScales : null;
     if (data.sortOrder !== undefined) update.sort_order = data.sortOrder;
 
     const { error } = await supabase

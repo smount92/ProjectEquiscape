@@ -258,6 +258,30 @@ export async function enterShow(
         return { success: false, error: "Maximum 3 entries per show." };
     }
 
+    // Scale enforcement: if entering a class with allowed_scales, verify the horse matches
+    if (classId) {
+        const { data: classData } = await supabase
+            .from("event_classes")
+            .select("allowed_scales")
+            .eq("id", classId)
+            .single();
+
+        const allowedScales = (classData as { allowed_scales: string[] | null } | null)?.allowed_scales;
+        if (allowedScales && allowedScales.length > 0) {
+            // Get horse's scale via catalog_items
+            const { data: horseRef } = await supabase
+                .from("user_horses")
+                .select("catalog_items:catalog_id(scale)")
+                .eq("id", horseId)
+                .single();
+
+            const horseScale = (horseRef as { catalog_items: { scale: string } | null } | null)?.catalog_items?.scale;
+            if (horseScale && !allowedScales.includes(horseScale)) {
+                return { success: false, error: `This class only accepts: ${allowedScales.join(", ")}. Your horse is a ${horseScale}.` };
+            }
+        }
+    }
+
     const insertData: Record<string, unknown> = {
         event_id: showId,
         horse_id: horseId,
