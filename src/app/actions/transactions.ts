@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -67,7 +69,7 @@ export async function completeTransaction(
         await admin.rpc("refresh_market_prices" as string);
     } catch {
         // Non-blocking — cron will catch it within 6 hours
-        console.warn("[completeTransaction] Market price refresh failed (non-blocking)");
+        logger.warn("completeTransaction", "Market price refresh failed (non-blocking)");
     }
 
     return { success: true };

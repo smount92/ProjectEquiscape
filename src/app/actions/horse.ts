@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -82,7 +84,7 @@ export async function deleteHorseImageAction(recordId: string, storagePath: stri
 
         if (storagePath) {
             const { error: storageError } = await supabase.storage.from("horse-images").remove([storagePath]);
-            if (storageError) console.error("Storage cleanup failed:", storageError);
+            if (storageError) logger.error("Horse", "Storage cleanup failed", storageError);
         }
 
         const { error } = await supabase.from("horse_images").delete().eq("id", recordId);

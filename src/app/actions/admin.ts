@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createAuthClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
@@ -119,11 +121,11 @@ export async function replyToContactMessage(
     });
 
     if (error) {
-      console.error("[Admin Reply] Resend error:", error);
+      logger.error("Admin Reply", "Resend error", error);
       return { success: false, error: `Email failed: ${error.message}` };
     }
   } catch (err) {
-    console.error("[Admin Reply] Unexpected error:", err);
+    logger.error("Admin Reply", "Unexpected error", err);
     return { success: false, error: "Failed to send email. Check Resend configuration." };
   }
 

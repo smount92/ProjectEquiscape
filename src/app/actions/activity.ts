@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -43,7 +45,7 @@ export async function createActivityEvent(data: {
             metadata: data.metadata || null,
         });
     } catch {
-        console.error("[Activity] Failed to log event");
+        logger.error("Activity", "Failed to log event");
     }
 }
 

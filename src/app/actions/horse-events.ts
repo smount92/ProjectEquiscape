@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { createActivityEvent } from "@/app/actions/activity";
 import { getAdminClient } from "@/lib/supabase/admin";
 
@@ -80,6 +82,6 @@ async function checkWishlistMatches(data: {
             });
         }
     } catch {
-        console.error("[WishlistMatch] Failed to check matches");
+        logger.error("WishlistMatch", "Failed to check matches");
     }
 }

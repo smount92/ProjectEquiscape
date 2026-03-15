@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { createClient } from "@/lib/supabase/server";
 
 export async function addToWishlist(
@@ -31,7 +33,7 @@ export async function addToWishlist(
         if (error.code === "23505") {
             return { error: "Already in your wishlist!", success: false };
         }
-        console.error("Wishlist insert error:", error);
+        logger.error("Wishlist", "Insert error", error);
         return { error: "Failed to add to wishlist.", success: false };
     }
 
@@ -55,7 +57,7 @@ export async function removeFromWishlist(wishlistId: string) {
         .eq("user_id", user.id);
 
     if (error) {
-        console.error("Wishlist delete error:", error);
+        logger.error("Wishlist", "Delete error", error);
         return { error: "Failed to remove from wishlist.", success: false };
     }
 

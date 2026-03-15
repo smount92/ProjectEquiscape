@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -251,7 +253,7 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
     );
 
     if (authError) {
-        console.error("[DeleteAccount] Failed to disable auth:", authError.message);
+        logger.error("DeleteAccount", "Failed to disable auth", authError.message);
         // Non-fatal — the soft delete already happened
     }
 

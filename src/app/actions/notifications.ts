@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 
@@ -157,6 +159,6 @@ export async function createNotification(data: {
         });
     } catch {
         // Fire-and-forget — never fail the parent action
-        console.error("[Notification] Failed to create notification");
+        logger.error("Notification", "Failed to create notification");
     }
 }

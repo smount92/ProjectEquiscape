@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
 
@@ -52,7 +54,7 @@ export async function submitContactForm(
     });
 
     if (error) {
-        console.error("Contact form insert error:", error);
+        logger.error("Contact", "Form insert error", error);
         return { error: "Something went wrong. Please try again later.", success: false };
     }
 

@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sendNewMessageNotification } from "@/lib/email";
@@ -179,7 +181,7 @@ export async function sendMessage(
         }
     } catch (emailErr) {
         // Log but never crash — the in-app message was already delivered
-        console.error("[Messaging] Email notification failed (non-blocking):", emailErr);
+        logger.error("Messaging", "Email notification failed (non-blocking)", emailErr);
     }
 
     return { success: true };
