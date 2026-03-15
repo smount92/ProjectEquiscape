@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "npx playwright test",
+    "gen-types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/lib/types/database.generated.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.2",
@@ -27,6 +29,7 @@
     "sanitize-html": "^2.17.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
