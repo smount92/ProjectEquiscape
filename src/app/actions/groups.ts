@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
@@ -67,9 +68,7 @@ export async function createGroup(data: {
     region?: string;
     visibility?: string;
 }): Promise<{ success: boolean; slug?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (!data.name.trim()) return { success: false, error: "Group name is required." };
 
@@ -239,9 +238,7 @@ export async function getGroups(filters?: {
 
 /** Join a group */
 export async function joinGroup(groupId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase.from("group_memberships").insert({
         group_id: groupId,
@@ -270,9 +267,7 @@ export async function joinGroup(groupId: string): Promise<{ success: boolean; er
 
 /** Leave a group */
 export async function leaveGroup(groupId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Can't leave if you're the owner
     const { data: membership } = await supabase
@@ -306,9 +301,7 @@ export async function leaveGroup(groupId: string): Promise<{ success: boolean; e
 
 /** Get groups the current user belongs to */
 export async function getMyGroups(): Promise<Group[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data: memberships } = await supabase
         .from("group_memberships")
@@ -358,9 +351,7 @@ export async function createGroupPost(
     content: string,
     horseId?: string,
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (!content.trim()) return { success: false, error: "Content is required." };
 
@@ -461,9 +452,7 @@ export async function getGroupPosts(groupId: string): Promise<GroupPost[]> {
 
 /** Reply to a group post */
 export async function replyToPost(postId: string, content: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (!content.trim()) return { success: false, error: "Content is required." };
 
@@ -489,9 +478,7 @@ export async function replyToPost(postId: string, content: string): Promise<{ su
 
 /** Delete a group post (owner only) */
 export async function deleteGroupPost(postId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { data: post } = await supabase
         .from("group_posts")
@@ -612,9 +599,7 @@ export async function uploadGroupFile(
     fileSize: number,
     description?: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify admin/owner/mod role
     const { data: membership } = await supabase
@@ -654,9 +639,7 @@ export async function uploadGroupFile(
 export async function deleteGroupFile(
     fileId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Fetch the file URL before deleting the row
     try {
@@ -721,9 +704,7 @@ export async function updateMemberRole(
     targetUserId: string,
     newRole: "admin" | "moderator" | "member"
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (user.id === targetUserId) return { success: false, error: "Cannot change your own role." };
 
@@ -755,9 +736,7 @@ export async function removeMember(
     groupId: string,
     targetUserId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (user.id === targetUserId) return { success: false, error: "Use leaveGroup to remove yourself." };
 
@@ -808,9 +787,7 @@ export async function removeMember(
 export async function togglePinPost(
     postId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Get the post's group_id and current pin state
     const { data: post } = await supabase
@@ -884,9 +861,7 @@ export async function createGroupChannel(
     name: string,
     description?: string
 ): Promise<{ success: boolean; channelId?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (!name.trim()) return { success: false, error: "Channel name is required." };
 
@@ -929,9 +904,7 @@ export async function createGroupChannel(
 export async function deleteGroupChannel(
     channelId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Get channel's group and check how many channels exist
     const { data: channel } = await supabase

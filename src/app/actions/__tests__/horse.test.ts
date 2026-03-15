@@ -1,5 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { createMockSupabaseClient } from "@/__tests__/mocks/supabase";
+import { AuthError } from "@/lib/auth";
 
 const mockClient = createMockSupabaseClient();
 const mockAdmin = createMockSupabaseClient();
@@ -35,9 +36,7 @@ describe("horse.ts — CRUD", () => {
     describe("createHorseRecord", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-            const result = await createHorseRecord({ customName: "Test", finishType: "OF", isPublic: true });
-            expect(result.success).toBe(false);
-            expect(result.error).toMatch(/not authenticated/i);
+            await expect(createHorseRecord({ customName: "Test", finishType: "OF", isPublic: true })).rejects.toThrow(AuthError);
         });
 
         it("rejects missing name", async () => {
@@ -85,8 +84,7 @@ describe("horse.ts — CRUD", () => {
     describe("deleteHorse", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-            const result = await deleteHorse("h1");
-            expect(result.success).toBe(false);
+            await expect(deleteHorse("h1")).rejects.toThrow(AuthError);
         });
 
         it("rejects non-owner", async () => {
@@ -131,8 +129,7 @@ describe("horse.ts — CRUD", () => {
     describe("quickAddHorse", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-            const result = await quickAddHorse({ finishType: "OF", conditionGrade: "Mint" });
-            expect(result.success).toBe(false);
+            await expect(quickAddHorse({ finishType: "OF", conditionGrade: "Mint" })).rejects.toThrow(AuthError);
         });
 
         it("auto-names from catalog when catalogId provided", async () => {

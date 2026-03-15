@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -190,9 +191,7 @@ export async function createArtistProfile(formData: FormData): Promise<{
     slug?: string;
     error?: string;
 }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const studioName = (formData.get("studioName") as string)?.trim();
     if (!studioName) return { success: false, error: "Studio name is required." };
@@ -257,9 +256,7 @@ export async function updateArtistProfile(formData: FormData): Promise<{
     success: boolean;
     error?: string;
 }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const studioName = (formData.get("studioName") as string)?.trim();
     if (!studioName) return { success: false, error: "Studio name is required." };
@@ -319,9 +316,7 @@ export async function updateArtistProfile(formData: FormData): Promise<{
 
 /** Fetch all commissions where artist_id = current user */
 export async function getArtistCommissions(): Promise<Commission[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data: rawCommissions } = await supabase
         .from("commissions")
@@ -336,9 +331,7 @@ export async function getArtistCommissions(): Promise<Commission[]> {
 
 /** Fetch all commissions where client_id = current user */
 export async function getClientCommissions(): Promise<Commission[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data: rawCommissions } = await supabase
         .from("commissions")
@@ -360,9 +353,7 @@ export async function createCommission(data: {
     budget?: number;
     horseId?: string;
 }): Promise<{ success: boolean; commissionId?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (user.id === data.artistId) {
         return { success: false, error: "You can't commission yourself." };
@@ -427,9 +418,7 @@ export async function updateCommissionStatus(
     newStatus: string,
     note?: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Fetch current commission
     const { data: commission } = await supabase
@@ -591,9 +580,7 @@ export async function addCommissionUpdate(
         requiresPayment?: boolean;
     }
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify participation
     const { data: commission } = await supabase
@@ -792,9 +779,7 @@ export async function linkHorseToCommission(
     commissionId: string,
     horseId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify user is the artist on this commission
     const { data: commission } = await supabase

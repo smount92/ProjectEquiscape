@@ -1,12 +1,11 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function getCollectionsAction() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data } = await supabase
         .from("user_collections")
@@ -18,9 +17,7 @@ export async function getCollectionsAction() {
 }
 
 export async function createCollectionAction(name: string, description: string | null, isPublic: boolean) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated" };
+    const { supabase, user } = await requireAuth();
 
     const { data, error } = await supabase
         .from("user_collections")
@@ -41,9 +38,7 @@ export async function updateCollectionAction(
     collectionId: string,
     data: { name?: string; description?: string; isPublic?: boolean }
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const update: Record<string, unknown> = {};
     if (data.name !== undefined) update.name = data.name.trim();
@@ -64,9 +59,7 @@ export async function updateCollectionAction(
 export async function deleteCollectionAction(
     collectionId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Clean up junction table (cascade should handle this, but be explicit)
     await supabase
@@ -112,9 +105,7 @@ export async function setHorseCollections(
     horseId: string,
     collectionIds: string[]
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify horse ownership
     const { data: horse } = await supabase

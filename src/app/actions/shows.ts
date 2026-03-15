@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
@@ -215,9 +216,7 @@ export async function enterShow(
     horseId: string,
     classId?: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "You must be logged in." };
+    const { supabase, user } = await requireAuth();
 
     // Verify show is open
     const { data: event } = await supabase
@@ -306,9 +305,7 @@ export async function enterShow(
 export async function voteForEntry(
     entryId: string
 ): Promise<{ success: boolean; newVotes?: number; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "You must be logged in." };
+    const { supabase, user } = await requireAuth();
 
     const admin = getAdminClient();
     const { data, error } = await admin.rpc("vote_for_entry", {
@@ -450,9 +447,7 @@ export async function deleteShow(
 export async function withdrawEntry(
     entryId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not logged in." };
+    const { supabase, user } = await requireAuth();
 
     const { data: entry } = await supabase
         .from("event_entries")
@@ -486,9 +481,7 @@ export async function batchRecordResults(records: {
     placing: string | null;
     ribbonColor: string | null;
 }[]): Promise<{ success: boolean; error?: string; count?: number }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not logged in." };
+    const { supabase, user } = await requireAuth();
 
     if (records.length === 0) return { success: true, count: 0 };
 
@@ -532,9 +525,7 @@ export async function saveExpertPlacings(
     eventId: string,
     placings: { entryId: string; placing: string }[]
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not logged in." };
+    const { supabase, user } = await requireAuth();
 
     // Verify user is the event creator or assigned judge
     const { data: event } = await supabase

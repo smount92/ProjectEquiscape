@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -89,9 +90,7 @@ export async function getNanQualifications(horseId: string): Promise<NanQualific
 
 /** Get NAN qualification summary across all user's horses */
 export async function getNanDashboard(): Promise<NanHorseSummary[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     // Get all user's horses
     const { data: horses } = await supabase
@@ -162,9 +161,7 @@ export async function addShowRecord(data: {
     nanYear?: number;
     notes?: string;
 }): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify horse ownership
     const { data: horse } = await supabase
@@ -204,9 +201,7 @@ export async function verifyShowRecord(
     recordId: string,
     note?: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Check user is judge or admin
     const { data: profile } = await supabase
@@ -238,9 +233,7 @@ export async function verifyShowRecord(
 
 /** Get all user's show strings */
 export async function getShowStrings(): Promise<ShowString[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data: strings } = await supabase
         .from("show_strings")
@@ -278,9 +271,7 @@ export async function createShowString(data: {
     showDate?: string;
     notes?: string;
 }): Promise<{ success: boolean; id?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (!data.name.trim()) return { success: false, error: "Show string name is required." };
 
@@ -311,9 +302,7 @@ export async function addShowStringEntry(data: {
     timeSlot?: string;
     notes?: string;
 }): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify ownership of show string
     const { data: showString } = await supabase
@@ -417,9 +406,7 @@ export async function convertShowStringToResults(
         nanCardType?: string;
     }[]
 ): Promise<{ success: boolean; count?: number; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Get the show string
     const { data: showString } = await supabase
@@ -640,9 +627,7 @@ export async function createDivision(data: {
     description?: string;
     sortOrder?: number;
 }): Promise<{ success: boolean; id?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify event ownership
     const { data: event } = await supabase
@@ -814,9 +799,7 @@ export async function copyDivisionsFromEvent(
     sourceEventId: string,
     targetEventId: string
 ): Promise<{ success: boolean; count?: number; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify target event ownership
     const { data: event } = await supabase
@@ -863,9 +846,7 @@ export async function copyDivisionsFromEvent(
 export async function duplicateShowString(
     stringId: string
 ): Promise<{ success: boolean; newStringId?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Fetch original
     const { data: original } = await supabase

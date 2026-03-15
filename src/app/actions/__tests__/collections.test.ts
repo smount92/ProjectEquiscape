@@ -1,5 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { createMockSupabaseClient } from "@/__tests__/mocks/supabase";
+import { AuthError } from "@/lib/auth";
 
 const mockClient = createMockSupabaseClient();
 
@@ -29,8 +30,7 @@ describe("collections.ts — M:N Junction", () => {
     describe("createCollectionAction", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-            const result = await createCollectionAction("My Collection", null, true);
-            expect(result.success).toBe(false);
+            await expect(createCollectionAction("My Collection", null, true)).rejects.toThrow(AuthError);
         });
 
         it("creates collection successfully", async () => {
@@ -48,8 +48,7 @@ describe("collections.ts — M:N Junction", () => {
     describe("setHorseCollections", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-            const result = await setHorseCollections("h1", ["col-1"]);
-            expect(result.success).toBe(false);
+            await expect(setHorseCollections("h1", ["col-1"])).rejects.toThrow(AuthError);
         });
 
         it("rejects non-owner", async () => {
@@ -90,8 +89,7 @@ describe("collections.ts — M:N Junction", () => {
     describe("deleteCollectionAction", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-            const result = await deleteCollectionAction("col-1");
-            expect(result.success).toBe(false);
+            await expect(deleteCollectionAction("col-1")).rejects.toThrow(AuthError);
         });
 
         it("deletes collection and cleans up junction rows", async () => {

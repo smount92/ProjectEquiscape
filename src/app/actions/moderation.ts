@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { requireAuth } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
@@ -30,9 +30,7 @@ export async function submitReport(data: {
     reason: string;
     details?: string;
 }): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Rate limit
     const allowed = await checkRateLimit(`report:${user.id}`, 10, 60, user.id);
@@ -103,9 +101,7 @@ export async function dismissReport(
     reportId: string,
     notes?: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const admin = getAdminClient();
     const { error } = await admin
@@ -128,9 +124,7 @@ export async function actionReport(
     reportId: string,
     notes: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const admin = getAdminClient();
     const { error } = await admin

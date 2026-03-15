@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
@@ -79,9 +80,7 @@ export async function createEvent(data: {
     groupId?: string;
     judgingMethod?: "community_vote" | "expert_judge";
 }): Promise<{ success: boolean; eventId?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (!data.name.trim()) return { success: false, error: "Event name is required." };
 
@@ -290,9 +289,7 @@ export async function rsvpEvent(
     eventId: string,
     status: "going" | "interested" | "not_going"
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Upsert RSVP
     const { error } = await supabase
@@ -321,9 +318,7 @@ export async function rsvpEvent(
 
 /** Dashboard widget: next 5 events user has RSVP'd to */
 export async function getUpcomingEvents(): Promise<MHHEvent[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     // Get user's RSVP'd event IDs
     const { data: rsvps } = await supabase
@@ -379,9 +374,7 @@ export async function getUpcomingEvents(): Promise<MHHEvent[]> {
 
 /** Delete an event (creator only) */
 export async function deleteEvent(eventId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { data: event } = await supabase
         .from("events")
@@ -467,9 +460,7 @@ export async function updateEvent(
         judgingMethod?: "community_vote" | "expert_judge";
     }
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify ownership
     const { data: event } = await supabase
@@ -551,9 +542,7 @@ export async function addEventJudge(
     eventId: string,
     userAlias: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify ownership
     const { data: event } = await supabase
@@ -598,9 +587,7 @@ export async function addEventJudge(
 export async function removeEventJudge(
     judgeId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Fetch the judge record to verify the event ownership
     const { data: judge } = await supabase
@@ -645,9 +632,7 @@ export async function addEventComment(
     eventId: string,
     content: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
     if (!content.trim()) return { success: false, error: "Comment cannot be empty." };
     if (content.trim().length > 500) return { success: false, error: "Comment is too long (500 char max)." };
 
@@ -692,9 +677,7 @@ export async function addEventComment(
 export async function deleteEventComment(
     commentId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase
         .from("event_comments")
@@ -762,9 +745,7 @@ export async function addEventPhoto(
     imagePath: string,
     caption?: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase.from("event_photos").insert({
         event_id: eventId,
@@ -817,9 +798,7 @@ export async function getEventPhotos(eventId: string) {
 export async function deleteEventPhoto(
     photoId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Fetch the photo URL before deleting
     try {

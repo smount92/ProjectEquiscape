@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 // ============================================================
@@ -201,9 +202,7 @@ export async function getTopTraded(limit: number = 10): Promise<MarketPrice[]> {
  * Admin only.
  */
 export async function refreshMarketPrices(): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Check admin role
     const { data: profile } = await supabase

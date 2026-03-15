@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
@@ -51,9 +52,7 @@ export async function createActivityEvent(data: {
  * Supports optional image URLs for casual image posts.
  */
 export async function createTextPost(text: string, imageUrls?: string[]): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const trimmed = text.trim();
     if (!trimmed && (!imageUrls || imageUrls.length === 0)) return { success: false, error: "Post cannot be empty." };
@@ -344,9 +343,7 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
  * Delete a text post (owner only).
  */
 export async function deleteTextPost(eventId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { data: event } = await supabase
         .from("activity_events")

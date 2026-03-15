@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
@@ -9,9 +10,7 @@ export async function submitSuggestion(data: {
     name: string;
     details?: string;
 }): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase.from("database_suggestions").insert({
         submitted_by: user.id,

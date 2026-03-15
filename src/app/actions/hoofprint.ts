@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
@@ -133,9 +134,7 @@ export async function addTimelineEvent(data: {
     metadata?: Record<string, unknown>;
     isPublic?: boolean;
 }): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Build post content from title + description
     const content = data.description
@@ -159,9 +158,7 @@ export async function addTimelineEvent(data: {
 // System events are immutable — derived from reality.
 
 export async function deleteTimelineEvent(eventId: string, horseId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Delete the post (RLS ensures only author or horse owner can delete)
     const { error } = await supabase
@@ -184,9 +181,7 @@ export async function updateLifeStage(
     horseId: string,
     newStage: "blank" | "stripped" | "in_progress" | "completed" | "for_sale"
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Get current stage
     const { data: horse } = await supabase
@@ -224,9 +219,7 @@ export async function initializeHoofprint(data: {
     lifeStage?: string;
     acquisitionNotes?: string;
 }): Promise<void> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const { supabase, user } = await requireAuth();
 
     // Get user alias
     const { data: profile } = await supabase
@@ -271,9 +264,7 @@ export async function generateTransferCode(data: {
     isPricePublic?: boolean;
     notes?: string;
 }): Promise<{ success: boolean; code?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify ownership
     const { data: horse } = await supabase
@@ -318,9 +309,7 @@ export async function claimTransfer(transferCode: string): Promise<{
     horseId?: string;
     error?: string;
 }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Rate limit: 5 attempts per 15 minutes per IP
     const allowed = await checkRateLimit("claim_transfer", 5, 15);
@@ -413,9 +402,7 @@ export async function getMyPendingTransfers(): Promise<{
     expiresAt: string;
     acquisitionType: string;
 }[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data } = await supabase
         .from("horse_transfers")
@@ -457,9 +444,7 @@ export async function getTransferHistory(): Promise<{
     acquisitionType: string;
     releasedAt: string;
 }[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data: records } = await supabase
         .from("horse_ownership_history")

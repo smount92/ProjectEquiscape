@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
@@ -42,9 +43,7 @@ export async function createPost(data: {
     helpRequestId?: string;
     imagePaths?: string[];
 }): Promise<{ success: boolean; postId?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
     if (!data.content.trim() && (!data.imagePaths || data.imagePaths.length === 0)) {
         return { success: false, error: "Post cannot be empty." };
     }
@@ -103,9 +102,7 @@ export async function replyToPost(
     parentId: string,
     content: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
     if (!content.trim()) return { success: false, error: "Reply cannot be empty." };
     if (content.trim().length > 500) return { success: false, error: "Reply is too long (500 char max)." };
 
@@ -124,9 +121,7 @@ export async function replyToPost(
 export async function deletePost(
     postId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Clean up storage files for attached media
     try {
@@ -160,9 +155,7 @@ export async function updatePost(
     postId: string,
     newContent: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (!newContent.trim()) return { success: false, error: "Content cannot be empty." };
     if (newContent.length > 10000) return { success: false, error: "Content is too long." };
@@ -185,9 +178,7 @@ export async function updatePost(
 export async function togglePostLike(
     postId: string
 ): Promise<{ success: boolean; action?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { data, error } = await supabase.rpc("toggle_post_like", {
         p_post_id: postId,
@@ -209,9 +200,7 @@ export async function getPosts(context: {
     cursor?: string;
     includeReplies?: boolean;
 }): Promise<Post[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     let query = supabase
         .from("posts")
@@ -357,9 +346,7 @@ export async function addEventMedia(
     imagePath: string,
     caption?: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase.from("media_attachments").insert({
         event_id: eventId,
@@ -377,9 +364,7 @@ export async function addEventMedia(
 export async function deleteEventMedia(
     mediaId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Fetch the image URL before deleting the row
     try {

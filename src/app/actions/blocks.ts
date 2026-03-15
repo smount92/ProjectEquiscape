@@ -1,12 +1,11 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function blockUser(targetId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
     if (user.id === targetId) return { success: false, error: "Cannot block yourself." };
 
     const { error } = await supabase.from("user_blocks").insert({
@@ -24,9 +23,7 @@ export async function blockUser(targetId: string): Promise<{ success: boolean; e
 }
 
 export async function unblockUser(targetId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase
         .from("user_blocks")
@@ -40,9 +37,7 @@ export async function unblockUser(targetId: string): Promise<{ success: boolean;
 }
 
 export async function getBlockedUserIds(): Promise<string[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data } = await supabase
         .from("user_blocks")

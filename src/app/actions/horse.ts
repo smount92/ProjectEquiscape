@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -25,9 +26,7 @@ async function checkActiveTransaction(horseId: string): Promise<string | null> {
 }
 
 export async function deleteHorse(horseId: string): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify ownership
     const { data: horse } = await supabase
@@ -270,9 +269,7 @@ export async function createHorseRecord(data: {
     regionalId?: string;
     purchaseDateText?: string;
 }): Promise<{ success: boolean; horseId?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (!data.customName?.trim()) {
         return { success: false, error: "Missing required fields." };
@@ -350,9 +347,7 @@ export async function finalizeHorseImages(
     horseId: string,
     images: { path: string; angle: string }[]
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Verify ownership
     const { data: horse } = await supabase
@@ -395,9 +390,7 @@ export async function bulkUpdateHorses(
         visibility?: "public" | "unlisted" | "private";
     }
 ): Promise<{ success: boolean; count?: number; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
     if (horseIds.length === 0) return { success: false, error: "No horses selected." };
     if (horseIds.length > 200) return { success: false, error: "Too many items (max 200)." };
 
@@ -437,9 +430,7 @@ export async function bulkUpdateHorses(
 export async function bulkDeleteHorses(
     horseIds: string[]
 ): Promise<{ success: boolean; count?: number; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
     if (horseIds.length === 0) return { success: false, error: "No horses selected." };
     if (horseIds.length > 100) return { success: false, error: "Too many items (max 100)." };
 
@@ -509,9 +500,7 @@ export async function quickAddHorse(data: {
     conditionGrade: string;
     collectionId?: string;
 }): Promise<{ success: boolean; horseId?: string; horseName?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // If catalogId provided, auto-name from catalog
     let horseName = data.customName?.trim() || "";
@@ -559,9 +548,7 @@ export async function reorderHorseImages(
     horseId: string,
     imageIds: string[]
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
     if (imageIds.length === 0) return { success: false, error: "No images." };
 
     // Verify ownership

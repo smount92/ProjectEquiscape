@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createNotification } from "@/app/actions/notifications";
@@ -51,9 +52,7 @@ export async function createTransaction(data: {
 export async function completeTransaction(
     transactionId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase
         .from("transactions")
@@ -93,9 +92,7 @@ export async function getTransactionsForUser(): Promise<{
         createdAt: string;
     }[];
 }[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     const { data: rows } = await supabase
         .from("transactions")
@@ -154,9 +151,7 @@ export async function leaveReview(data: {
     stars: number;
     content?: string;
 }): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     if (data.stars < 1 || data.stars > 5) return { success: false, error: "Stars must be 1-5." };
     if (user.id === data.targetId) return { success: false, error: "You cannot review yourself." };
@@ -198,9 +193,7 @@ export async function leaveReview(data: {
 export async function deleteReview(
     reviewId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
     if (error) return { success: false, error: error.message };
@@ -269,9 +262,7 @@ export async function getReviewableTransactions(): Promise<{
     horseName: string | null;
     completedAt: string;
 }[]> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { supabase, user } = await requireAuth();
 
     // Get completed transactions where user is a party
     const { data: txns } = await supabase
@@ -403,9 +394,7 @@ export async function makeOffer(data: {
     message?: string;
     isBundle?: boolean;
 }): Promise<{ success: boolean; transactionId?: string; conversationId?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
     if (user.id === data.sellerId) return { success: false, error: "You cannot make an offer on your own horse." };
     if (data.amount <= 0) return { success: false, error: "Offer amount must be positive." };
 
@@ -485,9 +474,7 @@ export async function respondToOffer(
     transactionId: string,
     action: "accept" | "decline"
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const admin = getAdminClient();
     const { data: txn } = await admin
@@ -572,9 +559,7 @@ export async function respondToOffer(
 export async function markPaymentSent(
     transactionId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const admin = getAdminClient();
     const { data: txn } = await admin
@@ -615,9 +600,7 @@ export async function markPaymentSent(
 export async function verifyFundsAndRelease(
     transactionId: string
 ): Promise<{ success: boolean; pin?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const admin = getAdminClient();
     const { data: txn } = await admin
@@ -668,9 +651,7 @@ export async function verifyFundsAndRelease(
 export async function cancelTransaction(
     transactionId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated. Please refresh the page and try again." };
+    const { supabase, user } = await requireAuth();
 
     const admin = getAdminClient();
     const { data: txn } = await admin
@@ -727,9 +708,7 @@ export async function cancelTransaction(
 export async function retractOffer(
     transactionId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const admin = getAdminClient();
     const { data: txn } = await admin

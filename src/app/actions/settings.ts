@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -19,9 +20,7 @@ export async function getProfile(): Promise<{
     watermarkPhotos: boolean;
     currencySymbol: string;
 } | null> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    const { supabase, user } = await requireAuth();
 
     const { data } = await supabase
         .from("users")
@@ -78,9 +77,7 @@ export async function updateProfile(data: {
     watermarkPhotos?: boolean;
     currencySymbol?: string;
 }): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const updates: Record<string, unknown> = {};
 
@@ -136,9 +133,7 @@ export async function updateProfile(data: {
 export async function updateNotificationPrefs(
     prefs: Record<string, boolean>
 ): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const { error } = await supabase
         .from("users")
@@ -176,9 +171,7 @@ export async function changePassword(data: {
 export async function uploadAvatar(
     formData: FormData
 ): Promise<{ success: boolean; url?: string; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     const file = formData.get("avatar") as File;
     if (!file || file.size === 0) return { success: false, error: "No file selected." };
@@ -241,9 +234,7 @@ export async function uploadAvatar(
 import { getAdminClient } from "@/lib/supabase/admin";
 
 export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated." };
+    const { supabase, user } = await requireAuth();
 
     // Call the soft delete RPC
     const adminClient = getAdminClient();
