@@ -29,6 +29,24 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Testing
+
+### Unit Tests (Vitest)
+```bash
+npm run test:unit          # Single run
+npm run test:unit:watch    # Watch mode for development
+npm run test:unit:coverage # Run with coverage report
+```
+
+### E2E Tests (Playwright)
+```bash
+npm run test:e2e           # Headless Chromium
+```
+
+### Environment
+Tests use a mocked Supabase client (no live DB connection required).
+Set `NEXT_PUBLIC_SUPABASE_URL=https://test.supabase.co` in `.env.test` if needed.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

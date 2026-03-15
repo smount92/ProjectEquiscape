@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
     "test:e2e": "npx playwright test",
     "gen-types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/lib/types/database.generated.ts"
   },
@@ -34,9 +37,11 @@
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.0",
     "cheerio": "^1.2.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "eslint-plugin-security": "^4.0.0",
     "typescript": "^5",
     "vitest": "^4.0.18"
   }
