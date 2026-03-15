@@ -2038,7 +2038,8 @@ p {
 .passport-hero img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .passport-hero-placeholder {
@@ -8910,7 +8911,8 @@ p {
 .help-id-card-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .help-id-card-placeholder {

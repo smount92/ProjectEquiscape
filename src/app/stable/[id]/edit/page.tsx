@@ -12,6 +12,7 @@ import { compressImage, compressImageWithWatermark } from "@/lib/utils/imageComp
 import { updateLifeStage } from "@/app/actions/hoofprint";
 import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages } from "@/app/actions/horse";
 import { getProfile } from "@/app/actions/settings";
+import ImageCropModal from "@/components/ImageCropModal";
 
 // ---- Types ----
 
@@ -114,6 +115,10 @@ export default function EditHorsePage() {
 
   // Deferred image deletions (only executed on save)
   const [pendingImageDeletes, setPendingImageDeletes] = useState<{ recordId: string, path: string | null }[]>([]);
+
+  // Crop modal state
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropAngle, setCropAngle] = useState<AngleProfile | null>(null);
 
   // Watermark preference
   const [watermarkEnabled, setWatermarkEnabled] = useState(false);
@@ -274,10 +279,19 @@ export default function EditHorsePage() {
   // ---- Photo Studio handlers ----
   const handleSlotSelect = (angle: AngleProfile, file: File) => {
     if (!file.type.startsWith("image/")) return;
-    setNewFiles((prev) => ({ ...prev, [angle]: file }));
+    // Open crop modal instead of directly setting
+    setCropFile(file);
+    setCropAngle(angle);
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    if (!cropAngle) return;
+    setNewFiles((prev) => ({ ...prev, [cropAngle]: croppedFile }));
     const reader = new FileReader();
-    reader.onloadend = () => setPreviews((prev) => ({ ...prev, [angle]: reader.result as string }));
-    reader.readAsDataURL(file);
+    reader.onloadend = () => setPreviews((prev) => ({ ...prev, [cropAngle]: reader.result as string }));
+    reader.readAsDataURL(croppedFile);
+    setCropFile(null);
+    setCropAngle(null);
   };
 
   const handleSlotDrop = (angle: AngleProfile, e: React.DragEvent) => {
@@ -1076,6 +1090,15 @@ export default function EditHorsePage() {
           </button>
         </div>
       </div>
+
+      {/* ── Image Crop Modal ── */}
+      {cropFile && cropAngle && (
+        <ImageCropModal
+          file={cropFile}
+          onCrop={handleCropComplete}
+          onCancel={() => { setCropFile(null); setCropAngle(null); }}
+        />
+      )}
     </div>
   );
 }

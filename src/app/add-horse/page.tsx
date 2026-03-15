@@ -18,8 +18,8 @@ import CollectionPicker from "@/components/CollectionPicker";
 import { notifyHorsePublic } from "@/app/actions/horse-events";
 import { initializeHoofprint } from "@/app/actions/hoofprint";
 import { createHorseRecord, finalizeHorseImages } from "@/app/actions/horse";
-import { submitSuggestion } from "@/app/actions/suggestions";
 import { getProfile } from "@/app/actions/settings";
+import ImageCropModal from "@/components/ImageCropModal";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -87,6 +87,10 @@ export default function AddHorsePage() {
   const [imageSlots, setImageSlots] = useState<Partial<Record<AngleProfile, ImageSlot>>>({});
   const [extraFiles, setExtraFiles] = useState<{ file: File; previewUrl: string }[]>([]);
   const extraInputRef = useRef<HTMLInputElement>(null);
+
+  // Crop modal state
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropAngle, setCropAngle] = useState<AngleProfile | null>(null);
 
   // AI Vision Detection
   const [aiDetecting, setAiDetecting] = useState(false);
@@ -253,15 +257,27 @@ export default function AddHorsePage() {
       return;
     }
 
+    // Open crop modal
+    setCropFile(file);
+    setCropAngle(angle);
+  };
+
+  const handleCropComplete = (croppedFile: File) => {
+    if (!cropAngle) return;
+
     // Revoke old preview
-    const existingSlot = imageSlots[angle];
+    const existingSlot = imageSlots[cropAngle];
     if (existingSlot) revokeImagePreviewUrl(existingSlot.previewUrl);
 
-    const previewUrl = createImagePreviewUrl(file);
+    const previewUrl = createImagePreviewUrl(croppedFile);
     setImageSlots((prev) => ({
       ...prev,
-      [angle]: { file, previewUrl },
+      [cropAngle]: { file: croppedFile, previewUrl },
     }));
+
+    // Close modal
+    setCropFile(null);
+    setCropAngle(null);
   };
 
   const handleImageRemove = (angle: AngleProfile) => {
@@ -1310,6 +1326,15 @@ export default function AddHorsePage() {
           </div>
         ))}
       </div>
+
+      {/* ── Image Crop Modal ── */}
+      {cropFile && cropAngle && (
+        <ImageCropModal
+          file={cropFile}
+          onCrop={handleCropComplete}
+          onCancel={() => { setCropFile(null); setCropAngle(null); }}
+        />
+      )}
     </div >
   );
 }
