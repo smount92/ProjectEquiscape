@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { updateCollectionAction, deleteCollectionAction } from "@/app/actions/collections";
 
@@ -57,7 +58,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
         );
     }
 
-    return (
+    return createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
                 <h3 style={{ marginBottom: "var(--space-lg)" }}>Manage Collection</h3>
@@ -82,6 +83,6 @@ export default function CollectionManager({ collection }: CollectionManagerProps
                     </div>
                 </div>
             </div>
-        </div>
-    );
+        </div>,
+        document.body);
 }

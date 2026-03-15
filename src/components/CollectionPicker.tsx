@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { getCollectionsAction, createCollectionAction } from "@/app/actions/collections";
 
 interface Collection {
@@ -178,7 +179,7 @@ export default function CollectionPicker({
       </span>
 
       {/* ---- Create Collection Modal ---- */}
-      {showModal && (
+      {showModal && createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div
             className="modal-content collection-modal"
@@ -266,8 +267,8 @@ export default function CollectionPicker({
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+        document.body)}
     </div>
   );
 }

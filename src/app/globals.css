@@ -2336,17 +2336,8 @@ p {
 /* ============================================================
    CONFIRMATION MODAL
    ============================================================ */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 250;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(10, 10, 18, 0.85);
-  animation: modal-fade-in 0.2s ease forwards;
-  padding: var(--space-xl);
-}
+/* .modal-overlay — canonical definition at line ~3499 */
+
 
 @keyframes modal-fade-in {
   from {
@@ -3499,7 +3490,9 @@ p {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10060,24 +10053,8 @@ p {
 }
 
 /* Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-}
+/* .modal-overlay — deduplicated, canonical at line ~3499 */
 
-.modal-content {
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-xl);
-  max-width: 480px;
-  width: 90%;
-}
 
 /* ══════════════════════════════════════════════════════════════ */
 /* V17: Visibility Selector (3-option)                            */

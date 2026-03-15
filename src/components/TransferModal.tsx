@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { generateTransferCode, cancelTransfer } from "@/app/actions/hoofprint";
 
@@ -82,7 +83,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                 📦 Transfer Ownership
             </button>
 
-            {isOpen && (
+            {isOpen && createPortal(
                 <div className="modal-overlay" onClick={handleClose}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px" }}>
                         {step === "form" ? (
@@ -203,8 +204,8 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                             </>
                         )}
                     </div>
-                </div>
-            )}
+                </div>,
+                document.body)}
         </>
     );
 }

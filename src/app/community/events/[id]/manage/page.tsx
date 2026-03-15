@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -745,7 +746,7 @@ export default function ManageEventPage() {
                 )}
 
                 {/* Copy Modal */}
-                {showCopyModal && (
+                {showCopyModal && createPortal(
                     <div className="modal-overlay" onClick={() => setShowCopyModal(false)}>
                         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                             <h3>📋 Copy Division Tree From…</h3>
@@ -774,8 +775,8 @@ export default function ManageEventPage() {
                                 </>
                             )}
                         </div>
-                    </div>
-                )}
+                    </div>,
+                    document.body)}
             </div>
         </div>
     );

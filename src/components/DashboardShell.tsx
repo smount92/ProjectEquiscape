@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import StableGrid from "@/components/StableGrid";
 import StableLedger from "@/components/StableLedger";
@@ -224,7 +225,7 @@ export default function DashboardShell({
             )}
 
             {/* Delete Confirmation Modal */}
-            {showDeleteConfirm && (
+            {showDeleteConfirm && createPortal(
                 <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <h3 style={{ marginBottom: "var(--space-md)" }}>🗑️ Confirm Delete</h3>
@@ -245,8 +246,8 @@ export default function DashboardShell({
                             </button>
                         </div>
                     </div>
-                </div>
-            )}
+                </div>,
+                document.body)}
         </>
     );
 }
