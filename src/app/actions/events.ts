@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
 
@@ -97,6 +97,7 @@ export async function createEvent(data: {
     });
 
     revalidatePath("/community/events");
+    revalidateTag("events", "max");
     return { success: true, eventId };
 }
 

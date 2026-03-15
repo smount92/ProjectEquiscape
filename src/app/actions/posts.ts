@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { sanitizeText } from "@/lib/utils/validation";
@@ -80,6 +80,7 @@ export async function createPost(data: {
     if (data.eventId) revalidatePath(`/community/events/${data.eventId}`);
     if (data.eventId) revalidatePath(`/shows/${data.eventId}`);
     revalidatePath("/feed");
+    revalidateTag("feed", "max");
 
     // Deferred: notify mentions after response is sent
     const userId = user.id;

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
 
@@ -71,6 +71,7 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard");
+    revalidateTag("public_horses", "max");
     return { success: true };
 }
 
@@ -337,6 +338,7 @@ export async function createHorseRecord(data: {
     }
 
     revalidatePath("/dashboard");
+    revalidateTag("public_horses", "max");
     return { success: true, horseId: horse.id };
 }
 

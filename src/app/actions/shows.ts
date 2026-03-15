@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 // ============================================================
 // UNIFIED COMPETITION — Server Actions
@@ -383,12 +383,11 @@ export async function createPhotoShow(data: {
     if (error) return { success: false, error: error.message };
     revalidatePath("/shows");
     revalidatePath("/community/events");
+    revalidateTag("shows", "max");
     return { success: true };
 }
 
-/**
- * Update show status. If closing, calls close_virtual_show RPC.
- */
+/** Update show status. If closing, calls close_virtual_show RPC. */
 export async function updateShowStatus(
     showId: string,
     newStatus: "open" | "judging" | "closed"
@@ -421,6 +420,7 @@ export async function updateShowStatus(
 
     revalidatePath("/shows");
     revalidatePath(`/shows/${showId}`);
+    revalidateTag("shows", "max");
     return { success: true };
 }
 
