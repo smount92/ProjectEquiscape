@@ -36,12 +36,15 @@ export async function parkHorse(horseId: string): Promise<{
         // Verify ownership
         const { data: horse } = await supabase
             .from("user_horses")
-            .select("id, owner_id, custom_name, life_stage")
+            .select("id, owner_id, custom_name, life_stage, trade_status")
             .eq("id", horseId)
             .single();
 
         if (!horse || (horse as { owner_id: string }).owner_id !== user.id) {
             return { success: false, error: "You don't own this horse." };
+        }
+        if ((horse as { trade_status: string }).trade_status === "Stolen/Missing") {
+            return { success: false, error: "Cannot park a horse flagged as Stolen/Missing." };
         }
 
         const h = horse as { id: string; custom_name: string; life_stage: string };

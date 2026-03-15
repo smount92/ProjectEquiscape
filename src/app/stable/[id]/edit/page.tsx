@@ -952,6 +952,7 @@ export default function EditHorsePage() {
               <option value="Not for Sale">Not for Sale</option>
               <option value="For Sale">For Sale</option>
               <option value="Open to Offers">Open to Offers</option>
+              <option value="Stolen/Missing">🚨 Stolen/Missing</option>
             </select>
           </div>
 

@@ -278,11 +278,14 @@ export async function generateTransferCode(data: {
     // Verify ownership
     const { data: horse } = await supabase
         .from("user_horses")
-        .select("id, owner_id")
+        .select("id, owner_id, trade_status")
         .eq("id", data.horseId)
         .single();
     if (!horse || (horse as { owner_id: string }).owner_id !== user.id) {
         return { success: false, error: "You don't own this horse." };
+    }
+    if ((horse as { trade_status: string }).trade_status === "Stolen/Missing") {
+        return { success: false, error: "Cannot transfer a horse flagged as Stolen/Missing. Remove the flag first." };
     }
 
     // Cancel any existing pending transfers for this horse

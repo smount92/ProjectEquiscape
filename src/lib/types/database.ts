@@ -21,7 +21,7 @@ export type AngleProfile =
 
 export type FinishType = "OF" | "Custom" | "Artist Resin";
 
-export type TradeStatus = "Not for Sale" | "For Sale" | "Open to Offers";
+export type TradeStatus = "Not for Sale" | "For Sale" | "Open to Offers" | "Stolen/Missing";
 
 export type CatalogItemType = "plastic_mold" | "plastic_release" | "artist_resin" | "tack" | "medallion" | "micro_mini" | "prop" | "diorama";
 

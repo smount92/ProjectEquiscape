@@ -349,6 +349,27 @@ export default async function PublicPassportPage({
 
         {/* Right: Info sidebar */}
         <div className="passport-sidebar">
+          {/* Stolen/Missing Banner */}
+          {horse.trade_status === "Stolen/Missing" && (
+            <div style={{
+              background: "linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.08))",
+              border: "1px solid rgba(220, 38, 38, 0.4)",
+              borderRadius: "var(--radius-md)",
+              padding: "var(--space-md)",
+              marginBottom: "var(--space-md)",
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--space-sm)",
+            }}>
+              <span style={{ fontSize: "1.3em" }}>🚨</span>
+              <div>
+                <strong style={{ color: "rgb(220, 38, 38)" }}>Stolen / Missing</strong>
+                <p style={{ fontSize: "calc(0.8rem * var(--font-scale))", margin: "4px 0 0", color: "var(--color-text-muted)" }}>
+                  This model has been flagged by its owner. Transfers and offers are blocked.
+                </p>
+              </div>
+            </div>
+          )}
           {/* Title */}
           <div>
             <h1 className="passport-title">{horse.custom_name}</h1>
@@ -640,7 +661,7 @@ export default async function PublicPassportPage({
               {!isOwnHorse && (
                 <ReportButton targetType="horse" targetId={horseId} />
               )}
-              {!isOwnHorse && (horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
+              {!isOwnHorse && horse.trade_status !== "Stolen/Missing" && (horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
                 <MessageSellerButton
                   sellerId={horse.owner_id}
                   horseId={horseId}
