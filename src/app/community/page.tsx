@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import ShowRingGrid from "@/components/ShowRingGrid";
 import FeaturedHorseCard from "@/components/FeaturedHorseCard";
 
@@ -115,7 +115,7 @@ export default async function CommunityPage({
     if (url) thumbnailUrls.push(url);
   });
 
-  const signedUrlMap = await getSignedImageUrls(supabase, thumbnailUrls);
+  const signedUrlMap = getPublicImageUrls(thumbnailUrls);
 
   // ================================================================
   // SOCIAL: Fetch favorite counts + user's own favorites
@@ -245,7 +245,7 @@ export default async function CommunityPage({
       const imgUrl = thumb?.image_url || h.horse_images?.[0]?.image_url;
       let signedFeatUrl: string | null = null;
       if (imgUrl) {
-        const fMap = await getSignedImageUrls(supabase, [imgUrl]);
+        const fMap = getPublicImageUrls([imgUrl]);
         signedFeatUrl = fMap.get(imgUrl) || null;
       }
       featuredHorse = {

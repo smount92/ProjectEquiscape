@@ -770,14 +770,11 @@ export async function getEventPhotos(eventId: string) {
         users: { alias_name: string } | null;
     }[]);
 
-    // Batch sign URLs
+    // Batch public URLs
     if (photos.length === 0) return [];
+    const { getPublicImageUrls } = await import("@/lib/utils/storage");
     const paths = photos.map(p => p.image_path);
-    const { data: signedBatch } = await supabase.storage
-        .from("horse-images")
-        .createSignedUrls(paths, 3600);
-    const urlMap = new Map<string, string>();
-    signedBatch?.forEach((s) => { if (s.signedUrl) urlMap.set(s.path!, s.signedUrl); });
+    const urlMap = getPublicImageUrls(paths);
 
     return photos.map(p => ({
         id: p.id,

@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
@@ -183,7 +183,7 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
                 allThumbUrls.push(url);
             }
         }
-        const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
+        const signedUrls = getPublicImageUrls(allThumbUrls);
         for (const [hId, rawUrl] of thumbUrlMap1) {
             thumbUrlMap1.set(hId, signedUrls.get(rawUrl) ?? rawUrl);
         }
@@ -313,7 +313,7 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
                 allThumbUrls.push(url);
             }
         }
-        const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
+        const signedUrls = getPublicImageUrls(allThumbUrls);
         for (const [hId, rawUrl] of thumbUrlMap2) {
             thumbUrlMap2.set(hId, signedUrls.get(rawUrl) ?? rawUrl);
         }

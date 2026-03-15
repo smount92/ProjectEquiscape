@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import { revalidatePath } from "next/cache";
 
 // ============================================================
@@ -174,7 +174,7 @@ export async function getShowEntries(showId: string): Promise<{
             allThumbUrls.push(url);
         }
     }
-    const signedUrls = await getSignedImageUrls(supabase, allThumbUrls);
+    const signedUrls = getPublicImageUrls(allThumbUrls);
 
     // Build entries list
     let finalEntries = entryList.map(e => ({

@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getSignedImageUrl } from "@/lib/utils/storage";
+import { getPublicImageUrl } from "@/lib/utils/storage";
 import HelpIdDetailClient from "@/components/HelpIdDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -54,7 +54,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
 
     // Get signed URL for the image
     const signedImageUrl = req.image_url
-        ? await getSignedImageUrl(supabase, req.image_url)
+        ? getPublicImageUrl(req.image_url)
         : null;
 
     // Fetch suggestions — NO PostgREST join for same reason

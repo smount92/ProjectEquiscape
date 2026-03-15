@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import CollectionManager from "@/components/CollectionManager";
 
 export const dynamic = "force-dynamic";
@@ -123,7 +123,7 @@ export default async function CollectionPage({
     if (url) thumbnailUrls.push(url);
   });
 
-  const signedUrlMap = await getSignedImageUrls(supabase, thumbnailUrls);
+  const signedUrlMap = getPublicImageUrls(thumbnailUrls);
 
   // Fetch financial vault totals for horses in this collection (owner-only via RLS)
   const horseIds = horses.map((h) => h.id);

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import MarketValueBadge from "@/components/MarketValueBadge";
 import PassportGallery from "@/components/PassportGallery";
 import ShareButton from "@/components/ShareButton";
@@ -210,7 +210,7 @@ export default async function PublicPassportPage({
 
   // Generate signed URLs
   const imageUrls = images.map((img) => img.image_url);
-  const signedUrlMap = await getSignedImageUrls(supabase, imageUrls);
+  const signedUrlMap = getPublicImageUrls(imageUrls);
 
   const galleryImages = images.map((img) => ({
     signedUrl: signedUrlMap.get(img.image_url) || img.image_url,

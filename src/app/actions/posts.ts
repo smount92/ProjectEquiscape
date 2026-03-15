@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 
 // ============================================================
 // UNIVERSAL POSTS — Server Actions
@@ -248,15 +249,9 @@ export async function getPosts(context: {
         .select("id, storage_path, post_id, caption")
         .in("post_id", postIds);
 
-    // Sign media URLs in batch
+    // Generate public URLs for media
     const allPaths = (media ?? []).map((m: { storage_path: string }) => m.storage_path);
-    const urlMap = new Map<string, string>();
-    if (allPaths.length > 0) {
-        const { data: signed } = await supabase.storage.from("horse-images").createSignedUrls(allPaths, 3600);
-        signed?.forEach(s => {
-            if (s.signedUrl && s.path) urlMap.set(s.path, s.signedUrl);
-        });
-    }
+    const urlMap = getPublicImageUrls(allPaths);
 
     // Check which posts the user has liked
     const { data: likedRows } = await supabase
@@ -342,9 +337,7 @@ export async function getEventMedia(eventId: string) {
 
     if (items.length === 0) return [];
     const paths = items.map(i => i.storage_path);
-    const { data: signedBatch } = await supabase.storage.from("horse-images").createSignedUrls(paths, 3600);
-    const urlMap = new Map<string, string>();
-    signedBatch?.forEach(s => { if (s.signedUrl && s.path) urlMap.set(s.path, s.signedUrl); });
+    const urlMap = getPublicImageUrls(paths);
 
     return items.map(i => ({
         id: i.id,

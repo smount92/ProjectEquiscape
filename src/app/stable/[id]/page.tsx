@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import MarketValueBadge from "@/components/MarketValueBadge";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import PassportGallery from "@/components/PassportGallery";
 import VaultReveal from "@/components/VaultReveal";
 import DeleteHorseModal from "@/components/DeleteHorseModal";
@@ -161,7 +161,7 @@ export default async function HorsePassportPage({
 
   // Generate signed URLs for all images
   const imageUrls = images.map((img) => img.image_url);
-  const signedUrlMap = await getSignedImageUrls(supabase, imageUrls);
+  const signedUrlMap = getPublicImageUrls(imageUrls);
 
   const galleryImages = images.map((img) => ({
     signedUrl: signedUrlMap.get(img.image_url) || img.image_url,

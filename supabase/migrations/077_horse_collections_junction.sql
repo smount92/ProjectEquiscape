@@ -27,7 +27,7 @@ CREATE POLICY "Users can view own horse collection links"
     ON horse_collections FOR SELECT
     USING (
         horse_id IN (
-            SELECT id FROM user_horses WHERE user_id = auth.uid()
+            SELECT id FROM user_horses WHERE owner_id = auth.uid()
         )
     );
 
@@ -35,7 +35,7 @@ CREATE POLICY "Users can insert own horse collection links"
     ON horse_collections FOR INSERT
     WITH CHECK (
         horse_id IN (
-            SELECT id FROM user_horses WHERE user_id = auth.uid()
+            SELECT id FROM user_horses WHERE owner_id = auth.uid()
         )
     );
 
@@ -43,7 +43,7 @@ CREATE POLICY "Users can delete own horse collection links"
     ON horse_collections FOR DELETE
     USING (
         horse_id IN (
-            SELECT id FROM user_horses WHERE user_id = auth.uid()
+            SELECT id FROM user_horses WHERE owner_id = auth.uid()
         )
     );
 

@@ -1,10 +1,12 @@
 /**
  * Storage Utility
- * Since our horse-images bucket is private, we need signed URLs
- * for images to render in the browser.
+ * horse-images bucket is now PUBLIC for reads.
+ * No more signed URLs — simple string concatenation for CDN-cacheable URLs.
+ * Writes remain restricted via RLS (owner-only upload/delete).
  */
 
-import type { SupabaseClient } from "@supabase/supabase-js";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const PUBLIC_BASE = `${SUPABASE_URL}/storage/v1/object/public/horse-images`;
 
 /**
  * Extract the relative file path from a stored image URL or raw path.
@@ -21,41 +23,23 @@ export function extractStoragePath(imageUrl: string): string {
 }
 
 /**
- * Generate a signed URL for a single image (1 hour expiry).
+ * Generate a public URL for a single image.
+ * No API call needed — pure string concatenation.
  */
-export async function getSignedImageUrl(
-  supabase: SupabaseClient,
-  imageUrl: string
-): Promise<string> {
+export function getPublicImageUrl(imageUrl: string): string {
   const path = extractStoragePath(imageUrl);
-  const { data } = await supabase.storage
-    .from("horse-images")
-    .createSignedUrl(path, 3600);
-  return data?.signedUrl ?? imageUrl;
+  return `${PUBLIC_BASE}/${path}`;
 }
 
 /**
- * Batch-generate signed URLs for multiple images.
- * Returns a Map from original image_url -> signed URL.
+ * Batch-generate public URLs for multiple images.
+ * Returns a Map from original image_url → public URL.
+ * Synchronous — no `await` needed.
  */
-export async function getSignedImageUrls(
-  supabase: SupabaseClient,
-  imageUrls: string[]
-): Promise<Map<string, string>> {
+export function getPublicImageUrls(imageUrls: string[]): Map<string, string> {
   const urlMap = new Map<string, string>();
-  if (imageUrls.length === 0) return urlMap;
-
-  const paths = imageUrls.map(extractStoragePath);
-  const { data } = await supabase.storage
-    .from("horse-images")
-    .createSignedUrls(paths, 3600);
-
-  if (data) {
-    data.forEach((item, i) => {
-      if (item.signedUrl) {
-        urlMap.set(imageUrls[i], item.signedUrl);
-      }
-    });
+  for (const url of imageUrls) {
+    urlMap.set(url, getPublicImageUrl(url));
   }
   return urlMap;
 }

@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
-import { getSignedImageUrl } from "@/lib/utils/storage";
+import { getPublicImageUrl } from "@/lib/utils/storage";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
 import { randomInt } from "crypto";
 
@@ -233,7 +233,7 @@ export async function getParkedHorseByPin(pin: string): Promise<{
             const thumb = imgList.find((img) => img.angle_profile === "Primary_Thumbnail");
             const imageUrl = thumb?.image_url || imgList[0]?.image_url;
             if (imageUrl) {
-                photo = await getSignedImageUrl(admin, imageUrl);
+                photo = getPublicImageUrl(imageUrl);
             }
         } catch { /* photo is optional for preview */ }
 
@@ -468,7 +468,7 @@ export async function getCoaData(horseId: string): Promise<{
         const thumb = h.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
         const imageUrl = thumb?.image_url || h.horse_images?.[0]?.image_url;
         if (imageUrl) {
-            const signedUrl = await getSignedImageUrl(supabase, imageUrl);
+            const signedUrl = getPublicImageUrl(imageUrl);
             photoUrl = signedUrl || null;
         }
 

@@ -60,10 +60,9 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
 
     let signedUrls: { url: string; caption: string | null }[] = [];
     if (media && media.length > 0) {
-        const paths = (media as { storage_path: string }[]).map(m => m.storage_path);
-        const { data: batch } = await supabase.storage.from("horse-images").createSignedUrls(paths, 3600);
-        signedUrls = (media as { storage_path: string; caption: string | null }[]).map((m, i) => ({
-            url: batch?.[i]?.signedUrl || "",
+        const { getPublicImageUrl } = await import("@/lib/utils/storage");
+        signedUrls = (media as { storage_path: string; caption: string | null }[]).map((m) => ({
+            url: getPublicImageUrl(m.storage_path),
             caption: m.caption,
         }));
     }

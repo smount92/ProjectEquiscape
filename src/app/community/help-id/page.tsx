@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getSignedImageUrl } from "@/lib/utils/storage";
+import { getPublicImageUrl } from "@/lib/utils/storage";
 import HelpIdRequestForm from "@/components/HelpIdRequestForm";
 
 export const metadata: Metadata = {
@@ -81,7 +81,7 @@ export default async function HelpIdPage() {
     const signedUrlMap = new Map<string, string>();
     for (const req of requests) {
         if (req.image_url) {
-            const signedUrl = await getSignedImageUrl(supabase, req.image_url);
+            const signedUrl = getPublicImageUrl(req.image_url);
             signedUrlMap.set(req.id, signedUrl);
         }
     }

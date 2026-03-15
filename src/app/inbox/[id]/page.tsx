@@ -8,7 +8,7 @@ import OfferCard from "@/components/OfferCard";
 import BlockButton from "@/components/BlockButton";
 import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
 import { getTransactionByConversation } from "@/app/actions/transactions";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 
 export async function generateMetadata({
     params,
@@ -147,7 +147,7 @@ export default async function ChatPage({
             // Sign the URL
             let signedThumb: string | null = null;
             if (imgPath) {
-                const urlMap = await getSignedImageUrls(supabase, [imgPath]);
+                const urlMap = getPublicImageUrls([imgPath]);
                 signedThumb = urlMap.get(imgPath) || null;
             }
 

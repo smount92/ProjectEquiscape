@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import ShareButton from "@/components/ShareButton";
 import MessageSellerButton from "@/components/MessageSellerButton";
 import RatingBadge from "@/components/RatingBadge";
@@ -194,7 +194,7 @@ export default async function ProfilePage({
     if (url) thumbnailUrls.push(url);
   });
 
-  const signedUrlMap = await getSignedImageUrls(supabase, thumbnailUrls);
+  const signedUrlMap = getPublicImageUrls(thumbnailUrls);
 
   // Build display data
   const profileCards = horses.map((horse) => {

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { extractStoragePath } from "@/lib/utils/storage";
+import { getPublicImageUrl } from "@/lib/utils/storage";
 
 // ============================================================
 // Insurance Report Data — Server Action
@@ -96,36 +96,15 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
         let totalValue = 0;
         const reportHorses: HorseReportData[] = [];
 
-        // ── Batch-fetch signed URLs (1 API call for ALL images) ──
-        const imagePathMap = new Map<string, string>(); // horseId → storagePath
+        // ── Generate public URLs for images (1 sync call, no API) ──
+        const signedUrlMap = new Map<string, string>();
         for (const horse of horses) {
             const thumb = horse.horse_images?.find(
                 (img) => img.angle_profile === "Primary_Thumbnail"
             );
             const imageUrl = thumb?.image_url || horse.horse_images?.[0]?.image_url;
             if (imageUrl) {
-                imagePathMap.set(horse.id, extractStoragePath(imageUrl));
-            }
-        }
-
-        const signedUrlMap = new Map<string, string>();
-        const allPaths = Array.from(imagePathMap.values());
-        if (allPaths.length > 0) {
-            const { data: signedData } = await supabase.storage
-                .from("horse-images")
-                .createSignedUrls(allPaths, 600); // 10 min expiry
-            if (signedData) {
-                signedData.forEach((item, i) => {
-                    if (item.signedUrl) {
-                        const path = allPaths[i];
-                        for (const [horseId, horsePath] of imagePathMap) {
-                            if (horsePath === path) {
-                                signedUrlMap.set(horseId, item.signedUrl);
-                                break;
-                            }
-                        }
-                    }
-                });
+                signedUrlMap.set(horse.id, getPublicImageUrl(imageUrl));
             }
         }
 

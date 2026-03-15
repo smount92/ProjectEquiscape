@@ -4,7 +4,7 @@ import Link from "next/link";
 import WishlistRemoveButton from "@/components/WishlistRemoveButton";
 import MatchmakerMatches from "@/components/MatchmakerMatches";
 import WishlistSearch from "@/components/WishlistSearch";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 
 export const metadata = {
     title: "My Wishlist — Model Horse Hub",
@@ -104,7 +104,7 @@ export default async function WishlistPage() {
                 if (url) thumbUrls.push(url);
             });
 
-            const signedUrlMap = await getSignedImageUrls(supabase, thumbUrls);
+            const signedUrlMap = getPublicImageUrls(thumbUrls);
 
             // Group matches by wishlist item
             for (const item of items) {

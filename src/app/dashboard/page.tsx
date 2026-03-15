@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
-import { getSignedImageUrls } from "@/lib/utils/storage";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import {
     Camera, Trophy, Users, FileText, Zap, Plus,
     BarChart3, FolderOpen, DollarSign, Award, Mail
@@ -100,7 +100,7 @@ export default async function DashboardPage({
         convoIds.length > 0
             ? supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).eq("is_read", false).in("conversation_id", convoIds)
             : Promise.resolve({ count: 0 }),
-        getSignedImageUrls(supabase, thumbnailUrls),
+        getPublicImageUrls(thumbnailUrls),
     ]);
 
     const vaults = (vaultsResult.data as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[]) ?? [];
