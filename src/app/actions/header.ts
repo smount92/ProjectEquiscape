@@ -9,17 +9,18 @@ export async function getHeaderData() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-        return { user: null, aliasName: null, unreadCount: 0 };
+        return { user: null, aliasName: null, avatarUrl: null, unreadCount: 0 };
     }
 
     // Fetch alias_name
     const { data: profile } = await supabase
         .from("users")
-        .select("alias_name")
+        .select("alias_name, avatar_url")
         .eq("id", user.id)
         .single();
 
     const aliasName = profile?.alias_name ?? null;
+    const avatarUrl = profile?.avatar_url ?? null;
 
     // Fetch unread count
     const { data: convos } = await supabase
@@ -54,6 +55,7 @@ export async function getHeaderData() {
     return {
         user: { id: user.id, email: user.email },
         aliasName,
+        avatarUrl,
         unreadCount,
         isAdmin,
         artistStudioSlug: (artistProfile as { studio_slug: string } | null)?.studio_slug || null,

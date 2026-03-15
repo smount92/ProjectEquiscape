@@ -53,6 +53,7 @@ export default function Header() {
   const [aliasName, setAliasName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [artistSlug, setArtistSlug] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
@@ -69,6 +70,7 @@ export default function Header() {
       const data = await getHeaderData();
       setUser(data.user);
       setAliasName(data.aliasName);
+      setAvatarUrl(data.avatarUrl ?? null);
       setUnreadCount(data.unreadCount);
       setIsAdmin(data.isAdmin ?? false);
       setArtistSlug(data.artistStudioSlug ?? null);
@@ -96,6 +98,7 @@ export default function Header() {
       } else {
         setUser(null);
         setAliasName(null);
+        setAvatarUrl(null);
         setUnreadCount(0);
         setIsAdmin(false);
         setArtistSlug(null);
@@ -314,7 +317,12 @@ export default function Header() {
               aria-label="User menu"
             >
               <span className="header-user-avatar">
-                {aliasName ? aliasName.charAt(0).toUpperCase() : "U"}
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt={aliasName || "User"} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                ) : (
+                  aliasName ? aliasName.charAt(0).toUpperCase() : "U"
+                )}
               </span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
