@@ -18,7 +18,7 @@ import {
     copyDivisionsFromEvent,
 } from "@/app/actions/competition";
 import type { Division } from "@/app/actions/competition";
-import { updateEvent, getEventJudges, addEventJudge, removeEventJudge } from "@/app/actions/events";
+import { updateEvent, getEventJudges, addEventJudge, removeEventJudge, searchUsers } from "@/app/actions/events";
 
 type TabId = "details" | "classes" | "judges";
 
@@ -70,6 +70,8 @@ export default function ManageEventPage() {
     const [newJudgeAlias, setNewJudgeAlias] = useState("");
     const [judgeError, setJudgeError] = useState("");
     const [judgeSuccess, setJudgeSuccess] = useState("");
+    const [userSuggestions, setUserSuggestions] = useState<{ id: string; aliasName: string; avatarUrl: string | null }[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
 
     // Inline editing state (class list)
     const [editingDivision, setEditingDivision] = useState<string | null>(null);
@@ -132,6 +134,21 @@ export default function ManageEventPage() {
     }, [eventId, router, supabase]);
 
     useEffect(() => { loadData(); }, [loadData]);
+
+    // ── Debounced user search for judge autocomplete ──
+    useEffect(() => {
+        if (newJudgeAlias.trim().length < 2) {
+            setUserSuggestions([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            setIsSearching(true);
+            const results = await searchUsers(newJudgeAlias);
+            setUserSuggestions(results);
+            setIsSearching(false);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [newJudgeAlias]);
 
     // ── Event Details Save ──
 
@@ -679,18 +696,88 @@ export default function ManageEventPage() {
                         </p>
 
                         {/* Add Judge Form */}
-                        <div style={{ display: "flex", gap: "var(--space-sm)", marginBottom: "var(--space-lg)", alignItems: "center" }}>
-                            <input
-                                className="form-input"
-                                value={newJudgeAlias}
-                                onChange={e => setNewJudgeAlias(e.target.value)}
-                                onKeyDown={e => e.key === "Enter" && handleAddJudge()}
-                                placeholder="Enter user alias (e.g. JaneDoe)"
-                                style={{ flex: 1, maxWidth: 300 }}
-                            />
-                            <button className="btn btn-primary" onClick={handleAddJudge} disabled={!newJudgeAlias.trim()}>
-                                + Add Judge
-                            </button>
+                        <div style={{ position: "relative", marginBottom: "var(--space-lg)" }}>
+                            <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
+                                <div style={{ position: "relative", flex: 1, maxWidth: 300 }}>
+                                    <input
+                                        className="form-input"
+                                        value={newJudgeAlias}
+                                        onChange={e => { setNewJudgeAlias(e.target.value); setJudgeError(""); }}
+                                        onKeyDown={e => e.key === "Enter" && handleAddJudge()}
+                                        placeholder="Search by user alias…"
+                                        autoComplete="off"
+                                    />
+                                    {/* Autocomplete dropdown */}
+                                    {userSuggestions.length > 0 && newJudgeAlias.trim().length >= 2 && (
+                                        <div style={{
+                                            position: "absolute",
+                                            top: "100%",
+                                            left: 0,
+                                            right: 0,
+                                            zIndex: 50,
+                                            background: "var(--color-surface-elevated)",
+                                            border: "1px solid var(--color-border)",
+                                            borderRadius: "var(--radius-md)",
+                                            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+                                            marginTop: 4,
+                                            maxHeight: 240,
+                                            overflow: "auto",
+                                        }}>
+                                            {userSuggestions.map(u => (
+                                                <button
+                                                    key={u.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setNewJudgeAlias(u.aliasName);
+                                                        setUserSuggestions([]);
+                                                    }}
+                                                    style={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: "var(--space-sm)",
+                                                        width: "100%",
+                                                        padding: "var(--space-sm) var(--space-md)",
+                                                        background: "none",
+                                                        border: "none",
+                                                        cursor: "pointer",
+                                                        color: "var(--color-text-primary)",
+                                                        fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                                                        textAlign: "left",
+                                                        borderBottom: "1px solid var(--color-border)",
+                                                    }}
+                                                    onMouseEnter={e => (e.currentTarget.style.background = "var(--color-surface-hover)")}
+                                                    onMouseLeave={e => (e.currentTarget.style.background = "none")}
+                                                >
+                                                    <div style={{
+                                                        width: 28, height: 28, borderRadius: "50%",
+                                                        background: "var(--color-accent-primary-glow)",
+                                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                                        fontSize: "0.75rem", flexShrink: 0,
+                                                        overflow: "hidden",
+                                                    }}>
+                                                        {u.avatarUrl ? (
+                                                            // eslint-disable-next-line @next/next/no-img-element
+                                                            <img src={u.avatarUrl} alt={u.aliasName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                        ) : "👤"}
+                                                    </div>
+                                                    <span>@{u.aliasName}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {isSearching && (
+                                        <div style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>
+                                            Searching…
+                                        </div>
+                                    )}
+                                </div>
+                                <button className="btn btn-primary" onClick={handleAddJudge} disabled={!newJudgeAlias.trim()}>
+                                    + Add Judge
+                                </button>
+                            </div>
+                            <p style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: 4 }}>
+                                Type 2+ characters to search. Click a result to select, then "Add Judge".
+                            </p>
                         </div>
 
                         {judgeError && <div className="comment-error" style={{ marginBottom: "var(--space-md)" }}>{judgeError}</div>}

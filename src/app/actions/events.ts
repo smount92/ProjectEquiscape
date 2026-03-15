@@ -9,6 +9,29 @@ import { sanitizeText } from "@/lib/utils/validation";
 // EVENTS — Server Actions
 // ============================================================
 
+// ── User Search (for judge assignment autocomplete) ──
+
+export async function searchUsers(query: string): Promise<{
+    id: string;
+    aliasName: string;
+    avatarUrl: string | null;
+}[]> {
+    if (!query || query.trim().length < 2) return [];
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from("users")
+        .select("id, alias_name, avatar_url")
+        .ilike("alias_name", `%${query.trim()}%`)
+        .order("alias_name")
+        .limit(8);
+
+    return (data || []).map((u: { id: string; alias_name: string; avatar_url: string | null }) => ({
+        id: u.id,
+        aliasName: u.alias_name,
+        avatarUrl: u.avatar_url,
+    }));
+}
+
 // ── Types ──
 
 export interface MHHEvent {
@@ -543,14 +566,14 @@ export async function addEventJudge(
         return { success: false, error: "Only the event creator can assign judges." };
     }
 
-    // Look up judge by alias
+    // Look up judge by alias (case-insensitive)
     const { data: judgeUser } = await supabase
         .from("users")
         .select("id")
-        .eq("alias_name", userAlias.trim())
+        .ilike("alias_name", userAlias.trim())
         .maybeSingle();
 
-    if (!judgeUser) return { success: false, error: `User "${userAlias}" not found.` };
+    if (!judgeUser) return { success: false, error: `User "${userAlias}" not found. Try searching below.` };
 
     // Insert
     const { error } = await supabase
