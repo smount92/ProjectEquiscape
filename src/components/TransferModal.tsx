@@ -111,7 +111,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
 
                                 {acquisitionType === "purchase" && (
                                     <div className="form-group">
-                                        <label className="form-label">Sale Price ($)</label>
+                                        <label className="form-label">Sale Price</label>
                                         <input
                                             type="number"
                                             className="form-input"
