@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { getShowEntries } from "@/app/actions/shows";
+import { getEventJudges } from "@/app/actions/events";
 import { getPosts } from "@/app/actions/posts";
 import Link from "next/link";
 import VoteButton from "@/components/VoteButton";
@@ -60,6 +61,10 @@ export default async function ShowDetailPage({
     // Expert judge flags
     const isExpertJudged = show.judgingMethod === "expert_judge";
     const isJudging = show.status === "judging";
+
+    // Check if user is assigned judge
+    const eventJudges = isExpertJudged ? await getEventJudges(showId) : [];
+    const isJudge = eventJudges.some(j => j.userId === user.id);
 
     return (
         <div className="page-container">
@@ -207,17 +212,17 @@ export default async function ShowDetailPage({
                     <h3>Judging in Progress</h3>
                     <p style={{ color: "var(--color-text-muted)" }}>
                         {isExpertJudged
-                            ? (isCreator
+                            ? ((isCreator || isJudge)
                                 ? "Use the judging panel below to assign placings."
-                                : "The show host is reviewing entries. Results will be announced soon!")
+                                : "The judges are reviewing entries. Results will be announced soon!")
                             : "Voting is closed. Results will be announced soon!"
                         }
                     </p>
                 </div>
             )}
 
-            {/* Expert Judging Panel — host only, during judging */}
-            {isExpertJudged && isJudging && isCreator && (
+            {/* Expert Judging Panel — host or assigned judge, during judging */}
+            {isExpertJudged && isJudging && (isCreator || isJudge) && (
                 <ExpertJudgingPanel
                     showId={showId}
                     entries={entries.map(e => ({
@@ -226,6 +231,7 @@ export default async function ShowDetailPage({
                         ownerAlias: e.ownerAlias,
                         thumbnailUrl: e.thumbnailUrl,
                         placing: e.placing,
+                        classId: null,
                     }))}
                 />
             )}

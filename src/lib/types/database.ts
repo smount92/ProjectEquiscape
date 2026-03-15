@@ -151,6 +151,13 @@ export interface ShowRecord {
   show_date_text: string | null;
 }
 
+export interface EventJudge {
+  id: string;
+  event_id: string;
+  user_id: string;
+  created_at: string;
+}
+
 export interface HorsePedigree {
   id: string;
   horse_id: string;

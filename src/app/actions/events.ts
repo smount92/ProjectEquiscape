@@ -424,6 +424,191 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
     return { success: true };
 }
 
+/** Update an event (creator only) */
+export async function updateEvent(
+    eventId: string,
+    data: {
+        name?: string;
+        description?: string;
+        startsAt?: string;
+        endsAt?: string;
+        timezone?: string;
+        isAllDay?: boolean;
+        isVirtual?: boolean;
+        locationName?: string;
+        locationAddress?: string;
+        region?: string;
+        virtualUrl?: string;
+        judgingMethod?: "community_vote" | "expert_judge";
+    }
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify ownership
+    const { data: event } = await supabase
+        .from("events")
+        .select("created_by")
+        .eq("id", eventId)
+        .single();
+
+    if (!event || (event as { created_by: string }).created_by !== user.id) {
+        return { success: false, error: "Not authorized — only the event creator can edit." };
+    }
+
+    const updates: Record<string, unknown> = {};
+    if (data.name !== undefined) updates.name = data.name.trim();
+    if (data.description !== undefined) updates.description = data.description.trim() || null;
+    if (data.startsAt !== undefined) updates.starts_at = data.startsAt;
+    if (data.endsAt !== undefined) updates.ends_at = data.endsAt || null;
+    if (data.timezone !== undefined) updates.timezone = data.timezone;
+    if (data.isAllDay !== undefined) updates.is_all_day = data.isAllDay;
+    if (data.isVirtual !== undefined) updates.is_virtual = data.isVirtual;
+    if (data.locationName !== undefined) updates.location_name = data.locationName.trim() || null;
+    if (data.locationAddress !== undefined) updates.location_address = data.locationAddress.trim() || null;
+    if (data.region !== undefined) updates.region = data.region || null;
+    if (data.virtualUrl !== undefined) updates.virtual_url = data.virtualUrl.trim() || null;
+    if (data.judgingMethod !== undefined) updates.judging_method = data.judgingMethod;
+
+    if (Object.keys(updates).length === 0) return { success: true };
+
+    const { error } = await supabase
+        .from("events")
+        .update(updates)
+        .eq("id", eventId);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath(`/community/events/${eventId}`);
+    revalidatePath(`/community/events/${eventId}/manage`);
+    return { success: true };
+}
+
+// ============================================================
+// EVENT JUDGES
+// ============================================================
+
+/**
+ * Get all judges assigned to an event.
+ */
+export async function getEventJudges(eventId: string): Promise<{
+    id: string;
+    userId: string;
+    aliasName: string;
+    avatarUrl: string | null;
+}[]> {
+    const supabase = await createClient();
+
+    const { data } = await supabase
+        .from("event_judges")
+        .select("id, user_id, users!inner(alias_name, avatar_url)")
+        .eq("event_id", eventId)
+        .order("created_at", { ascending: true });
+
+    if (!data) return [];
+
+    return data.map((j: Record<string, unknown>) => {
+        const user = j.users as { alias_name: string; avatar_url: string | null } | null;
+        return {
+            id: j.id as string,
+            userId: j.user_id as string,
+            aliasName: user?.alias_name || "Unknown",
+            avatarUrl: user?.avatar_url || null,
+        };
+    });
+}
+
+/**
+ * Add a user as a judge to an event. Looks up by alias_name.
+ */
+export async function addEventJudge(
+    eventId: string,
+    userAlias: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Verify ownership
+    const { data: event } = await supabase
+        .from("events")
+        .select("created_by")
+        .eq("id", eventId)
+        .single();
+
+    if (!event || (event as { created_by: string }).created_by !== user.id) {
+        return { success: false, error: "Only the event creator can assign judges." };
+    }
+
+    // Look up judge by alias
+    const { data: judgeUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("alias_name", userAlias.trim())
+        .maybeSingle();
+
+    if (!judgeUser) return { success: false, error: `User "${userAlias}" not found.` };
+
+    // Insert
+    const { error } = await supabase
+        .from("event_judges")
+        .insert({
+            event_id: eventId,
+            user_id: (judgeUser as { id: string }).id,
+        });
+
+    if (error) {
+        if (error.code === "23505") return { success: false, error: "This user is already a judge." };
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath(`/community/events/${eventId}/manage`);
+    return { success: true };
+}
+
+/**
+ * Remove a judge from an event.
+ */
+export async function removeEventJudge(
+    judgeId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated." };
+
+    // Fetch the judge record to verify the event ownership
+    const { data: judge } = await supabase
+        .from("event_judges")
+        .select("event_id")
+        .eq("id", judgeId)
+        .single();
+
+    if (!judge) return { success: false, error: "Judge record not found." };
+
+    const eventId = (judge as { event_id: string }).event_id;
+
+    const { data: event } = await supabase
+        .from("events")
+        .select("created_by")
+        .eq("id", eventId)
+        .single();
+
+    if (!event || (event as { created_by: string }).created_by !== user.id) {
+        return { success: false, error: "Only the event creator can remove judges." };
+    }
+
+    const { error } = await supabase
+        .from("event_judges")
+        .delete()
+        .eq("id", judgeId);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath(`/community/events/${eventId}/manage`);
+    return { success: true };
+}
+
 // ============================================================
 // EVENT COMMENTS
 // ============================================================

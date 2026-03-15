@@ -10,6 +10,13 @@ interface EntryForJudging {
     ownerAlias: string;
     thumbnailUrl: string | null;
     placing: string | null;
+    classId: string | null;
+}
+
+interface ClassInfo {
+    id: string;
+    name: string;
+    divisionName: string;
 }
 
 const PLACING_OPTIONS = [
@@ -17,15 +24,27 @@ const PLACING_OPTIONS = [
     { value: "1st", label: "🥇 1st" },
     { value: "2nd", label: "🥈 2nd" },
     { value: "3rd", label: "🥉 3rd" },
+    { value: "4th", label: "4th" },
+    { value: "5th", label: "5th" },
+    { value: "6th", label: "6th" },
     { value: "HM", label: "🎗️ HM" },
+    { value: "Champion", label: "🏆 Champ" },
+    { value: "Reserve Champion", label: "🥈 Reserve" },
+    { value: "Grand Champion", label: "🏆 Grand" },
+    { value: "Reserve Grand Champion", label: "🥈 Reserve Grand" },
+    { value: "Top 3", label: "🏅 Top 3" },
+    { value: "Top 5", label: "🏅 Top 5" },
+    { value: "Top 10", label: "🏅 Top 10" },
 ];
 
 export default function ExpertJudgingPanel({
     showId,
     entries,
+    classes,
 }: {
     showId: string;
     entries: EntryForJudging[];
+    classes?: ClassInfo[];
 }) {
     const router = useRouter();
     const [placings, setPlacings] = useState<Record<string, string>>(() => {
@@ -36,6 +55,15 @@ export default function ExpertJudgingPanel({
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
+    const [selectedClassId, setSelectedClassId] = useState<string>("all");
+
+    // Filter entries by selected class
+    const filteredEntries = selectedClassId === "all"
+        ? entries
+        : entries.filter(e => e.classId === selectedClassId);
+
+    // Find current class info
+    const currentClass = classes?.find(c => c.id === selectedClassId);
 
     const handleSave = async () => {
         setSaving(true);
@@ -62,6 +90,16 @@ export default function ExpertJudgingPanel({
         setSaving(false);
     };
 
+    // Group classes by division for the selector
+    const divisionGroups: Map<string, ClassInfo[]> = new Map();
+    if (classes && classes.length > 0) {
+        for (const c of classes) {
+            const group = divisionGroups.get(c.divisionName) || [];
+            group.push(c);
+            divisionGroups.set(c.divisionName, group);
+        }
+    }
+
     return (
         <div className="card animate-fade-in-up" style={{
             marginBottom: "var(--space-lg)",
@@ -72,45 +110,86 @@ export default function ExpertJudgingPanel({
                 🏅 <span className="text-gradient">Expert Judging Panel</span>
             </h3>
             <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-md)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
-                As the show host, assign placings to each entry below. Only placed entries will appear in results.
+                Assign placings to each entry below. Only placed entries will appear in results and auto-generate show records.
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
-                {entries.map(entry => (
-                    <div key={entry.id} style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "var(--space-md)",
-                        padding: "var(--space-sm) var(--space-md)",
-                        background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.5)",
-                        borderRadius: "var(--radius-sm)",
-                    }}>
-                        {entry.thumbnailUrl && (
-                            <div style={{ width: 40, height: 40, borderRadius: "var(--radius-sm)", overflow: "hidden", flexShrink: 0 }}>
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                            </div>
-                        )}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 600, fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
-                                🐴 {entry.horseName}
-                            </div>
-                            <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
-                                by @{entry.ownerAlias}
-                            </div>
+            {/* Class Filter */}
+            {classes && classes.length > 0 && (
+                <div style={{ marginBottom: "var(--space-md)" }}>
+                    <select
+                        className="form-input"
+                        value={selectedClassId}
+                        onChange={e => setSelectedClassId(e.target.value)}
+                        style={{ maxWidth: 400 }}
+                    >
+                        <option value="all">All Entries ({entries.length})</option>
+                        {Array.from(divisionGroups.entries()).map(([divName, items]) => (
+                            <optgroup key={divName} label={divName}>
+                                {items.map(c => {
+                                    const count = entries.filter(e => e.classId === c.id).length;
+                                    return (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name} ({count})
+                                        </option>
+                                    );
+                                })}
+                            </optgroup>
+                        ))}
+                    </select>
+                    {currentClass && (
+                        <div style={{
+                            marginTop: "var(--space-xs)",
+                            fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                            color: "var(--color-text-muted)",
+                        }}>
+                            Currently judging: <strong>{currentClass.divisionName}</strong> › <strong>{currentClass.name}</strong>
                         </div>
-                        <select
-                            className="form-input"
-                            value={placings[entry.id] || ""}
-                            onChange={e => setPlacings(prev => ({ ...prev, [entry.id]: e.target.value }))}
-                            style={{ width: 120, flexShrink: 0 }}
-                        >
-                            {PLACING_OPTIONS.map(opt => (
-                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                            ))}
-                        </select>
+                    )}
+                </div>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
+                {filteredEntries.length === 0 ? (
+                    <div style={{ color: "var(--color-text-muted)", padding: "var(--space-md)", textAlign: "center" }}>
+                        No entries {selectedClassId !== "all" ? "in this class" : "to judge"}.
                     </div>
-                ))}
+                ) : (
+                    filteredEntries.map(entry => (
+                        <div key={entry.id} style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "var(--space-md)",
+                            padding: "var(--space-sm) var(--space-md)",
+                            background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.5)",
+                            borderRadius: "var(--radius-sm)",
+                        }}>
+                            {entry.thumbnailUrl && (
+                                <div style={{ width: 40, height: 40, borderRadius: "var(--radius-sm)", overflow: "hidden", flexShrink: 0 }}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                </div>
+                            )}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontWeight: 600, fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                    🐴 {entry.horseName}
+                                </div>
+                                <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                    by @{entry.ownerAlias}
+                                </div>
+                            </div>
+                            <select
+                                className="form-input"
+                                value={placings[entry.id] || ""}
+                                onChange={e => setPlacings(prev => ({ ...prev, [entry.id]: e.target.value }))}
+                                style={{ width: 140, flexShrink: 0 }}
+                            >
+                                {PLACING_OPTIONS.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                    ))
+                )}
             </div>
 
             {error && <div className="comment-error" style={{ marginTop: "var(--space-sm)" }}>{error}</div>}
@@ -123,7 +202,7 @@ export default function ExpertJudgingPanel({
                     borderRadius: "var(--radius-sm)",
                     fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
                 }}>
-                    ✅ Placings saved successfully!
+                    ✅ Placings saved! Show records auto-generated for placed entries.
                 </div>
             )}
 

@@ -212,7 +212,8 @@ export async function getShowEntries(showId: string): Promise<{
  */
 export async function enterShow(
     showId: string,
-    horseId: string
+    horseId: string,
+    classId?: string
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -257,12 +258,15 @@ export async function enterShow(
         return { success: false, error: "Maximum 3 entries per show." };
     }
 
-    const { error } = await supabase.from("event_entries").insert({
+    const insertData: Record<string, unknown> = {
         event_id: showId,
         horse_id: horseId,
         user_id: user.id,
         entry_type: "entered",
-    });
+    };
+    if (classId) insertData.class_id = classId;
+
+    const { error } = await supabase.from("event_entries").insert(insertData);
 
     if (error) {
         if (error.code === "23505") return { success: false, error: "This horse is already entered." };
@@ -497,7 +501,8 @@ export async function batchRecordResults(records: {
 
 /**
  * Save expert-judged placings for event entries.
- * Only the event creator (show host) can assign placings.
+ * Only the event creator (show host) or assigned judges can assign placings.
+ * After saving, auto-generates show_records for placed entries.
  */
 export async function saveExpertPlacings(
     eventId: string,
@@ -507,17 +512,30 @@ export async function saveExpertPlacings(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "Not logged in." };
 
-    // Verify user is the event creator
+    // Verify user is the event creator or assigned judge
     const { data: event } = await supabase
         .from("events")
-        .select("created_by, judging_method")
+        .select("created_by, judging_method, name, starts_at")
         .eq("id", eventId)
         .single();
 
     if (!event) return { success: false, error: "Event not found." };
-    const ev = event as { created_by: string; judging_method: string | null };
-    if (ev.created_by !== user.id) {
-        return { success: false, error: "Only the event host can assign placings." };
+    const ev = event as { created_by: string; judging_method: string | null; name: string; starts_at: string };
+
+    // Check if host or assigned judge
+    let authorized = ev.created_by === user.id;
+    if (!authorized) {
+        const { data: judgeRecord } = await supabase
+            .from("event_judges")
+            .select("id")
+            .eq("event_id", eventId)
+            .eq("user_id", user.id)
+            .maybeSingle();
+        authorized = !!judgeRecord;
+    }
+
+    if (!authorized) {
+        return { success: false, error: "Only the event host or assigned judges can assign placings." };
     }
     if (ev.judging_method !== "expert_judge") {
         return { success: false, error: "This event uses community voting, not expert judging." };
@@ -532,6 +550,68 @@ export async function saveExpertPlacings(
             .eq("event_id", eventId);
 
         if (error) return { success: false, error: error.message };
+    }
+
+    // Auto-generate show_records for placed entries
+    const PLACING_TO_RIBBON: Record<string, string> = {
+        "1st": "Blue",
+        "2nd": "Red",
+        "3rd": "Yellow",
+        "4th": "White",
+        "5th": "Pink",
+        "6th": "Green",
+        "HM": "Green",
+        "Champion": "Grand Champion",
+        "Reserve Champion": "Reserve Grand Champion",
+        "Grand Champion": "Grand Champion",
+        "Reserve Grand Champion": "Reserve Grand Champion",
+        "Top 3": "Blue",
+        "Top 5": "Blue",
+        "Top 10": "Blue",
+    };
+
+    try {
+        // Fetch placed entries with horse + user details
+        const entryIds = placings.map(p => p.entryId);
+        const { data: entries } = await supabase
+            .from("event_entries")
+            .select("id, horse_id, user_id, placing")
+            .in("id", entryIds)
+            .eq("event_id", eventId);
+
+        if (entries && entries.length > 0) {
+            const showDate = ev.starts_at ? ev.starts_at.split("T")[0] : null;
+
+            for (const entry of entries as { id: string; horse_id: string; user_id: string; placing: string | null }[]) {
+                if (!entry.placing) continue;
+
+                const ribbonColor = PLACING_TO_RIBBON[entry.placing] || null;
+
+                // Check if a show_record already exists for this combination
+                const { data: existing } = await supabase
+                    .from("show_records")
+                    .select("id")
+                    .eq("horse_id", entry.horse_id)
+                    .eq("show_name", ev.name)
+                    .eq("placing", entry.placing)
+                    .maybeSingle();
+
+                if (!existing) {
+                    await supabase.from("show_records").insert({
+                        horse_id: entry.horse_id,
+                        user_id: entry.user_id,
+                        show_name: ev.name,
+                        show_date: showDate,
+                        placing: entry.placing,
+                        ribbon_color: ribbonColor,
+                        is_nan: false,
+                        notes: "Auto-generated from expert judging",
+                    });
+                }
+            }
+        }
+    } catch {
+        // Non-blocking — placing updates already saved
     }
 
     revalidatePath(`/community/events/${eventId}`);
