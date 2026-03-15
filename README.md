@@ -31,21 +31,39 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Testing
 
-### Unit Tests (Vitest)
+### Unit & Integration Tests (Vitest) — 132+ tests
 ```bash
-npm run test:unit          # Single run
+npm run test:unit          # Single run (~600ms)
 npm run test:unit:watch    # Watch mode for development
-npm run test:unit:coverage # Run with coverage report
+npm run test:unit:coverage # Coverage report (HTML at coverage/)
 ```
 
-### E2E Tests (Playwright)
+Coverage includes:
+- **4 utility files** at 100% coverage (mentions, validation, storage, rateLimit)
+- **5 server action files** with integration tests (transactions, horse, provenance, collections, hoofprint)
+- **5 API routes** tested (auth/me, export, cron/refresh-market, reference-dictionary, identify-mold)
+
+### E2E Tests (Playwright) — 20+ specs
 ```bash
-npm run test:e2e           # Headless Chromium
+npm run test:e2e           # Headless Chromium (requires dev server)
 ```
+
+Includes smoke tests, auth flow, inventory CRUD, show entry, safe-trade scaffolds, hoofprint transfer scaffolds, performance benchmark, and axe-core accessibility audits.
+
+### Test Accounts (E2E)
+Two test accounts configured in `.env.local`:
+- `TEST_USER_A_EMAIL` / `TEST_USER_A_PASSWORD` — seller/owner role
+- `TEST_USER_B_EMAIL` / `TEST_USER_B_PASSWORD` — buyer/recipient role
+
+### Pre-Commit
+Husky runs unit tests on every commit. E2E tests should be run manually before push.
+
+### Coverage
+Coverage thresholds enforced at 37% (statements, lines, functions, branches) on `src/lib/**`.
 
 ### Environment
-Tests use a mocked Supabase client (no live DB connection required).
-Set `NEXT_PUBLIC_SUPABASE_URL=https://test.supabase.co` in `.env.test` if needed.
+Unit tests use a mocked Supabase client (no live DB connection required).
+E2E tests run against the live dev server.
 
 ## Deploy on Vercel
 
