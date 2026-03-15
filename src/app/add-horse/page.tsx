@@ -735,11 +735,7 @@ export default function AddHorsePage() {
                 setCustomName(searchTerm);
                 setNameAutoFilled(true);
               }
-              // Auto-submit as suggestion (fire-and-forget)
-              submitSuggestion({
-                suggestionType: "mold",
-                name: searchTerm,
-              }).catch(() => { });
+              // Suggestion was already submitted via the modal — no need to fire-and-forget here
               // Skip to Step 3 (Identity)
               setCurrentStep(2);
               window.scrollTo({ top: 0, behavior: "smooth" });

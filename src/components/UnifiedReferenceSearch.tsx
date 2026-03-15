@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { searchCatalogAction, getReleasesForMold, getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import MarketValueBadge from "@/components/MarketValueBadge";
+import SuggestReferenceModal from "@/components/SuggestReferenceModal";
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -38,6 +39,7 @@ export default function UnifiedReferenceSearch({
   aiNotice,
 }: UnifiedReferenceSearchProps) {
   const [query, setQuery] = useState("");
+  const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [results, setResults] = useState<CatalogItem[]>([]);
   const [releases, setReleases] = useState<CatalogItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
@@ -275,11 +277,9 @@ export default function UnifiedReferenceSearch({
                       <p style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
                         Check the <a href="/market" style={{ color: "var(--color-accent-primary)" }}>📈 Price Guide</a> for market data, or use the button below.
                       </p>
-                      {onCustomEntry && (
-                        <button className="btn btn-ghost" onClick={() => { onCustomEntry(query.trim()); setShowDropdown(false); }}>
-                          ✍️ Can&apos;t find it? Suggest adding it
-                        </button>
-                      )}
+                      <button className="btn btn-ghost" onClick={() => { setShowSuggestModal(true); setShowDropdown(false); }}>
+                        ✍️ Can&apos;t find it? Suggest adding it
+                      </button>
                     </div>
                   )}
                 </>
@@ -325,6 +325,18 @@ export default function UnifiedReferenceSearch({
           )}
         </>
       )}
+      {/* Suggest Reference Modal */}
+      <SuggestReferenceModal
+        isOpen={showSuggestModal}
+        searchTerm={query.trim()}
+        onClose={() => setShowSuggestModal(false)}
+        onSubmitted={(searchTerm) => {
+          setShowSuggestModal(false);
+          if (onCustomEntry) {
+            onCustomEntry(searchTerm);
+          }
+        }}
+      />
     </div>
   );
 }
