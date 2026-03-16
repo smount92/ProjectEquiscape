@@ -292,7 +292,7 @@ export async function createHorseRecord(data: {
         is_public: data.isPublic,
         visibility: data.isPublic ? "public" : "private",
         trade_status: data.tradeStatus || null,
-        life_stage: data.lifeStage || "Living",
+        life_stage: data.lifeStage || "completed",
     };
 
     // Set unified catalog_id
