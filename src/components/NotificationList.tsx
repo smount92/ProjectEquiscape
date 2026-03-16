@@ -29,6 +29,7 @@ function getNotifIcon(type: string): string {
         case "feature": return "🌟";
         case "wishlist_match": return "❤️‍🔥";
         case "show_vote": return "📸";
+        case "achievement": return "🏆";
         default: return "🔔";
     }
 }

@@ -124,6 +124,10 @@ export async function createPost(data: {
 
             // Notify @mentions
             await parseAndNotifyMentions(content, userId, alias, `/feed/${postIdFinal}`);
+
+            // Evaluate post achievements
+            const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
+            await evaluateUserAchievements(userId, "post_created");
         } catch { /* non-blocking */ }
     });
 

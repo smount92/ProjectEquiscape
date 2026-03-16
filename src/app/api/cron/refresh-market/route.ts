@@ -41,10 +41,18 @@ export async function GET(request: NextRequest) {
             gcResult = data;
         } catch { /* non-blocking */ }
 
+        // Evaluate complex relational badges (too heavy for after() hooks)
+        let badgesAwarded = 0;
+        try {
+            const { evaluateComplexBadges } = await import("@/lib/utils/achievements-cron");
+            badgesAwarded = await evaluateComplexBadges(admin);
+        } catch { /* non-blocking */ }
+
         return NextResponse.json({
             success: true,
             refreshedAt: new Date().toISOString(),
             gc: gcResult,
+            badgesAwarded,
         });
     } catch (error) {
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });

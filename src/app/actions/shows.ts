@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { after } from "next/server";
 
 // ============================================================
 // UNIFIED COMPETITION — Server Actions
@@ -339,6 +340,15 @@ export async function enterShow(
         if (error.code === "23505") return { success: false, error: "This horse is already entered." };
         return { success: false, error: error.message };
     }
+
+    // Deferred: evaluate show achievements
+    const showUserId = user.id;
+    after(async () => {
+        try {
+            const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
+            await evaluateUserAchievements(showUserId, "show_entered");
+        } catch { /* non-blocking */ }
+    });
 
     return { success: true };
 }

@@ -8,6 +8,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { createNotification } from "@/app/actions/notifications";
 import { createActivityEvent } from "@/app/actions/activity";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 // ============================================================
 // UNIVERSAL TRUST ENGINE — Server Actions
@@ -71,6 +72,15 @@ export async function completeTransaction(
         // Non-blocking — cron will catch it within 6 hours
         logger.warn("completeTransaction", "Market price refresh failed (non-blocking)");
     }
+
+    // Deferred: evaluate commerce achievements
+    const completingUserId = user.id;
+    after(async () => {
+        try {
+            const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
+            await evaluateUserAchievements(completingUserId, "transaction_completed");
+        } catch { /* non-blocking */ }
+    });
 
     return { success: true };
 }

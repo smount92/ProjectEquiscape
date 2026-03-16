@@ -11293,3 +11293,182 @@ p {
     right: 16px;
   }
 }
+
+/* ============================================================
+   TROPHY CASE — Gamification Badge Display
+   ============================================================ */
+
+.trophy-case {
+  margin-top: var(--space-sm);
+}
+
+.trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-md);
+}
+
+.trophy-card {
+  position: relative;
+  text-align: center;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-glass);
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: default;
+}
+
+.trophy-card:hover {
+  transform: translateY(-2px);
+}
+
+.trophy-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.trophy-name {
+  font-size: calc(0.75rem * var(--font-scale));
+  font-weight: 600;
+  display: block;
+}
+
+.trophy-date {
+  font-size: calc(0.6rem * var(--font-scale));
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  display: block;
+}
+
+/* Tier glows */
+.trophy-tier-1 {
+  border-color: #cd7f32;
+}
+
+.trophy-tier-1:hover {
+  box-shadow: 0 0 12px rgba(205, 127, 50, 0.3);
+}
+
+.trophy-tier-2 {
+  border-color: #c0c0c0;
+}
+
+.trophy-tier-2:hover {
+  box-shadow: 0 0 12px rgba(192, 192, 192, 0.4);
+}
+
+.trophy-tier-3 {
+  border-color: #ffd700;
+}
+
+.trophy-tier-3:hover {
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+}
+
+.trophy-tier-4 {
+  border-color: #b9f2ff;
+}
+
+.trophy-tier-4:hover {
+  box-shadow: 0 0 20px rgba(185, 242, 255, 0.5);
+}
+
+.trophy-tier-5 {
+  border-color: var(--color-accent-primary);
+  background: rgba(212, 165, 116, 0.08);
+}
+
+.trophy-tier-5:hover {
+  box-shadow: 0 0 24px rgba(212, 165, 116, 0.5);
+}
+
+/* Category headers */
+.trophy-category-header {
+  font-size: calc(0.85rem * var(--font-scale));
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin: var(--space-lg) 0 var(--space-sm);
+}
+
+.trophy-category-header:first-child {
+  margin-top: 0;
+}
+
+/* Tooltip */
+.trophy-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  min-width: 200px;
+  max-width: 260px;
+  box-shadow: var(--shadow-lg);
+  z-index: 50;
+  text-align: left;
+  pointer-events: none;
+  animation: fadeInUp 0.15s ease;
+}
+
+.trophy-tooltip strong {
+  display: block;
+  font-size: calc(0.8rem * var(--font-scale));
+  margin-bottom: 4px;
+}
+
+.trophy-tooltip p {
+  font-size: calc(0.7rem * var(--font-scale));
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin: 0 0 4px;
+}
+
+.trophy-tooltip span {
+  font-size: calc(0.65rem * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+/* Empty state */
+.trophy-empty {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--color-text-muted);
+}
+
+.trophy-empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+
+.trophy-empty p {
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .trophy-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: var(--space-sm);
+  }
+
+  .trophy-card {
+    padding: var(--space-sm);
+  }
+
+  .trophy-icon {
+    font-size: 1.5rem;
+  }
+
+  .trophy-tooltip {
+    display: none;
+  }
+}

@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { after } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
 
@@ -338,6 +339,16 @@ export async function createHorseRecord(data: {
 
     revalidatePath("/dashboard");
     revalidateTag("public_horses", "max");
+
+    // Deferred: evaluate achievements
+    const finalUserId = user.id;
+    after(async () => {
+        try {
+            const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
+            await evaluateUserAchievements(finalUserId, "horse_added");
+        } catch { /* non-blocking */ }
+    });
+
     return { success: true, horseId: horse.id };
 }
 
@@ -377,6 +388,16 @@ export async function finalizeHorseImages(
 
     revalidatePath("/dashboard");
     revalidatePath(`/stable/${horseId}`);
+
+    // Deferred: evaluate photo achievements
+    const finalUserId = user.id;
+    after(async () => {
+        try {
+            const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
+            await evaluateUserAchievements(finalUserId, "photo_uploaded");
+        } catch { /* non-blocking */ }
+    });
+
     return { success: true };
 }
 

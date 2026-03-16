@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/app/actions/notifications";
 import { createActivityEvent } from "@/app/actions/activity";
+import { after } from "next/server";
 
 /**
  * Toggle follow on a user. Returns new state + counts.
@@ -64,6 +65,15 @@ export async function toggleFollow(
             eventType: "follow",
             targetId: targetUserId,
             metadata: { targetAlias: alias },
+        });
+
+        // Deferred: evaluate follower achievements for the target user
+        const targetId = targetUserId;
+        after(async () => {
+            try {
+                const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
+                await evaluateUserAchievements(targetId, "follower_gained");
+            } catch { /* non-blocking */ }
         });
     }
 

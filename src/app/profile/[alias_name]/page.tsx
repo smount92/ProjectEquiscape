@@ -13,6 +13,7 @@ import BlockButton from "@/components/BlockButton";
 import MessageUserButton from "@/components/MessageUserButton";
 import RatingForm from "@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
+import TrophyCase from "@/components/TrophyCase";
 
 export const dynamic = "force-dynamic";
 
@@ -171,6 +172,23 @@ export default async function ProfilePage({
     .eq("user_id", profileUser.id)
     .eq("is_public", true)
     .order("name");
+
+  // Fetch user badges for Trophy Case
+  const { data: rawBadges } = await supabase
+    .from("user_badges")
+    .select("badge_id, earned_at, badges(id, name, description, icon, category, tier)")
+    .eq("user_id", profileUser.id)
+    .order("earned_at", { ascending: false });
+
+  const userBadges = (rawBadges ?? []).map((b: Record<string, unknown>) => ({
+    id: (b.badges as { id: string }).id,
+    name: (b.badges as { name: string }).name,
+    description: (b.badges as { description: string }).description,
+    icon: (b.badges as { icon: string }).icon,
+    category: (b.badges as { category: string }).category,
+    tier: (b.badges as { tier: number }).tier,
+    earnedAt: b.earned_at as string,
+  }));
 
   // ================================================================
   // PROFILE QUERY: Only public horses for this user
@@ -379,6 +397,16 @@ export default async function ProfilePage({
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Trophy Case */}
+      {userBadges.length > 0 && (
+        <div className="animate-fade-in-up" id="trophies" style={{ marginBottom: "var(--space-lg)" }}>
+          <h3 style={{ fontSize: "calc(0.9rem * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
+            🏆 Trophy Case
+          </h3>
+          <TrophyCase badges={userBadges} />
         </div>
       )}
 
