@@ -347,7 +347,7 @@ export default async function PublicPassportPage({
       {/* Two-column layout: Gallery | Info */}
       <div className="passport-layout animate-fade-in-up">
         {/* Left: Gallery */}
-        <div>
+        <div className="passport-gallery-col">
           <PassportGallery images={galleryImages} />
         </div>
 

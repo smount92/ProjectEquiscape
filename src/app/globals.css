@@ -2025,14 +2025,25 @@ p {
 .passport-layout {
   display: grid;
   grid-template-columns: 1fr 420px;
-  gap: var(--space-xl);
-  align-items: start;
+  gap: 0;
+  align-items: stretch;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
 }
 
 @media (max-width: 960px) {
   .passport-layout {
     grid-template-columns: 1fr;
+    border-radius: 0;
+    box-shadow: none;
   }
+}
+
+/* Gallery column inside the split layout */
+.passport-gallery-col {
+  padding: var(--space-lg);
+  background: var(--color-bg-primary);
 }
 
 /* Passport Gallery */
@@ -2164,13 +2175,15 @@ p {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  position: sticky;
-  top: calc(var(--header-height, 60px) + var(--space-md));
+  padding: var(--space-xl) var(--space-lg);
+  background: #3B2A1A;
+  min-height: 100%;
 }
 
 @media (max-width: 960px) {
   .passport-sidebar {
-    position: static;
+    border-radius: 0;
+    padding: var(--space-lg);
   }
 }
 
@@ -2180,21 +2193,51 @@ p {
   line-height: 1.15;
   font-weight: 800;
   letter-spacing: -0.02em;
+  color: #FBF7ED;
 }
 
 .passport-subtitle {
   font-size: calc(var(--font-size-md) * var(--font-scale));
-  color: var(--color-text-secondary);
+  color: rgba(251, 247, 237, 0.65);
   margin-bottom: var(--space-xs);
 }
 
+/* ── Owner pill on dark bg ── */
+.passport-sidebar .passport-owner-pill {
+  background: rgba(251, 247, 237, 0.1);
+  border-color: rgba(251, 247, 237, 0.15);
+  color: #FBF7ED;
+}
+
+.passport-sidebar .passport-owner-pill:hover {
+  background: rgba(251, 247, 237, 0.18);
+  border-color: rgba(251, 247, 237, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.passport-sidebar .passport-owner-avatar {
+  background: rgba(251, 247, 237, 0.12);
+  border-color: rgba(251, 247, 237, 0.2);
+  color: rgba(251, 247, 237, 0.6);
+}
+
+/* ── See more link on dark bg ── */
+.passport-sidebar .passport-see-more-link {
+  color: rgba(251, 247, 237, 0.5);
+}
+
+.passport-sidebar .passport-see-more-link:hover {
+  color: #f0d06c;
+}
+
 .passport-detail-card {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
+  background: #FBF7ED;
+  border: none;
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   margin-top: var(--space-xs);
+  color: var(--color-text-primary);
 }
 
 .passport-detail-card h3 {
@@ -2248,14 +2291,14 @@ p {
   font-weight: 600;
 }
 
-/* ── Passport Action Bar — split icon row + full-width CTA ── */
+/* ── Passport Action Bar — on dark sidebar ── */
 .passport-action-bar {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
   padding: var(--space-md);
-  background: var(--color-surface-glass);
-  border: 1px solid var(--color-border);
+  background: rgba(251, 247, 237, 0.08);
+  border: 1px solid rgba(251, 247, 237, 0.1);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2275,31 +2318,45 @@ p {
   font-size: calc(var(--font-size-sm) * var(--font-scale));
   padding: var(--space-xs) var(--space-md);
   white-space: nowrap;
+  color: #FBF7ED;
+  border-color: rgba(251, 247, 237, 0.15);
+}
+
+.passport-action-icons .btn:hover {
+  background: rgba(251, 247, 237, 0.12);
+}
+
+.passport-action-icons .btn-primary {
+  color: white;
+  border-color: transparent;
 }
 
 .passport-action-full {
   width: 100%;
   justify-content: center;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgba(251, 247, 237, 0.1);
   padding-top: var(--space-sm) !important;
   margin-top: var(--space-xs);
   border-radius: 0;
+  color: rgba(251, 247, 237, 0.7);
 }
 
-/* ── Back link ── */
+.passport-action-full:hover {
+  color: #FBF7ED;
+}
+
+/* ── Back link on dark bg ── */
 .passport-back-link {
   text-align: center;
   font-size: calc(var(--font-size-sm) * var(--font-scale));
-  color: var(--color-text-muted);
+  color: rgba(251, 247, 237, 0.4);
   text-decoration: none;
   padding: var(--space-xs) 0;
-  opacity: 0.6;
-  transition: opacity 0.15s, color 0.15s;
+  transition: color 0.15s;
 }
 
 .passport-back-link:hover {
-  opacity: 1;
-  color: var(--color-accent-primary);
+  color: #f0d06c;
 }
 
 @media (max-width: 480px) {
