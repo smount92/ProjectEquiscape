@@ -374,8 +374,8 @@ export default async function PublicPassportPage({
             </div>
           )}
 
-          {/* Consolidated Header Card */}
-          <div className="passport-header-card">
+          {/* Free-floating Title — no card wrapper */}
+          <div className="passport-header-block">
             <h1 className="passport-title">{horse.custom_name}</h1>
             {refInfo ? (
               <p className="passport-subtitle">
@@ -389,47 +389,34 @@ export default async function PublicPassportPage({
                 Unlisted / Custom Entry
               </p>
             )}
+          </div>
 
-            {/* Owner badge — inside header card */}
-            <Link
-              href={`/profile/${encodeURIComponent(ownerAlias)}`}
-              className="community-owner-badge"
-              style={{ textDecoration: "none", marginTop: "var(--space-md)", marginBottom: 0 }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
+          {/* Owner Pill */}
+          <Link
+            href={`/profile/${encodeURIComponent(ownerAlias)}`}
+            className="passport-owner-pill"
+          >
+            <span className="passport-owner-avatar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-              <span>
-                Owned by <strong>@{ownerAlias}</strong>
-              </span>
-              {isOwnHorse && (
-                <span className="community-own-badge">You</span>
-              )}
-            </Link>
-
-            {/* See More from Seller — inside header card */}
-            {!isOwnHorse && (
-              <Link
-                href={`/profile/${encodeURIComponent(ownerAlias)}`}
-                className="btn btn-ghost"
-                style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginTop: "var(--space-sm)", width: "100%", justifyContent: "center" }}
-                id="see-more-seller"
-              >
-                👤 See all models from @{ownerAlias} →
-              </Link>
+            </span>
+            <span>@{ownerAlias}</span>
+            {isOwnHorse && (
+              <span className="community-own-badge">You</span>
             )}
-          </div>
+          </Link>
+
+          {!isOwnHorse && (
+            <Link
+              href={`/profile/${encodeURIComponent(ownerAlias)}`}
+              className="passport-see-more-link"
+              id="see-more-seller"
+            >
+              See all models from @{ownerAlias} →
+            </Link>
+          )}
 
           {/* Model Details Card */}
           <div className="passport-detail-card">
@@ -645,46 +632,48 @@ export default async function PublicPassportPage({
           {/* Market Value Badge */}
           {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
-          {/* Action Bar — glassmorphism */}
+          {/* Action Bar — split layout: icon row + full-width CTA */}
           <div className="passport-action-bar">
-            <FavoriteButton
-              horseId={horseId}
-              initialIsFavorited={!!userFav}
-              initialCount={favoriteCount ?? 0}
-            />
-            <ShareButton
-              title={`${horse.custom_name} — Model Horse Hub`}
-              text={`Check out ${horse.custom_name} on Model Horse Hub!`}
-              label="Share"
-              variant="full"
-            />
-            {!isOwnHorse && (
-              <ReportButton targetType="horse" targetId={horseId} />
-            )}
-            {!isOwnHorse && horse.trade_status !== "Stolen/Missing" && (horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
-              <MessageSellerButton
-                sellerId={horse.owner_id}
+            <div className="passport-action-icons">
+              <FavoriteButton
                 horseId={horseId}
-                horseName={horse.custom_name}
-                tradeStatus={horse.trade_status}
-                askingPrice={horse.listing_price}
+                initialIsFavorited={!!userFav}
+                initialCount={favoriteCount ?? 0}
               />
-            )}
-            {isOwnHorse && (
-              <Link
-                href={`/stable/${horse.id}`}
-                className="btn btn-primary"
-              >
-                🔒 My Passport
-              </Link>
-            )}
-            <Link href={`/community/${horseId}/hoofprint`} className="btn btn-ghost">
-              🐾 Hoofprint
+              <ShareButton
+                title={`${horse.custom_name} — Model Horse Hub`}
+                text={`Check out ${horse.custom_name} on Model Horse Hub!`}
+                label="Share"
+                variant="full"
+              />
+              {!isOwnHorse && (
+                <ReportButton targetType="horse" targetId={horseId} />
+              )}
+              {!isOwnHorse && horse.trade_status !== "Stolen/Missing" && (horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
+                <MessageSellerButton
+                  sellerId={horse.owner_id}
+                  horseId={horseId}
+                  horseName={horse.custom_name}
+                  tradeStatus={horse.trade_status}
+                  askingPrice={horse.listing_price}
+                />
+              )}
+              {isOwnHorse && (
+                <Link
+                  href={`/stable/${horse.id}`}
+                  className="btn btn-primary"
+                >
+                  🔒 My Passport
+                </Link>
+              )}
+            </div>
+            <Link href={`/community/${horseId}/hoofprint`} className="btn btn-ghost passport-action-full">
+              🐾 View Hoofprint
             </Link>
           </div>
 
-          {/* Back link — subtle below action bar */}
-          <Link href="/community" className="btn btn-ghost" style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", alignSelf: "center", opacity: 0.7 }}>
+          {/* Back link */}
+          <Link href="/community" className="passport-back-link">
             ← Back to Show Ring
           </Link>
         </div>
