@@ -39,6 +39,7 @@ interface ShowEntryDisplay {
     placing: string | null;
     className: string | null;
     divisionName: string | null;
+    caption: string | null;
 }
 
 /**
@@ -122,7 +123,7 @@ export async function getShowEntries(showId: string): Promise<{
     // Fetch entries with user alias via PostgREST join
     const { data: rawEntries } = await supabase
         .from("event_entries")
-        .select("id, horse_id, user_id, votes_count, created_at, placing, class_id, users!user_id(alias_name)")
+        .select("id, horse_id, user_id, votes_count, created_at, placing, class_id, entry_image_path, caption, users!user_id(alias_name)")
         .eq("event_id", showId)
         .eq("entry_type", "entered")
         .order("votes_count", { ascending: false });
@@ -130,6 +131,7 @@ export async function getShowEntries(showId: string): Promise<{
     const entryList = (rawEntries as unknown as {
         id: string; horse_id: string; user_id: string; votes_count: number;
         created_at: string; placing: string | null; class_id: string | null;
+        entry_image_path: string | null; caption: string | null;
         users: { alias_name: string } | null;
     }[]) ?? [];
 
@@ -197,22 +199,34 @@ export async function getShowEntries(showId: string): Promise<{
         });
     }
 
-    // Build entries list
-    let finalEntries = entryList.map(e => ({
-        id: e.id,
-        horseName: horseMap.get(e.horse_id)?.name || "Unknown",
-        horseId: e.horse_id,
-        ownerAlias: e.users?.alias_name || "Unknown",
-        ownerId: e.user_id,
-        thumbnailUrl: thumbUrlMap.has(e.horse_id) ? (signedUrls.get(thumbUrlMap.get(e.horse_id)!) ?? null) : null,
-        finishType: horseMap.get(e.horse_id)?.finish || "OF",
-        votes: e.votes_count,
-        hasVoted: votedSet.has(e.id),
-        createdAt: e.created_at,
-        placing: e.placing,
-        className: e.class_id ? (classMap.get(e.class_id)?.className || null) : null,
-        divisionName: e.class_id ? (classMap.get(e.class_id)?.divisionName || null) : null,
-    }));
+    let finalEntries = entryList.map(e => {
+        // Entry image takes priority: custom entry photo > horse thumbnail
+        let displayThumb: string | null = null;
+        if (e.entry_image_path) {
+            // entry_image_path is a storage path — resolve to public URL
+            const entryUrl = `${e.entry_image_path}`;
+            displayThumb = getPublicImageUrls([entryUrl]).get(entryUrl) ?? null;
+        } else if (thumbUrlMap.has(e.horse_id)) {
+            displayThumb = signedUrls.get(thumbUrlMap.get(e.horse_id)!) ?? null;
+        }
+
+        return {
+            id: e.id,
+            horseName: horseMap.get(e.horse_id)?.name || "Unknown",
+            horseId: e.horse_id,
+            ownerAlias: e.users?.alias_name || "Unknown",
+            ownerId: e.user_id,
+            thumbnailUrl: displayThumb,
+            finishType: horseMap.get(e.horse_id)?.finish || "OF",
+            votes: e.votes_count,
+            hasVoted: votedSet.has(e.id),
+            createdAt: e.created_at,
+            placing: e.placing,
+            className: e.class_id ? (classMap.get(e.class_id)?.className || null) : null,
+            divisionName: e.class_id ? (classMap.get(e.class_id)?.divisionName || null) : null,
+            caption: e.caption || null,
+        };
+    });
 
     // For expert-judged closed shows, sort by placing (1st, 2nd, 3rd...) instead of votes
     if (isExpertJudged && s.show_status === "closed") {
@@ -236,7 +250,9 @@ export async function getShowEntries(showId: string): Promise<{
 export async function enterShow(
     showId: string,
     horseId: string,
-    classId?: string
+    classId?: string,
+    entryImagePath?: string,
+    caption?: string
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -314,6 +330,8 @@ export async function enterShow(
         entry_type: "entered",
     };
     if (classId) insertData.class_id = classId;
+    if (entryImagePath) insertData.entry_image_path = entryImagePath;
+    if (caption?.trim()) insertData.caption = caption.trim().slice(0, 280);
 
     const { error } = await supabase.from("event_entries").insert(insertData);
 

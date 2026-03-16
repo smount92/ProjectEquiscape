@@ -315,6 +315,17 @@ export default async function ShowDetailPage({
                                         </span>
                                     )}
                                 </span>
+                                {entry.caption && (
+                                    <p style={{
+                                        fontSize: "calc(0.75rem * var(--font-scale))",
+                                        color: "var(--color-text-secondary)",
+                                        margin: "var(--space-xs) 0 0",
+                                        fontStyle: "italic",
+                                        lineHeight: 1.4,
+                                    }}>
+                                        &ldquo;{entry.caption}&rdquo;
+                                    </p>
+                                )}
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
                                 {isExpertJudged ? (
