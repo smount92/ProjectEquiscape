@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { getShowEntries } from "@/app/actions/shows";
 import { getEventJudges } from "@/app/actions/events";
+import { getEventDivisions } from "@/app/actions/competition";
 import { getPosts } from "@/app/actions/posts";
 import Link from "next/link";
 import VoteButton from "@/components/VoteButton";
@@ -65,6 +66,23 @@ export default async function ShowDetailPage({
     // Check if user is assigned judge
     const eventJudges = isExpertJudged ? await getEventJudges(showId) : [];
     const isJudge = eventJudges.some(j => j.userId === user.id);
+
+    // Fetch divisions/classes for the entry form
+    const divisions = await getEventDivisions(showId);
+    const classOptions = divisions.flatMap(d =>
+        d.classes.map(c => ({ id: c.id, name: c.name, divisionName: d.name }))
+    );
+
+    // Sort entries by division → class → entry order
+    const sortedEntries = [...entries].sort((a, b) => {
+        const divA = a.divisionName || "zzz";
+        const divB = b.divisionName || "zzz";
+        if (divA !== divB) return divA.localeCompare(divB);
+        const clsA = a.className || "zzz";
+        const clsB = b.className || "zzz";
+        if (clsA !== clsB) return clsA.localeCompare(clsB);
+        return 0;
+    });
 
     return (
         <div className="page-container">
@@ -137,7 +155,7 @@ export default async function ShowDetailPage({
                     <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                         Enter Your Horse
                     </h2>
-                    <ShowEntryForm showId={showId} userHorses={horseOptions} />
+                    <ShowEntryForm showId={showId} userHorses={horseOptions} classes={classOptions.length > 0 ? classOptions : undefined} />
                 </div>
             )}
 
@@ -264,7 +282,7 @@ export default async function ShowDetailPage({
                 </div>
             ) : (
                 <div className="show-entries-grid animate-fade-in-up">
-                    {entries.map((entry, index) => (
+                    {sortedEntries.map((entry, index) => (
                         <div key={entry.id} className="show-entry-card">
                             <div className="show-entry-rank">
                                 {isExpertJudged && show.status === "closed" && entry.placing

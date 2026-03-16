@@ -50,7 +50,15 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         isShowEvent ? getShowEntries(id) : Promise.resolve({ show: null, entries: [] }),
     ]);
 
-    const showEntries = showData.entries;
+    const showEntries = [...showData.entries].sort((a, b) => {
+        const divA = a.divisionName || "zzz";
+        const divB = b.divisionName || "zzz";
+        if (divA !== divB) return divA.localeCompare(divB);
+        const clsA = a.className || "zzz";
+        const clsB = b.className || "zzz";
+        if (clsA !== clsB) return clsA.localeCompare(clsB);
+        return 0;
+    });
     const showStatus = showData.show?.status || "open";
     const isShowOpen = showStatus === "open";
 

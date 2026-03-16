@@ -146,7 +146,7 @@ export async function getEvents(filters?: {
         query = query.ilike("region", `%${filters.region}%`);
     }
     if (filters?.upcoming !== false) {
-        query = query.gte("starts_at", new Date().toISOString());
+        query = query.or(`ends_at.gte.${new Date().toISOString()},and(ends_at.is.null,starts_at.gte.${new Date().toISOString()})`);
     }
     if (filters?.groupId) {
         query = query.eq("group_id", filters.groupId);
