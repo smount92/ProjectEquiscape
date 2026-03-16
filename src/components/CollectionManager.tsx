@@ -68,7 +68,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
                 </div>
                 <div className="form-group">
                     <label className="form-label">Description</label>
-                    <textarea className="form-input" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} style={{ resize: "vertical" }} />
+                    <textarea className="form-textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} style={{ resize: "vertical" }} />
                 </div>
                 {error && <p className="form-error">{error}</p>}
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: "var(--space-lg)" }}>

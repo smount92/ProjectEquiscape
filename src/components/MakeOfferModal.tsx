@@ -100,7 +100,7 @@ export default function MakeOfferModal({
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Tell the seller about your interest…"
-                            className="form-input"
+                            className="form-textarea"
                             rows={3}
                             maxLength={500}
                         />

@@ -62,7 +62,7 @@ export default function CreateGroupPage() {
 
                     <div className="form-group">
                         <label className="form-label">Description</label>
-                        <textarea className="form-input" rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="What is this group about?" style={{ resize: "vertical" }} />
+                        <textarea className="form-textarea" rows={3} value={description} onChange={e => setDescription(e.target.value)} placeholder="What is this group about?" style={{ resize: "vertical" }} />
                     </div>
 
                     <div className="form-row-2col">

@@ -253,7 +253,7 @@ export default function ShowRecordForm({
                 <div className="form-group">
                     <label className="form-label">Notes</label>
                     <textarea
-                        className="form-input"
+                        className="form-textarea"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Additional notes (optional)"

@@ -807,7 +807,7 @@ export default function EditHorsePage() {
           {/* Public Notes */}
           <div className="form-group">
             <label className="form-label">Public Notes</label>
-            <textarea className="form-input" value={publicNotes}
+            <textarea className="form-textarea" value={publicNotes}
               onChange={(e) => setPublicNotes(e.target.value)}
               placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
               maxLength={500} rows={2} id="edit-public-notes" />

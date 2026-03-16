@@ -169,7 +169,7 @@ export default function HelpIdDetailClient({
                             <h3 style={{ marginBottom: "var(--space-md)" }}>Your Suggestion</h3>
                             <div className="form-group">
                                 <textarea
-                                    className="form-input"
+                                    className="form-textarea"
                                     rows={3}
                                     value={suggestText}
                                     onChange={(e) => setSuggestText(e.target.value)}

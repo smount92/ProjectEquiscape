@@ -105,7 +105,7 @@ export default function CreateEventPage() {
 
                     <div className="form-group">
                         <label className="form-label">Description</label>
-                        <textarea className="form-input" rows={4} value={description} onChange={e => setDescription(e.target.value)} placeholder="What's this event about?" style={{ resize: "vertical" }} />
+                        <textarea className="form-textarea" rows={4} value={description} onChange={e => setDescription(e.target.value)} placeholder="What's this event about?" style={{ resize: "vertical" }} />
                     </div>
 
                     <div className="form-row-2col">

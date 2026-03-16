@@ -84,7 +84,7 @@ export default function ReportButton({
                 ))}
             </select>
             <textarea
-                className="form-input"
+                className="form-textarea"
                 placeholder="Additional details (optional)"
                 value={details}
                 onChange={e => setDetails(e.target.value)}

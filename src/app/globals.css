@@ -147,7 +147,8 @@
 }
 
 [data-simple-mode="true"] .form-input,
-[data-simple-mode="true"] .form-select {
+[data-simple-mode="true"] .form-select,
+[data-simple-mode="true"] .form-textarea {
   border: 2px solid #111111;
 }
 
@@ -675,7 +676,8 @@ p {
 }
 
 .form-input,
-.form-select {
+.form-select,
+.form-textarea {
   display: block;
   width: 100%;
   min-height: var(--btn-min-h);
@@ -691,12 +693,20 @@ p {
     background-color var(--transition-base);
 }
 
-.form-input::placeholder {
+.form-textarea {
+  min-height: 80px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
   color: var(--color-text-muted);
 }
 
 .form-input:focus,
-.form-select:focus {
+.form-select:focus,
+.form-textarea:focus {
   border-color: var(--color-border-focus);
   box-shadow: 0 0 0 3px var(--color-accent-primary-glow);
 }
