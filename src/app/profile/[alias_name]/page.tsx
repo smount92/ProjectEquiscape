@@ -152,6 +152,15 @@ export default async function ProfilePage({
   // Fetch follow stats
   const followStats = await getFollowStats(profileUser.id);
 
+  // Check if user has an art studio
+  const { data: studioProfile } = await supabase
+    .from("artist_profiles")
+    .select("studio_slug, studio_name")
+    .eq("user_id", profileUser.id)
+    .maybeSingle();
+  const studioSlug = (studioProfile as { studio_slug: string; studio_name: string } | null)?.studio_slug || null;
+  const studioName = (studioProfile as { studio_slug: string; studio_name: string } | null)?.studio_name || null;
+
   // Check block status (for other users)
   const blocked = isOwnProfile ? false : await checkIsBlocked(profileUser.id);
 
@@ -288,6 +297,15 @@ export default async function ProfilePage({
           )}
           {isOwnProfile && (
             <EditBioButton currentBio={profileUser.bio} />
+          )}
+          {studioSlug && (
+            <Link
+              href={`/studio/${studioSlug}`}
+              className="btn btn-ghost"
+              style={{ marginTop: "var(--space-xs)", display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              🎨 {isOwnProfile ? "My Studio" : `Visit ${studioName || "Studio"}`}
+            </Link>
           )}
           <div className="profile-hero-stats">
             <span className="profile-stat">
