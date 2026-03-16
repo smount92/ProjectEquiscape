@@ -14,6 +14,7 @@ import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages } from "
 import { getProfile } from "@/app/actions/settings";
 import { getHorseCollections, setHorseCollections } from "@/app/actions/collections";
 import ImageCropModal from "@/components/ImageCropModal";
+import { getPublicImageUrl } from "@/lib/utils/storage";
 
 // ---- Types ----
 
@@ -250,7 +251,7 @@ export default function EditHorsePage() {
             imageUrl: img.image_url,
             storagePath: urlParts.length > 1 ? urlParts[1] : null,
           };
-          previewMap[img.angle_profile] = img.image_url;
+          previewMap[img.angle_profile] = getPublicImageUrl(img.image_url);
         }
         setExistingImages(existingMap);
         setPreviews(previewMap);
@@ -262,7 +263,7 @@ export default function EditHorsePage() {
             const urlParts = img.image_url.split("/horse-images/");
             return {
               recordId: img.id,
-              imageUrl: img.image_url,
+              imageUrl: getPublicImageUrl(img.image_url),
               storagePath: urlParts.length > 1 ? urlParts[1] : null,
             };
           });
