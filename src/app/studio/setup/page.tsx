@@ -316,9 +316,14 @@ export default function StudioSetupPage() {
                                     type="number"
                                     className="form-input"
                                     value={maxSlots}
-                                    onChange={e => setMaxSlots(Math.max(1, Math.min(20, parseInt(e.target.value) || 5)))}
+                                    onChange={e => {
+                                        const raw = e.target.value;
+                                        if (raw === "") { setMaxSlots(1); return; }
+                                        const val = parseInt(raw);
+                                        if (!isNaN(val)) setMaxSlots(Math.max(1, Math.min(50, val)));
+                                    }}
                                     min={1}
-                                    max={20}
+                                    max={50}
                                 />
                             </div>
                             <div />
