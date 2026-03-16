@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getGroupFiles, uploadGroupFile, deleteGroupFile, type GroupFile } from "@/app/actions/groups";
+import { safeUUID } from "@/lib/utils/uuid";
 import styles from "./GroupFiles.module.css";
 
 interface Props {
@@ -59,7 +60,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
         // For now, store the file name as the path — actual storage upload would happen here
         const result = await uploadGroupFile(
             groupId,
-            `group-files/${groupId}/${crypto.randomUUID()}-${file.name}`,
+            `group-files/${groupId}/${safeUUID()}-${file.name}`,
             file.name,
             file.size,
             description

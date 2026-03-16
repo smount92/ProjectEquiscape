@@ -4,6 +4,7 @@ import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { addEventMedia, deleteEventMedia } from "@/app/actions/posts";
 import { createClient } from "@/lib/supabase/client";
+import { safeUUID } from "@/lib/utils/uuid";
 
 interface EventPhoto {
     id: string;
@@ -68,7 +69,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
                     // Optimistic — add with object URL for immediate preview
                     const previewUrl = URL.createObjectURL(file);
                     setPhotos(prev => [{
-                        id: crypto.randomUUID(),
+                        id: safeUUID(),
                         imageUrl: previewUrl,
                         caption: null,
                         createdAt: new Date().toISOString(),

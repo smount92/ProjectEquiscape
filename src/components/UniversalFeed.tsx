@@ -8,6 +8,7 @@ import type { Post } from "@/app/actions/posts";
 import { createClient } from "@/lib/supabase/client";
 import RichText from "@/components/RichText";
 import LikeToggle from "@/components/LikeToggle";
+import { safeUUID } from "@/lib/utils/uuid";
 
 // ============================================================
 // UNIVERSAL FEED — renders posts for ANY context
@@ -134,7 +135,7 @@ export default function UniversalFeed({
             if (result.success) {
                 // Optimistic add
                 setPosts(prev => [{
-                    id: result.postId || crypto.randomUUID(),
+                    id: result.postId || safeUUID(),
                     authorId: currentUserId,
                     authorAlias: "You",
                     content: composerText.trim(),
@@ -252,7 +253,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
             const result = await replyToPost(post.id, replyText.trim());
             if (result.success) {
                 setReplies(prev => [...prev, {
-                    id: crypto.randomUUID(),
+                    id: safeUUID(),
                     authorId: currentUserId,
                     authorAlias: "You",
                     content: replyText.trim(),
