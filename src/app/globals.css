@@ -2170,13 +2170,13 @@ p {
   text-decoration: underline;
 }
 
-/* Passport Info Sidebar */
+/* Passport Info Sidebar — warm aged-leather panel */
 .passport-sidebar {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
   padding: var(--space-xl) var(--space-lg);
-  background: #3B2A1A;
+  background: #C8B596;
   min-height: 100%;
 }
 
@@ -2193,41 +2193,41 @@ p {
   line-height: 1.15;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #FBF7ED;
+  color: #2D2318;
 }
 
 .passport-subtitle {
   font-size: calc(var(--font-size-md) * var(--font-scale));
-  color: rgba(251, 247, 237, 0.65);
+  color: #59493A;
   margin-bottom: var(--space-xs);
 }
 
-/* ── Owner pill on dark bg ── */
+/* ── Owner pill on warm bg ── */
 .passport-sidebar .passport-owner-pill {
-  background: rgba(251, 247, 237, 0.1);
-  border-color: rgba(251, 247, 237, 0.15);
-  color: #FBF7ED;
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #2D2318;
 }
 
 .passport-sidebar .passport-owner-pill:hover {
-  background: rgba(251, 247, 237, 0.18);
-  border-color: rgba(251, 247, 237, 0.3);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .passport-sidebar .passport-owner-avatar {
-  background: rgba(251, 247, 237, 0.12);
-  border-color: rgba(251, 247, 237, 0.2);
-  color: rgba(251, 247, 237, 0.6);
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #59493A;
 }
 
-/* ── See more link on dark bg ── */
+/* ── See more link on warm bg ── */
 .passport-sidebar .passport-see-more-link {
-  color: rgba(251, 247, 237, 0.5);
+  color: #59493A;
 }
 
 .passport-sidebar .passport-see-more-link:hover {
-  color: #f0d06c;
+  color: var(--color-accent-primary);
 }
 
 .passport-detail-card {
@@ -2235,7 +2235,7 @@ p {
   border: none;
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   margin-top: var(--space-xs);
   color: var(--color-text-primary);
 }
@@ -2291,14 +2291,14 @@ p {
   font-weight: 600;
 }
 
-/* ── Passport Action Bar — on dark sidebar ── */
+/* ── Passport Action Bar — on warm sidebar ── */
 .passport-action-bar {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
   padding: var(--space-md);
-  background: rgba(251, 247, 237, 0.08);
-  border: 1px solid rgba(251, 247, 237, 0.1);
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2318,45 +2318,31 @@ p {
   font-size: calc(var(--font-size-sm) * var(--font-scale));
   padding: var(--space-xs) var(--space-md);
   white-space: nowrap;
-  color: #FBF7ED;
-  border-color: rgba(251, 247, 237, 0.15);
-}
-
-.passport-action-icons .btn:hover {
-  background: rgba(251, 247, 237, 0.12);
-}
-
-.passport-action-icons .btn-primary {
-  color: white;
-  border-color: transparent;
 }
 
 .passport-action-full {
   width: 100%;
   justify-content: center;
-  border-top: 1px solid rgba(251, 247, 237, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   padding-top: var(--space-sm) !important;
   margin-top: var(--space-xs);
   border-radius: 0;
-  color: rgba(251, 247, 237, 0.7);
 }
 
-.passport-action-full:hover {
-  color: #FBF7ED;
-}
-
-/* ── Back link on dark bg ── */
+/* ── Back link ── */
 .passport-back-link {
   text-align: center;
   font-size: calc(var(--font-size-sm) * var(--font-scale));
-  color: rgba(251, 247, 237, 0.4);
+  color: #59493A;
   text-decoration: none;
   padding: var(--space-xs) 0;
-  transition: color 0.15s;
+  opacity: 0.6;
+  transition: opacity 0.15s, color 0.15s;
 }
 
 .passport-back-link:hover {
-  color: #f0d06c;
+  opacity: 1;
+  color: var(--color-accent-primary);
 }
 
 @media (max-width: 480px) {
