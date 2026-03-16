@@ -1,16 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
-import MarkReadButton from "@/components/MarkReadButton";
-import AdminReplyForm from "@/components/AdminReplyForm";
-import FeatureHorseForm from "@/components/FeatureHorseForm";
-import CreateShowForm from "@/components/CreateShowForm";
-import AdminShowManager from "@/components/AdminShowManager";
-import AdminSuggestionsPanel from "@/components/AdminSuggestionsPanel";
 import { getPhotoShows } from "@/app/actions/shows";
 import { getPendingSuggestions } from "@/app/actions/suggestions";
 import { getOpenReports } from "@/app/actions/moderation";
-import ReportActions from "@/components/ReportActions";
+import AdminTabs from "@/components/AdminTabs";
 
 export const metadata = {
     title: "Admin Console — Model Horse Hub",
@@ -46,18 +40,14 @@ export default async function AdminPage() {
     // Fetch metrics in parallel
     const [usersResult, horsesResult, unreadResult, messagesResult] =
         await Promise.all([
-            // Total registered users
             supabaseAdmin.auth.admin.listUsers({ perPage: 1, page: 1 }),
-            // Total horses
             supabaseAdmin
                 .from("user_horses")
                 .select("id", { count: "exact", head: true }),
-            // Unread support messages
             supabaseAdmin
                 .from("contact_messages")
                 .select("id", { count: "exact", head: true })
                 .eq("is_read", false),
-            // All contact messages
             supabaseAdmin
                 .from("contact_messages")
                 .select("id, name, email, subject, message, is_read, created_at")
@@ -65,8 +55,6 @@ export default async function AdminPage() {
                 .limit(100),
         ]);
 
-    // listUsers returns total in a different way — use the users array length or total
-    // The admin API returns { data: { users: [], total: number } }
     const totalUsers =
         (usersResult.data as unknown as { users: unknown[]; total?: number })
             ?.total ?? 0;
@@ -77,16 +65,6 @@ export default async function AdminPage() {
     const allShows = await getPhotoShows();
     const pendingSuggestions = await getPendingSuggestions();
     const reports = await getOpenReports();
-
-    function formatDate(dateStr: string): string {
-        return new Date(dateStr).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-        });
-    }
 
     return (
         <div className="page-container form-page">
@@ -124,7 +102,7 @@ export default async function AdminPage() {
                     </div>
                 </div>
 
-                {/* Metrics Row */}
+                {/* Metrics Row — always visible */}
                 <div className="admin-metrics-row">
                     <div className="admin-metric-card">
                         <div className="admin-metric-icon">👥</div>
@@ -145,141 +123,20 @@ export default async function AdminPage() {
                     </div>
                 </div>
 
-                {/* Mailbox */}
-                <div className="admin-section">
-                    <h2 className="admin-section-title">
-                        📬 Support Mailbox
-                        <span className="admin-section-count">
-                            {messages.length} message{messages.length !== 1 ? "s" : ""}
-                        </span>
-                    </h2>
-
-                    {messages.length === 0 ? (
-                        <div className="card shelf-empty">
-                            <div className="shelf-empty-icon">📬</div>
-                            <h2>No Messages Yet</h2>
-                            <p>Contact form submissions will appear here.</p>
-                        </div>
-                    ) : (
-                        <div className="admin-mailbox">
-                            {messages.map((msg) => (
-                                <div
-                                    key={msg.id}
-                                    className={`admin-message ${msg.is_read ? "admin-message-read" : "admin-message-unread"}`}
-                                >
-                                    <div className="admin-message-header">
-                                        <div className="admin-message-sender">
-                                            <span className="admin-message-name">{msg.name}</span>
-                                            <a
-                                                href={`mailto:${msg.email}`}
-                                                className="admin-message-email"
-                                            >
-                                                {msg.email}
-                                            </a>
-                                        </div>
-                                        <div className="admin-message-actions">
-                                            <span className="admin-message-date">
-                                                {formatDate(msg.created_at)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    {msg.subject && (
-                                        <div className="admin-message-subject">
-                                            {!msg.is_read && <span className="admin-unread-dot" />}
-                                            {msg.subject}
-                                        </div>
-                                    )}
-                                    <div className="admin-message-body">{msg.message}</div>
-                                    <div className="admin-message-footer">
-                                        <AdminReplyForm
-                                            messageId={msg.id}
-                                            recipientEmail={msg.email}
-                                            recipientName={msg.name}
-                                            originalSubject={msg.subject}
-                                            originalMessage={msg.message}
-                                        />
-                                        <MarkReadButton messageId={msg.id} isRead={msg.is_read} />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Feature a Horse */}
-                <div className="admin-section">
-                    <h2 className="admin-section-title">
-                        🌟 Feature a Horse
-                        <span className="admin-section-count">Horse of the Week</span>
-                    </h2>
-                    <FeatureHorseForm />
-                </div>
-
-                {/* Create Photo Show */}
-                <div className="admin-section">
-                    <h2 className="admin-section-title">
-                        📸 Create Photo Show
-                        <span className="admin-section-count">Virtual Shows</span>
-                    </h2>
-                    <CreateShowForm />
-                </div>
-
-                {/* Manage Shows */}
-                <div className="admin-section">
-                    <h2 className="admin-section-title">
-                        🎛️ Manage Shows
-                        <span className="admin-section-count">{allShows.length} total</span>
-                    </h2>
-                    <AdminShowManager shows={allShows.map(s => ({
+                {/* Tabbed sections */}
+                <AdminTabs
+                    messages={messages}
+                    unreadCount={unreadMessages}
+                    shows={allShows.map(s => ({
                         id: s.id,
                         title: s.title,
                         status: s.status,
                         endAt: s.endAt,
                         entryCount: s.entryCount,
-                    }))} />
-                </div>
-
-                {/* Database Suggestions */}
-                <div className="admin-section">
-                    <h2 className="admin-section-title">
-                        💡 Database Suggestions
-                        <span className="admin-section-count">
-                            {pendingSuggestions.length} pending
-                        </span>
-                    </h2>
-                    <AdminSuggestionsPanel suggestions={pendingSuggestions} />
-                </div>
-
-                {/* Open Reports */}
-                <div className="admin-section">
-                    <h2 className="admin-section-title">
-                        🚩 Open Reports
-                        <span className="admin-section-count">{reports.length}</span>
-                    </h2>
-                    {reports.length === 0 ? (
-                        <p style={{ color: "var(--color-text-muted)" }}>No open reports. 🎉</p>
-                    ) : (
-                        reports.map(report => (
-                            <div key={report.id} className="admin-message" style={{ marginBottom: "var(--space-sm)" }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--space-xs)" }}>
-                                    <strong>{report.reason}</strong>
-                                    <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
-                                        {report.targetType} · {new Date(report.createdAt).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-xs)" }}>
-                                    Reported by: {report.reporterAlias} · Target: {report.targetId.slice(0, 8)}…
-                                </p>
-                                {report.details && (
-                                    <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)" }}>
-                                        {report.details}
-                                    </p>
-                                )}
-                                <ReportActions reportId={report.id} />
-                            </div>
-                        ))
-                    )}
-                </div>
+                    }))}
+                    suggestions={pendingSuggestions}
+                    reports={reports}
+                />
             </div>
         </div>
     );

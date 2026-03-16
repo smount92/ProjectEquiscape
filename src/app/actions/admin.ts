@@ -46,6 +46,24 @@ export async function toggleMessageRead(
 }
 
 /**
+ * Delete a contact message permanently.
+ */
+export async function deleteContactMessage(
+  messageId: string
+): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const { error } = await getAdminSupabase()
+    .from("contact_messages")
+    .delete()
+    .eq("id", messageId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+/**
  * Reply to a contact message via Resend email — sent directly from the admin console.
  * Auto-marks the original message as read after sending.
  */
@@ -189,4 +207,3 @@ function escapeHtml(str: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
-

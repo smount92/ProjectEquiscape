@@ -5345,6 +5345,115 @@ p {
 }
 
 
+/* Admin Tab Bar */
+
+.admin-tab-bar {
+  display: flex;
+  gap: var(--space-xs);
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: var(--space-lg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.admin-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.admin-tab-active {
+  color: var(--color-accent-primary);
+  border-bottom-color: var(--color-accent-primary);
+}
+
+.admin-tab-emoji {
+  font-size: 1.1em;
+}
+
+.admin-tab-label {
+  display: inline;
+}
+
+.admin-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--color-text-muted);
+  line-height: 1;
+}
+
+.admin-tab-badge-alert {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.admin-tab-active .admin-tab-badge {
+  background: rgba(var(--color-accent-primary-rgb, 212, 165, 116), 0.15);
+  color: var(--color-accent-primary);
+}
+
+.admin-tab-content {
+  min-height: 300px;
+}
+
+/* Admin two-column grids */
+
+.admin-shows-grid,
+.admin-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.admin-sub-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 768px) {
+  .admin-shows-grid,
+  .admin-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-tab-label {
+    display: none;
+  }
+
+  .admin-tab-emoji {
+    font-size: 1.3em;
+  }
+}
+
 /* Admin Section */
 
 .admin-section {
