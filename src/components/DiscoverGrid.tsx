@@ -11,9 +11,11 @@ interface DiscoverUser {
     alias_name: string;
     created_at: string;
     avatar_url: string | null;
+    bio: string | null;
     public_horse_count: number;
     avg_rating: number;
     rating_count: number;
+    has_studio: boolean;
 }
 
 interface DiscoverGridProps {
@@ -21,48 +23,117 @@ interface DiscoverGridProps {
     currentUserId: string;
 }
 
+type TagKey = "all" | "art_studio" | "top_rated" | "new_members" | "big_stables";
+
+const TAGS: { key: TagKey; emoji: string; label: string }[] = [
+    { key: "all", emoji: "👥", label: "All" },
+    { key: "art_studio", emoji: "🎨", label: "Art Studios" },
+    { key: "top_rated", emoji: "⭐", label: "Top Rated" },
+    { key: "new_members", emoji: "🆕", label: "New Members" },
+    { key: "big_stables", emoji: "🐴", label: "Big Stables" },
+];
+
 const memberSince = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("en-US", {
         month: "short",
         year: "numeric",
     });
 
+// "New" = joined within the last 30 days
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 export default function DiscoverGrid({ users, currentUserId }: DiscoverGridProps) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [activeTag, setActiveTag] = useState<TagKey>("all");
 
     const filteredUsers = useMemo(() => {
-        if (!searchQuery.trim()) return users;
-        const q = searchQuery.toLowerCase();
-        return users.filter(
-            (u) => u.alias_name.toLowerCase().includes(q)
-        );
-    }, [users, searchQuery]);
+        let result = users;
+
+        // Tag filter
+        switch (activeTag) {
+            case "art_studio":
+                result = result.filter(u => u.has_studio);
+                break;
+            case "top_rated":
+                result = result.filter(u => u.rating_count > 0)
+                    .sort((a, b) => b.avg_rating - a.avg_rating || b.rating_count - a.rating_count);
+                break;
+            case "new_members":
+                result = result.filter(u =>
+                    Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS
+                );
+                break;
+            case "big_stables":
+                result = result.filter(u => u.public_horse_count >= 5)
+                    .sort((a, b) => b.public_horse_count - a.public_horse_count);
+                break;
+        }
+
+        // Search filter — matches name or bio
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(
+                (u) =>
+                    u.alias_name.toLowerCase().includes(q) ||
+                    (u.bio && u.bio.toLowerCase().includes(q))
+            );
+        }
+
+        return result;
+    }, [users, searchQuery, activeTag]);
+
+    // Tag counts for badges
+    const tagCounts = useMemo(() => ({
+        all: users.length,
+        art_studio: users.filter(u => u.has_studio).length,
+        top_rated: users.filter(u => u.rating_count > 0).length,
+        new_members: users.filter(u => Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS).length,
+        big_stables: users.filter(u => u.public_horse_count >= 5).length,
+    }), [users]);
 
     return (
         <>
             {/* Search Bar */}
-            <div className="search-bar-container" style={{ marginBottom: "var(--space-lg)" }}>
+            <div className="search-bar-container" style={{ marginBottom: "var(--space-md)" }}>
                 <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="🔍 Search for a collector by name…"
+                    placeholder="🔍 Search by name or bio…"
                     className="form-input"
                     id="discover-search-bar"
                     style={{ maxWidth: 500 }}
                 />
             </div>
 
-            {searchQuery.trim() && (
+            {/* Tag Chips */}
+            <div className="discover-tags" style={{ marginBottom: "var(--space-lg)" }}>
+                {TAGS.map((tag) => (
+                    <button
+                        key={tag.key}
+                        className={`discover-tag ${activeTag === tag.key ? "discover-tag-active" : ""}`}
+                        onClick={() => setActiveTag(tag.key)}
+                    >
+                        <span>{tag.emoji}</span>
+                        <span>{tag.label}</span>
+                        <span className="discover-tag-count">{tagCounts[tag.key]}</span>
+                    </button>
+                ))}
+            </div>
+
+            {/* Results count */}
+            {(searchQuery.trim() || activeTag !== "all") && (
                 <div className="search-results-count" style={{ marginBottom: "var(--space-md)" }}>
                     {filteredUsers.length === 0
-                        ? `No collectors match "${searchQuery}"`
+                        ? searchQuery.trim()
+                            ? `No collectors match "${searchQuery}"`
+                            : "No collectors match this filter"
                         : `Showing ${filteredUsers.length} collector${filteredUsers.length !== 1 ? "s" : ""}`}
                 </div>
             )}
 
             {/* Grid */}
-            {filteredUsers.length === 0 && !searchQuery.trim() ? (
+            {filteredUsers.length === 0 && !searchQuery.trim() && activeTag === "all" ? (
                 <div className="card shelf-empty animate-fade-in-up">
                     <div className="shelf-empty-icon">👥</div>
                     <h2>No Active Collectors Yet</h2>
@@ -72,7 +143,7 @@ export default function DiscoverGrid({ users, currentUserId }: DiscoverGridProps
                 <div className="card shelf-empty animate-fade-in-up">
                     <div className="shelf-empty-icon">🔍</div>
                     <h2>No Results</h2>
-                    <p>No collectors match &quot;{searchQuery}&quot;. Try a different name.</p>
+                    <p>Try a different search or filter.</p>
                 </div>
             ) : (
                 <div className={`${styles.grid} animate-fade-in-up`}>
@@ -101,7 +172,17 @@ export default function DiscoverGrid({ users, currentUserId }: DiscoverGridProps
                                                 You
                                             </span>
                                         )}
+                                        {u.has_studio && (
+                                            <span className="discover-studio-badge" title="Has an Art Studio">
+                                                🎨
+                                            </span>
+                                        )}
                                     </div>
+                                    {u.bio && (
+                                        <div className={styles.stats} style={{ color: "var(--color-text-muted)", fontStyle: "italic" }}>
+                                            {u.bio.length > 80 ? `${u.bio.slice(0, 80)}…` : u.bio}
+                                        </div>
+                                    )}
                                     <div className={styles.stats}>
                                         <span>
                                             🐴 {publicCount} model{publicCount !== 1 ? "s" : ""}

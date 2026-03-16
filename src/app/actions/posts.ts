@@ -78,18 +78,51 @@ export async function createPost(data: {
     if (data.groupId) revalidatePath("/community/groups");
     if (data.eventId) revalidatePath(`/community/events/${data.eventId}`);
     if (data.eventId) revalidatePath(`/shows/${data.eventId}`);
+    if (data.studioId) revalidatePath(`/studio`);
     revalidatePath("/feed");
     revalidateTag("feed", "max");
 
-    // Deferred: notify mentions after response is sent
+    // Deferred: notify context owner + mentions after response is sent
     const userId = user.id;
     const content = data.content.trim();
     const postIdFinal = post!.id;
+    const eventId = data.eventId;
+    const studioId = data.studioId;
     after(async () => {
         try {
-            const { data: actor } = await (await import("@/lib/supabase/server")).createClient().then(s => s.from("users").select("alias_name").eq("id", userId).single());
+            const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
+            const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+            const { createNotification } = await import("@/app/actions/notifications");
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
+
+            // Notify event creator
+            if (eventId) {
+                const { data: event } = await supabaseDeferred.from("events").select("created_by, name").eq("id", eventId).single();
+                if (event && (event as { created_by: string }).created_by !== userId) {
+                    await createNotification({
+                        userId: (event as { created_by: string }).created_by,
+                        type: "comment",
+                        actorId: userId,
+                        content: `@${alias} commented on your event "${(event as { name: string }).name}"`,
+                    });
+                }
+            }
+
+            // Notify studio owner
+            if (studioId) {
+                const { data: studio } = await supabaseDeferred.from("artist_profiles").select("user_id, studio_name").eq("user_id", studioId).single();
+                if (studio && (studio as { user_id: string }).user_id !== userId) {
+                    await createNotification({
+                        userId: (studio as { user_id: string }).user_id,
+                        type: "comment",
+                        actorId: userId,
+                        content: `@${alias} commented on your studio "${(studio as { studio_name: string }).studio_name}"`,
+                    });
+                }
+            }
+
+            // Notify @mentions
             await parseAndNotifyMentions(content, userId, alias, `/feed/${postIdFinal}`);
         } catch { /* non-blocking */ }
     });

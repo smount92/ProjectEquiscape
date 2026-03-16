@@ -18,7 +18,7 @@ export default async function DiscoverPage() {
 
     if (!user) redirect("/login");
 
-    // Fetch aggregated data from the highly efficient PostgreSQL View
+    // Fetch aggregated data from the PostgreSQL View (now includes bio + has_studio)
     const { data: activeUsersView } = await supabase
         .from("discover_users_view")
         .select("*")
@@ -29,9 +29,11 @@ export default async function DiscoverPage() {
         alias_name: string;
         created_at: string;
         avatar_url: string | null;
+        bio: string | null;
         public_horse_count: number;
         avg_rating: number;
         rating_count: number;
+        has_studio: boolean;
     }[];
 
     // Resolve avatar storage paths to signed URLs
@@ -65,9 +67,8 @@ export default async function DiscoverPage() {
                 </div>
             </div>
 
-            {/* Client-side searchable grid */}
+            {/* Client-side searchable grid with tags */}
             <DiscoverGrid users={activeUsers} currentUserId={user.id} />
         </div>
     );
 }
-

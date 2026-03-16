@@ -7572,7 +7572,69 @@ p {
   .discover-grid {
     grid-template-columns: 1fr;
   }
+}
 
+/* ===== Discover Tag Filters ===== */
+.discover-tags {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--space-xs);
+}
+
+.discover-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-glass, rgba(255,255,255,0.03));
+  cursor: pointer;
+  font-family: inherit;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.discover-tag:hover {
+  border-color: var(--color-accent-primary);
+  color: var(--color-text-primary);
+}
+
+.discover-tag-active {
+  background: rgba(var(--color-accent-primary-rgb, 212, 165, 116), 0.12);
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  font-weight: 600;
+}
+
+.discover-tag-count {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-full);
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.discover-tag-active .discover-tag-count {
+  background: rgba(var(--color-accent-primary-rgb, 212, 165, 116), 0.2);
+}
+
+.discover-studio-badge {
+  margin-left: 4px;
+  font-size: 0.85em;
+}
+
+@media (max-width: 600px) {
   .notification-item {
     flex-direction: column;
     align-items: flex-start;
