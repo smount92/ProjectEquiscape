@@ -49,7 +49,7 @@ export default function StudioSetupPage() {
     const [scalesOffered, setScalesOffered] = useState<string[]>([]);
     const [bioArtist, setBioArtist] = useState("");
     const [status, setStatus] = useState("closed");
-    const [maxSlots, setMaxSlots] = useState(5);
+    const [maxSlots, setMaxSlots] = useState("5");
     const [turnaroundMin, setTurnaroundMin] = useState("");
     const [turnaroundMax, setTurnaroundMax] = useState("");
     const [priceMin, setPriceMin] = useState("");
@@ -78,7 +78,7 @@ export default function StudioSetupPage() {
                 setScalesOffered(profile.scalesOffered);
                 setBioArtist(profile.bioArtist || "");
                 setStatus(profile.status);
-                setMaxSlots(profile.maxSlots);
+                setMaxSlots(profile.maxSlots?.toString() || "5");
                 setTurnaroundMin(profile.turnaroundMinDays?.toString() || "");
                 setTurnaroundMax(profile.turnaroundMaxDays?.toString() || "");
                 setPriceMin(profile.priceRangeMin?.toString() || "");
@@ -118,7 +118,7 @@ export default function StudioSetupPage() {
         formData.set("scalesOffered", JSON.stringify(scalesOffered));
         formData.set("bioArtist", bioArtist);
         formData.set("status", status);
-        formData.set("maxSlots", maxSlots.toString());
+        formData.set("maxSlots", (parseInt(maxSlots) || 5).toString());
         formData.set("turnaroundMinDays", turnaroundMin);
         formData.set("turnaroundMaxDays", turnaroundMax);
         formData.set("priceRangeMin", priceMin);
@@ -316,11 +316,12 @@ export default function StudioSetupPage() {
                                     type="number"
                                     className="form-input"
                                     value={maxSlots}
-                                    onChange={e => {
-                                        const raw = e.target.value;
-                                        if (raw === "") { setMaxSlots(1); return; }
-                                        const val = parseInt(raw);
-                                        if (!isNaN(val)) setMaxSlots(Math.max(1, Math.min(50, val)));
+                                    onChange={e => setMaxSlots(e.target.value)}
+                                    onBlur={() => {
+                                        const val = parseInt(maxSlots);
+                                        if (isNaN(val) || val < 1) setMaxSlots("1");
+                                        else if (val > 50) setMaxSlots("50");
+                                        else setMaxSlots(val.toString());
                                     }}
                                     min={1}
                                     max={50}
