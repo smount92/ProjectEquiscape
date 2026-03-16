@@ -1,12 +1,12 @@
 /* ── WishlistButton.module.css ──
-   Extracted from globals.css lines 4355-4393
-   Heart button on community cards */
+   Bookmark-style button for wishlist.
+   Distinct from FavoriteButton (heart). */
 
 .btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
+    gap: 4px;
     height: 32px;
     border: none;
     background: transparent;
@@ -14,29 +14,36 @@
     cursor: pointer;
     border-radius: var(--radius-full);
     transition: all 0.2s ease;
-    padding: 0;
+    padding: 0 8px;
+    white-space: nowrap;
 }
 
 .btn:hover {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-    transform: scale(1.15);
+    color: var(--color-accent-secondary, #8B5A2B);
+    background: rgba(139, 90, 43, 0.08);
+    transform: scale(1.05);
 }
 
 .wishlisted {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
+    gap: 4px;
     height: 32px;
     border: none;
     background: transparent;
-    color: #ef4444;
+    color: var(--color-accent-secondary, #8B5A2B);
     cursor: pointer;
     border-radius: var(--radius-full);
     transition: all 0.2s ease;
-    padding: 0;
+    padding: 0 8px;
+    white-space: nowrap;
     animation: wishlistPop 0.3s ease;
+}
+
+.label {
+    font-size: calc(0.7rem * var(--font-scale, 1));
+    font-weight: 600;
 }
 
 @keyframes wishlistPop {
@@ -45,7 +52,7 @@
     }
 
     50% {
-        transform: scale(1.35);
+        transform: scale(1.15);
     }
 
     100% {
