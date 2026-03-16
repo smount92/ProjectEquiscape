@@ -133,189 +133,164 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
         }
     }
 
+    const selectedPhotoObj = horsePhotos.find(p => p.storagePath === selectedPhoto);
+
     return (
-        <form onSubmit={handleSubmit} className="show-entry-form" style={{ display: "flex", flexDirection: "column", gap: "var(--space-md)" }}>
+        <form onSubmit={handleSubmit} className="show-entry-form">
             {/* Guidance tip */}
-            <div className="getting-started-tip" style={{ fontSize: "calc(0.8rem * var(--font-scale))", padding: "var(--space-sm) var(--space-md)" }}>
-                💡 <strong>How it works:</strong> Select a horse, pick your best photo for the entry, add an optional caption, then submit.
+            <div className="getting-started-tip show-entry-tip">
+                💡 <strong>How it works:</strong> Select a horse, pick your best photo, add an optional caption, then submit.
                 For best results, upload clear, well-lit photos (at least 800×600) to your horse&apos;s passport first.
             </div>
 
-            {/* Horse selector */}
-            <select
-                className="form-input"
-                value={selectedHorse}
-                onChange={(e) => {
-                    setSelectedHorse(e.target.value);
-                    setSelectedClassId("");
-                }}
-                required
-            >
-                <option value="">Select a horse to enter…</option>
-                {userHorses.map((h) => (
-                    <option key={h.id} value={h.id}>{h.name}</option>
-                ))}
-            </select>
-
-            {/* Class selection — only if structured classes exist */}
-            {divisionGroups.size > 0 && (
+            {/* Top row: Horse + Class selectors side by side */}
+            <div className="show-entry-selectors">
                 <select
-                    className="form-input"
-                    value={selectedClassId}
-                    onChange={(e) => setSelectedClassId(e.target.value)}
+                    className="form-select"
+                    value={selectedHorse}
+                    onChange={(e) => {
+                        setSelectedHorse(e.target.value);
+                        setSelectedClassId("");
+                    }}
+                    required
                 >
-                    <option value="">Select a class (optional)…</option>
-                    {Array.from(divisionGroups.entries()).map(([divName, items]) => (
-                        <optgroup key={divName} label={divName}>
-                            {items.map((c) => (
-                                <option key={c.id} value={c.id}>{c.name}</option>
-                            ))}
-                        </optgroup>
+                    <option value="">Select a horse to enter…</option>
+                    {userHorses.map((h) => (
+                        <option key={h.id} value={h.id}>{h.name}</option>
                     ))}
                 </select>
-            )}
 
-            {/* Photo Picker — shows after horse selected */}
-            {selectedHorse && (
-                <div>
-                    <label className="form-label" style={{ marginBottom: "var(--space-xs)" }}>
-                        📸 Choose Entry Photo
-                    </label>
-                    {loadingPhotos ? (
-                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
-                            Loading photos…
-                        </p>
-                    ) : horsePhotos.length === 0 ? (
-                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
-                            No photos found. Upload photos to your horse&apos;s passport first.
-                        </p>
-                    ) : (
-                        <>
-                            <div style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))",
-                                gap: "var(--space-xs)",
-                            }}>
-                                {horsePhotos.map((photo) => (
-                                    <button
-                                        key={photo.id}
-                                        type="button"
-                                        onClick={() => setSelectedPhoto(photo.storagePath)}
-                                        style={{
-                                            position: "relative",
-                                            aspectRatio: "1",
-                                            border: selectedPhoto === photo.storagePath
-                                                ? "3px solid var(--color-accent-primary, #d4a574)"
-                                                : "2px solid var(--color-border)",
-                                            borderRadius: "var(--radius-md)",
-                                            overflow: "hidden",
-                                            cursor: "pointer",
-                                            padding: 0,
-                                            background: "var(--color-bg-secondary)",
-                                            transition: "border-color 0.2s ease, transform 0.15s ease",
-                                            transform: selectedPhoto === photo.storagePath ? "scale(1.05)" : "scale(1)",
-                                        }}
-                                        title={ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
-                                    >
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={photo.publicUrl}
-                                            alt={ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                objectFit: "cover",
-                                            }}
-                                            loading="lazy"
-                                        />
-                                        {selectedPhoto === photo.storagePath && (
-                                            <div style={{
-                                                position: "absolute",
-                                                top: 2,
-                                                right: 2,
-                                                background: "var(--color-accent-primary, #d4a574)",
-                                                color: "white",
-                                                borderRadius: "50%",
-                                                width: 20,
-                                                height: 20,
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                fontSize: "0.7rem",
-                                                fontWeight: 700,
-                                            }}>
-                                                ✓
-                                            </div>
-                                        )}
-                                        <div style={{
-                                            position: "absolute",
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
-                                            background: "rgba(0,0,0,0.55)",
-                                            color: "white",
-                                            fontSize: "0.55rem",
-                                            padding: "1px 4px",
-                                            textAlign: "center",
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                        }}>
-                                            {ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
-                                        </div>
-                                    </button>
+                {divisionGroups.size > 0 && (
+                    <select
+                        className="form-select"
+                        value={selectedClassId}
+                        onChange={(e) => setSelectedClassId(e.target.value)}
+                    >
+                        <option value="">Select a class (optional)…</option>
+                        {Array.from(divisionGroups.entries()).map(([divName, items]) => (
+                            <optgroup key={divName} label={divName}>
+                                {items.map((c) => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
                                 ))}
-                            </div>
-                            <p style={{
-                                fontSize: "calc(0.7rem * var(--font-scale))",
-                                color: "var(--color-text-muted)",
-                                marginTop: "var(--space-xs)",
-                            }}>
-                                Photos display at 4:3 in the show grid. Upload at least 800×600 for sharpness.
-                            </p>
-                        </>
-                    )}
-                </div>
-            )}
+                            </optgroup>
+                        ))}
+                    </select>
+                )}
+            </div>
 
-            {/* Caption */}
+            {/* Two-column layout: Photo picker left, Caption + Submit right */}
             {selectedHorse && (
-                <div>
-                    <label className="form-label" htmlFor="entry-caption" style={{ marginBottom: "var(--space-xs)" }}>
-                        ✏️ Entry Caption <span style={{ color: "var(--color-text-muted)", fontWeight: 400 }}>(optional)</span>
-                    </label>
-                    <textarea
-                        id="entry-caption"
-                        className="form-textarea"
-                        value={caption}
-                        onChange={(e) => setCaption(e.target.value)}
-                        maxLength={280}
-                        rows={2}
-                        placeholder="Describe your entry, photography setup, or what makes this model special…"
-                        style={{ fontSize: "calc(0.85rem * var(--font-scale))", resize: "vertical" }}
-                    />
-                    <span style={{
-                        fontSize: "calc(0.7rem * var(--font-scale))",
-                        color: caption.length > 250 ? "var(--color-error)" : "var(--color-text-muted)",
-                        float: "right",
-                    }}>
-                        {caption.length}/280
-                    </span>
+                <div className="show-entry-body">
+                    {/* LEFT: Photo picker */}
+                    <div className="show-entry-photos">
+                        <label className="form-label">
+                            📸 Choose Entry Photo
+                        </label>
+                        {loadingPhotos ? (
+                            <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                Loading photos…
+                            </p>
+                        ) : horsePhotos.length === 0 ? (
+                            <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                No photos found. Upload photos to your horse&apos;s passport first.
+                            </p>
+                        ) : (
+                            <>
+                                <div className="show-entry-photo-grid">
+                                    {horsePhotos.map((photo) => (
+                                        <button
+                                            key={photo.id}
+                                            type="button"
+                                            onClick={() => setSelectedPhoto(photo.storagePath)}
+                                            className={`show-entry-photo-btn ${selectedPhoto === photo.storagePath ? "selected" : ""}`}
+                                            title={ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
+                                        >
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={photo.publicUrl}
+                                                alt={ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
+                                                loading="lazy"
+                                            />
+                                            {selectedPhoto === photo.storagePath && (
+                                                <div className="show-entry-photo-check">✓</div>
+                                            )}
+                                            <div className="show-entry-photo-label">
+                                                {ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="form-hint" style={{ marginTop: "var(--space-xs)" }}>
+                                    Photos display at 4:3 in the show grid. 800×600 minimum recommended.
+                                </p>
+                            </>
+                        )}
+                    </div>
+
+                    {/* RIGHT: Preview + Caption + Submit */}
+                    <div className="show-entry-details">
+                        {/* Preview of selected photo */}
+                        {selectedPhotoObj && (
+                            <div className="show-entry-preview">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={selectedPhotoObj.publicUrl}
+                                    alt="Selected entry photo"
+                                />
+                            </div>
+                        )}
+
+                        {/* Caption */}
+                        <div>
+                            <label className="form-label" htmlFor="entry-caption">
+                                ✏️ Entry Caption <span style={{ color: "var(--color-text-muted)", fontWeight: 400 }}>(optional)</span>
+                            </label>
+                            <textarea
+                                id="entry-caption"
+                                className="form-textarea"
+                                value={caption}
+                                onChange={(e) => setCaption(e.target.value)}
+                                maxLength={280}
+                                rows={3}
+                                placeholder="Describe your entry, photography setup, or what makes this model special…"
+                            />
+                            <span style={{
+                                fontSize: "calc(0.7rem * var(--font-scale))",
+                                color: caption.length > 250 ? "var(--color-error)" : "var(--color-text-muted)",
+                                float: "right",
+                            }}>
+                                {caption.length}/280
+                            </span>
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={!selectedHorse || status === "submitting"}
+                            style={{ marginTop: "var(--space-sm)" }}
+                        >
+                            {status === "submitting" ? "Entering…" : "🐴 Enter Show"}
+                        </button>
+                        {status === "success" && (
+                            <span className="comment-success">✅ Entered!</span>
+                        )}
+                        {status === "error" && errorMsg && (
+                            <span className="comment-error">{errorMsg}</span>
+                        )}
+                    </div>
                 </div>
             )}
 
-            <button
-                type="submit"
-                className="btn btn-primary btn-sm"
-                disabled={!selectedHorse || status === "submitting"}
-            >
-                {status === "submitting" ? "Entering…" : "🐴 Enter Show"}
-            </button>
-            {status === "success" && (
-                <span className="comment-success">✅ Entered!</span>
-            )}
-            {status === "error" && errorMsg && (
-                <span className="comment-error">{errorMsg}</span>
+            {/* Show submit button when no horse selected yet */}
+            {!selectedHorse && (
+                <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={true}
+                >
+                    🐴 Enter Show
+                </button>
             )}
         </form>
     );
