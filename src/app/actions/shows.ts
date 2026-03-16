@@ -224,8 +224,11 @@ export async function enterShow(
         .select("show_status, ends_at")
         .eq("id", showId)
         .single();
+    if (!event) {
+        return { success: false, error: "This show is not accepting entries." };
+    }
     const currentStatus = (event as { show_status: string | null }).show_status || "open";
-    if (!event || currentStatus !== "open") {
+    if (currentStatus !== "open") {
         return { success: false, error: "This show is not accepting entries." };
     }
 
