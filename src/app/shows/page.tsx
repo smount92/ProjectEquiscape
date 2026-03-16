@@ -76,6 +76,11 @@ export default async function ShowsPage() {
                                 {show.description && (
                                     <p className="show-card-desc">{show.description}</p>
                                 )}
+                                {show.creatorAlias && (
+                                    <div style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
+                                        Hosted by @{show.creatorAlias}
+                                    </div>
+                                )}
                                 <div className="show-card-footer">
                                     <span>🐴 {show.entryCount} entr{show.entryCount !== 1 ? "ies" : "y"}</span>
                                     {show.endAt && (

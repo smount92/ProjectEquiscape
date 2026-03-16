@@ -22,6 +22,7 @@ interface ShowDisplay {
     endAt: string | null;
     createdBy?: string;
     judgingMethod?: string;
+    creatorAlias?: string;
 }
 
 interface ShowEntryDisplay {
@@ -36,6 +37,8 @@ interface ShowEntryDisplay {
     hasVoted: boolean;
     createdAt: string;
     placing: string | null;
+    className: string | null;
+    divisionName: string | null;
 }
 
 /**
@@ -47,7 +50,7 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
 
     const { data: shows } = await supabase
         .from("events")
-        .select("id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at")
+        .select("id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at, created_by, users!created_by(alias_name)")
         .in("event_type", ["photo_show", "live_show"])
         .order("created_at", { ascending: false });
 
@@ -57,6 +60,7 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
         id: string; name: string; description: string | null;
         show_status: string; show_theme: string | null;
         starts_at: string; ends_at: string | null; created_at: string;
+        created_by: string; users: { alias_name: string } | { alias_name: string }[] | null;
     };
 
     // Count entries per show
@@ -82,6 +86,8 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
         entryCount: countMap.get(s.id) || 0,
         createdAt: s.created_at,
         endAt: s.ends_at,
+        createdBy: s.created_by,
+        creatorAlias: (Array.isArray(s.users) ? s.users[0]?.alias_name : s.users?.alias_name) || "Unknown",
     }));
 }
 
@@ -116,14 +122,14 @@ export async function getShowEntries(showId: string): Promise<{
     // Fetch entries with user alias via PostgREST join
     const { data: rawEntries } = await supabase
         .from("event_entries")
-        .select("id, horse_id, user_id, votes_count, created_at, placing, users!user_id(alias_name)")
+        .select("id, horse_id, user_id, votes_count, created_at, placing, class_id, users!user_id(alias_name)")
         .eq("event_id", showId)
         .eq("entry_type", "entered")
         .order("votes_count", { ascending: false });
 
     const entryList = (rawEntries as unknown as {
         id: string; horse_id: string; user_id: string; votes_count: number;
-        created_at: string; placing: string | null;
+        created_at: string; placing: string | null; class_id: string | null;
         users: { alias_name: string } | null;
     }[]) ?? [];
 
@@ -177,6 +183,20 @@ export async function getShowEntries(showId: string): Promise<{
     }
     const signedUrls = getPublicImageUrls(allThumbUrls);
 
+    // Batch-fetch class names + division names for entries
+    const classIds = [...new Set(entryList.filter(e => e.class_id).map(e => e.class_id!))];
+    const classMap = new Map<string, { className: string; divisionName: string }>();
+    if (classIds.length > 0) {
+        const { data: classRows } = await supabase
+            .from("event_classes")
+            .select("id, name, event_divisions!division_id(name)")
+            .in("id", classIds);
+        (classRows ?? []).forEach((cr: { id: string; name: string; event_divisions: { name: string } | { name: string }[] | null }) => {
+            const divObj = Array.isArray(cr.event_divisions) ? cr.event_divisions[0] : cr.event_divisions;
+            classMap.set(cr.id, { className: cr.name, divisionName: divObj?.name || "General" });
+        });
+    }
+
     // Build entries list
     let finalEntries = entryList.map(e => ({
         id: e.id,
@@ -190,6 +210,8 @@ export async function getShowEntries(showId: string): Promise<{
         hasVoted: votedSet.has(e.id),
         createdAt: e.created_at,
         placing: e.placing,
+        className: e.class_id ? (classMap.get(e.class_id)?.className || null) : null,
+        divisionName: e.class_id ? (classMap.get(e.class_id)?.divisionName || null) : null,
     }));
 
     // For expert-judged closed shows, sort by placing (1st, 2nd, 3rd...) instead of votes

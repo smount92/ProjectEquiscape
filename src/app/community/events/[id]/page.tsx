@@ -241,6 +241,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                                                 @{entry.ownerAlias}
                                             </Link>
                                             {" · "}{entry.finishType}
+                                            {entry.className && (
+                                                <span style={{ marginLeft: "var(--space-xs)", color: "var(--color-accent-primary)" }}>
+                                                    · {entry.divisionName && `${entry.divisionName} / `}{entry.className}
+                                                </span>
+                                            )}
                                         </span>
                                     </div>
                                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>

@@ -94,6 +94,11 @@ export default async function ShowDetailPage({
                             }
                         </p>
                     )}
+                    {show.creatorAlias && (
+                        <p className="community-hero-subtitle" style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                            Hosted by @{show.creatorAlias}
+                        </p>
+                    )}
                 </div>
                 <div className="community-stats">
                     <div className="community-stat">
@@ -116,6 +121,15 @@ export default async function ShowDetailPage({
                     </div>
                 </div>
             </div>
+
+            {/* Creator Actions */}
+            {(isCreator || isAdmin) && (
+                <div className="animate-fade-in-up" style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end", marginBottom: "var(--space-md)" }}>
+                    <Link href={`/community/events/${showId}/manage`} className="btn btn-ghost">
+                        ⚙️ Manage Classes
+                    </Link>
+                </div>
+            )}
 
             {/* Entry Form */}
             {isOpen && (
@@ -277,6 +291,11 @@ export default async function ShowDetailPage({
                                         @{entry.ownerAlias}
                                     </Link>
                                     {" · "}{entry.finishType}
+                                    {entry.className && (
+                                        <span style={{ marginLeft: "var(--space-xs)", color: "var(--color-accent-primary)" }}>
+                                            · {entry.divisionName && `${entry.divisionName} / `}{entry.className}
+                                        </span>
+                                    )}
                                 </span>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
