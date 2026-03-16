@@ -6,7 +6,6 @@ import Link from "next/link";
 import ShowRingFilters from "@/components/ShowRingFilters";
 import type { FilterState } from "@/components/ShowRingFilters";
 import WishlistButton from "@/components/WishlistButton";
-import MessageSellerButton from "@/components/MessageSellerButton";
 import FavoriteButton from "@/components/FavoriteButton";
 
 interface CommunityCardData {
@@ -218,14 +217,17 @@ export default function ShowRingGrid({
                                             </span>
                                         )}
                                     </div>
-                                    <div className="community-card-info">
-                                        <div className="community-card-name">
-                                            {horse.customName}
-                                            {(horse.hoofprintCount ?? 0) > 0 && (
-                                                <span className="hoofprint-badge" style={{ marginLeft: "6px" }}>🐾 Hoofprint</span>
-                                            )}
-                                        </div>
-                                        <div className="community-card-ref">{horse.refName}</div>
+                                        <div className="community-card-info">
+                                            <div className="community-card-name">
+                                                {horse.customName}
+                                                {(horse.hoofprintCount ?? 0) > 0 && (
+                                                    <span className="hoofprint-badge" title="Has Hoofprint" style={{ marginLeft: "6px" }}>🐾</span>
+                                                )}
+                                            </div>
+                                            <div className="community-card-ref">
+                                                {horse.refName}
+                                                <span className="community-card-time" style={{ marginLeft: "auto", flexShrink: 0 }}>{timeAgo(horse.createdAt)}</span>
+                                            </div>
                                         {horse.releaseLine && (
                                             <div className="community-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
                                                 🎨 {horse.releaseLine}
@@ -260,16 +262,12 @@ export default function ShowRingGrid({
                                         @{horse.ownerAlias}
                                     </Link>
                                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
-                                        {isListed && (
-                                            <MessageSellerButton sellerId={horse.ownerId} horseId={horse.id} horseName={horse.customName} tradeStatus={horse.tradeStatus} askingPrice={horse.listingPrice} compact />
-                                        )}
                                         <FavoriteButton
                                             horseId={horse.id}
                                             initialIsFavorited={horse.isFavorited}
                                             initialCount={horse.favoriteCount}
                                         />
                                         <WishlistButton catalogId={horse.catalogId} />
-                                        <span className="community-card-time">{timeAgo(horse.createdAt)}</span>
                                     </div>
                                 </div>
                             </div>
