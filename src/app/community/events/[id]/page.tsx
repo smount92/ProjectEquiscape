@@ -10,6 +10,9 @@ import EventDeleteButton from "@/components/EventDeleteButton";
 import EventPhotoGallery from "@/components/EventPhotoGallery";
 import UniversalFeed from "@/components/UniversalFeed";
 import AssignPlacings from "@/components/AssignPlacings";
+import ShowEntryForm from "@/components/ShowEntryForm";
+import VoteButton from "@/components/VoteButton";
+import WithdrawButton from "@/components/WithdrawButton";
 
 import { EVENT_TYPE_LABELS } from "@/lib/constants/events";
 
@@ -33,26 +36,46 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     const event = await getEvent(id);
     if (!event) notFound();
 
+    // Is this a show-type event? (live_show or photo_show)
+    const isShowEvent = event.eventType === "live_show" || event.eventType === "photo_show";
+    const isExpertJudged = event.judgingMethod === "expert_judge";
+    const isHost = user.id === event.createdBy;
+
     // Parallel data fetches
-    const [attendees, comments, photos, divisions] = await Promise.all([
+    const [attendees, comments, photos, divisions, showData] = await Promise.all([
         getEventAttendees(id),
         getPosts({ eventId: id }, { includeReplies: true }),
         getEventMedia(id),
         getEventDivisions(id),
+        isShowEvent ? getShowEntries(id) : Promise.resolve({ show: null, entries: [] }),
     ]);
 
-    // For expert-judged events, fetch entries so the host can assign placings
-    const isExpertJudged = event.judgingMethod === "expert_judge";
-    const isHost = user.id === event.createdBy;
-    let expertEntries: { id: string; horseName: string; ownerAlias: string; placing?: string }[] = [];
-    if (isExpertJudged && isHost) {
-        const { entries } = await getShowEntries(id);
-        expertEntries = entries.map(e => ({
-            id: e.id,
-            horseName: e.horseName,
-            ownerAlias: e.ownerAlias,
+    const showEntries = showData.entries;
+    const showStatus = showData.show?.status || "open";
+    const isShowOpen = showStatus === "open";
+
+    // Fetch user's public horses for show entry form
+    let horseOptions: { id: string; name: string }[] = [];
+    if (isShowEvent && isShowOpen) {
+        const { data: userHorses } = await supabase
+            .from("user_horses")
+            .select("id, custom_name")
+            .eq("owner_id", user.id)
+            .eq("is_public", true);
+        horseOptions = (userHorses ?? []).map((h: { id: string; custom_name: string }) => ({
+            id: h.id, name: h.custom_name,
         }));
     }
+
+    // Build class options for the entry form (from divisions)
+    const classOptions = divisions.flatMap(d =>
+        d.classes.map(c => ({ id: c.id, name: c.name, divisionName: d.name }))
+    );
+
+    // Expert entries for assign placings panel
+    const expertEntries = (isExpertJudged && isHost)
+        ? showEntries.map(e => ({ id: e.id, horseName: e.horseName, ownerAlias: e.ownerAlias }))
+        : [];
 
     const date = new Date(event.startsAt);
     const endDate = event.endsAt ? new Date(event.endsAt) : null;
@@ -172,6 +195,89 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* ══════════════════════════════════════ */}
+                {/* Show Entry Section (live_show / photo_show) */}
+                {/* ══════════════════════════════════════ */}
+                {isShowEvent && isShowOpen && (
+                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                        <h3 style={{ marginBottom: "var(--space-sm)" }}>🐴 Enter Your Horse</h3>
+                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                            Select a public horse to enter. Your horse&apos;s passport photo will be used as the entry thumbnail.
+                            {classOptions.length > 0 && " Choose which class to enter."}
+                        </p>
+                        <ShowEntryForm showId={event.id} userHorses={horseOptions} classes={classOptions.length > 0 ? classOptions : undefined} />
+                    </div>
+                )}
+
+                {/* Show Entries Grid */}
+                {isShowEvent && showEntries.length > 0 && (
+                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                        <h3 style={{ marginBottom: "var(--space-md)" }}>📸 Entries ({showEntries.length})</h3>
+                        <div className="show-entries-grid">
+                            {showEntries.map((entry, index) => (
+                                <div key={entry.id} className="show-entry-card">
+                                    <div className="show-entry-rank">
+                                        {isExpertJudged && showStatus === "closed" && entry.placing
+                                            ? entry.placing
+                                            : `#${index + 1}`
+                                        }
+                                    </div>
+                                    {entry.thumbnailUrl && (
+                                        <div className="show-entry-thumb">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
+                                        </div>
+                                    )}
+                                    <div className="show-entry-info">
+                                        <Link href={`/community/${entry.horseId}`} className="show-entry-horse-name">
+                                            🐴 {entry.horseName}
+                                        </Link>
+                                        <span className="show-entry-owner">
+                                            by{" "}
+                                            <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
+                                                @{entry.ownerAlias}
+                                            </Link>
+                                            {" · "}{entry.finishType}
+                                        </span>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                                        {isExpertJudged ? (
+                                            entry.placing && showStatus === "closed" ? (
+                                                <span style={{
+                                                    fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                                                    padding: "var(--space-xs) var(--space-sm)",
+                                                    borderRadius: "var(--radius-sm)",
+                                                    background: "rgba(245, 158, 11, 0.15)",
+                                                    color: "var(--color-accent, #f59e0b)",
+                                                    fontWeight: 600,
+                                                }}>
+                                                    {entry.placing}
+                                                </span>
+                                            ) : null
+                                        ) : (
+                                            <VoteButton
+                                                entryId={entry.id}
+                                                initialVotes={entry.votes}
+                                                initialHasVoted={entry.hasVoted}
+                                                disabled={showStatus !== "open"}
+                                            />
+                                        )}
+                                        {entry.ownerId === user.id && showStatus === "open" && (
+                                            <WithdrawButton entryId={entry.id} />
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {isShowEvent && showEntries.length === 0 && !isShowOpen && (
+                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)", textAlign: "center" }}>
+                        <p style={{ color: "var(--color-text-muted)" }}>No entries were submitted for this show.</p>
                     </div>
                 )}
 

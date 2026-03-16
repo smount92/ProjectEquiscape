@@ -48,7 +48,7 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
     const { data: shows } = await supabase
         .from("events")
         .select("id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at")
-        .eq("event_type", "photo_show")
+        .in("event_type", ["photo_show", "live_show"])
         .order("created_at", { ascending: false });
 
     if (!shows || shows.length === 0) return [];
@@ -224,7 +224,8 @@ export async function enterShow(
         .select("show_status, ends_at")
         .eq("id", showId)
         .single();
-    if (!event || (event as { show_status: string }).show_status !== "open") {
+    const currentStatus = (event as { show_status: string | null }).show_status || "open";
+    if (!event || currentStatus !== "open") {
         return { success: false, error: "This show is not accepting entries." };
     }
 
