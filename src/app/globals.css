@@ -3243,9 +3243,6 @@ p {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
 }
 
 .community-card-footer {
@@ -3265,6 +3262,10 @@ p {
   font-size: calc(0.75rem * var(--font-scale));
   color: var(--color-accent-primary);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .community-card-time {

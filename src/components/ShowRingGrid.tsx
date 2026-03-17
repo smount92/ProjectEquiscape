@@ -224,10 +224,8 @@ export default function ShowRingGrid({
                                                     <span className="hoofprint-badge" title="Has Hoofprint" style={{ marginLeft: "6px" }}>🐾</span>
                                                 )}
                                             </div>
-                                            <div className="community-card-ref">
-                                                {horse.refName}
-                                                <span className="community-card-time" style={{ marginLeft: "auto", flexShrink: 0 }}>{timeAgo(horse.createdAt)}</span>
-                                            </div>
+                                            <div className="community-card-ref">{horse.refName}</div>
+                                            <div className="community-card-time">{timeAgo(horse.createdAt)}</div>
                                         {horse.releaseLine && (
                                             <div className="community-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
                                                 🎨 {horse.releaseLine}

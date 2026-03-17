@@ -1,12 +1,12 @@
 /* ── WishlistButton.module.css ──
-   Bookmark-style button for wishlist.
+   Bookmark icon button for wishlist.
    Distinct from FavoriteButton (heart). */
 
 .btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    width: 32px;
     height: 32px;
     border: none;
     background: transparent;
@@ -14,21 +14,20 @@
     cursor: pointer;
     border-radius: var(--radius-full);
     transition: all 0.2s ease;
-    padding: 0 8px;
-    white-space: nowrap;
+    padding: 0;
 }
 
 .btn:hover {
     color: var(--color-accent-secondary, #8B5A2B);
     background: rgba(139, 90, 43, 0.08);
-    transform: scale(1.05);
+    transform: scale(1.15);
 }
 
 .wishlisted {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    width: 32px;
     height: 32px;
     border: none;
     background: transparent;
@@ -36,14 +35,8 @@
     cursor: pointer;
     border-radius: var(--radius-full);
     transition: all 0.2s ease;
-    padding: 0 8px;
-    white-space: nowrap;
+    padding: 0;
     animation: wishlistPop 0.3s ease;
-}
-
-.label {
-    font-size: calc(0.7rem * var(--font-scale, 1));
-    font-weight: 600;
 }
 
 @keyframes wishlistPop {
@@ -52,7 +45,7 @@
     }
 
     50% {
-        transform: scale(1.15);
+        transform: scale(1.35);
     }
 
     100% {

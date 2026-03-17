@@ -42,22 +42,19 @@ export default function WishlistButton({ catalogId }: WishlistButtonProps) {
             {status === "saving" ? (
                 <span className="btn-spinner" style={{ width: 14, height: 14 }} aria-hidden="true" />
             ) : (
-                <>
-                    <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill={status === "saved" ? "currentColor" : "none"}
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                    >
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                    </svg>
-                    <span className={styles.label}>{status === "saved" ? "Saved" : "Wishlist"}</span>
-                </>
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill={status === "saved" ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
             )}
         </button>
     );
