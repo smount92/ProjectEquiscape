@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSimpleMode } from "@/lib/context/SimpleModeContext";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import NotificationBell from "@/components/NotificationBell";
 import { getHeaderData } from "@/app/actions/header";
@@ -63,6 +63,7 @@ export default function Header() {
   const moreMenuRef = useRef<HTMLDivElement>(null);
   const primaryNavRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
 
   const fetchHeaderInfo = useCallback(async () => {
@@ -131,6 +132,11 @@ export default function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [mobileMenuOpen]);
+
+  // Close mobile menu on route change (fixes touch devices where onClick can race)
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // Close user menu on outside click
   useEffect(() => {
@@ -433,7 +439,7 @@ export default function Header() {
           </Link>
           <NotificationBell />
           {isAdmin && (
-            <Link href="/admin" className="header-nav-link admin-nav-link" id="nav-admin-m">
+            <Link href="/admin" className="header-nav-link admin-nav-link" id="nav-admin-m" onClick={closeMobileMenu}>
               Admin <Zap size={16} strokeWidth={1.5} />
             </Link>
           )}
