@@ -121,6 +121,9 @@ export default function EditHorsePage() {
   // Crop modal state
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [cropAngle, setCropAngle] = useState<AngleProfile | null>(null);
+  const [extraCropQueue, setExtraCropQueue] = useState<File[]>([]);
+  const [isCroppingExtra, setIsCroppingExtra] = useState(false);
+  const [reCropExtraIdx, setReCropExtraIdx] = useState<number | null>(null);
 
   // Watermark preference
   const [watermarkEnabled, setWatermarkEnabled] = useState(false);
@@ -295,12 +298,48 @@ export default function EditHorsePage() {
   };
 
   const handleCropComplete = (croppedFile: File) => {
+    // Re-cropping an existing new extra
+    if (reCropExtraIdx !== null) {
+      const oldUrl = newExtraFiles[reCropExtraIdx]?.previewUrl;
+      if (oldUrl) URL.revokeObjectURL(oldUrl);
+      setNewExtraFiles(prev => prev.map((ef, i) => i === reCropExtraIdx ? { file: croppedFile, previewUrl: URL.createObjectURL(croppedFile) } : ef));
+      setReCropExtraIdx(null);
+      setCropFile(null);
+      return;
+    }
+
+    // Cropping an extra from the queue
+    if (isCroppingExtra) {
+      const previewUrl = URL.createObjectURL(croppedFile);
+      setNewExtraFiles(prev => [...prev, { file: croppedFile, previewUrl }]);
+      setCropFile(null);
+      setExtraCropQueue(prev => {
+        const remaining = prev.slice(1);
+        if (remaining.length > 0) {
+          setCropFile(remaining[0]);
+        } else {
+          setIsCroppingExtra(false);
+        }
+        return remaining;
+      });
+      return;
+    }
+
+    // Standard gallery slot crop
     if (!cropAngle) return;
     setNewFiles((prev) => ({ ...prev, [cropAngle]: croppedFile }));
     const reader = new FileReader();
     reader.onloadend = () => setPreviews((prev) => ({ ...prev, [cropAngle]: reader.result as string }));
     reader.readAsDataURL(croppedFile);
     setCropFile(null);
+    setCropAngle(null);
+  };
+
+  const startExtraCropQueue = (files: File[]) => {
+    if (files.length === 0) return;
+    setIsCroppingExtra(true);
+    setExtraCropQueue(files);
+    setCropFile(files[0]);
     setCropAngle(null);
   };
 
@@ -649,8 +688,7 @@ export default function EditHorsePage() {
                   alert("Maximum 10 extra detail photos allowed.");
                   return;
                 }
-                const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
-                setNewExtraFiles(prev => [...prev, ...newExtras]);
+                startExtraCropQueue(files);
               }}
               role="button"
               tabIndex={0}
@@ -667,8 +705,7 @@ export default function EditHorsePage() {
                     e.target.value = "";
                     return;
                   }
-                  const newExtras = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
-                  setNewExtraFiles(prev => [...prev, ...newExtras]);
+                  startExtraCropQueue(files);
                   e.target.value = "";
                 }}
                 style={{ display: "none" }}
@@ -741,6 +778,19 @@ export default function EditHorsePage() {
                       aria-label={`Remove new extra ${i + 1}`}
                     >
                       ✕
+                    </button>
+                    <button
+                      className="gallery-recrop"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setReCropExtraIdx(i);
+                        setCropFile(ef.file);
+                        setCropAngle(null);
+                      }}
+                      aria-label={`Re-crop extra photo ${i + 1}`}
+                      title="Crop"
+                    >
+                      ✂
                     </button>
                   </div>
                 ))}
@@ -1106,11 +1156,28 @@ export default function EditHorsePage() {
       </div>
 
       {/* ── Image Crop Modal ── */}
-      {cropFile && cropAngle && (
+      {cropFile && (
         <ImageCropModal
           file={cropFile}
           onCrop={handleCropComplete}
-          onCancel={() => { setCropFile(null); setCropAngle(null); }}
+          onCancel={() => {
+            setCropFile(null);
+            setCropAngle(null);
+            if (isCroppingExtra) {
+              setExtraCropQueue(prev => {
+                const remaining = prev.slice(1);
+                if (remaining.length > 0) {
+                  setTimeout(() => setCropFile(remaining[0]), 50);
+                } else {
+                  setIsCroppingExtra(false);
+                }
+                return remaining;
+              });
+            }
+            if (reCropExtraIdx !== null) {
+              setReCropExtraIdx(null);
+            }
+          }}
         />
       )}
     </div>

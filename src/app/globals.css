@@ -6215,6 +6215,51 @@ p {
   opacity: 1;
 }
 
+/* Re-crop button on extra detail thumbnails */
+.gallery-recrop {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  line-height: 1;
+}
+
+.extras-preview-item:hover .gallery-recrop {
+  opacity: 1;
+}
+
+.gallery-recrop:hover {
+  background: rgba(44, 85, 69, 0.9);
+}
+
+/* ── New Collection Modal overrides ── */
+.collection-modal {
+  max-width: 480px;
+}
+
+.collection-modal .form-group {
+  margin-bottom: 0;
+}
+
+.collection-modal .form-input {
+  width: 100%;
+}
+
+.collection-modal .modal-body {
+  gap: var(--space-lg);
+}
 
 @media (max-width: 768px) {
   .admin-metrics-row {
