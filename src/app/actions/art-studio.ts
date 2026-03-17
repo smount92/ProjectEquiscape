@@ -11,12 +11,12 @@ import { revalidatePath } from "next/cache";
 // ── Status Transition Rules ──
 const VALID_TRANSITIONS: Record<string, string[]> = {
     requested: ["accepted", "declined"],
-    accepted: ["in_progress", "cancelled"],
+    accepted: ["in_progress", "shipping", "cancelled"],
     in_progress: ["review", "revision"],
     review: ["completed", "revision"],
     revision: ["in_progress"],
     completed: ["shipping"],
-    shipping: ["delivered"],
+    shipping: ["in_progress", "delivered"],
 };
 
 const STATUS_LABELS: Record<string, string> = {

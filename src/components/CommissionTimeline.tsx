@@ -23,6 +23,7 @@ const ARTIST_TRANSITIONS: Record<string, { label: string; emoji: string; style: 
     ],
     accepted: [
         { label: "Start Work", emoji: "🎨", style: "primary" },
+        { label: "Awaiting Shipment", emoji: "📦", style: "ghost" },
         { label: "Cancel", emoji: "🚫", style: "danger" },
     ],
     in_progress: [
@@ -36,6 +37,7 @@ const ARTIST_TRANSITIONS: Record<string, { label: string; emoji: string; style: 
         { label: "Ship to Client", emoji: "📦", style: "primary" },
     ],
     shipping: [
+        { label: "Model Received", emoji: "📥", style: "primary" },
         { label: "Mark Delivered", emoji: "✅", style: "primary" },
     ],
 };
@@ -44,9 +46,11 @@ const TRANSITION_MAP: Record<string, string> = {
     "Accept": "accepted",
     "Decline": "declined",
     "Start Work": "in_progress",
+    "Awaiting Shipment": "shipping",
     "Cancel": "cancelled",
     "Submit for Review": "review",
     "Resume Work": "in_progress",
+    "Model Received": "in_progress",
     "Ship to Client": "shipping",
     "Mark Delivered": "delivered",
 };
