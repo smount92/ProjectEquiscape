@@ -16,6 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
     review: "#8b5cf6",
     revision: "#f97316",
     completed: "#22c55e",
+    shipping: "#0ea5e9",
     delivered: "#14b8a6",
     declined: "#ef4444",
     cancelled: "#ef4444",

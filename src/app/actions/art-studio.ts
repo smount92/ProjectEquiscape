@@ -15,7 +15,8 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
     in_progress: ["review", "revision"],
     review: ["completed", "revision"],
     revision: ["in_progress"],
-    completed: ["delivered"],
+    completed: ["shipping"],
+    shipping: ["delivered"],
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -27,6 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
     review: "Under Review",
     revision: "Revision Requested",
     completed: "Completed",
+    shipping: "Shipping",
     delivered: "Delivered",
 };
 
@@ -430,8 +432,9 @@ export async function updateCommissionStatus(
     if (!commission) return { success: false, error: "Commission not found." };
     const c = commission as { id: string; artist_id: string; client_id: string | null; status: string; commission_type: string; horse_id: string | null };
 
-    // Only artist can change status (except revision_request from client handled separately)
-    if (c.artist_id !== user.id) {
+    // Only artist can change status, except: client can approve (review → completed)
+    const isClientApproval = c.client_id === user.id && c.status === "review" && newStatus === "completed";
+    if (c.artist_id !== user.id && !isClientApproval) {
         return { success: false, error: "Only the artist can update commission status." };
     }
 
@@ -523,29 +526,40 @@ export async function updateCommissionStatus(
                     .eq("is_visible_to_client", true)
                     .order("created_at", { ascending: true });
 
-                if (wipUpdates && wipUpdates.length > 0) {
-                    // Fetch artist alias for timeline entries
-                    const { data: artistUser } = await supabase
-                        .from("users")
-                        .select("alias_name")
-                        .eq("id", c.artist_id)
-                        .single();
-                    const artistAlias = (artistUser as { alias_name: string } | null)?.alias_name || "Artist";
+                // Fetch artist alias for the customization log
+                const { data: artistUser2 } = await supabase
+                    .from("users")
+                    .select("alias_name")
+                    .eq("id", c.artist_id)
+                    .single();
+                const artistAlias2 = (artistUser2 as { alias_name: string } | null)?.alias_name || "Artist";
 
-                    // ⚡ REMOVED: horse_timeline INSERT — WIP events now derived by v_horse_hoofprint
-                    // from customization_logs table. Insert customization_log entries instead.
+                // Collect all WIP image URLs into a single array
+                const allImageUrls: string[] = [];
+                const descriptions: string[] = [];
+
+                if (wipUpdates && wipUpdates.length > 0) {
                     for (const wip of (wipUpdates as { title: string | null; body: string | null; image_urls: string[]; created_at: string }[])) {
-                        try {
-                            await supabase.from("customization_logs").insert({
-                                horse_id: c.horse_id,
-                                work_type: c.commission_type,
-                                artist_alias: artistAlias,
-                                materials_used: wip.body || wip.title || `${c.commission_type} — WIP`,
-                                date_completed: wip.created_at.split("T")[0],
-                            });
-                        } catch { /* best-effort */ }
+                        if (wip.image_urls && wip.image_urls.length > 0) {
+                            allImageUrls.push(...wip.image_urls);
+                        }
+                        if (wip.body || wip.title) {
+                            descriptions.push(wip.body || wip.title || "");
+                        }
                     }
                 }
+
+                // Create a single consolidated customization_log entry
+                await supabase.from("customization_logs").insert({
+                    horse_id: c.horse_id,
+                    work_type: c.commission_type,
+                    artist_alias: artistAlias2,
+                    materials_used: descriptions.length > 0
+                        ? descriptions.join(" • ")
+                        : `${c.commission_type} commission completed`,
+                    date_completed: new Date().toISOString().split("T")[0],
+                    image_urls: allImageUrls,
+                });
             } catch {
                 // Non-blocking: Hoofprint injection is best-effort
             }
