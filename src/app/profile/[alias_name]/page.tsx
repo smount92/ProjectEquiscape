@@ -94,9 +94,9 @@ export default async function ProfilePage({
   // Look up the user by alias_name
   const { data: profileUser } = await supabase
     .from("users")
-    .select("id, alias_name, created_at, bio, avatar_url")
+    .select("id, alias_name, created_at, bio, avatar_url, show_badges")
     .eq("alias_name", aliasDecoded)
-    .single<{ id: string; alias_name: string; created_at: string; bio: string | null; avatar_url: string | null }>();
+    .single<{ id: string; alias_name: string; created_at: string; bio: string | null; avatar_url: string | null; show_badges: boolean | null }>();
 
   if (!profileUser) {
     notFound();
@@ -400,8 +400,8 @@ export default async function ProfilePage({
         </div>
       )}
 
-      {/* Trophy Case */}
-      {userBadges.length > 0 && (
+      {/* Trophy Case — only if user hasn't hidden badges (owner always sees their own) */}
+      {userBadges.length > 0 && (isOwnProfile || (profileUser.show_badges ?? true)) && (
         <div className="animate-fade-in-up" id="trophies" style={{ marginBottom: "var(--space-lg)" }}>
           <h3 style={{ fontSize: "calc(0.9rem * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
             🏆 Trophy Case

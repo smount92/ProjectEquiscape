@@ -21,12 +21,13 @@ export async function getProfile(): Promise<{
     defaultHorsePublic: boolean;
     watermarkPhotos: boolean;
     currencySymbol: string;
+    showBadges: boolean;
 } | null> {
     const { supabase, user } = await requireAuth();
 
     const { data } = await supabase
         .from("users")
-        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, currency_symbol")
+        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, currency_symbol, show_badges")
         .eq("id", user.id)
         .single();
 
@@ -39,6 +40,7 @@ export async function getProfile(): Promise<{
         default_horse_public: boolean | null;
         watermark_photos: boolean | null;
         currency_symbol: string | null;
+        show_badges: boolean | null;
     };
 
     // Generate signed URL for avatar if stored as a storage path
@@ -67,6 +69,7 @@ export async function getProfile(): Promise<{
         defaultHorsePublic: d.default_horse_public ?? true,
         watermarkPhotos: d.watermark_photos ?? false,
         currencySymbol: d.currency_symbol || "$",
+        showBadges: d.show_badges ?? true,
     };
 }
 
@@ -78,6 +81,7 @@ export async function updateProfile(data: {
     defaultHorsePublic?: boolean;
     watermarkPhotos?: boolean;
     currencySymbol?: string;
+    showBadges?: boolean;
 }): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -115,6 +119,10 @@ export async function updateProfile(data: {
         const symbol = data.currencySymbol.trim().slice(0, 5);
         if (!symbol) return { success: false, error: "Currency symbol cannot be empty." };
         updates.currency_symbol = symbol;
+    }
+
+    if (data.showBadges !== undefined) {
+        updates.show_badges = data.showBadges;
     }
 
     if (Object.keys(updates).length === 0) return { success: true };

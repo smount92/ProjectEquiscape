@@ -37,6 +37,7 @@ export default function SettingsPage() {
     const [email, setEmail] = useState("");
     const [defaultHorsePublic, setDefaultHorsePublic] = useState(true);
     const [watermarkPhotos, setWatermarkPhotos] = useState(false);
+    const [showBadges, setShowBadges] = useState(true);
     const [currencySymbol, setCurrencySymbol] = useState("$");
     const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -72,6 +73,7 @@ export default function SettingsPage() {
             setNotifPrefs(profile.notificationPrefs);
             setDefaultHorsePublic(profile.defaultHorsePublic);
             setWatermarkPhotos(profile.watermarkPhotos);
+            setShowBadges(profile.showBadges);
             setCurrencySymbol(profile.currencySymbol);
             setIsLoading(false);
         }
@@ -82,7 +84,7 @@ export default function SettingsPage() {
     const handleSaveProfile = async () => {
         setIsSavingProfile(true);
         setProfileMsg(null);
-        const result = await updateProfile({ aliasName, bio, defaultHorsePublic, watermarkPhotos, currencySymbol });
+        const result = await updateProfile({ aliasName, bio, defaultHorsePublic, watermarkPhotos, showBadges, currencySymbol });
         if (result.success) {
             setProfileMsg({ type: "success", text: "Profile updated!" });
         } else {
@@ -158,8 +160,8 @@ export default function SettingsPage() {
             </nav>
 
             <div className="static-page-inner animate-fade-in-up" style={{ maxWidth: 680 }}>
-                <h1 style={{ marginBottom: "var(--space-2xl)" }}>
-                    <span className="text-gradient">⚙️ Settings</span>
+                <h1 style={{ marginBottom: "var(--space-2xl)", fontSize: "calc(1.6rem * var(--font-scale))" }}>
+                    ⚙️ <span className="text-gradient">Settings</span>
                 </h1>
 
                 {/* ═══ Profile ═══ */}
@@ -260,6 +262,24 @@ export default function SettingsPage() {
                                 className={watermarkPhotos ? styles.toggleActive : styles.toggle}
                                 onClick={() => setWatermarkPhotos(!watermarkPhotos)}
                                 aria-pressed={watermarkPhotos}
+                            />
+                        </div>
+
+                        {/* Show trophies on profile */}
+                        <div className={styles.toggleRow}>
+                            <div>
+                                <span className={styles.toggleLabel}>
+                                    🏆 Show Trophy Case on profile
+                                </span>
+                                <span className="form-hint" style={{ display: "block", marginTop: 2 }}>
+                                    When off, your badges are hidden from other users
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                className={showBadges ? styles.toggleActive : styles.toggle}
+                                onClick={() => setShowBadges(!showBadges)}
+                                aria-pressed={showBadges}
                             />
                         </div>
 
