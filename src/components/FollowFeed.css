@@ -1,0 +1,147 @@
+/* Extracted from globals.css — Follows & Activity Feed */
+
+/* ============================================================
+ SOCIAL EXPANSION — Phase 3: Follows + Activity Feed
+ ============================================================ */
+
+/* Follow Button */
+.follow-button-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.follow-btn-following {
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  color: #22C55E !important;
+}
+
+.follow-btn-following:hover {
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #ef4444 !important;
+}
+
+.follow-count {
+  font-size: calc(0.8rem * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+/* Profile Follow Stats */
+.profile-follow-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: calc(0.85rem * var(--font-scale));
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+}
+
+.profile-action-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.message-user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: calc(var(--font-size-sm) * var(--font-scale)) !important;
+  padding: var(--space-sm) var(--space-lg) !important;
+}
+
+.message-user-btn svg {
+  flex-shrink: 0;
+}
+
+.message-user-btn:hover {
+  color: var(--color-accent-primary) !important;
+  border-color: var(--color-accent-primary) !important;
+}
+
+/* Feed Tabs */
+.feed-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-lg);
+  padding: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: var(--space-xl);
+  width: fit-content;
+}
+
+.feed-tab {
+  padding: 8px 20px;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  border-radius: calc(var(--radius-lg) - 2px);
+  font-size: calc(0.9rem * var(--font-scale));
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.feed-tab:hover {
+  color: var(--color-text-primary);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.feed-tab-active {
+  background: var(--color-accent-primary) !important;
+  color: white !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(129, 140, 248, 0.25);
+}
+
+/* Activity Feed */
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.06));
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.activity-feed-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.06));
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s ease;
+}
+
+.activity-feed-item:last-child {
+  border-bottom: none;
+}
+
+.activity-feed-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.activity-feed-icon {
+  font-size: calc(1.2rem * var(--font-scale));
+  flex-shrink: 0;
+}
+
+.activity-feed-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.activity-feed-text {
+  font-size: calc(0.9rem * var(--font-scale));
+}
+
+.activity-feed-time {
+  font-size: calc(0.75rem * var(--font-scale));
+  color: var(--color-text-muted);
+}

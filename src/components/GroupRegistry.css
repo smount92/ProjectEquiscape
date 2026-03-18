@@ -1,0 +1,53 @@
+/* Extracted from globals.css — Group Registry */
+/* ══════════════════════════════════════════════════════════════ */
+/* V17: Group Registry                                            */
+/* ══════════════════════════════════════════════════════════════ */
+
+.registry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+.registry-card {
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.registry-card:hover {
+  border-color: var(--color-accent-primary);
+  transform: translateY(-2px);
+}
+
+.registry-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.registry-card-name {
+  font-weight: 600;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.registry-card-meta {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  color: var(--color-text-muted);
+}
+
+.registry-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.registry-item:last-child {
+  border-bottom: none;
+}

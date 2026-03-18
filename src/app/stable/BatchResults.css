@@ -1,0 +1,77 @@
+/* Extracted from globals.css — Batch Results */
+/* ══════════════════════════════════════════════════════════════ */
+/* V17: Batch Results Grid                                        */
+/* ══════════════════════════════════════════════════════════════ */
+
+.results-grid {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-grid th,
+.results-grid td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.results-grid th {
+  background: var(--color-surface-secondary);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.results-grid input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.results-grid input:focus {
+  border-color: var(--color-accent-primary);
+  outline: none;
+}
+
+.results-grid select {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+
+.results-summary {
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.results-summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.results-summary-stat .stat-value {
+  font-size: calc(1.2rem * var(--font-scale));
+  font-weight: 700;
+  color: var(--color-accent-primary);
+}
+
+.results-summary-stat .stat-label {
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  color: var(--color-text-muted);
+}

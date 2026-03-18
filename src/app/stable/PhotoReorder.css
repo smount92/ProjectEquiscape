@@ -1,0 +1,36 @@
+/* Extracted from globals.css — Photo Reorder */
+/* ══════════════════════════════════════════════════════════════ */
+/* V17: Photo Reorder Drag & Drop                                 */
+/* ══════════════════════════════════════════════════════════════ */
+
+.extras-drag-handle {
+  position: absolute;
+  top: 4px;
+  right: 28px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 3;
+}
+
+.extras-preview-item:hover .extras-drag-handle {
+  opacity: 1;
+}
+
+.extras-preview-item.dragging {
+  opacity: 0.4;
+  outline: 2px dashed var(--color-accent-primary);
+}
+
+.extras-preview-item[draggable="true"] {
+  cursor: grab;
+}

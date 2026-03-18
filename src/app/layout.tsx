@@ -4,6 +4,42 @@ import Script from "next/script";
 import "./globals.css";
 import "./studio.css";
 import "./competition.css";
+
+/* ── Extracted CSS (globals.css modularization sprint) ── */
+// Layout components
+import "@/components/Footer.css";
+import "@/components/BackToTop.css";
+import "@/components/CookieConsent.css";
+// Core UI components
+import "@/components/VaultReveal.css";
+import "@/components/CommentSection.css";
+import "@/components/Provenance.css";
+import "@/components/Ratings.css";
+import "@/components/TrophyCase.css";
+import "@/components/RichEmbed.css";
+import "@/components/GroupRegistry.css";
+import "@/components/CsvImport.css";
+// Social components
+import "@/components/Notifications.css";
+import "@/components/FollowFeed.css";
+import "@/components/ChatGuardrails.css";
+import "@/components/SocialFoundation.css";
+// Page-specific styles
+import "./WelcomeOnboarding.css";
+import "./faq/faq.css";
+import "./about/static.css";
+import "./admin/admin.css";
+import "./market/market.css";
+import "./community/HelpId.css";
+import "./shows/shows.css";
+import "./shows/ShowBuilder.css";
+import "./shows/RingConflict.css";
+import "./stable/passport.css";
+import "./stable/PhotoUpload.css";
+import "./stable/PhotoReorder.css";
+import "./stable/VisibilitySelector.css";
+import "./stable/BatchResults.css";
+import "./add-horse/gallery.css";
 import { SimpleModeProvider } from "@/lib/context/SimpleModeContext";
 import { ToastProvider } from "@/lib/context/ToastContext";
 import Header from "@/components/Header";
