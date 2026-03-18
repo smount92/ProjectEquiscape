@@ -29,6 +29,13 @@ const TOAST_MESSAGES: Record<string, { icon: string; message: (name?: string, ph
         : `Horse updated — ${photoText} saved!`;
     },
   },
+  photo_error: {
+    icon: "⚠️",
+    message: (name, _photos) =>
+      name
+        ? `"${name}" saved, but some photos failed to upload. Please try adding them again.`
+        : "Horse saved, but some photos failed to upload. Please try again.",
+  },
 };
 
 export default function DashboardToast() {

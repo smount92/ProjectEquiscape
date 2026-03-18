@@ -449,6 +449,7 @@ export default function EditHorsePage() {
 
       // Step 2: Upload NEW images directly from browser → Supabase Storage
       const uploadedImages: { path: string; angle: string }[] = [];
+      const uploadErrors: string[] = [];
 
       for (const slot of PHOTO_STUDIO_SLOTS) {
         const angle = slot.angle;
@@ -471,7 +472,10 @@ export default function EditHorsePage() {
             .from("horse-images")
             .upload(filePath, compressed, { contentType: "image/webp" });
 
-          if (!uploadError) {
+          if (uploadError) {
+            console.error(`Upload failed for ${angle}:`, uploadError);
+            uploadErrors.push(`${slot.label}: ${uploadError.message}`);
+          } else {
             uploadedImages.push({ path: filePath, angle });
           }
         }
@@ -487,14 +491,27 @@ export default function EditHorsePage() {
           .from("horse-images")
           .upload(filePath, compressed, { contentType: "image/webp" });
 
-        if (!uploadError) {
+        if (uploadError) {
+          console.error(`Upload failed for extra detail ${i}:`, uploadError);
+          uploadErrors.push(`Extra photo ${i + 1}: ${uploadError.message}`);
+        } else {
           uploadedImages.push({ path: filePath, angle: "extra_detail" });
         }
       }
 
       // Step 3: Finalize image metadata on server
       if (uploadedImages.length > 0) {
-        await finalizeHorseImages(horseId, uploadedImages);
+        const finalizeResult = await finalizeHorseImages(horseId, uploadedImages);
+        if (!finalizeResult.success) {
+          console.error("Finalize failed:", finalizeResult.error);
+          uploadErrors.push(`Save failed: ${finalizeResult.error || "Unknown error"}`);
+        }
+      }
+
+      // Show upload errors but still redirect (text fields saved successfully)
+      if (uploadErrors.length > 0) {
+        console.error("Photo upload errors:", uploadErrors);
+        // Don't block — text data saved, show partial-success toast
       }
 
       // Activity event if public
@@ -522,8 +539,14 @@ export default function EditHorsePage() {
 
       // Redirect — use Next.js router instead of window.location for serverless safety
       const uploadCount = uploadedImages.length;
-      const toastParam = uploadCount > 0 ? "photos_updated" : "updated";
-      router.push(`/dashboard?toast=${toastParam}&name=${encodeURIComponent(customName.trim())}&photos=${uploadCount}`);
+      const hadNewPhotos = Object.keys(newFiles).length > 0 || newExtraFiles.length > 0;
+      let toastParam = "updated";
+      if (uploadErrors.length > 0) {
+        toastParam = "photo_error";
+      } else if (uploadCount > 0) {
+        toastParam = "photos_updated";
+      }
+      router.push(`/dashboard?toast=${toastParam}&name=${encodeURIComponent(customName.trim())}&photos=${uploadCount}&expected=${hadNewPhotos ? Object.keys(newFiles).length + newExtraFiles.length : 0}`);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to save changes.");
     } finally {
