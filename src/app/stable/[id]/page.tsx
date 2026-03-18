@@ -69,24 +69,28 @@ const ANGLE_LABELS: Record<string, string> = {
   Right_Side: "Right Side",
   Front_Chest: "Front / Chest",
   Back_Hind: "Back / Hind",
+  Belly_Makers_Mark: "Belly / Mark",
   Detail_Face_Eyes: "Face & Eyes Detail",
   Detail_Ears: "Ears Detail",
   Detail_Hooves: "Hooves Detail",
   Flaw_Rub_Damage: "Flaws / Damage",
+  extra_detail: "Detail",
   Other: "Other",
 };
 
 // Priority for sorting images (thumbnail first)
 const ANGLE_ORDER: string[] = [
   "Primary_Thumbnail",
-  "Left_Side",
   "Right_Side",
   "Front_Chest",
   "Back_Hind",
+  "Belly_Makers_Mark",
+  "Left_Side",
   "Detail_Face_Eyes",
   "Detail_Ears",
   "Detail_Hooves",
   "Flaw_Rub_Damage",
+  "extra_detail",
   "Other",
 ];
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 
 interface PhotoLightboxProps {
     images: { url: string; label?: string }[];
@@ -40,7 +41,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
     const current = images[currentIndex];
     if (!current) return null;
 
-    return (
+    return createPortal(
         <div
             className="lightbox-overlay"
             onClick={onClose}
@@ -96,6 +97,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
                     {currentIndex + 1} of {images.length}
                 </div>
             )}
-        </div>
+        </div>,
+        document.body
     );
 }

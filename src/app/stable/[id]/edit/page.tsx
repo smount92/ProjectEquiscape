@@ -521,7 +521,9 @@ export default function EditHorsePage() {
       // ⚡ REMOVED: addTimelineEvent for listed status — now derived from view
 
       // Redirect — use Next.js router instead of window.location for serverless safety
-      router.push("/dashboard?toast=updated&name=" + encodeURIComponent(customName.trim()));
+      const uploadCount = uploadedImages.length;
+      const toastParam = uploadCount > 0 ? "photos_updated" : "updated";
+      router.push(`/dashboard?toast=${toastParam}&name=${encodeURIComponent(customName.trim())}&photos=${uploadCount}`);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to save changes.");
     } finally {
