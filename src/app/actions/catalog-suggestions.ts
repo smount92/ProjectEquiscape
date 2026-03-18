@@ -243,7 +243,7 @@ export async function getSuggestions(
     let query = supabase
         .from("catalog_suggestions")
         .select(
-            "*, profiles!catalog_suggestions_user_id_fkey(alias_name, avatar_url, approved_suggestions_count)",
+            "*, users!catalog_suggestions_user_id_fkey(alias_name, avatar_url, approved_suggestions_count)",
             { count: "exact" }
         )
         .order("created_at", { ascending: false })
@@ -269,7 +269,7 @@ export async function getSuggestion(id: string) {
     const { data: suggestion, error } = await supabase
         .from("catalog_suggestions")
         .select(
-            "*, profiles!catalog_suggestions_user_id_fkey(alias_name, avatar_url, approved_suggestions_count)"
+            "*, users!catalog_suggestions_user_id_fkey(alias_name, avatar_url, approved_suggestions_count)"
         )
         .eq("id", id)
         .single();
@@ -452,15 +452,9 @@ export async function reviewSuggestion(decision: ReviewDecision) {
     const { user } = await requireAuth();
     const admin = getAdminClient();
 
-    // Verify admin role
-    const { data: adminProfile } = await admin
-        .from("users")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-    if (
-        (adminProfile as { role: string } | null)?.role !== "admin"
-    ) {
+    // Verify admin — use ADMIN_EMAIL check (same as admin page)
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    if (!adminEmail || user.email?.toLowerCase() !== adminEmail) {
         return { success: false, error: "Admin access required." };
     }
 
