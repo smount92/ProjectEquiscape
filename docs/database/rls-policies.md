@@ -156,6 +156,15 @@ CREATE POLICY "select_unblocked" ON posts FOR SELECT
 | `event_divisions` | All | Event creator | Event creator | Event creator |
 | `event_classes` | All | Event creator | Event creator | Event creator |
 
+### Catalog Curation Tables (V32)
+
+| Table | SELECT | INSERT | UPDATE | DELETE |
+|-------|--------|--------|--------|--------|
+| `catalog_suggestions` | All (public) | Authenticated | Admin (status change) | — |
+| `catalog_suggestion_votes` | All | Authenticated (one per suggestion) | — | Own |
+| `catalog_suggestion_comments` | All | Authenticated | — | Own |
+| `catalog_changelog` | All (public) | System (admin) | — | — |
+
 ## Storage Policies
 
 The `horse-images` bucket is **private** with read policies based on content type:

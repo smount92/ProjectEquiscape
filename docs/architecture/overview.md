@@ -7,8 +7,8 @@ graph TD
     subgraph Vercel["Vercel (Hosting)"]
         subgraph Next["Next.js 16 (App Router)"]
             SC["Server Components (pages)"]
-            CC["Client Components (110)"]
-            SA["Server Actions (35 files)"]
+            CC["Client Components (116)"]
+            SA["Server Actions (36 files)"]
         end
         Cron["Vercel Cron (daily 6AM UTC)"]
     end
@@ -57,7 +57,7 @@ graph TD
 
 ### 1. Server Actions as the Backend
 
-There is **no separate API layer**. All backend logic lives in 35 `"use server"` files under `src/app/actions/`. Client components import server action functions directly — Next.js handles serialization.
+There is **no separate API layer**. All backend logic lives in 36 `"use server"` files under `src/app/actions/`. Client components import server action functions directly — Next.js handles serialization.
 
 This means:
 - No REST controllers, no API route boilerplate

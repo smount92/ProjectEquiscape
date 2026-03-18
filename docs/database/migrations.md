@@ -88,13 +88,14 @@ All SQL migrations are located in `supabase/migrations/` and are applied sequent
 | 087 | `087_hoofprint_remove_comments.sql` | Remove visitor comments from Hoofprint view |
 | 088 | `088_show_badges_toggle.sql` | Toggle badge display on profiles |
 | 089 | `089_commission_wip_photos.sql` | Commission WIP photos, shipping status, Hoofprint injection |
+| 091 | `091_catalog_curation.sql` | Catalog curation: `catalog_suggestions`, `catalog_suggestion_votes`, `catalog_suggestion_comments`, `catalog_changelog` tables + curator columns on `users` + `increment_approved_suggestions` RPC + curator badge seeds |
 
-> **Note:** Migration numbers 045, 047, 049, 051 are intentionally skipped (consolidated into adjacent migrations during development).
+> **Note:** Migration numbers 045, 047, 049, 051, 090 are intentionally skipped (consolidated into adjacent migrations during development).
 
 ## Adding New Migrations
 
 1. Create a new file: `supabase/migrations/NNN_description.sql`
-2. Use the next sequential number (currently: **090**)
+2. Use the next sequential number (currently: **092**)
 3. Always include RLS policies for new tables
 4. Add foreign key indexes for new FK columns
 5. Test by running the SQL in Supabase Dashboard → SQL Editor

@@ -39,10 +39,10 @@ model-horse-hub/
 │   └── *.mjs                         # Other data processing scripts
 │
 ├── supabase/
-│   └── migrations/                   # 85+ sequential SQL migration files
+│   └── migrations/                   # 86+ sequential SQL migration files
 │       ├── 001_initial_schema.sql    # Core tables (users, user_horses, etc.)
 │       ├── ...                       # Feature additions, schema changes
-│       └── 089_commission_wip_photos.sql  # Latest migration
+│       └── 091_catalog_curation.sql  # Latest migration (catalog curation)
 │
 ├── src/                              # Application source code
 │   ├── app/                          # Next.js App Router
@@ -52,11 +52,12 @@ model-horse-hub/
 │   │   ├── studio.css                # Art Studio feature styles
 │   │   ├── competition.css           # Show/competition feature styles
 │   │   │
-│   │   ├── actions/                  # 35 server action files — ALL backend logic
+│   │   ├── actions/                  # 36 server action files — ALL backend logic
 │   │   │   ├── horse.ts              # Core CRUD — create, update, delete horses
 │   │   │   ├── transactions.ts       # Commerce state machine (offers, payments)
 │   │   │   ├── hoofprint.ts          # Provenance timeline, transfers
 │   │   │   ├── art-studio.ts         # Artist profiles, commissions, WIP
+│   │   │   ├── catalog-suggestions.ts # Catalog curation (V32) — browse, suggest, vote, review
 │   │   │   ├── competition.ts        # Events, divisions, classes, judging
 │   │   │   ├── groups.ts             # Group CRUD, membership, files
 │   │   │   ├── events.ts             # Event CRUD, RSVP, photos
@@ -82,13 +83,14 @@ model-horse-hub/
 │   │       ├── market/               # Blue Book price guide
 │   │       ├── shows/                # Competition center
 │   │       ├── studio/               # Art Studio (artist profiles, commissions)
+│   │       ├── reference/            # Catalog browser, suggestions, changelog (V32)
 │   │       ├── discover/             # Discover collectors
 │   │       ├── profile/[alias_name]/ # Public user profiles
 │   │       ├── admin/                # Admin console
 │   │       ├── settings/             # User settings
 │   │       └── ...                   # auth, contact, about, faq, etc.
 │   │
-│   ├── components/                   # 110 client components
+│   ├── components/                   # 116 client components
 │   │   ├── Header.tsx                # Priority+ nav with ResizeObserver
 │   │   ├── DashboardShell.tsx        # Two-column layout, search, view toggles
 │   │   ├── StableGrid.tsx            # Horse card grid with sorting/filtering
@@ -96,6 +98,11 @@ model-horse-hub/
 │   │   ├── ShowStringManager.tsx     # Show string planning (largest component)
 │   │   ├── CsvImport.tsx             # Batch import wizard
 │   │   ├── CommissionTimeline.tsx     # Commission lifecycle UI
+│   │   ├── CatalogBrowser.tsx        # Catalog search/filter/sort/paginate (V32)
+│   │   ├── SuggestEditModal.tsx      # Catalog edit suggestion modal (V32)
+│   │   ├── SuggestionVoteButtons.tsx # Optimistic up/down voting (V32)
+│   │   ├── SuggestionCommentThread.tsx # Discussion threads (V32)
+│   │   ├── SuggestionAdminActions.tsx # Admin approve/reject UI (V32)
 │   │   ├── *.module.css              # 19 co-located CSS Modules
 │   │   └── pdf/                      # PDF generation components (insurance, CoA)
 │   │
@@ -145,7 +152,7 @@ model-horse-hub/
 
 ### Server Actions as the Backend
 
-There is **no separate API layer**. All backend logic lives in 35 `"use server"` files under `src/app/actions/`. Next.js handles serialization between client and server. Client components import server actions directly.
+There is **no separate API layer**. All backend logic lives in 36 `"use server"` files under `src/app/actions/`. Next.js handles serialization between client and server. Client components import server actions directly.
 
 ### Three Supabase Clients
 
@@ -162,6 +169,7 @@ There is **no separate API layer**. All backend logic lives in 35 `"use server"`
 | `globals.css` | Design tokens (`:root`), shared primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`) |
 | `studio.css` | Art Studio feature styles |
 | `competition.css` | Competition/show feature styles |
+| `reference.css` | Catalog curation feature styles (V32) |
 | `*.module.css` | 19 component-scoped CSS Modules |
 
 **Convention:** New components should use CSS Modules. Shared primitives stay in globals.

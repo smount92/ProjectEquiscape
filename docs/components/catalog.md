@@ -1,6 +1,6 @@
 # Component Catalog
 
-All 95 client components live in `src/components/`. Every component is a `"use client"` React component.
+All 101 client components live in `src/components/`. Every component is a `"use client"` React component.
 
 ## Component Index by Domain
 
@@ -140,6 +140,16 @@ All 95 client components live in `src/components/`. Every component is a `"use c
 | `FeaturedHorseCard` | `FeaturedHorseCard.tsx` | Featured horse card |
 | `FeatureHorseForm` | `FeatureHorseForm.tsx` | Admin: feature a horse |
 
+### 📚 Catalog Curation (V32)
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `CatalogBrowser` | `CatalogBrowser.tsx` | Debounced search, maker chips, scale filter, sortable table, pagination |
+| `SuggestEditModal` | `SuggestEditModal.tsx` | Pre-filled edit form with amber change highlighting and diff summary |
+| `SuggestionVoteButtons` | `SuggestionVoteButtons.tsx` | Optimistic ▲/▼ voting with toggle, switch, and net score |
+| `SuggestionCommentThread` | `SuggestionCommentThread.tsx` | Discussion threads with add/delete and relative timestamps |
+| `SuggestionAdminActions` | `SuggestionAdminActions.tsx` | Admin approve/reject with required reason for rejections |
+
 ### 🔧 Admin
 
 | Component | File | Purpose |
@@ -160,7 +170,7 @@ All 95 client components live in `src/components/`. Every component is a `"use c
 | `WishlistSearch` | `WishlistSearch.tsx` | Search wishlist items |
 | `EditBioButton` | `EditBioButton.tsx` | Inline bio editing button |
 
-## Total Component Count: 95
+## Total Component Count: 101
 
 ---
 
