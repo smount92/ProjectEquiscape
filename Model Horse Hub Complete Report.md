@@ -1,32 +1,34 @@
 # Model Horse Hub — Complete Project Report
 
-> **Report Date:** March 15, 2026  
+> **Report Date:** March 17, 2026  
 > **Repository:** `smount92/ProjectEquiscape` (GitHub, private)  
-> **Total Commits:** 204 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
+> **Total Commits:** 263 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
 > **Status:** Closed beta with active testers
 
 ---
 
 ## 1. Executive Summary
 
-**Model Horse Hub** is a privacy-first digital stable, social platform, and marketplace purpose-built for the model horse collecting hobby. It serves as a comprehensive tool for cataloging, insuring, showing, trading, and socializing around model horses (Breyer, Stone, artist resins, etc.).
+**Model Horse Hub** is a privacy-first digital stable, social platform, and marketplace purpose-built for the model horse collecting hobby. It serves as a comprehensive tool for cataloging, insuring, showing, trading, commissioning art, and socializing around model horses (Breyer, Stone, artist resins, etc.).
 
-The platform was built from scratch in ~9 days using AI-assisted pair programming. Despite the rapid pace, the architecture follows enterprise-grade patterns: event-sourced provenance, a unified polymorphic catalog, formal commerce state machine, and comprehensive Row Level Security across every table.
+The platform was built from scratch in ~12 days using AI-assisted pair programming. Despite the rapid pace, the architecture follows enterprise-grade patterns: event-sourced provenance, a unified polymorphic catalog, formal commerce state machine, a gamification achievement engine, and comprehensive Row Level Security across every table. Full JSDoc documentation and a comprehensive `/docs` folder were added as part of a formal documentation sprint.
 
 ### Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| **TypeScript/TSX source lines** | 37,308 |
-| **CSS lines** | 11,779 |
-| **Total source size** | 1.92 MB |
-| **Page routes** | 37 |
-| **Client components** | 94 |
+| **TypeScript/TSX source lines** | 35,703 |
+| **CSS lines** | 12,411 |
+| **Total source size** | 2.11 MB |
+| **Page routes** | 53 |
+| **Client components** | 98 (+14 CSS Modules) |
 | **Server action files** | 35 |
-| **Database migrations** | 73 (001–077) |
-| **SQL migration lines** | 6,035 |
-| **Workflow documents** | 50 |
-| **Strategic docs** | 15 |
+| **Database migrations** | 86 (001–090) |
+| **SQL migration lines** | 6,532 |
+| **Unit tests** | 136 (across 15 test files) |
+| **Documentation pages** | 31 (in `/docs/`) |
+| **Workflow documents** | 57 |
+| **Strategic docs** | 16 |
 
 ---
 
@@ -38,9 +40,10 @@ The platform was built from scratch in ~9 days using AI-assisted pair programmin
 | **Runtime** | React | 19.2.3 | Server Components + Client Components |
 | **Language** | TypeScript | 5.x | Strict mode, manual DB types |
 | **Database** | Supabase (PostgreSQL) | — | RLS on every table, materialized views |
-| **Auth** | Supabase Auth | — | PKCE flow, cookie-based SSR |
+| **Auth** | Supabase Auth | — | PKCE flow, cookie-based SSR, `requireAuth()` helper |
 | **Hosting** | Vercel | Serverless | Hobby tier |
 | **CSS** | Vanilla CSS | — | Design tokens + 19 CSS Modules |
+| **Testing** | Vitest + Playwright | 4.x / 1.58 | Unit tests + E2E scaffolding |
 | **Email** | Resend | 6.9.3 | Transactional notifications |
 | **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, CoA exports |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching |
@@ -48,13 +51,15 @@ The platform was built from scratch in ~9 days using AI-assisted pair programmin
 | **QR Codes** | qrcode.react | 4.2.0 | Passport/transfer QR codes |
 | **Markdown** | react-markdown + remark-gfm | 10.1.0 | Rich text rendering |
 | **Icons** | lucide-react | 0.577.0 | UI icons throughout |
+| **Sanitization** | sanitize-html | 2.17.1 | XSS-safe HTML rendering |
 
 ### Why These Choices
 
 - **Next.js App Router** — Server Components reduce client JS bundle; server actions eliminate the need for a separate API layer. The entire backend is co-located with the frontend.
 - **Supabase** — PostgreSQL with RLS provides row-level security without application middleware. Signed URLs for private storage. Real-time subscriptions for future features.
-- **Vanilla CSS** — The design system predates component-scoped styling. A `globals.css` monolith (11K lines) was partially refactored into 19 CSS Modules in V20. Shared primitives (buttons, cards, forms, modals) remain global.
+- **Vanilla CSS** — The design system predates component-scoped styling. A `globals.css` monolith (~12K lines) was partially refactored into 19 CSS Modules in V20. Shared primitives (buttons, cards, forms, modals) remain global.
 - **No ORM** — Direct Supabase client calls with PostgREST joins. Manual TypeScript types mirror the schema. This avoids ORM abstraction leaks and keeps queries transparent.
+- **Vitest** — Lightweight, fast unit testing with good TypeScript support. 136 tests cover critical server action logic (commerce, CRUD, provenance, collections).
 
 ---
 
@@ -65,26 +70,39 @@ The platform was built from scratch in ~9 days using AI-assisted pair programmin
 ```
 model-horse-hub/
 ├── .agents/
-│   ├── workflows/           # 50 workflow documents (.md)
-│   └── docs/                # 15 strategic/planning documents
+│   ├── workflows/           # 57 workflow documents (.md)
+│   └── docs/                # 16 strategic/planning documents
+├── docs/                    # 31 documentation pages (architecture, guides, API, database)
+│   ├── architecture/        # ADRs, data-flow diagrams, system overview
+│   ├── api/                 # API route documentation
+│   ├── components/          # Component catalog
+│   ├── database/            # Schema overview, migrations log, RLS policies
+│   ├── getting-started/     # Setup, project structure
+│   ├── guides/              # Adding features, migrations
+│   └── routes/              # Page route documentation
 ├── scripts/                 # 7 data scraping/seeding scripts
 ├── supabase/
-│   └── migrations/          # 73 SQL migration files (001–077)
+│   └── migrations/          # 86 SQL migration files (001–090)
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx       # Root layout (Inter font, GA, SimpleModeProvider, Header)
-│   │   ├── globals.css      # 11,017 lines — design tokens + shared styles
+│   │   ├── globals.css      # ~11,700 lines — design tokens + shared styles
 │   │   ├── studio.css       # Art Studio styles
 │   │   ├── competition.css  # Competition/show styles
 │   │   ├── actions/         # 35 server action files (ALL backend logic)
-│   │   ├── api/             # 5 API routes (auth, cron, export, identify-mold, reference)
-│   │   └── [37 route dirs]  # Page routes
-│   ├── components/          # 94 client components + 19 CSS Modules
+│   │   │   └── __tests__/   # 15 test files, 136 unit tests
+│   │   ├── api/             # 11 API routes
+│   │   └── [53 route dirs]  # Page routes
+│   ├── components/          # 98 client components + 19 CSS Modules
+│   │   └── pdf/             # PDF generation components
 │   └── lib/
 │       ├── supabase/        # admin.ts, client.ts, server.ts
 │       ├── types/           # database.ts (manual types), csv-import.ts
-│       ├── utils/           # imageCompression, mentions, rateLimit, storage, validation
-│       └── context/         # SimpleModeContext (accessibility)
+│       ├── utils/           # achievements, imageCompression, mentions, rateLimit, storage, validation
+│       ├── context/         # SimpleModeContext (accessibility)
+│       ├── constants/       # Shared constants
+│       └── auth.ts          # requireAuth() helper
+├── e2e/                     # Playwright E2E test scaffolding
 └── public/                  # Static assets, fonts
 ```
 
@@ -93,17 +111,17 @@ model-horse-hub/
 ```mermaid
 graph TD
     A["Browser (React 19)"] -->|Server Action calls| B["Next.js Server Actions"]
-    B -->|createClient SSR| C["Supabase PostgreSQL"]
+    B -->|requireAuth + createClient SSR| C["Supabase PostgreSQL"]
     A -->|Direct upload| D["Supabase Storage"]
     B -->|getAdminClient| E["Supabase Admin (bypasses RLS)"]
     B -->|after()| F["Background Tasks"]
-    F -->|Notifications, Activity Events| C
+    F -->|Notifications, Activity Events, Achievements| C
     G["Vercel Cron"] -->|Daily 6 AM UTC| H["/api/cron/refresh-market"]
     H -->|Refresh materialized view| C
-    A -->|Signed URLs| D
+    A -->|Public URLs| D
 ```
 
-**Key pattern:** Pages are Server Components that fetch data directly. Client Components call server actions (imported directly — Next.js handles serialization). The `after()` API from Next.js wraps deferred tasks (notifications, activity events) so they don't block the response — critical for serverless cold start budget.
+**Key pattern:** Pages are Server Components that fetch data directly. Client Components call server actions (imported directly — Next.js handles serialization). The `after()` API from Next.js wraps deferred tasks (notifications, activity events, achievement evaluation) so they don't block the response — critical for serverless cold start budget.
 
 ### 3.3 Authentication Flow
 
@@ -113,12 +131,14 @@ graph TD
 4. Cookie-based SSR session — `createClient()` from `@/lib/supabase/server` reads cookies
 5. Client-side: `createClient()` from `@/lib/supabase/client` for direct storage uploads
 6. Password reset: `/forgot-password` → `/auth/callback` (PKCE) → `/settings` (reset form)
+7. Server actions use `requireAuth()` helper — a centralized auth gate that returns `{ supabase, user }` or throws
 
 ### 3.4 Security Layers
 
 | Layer | Implementation |
 |-------|---------------|
 | **Row Level Security** | Every table has RLS policies. Users can only read/write their own data. |
+| **Auth helper** | `requireAuth()` centralizes auth checks across all 35 server action files |
 | **Admin bypass** | `getAdminClient()` uses `SUPABASE_SERVICE_ROLE_KEY` for cross-user writes (notifications, transfers) |
 | **Rate limiting** | `checkRateLimit()` utility — configurable per-action limits |
 | **Chat guardrails** | `RISKY_PAYMENT_REGEX` warns when users mention off-platform payment methods |
@@ -127,6 +147,7 @@ graph TD
 | **Watermarking** | Opt-in image watermarking at upload time (username overlay) |
 | **Block system** | Blocked users cannot interact — filtered at query level |
 | **Immutable storage** | Horse image paths include `horse_id` prefix — no cross-user access |
+| **HTML sanitization** | `sanitize-html` prevents XSS in user-generated content |
 
 ---
 
@@ -147,20 +168,20 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 
 ### 4.2 Core Tables
 
-| Table | Purpose | Row Count (est.) |
-|-------|---------|---------|
-| `users` | User profiles, settings, avatar | — |
-| `user_horses` | The central inventory record | — |
-| `horse_images` | Photo metadata, angle profiles (Near-Side, Off-Side, etc.) | — |
-| `financial_vault` | Purchase price, estimated value, insurance notes (PRIVATE) | — |
-| `catalog_items` | Polymorphic reference catalog — molds, releases, resins, tack | 10,500+ |
-| `user_collections` | Personal folders/collections | — |
-| `horse_collections` | Junction table for multi-collection assignment (M:N) | — |
-| `horse_transfers` | Ownership transfer records with claim PINs | — |
-| `horse_pedigrees` | Artist resin lineage (sire, dam, sculptor, cast#) | — |
-| `show_records` | Manually-entered show results for individual horses | — |
-| `customization_logs` | Customization work history | — |
-| `condition_history` | Condition grade changes over time | — |
+| Table | Purpose |
+|-------|---------|
+| `users` | User profiles, settings, avatar, bio, currency preference |
+| `user_horses` | The central inventory record — custom name, finish, condition, visibility, trade status |
+| `horse_images` | Photo metadata with `angle_profile` enum (12 values including extra_detail) |
+| `financial_vault` | Purchase price, estimated value, insurance notes (STRICTLY PRIVATE) |
+| `catalog_items` | Polymorphic reference catalog — molds, releases, resins, tack (10,500+ entries) |
+| `user_collections` | Personal folders/collections |
+| `horse_collections` | Junction table for multi-collection assignment (M:N) |
+| `horse_transfers` | Ownership transfer records with claim PINs |
+| `horse_pedigrees` | Artist resin lineage (sire, dam, sculptor, cast#) |
+| `show_records` | Manually-entered show results for individual horses |
+| `customization_logs` | Customization work history |
+| `condition_history` | Condition grade changes over time |
 
 ### 4.3 Social & Community Tables
 
@@ -204,8 +225,8 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 |-------|---------|
 | `artist_profiles` | Artist public profiles and portfolios |
 | `commission_listings` | Posted commission offerings |
-| `commissions` | Active commission orders |
-| `commission_updates` | WIP progress updates |
+| `commissions` | Active commission orders with shipping status |
+| `commission_updates` | WIP progress updates with photos |
 
 ### 4.7 Groups & Collaboration
 
@@ -215,15 +236,22 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | `group_members` | Membership with roles (admin/moderator/member) |
 | `group_files` | Shared documents within groups |
 
-### 4.8 Materialized Views
+### 4.8 Gamification Tables
+
+| Table | Purpose |
+|-------|---------|
+| `badges` | Achievement definitions (name, criteria, icon, tier) |
+| `user_badges` | Awarded badges per user with timestamps |
+
+### 4.9 Materialized Views
 
 | View | Purpose | Refresh |
-|------|---------|---------|
+|------|---------|---------| 
 | `v_horse_hoofprint` | Universal provenance ledger — UNION ALL across transfers, condition changes, show records, customization logs, pedigrees | On demand |
 | `mv_market_prices` | Blue Book price guide — aggregated from completed transactions by catalog item, finish type, life stage | Vercel cron daily at 6 AM UTC |
 | `discover_users_view` | Active collectors with horse counts and rating averages | — |
 
-### 4.9 Key Design Decisions
+### 4.10 Key Design Decisions
 
 1. **Polymorphic `catalog_items`** — A single table with an `item_type` column (`plastic_mold`, `plastic_release`, `artist_resin`, `tack`, etc.) and a `parent_id` FK for hierarchy (release → mold). This eliminated 3 separate reference tables and future-proofs for any collectible type.
 
@@ -232,6 +260,8 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 3. **Commerce state machine** — Transaction status follows a strict flow: `offer_made → pending_payment → funds_verified → completed` (with `cancelled` escape hatch at any step). This prevents rug-pulls and ensures both parties have clear state visibility.
 
 4. **Junction table for collections** — Horses can belong to multiple collections (e.g., "Show String" and "Childhood Herd" simultaneously) via the `horse_collections` junction table. A legacy `collection_id` FK on `user_horses` is maintained for backward compatibility.
+
+5. **Angle profile enum** — Horse photos use a strict PostgreSQL enum (`angle_profile`) with 12 values: `Primary_Thumbnail`, `Left_Side`, `Right_Side`, `Front_Chest`, `Back_Hind`, `Belly_Makers_Mark`, `Detail_Face_Eyes`, `Detail_Ears`, `Detail_Hooves`, `Flaw_Rub_Damage`, `extra_detail`, and `Other`. This enables structured multi-angle galleries.
 
 ---
 
@@ -244,9 +274,10 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | Multi-step Add Horse form | ✅ Complete | `/add-horse` |
 | Edit Horse (all fields) | ✅ Complete | `/stable/[id]/edit` |
 | Delete Horse (tombstone) | ✅ Complete | Delete modal |
-| 5 LSQ Photo Slots | ✅ Complete | Near-Side, Off-Side, Front, Hind, Belly |
+| 5 LSQ Photo Slots | ✅ Complete | Near-Side, Off-Side, Front, Hind, Belly/Mark |
 | Extra Detail Photos (10 max) | ✅ Complete | Dropzone in add/edit forms |
 | Image Crop Tool | ✅ Complete | Aspect ratio presets, rule-of-thirds grid |
+| Photo Lightbox | ✅ Complete | Portal-based fullscreen viewer with keyboard nav |
 | Opt-in Watermarking | ✅ Complete | Settings toggle |
 | Unified Reference Search | ✅ Complete | Fuzzy search across 10,500+ catalog items |
 | Suggest Missing Reference | ✅ Complete | Modal with type selection |
@@ -293,7 +324,7 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 
 | Feature | Status | Entry Point |
 |---------|--------|-------------|
-| Marketplace Status | ✅ Complete | For Sale / Open to Offers / Not for Sale |
+| Marketplace Status | ✅ Complete | For Sale / Open to Offers / Not for Sale / Stolen/Missing |
 | Make Offer System | ✅ Complete | Formal offer → accept/decline flow |
 | Commerce State Machine | ✅ Complete | 4-step transaction lifecycle |
 | Transaction Ratings | ✅ Complete | 1–5 stars + review text |
@@ -326,6 +357,7 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | Commission Listings | ✅ Complete | Service catalog |
 | Commission Requests | ✅ Complete | Request form with horse linking |
 | WIP Portal | ✅ Complete | Progress updates + photo timeline |
+| Shipping Status | ✅ Complete | Commission status includes shipping step |
 | Artist Browser | ✅ Complete | `/studio` |
 
 ### 5.7 Groups
@@ -339,7 +371,16 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | Group Registry | ✅ Complete | Collection registries within groups |
 | Sub-Channels | ✅ Complete | Categorized discussions |
 
-### 5.8 Platform & Infrastructure
+### 5.8 Gamification
+
+| Feature | Status | Entry Point |
+|---------|--------|-------------|
+| Achievement System | ✅ Complete | Badge definitions + criteria engine |
+| Trophy Case | ✅ Complete | User profile display |
+| Async Evaluation | ✅ Complete | `after()` hook evaluates on triggers |
+| Cron Evaluation | ✅ Complete | Complex badges via scheduled job |
+
+### 5.9 Platform & Infrastructure
 
 | Feature | Status | Entry Point |
 |---------|--------|-------------|
@@ -351,8 +392,10 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | Contact Form | ✅ Complete | `/contact` |
 | Cookie Consent | ✅ Complete | GDPR banner |
 | Back-to-Top Button | ✅ Complete | Scroll utility |
-| Dashboard Toast System | ✅ Complete | Timed notification toasts |
+| Dashboard Toast System | ✅ Complete | Timed notification toasts (updated, deleted, photos_updated, photo_error) |
 | Error/Not Found Pages | ✅ Complete | Branded error states |
+| Private Analytics Widget | ✅ Complete | Stable overview on dashboard |
+| Share Button | ✅ Complete | Web Share API + clipboard fallback |
 
 ---
 
@@ -387,9 +430,9 @@ The CSS layer evolved through several phases:
 
 1. **V1–V15:** Everything in `globals.css` (grew to ~12,000 lines)
 2. **V20 (CSS Maturity Sprint):** Extracted 19 CSS Modules, reducing globals by 28%
-3. **Current state:** `globals.css` (~11,017 lines) contains design tokens + shared primitives. Component-specific styles live in co-located CSS Modules.
+3. **Current state:** `globals.css` (~11,700 lines) contains design tokens + shared primitives. Component-specific styles live in co-located CSS Modules.
 
-**CSS Modules in use:** ChatThread, OfferCard, MakeOfferModal, DashboardShell, DashboardToast, StableLedger, GroupDetailClient, GroupAdminPanel, GroupFiles, FeaturedHorseCard, MatchmakerMatches, FavoriteButton, WishlistButton, RatingForm, discover.module.css, inbox, settings, page.module.css
+**CSS Modules in use (19):** ChatThread, OfferCard, MakeOfferModal, DashboardShell, DashboardToast, StableLedger, GroupDetailClient, GroupAdminPanel, GroupFiles, FeaturedHorseCard, MatchmakerMatches, FavoriteButton, WishlistButton, RatingForm, discover, inbox, settings, page.module.css
 
 **Convention:** New components should use CSS Modules. Shared primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`, `.horse-card-*`, `.feed-*`) remain in globals.
 
@@ -400,6 +443,7 @@ The CSS layer evolved through several phases:
 - Dashboard uses two-column layout on desktop, single column on mobile
 - Horse cards in responsive grid: `repeat(auto-fill, minmax(280px, 1fr))`
 - Forms use multi-step wizard pattern with step cards
+- Desktop polish sprint (V18) addressed widescreen gutters and grid scaling at 1440px
 
 ---
 
@@ -411,69 +455,79 @@ All backend logic lives in 35 `"use server"` action files under `src/app/actions
 
 | File | Size | Purpose |
 |------|------|---------|
-| `horse.ts` | 24KB | Core CRUD — create, update, delete, finalize images |
-| `competition.ts` | 33KB | Event divisions, classes, entries, placings |
-| `transactions.ts` | 31KB | Commerce state machine — offers, payments, completion |
-| `art-studio.ts` | 32KB | Artist profiles, commissions, WIP updates |
-| `groups.ts` | 34KB | Group CRUD, membership, files, sub-channels |
+| `horse.ts` | 27KB | Core CRUD — create, update, delete, finalize images, bulk ops |
+| `competition.ts` | 32KB | Event divisions, classes, entries, placings |
+| `transactions.ts` | 34KB | Commerce state machine — offers, payments, completion |
+| `art-studio.ts` | 32KB | Artist profiles, commissions, WIP updates, shipping |
+| `groups.ts` | 32KB | Group CRUD, membership, files, sub-channels |
 | `events.ts` | 29KB | Event CRUD, RSVP, judges, comments, photos |
-| `shows.ts` | 22KB | Photo shows, voting, show records |
-| `hoofprint.ts` | 17KB | Provenance timeline, transfers, life stage |
-| `parked-export.ts` | 18KB | CoA PDF data assembly |
-| `posts.ts` | 16KB | Social posts, comments, media |
+| `shows.ts` | 25KB | Photo shows, voting, show records |
+| `parked-export.ts` | 19KB | CoA PDF data assembly |
+| `hoofprint.ts` | 18KB | Provenance timeline, transfers, life stage |
+| `posts.ts` | 17KB | Social posts, comments, media |
 | `activity.ts` | 13KB | Feed generation, activity events |
-| `help-id.ts` | 10KB | Community identification requests |
+| `help-id.ts` | 11KB | Community identification requests |
 | `messaging.ts` | 10KB | DM conversations, messages |
-| `settings.ts` | 9KB | User preferences, profile, password |
+| `settings.ts` | 10KB | User preferences, profile, password |
+| `provenance.ts` | 9KB | Hoofprint timeline queries |
 | `market.ts` | 8KB | Blue Book price queries |
+| `insurance-report.ts` | 6KB | Insurance PDF data |
+| `admin.ts` | 7KB | Admin dashboard, suggestions |
 | `collections.ts` | 5KB | Multi-collection management |
-| `follows.ts` | 4KB | Follow/unfollow |
-| `notifications.ts` | 5KB | Notification queue management |
-| `mentions.ts` | 2KB | @mention parsing and notification |
-| `ratings.ts` | 2KB | Transaction review queries |
-| `likes.ts` | 2KB | Like/unlike toggle |
-| `blocks.ts` | 2KB | Block/unblock |
 | `moderation.ts` | 5KB | Reports, admin actions |
-| `admin.ts` | 6KB | Admin dashboard, suggestions |
-| `insurance-report.ts` | 7KB | Insurance PDF data |
+| `notifications.ts` | 5KB | Notification queue management |
+| `follows.ts` | 4KB | Follow/unfollow |
 | `reference.ts` | 4KB | Catalog item queries |
-| `suggestions.ts` | 3KB | Reference catalog suggestions |
-| `csv-import.ts` | 2KB | Batch import RPC |
+| `suggestions.ts` | 4KB | Reference catalog suggestions |
+| `horse-events.ts` | 3KB | Activity event emission for horses |
+| `csv-import.ts` | 3KB | Batch import RPC |
+| `blocks.ts` | 3KB | Block/unblock |
+| `contact.ts` | 2KB | Contact form submission |
+| `likes.ts` | 2KB | Like/unlike toggle |
 | `wishlist.ts` | 2KB | Wishlist management |
 | `social.ts` | 2KB | Legacy social helpers |
-| `contact.ts` | 2KB | Contact form submission |
-| `profile.ts` | 1KB | Public profile query |
+| `mentions.ts` | 2KB | @mention parsing and notification |
+| `ratings.ts` | 2KB | Transaction review queries |
 | `header.ts` | 2KB | Header data (unread counts) |
-| `horse-events.ts` | 3KB | Activity event emission for horses |
-| `provenance.ts` | 9KB | Hoofprint timeline queries |
+| `profile.ts` | 1KB | Public profile query |
 
 ### 7.2 Patterns Used
 
 ```typescript
+// Centralized auth gate (migrated from boilerplate in V33)
+const { supabase, user } = await requireAuth();
+
 // Standard return type
 { success: boolean; error?: string; data?: T }
-
-// Auth check
-const { data: { user } } = await supabase.auth.getUser();
-if (!user) return { success: false, error: "Not authenticated." };
 
 // Admin client for cross-user writes
 const admin = getAdminClient();
 
 // Background task (serverless-safe)
 after(async () => {
-  // notifications, activity events
+  // notifications, activity events, achievement evaluation
 });
 
 // Cache invalidation
 revalidatePath("/dashboard");
 ```
 
+### 7.3 Unit Test Coverage
+
+136 unit tests across 4 test suites covering critical server action logic:
+
+| Suite | Tests | Coverage |
+|-------|-------|----------|
+| `collections.test.ts` | Collection CRUD, M:N junction ops | 30+ |
+| `horse.test.ts` | Create, delete, quick-add, finalize images | 30+ |
+| `provenance.test.ts` | Show records, pedigree, timeline queries | 30+ |
+| `transactions.test.ts` | Commerce state machine, offers, payments, cancellations | 40+ |
+
 ---
 
 ## 8. API Routes
 
-Five API routes handle concerns that can't be server actions:
+Eleven API routes handle concerns that can't be server actions:
 
 | Route | Purpose |
 |-------|---------|
@@ -487,21 +541,23 @@ Five API routes handle concerns that can't be server actions:
 
 ## 9. Client Components
 
-94 client components power the interactive UI. Major categories:
+98 client components power the interactive UI. Major categories:
 
 ### 9.1 Core UI Components
 
-| Component | Lines | Purpose |
-|-----------|-------|---------|
-| `Header.tsx` | 22K | Priority+ nav with ResizeObserver |
-| `DashboardShell.tsx` | 10K | Two-column layout, search, view toggles |
-| `StableGrid.tsx` | 11K | Horse card grid with sorting/filtering |
-| `UnifiedReferenceSearch.tsx` | 14K | Fuzzy catalog search with preview |
-| `UniversalFeed.tsx` | 21K | Activity feed with infinite scroll |
-| `ShowRingGrid.tsx` | 14K | Public horse browsing |
-| `ShowStringManager.tsx` | 30K | Show string planning + entry management |
-| `CsvImport.tsx` | 30K | Multi-step batch import wizard |
-| `ImageCropModal.tsx` | 19K | Interactive image cropping |
+| Component | Size | Purpose |
+|-----------|------|---------|
+| `Header.tsx` | 23KB | Priority+ nav with ResizeObserver |
+| `DashboardShell.tsx` | 11KB | Two-column layout, search, view toggles |
+| `StableGrid.tsx` | 11KB | Horse card grid with sorting/filtering |
+| `UnifiedReferenceSearch.tsx` | 14KB | Fuzzy catalog search with preview |
+| `UniversalFeed.tsx` | 21KB | Activity feed with infinite scroll |
+| `ShowRingGrid.tsx` | 14KB | Public horse browsing |
+| `ShowStringManager.tsx` | 30KB | Show string planning + entry management |
+| `CsvImport.tsx` | 30KB | Multi-step batch import wizard |
+| `ImageCropModal.tsx` | 19KB | Interactive image cropping |
+| `PedigreeCard.tsx` | 20KB | Resin lineage display |
+| `CommissionTimeline.tsx` | 23KB | Commission progress + shipping workflow |
 
 ### 9.2 Commerce Components
 
@@ -541,6 +597,15 @@ Five API routes handle concerns that can't be server actions:
 | `TransferHistorySection.tsx` | Transfer chain display |
 | `ParkedExportPanel.tsx` | CoA/export controls |
 | `InsuranceReportButton.tsx` | Insurance PDF trigger |
+| `PhotoLightbox.tsx` | Portal-based fullscreen photo viewer |
+| `PassportGallery.tsx` | Multi-angle passport photo display |
+
+### 9.5 Gamification Components
+
+| Component | Purpose |
+|-----------|---------|
+| `TrophyCase.tsx` | User badge display grid |
+| `NanDashboardWidget.tsx` | NAN tracking widget |
 
 ---
 
@@ -553,10 +618,10 @@ Five API routes handle concerns that can't be server actions:
 | `scrape_breyer_molds.mjs` | Scrapes Breyer mold data from external sources |
 | `scrape_releases.mjs` | Scrapes Breyer release data |
 | `scrape_missing_releases.mjs` | Fills gaps in release data |
-| `scrape_erd.mjs` | Scrapes Equine Resin Directory (artist resins) |
-| `seed_batch2.mjs` | Seeds scraped data into catalog_items |
+| `scrape_erd.mjs` | Scrapes Equine Resin Directory (artist resins, ~5000 IDs) |
+| `seed_batch2.mjs` | Seeds scraped mold data into catalog_items |
 | `seed_releases.mjs` | Seeds release data |
-| `seed_erd_resins.mjs` | Seeds ERD resin data |
+| `seed_erd_resins.mjs` | Seeds ERD resin data into artist_resins → catalog_items |
 
 ### 10.2 Catalog Content
 
@@ -571,9 +636,35 @@ The polymorphic `item_type` column + `parent_id` FK enables arbitrary hierarchy 
 
 ---
 
-## 11. Development History
+## 11. Documentation
 
-### 11.1 Phase Timeline
+### 11.1 Documentation Structure
+
+The `/docs/` directory contains 31 pages organized into 7 sections:
+
+| Section | Contents |
+|---------|----------|
+| `getting-started/` | Setup guide, project structure reference |
+| `architecture/` | System overview, data flow diagrams, ADRs (6 decisions documented) |
+| `database/` | Schema overview, migrations log, RLS policy catalog |
+| `api/` | API route documentation |
+| `components/` | Component catalog with props |
+| `routes/` | Page route documentation |
+| `guides/` | How to add features, write migrations |
+
+### 11.2 JSDoc Coverage
+
+All 35 server action files have JSDoc comments on exported functions, documenting parameters, return types, and behavior. Coverage was achieved through a formal documentation sprint (Phase 5 of the documentation plan).
+
+### 11.3 Workflow Documents
+
+57 workflow files in `.agents/workflows/` document every sprint, from the initial mobile polish through the latest commission refinements. Each workflow follows a standard format with `// turbo-all` annotations for automated execution.
+
+---
+
+## 12. Development History
+
+### 12.1 Phase Timeline
 
 | Phase | Sprint | Key Deliverables |
 |-------|--------|-----------------|
@@ -607,8 +698,16 @@ The polymorphic `item_type` column + `parent_id` FK enables arbitrary hierarchy 
 | **V28** | Beta Feedback R1 | Show bio, ribbons, fuzzy dates, currency, reference prominence |
 | **V29** | Competition Engine | Event editing, judges, class-linked entries, expert judging |
 | **V30** | UI Polish | Image cropping, multi-collections, discover search, mention fixes |
+| **V31** | Private Analytics | Stable overview widget, Web Share API, native sharing |
+| **V32** | Desktop Polish | Header Priority+ pattern, widescreen grid scaling, gutter fixes |
+| **V33** | Auth Migration | `requireAuth()` helper rollout across all server actions |
+| **V34** | ERD Scraping | Equine Resin Directory data import (5000 IDs → catalog_items) |
+| **V35** | Gamification Engine | Badges, Trophy Case, async achievement evaluation |
+| **V36** | Commission Refinement | Shipping status, WIP photos, status transition fixes |
+| **V37** | Documentation Sprint | 31 doc pages, JSDoc on all exports, architecture diagrams |
+| **V38** | Photo Upload Fixes | Lightbox portal, angle_profile enum fix, upload error visibility |
 
-### 11.2 Key Architectural Decisions Log
+### 12.2 Key Architectural Decisions Log
 
 | Decision | Rationale |
 |----------|-----------|
@@ -616,73 +715,47 @@ The polymorphic `item_type` column + `parent_id` FK enables arbitrary hierarchy 
 | **Manual TypeScript types** | Generated Supabase types were too permissive. Manual typing ensures compile-time safety for the specific columns we use. |
 | **Vanilla CSS over Tailwind** | Full design token control. The token system predates the project; Tailwind would require mapping all tokens to utility classes. |
 | **`after()` for background tasks** | Serverless functions have cold start budgets. Notifications and activity events are deferred so they don't block the user-facing response. |
-| **Junction table for collections** | The original single FK (`collection_id`) limited horses to one collection. Real-world use cases (a horse in both "Show String" and "Childhood Herd") demanded M:N. Legacy FK kept in sync for backward compat. |
-| **Materialized views for read-heavy queries** | The provenance timeline and market prices are expensive UNION ALL queries. Materialized views pre-compute results; the market view refreshes daily via cron. |
+| **Junction table for collections** | The original single FK (`collection_id`) limited horses to one collection. Real-world use cases demanded M:N. Legacy FK kept in sync. |
+| **Materialized views** | Provenance timeline and market prices are expensive UNION ALL queries. Materialized views pre-compute results; market refreshes daily via cron. |
 | **Soft delete (tombstone)** | Hard deleting horses breaks provenance chains, transfer history, and show records. Tombstone preserves FK integrity. |
-| **Private storage bucket** | Horse images are in a private Supabase bucket. Signed URLs with TTL prevent hotlinking. The `getSignedImageUrl()` utility handles batch signing. |
-
----
-
-## 12. Foundational Documents
-
-### 12.1 Document Index
-
-| Document | Location | Purpose |
-|----------|----------|---------|
-| [model_horse_hub_state_report.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/model_horse_hub_state_report.md) | `.agents/docs/` | Complete feature inventory and route-by-route breakdown |
-| [platform_architecture_deep_dive.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/platform_architecture_deep_dive.md) | `.agents/docs/` | Deep technical architecture analysis |
-| [Grand_Unification_Plan.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/Grand_Unification_Plan.md) | `.agents/docs/` | Schema consolidation strategy (V6–V11) |
-| [Phase6_master_blueprint.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/Phase6_master_blueprint.md) | `.agents/docs/` | Phase 6 epic planning |
-| [feature_wishlist_report.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/feature_wishlist_report.md) | `.agents/docs/` | Future feature proposals and research |
-| [Theme_Overhaul.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/Theme_Overhaul.md) | `.agents/docs/` | Design system specification |
-| [Master_QA_Worksheet.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/Master_QA_Worksheet.md) | `.agents/docs/` | QA test plan |
-| [QA_Phase1_Results.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/QA_Phase1_Results.md) | `.agents/docs/` | Automated test results |
-| [Beta_Feedback_Round1.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/Beta_Feedback_Round1.md) | `.agents/docs/` | First round beta tester feedback |
-| [Ecosystem_Expansion_Plan.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/docs/Ecosystem_Expansion_Plan.md) | `.agents/docs/` | Long-term ecosystem vision |
-| [onboard.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/workflows/onboard.md) | `.agents/workflows/` | Developer onboarding workflow |
-| [architect.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/workflows/architect.md) | `.agents/workflows/` | Architecture management workflow |
-| [roadmap.md](file:///c:/Project%20Equispace/model-horse-hub/.agents/workflows/roadmap.md) | `.agents/workflows/` | Long-term product roadmap |
-
-### 12.2 Workflow Documents
-
-50 workflow files in `.agents/workflows/` document every sprint, from the initial mobile polish through the latest competition engine. Each workflow follows a standard format:
-
-```yaml
----
-description: [sprint name and purpose]
----
-# Sprint Title
-> Context, prerequisites, and rules
-// turbo-all  (auto-run annotation for developer agents)
-
-## Task 1: ...
-## Task 2: ...
-```
-
-Workflows serve as both execution plans and historical records. Completed tasks are marked `✅ DONE` with dates.
+| **`requireAuth()` helper** | Centralized auth gate replaced boilerplate `getUser()` checks across all 35 action files. Reduces duplication and ensures consistent error handling. |
+| **`createPortal` for modals/lightboxes** | All overlay components (modals, lightboxes) render via `createPortal(…, document.body)` to avoid CSS clipping from parent `overflow: hidden` containers. |
+| **Public storage bucket** | Horse images use public Supabase URLs (no signed URL overhead). Image paths include `horses/{horseId}/` prefix for organization. |
 
 ---
 
 ## 13. Testing & Quality
 
-### 13.1 Build Verification
+### 13.1 Unit Tests
+
+136 tests across 15 test files covering critical server action logic:
+
+- **Collections:** M:N junction CRUD, collection assignment, deletion
+- **Horse CRUD:** Create, delete, quick-add, finalize images
+- **Provenance:** Show records, pedigree, timeline queries
+- **Commerce:** Full state machine (offer → payment → completion → rating), cancellation, retraction
+
+All tests pass with pre-commit hooks via Husky.
+
+### 13.2 Build Verification
 
 Every sprint ends with `npx next build` — the Turbopack build catches type errors, import issues, and dead code. The project currently builds with **0 errors**.
 
-### 13.2 QA Process
+### 13.3 QA Process
 
-- **Automated:** QA Agent workflow (`/qa-agent`) runs 22 browser-based tests across 3 phases
-- **Manual:** Beta testers provide feedback via structured rounds (Round 1 complete)
-- **Lint:** ESLint with Next.js config
+- **Automated:** Vitest unit tests (136 tests, pre-commit hook)
+- **E2E scaffold:** Playwright configured with axe-core accessibility testing
+- **Manual:** Beta testers provide feedback via structured rounds
+- **Lint:** ESLint with Next.js config + security plugin
 - **Type safety:** Strict TypeScript with manual database types
 
-### 13.3 Known Limitations
+### 13.4 Known Limitations
 
 | Area | Limitation | Mitigation |
 |------|-----------|------------|
-| **Test coverage** | No unit test suite beyond vitest scaffold | Build verification + QA agent + manual testing |
+| **Test coverage** | Unit tests cover server actions; no component tests | Build verification + E2E scaffold + manual testing |
 | **Database types** | Manual types, not auto-generated | Types are comprehensive and kept in sync with migrations |
-| **CSS monolith** | `globals.css` still 11K lines | Partially refactored (V20). New components use CSS Modules. |
+| **CSS monolith** | `globals.css` still ~11,700 lines | 19 CSS Modules extracted (V20). New components use CSS Modules. |
 | **No SSR caching** | All dynamic pages fetch on every request | Supabase RLS requires authenticated requests; static generation not viable for private data |
 | **Hobby tier Vercel** | Cron limited to daily frequency | Market price refresh is daily (sufficient for hobby volumes) |
 
@@ -693,7 +766,7 @@ Every sprint ends with `npx next build` — the Turbopack build catches type err
 ### 14.1 Deployment
 
 - **Git push to `main`** → Vercel auto-deploys
-- **Supabase migrations** → Run via dashboard SQL editor or `npx supabase db push`
+- **Supabase migrations** → Run via dashboard SQL editor
 - **Environment variables** → `.env.local` (local) / Vercel dashboard (production)
 
 ### 14.2 Required Environment Variables
@@ -717,21 +790,32 @@ RESEND_API_KEY=...
 
 ### 15.1 What's Complete
 
-The platform is feature-complete for closed beta. All core inventory, social, commerce, competition, art studio, and group features are implemented and building successfully.
+The platform is feature-complete for closed beta. All core inventory, social, commerce, competition, art studio, group, and gamification features are implemented and building successfully. Comprehensive documentation covers architecture, database schema, API routes, components, and developer guides.
 
 ### 15.2 Migration Status
 
-All 73 migrations (001–077) have been deployed to production Supabase. The most recent, migration **077** (`horse_collections_junction.sql`), was deployed on March 15, 2026 after a manual fix to the RLS policies (the subquery correctly references `owner_id` on `user_horses`, not `user_id`).
+All 86 migrations (001–090) have been deployed to production Supabase. The most recent, migration **090** (`angle_profile_extras.sql`), added the `extra_detail` and `Belly_Makers_Mark` values to the `angle_profile` PostgreSQL enum — fixing a bug where extra detail photo uploads silently failed.
 
-### 15.3 Recommended Next Steps
+### 15.3 Recent Bug Fixes (V38)
+
+| Bug | Root Cause | Fix |
+|-----|-----------|-----|
+| Photo lightbox not working on stable page | `overflow: hidden` on `.passport-layout` clipped the inline lightbox | `PhotoLightbox` now uses `createPortal(…, document.body)` |
+| Extra detail photos not saving | PostgreSQL `angle_profile` enum missing `extra_detail` value | Migration 090 added missing enum values |
+| No feedback when photos uploaded during edit | Silent redirect with no indication of photo status | Added `photos_updated` and `photo_error` toast variants |
+| Stable page missing photo angles | `ANGLE_ORDER` and `ANGLE_LABELS` missing `Belly_Makers_Mark` and `extra_detail` | Synced stable page maps with community page |
+
+### 15.4 Recommended Next Steps
 
 1. **Production hardening** — Rate limit tuning, error monitoring (Sentry), performance profiling
-2. **Unit tests** — Critical path coverage for server actions (commerce, transfers, auth)
+2. **Component tests** — React Testing Library coverage for critical UI flows
 3. **Search infrastructure** — Server-side full-text search (Supabase pg_search or external)
 4. **Image optimization** — Next.js Image component integration (currently raw `<img>`)
 5. **Progressive Web App** — Offline show mode for live events without WiFi
 6. **Mobile app** — React Native or Capacitor wrapper for app store presence
+7. **Real-time features** — Supabase Realtime for live chat and notification push
+8. **Marketplace expansion** — Escrow integration, shipping label generation
 
 ---
 
-*This report covers the complete Model Horse Hub project as of commit `8587247` (March 15, 2026). Total development time: ~9 days from first commit to current state.*
+*This report covers the complete Model Horse Hub project as of commit `2dbeedf` (March 17, 2026). Total development time: ~12 days from first commit to current state.*
