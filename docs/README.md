@@ -1,6 +1,6 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** March 17, 2026
+> **Last Updated:** March 18, 2026
 > **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference.
 
 ---
@@ -83,7 +83,7 @@ docs/
 | Document | Location | Purpose |
 |---|---|---|
 | `CONTRIBUTING.md` | Project root | Code style, commit conventions, PR process |
-| `Model Horse Hub Complete Report.md` | Project root | Comprehensive project report (March 15, 2026 snapshot) |
+| `Model Horse Hub Complete Report.md` | Project root | Comprehensive project report (March 18, 2026 snapshot) |
 | `.agents/workflows/onboard.md` | `.agents/` | AI agent onboarding workflow |
 | `.agents/workflows/dev-nextsteps.md` | `.agents/` | Living development task queue |
 | `.agents/docs/` | `.agents/` | Strategic planning documents and research briefs |

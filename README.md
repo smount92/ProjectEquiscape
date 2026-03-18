@@ -31,7 +31,7 @@ Model Horse Hub is a privacy-first platform purpose-built for the model horse co
 | Auth | Supabase Auth (PKCE flow, cookie-based SSR) |
 | Storage | Supabase Storage (private bucket, signed URLs) |
 | Hosting | Vercel (serverless) |
-| CSS | Vanilla CSS design system + 19 CSS Modules |
+| CSS | Vanilla CSS design system + 49 CSS files (19 Modules + 30 extracted) |
 | Email | Resend |
 | PDF | @react-pdf/renderer |
 
@@ -71,17 +71,21 @@ Comprehensive developer documentation lives in the [`docs/`](docs/) directory:
 ## 🧪 Testing
 
 ```bash
-npm run test:unit          # Vitest unit/integration tests (~600ms)
+npm run test               # Vitest unit/integration + component tests
 npm run test:unit:watch    # Watch mode for development
 npm run test:unit:coverage # Coverage report (HTML at coverage/)
+npm run test:components    # Component tests only (React Testing Library)
 npm run test:e2e           # Playwright E2E (requires dev server running)
 ```
 
-**Coverage includes:**
-- Utility files at 100% coverage (mentions, validation, storage, rateLimit)
+**194 tests across 20 test files:**
+- Utility functions at 100% coverage (mentions, validation, storage, rateLimit)
 - Server action integration tests (transactions, horse, provenance, collections, hoofprint)
 - API route tests (auth, export, cron, reference-dictionary, identify-mold)
+- Component tests (PhotoLightbox, TrophyCase, MarketFilters, MakeOfferModal, HoofprintTimeline) — 58 React Testing Library tests
 - 7 E2E specs: smoke, auth, inventory, safe-trade, hoofprint-transfer, show-entry, accessibility
+
+**CI:** GitHub Actions runs build + tests on every push (`.github/workflows/ci.yml`).
 
 **Pre-commit:** Husky runs unit tests on every commit.
 
@@ -94,7 +98,9 @@ npm run test:e2e           # Playwright E2E (requires dev server running)
 | Server action files | 35 |
 | Database migrations | 85 (001–089) |
 | Reference catalog entries | 10,500+ |
-| CSS Modules | 19 |
+| CSS files | 49 (19 Modules + 30 extracted) |
+| Unit/component tests | 194 (20 test files) |
+| CI | GitHub Actions |
 
 ## 🚀 Deployment
 

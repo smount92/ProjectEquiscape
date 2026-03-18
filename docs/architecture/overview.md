@@ -46,12 +46,12 @@ graph TD
 | **Auth** | Supabase Auth | — | PKCE flow, cookie-based SSR sessions |
 | **Storage** | Supabase Storage | — | Private `horse-images` bucket with signed URLs |
 | **Hosting** | Vercel | Serverless | Hobby tier, auto-deploy on push to `main` |
-| **CSS** | Vanilla CSS | — | Design tokens in `:root` + 19 CSS Modules |
+| **CSS** | Vanilla CSS | — | Design tokens in `:root` + 49 CSS files (19 Modules + 30 extracted globals) |
 | **Email** | Resend | 6.9.3 | Transactional notifications (offers, comments, follows) |
 | **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, Certificate of Authenticity exports |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching for reference catalog |
 | **CSV** | PapaParse | 5.5.3 | Batch import parsing |
-| **Testing** | Vitest + Playwright | — | Unit/integration + E2E |
+| **Testing** | Vitest + Playwright | — | Unit/integration + component (RTL) + E2E |
 
 ## Core Architectural Principles
 
@@ -112,7 +112,7 @@ Horse provenance is assembled from **immutable source tables** via a materialize
 
 The materialized view UNION ALLs these into a single chronological timeline.
 
-## Scale (as of March 17, 2026)
+## Scale (as of March 18, 2026)
 
 | Metric | Count |
 |--------|-------|
@@ -120,9 +120,11 @@ The materialized view UNION ALLs these into a single chronological timeline.
 | Client components | 110 |
 | Server action files | 35 |
 | Database migrations | 85 (001–089) |
-| CSS Modules | 19 |
+| CSS files | 49 (19 Modules + 30 extracted globals) |
 | Reference catalog entries | 10,500+ |
+| Unit/component tests | 194 (across 20 test files) |
 | E2E test specs | 7 |
+| CI | GitHub Actions (build + test on every push) |
 
 ---
 

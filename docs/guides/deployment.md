@@ -7,7 +7,8 @@ Model Horse Hub is deployed on **Vercel** (frontend/backend) with **Supabase** (
 ```mermaid
 graph LR
     Dev["Developer"] -->|"git push main"| GH["GitHub"]
-    GH -->|"Auto-deploy"| Vercel["Vercel"]
+    GH -->|"CI: build + test"| CI["GitHub Actions"]
+    CI -->|"Pass → auto-deploy"| Vercel["Vercel"]
     Vercel -->|"Reads/Writes"| Supabase["Supabase"]
     Vercel -->|"Sends email"| Resend["Resend"]
 ```
@@ -102,7 +103,8 @@ Configured in **Supabase Dashboard → Authentication → Settings**:
 ### Before Deploying
 
 - [ ] `npm run build` passes locally
-- [ ] `npm run test` passes
+- [ ] `npm run test` passes (all 194 tests)
+- [ ] GitHub Actions CI is green
 - [ ] No TypeScript errors
 - [ ] New migrations applied to Supabase production
 - [ ] Environment variables set in Vercel for any new secrets
@@ -129,6 +131,7 @@ Database rollbacks require writing a compensating migration (see [Adding a Migra
 
 | What | Where |
 |------|-------|
+| CI pipeline status | GitHub → Actions tab |
 | Build logs | Vercel Dashboard → Deployments → [deployment] → Build Logs |
 | Runtime errors | Vercel Dashboard → Logs (filter by "Error") |
 | Database performance | Supabase Dashboard → Reports → Database |

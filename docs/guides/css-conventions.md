@@ -8,17 +8,27 @@ See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the rat
 
 ```
 src/app/
-├── globals.css                       # Design tokens (:root) + shared primitives
+├── globals.css                       # Design tokens (:root) + shared primitives (~4,670 lines)
 ├── studio.css                        # Art Studio feature styles
 ├── competition.css                   # Competition feature styles
 ├── page.module.css                   # Landing page styles
 ├── dashboard/dashboard.module.css    # Dashboard styles
 ├── discover/discover.module.css      # Discover page styles
 ├── inbox/inbox.module.css            # Inbox styles
-└── settings/settings.module.css      # Settings styles
+├── settings/settings.module.css      # Settings styles
+├── faq/faq.css                       # FAQ page (extracted from globals)
+├── static/static.css                 # Static pages (extracted from globals)
+├── admin/admin.css                   # Admin pages (extracted from globals)
+├── stable/                           # Stable feature extracted CSS
+│   ├── VisibilitySelector.css
+│   ├── PhotoReorder.css
+│   └── BatchResults.css
+├── shows/RingConflict.css            # Show ring conflicts (extracted)
+├── market/market.css                 # Market page (extracted)
+└── help/HelpId.css                   # Help page (extracted)
 
 src/components/
-├── ChatThread.module.css
+├── ChatThread.module.css             # CSS Modules (scoped)
 ├── DashboardShell.module.css
 ├── DashboardToast.module.css
 ├── FavoriteButton.module.css
@@ -31,10 +41,19 @@ src/components/
 ├── OfferCard.module.css
 ├── RatingForm.module.css
 ├── StableLedger.module.css
-└── WishlistButton.module.css
+├── WishlistButton.module.css
+├── Footer.css                        # Extracted from globals
+├── BackToTop.css                     # Extracted from globals
+├── CookieConsent.css
+├── TrophyCase.css
+├── RichEmbed.css
+├── GroupRegistry.css
+└── ... (+ more extracted globals)
 ```
 
-**Total:** 19 CSS Modules
+**Total:** 49 CSS files (19 CSS Modules + 30 extracted global stylesheets)
+
+> **Note (March 2026):** 30 page-specific CSS blocks were extracted from `globals.css` into co-located `.css` files as part of a CSS modularization sprint. These use global class names (not CSS Modules) and are imported in `layout.tsx` as side-effect imports. The extraction reduced `globals.css` from 11,701 to 4,670 lines (60% reduction).
 
 ## Rules
 
@@ -172,9 +191,10 @@ See [Design System](../components/design-system.md) for the complete reference.
 | Scenario | Where |
 |----------|-------|
 | Used by 3+ components | `globals.css` |
-| Component-specific styling | `ComponentName.module.css` |
+| Component-specific styling (new) | `ComponentName.module.css` |
 | Feature-wide styling (Studio, Competition) | `studio.css` / `competition.css` |
 | Design token or utility class | `globals.css` `:root` |
+| Extracted page-specific block (legacy) | Co-located `.css` (imported in `layout.tsx`) |
 
 ---
 

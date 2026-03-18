@@ -8,6 +8,9 @@ Model Horse Hub uses a two-layer testing strategy: **Vitest** for unit/integrati
 |------|---------|---------|
 | **Vitest** | 4.x | Unit & integration testing |
 | **@vitest/coverage-v8** | 4.x | Code coverage |
+| **@testing-library/react** | 16.x | Component testing (React Testing Library) |
+| **@testing-library/jest-dom** | 6.x | Custom DOM matchers |
+| **@testing-library/user-event** | 14.x | User interaction simulation |
 | **Playwright** | 1.58+ | End-to-end browser testing |
 | **@axe-core/playwright** | 4.x | Accessibility testing |
 
@@ -22,6 +25,9 @@ npm run test:unit:watch
 
 # Unit tests with coverage report
 npm run test:unit:coverage
+
+# Component tests only (React Testing Library)
+npm run test:components
 
 # E2E tests (all specs)
 npm run test:e2e
@@ -40,7 +46,7 @@ npx playwright test --debug
 
 ### File Location
 
-Unit tests go in `__tests__/` directories alongside the code they test, or in a top-level `__tests__/` directory:
+Unit tests go in `__tests__/` directories alongside the code they test:
 
 ```
 src/
@@ -50,6 +56,14 @@ src/
 ├── lib/utils/
 │   └── __tests__/
 │       └── rateLimit.test.ts
+├── components/
+│   └── __tests__/
+│       ├── setup.ts                  ← Common mocks (Next.js, Supabase)
+│       ├── PhotoLightbox.test.tsx
+│       ├── TrophyCase.test.tsx
+│       ├── MarketFilters.test.tsx
+│       ├── MakeOfferModal.test.tsx
+│       └── HoofprintTimeline.test.tsx
 ```
 
 ### Writing a Unit Test
@@ -75,6 +89,20 @@ describe("myFunction", () => {
 });
 ```
 
+### Mocking Next.js Server APIs
+
+Server actions often use `after()` (from `next/server`) and `revalidatePath()` (from `next/cache`). These must be mocked in test files:
+
+```typescript
+vi.mock("next/cache", () => ({
+    revalidatePath: vi.fn(),
+    revalidateTag: vi.fn(),
+}));
+vi.mock("next/server", () => ({
+    after: vi.fn((fn: () => void) => { /* no-op in tests */ }),
+}));
+```
+
 ### Mocking Supabase
 
 Most server actions need the Supabase client mocked:
@@ -97,6 +125,63 @@ vi.mock("@/lib/supabase/server", () => ({
     })),
 }));
 ```
+
+## Component Tests (React Testing Library)
+
+### Environment
+
+Component tests run in `jsdom`. Add the environment annotation at the top of each test file:
+
+```typescript
+// @vitest-environment jsdom
+```
+
+### Setup File
+
+The setup file at `src/components/__tests__/setup.ts` provides common mocks:
+- `@testing-library/jest-dom/vitest` matchers (`.toBeInTheDocument()`, `.toHaveAttribute()`, etc.)
+- Next.js navigation mocks (`useRouter`, `usePathname`, `useSearchParams`, `Link`)
+- Supabase client/server mocks
+
+### Writing a Component Test
+
+```typescript
+// @vitest-environment jsdom
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import MyComponent from "../MyComponent";
+
+// Mock portal-based components
+vi.mock("react-dom", async () => {
+    const actual = await vi.importActual<typeof import("react-dom")>("react-dom");
+    return { ...actual, createPortal: (node: React.ReactNode) => node };
+});
+
+describe("MyComponent", () => {
+    it("renders correctly", () => {
+        render(<MyComponent prop="value" />);
+        expect(screen.getByText("Expected Text")).toBeInTheDocument();
+    });
+
+    it("handles user interaction", async () => {
+        const user = userEvent.setup();
+        render(<MyComponent prop="value" />);
+        await user.click(screen.getByText("Click Me"));
+        expect(screen.getByText("Clicked!")).toBeInTheDocument();
+    });
+});
+```
+
+### Tested Components (58 tests)
+
+| Component | Tests | Coverage Highlights |
+|-----------|-------|-------------------|
+| **PhotoLightbox** | 15 | Keyboard nav, portal rendering, body scroll lock, single-image mode |
+| **TrophyCase** | 9 | Empty state, category grouping, sort order, tier classes, tooltips |
+| **MarketFilters** | 10 | Filter controls, URL param updates, dropdowns, a11y IDs |
+| **MakeOfferModal** | 11 | Form validation, payment safety warnings, offer submission |
+| **HoofprintTimeline** | 13 | Timeline events, ownership chain, add note form, stage selector |
 
 ## E2E Tests (Playwright)
 
@@ -180,6 +265,7 @@ test("page should have no accessibility violations", async ({ page }) => {
 |-------|-------------|-----|
 | **Server Actions** | Business logic, validation, error cases | Vitest with mocked Supabase |
 | **Utilities** | Pure functions, edge cases | Vitest |
+| **UI Components** | Rendering, interactions, accessibility | Vitest + React Testing Library |
 | **Critical Flows** | Auth, commerce, transfers | Playwright E2E |
 | **Accessibility** | WCAG compliance | Playwright + axe-core |
 | **Smoke** | Pages load without errors | Playwright |
@@ -192,17 +278,29 @@ test("page should have no accessibility violations", async ({ page }) => {
 
 ## CI / Build Verification
 
-The `npm run build` step catches:
-- TypeScript type errors
-- Missing imports
-- Server/client boundary violations
-- Dead code (unused exports)
+### GitHub Actions
+
+A CI pipeline (`.github/workflows/ci.yml`) runs automatically on every push to `main` or `quality-sprint-*` branches, and on every PR to `main`:
+
+1. **Checkout** → **Node.js 20 setup** → **npm ci**
+2. **Lint** (advisory — `continue-on-error`)
+3. **Build** (`npm run build`)
+4. **Unit + Component Tests** (`npx vitest run`)
+5. **Upload test artifacts** (14-day retention)
+
+### Local Verification
 
 Always run before committing:
 
 ```bash
 npm run build && npm run test
 ```
+
+The `npm run build` step catches:
+- TypeScript type errors
+- Missing imports
+- Server/client boundary violations
+- Dead code (unused exports)
 
 ---
 

@@ -1,8 +1,8 @@
 # Model Horse Hub — Complete Project Report
 
-> **Report Date:** March 17, 2026  
+> **Report Date:** March 18, 2026  
 > **Repository:** `smount92/ProjectEquiscape` (GitHub, private)  
-> **Total Commits:** 263 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
+> **Total Commits:** 267 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
 > **Status:** Closed beta with active testers
 
 ---
@@ -18,14 +18,15 @@ The platform was built from scratch in ~12 days using AI-assisted pair programmi
 | Metric | Value |
 |--------|-------|
 | **TypeScript/TSX source lines** | 35,703 |
-| **CSS lines** | 12,411 |
+| **CSS lines** | 12,411 (globals: 4,673 + 49 CSS files) |
 | **Total source size** | 2.11 MB |
 | **Page routes** | 53 |
 | **Client components** | 98 (+14 CSS Modules) |
 | **Server action files** | 35 |
 | **Database migrations** | 86 (001–090) |
 | **SQL migration lines** | 6,532 |
-| **Unit tests** | 136 (across 15 test files) |
+| **Unit/component tests** | 194 (across 20 test files) |
+| **CI pipeline** | GitHub Actions (build + test on every push) |
 | **Documentation pages** | 31 (in `/docs/`) |
 | **Workflow documents** | 57 |
 | **Strategic docs** | 16 |
@@ -42,8 +43,8 @@ The platform was built from scratch in ~12 days using AI-assisted pair programmi
 | **Database** | Supabase (PostgreSQL) | — | RLS on every table, materialized views |
 | **Auth** | Supabase Auth | — | PKCE flow, cookie-based SSR, `requireAuth()` helper |
 | **Hosting** | Vercel | Serverless | Hobby tier |
-| **CSS** | Vanilla CSS | — | Design tokens + 19 CSS Modules |
-| **Testing** | Vitest + Playwright | 4.x / 1.58 | Unit tests + E2E scaffolding |
+| **CSS** | Vanilla CSS | — | Design tokens + 49 CSS files (19 Modules + 30 extracted globals) |
+| **Testing** | Vitest + Playwright | 4.x / 1.58 | Unit + component (RTL) + E2E scaffolding |
 | **Email** | Resend | 6.9.3 | Transactional notifications |
 | **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, CoA exports |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching |
@@ -57,9 +58,9 @@ The platform was built from scratch in ~12 days using AI-assisted pair programmi
 
 - **Next.js App Router** — Server Components reduce client JS bundle; server actions eliminate the need for a separate API layer. The entire backend is co-located with the frontend.
 - **Supabase** — PostgreSQL with RLS provides row-level security without application middleware. Signed URLs for private storage. Real-time subscriptions for future features.
-- **Vanilla CSS** — The design system predates component-scoped styling. A `globals.css` monolith (~12K lines) was partially refactored into 19 CSS Modules in V20. Shared primitives (buttons, cards, forms, modals) remain global.
+- **Vanilla CSS** — The design system predates component-scoped styling. A `globals.css` monolith was refactored in the March 2026 CSS Modularization Sprint: 30 page-specific blocks were extracted into co-located `.css` files, reducing `globals.css` from 11,701 to 4,673 lines (60% reduction). 19 CSS Modules provide scoped styles for newer components. Shared primitives (buttons, cards, forms, modals) remain global.
 - **No ORM** — Direct Supabase client calls with PostgREST joins. Manual TypeScript types mirror the schema. This avoids ORM abstraction leaks and keeps queries transparent.
-- **Vitest** — Lightweight, fast unit testing with good TypeScript support. 136 tests cover critical server action logic (commerce, CRUD, provenance, collections).
+- **Vitest** — Lightweight, fast unit testing with good TypeScript support. 194 tests cover critical server action logic, utility functions, and 5 UI components via React Testing Library. GitHub Actions CI runs all tests on every push.
 
 ---
 
@@ -86,14 +87,16 @@ model-horse-hub/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx       # Root layout (Inter font, GA, SimpleModeProvider, Header)
-│   │   ├── globals.css      # ~11,700 lines — design tokens + shared styles
+│   │   ├── globals.css      # ~4,673 lines — design tokens + shared styles
 │   │   ├── studio.css       # Art Studio styles
 │   │   ├── competition.css  # Competition/show styles
+│   │   ├── [12 extracted .css] # Page-specific blocks extracted from globals
 │   │   ├── actions/         # 35 server action files (ALL backend logic)
-│   │   │   └── __tests__/   # 15 test files, 136 unit tests
+│   │   │   └── __tests__/   # 15 test files, 136 server action tests
 │   │   ├── api/             # 11 API routes
 │   │   └── [53 route dirs]  # Page routes
-│   ├── components/          # 98 client components + 19 CSS Modules
+│   ├── components/          # 98 client components + 19 CSS Modules + 16 extracted .css
+│   │   ├── __tests__/       # 5 component test files, 58 RTL tests
 │   │   └── pdf/             # PDF generation components
 │   └── lib/
 │       ├── supabase/        # admin.ts, client.ts, server.ts
@@ -512,16 +515,39 @@ after(async () => {
 revalidatePath("/dashboard");
 ```
 
-### 7.3 Unit Test Coverage
+### 7.3 Test Coverage
 
-136 unit tests across 4 test suites covering critical server action logic:
+194 tests across 20 test files covering server actions, utilities, and UI components:
+
+#### Server Action Tests (136 tests, 15 files)
 
 | Suite | Tests | Coverage |
 |-------|-------|----------|
 | `collections.test.ts` | Collection CRUD, M:N junction ops | 30+ |
-| `horse.test.ts` | Create, delete, quick-add, finalize images | 30+ |
+| `horse.test.ts` | Create, delete, quick-add, finalize images | 12 |
 | `provenance.test.ts` | Show records, pedigree, timeline queries | 30+ |
 | `transactions.test.ts` | Commerce state machine, offers, payments, cancellations | 40+ |
+
+#### Component Tests — React Testing Library (58 tests, 5 files)
+
+| Component | Tests | Coverage Highlights |
+|-----------|-------|-------------------|
+| `PhotoLightbox.test.tsx` | 15 | Keyboard nav, portal rendering, body scroll lock, wrap-around |
+| `TrophyCase.test.tsx` | 9 | Empty state, category grouping, sort order, tier classes |
+| `MarketFilters.test.tsx` | 10 | Filter controls, URL param updates, dropdowns, accessibility IDs |
+| `MakeOfferModal.test.tsx` | 11 | Form validation, payment safety warnings, offer submission |
+| `HoofprintTimeline.test.tsx` | 13 | Timeline events, ownership chain, add note form, stage selector |
+
+Setup: `src/components/__tests__/setup.ts` provides shared mocks for Next.js navigation, Supabase clients, and `@testing-library/jest-dom` matchers. Tests use `// @vitest-environment jsdom` and `userEvent` for interaction simulation.
+
+#### CI Pipeline
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` or `quality-sprint-*` branches:
+1. Install dependencies (`npm ci`)
+2. Lint (advisory)
+3. Build (`npm run build`)
+4. All tests (`npx vitest run`)
+5. Upload test artifacts (14-day retention)
 
 ---
 

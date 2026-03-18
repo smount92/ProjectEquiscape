@@ -142,20 +142,20 @@ All shadows are **warm brown-tinted** (`rgba(80, 60, 40, ...)`) — not standard
 
 ```
 src/app/
-├── globals.css          ← Design tokens + shared primitives (~11K lines)
+├── globals.css          ← Design tokens + shared primitives (~4,670 lines, down from 11.7K)
 ├── studio.css           ← Art Studio feature styles
 ├── competition.css      ← Competition feature styles
-└── *.module.css         ← 19 component-scoped CSS Modules
+├── *.module.css         ← 8 page-scoped CSS Modules
+└── 12 extracted *.css   ← Page-specific blocks extracted from globals (March 2026)
+
+src/components/
+├── 14 *.module.css      ← Component-scoped CSS Modules
+└── 16 extracted *.css   ← Component-specific blocks extracted from globals
 ```
 
-### Rules
+**Total: 49 CSS files** (19 CSS Modules + 30 extracted global stylesheets)
 
-1. **New components must use CSS Modules** for scoping
-2. **Shared primitives** (`.btn`, `.card`, `.form-*`) stay in `globals.css`
-3. **Design tokens** (custom properties) are the single source of truth for colors, spacing, etc.
-4. **No Tailwind** — all styles are hand-written (see [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md))
-5. **No inline styles** — use CSS custom properties or module classes
-6. **Simple Mode** is handled entirely via CSS custom property overrides
+> As of March 2026, 30 large CSS blocks were extracted from `globals.css` into co-located `.css` files. These still use global class names (not CSS Modules) and are imported via `layout.tsx`. See [CSS Conventions](../guides/css-conventions.md) for the full file listing.
 
 ---
 

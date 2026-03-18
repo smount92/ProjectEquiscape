@@ -73,7 +73,7 @@ export async function doSomething(data: { ... }): Promise<{ success: boolean; er
 
 ### Database
 
-- Migrations in `supabase/migrations/` — **sequential numbering** (currently at 089)
+- Migrations in `supabase/migrations/` — **sequential numbering** (currently at 090)
 - Always add **RLS policies** to new tables
 - Add **foreign key indexes** for any new FK columns
 - Use **soft delete** (tombstone) when records are referenced by other tables
@@ -136,9 +136,9 @@ When adding new features, verify:
 ## Testing Policy
 
 - **Utility functions** (`src/lib/utils/`) — Write unit tests in `__tests__/`. Pure functions are highest-ROI.
-- **Critical server actions** — When modifying `transactions.ts`, `hoofprint.ts`, `horse.ts`, `collections.ts`, or `competition.ts`, add or update integration tests.
+- **Critical server actions** — When modifying `transactions.ts`, `hoofprint.ts`, `horse.ts`, `collections.ts`, or `competition.ts`, add or update integration tests. Mock `after()` from `next/server` as a no-op.
+- **UI components** — Write React Testing Library tests in `src/components/__tests__/`. Use `// @vitest-environment jsdom` and the shared `setup.ts` for mocks. Currently 58 component tests covering 5 components.
 - **New features** — If it involves a state machine, complex validation, or financial data, it needs tests.
-- **Don't test rendering** — Component tests are deferred in favor of E2E Playwright tests.
 
 ## Getting Help
 
