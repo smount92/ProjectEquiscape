@@ -99,6 +99,12 @@ For the full request lifecycle, see [Data Flow](../architecture/data-flow.md).
 |------|-----------|---------|
 | [`admin.ts`](actions/user.md#admin) | `getAdminStats`, `getAdminUsers`, `toggleVerified`, `getAdminReports` | Admin dashboard |
 
+### 📚 Catalog Curation (V32)
+
+| File | Functions | Purpose |
+|------|-----------|---------|
+| [`catalog-suggestions.ts`](actions/catalog-suggestions.md) | `getCatalogItems`, `getCatalogItem`, `createSuggestion`, `getSuggestions`, `getSuggestion`, `voteSuggestion`, `removeVote`, `getUserVote`, `addSuggestionComment`, `deleteSuggestionComment`, `reviewSuggestion`, `getChangelog`, `getTopCurators` | Community catalog curation — browsing, suggestions, voting, discussion, admin review, trusted curator auto-approve, changelog |
+
 ## Auth Patterns
 
 Every mutating server action begins with one of:

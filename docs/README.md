@@ -26,6 +26,7 @@
 | **Add a database migration** | [Guides → Adding a Migration](guides/adding-a-migration.md) |
 | **Find a component** | [Components → Catalog](components/catalog.md) |
 | **Find a page route** | [Routes → Route Map](routes/route-map.md) |
+| **Understand catalog curation** | [Guides → Catalog Curation](guides/catalog-curation.md) |
 | **Understand an architecture decision** | [Architecture → ADRs](architecture/adrs/) |
 
 ---
@@ -70,9 +71,10 @@ docs/
 │   ├── adding-a-migration.md          # SQL migration guide
 │   ├── css-conventions.md             # CSS architecture rules
 │   ├── testing.md                     # Test strategy and commands
+│   ├── catalog-curation.md            # Catalog curation guide (V32)
 │   └── deployment.md                  # Vercel + Supabase deployment
 └── routes/
-    └── route-map.md                   # Complete URL → page mapping (52 routes)
+    └── route-map.md                   # Complete URL → page mapping (57 routes)
 ```
 
 

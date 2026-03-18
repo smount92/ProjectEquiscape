@@ -136,6 +136,22 @@ erDiagram
 | `user_badges` | Earned achievements | `user_id`, `badge_id`, `awarded_at` |
 | `user_reports` | Content moderation reports | `reporter_id`, `reported_id`, `reason` |
 
+### Catalog Curation (V32)
+
+| Table | Purpose | Key Columns |
+|-------|---------|-------------|
+| `catalog_suggestions` | Community-submitted catalog edits, additions, removals, photos | `user_id`, `catalog_item_id`, `suggestion_type`, `field_changes` (JSONB), `reason`, `status`, `upvotes`, `downvotes` |
+| `catalog_suggestion_votes` | Votes on suggestions (unique per user per suggestion) | `suggestion_id`, `user_id`, `vote_type` (up/down) |
+| `catalog_suggestion_comments` | Discussion threads on suggestions | `suggestion_id`, `user_id`, `user_alias`, `body` |
+| `catalog_changelog` | Public log of approved catalog changes | `suggestion_id`, `catalog_item_id`, `change_type`, `change_summary`, `contributed_by`, `contributor_alias` |
+
+**Curator columns on `users`:** `approved_suggestions_count` (int), `is_trusted_curator` (bool, set at 50+ approvals).
+
+**Auto-approve tiers:**
+- **Silver (50+ approved):** Auto-approves corrections to `color`, `year`, `production_run`, `release_date`
+- **Gold (200+ approved):** Auto-approves all correction suggestions
+- Additions and removals always require admin review
+
 ## Views
 
 | View | Type | Purpose | Refresh |

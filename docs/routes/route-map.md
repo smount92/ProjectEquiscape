@@ -1,6 +1,6 @@
 # Route Map
 
-All 53 page routes in the Model Horse Hub application, organized by section.
+All 58 page routes in the Model Horse Hub application, organized by section.
 
 ## Route Diagram
 
@@ -176,6 +176,16 @@ graph TD
 | `/claim` | Transfer claim | Auth | Enter 6-char transfer code |
 | `/admin` | Admin dashboard | Auth + Admin | Stats, users, reports |
 
+### Reference Catalog (5 routes)
+
+| Path | Page | Auth | Notes |
+|------|------|------|-------|
+| `/reference` | Catalog browser | Public | Search, filter, sort, paginate 10,500+ entries |
+| `/reference/[id]` | Catalog item detail | Public | View all fields, suggest edit (auth required) |
+| `/reference/suggestions` | Suggestions list | Public | Filter by status, browse community proposals |
+| `/reference/suggestions/[id]` | Suggestion detail | Public | Vote (auth), discuss (auth), admin review |
+| `/reference/changelog` | Public changelog | Public | Chronological feed of approved catalog changes |
+
 ## Route Totals
 
 | Section | Routes |
@@ -188,7 +198,8 @@ graph TD
 | Shows & Competition | 3 |
 | Events | 4 |
 | Utility | 4 |
-| **Total** | **52** |
+| Reference Catalog | 5 |
+| **Total** | **57** |
 
 ---
 
