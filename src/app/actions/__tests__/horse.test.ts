@@ -15,6 +15,9 @@ vi.mock("next/cache", () => ({
     revalidatePath: vi.fn(),
     revalidateTag: vi.fn(),
 }));
+vi.mock("next/server", () => ({
+    after: vi.fn((fn: () => void) => { /* no-op in tests */ }),
+}));
 vi.mock("@/lib/utils/validation", () => ({
     sanitizeText: vi.fn((s: string) => s.trim()),
 }));
