@@ -130,7 +130,7 @@ erDiagram
 |-------|---------|-------------|
 | `contact_messages` | Contact form submissions | `email`, `subject`, `message` |
 | `beta_feedback` | Beta user feedback | `user_id`, `content` |
-| `rate_limits` | Rate limiting state | `identifier`, `endpoint`, `attempts` |
+| `rate_limits` | Rate limiting state (RLS enabled, no user policies — accessed via SECURITY DEFINER RPCs only) | `identifier`, `endpoint`, `attempts` |
 | `featured_horses` | Admin-featured horses | `horse_id`, `title` |
 | `badges` | Achievement definitions | `slug`, `name`, `description`, `category`, `tier` |
 | `user_badges` | Earned achievements | `user_id`, `badge_id`, `awarded_at` |
@@ -154,11 +154,11 @@ erDiagram
 
 ## Views
 
-| View | Type | Purpose | Refresh |
-|------|------|---------|---------|
-| `v_horse_hoofprint` | Regular VIEW | Union of 6 provenance source tables into chronological timeline | Real-time |
-| `mv_market_prices` | MATERIALIZED VIEW | Aggregated sale prices by catalog item, finish type, and life stage | Daily cron (6 AM UTC) |
-| `discover_users_view` | Regular VIEW | User profiles with horse counts, badges — excludes test accounts | Real-time |
+| View | Type | Purpose | Refresh | Security |
+|------|------|---------|---------|---------|
+| `v_horse_hoofprint` | Regular VIEW | Union of 6 provenance source tables into chronological timeline | Real-time | `security_invoker = true` |
+| `mv_market_prices` | MATERIALIZED VIEW | Aggregated sale prices by catalog item, finish type, and life stage | Daily cron (6 AM UTC) | `authenticated` only (no `anon`) |
+| `discover_users_view` | Regular VIEW | User profiles with horse counts, badges — excludes test accounts | Real-time | `security_invoker = true` |
 
 ## Key Patterns
 
@@ -166,6 +166,10 @@ erDiagram
 - **Event-sourced provenance:** The Hoofprint™ timeline is never written directly — it's assembled from immutable source tables via `v_horse_hoofprint`.
 - **Soft delete:** Records referenced by other tables use tombstone deletion (set `is_tombstone = true`) rather than hard DELETE.
 - **RLS everywhere:** Every table has Row Level Security policies. See [RLS Policies](rls-policies.md) for the full inventory.
+- **Security invoker views:** All views use `security_invoker = true` so they respect the calling user's RLS policies.
+- **Hardened SECURITY DEFINER functions:** All 19 SECURITY DEFINER RPCs use `SET search_path = ''` with fully qualified table names (`public.table_name`).
+- **Extensions schema:** `pg_trgm` lives in the `extensions` schema, not `public`, to avoid API exposure.
+- **InitPlan optimization:** All RLS policies wrap `auth.uid()` in `(SELECT auth.uid())` for per-query evaluation.
 
 ---
 

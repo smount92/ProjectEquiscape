@@ -100,7 +100,7 @@ after(async () => {
 
 ### 5. Event-Sourced Provenance
 
-Horse provenance is assembled from **immutable source tables** via a materialized view (`v_horse_hoofprint`), not a mutable timeline table. Each source of truth maintains its own data:
+Horse provenance is assembled from **immutable source tables** via a regular view (`v_horse_hoofprint`), not a mutable timeline table. Both views (`v_horse_hoofprint`, `discover_users_view`) use `security_invoker = true` so they respect the querying user's RLS policies. Each source of truth maintains its own data:
 
 | Source Table | Provenance Events |
 |---|---|
@@ -119,7 +119,7 @@ The materialized view UNION ALLs these into a single chronological timeline.
 | Page routes | 28+ route groups |
 | Client components | 110 |
 | Server action files | 35 |
-| Database migrations | 85 (001–089) |
+| Database migrations | 88 (001–092) |
 | CSS files | 49 (19 Modules + 30 extracted globals) |
 | Reference catalog entries | 10,500+ |
 | Unit/component tests | 194 (across 20 test files) |

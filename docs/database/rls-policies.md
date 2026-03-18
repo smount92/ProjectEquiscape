@@ -25,7 +25,10 @@ graph TD
 
 ### Pattern 1: Owner-Only Access
 
-Most tables allow users to see and modify only their own rows:
+Most tables allow users to see and modify only their own rows.
+
+> [!TIP]
+> Always wrap `auth.uid()` in `(SELECT auth.uid())` to force PostgreSQL to evaluate it once per query (InitPlan) instead of once per row.
 
 ```sql
 -- SELECT: users can read their own data
@@ -183,6 +186,11 @@ The `horse-images` bucket is **private** with read policies based on content typ
 2. **The admin client (`getAdminClient()`) bypasses ALL RLS** — use only for cross-user operations
 3. **Block filtering is at the DB level** — blocked users' content is invisible, not just hidden in UI
 4. **Rate limiting is application-level** — `checkRateLimit()` supplements RLS for sensitive operations
+5. **All views use `security_invoker = true`** — views respect the querying user's RLS policies, not the view creator's
+6. **All `SECURITY DEFINER` functions use `SET search_path = ''`** — prevents search path injection attacks; table references must be fully qualified (`public.table_name`)
+7. **`pg_trgm` lives in the `extensions` schema** — not exposed via the public API
+8. **`mv_market_prices` is not accessible to `anon`** — only `authenticated` users can query the Blue Book
+9. **Avoid multiple permissive policies per table/role/action** — merge with `OR` for better performance
 
 ---
 

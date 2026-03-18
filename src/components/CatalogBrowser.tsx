@@ -248,7 +248,7 @@ export default function CatalogBrowser({
                             <tr
                                 key={item.id}
                                 className="ref-row"
-                                onClick={() => router.push(`/reference/${item.id}`)}
+                                onClick={() => router.push(`/catalog/${item.id}`)}
                             >
                                 <td className="ref-td ref-td-title">{item.title}</td>
                                 <td className="ref-td">{item.maker}</td>
@@ -260,7 +260,7 @@ export default function CatalogBrowser({
                                         className="ref-suggest-link"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            router.push(`/reference/${item.id}?suggest=true`);
+                                            router.push(`/catalog/${item.id}?suggest=true`);
                                         }}
                                     >
                                         ✏️ Suggest Edit
@@ -272,7 +272,7 @@ export default function CatalogBrowser({
                             <tr>
                                 <td colSpan={6} className="ref-empty">
                                     No entries match your search.{" "}
-                                    <a href="/reference/suggestions">Suggest a new entry?</a>
+                                    <a href="/catalog/suggestions">Suggest a new entry?</a>
                                 </td>
                             </tr>
                         )}

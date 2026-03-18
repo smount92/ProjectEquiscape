@@ -22,7 +22,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **37+ routes**, **94+ components**, **35 server action files**, and **77 database migrations** (001–077).
+The platform has **37+ routes**, **94+ components**, **35 server action files**, and **92 database migrations** (001–092).
 
 ## Step 2 — Read the Current State Report
 
@@ -109,11 +109,14 @@ src/
 - New components should use CSS Modules, not add to globals
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 077)
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 092)
 - Universal Catalog (`catalog_items`) — 10,500+ entries for molds, releases, artist resins, tack
-- Universal Ledger — `v_horse_hoofprint` materialized view (UNION ALL across 5 source tables)
+- Universal Ledger — `v_horse_hoofprint` regular view (UNION ALL across 6 source tables) with `security_invoker = true`
 - Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
-- Market Price Guide — `mv_market_prices` materialized view refreshed by cron
+- Market Price Guide — `mv_market_prices` materialized view refreshed by cron (`authenticated` only, no `anon`)
+- All SECURITY DEFINER functions use `SET search_path = ''` with fully qualified `public.table_name` references
+- `pg_trgm` extension lives in the `extensions` schema (not `public`)
+- All RLS policies use `(SELECT auth.uid())` (InitPlan pattern) for performance
 
 **Privacy Rules:**
 - `financial_vault` is NEVER queried on public routes (only owner via RLS)

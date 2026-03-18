@@ -124,7 +124,7 @@ export default async function ReferencePage() {
                     <div className="card ref-sidebar-card">
                         <h3 className="ref-sidebar-title">📋 Community</h3>
                         <div className="ref-sidebar-links">
-                            <a href="/reference/suggestions" className="btn btn-secondary btn-small ref-sidebar-btn">
+                            <a href="/catalog/suggestions" className="btn btn-secondary btn-small ref-sidebar-btn">
                                 View Suggestions
                                 {(pendingSuggestions ?? 0) > 0 && (
                                     <span className="ref-badge">
@@ -132,7 +132,7 @@ export default async function ReferencePage() {
                                     </span>
                                 )}
                             </a>
-                            <a href="/reference/changelog" className="btn btn-secondary btn-small ref-sidebar-btn">
+                            <a href="/catalog/changelog" className="btn btn-secondary btn-small ref-sidebar-btn">
                                 📋 View Changelog
                             </a>
                         </div>

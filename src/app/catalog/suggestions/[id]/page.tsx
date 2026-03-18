@@ -135,9 +135,9 @@ export default async function SuggestionDetailPage({ params }: Props) {
     return (
         <div className="page-container">
             <nav className="ref-breadcrumb">
-                <Link href="/reference">📚 Reference Catalog</Link>
+                <Link href="/catalog">📚 Reference Catalog</Link>
                 <span className="ref-breadcrumb-sep">›</span>
-                <Link href="/reference/suggestions">Suggestions</Link>
+                <Link href="/catalog/suggestions">Suggestions</Link>
                 <span className="ref-breadcrumb-sep">›</span>
                 <span>Detail</span>
             </nav>
@@ -216,7 +216,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                             {catalogItem && (
                                 <div className="ref-suggestion-item-ref">
                                     <span>For: </span>
-                                    <Link href={`/reference/${catalogItem.id}`}>
+                                    <Link href={`/catalog/${catalogItem.id}`}>
                                         {catalogItem.title} by {catalogItem.maker}
                                     </Link>
                                 </div>

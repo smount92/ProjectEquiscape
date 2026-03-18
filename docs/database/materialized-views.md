@@ -8,7 +8,8 @@ Two computed views power read-heavy features by pre-aggregating data from source
 
 **Type:** Regular VIEW (computed at query time)  
 **Purpose:** Unified provenance timeline for each horse  
-**Latest definition:** Migration `089_commission_wip_photos.sql`
+**Latest definition:** Migration `092_supabase_linter_fixes.sql`  
+**Security:** `security_invoker = true` (respects the querying user's RLS policies)
 
 ### Source Tables
 
@@ -63,7 +64,8 @@ const { data } = await supabase
 
 **Type:** MATERIALIZED VIEW (pre-computed, refreshed on schedule)  
 **Purpose:** Blue Book market price guide  
-**Latest definition:** Migration `055_market_price_guide.sql`
+**Latest definition:** Migration `055_market_price_guide.sql`  
+**Access:** `authenticated` role only (`anon` access revoked in migration 092)
 
 ### Aggregation Logic
 
@@ -112,7 +114,8 @@ const { data } = await supabase
 
 **Type:** Regular VIEW  
 **Purpose:** User profiles for the Discover page  
-**Latest definition:** Migration `086_hide_test_accounts.sql`
+**Latest definition:** Migration `092_supabase_linter_fixes.sql`  
+**Security:** `security_invoker = true` (respects the querying user's RLS policies)
 
 ### Purpose
 

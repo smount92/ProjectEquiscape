@@ -224,7 +224,7 @@ export async function createSuggestion(input: SuggestionInput) {
         });
     }
 
-    revalidatePath("/reference/suggestions");
+    revalidatePath("/catalog/suggestions");
     return {
         success: true,
         id: data?.id as string,
@@ -361,8 +361,8 @@ export async function voteSuggestion(
 
     await updateVoteCounts(suggestionId);
 
-    revalidatePath(`/reference/suggestions/${suggestionId}`);
-    revalidatePath("/reference/suggestions");
+    revalidatePath(`/catalog/suggestions/${suggestionId}`);
+    revalidatePath("/catalog/suggestions");
     return { success: true };
 }
 
@@ -376,8 +376,8 @@ export async function removeVote(suggestionId: string) {
         .eq("user_id", user.id);
 
     await updateVoteCounts(suggestionId);
-    revalidatePath(`/reference/suggestions/${suggestionId}`);
-    revalidatePath("/reference/suggestions");
+    revalidatePath(`/catalog/suggestions/${suggestionId}`);
+    revalidatePath("/catalog/suggestions");
     return { success: true };
 }
 
@@ -457,7 +457,7 @@ export async function addSuggestionComment(
         });
 
     if (error) return { success: false, error: error.message };
-    revalidatePath(`/reference/suggestions/${suggestionId}`);
+    revalidatePath(`/catalog/suggestions/${suggestionId}`);
     return { success: true };
 }
 
@@ -549,7 +549,7 @@ export async function reviewSuggestion(decision: ReviewDecision) {
         }
     });
 
-    revalidatePath("/reference/suggestions");
+    revalidatePath("/catalog/suggestions");
     revalidatePath("/admin");
     return { success: true };
 }

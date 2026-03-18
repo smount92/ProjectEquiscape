@@ -81,7 +81,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
     return (
         <div className="page-container">
             <nav className="ref-breadcrumb">
-                <Link href="/reference">📚 Reference Catalog</Link>
+                <Link href="/catalog">📚 Reference Catalog</Link>
                 <span className="ref-breadcrumb-sep">›</span>
                 <span>Suggestions</span>
             </nav>
@@ -99,7 +99,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                 {tabs.map((tab) => (
                     <Link
                         key={tab.key}
-                        href={`/reference/suggestions?status=${tab.key}${itemFilter ? `&item=${itemFilter}` : ""}`}
+                        href={`/catalog/suggestions?status=${tab.key}${itemFilter ? `&item=${itemFilter}` : ""}`}
                         className={`ref-filter-tab ${currentStatus === tab.key ? "ref-filter-tab-active" : ""}`}
                     >
                         {tab.label}
@@ -180,7 +180,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                     return (
                         <Link
                             key={s.id}
-                            href={`/reference/suggestions/${s.id}`}
+                            href={`/catalog/suggestions/${s.id}`}
                             className="card ref-suggestion-card"
                         >
                             <div className="ref-suggestion-header">
@@ -225,7 +225,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                 {(suggestions ?? []).length === 0 && (
                     <div className="card ref-empty-state">
                         <p>No suggestions yet. Be the first to contribute!</p>
-                        <Link href="/reference" className="btn btn-primary">
+                        <Link href="/catalog" className="btn btn-primary">
                             Browse Catalog
                         </Link>
                     </div>

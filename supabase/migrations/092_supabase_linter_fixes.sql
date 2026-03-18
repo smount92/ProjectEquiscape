@@ -941,7 +941,7 @@ CREATE POLICY "View commissions" ON commissions
     USING (
         artist_id = (SELECT auth.uid())
         OR client_id = (SELECT auth.uid())
-        OR queue_public = true
+        OR (is_public_in_queue = true AND status IN ('accepted', 'in_progress'))
     );
 
 -- 7d. condition_history — authenticated SELECT (merge + initplan fix)

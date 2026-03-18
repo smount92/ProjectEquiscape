@@ -22,7 +22,7 @@ export default async function ChangelogPage() {
     return (
         <div className="page-container">
             <nav className="ref-breadcrumb">
-                <Link href="/reference">📚 Reference Catalog</Link>
+                <Link href="/catalog">📚 Reference Catalog</Link>
                 <span className="ref-breadcrumb-sep">›</span>
                 <span>Changelog</span>
             </nav>
@@ -80,7 +80,7 @@ export default async function ChangelogPage() {
                                         <>
                                             {" · "}
                                             <Link
-                                                href={`/reference/${entry.catalog_item_id}`}
+                                                href={`/catalog/${entry.catalog_item_id}`}
                                             >
                                                 View entry →
                                             </Link>
@@ -95,7 +95,7 @@ export default async function ChangelogPage() {
                 {(entries ?? []).length === 0 && (
                     <div className="card ref-empty-state">
                         <p>No changes yet. The catalog awaits your contributions!</p>
-                        <Link href="/reference" className="btn btn-primary">
+                        <Link href="/catalog" className="btn btn-primary">
                             Browse Catalog
                         </Link>
                     </div>

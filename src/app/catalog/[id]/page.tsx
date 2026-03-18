@@ -89,7 +89,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
         <div className="page-container">
             {/* Breadcrumb */}
             <nav className="ref-breadcrumb">
-                <Link href="/reference">📚 Reference Catalog</Link>
+                <Link href="/catalog">📚 Reference Catalog</Link>
                 <span className="ref-breadcrumb-sep">›</span>
                 <span>{catalogItem.title}</span>
             </nav>
@@ -146,7 +146,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                                 }[]
                             )?.map((s) => (
                                 <li key={s.id} className="ref-pending-item">
-                                    <Link href={`/reference/suggestions/${s.id}`}>
+                                    <Link href={`/catalog/suggestions/${s.id}`}>
                                         <span className="ref-pending-type">
                                             {s.suggestion_type === "correction"
                                                 ? "🔧"
@@ -167,7 +167,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                             ))}
                         </ul>
                         <Link
-                            href={`/reference/suggestions?item=${id}`}
+                            href={`/catalog/suggestions?item=${id}`}
                             className="ref-view-all-link"
                         >
                             View all suggestions →

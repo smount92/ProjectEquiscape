@@ -40,7 +40,7 @@ import "./stable/PhotoReorder.css";
 import "./stable/VisibilitySelector.css";
 import "./stable/BatchResults.css";
 import "./add-horse/gallery.css";
-import "./reference/reference.css";
+import "./catalog/reference.css";
 import { SimpleModeProvider } from "@/lib/context/SimpleModeContext";
 import { ToastProvider } from "@/lib/context/ToastContext";
 import Header from "@/components/Header";
