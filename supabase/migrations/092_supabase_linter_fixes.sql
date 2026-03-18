@@ -7,10 +7,9 @@
 -- ══════════════════════════════════════════════════════════════
 -- FIX 1: SECURITY DEFINER VIEWS → SECURITY INVOKER
 -- Linter: security_definer_view (ERROR)
--- The v_horse_hoofprint and discover_users_view views are
--- SECURITY DEFINER by default (Postgres default for views).
--- This means they run with the view creator's permissions,
--- bypassing the querying user's RLS. Change to INVOKER.
+-- The v_horse_hoofprint and discover_users_view views run with
+-- the view creator's permissions, bypassing the querying user's
+-- RLS. Change to INVOKER so RLS is enforced per-user.
 -- ══════════════════════════════════════════════════════════════
 
 -- 1a. v_horse_hoofprint — recreate with SECURITY INVOKER
@@ -169,7 +168,6 @@ FROM users u
 WHERE u.account_status = 'active'
   AND u.is_test_account = false;
 
--- Re-grant SELECT permissions
 GRANT SELECT ON discover_users_view TO anon, authenticated;
 
 
@@ -177,10 +175,11 @@ GRANT SELECT ON discover_users_view TO anon, authenticated;
 -- FIX 2: FUNCTION SEARCH PATH MUTABLE → SET search_path = ''
 -- Linter: function_search_path_mutable (WARN)
 -- All SECURITY DEFINER functions need SET search_path = ''
--- to prevent search_path injection attacks.
+-- to prevent search_path injection attacks. Each function is
+-- recreated with its exact original body + the fix applied.
 -- ══════════════════════════════════════════════════════════════
 
--- 2a. increment_approved_suggestions
+-- 2a. increment_approved_suggestions (from 091)
 CREATE OR REPLACE FUNCTION public.increment_approved_suggestions(target_user_id UUID)
 RETURNS void AS $$
 BEGIN
@@ -190,70 +189,59 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
--- 2b. upvote_suggestion
--- Find and recreate upvote_suggestion
-CREATE OR REPLACE FUNCTION public.upvote_suggestion(p_suggestion_id UUID, p_vote_type TEXT)
-RETURNS JSONB AS $$
-DECLARE
-    v_existing UUID;
+-- 2b. upvote_suggestion (from 024 — Help Me ID feature)
+CREATE OR REPLACE FUNCTION public.upvote_suggestion(p_suggestion_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-    SELECT id INTO v_existing
-    FROM public.catalog_suggestion_votes
-    WHERE suggestion_id = p_suggestion_id AND user_id = auth.uid();
-
-    IF v_existing IS NOT NULL THEN
-        DELETE FROM public.catalog_suggestion_votes WHERE id = v_existing;
-    END IF;
-
-    INSERT INTO public.catalog_suggestion_votes (suggestion_id, user_id, vote_type)
-    VALUES (p_suggestion_id, auth.uid(), p_vote_type);
-
-    -- Update cached counts
-    UPDATE public.catalog_suggestions
-    SET upvotes = (SELECT count(*) FROM public.catalog_suggestion_votes WHERE suggestion_id = p_suggestion_id AND vote_type = 'up'),
-        downvotes = (SELECT count(*) FROM public.catalog_suggestion_votes WHERE suggestion_id = p_suggestion_id AND vote_type = 'down')
-    WHERE id = p_suggestion_id;
-
-    RETURN jsonb_build_object('success', true);
+  UPDATE public.id_suggestions
+  SET upvotes = upvotes + 1
+  WHERE id = p_suggestion_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
+$$;
 
--- 2c. trg_transaction_complete_price (trigger function)
+-- 2c. trg_transaction_complete_price (from 071)
 CREATE OR REPLACE FUNCTION public.trg_transaction_complete_price()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
-        NEW.completed_at := now();
+    IF NEW.status = 'completed' AND (OLD.status IS DISTINCT FROM 'completed') THEN
+        NEW.completed_at = COALESCE(NEW.completed_at, now());
+        NEW.metadata = COALESCE(NEW.metadata, '{}'::jsonb)
+            || jsonb_build_object('sale_price', NEW.offer_amount);
     END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
--- 2d. cleanup_system_garbage
+-- 2d. cleanup_system_garbage (from 068)
 CREATE OR REPLACE FUNCTION public.cleanup_system_garbage()
 RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
-    v_expired_transfers INT;
-    v_orphan_images INT;
-    v_old_rate_limits INT;
-    v_old_activity INT;
+    deleted_notifications INT;
+    cancelled_offers INT;
 BEGIN
-    -- Clean expired rate limits
-    DELETE FROM public.rate_limits WHERE window_start < now() - INTERVAL '24 hours';
-    GET DIAGNOSTICS v_old_rate_limits = ROW_COUNT;
+    DELETE FROM public.notifications
+    WHERE is_read = true AND created_at < NOW() - INTERVAL '30 days';
+    GET DIAGNOSTICS deleted_notifications = ROW_COUNT;
 
-    -- Clean old activity events (> 90 days)
-    DELETE FROM public.activity_events WHERE created_at < now() - INTERVAL '90 days';
-    GET DIAGNOSTICS v_old_activity = ROW_COUNT;
+    UPDATE public.transactions
+    SET status = 'cancelled', metadata = COALESCE(metadata, '{}'::jsonb) || '{"auto_cancelled": true}'::jsonb
+    WHERE status = 'offer_made'
+      AND created_at < NOW() - INTERVAL '7 days';
+    GET DIAGNOSTICS cancelled_offers = ROW_COUNT;
 
     RETURN jsonb_build_object(
-        'rate_limits_cleaned', v_old_rate_limits,
-        'old_activity_cleaned', v_old_activity
+        'deleted_notifications', deleted_notifications,
+        'cancelled_offers', cancelled_offers,
+        'ran_at', now()
     );
 END;
 $$;
 
--- 2e. check_rate_limit
+-- 2e. check_rate_limit (from 032)
 CREATE OR REPLACE FUNCTION public.check_rate_limit(
     p_identifier TEXT,
     p_endpoint TEXT,
@@ -295,32 +283,26 @@ BEGIN
 END;
 $$;
 
--- 2f. auto_unpark_expired_transfers
+-- 2f. auto_unpark_expired_transfers (from 071)
 CREATE OR REPLACE FUNCTION public.auto_unpark_expired_transfers()
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-DECLARE
-    v_count INT := 0;
+RETURNS void AS $$
 BEGIN
-    UPDATE public.user_horses
-    SET trade_status = 'not_for_sale'
-    WHERE trade_status = 'parked'
-      AND id IN (
-          SELECT horse_id FROM public.horse_transfers
-          WHERE status = 'pending'
-            AND expires_at < now()
-      );
-    GET DIAGNOSTICS v_count = ROW_COUNT;
+    UPDATE public.user_horses h
+    SET life_stage = 'completed'
+    FROM public.horse_transfers t
+    WHERE t.horse_id = h.id
+      AND t.status = 'pending'
+      AND t.expires_at < now()
+      AND h.life_stage = 'parked';
 
     UPDATE public.horse_transfers
     SET status = 'expired'
     WHERE status = 'pending'
       AND expires_at < now();
-
-    RETURN jsonb_build_object('unparked', v_count);
 END;
-$$;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
--- 2g. cleanup_rate_limits
+-- 2g. cleanup_rate_limits (from 032)
 CREATE OR REPLACE FUNCTION public.cleanup_rate_limits()
 RETURNS void
 LANGUAGE sql
@@ -330,297 +312,365 @@ AS $$
     DELETE FROM public.rate_limits WHERE window_start < now() - INTERVAL '24 hours';
 $$;
 
--- 2h. vote_for_entry
-CREATE OR REPLACE FUNCTION public.vote_for_entry(
-    p_entry_id UUID,
-    p_show_id UUID
-) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-DECLARE
-    v_existing UUID;
-    v_total INT;
-BEGIN
-    SELECT id INTO v_existing
-    FROM public.event_votes
-    WHERE entry_id = p_entry_id AND user_id = auth.uid();
-
-    IF v_existing IS NOT NULL THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Already voted');
-    END IF;
-
-    INSERT INTO public.event_votes (entry_id, show_id, user_id)
-    VALUES (p_entry_id, p_show_id, auth.uid());
-
-    SELECT count(*) INTO v_total FROM public.event_votes WHERE entry_id = p_entry_id;
-
-    RETURN jsonb_build_object('success', true, 'votes', v_total);
-END;
-$$;
-
--- 2i. soft_delete_account
-CREATE OR REPLACE FUNCTION public.soft_delete_account(p_user_id UUID)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-BEGIN
-    UPDATE public.users
-    SET account_status = 'deleted',
-        alias_name = 'deleted_' || LEFT(p_user_id::text, 8),
-        bio = NULL,
-        avatar_url = NULL
-    WHERE id = p_user_id;
-
-    UPDATE public.user_horses
-    SET is_public = false
-    WHERE owner_id = p_user_id;
-
-    RETURN jsonb_build_object('success', true);
-END;
-$$;
-
--- 2j. close_virtual_show
-CREATE OR REPLACE FUNCTION public.close_virtual_show(p_show_id UUID)
+-- 2h. vote_for_entry (from 046)
+CREATE OR REPLACE FUNCTION public.vote_for_entry(p_entry_id UUID, p_user_id UUID)
 RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
-    v_show RECORD;
+  v_exists BOOLEAN;
+  v_entry RECORD;
+  v_new_votes INTEGER;
 BEGIN
-    SELECT * INTO v_show FROM public.events WHERE id = p_show_id;
+  SELECT user_id, event_id INTO v_entry FROM public.event_entries WHERE id = p_entry_id;
+  IF v_entry IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Entry not found');
+  END IF;
 
-    IF NOT FOUND THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Show not found');
-    END IF;
+  IF v_entry.user_id = p_user_id THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Cannot vote for your own entry');
+  END IF;
 
-    UPDATE public.events SET show_status = 'closed' WHERE id = p_show_id;
+  IF NOT EXISTS(
+    SELECT 1 FROM public.events WHERE id = v_entry.event_id AND show_status = 'open'
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Voting is closed for this show');
+  END IF;
 
-    RETURN jsonb_build_object('success', true);
+  SELECT EXISTS(SELECT 1 FROM public.event_votes WHERE entry_id = p_entry_id AND user_id = p_user_id) INTO v_exists;
+  IF v_exists THEN
+    DELETE FROM public.event_votes WHERE entry_id = p_entry_id AND user_id = p_user_id;
+    UPDATE public.event_entries SET votes_count = GREATEST(votes_count - 1, 0) WHERE id = p_entry_id RETURNING votes_count INTO v_new_votes;
+    RETURN jsonb_build_object('success', true, 'action', 'unvoted', 'new_votes', v_new_votes);
+  ELSE
+    INSERT INTO public.event_votes (entry_id, user_id) VALUES (p_entry_id, p_user_id);
+    UPDATE public.event_entries SET votes_count = votes_count + 1 WHERE id = p_entry_id RETURNING votes_count INTO v_new_votes;
+    RETURN jsonb_build_object('success', true, 'action', 'voted', 'new_votes', v_new_votes, 'entry_owner', v_entry.user_id);
+  END IF;
 END;
 $$;
 
--- 2k. log_condition_change (trigger function)
-CREATE OR REPLACE FUNCTION public.log_condition_change()
-RETURNS TRIGGER AS $$
+-- 2i. soft_delete_account (from 038, latest version)
+CREATE OR REPLACE FUNCTION public.soft_delete_account(target_uid UUID)
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 BEGIN
-    IF NEW.condition IS DISTINCT FROM OLD.condition THEN
-        INSERT INTO public.condition_history (horse_id, old_condition, new_condition, changed_by)
-        VALUES (NEW.id, OLD.condition, NEW.condition, NEW.owner_id);
+    IF (SELECT auth.uid()) != target_uid THEN RAISE EXCEPTION 'Unauthorized'; END IF;
+    UPDATE public.users SET
+        account_status = 'deleted',
+        deleted_at = now(),
+        alias_name = '[Deleted] ' || substr(target_uid::text, 1, 8),
+        bio = NULL, avatar_url = NULL, notification_prefs = NULL
+    WHERE id = target_uid;
+
+    UPDATE public.user_horses SET is_public = false, trade_status = 'Not for Sale', life_stage = 'orphaned' WHERE owner_id = target_uid;
+    UPDATE public.messages SET content = '[Message deleted by user]' WHERE sender_id = target_uid;
+    UPDATE public.horse_transfers SET status = 'cancelled' WHERE sender_id = target_uid AND status = 'pending';
+    UPDATE public.commissions SET status = 'cancelled' WHERE (artist_id = target_uid OR client_id = target_uid) AND status NOT IN ('completed', 'delivered', 'cancelled');
+    DELETE FROM public.group_memberships WHERE user_id = target_uid;
+END;
+$$;
+
+-- 2j. close_virtual_show (from 046)
+CREATE OR REPLACE FUNCTION public.close_virtual_show(p_event_id UUID, p_user_id UUID)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE
+  v_event RECORD;
+  v_entry RECORD;
+  v_rank INTEGER := 0;
+  v_records_created INTEGER := 0;
+  v_total_entries INTEGER;
+BEGIN
+  SELECT id, name, created_by, event_type, show_status, starts_at
+  INTO v_event FROM public.events WHERE id = p_event_id;
+
+  IF v_event IS NULL THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Event not found');
+  END IF;
+  IF v_event.created_by != p_user_id THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Only the event creator can close the show');
+  END IF;
+  IF v_event.event_type != 'photo_show' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Not a photo show');
+  END IF;
+  IF v_event.show_status = 'closed' THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Already closed');
+  END IF;
+
+  UPDATE public.events SET show_status = 'closed' WHERE id = p_event_id;
+
+  SELECT count(*) INTO v_total_entries
+  FROM public.event_entries WHERE event_id = p_event_id AND entry_type = 'entered';
+
+  FOR v_entry IN
+    SELECT ee.id, ee.horse_id, ee.user_id, ee.votes_count, ee.class_name
+    FROM public.event_entries ee
+    WHERE ee.event_id = p_event_id AND ee.entry_type = 'entered'
+    ORDER BY ee.votes_count DESC, ee.created_at ASC
+  LOOP
+    v_rank := v_rank + 1;
+
+    UPDATE public.event_entries SET "placing" =
+      CASE v_rank
+        WHEN 1 THEN '1st'
+        WHEN 2 THEN '2nd'
+        WHEN 3 THEN '3rd'
+        ELSE v_rank || 'th'
+      END
+    WHERE id = v_entry.id;
+
+    IF v_rank <= 10 THEN
+      INSERT INTO public.show_records (
+        horse_id, user_id, show_name, show_date, "placing", division,
+        show_type, class_name, total_entries, verification_tier
+      ) VALUES (
+        v_entry.horse_id,
+        v_entry.user_id,
+        v_event.name,
+        v_event.starts_at::date,
+        CASE v_rank
+          WHEN 1 THEN '1st' WHEN 2 THEN '2nd' WHEN 3 THEN '3rd'
+          ELSE v_rank || 'th'
+        END,
+        v_entry.class_name,
+        'photo_mhh',
+        v_entry.class_name,
+        v_total_entries,
+        'mhh_auto'
+      );
+      v_records_created := v_records_created + 1;
+    END IF;
+  END LOOP;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'entries_ranked', v_rank,
+    'records_created', v_records_created
+  );
+END;
+$$;
+
+-- 2k. log_condition_change (from 035 — trigger function)
+CREATE OR REPLACE FUNCTION public.log_condition_change() RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.condition_grade IS DISTINCT FROM NEW.condition_grade THEN
+        INSERT INTO public.condition_history (horse_id, changed_by, old_condition, new_condition)
+        VALUES (NEW.id, NEW.owner_id, OLD.condition_grade, NEW.condition_grade);
     END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
--- 2l. toggle_show_vote
-CREATE OR REPLACE FUNCTION public.toggle_show_vote(p_entry_id UUID, p_show_id UUID)
+-- 2l. toggle_show_vote (from 035)
+CREATE OR REPLACE FUNCTION public.toggle_show_vote(p_entry_id UUID, p_user_id UUID)
 RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
-    v_existing UUID;
-    v_total INT;
+    v_new_votes INT;
+    v_entry_owner UUID;
+    v_action TEXT;
 BEGIN
-    SELECT id INTO v_existing
-    FROM public.event_votes
-    WHERE entry_id = p_entry_id AND user_id = auth.uid();
-
-    IF v_existing IS NOT NULL THEN
-        DELETE FROM public.event_votes WHERE id = v_existing;
-        SELECT count(*) INTO v_total FROM public.event_votes WHERE entry_id = p_entry_id;
-        RETURN jsonb_build_object('success', true, 'voted', false, 'votes', v_total);
-    ELSE
-        INSERT INTO public.event_votes (entry_id, show_id, user_id)
-        VALUES (p_entry_id, p_show_id, auth.uid());
-        SELECT count(*) INTO v_total FROM public.event_votes WHERE entry_id = p_entry_id;
-        RETURN jsonb_build_object('success', true, 'voted', true, 'votes', v_total);
+    SELECT user_id INTO v_entry_owner FROM public.show_entries WHERE id = p_entry_id;
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object('success', false, 'error', 'Entry not found.');
     END IF;
+    IF v_entry_owner = p_user_id THEN
+        RETURN jsonb_build_object('success', false, 'error', 'Cannot vote for your own entry.');
+    END IF;
+
+    IF EXISTS(SELECT 1 FROM public.show_votes WHERE entry_id = p_entry_id AND user_id = p_user_id) THEN
+        DELETE FROM public.show_votes WHERE entry_id = p_entry_id AND user_id = p_user_id;
+        UPDATE public.show_entries SET votes = GREATEST(0, votes - 1) WHERE id = p_entry_id RETURNING votes INTO v_new_votes;
+        v_action := 'unvoted';
+    ELSE
+        INSERT INTO public.show_votes (entry_id, user_id) VALUES (p_entry_id, p_user_id);
+        UPDATE public.show_entries SET votes = votes + 1 WHERE id = p_entry_id RETURNING votes INTO v_new_votes;
+        v_action := 'voted';
+    END IF;
+
+    RETURN jsonb_build_object('success', true, 'new_votes', v_new_votes, 'action', v_action, 'entry_owner', v_entry_owner);
 END;
 $$;
 
--- 2m. claim_parked_horse_atomic
-CREATE OR REPLACE FUNCTION public.claim_parked_horse_atomic(
-    p_transfer_code TEXT,
-    p_claimer_id UUID
-) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- 2m. claim_parked_horse_atomic (from 064)
+CREATE OR REPLACE FUNCTION public.claim_parked_horse_atomic(p_pin TEXT, p_claimant_id UUID)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
-    v_transfer RECORD;
-    v_horse RECORD;
+    v_transfer RECORD; v_horse RECORD; v_sender_alias TEXT; v_receiver_alias TEXT; v_thumb TEXT;
 BEGIN
-    SELECT * INTO v_transfer
-    FROM public.horse_transfers
-    WHERE transfer_code = p_transfer_code
-      AND status = 'pending';
+    SELECT * INTO v_transfer FROM public.horse_transfers
+    WHERE claim_pin = upper(trim(p_pin)) AND status = 'pending'
+    FOR UPDATE;
 
     IF NOT FOUND THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Invalid or expired transfer code');
+        RETURN jsonb_build_object('success', false, 'error', 'Invalid PIN.');
     END IF;
 
     IF v_transfer.expires_at < now() THEN
         UPDATE public.horse_transfers SET status = 'expired' WHERE id = v_transfer.id;
-        RETURN jsonb_build_object('success', false, 'error', 'Transfer code has expired');
+        UPDATE public.user_horses SET life_stage = 'completed' WHERE id = v_transfer.horse_id;
+
+        INSERT INTO public.posts (author_id, horse_id, content)
+        VALUES (v_transfer.sender_id, v_transfer.horse_id,
+                '⏰ Parked transfer expired. Horse automatically unparked.');
+
+        RETURN jsonb_build_object('success', false, 'error', 'Expired PIN.');
+    END IF;
+
+    IF v_transfer.sender_id = p_claimant_id THEN
+        RETURN jsonb_build_object('success', false, 'error', 'Cannot claim your own horse.');
     END IF;
 
     SELECT * INTO v_horse FROM public.user_horses WHERE id = v_transfer.horse_id;
+    SELECT alias_name INTO v_sender_alias FROM public.users WHERE id = v_transfer.sender_id;
+    SELECT alias_name INTO v_receiver_alias FROM public.users WHERE id = p_claimant_id;
+    SELECT image_url INTO v_thumb FROM public.horse_images
+        WHERE horse_id = v_transfer.horse_id AND angle_profile = 'Primary_Thumbnail' LIMIT 1;
 
-    IF v_horse.owner_id = p_claimer_id THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Cannot claim your own horse');
-    END IF;
+    UPDATE public.horse_ownership_history
+    SET released_at = now(), horse_name = v_horse.custom_name, horse_thumbnail = v_thumb
+    WHERE horse_id = v_transfer.horse_id AND owner_id = v_transfer.sender_id AND released_at IS NULL;
 
-    -- Transfer ownership
-    UPDATE public.user_horses
-    SET owner_id = p_claimer_id,
-        trade_status = 'not_for_sale',
-        is_public = false
+    INSERT INTO public.horse_ownership_history (horse_id, owner_id, owner_alias, acquisition_type, sale_price, is_price_public, notes)
+    VALUES (v_transfer.horse_id, p_claimant_id, v_receiver_alias, v_transfer.acquisition_type, v_transfer.sale_price, v_transfer.is_price_public, 'Claimed via CoA PIN');
+
+    UPDATE public.user_horses SET owner_id = p_claimant_id, collection_id = NULL, life_stage = 'completed'
     WHERE id = v_transfer.horse_id;
 
-    -- Mark transfer as claimed
-    UPDATE public.horse_transfers
-    SET status = 'claimed',
-        claimed_by = p_claimer_id,
-        claimed_at = now()
+    UPDATE public.horse_transfers SET status = 'claimed', claimed_by = p_claimant_id, claimed_at = now()
     WHERE id = v_transfer.id;
 
-    -- Add ownership history
-    INSERT INTO public.horse_ownership_history (horse_id, owner_id, owner_alias, acquisition_type, acquired_at)
-    VALUES (v_transfer.horse_id, p_claimer_id,
-            (SELECT alias_name FROM public.users WHERE id = p_claimer_id),
-            'transfer', now());
+    UPDATE public.financial_vault SET purchase_price = NULL, estimated_current_value = NULL, insurance_notes = NULL, purchase_date = NULL
+    WHERE horse_id = v_transfer.horse_id;
 
-    -- Mark previous owner's record as released
-    UPDATE public.horse_ownership_history
-    SET released_at = now()
-    WHERE horse_id = v_transfer.horse_id
-      AND owner_id = v_horse.owner_id
-      AND released_at IS NULL;
-
-    RETURN jsonb_build_object('success', true, 'horse_id', v_transfer.horse_id);
+    RETURN jsonb_build_object(
+        'success', true,
+        'horse_id', v_transfer.horse_id,
+        'horse_name', v_horse.custom_name,
+        'sender_id', v_transfer.sender_id,
+        'sender_alias', v_sender_alias,
+        'receiver_alias', v_receiver_alias,
+        'sale_price', v_transfer.sale_price
+    );
 END;
 $$;
 
--- 2n. claim_transfer_atomic
-CREATE OR REPLACE FUNCTION public.claim_transfer_atomic(
-    p_transfer_code TEXT,
-    p_claimer_id UUID,
-    p_pin TEXT DEFAULT NULL
-) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+-- 2n. claim_transfer_atomic (from 056)
+CREATE OR REPLACE FUNCTION public.claim_transfer_atomic(p_code TEXT, p_claimant_id UUID)
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
     v_transfer RECORD;
     v_horse RECORD;
+    v_sender_alias TEXT;
+    v_receiver_alias TEXT;
+    v_thumb TEXT;
 BEGIN
-    SELECT * INTO v_transfer
-    FROM public.horse_transfers
-    WHERE transfer_code = p_transfer_code
-      AND status = 'pending';
+    SELECT * INTO v_transfer FROM public.horse_transfers
+    WHERE transfer_code = upper(trim(p_code)) AND status = 'pending'
+    FOR UPDATE;
 
     IF NOT FOUND THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Invalid or expired transfer code');
-    END IF;
-
-    -- Check PIN if transfer requires one
-    IF v_transfer.pin IS NOT NULL AND v_transfer.pin != p_pin THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Invalid PIN');
+        RETURN jsonb_build_object('success', false, 'error', 'Invalid or already claimed transfer code.');
     END IF;
 
     IF v_transfer.expires_at < now() THEN
         UPDATE public.horse_transfers SET status = 'expired' WHERE id = v_transfer.id;
-        RETURN jsonb_build_object('success', false, 'error', 'Transfer code has expired');
+        RETURN jsonb_build_object('success', false, 'error', 'This transfer code has expired.');
+    END IF;
+
+    IF v_transfer.sender_id = p_claimant_id THEN
+        RETURN jsonb_build_object('success', false, 'error', 'You cannot claim your own horse.');
     END IF;
 
     SELECT * INTO v_horse FROM public.user_horses WHERE id = v_transfer.horse_id;
-
-    IF v_horse.owner_id = p_claimer_id THEN
-        RETURN jsonb_build_object('success', false, 'error', 'Cannot claim your own horse');
-    END IF;
-
-    -- Transfer ownership
-    UPDATE public.user_horses
-    SET owner_id = p_claimer_id,
-        trade_status = 'not_for_sale',
-        is_public = false
-    WHERE id = v_transfer.horse_id;
-
-    UPDATE public.horse_transfers
-    SET status = 'claimed',
-        claimed_by = p_claimer_id,
-        claimed_at = now()
-    WHERE id = v_transfer.id;
-
-    INSERT INTO public.horse_ownership_history (horse_id, owner_id, owner_alias, acquisition_type, acquired_at)
-    VALUES (v_transfer.horse_id, p_claimer_id,
-            (SELECT alias_name FROM public.users WHERE id = p_claimer_id),
-            'transfer', now());
+    SELECT alias_name INTO v_sender_alias FROM public.users WHERE id = v_transfer.sender_id;
+    SELECT alias_name INTO v_receiver_alias FROM public.users WHERE id = p_claimant_id;
+    SELECT image_url INTO v_thumb FROM public.horse_images
+        WHERE horse_id = v_transfer.horse_id AND angle_profile = 'Primary_Thumbnail' LIMIT 1;
 
     UPDATE public.horse_ownership_history
-    SET released_at = now()
-    WHERE horse_id = v_transfer.horse_id
-      AND owner_id = v_horse.owner_id
-      AND released_at IS NULL;
+    SET released_at = now(), horse_name = v_horse.custom_name, horse_thumbnail = v_thumb
+    WHERE horse_id = v_transfer.horse_id AND owner_id = v_transfer.sender_id AND released_at IS NULL;
 
-    RETURN jsonb_build_object('success', true, 'horse_id', v_transfer.horse_id);
+    INSERT INTO public.horse_ownership_history (horse_id, owner_id, owner_alias, acquisition_type, sale_price, is_price_public, notes)
+    VALUES (v_transfer.horse_id, p_claimant_id, v_receiver_alias, v_transfer.acquisition_type, v_transfer.sale_price, v_transfer.is_price_public, 'Claimed via transfer');
+
+    UPDATE public.user_horses SET owner_id = p_claimant_id, collection_id = NULL WHERE id = v_transfer.horse_id;
+
+    UPDATE public.horse_transfers SET status = 'claimed', claimed_by = p_claimant_id, claimed_at = now() WHERE id = v_transfer.id;
+
+    UPDATE public.financial_vault SET purchase_price = NULL, estimated_current_value = NULL, insurance_notes = NULL, purchase_date = NULL
+    WHERE horse_id = v_transfer.horse_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'horse_id', v_transfer.horse_id,
+        'horse_name', v_horse.custom_name,
+        'sender_id', v_transfer.sender_id,
+        'sender_alias', v_sender_alias,
+        'receiver_alias', v_receiver_alias,
+        'sale_price', v_transfer.sale_price
+    );
 END;
 $$;
 
--- 2o. toggle_activity_like
-CREATE OR REPLACE FUNCTION public.toggle_activity_like(p_activity_id UUID)
+-- 2o. toggle_activity_like (from 039)
+CREATE OR REPLACE FUNCTION public.toggle_activity_like(p_activity_id UUID, p_user_id UUID)
 RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
-    v_existing UUID;
-    v_total INT;
+  v_exists BOOLEAN;
 BEGIN
-    SELECT id INTO v_existing
-    FROM public.activity_likes
-    WHERE activity_id = p_activity_id AND user_id = auth.uid();
-
-    IF v_existing IS NOT NULL THEN
-        DELETE FROM public.activity_likes WHERE id = v_existing;
-        SELECT count(*) INTO v_total FROM public.activity_likes WHERE activity_id = p_activity_id;
-        RETURN jsonb_build_object('success', true, 'liked', false, 'likes', v_total);
-    ELSE
-        INSERT INTO public.activity_likes (activity_id, user_id)
-        VALUES (p_activity_id, auth.uid());
-        SELECT count(*) INTO v_total FROM public.activity_likes WHERE activity_id = p_activity_id;
-        RETURN jsonb_build_object('success', true, 'liked', true, 'likes', v_total);
-    END IF;
+  SELECT EXISTS(SELECT 1 FROM public.activity_likes WHERE user_id = p_user_id AND activity_id = p_activity_id) INTO v_exists;
+  IF v_exists THEN
+    DELETE FROM public.activity_likes WHERE user_id = p_user_id AND activity_id = p_activity_id;
+    UPDATE public.activity_events SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = p_activity_id;
+    RETURN jsonb_build_object('success', true, 'action', 'unliked');
+  ELSE
+    INSERT INTO public.activity_likes (user_id, activity_id) VALUES (p_user_id, p_activity_id);
+    UPDATE public.activity_events SET likes_count = likes_count + 1 WHERE id = p_activity_id;
+    RETURN jsonb_build_object('success', true, 'action', 'liked');
+  END IF;
 END;
 $$;
 
--- 2p. toggle_post_like
-CREATE OR REPLACE FUNCTION public.toggle_post_like(p_post_id UUID)
+-- 2p. toggle_post_like (from 042)
+CREATE OR REPLACE FUNCTION public.toggle_post_like(p_post_id UUID, p_user_id UUID)
 RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
-    v_existing UUID;
-    v_total INT;
+  v_exists BOOLEAN;
 BEGIN
-    SELECT id INTO v_existing
-    FROM public.post_likes
-    WHERE post_id = p_post_id AND user_id = auth.uid();
-
-    IF v_existing IS NOT NULL THEN
-        DELETE FROM public.post_likes WHERE id = v_existing;
-        SELECT count(*) INTO v_total FROM public.post_likes WHERE post_id = p_post_id;
-        RETURN jsonb_build_object('success', true, 'liked', false, 'likes', v_total);
-    ELSE
-        INSERT INTO public.post_likes (post_id, user_id)
-        VALUES (p_post_id, auth.uid());
-        SELECT count(*) INTO v_total FROM public.post_likes WHERE post_id = p_post_id;
-        RETURN jsonb_build_object('success', true, 'liked', true, 'likes', v_total);
-    END IF;
+  SELECT EXISTS(SELECT 1 FROM public.likes WHERE user_id = p_user_id AND post_id = p_post_id) INTO v_exists;
+  IF v_exists THEN
+    DELETE FROM public.likes WHERE user_id = p_user_id AND post_id = p_post_id;
+    UPDATE public.posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = p_post_id;
+    RETURN jsonb_build_object('success', true, 'action', 'unliked');
+  ELSE
+    INSERT INTO public.likes (user_id, post_id) VALUES (p_user_id, p_post_id);
+    UPDATE public.posts SET likes_count = likes_count + 1 WHERE id = p_post_id;
+    RETURN jsonb_build_object('success', true, 'action', 'liked');
+  END IF;
 END;
 $$;
 
--- 2q. add_post_reply
+-- 2q. add_post_reply (from 042)
 CREATE OR REPLACE FUNCTION public.add_post_reply(
-    p_parent_id UUID,
-    p_content TEXT,
-    p_group_id UUID DEFAULT NULL
-) RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+  p_parent_id UUID,
+  p_author_id UUID,
+  p_content TEXT,
+  p_horse_id UUID DEFAULT NULL,
+  p_group_id UUID DEFAULT NULL,
+  p_event_id UUID DEFAULT NULL
+)
+RETURNS UUID LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE
-    v_new_id UUID;
-    v_author_alias TEXT;
+  v_id UUID;
 BEGIN
-    SELECT alias_name INTO v_author_alias FROM public.users WHERE id = auth.uid();
+  INSERT INTO public.posts (author_id, content, parent_id, horse_id, group_id, event_id)
+  VALUES (p_author_id, p_content, p_parent_id, p_horse_id, p_group_id, p_event_id)
+  RETURNING id INTO v_id;
 
-    INSERT INTO public.posts (parent_id, author_id, author_alias, content, group_id)
-    VALUES (p_parent_id, auth.uid(), v_author_alias, p_content, p_group_id)
-    RETURNING id INTO v_new_id;
-
-    RETURN v_new_id;
+  UPDATE public.posts SET replies_count = replies_count + 1 WHERE id = p_parent_id;
+  RETURN v_id;
 END;
 $$;
 
--- 2r. refresh_market_prices
+-- 2r. refresh_market_prices (from 067)
 CREATE OR REPLACE FUNCTION public.refresh_market_prices()
 RETURNS void AS $$
 BEGIN
@@ -628,36 +678,73 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
--- 2s. batch_import_horses
+-- 2s. batch_import_horses (from 056)
 CREATE OR REPLACE FUNCTION public.batch_import_horses(
     p_user_id UUID,
     p_horses JSONB
-) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
-    v_horse JSONB;
-    v_count INT := 0;
+    horse_record JSONB;
+    new_horse_id UUID;
+    imported_count INT := 0;
 BEGIN
-    FOR v_horse IN SELECT * FROM jsonb_array_elements(p_horses)
+    IF auth.uid() IS DISTINCT FROM p_user_id THEN
+        RAISE EXCEPTION 'Unauthorized: user mismatch';
+    END IF;
+
+    FOR horse_record IN SELECT * FROM jsonb_array_elements(p_horses)
     LOOP
         INSERT INTO public.user_horses (
-            owner_id, custom_name, breed, color, scale, finish_type,
-            condition, manufacturer, is_public, catalog_id
+            owner_id,
+            custom_name,
+            finish_type,
+            condition_grade,
+            catalog_id,
+            asset_category,
+            is_public,
+            trade_status
         ) VALUES (
             p_user_id,
-            v_horse->>'custom_name',
-            v_horse->>'breed',
-            v_horse->>'color',
-            v_horse->>'scale',
-            COALESCE(v_horse->>'finish_type', 'of'),
-            v_horse->>'condition',
-            v_horse->>'manufacturer',
+            horse_record->>'custom_name',
+            CASE
+                WHEN COALESCE(horse_record->>'asset_category', 'model') = 'model'
+                THEN COALESCE(horse_record->>'finish_type', 'OF')::public.finish_type
+                ELSE NULL
+            END,
+            CASE
+                WHEN COALESCE(horse_record->>'asset_category', 'model') = 'model'
+                THEN COALESCE(horse_record->>'condition_grade', 'Not Graded')
+                ELSE NULL
+            END,
+            NULLIF(horse_record->>'catalog_id', '')::UUID,
+            COALESCE(horse_record->>'asset_category', 'model'),
             false,
-            (v_horse->>'catalog_id')::UUID
-        );
-        v_count := v_count + 1;
+            'Not for Sale'
+        )
+        RETURNING id INTO new_horse_id;
+
+        IF (horse_record->>'purchase_price') IS NOT NULL
+           OR (horse_record->>'estimated_value') IS NOT NULL THEN
+            INSERT INTO public.financial_vault (
+                horse_id,
+                purchase_price,
+                estimated_current_value
+            ) VALUES (
+                new_horse_id,
+                NULLIF(horse_record->>'purchase_price', '')::NUMERIC,
+                NULLIF(horse_record->>'estimated_value', '')::NUMERIC
+            );
+        END IF;
+
+        imported_count := imported_count + 1;
     END LOOP;
 
-    RETURN jsonb_build_object('success', true, 'imported', v_count);
+    RETURN jsonb_build_object('success', true, 'imported', imported_count);
 END;
 $$;
 
@@ -667,31 +754,27 @@ $$;
 -- Linter: extension_in_public (WARN)
 -- ══════════════════════════════════════════════════════════════
 
--- Create extensions schema if it doesn't exist
 CREATE SCHEMA IF NOT EXISTS extensions;
 
--- Move pg_trgm from public to extensions
 ALTER EXTENSION pg_trgm SET SCHEMA extensions;
 
 
 -- ══════════════════════════════════════════════════════════════
--- FIX 4: MATERIALIZED VIEW IN API — REVOKE API ACCESS
+-- FIX 4: MATERIALIZED VIEW IN API — REVOKE anon ACCESS
 -- Linter: materialized_view_in_api (WARN)
--- mv_market_prices doesn't need direct anon/authenticated
--- access — it's queried via server actions with admin client.
--- We still need authenticated access for the Blue Book page,
--- so we keep it but revoke anon access.
+-- mv_market_prices is aggregated pricing data — no need for
+-- anonymous access. Authenticated users can still query via
+-- the Blue Book page.
 -- ══════════════════════════════════════════════════════════════
 
 REVOKE SELECT ON mv_market_prices FROM anon;
 
 
 -- ══════════════════════════════════════════════════════════════
--- FIX 5: RLS ENABLED NO POLICY — Add service-role-only comment
+-- FIX 5: RLS ENABLED NO POLICY — Document intent
 -- Linter: rls_enabled_no_policy (INFO)
--- rate_limits table has RLS enabled but no policies by design
--- (only accessed via SECURITY DEFINER RPCs). Add a
--- comment to document intent and a restrictive policy.
+-- rate_limits has RLS enabled but no user-facing policies by
+-- design — only accessed via SECURITY DEFINER RPCs.
 -- ══════════════════════════════════════════════════════════════
 
 COMMENT ON TABLE rate_limits IS
@@ -717,7 +800,8 @@ CREATE POLICY "Owner inserts requests" ON id_requests
 DROP POLICY IF EXISTS "Owner updates own requests" ON id_requests;
 CREATE POLICY "Owner updates own requests" ON id_requests
     FOR UPDATE TO authenticated
-    USING (user_id = (SELECT auth.uid()));
+    USING (user_id = (SELECT auth.uid()))
+    WITH CHECK (user_id = (SELECT auth.uid()));
 
 -- 6c. id_suggestions — "Authenticated users can suggest"
 DROP POLICY IF EXISTS "Authenticated users can suggest" ON id_suggestions;
@@ -729,31 +813,10 @@ CREATE POLICY "Authenticated users can suggest" ON id_suggestions
 DROP POLICY IF EXISTS "Owner updates own suggestions" ON id_suggestions;
 CREATE POLICY "Owner updates own suggestions" ON id_suggestions
     FOR UPDATE TO authenticated
-    USING (user_id = (SELECT auth.uid()));
+    USING (user_id = (SELECT auth.uid()))
+    WITH CHECK (user_id = (SELECT auth.uid()));
 
--- 6e. condition_history — "Owner views own condition history"
-DROP POLICY IF EXISTS "Owner views own condition history" ON condition_history;
-CREATE POLICY "Owner views own condition history" ON condition_history
-    FOR SELECT TO authenticated
-    USING (
-        EXISTS (
-            SELECT 1 FROM user_horses
-            WHERE user_horses.id = condition_history.horse_id
-              AND user_horses.owner_id = (SELECT auth.uid())
-        )
-    );
-
--- 6f. condition_history — "System insert condition history"
-DROP POLICY IF EXISTS "System insert condition history" ON condition_history;
-CREATE POLICY "System insert condition history" ON condition_history
-    FOR INSERT TO authenticated
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM user_horses
-            WHERE user_horses.id = condition_history.horse_id
-              AND user_horses.owner_id = (SELECT auth.uid())
-        )
-    );
+-- 6e+6f. condition_history — Handled in Fix 7d (merged policies)
 
 -- 6g. user_reports — "Users can insert reports"
 DROP POLICY IF EXISTS "Users can insert reports" ON user_reports;
@@ -803,48 +866,38 @@ CREATE POLICY "Users can delete own comments" ON catalog_suggestion_comments
     FOR DELETE TO authenticated
     USING (user_id = (SELECT auth.uid()));
 
--- 6o. event_divisions — "Event creator can manage divisions"
-DROP POLICY IF EXISTS "Event creator can manage divisions" ON event_divisions;
-CREATE POLICY "Event creator can manage divisions" ON event_divisions
-    FOR ALL TO authenticated
-    USING (
-        EXISTS (
-            SELECT 1 FROM events
-            WHERE events.id = event_divisions.event_id
-              AND events.created_by = (SELECT auth.uid())
-        )
-    );
+-- 6o+6p+6q. event_divisions, event_classes — Handled in Fix 7f/7g
 
--- 6p. event_classes — "Event creator can manage classes"
-DROP POLICY IF EXISTS "Event creator can manage classes" ON event_classes;
-CREATE POLICY "Event creator can manage classes" ON event_classes
-    FOR ALL TO authenticated
-    USING (
-        EXISTS (
-            SELECT 1 FROM events e
-            JOIN event_divisions ed ON ed.event_id = e.id
-            WHERE ed.id = event_classes.division_id
-              AND e.created_by = (SELECT auth.uid())
-        )
-    );
-
--- 6q. horse_collections — "Users can view own horse collection links"
+-- 6r. horse_collections — "Users can view own horse collection links"
+-- NOTE: horse_collections has NO user_id column — uses horse_id → user_horses.owner_id
 DROP POLICY IF EXISTS "Users can view own horse collection links" ON horse_collections;
 CREATE POLICY "Users can view own horse collection links" ON horse_collections
     FOR SELECT TO authenticated
-    USING (user_id = (SELECT auth.uid()));
+    USING (
+        horse_id IN (
+            SELECT id FROM user_horses WHERE owner_id = (SELECT auth.uid())
+        )
+    );
 
--- 6r. horse_collections — "Users can insert own horse collection links"
+-- 6s. horse_collections — "Users can insert own horse collection links"
 DROP POLICY IF EXISTS "Users can insert own horse collection links" ON horse_collections;
 CREATE POLICY "Users can insert own horse collection links" ON horse_collections
     FOR INSERT TO authenticated
-    WITH CHECK (user_id = (SELECT auth.uid()));
+    WITH CHECK (
+        horse_id IN (
+            SELECT id FROM user_horses WHERE owner_id = (SELECT auth.uid())
+        )
+    );
 
--- 6s. horse_collections — "Users can delete own horse collection links"
+-- 6t. horse_collections — "Users can delete own horse collection links"
 DROP POLICY IF EXISTS "Users can delete own horse collection links" ON horse_collections;
 CREATE POLICY "Users can delete own horse collection links" ON horse_collections
     FOR DELETE TO authenticated
-    USING (user_id = (SELECT auth.uid()));
+    USING (
+        horse_id IN (
+            SELECT id FROM user_horses WHERE owner_id = (SELECT auth.uid())
+        )
+    );
 
 
 -- ══════════════════════════════════════════════════════════════
@@ -855,7 +908,6 @@ CREATE POLICY "Users can delete own horse collection links" ON horse_collections
 -- ══════════════════════════════════════════════════════════════
 
 -- 7a. commission_updates — authenticated SELECT
--- "Artist views all updates for own commissions" + "Client views visible updates for own commissions"
 DROP POLICY IF EXISTS "Artist views all updates for own commissions" ON commission_updates;
 DROP POLICY IF EXISTS "Client views visible updates for own commissions" ON commission_updates;
 CREATE POLICY "Participants view commission updates" ON commission_updates
@@ -866,13 +918,12 @@ CREATE POLICY "Participants view commission updates" ON commission_updates
             WHERE c.id = commission_updates.commission_id
               AND (
                   c.artist_id = (SELECT auth.uid())
-                  OR (c.client_id = (SELECT auth.uid()) AND commission_updates.visible_to_client = true)
+                  OR (c.client_id = (SELECT auth.uid()) AND commission_updates.is_visible_to_client = true)
               )
         )
     );
 
 -- 7b. commissions — authenticated INSERT
--- "Artist creates own commissions" + "Client creates commission requests"
 DROP POLICY IF EXISTS "Artist creates own commissions" ON commissions;
 DROP POLICY IF EXISTS "Client creates commission requests" ON commissions;
 CREATE POLICY "Participants create commissions" ON commissions
@@ -882,7 +933,6 @@ CREATE POLICY "Participants create commissions" ON commissions
     );
 
 -- 7c. commissions — authenticated SELECT
--- "Artist views own commissions" + "Client views own commissions" + "Public queue visibility"
 DROP POLICY IF EXISTS "Artist views own commissions" ON commissions;
 DROP POLICY IF EXISTS "Client views own commissions" ON commissions;
 DROP POLICY IF EXISTS "Public queue visibility" ON commissions;
@@ -894,9 +944,7 @@ CREATE POLICY "View commissions" ON commissions
         OR queue_public = true
     );
 
--- 7d. condition_history — authenticated SELECT
--- "Owner views own condition history" already recreated in Fix 6e.
--- Need to merge with "View condition history on public horses"
+-- 7d. condition_history — authenticated SELECT (merge + initplan fix)
 DROP POLICY IF EXISTS "Owner views own condition history" ON condition_history;
 DROP POLICY IF EXISTS "View condition history on public horses" ON condition_history;
 CREATE POLICY "View condition history" ON condition_history
@@ -912,20 +960,24 @@ CREATE POLICY "View condition history" ON condition_history
         )
     );
 
+-- condition_history INSERT (initplan fix from 6f)
+-- Original policy: auth.uid() = changed_by (direct column check)
+DROP POLICY IF EXISTS "System insert condition history" ON condition_history;
+CREATE POLICY "System insert condition history" ON condition_history
+    FOR INSERT TO authenticated
+    WITH CHECK (changed_by = (SELECT auth.uid()));
+
 -- 7e. customization_logs — authenticated INSERT
--- "commission_artist_inserts_customization_log" + "customization_logs_insert_own"
 DROP POLICY IF EXISTS "commission_artist_inserts_customization_log" ON customization_logs;
 DROP POLICY IF EXISTS "customization_logs_insert_own" ON customization_logs;
 CREATE POLICY "Insert customization logs" ON customization_logs
     FOR INSERT TO authenticated
     WITH CHECK (
-        -- Owner of the horse
         EXISTS (
             SELECT 1 FROM user_horses
             WHERE user_horses.id = customization_logs.horse_id
               AND user_horses.owner_id = (SELECT auth.uid())
         )
-        -- OR commission artist for this horse
         OR EXISTS (
             SELECT 1 FROM commissions c
             WHERE c.horse_id = customization_logs.horse_id
@@ -934,11 +986,7 @@ CREATE POLICY "Insert customization logs" ON customization_logs
         )
     );
 
--- 7f. event_classes — merge SELECT policies
--- "Anyone can view event classes" + "Event creator can manage classes"
--- The "Anyone" policy already covers all SELECT — the creator
--- policy for SELECT is redundant. Drop the duplicate and keep
--- only the public read. The "manage" policy stays for INSERT/UPDATE/DELETE.
+-- 7f. event_classes — merge SELECT policies (also fixes initplan)
 DROP POLICY IF EXISTS "Anyone can view event classes" ON event_classes;
 DROP POLICY IF EXISTS "Event creator can manage classes" ON event_classes;
 
@@ -946,15 +994,7 @@ CREATE POLICY "Anyone can view event classes" ON event_classes
     FOR SELECT USING (true);
 
 CREATE POLICY "Event creator can manage classes" ON event_classes
-    FOR ALL TO authenticated
-    USING (
-        EXISTS (
-            SELECT 1 FROM events e
-            JOIN event_divisions ed ON ed.event_id = e.id
-            WHERE ed.id = event_classes.division_id
-              AND e.created_by = (SELECT auth.uid())
-        )
-    )
+    FOR INSERT TO authenticated
     WITH CHECK (
         EXISTS (
             SELECT 1 FROM events e
@@ -964,9 +1004,29 @@ CREATE POLICY "Event creator can manage classes" ON event_classes
         )
     );
 
--- 7g. event_divisions — merge SELECT policies
--- "Anyone can view event divisions" + "Event creator can manage divisions"
--- Same pattern as event_classes above.
+CREATE POLICY "Event creator can update classes" ON event_classes
+    FOR UPDATE TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM events e
+            JOIN event_divisions ed ON ed.event_id = e.id
+            WHERE ed.id = event_classes.division_id
+              AND e.created_by = (SELECT auth.uid())
+        )
+    );
+
+CREATE POLICY "Event creator can delete classes" ON event_classes
+    FOR DELETE TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM events e
+            JOIN event_divisions ed ON ed.event_id = e.id
+            WHERE ed.id = event_classes.division_id
+              AND e.created_by = (SELECT auth.uid())
+        )
+    );
+
+-- 7g. event_divisions — merge SELECT policies (also fixes initplan)
 DROP POLICY IF EXISTS "Anyone can view event divisions" ON event_divisions;
 DROP POLICY IF EXISTS "Event creator can manage divisions" ON event_divisions;
 
@@ -974,15 +1034,28 @@ CREATE POLICY "Anyone can view event divisions" ON event_divisions
     FOR SELECT USING (true);
 
 CREATE POLICY "Event creator can manage divisions" ON event_divisions
-    FOR ALL TO authenticated
+    FOR INSERT TO authenticated
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM events
+            WHERE events.id = event_divisions.event_id
+              AND events.created_by = (SELECT auth.uid())
+        )
+    );
+
+CREATE POLICY "Event creator can update divisions" ON event_divisions
+    FOR UPDATE TO authenticated
     USING (
         EXISTS (
             SELECT 1 FROM events
             WHERE events.id = event_divisions.event_id
               AND events.created_by = (SELECT auth.uid())
         )
-    )
-    WITH CHECK (
+    );
+
+CREATE POLICY "Event creator can delete divisions" ON event_divisions
+    FOR DELETE TO authenticated
+    USING (
         EXISTS (
             SELECT 1 FROM events
             WHERE events.id = event_divisions.event_id
@@ -991,7 +1064,6 @@ CREATE POLICY "Event creator can manage divisions" ON event_divisions
     );
 
 -- 7h. event_judges — authenticated SELECT
--- "Anyone can view event judges" + "Event creator manages judges"
 DROP POLICY IF EXISTS "Anyone can view event judges" ON event_judges;
 DROP POLICY IF EXISTS "Event creator manages judges" ON event_judges;
 
@@ -999,15 +1071,28 @@ CREATE POLICY "Anyone can view event judges" ON event_judges
     FOR SELECT USING (true);
 
 CREATE POLICY "Event creator manages judges" ON event_judges
-    FOR ALL TO authenticated
+    FOR INSERT TO authenticated
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM events
+            WHERE events.id = event_judges.event_id
+              AND events.created_by = (SELECT auth.uid())
+        )
+    );
+
+CREATE POLICY "Event creator updates judges" ON event_judges
+    FOR UPDATE TO authenticated
     USING (
         EXISTS (
             SELECT 1 FROM events
             WHERE events.id = event_judges.event_id
               AND events.created_by = (SELECT auth.uid())
         )
-    )
-    WITH CHECK (
+    );
+
+CREATE POLICY "Event creator deletes judges" ON event_judges
+    FOR DELETE TO authenticated
+    USING (
         EXISTS (
             SELECT 1 FROM events
             WHERE events.id = event_judges.event_id
@@ -1021,34 +1106,20 @@ CREATE POLICY "Event creator manages judges" ON event_judges
 -- Linter: duplicate_index (WARN — PERFORMANCE)
 -- ══════════════════════════════════════════════════════════════
 
--- 8a. activity_events — idx_activity_events_actor vs idx_activity_events_actor_id
 DROP INDEX IF EXISTS idx_activity_events_actor;
-
--- 8b. activity_events — idx_activity_events_created vs idx_activity_events_created_at
 DROP INDEX IF EXISTS idx_activity_events_created;
-
--- 8c. horse_images — idx_horse_images_horse vs idx_horse_images_horse_id
 DROP INDEX IF EXISTS idx_horse_images_horse;
-
--- 8d. horse_transfers — idx_horse_transfers_code vs idx_transfers_code
 DROP INDEX IF EXISTS idx_transfers_code;
-
--- 8e. notifications — idx_notifications_unread vs idx_notifications_user_unread
 DROP INDEX IF EXISTS idx_notifications_unread;
-
--- 8f. user_horses — idx_user_horses_owner vs idx_user_horses_owner_id
 DROP INDEX IF EXISTS idx_user_horses_owner;
 
 
 -- ══════════════════════════════════════════════════════════════
 -- FIX 9: UNINDEXED FOREIGN KEYS — Add covering indexes
 -- Linter: unindexed_foreign_keys (INFO — PERFORMANCE)
--- Adding indexes on FK columns that lack them.
--- Only adding indexes for tables likely to have significant
--- query patterns involving these foreign keys.
 -- ══════════════════════════════════════════════════════════════
 
--- High-value indexes (tables with frequent JOINs or filters on these FKs)
+-- High-value indexes (frequent JOINs/filters)
 CREATE INDEX IF NOT EXISTS idx_activity_likes_activity ON activity_likes(activity_id);
 CREATE INDEX IF NOT EXISTS idx_commission_updates_author ON commission_updates(author_id);
 CREATE INDEX IF NOT EXISTS idx_commissions_horse ON commissions(horse_id);
@@ -1070,7 +1141,7 @@ CREATE INDEX IF NOT EXISTS idx_catalog_suggestion_comments_user ON catalog_sugge
 CREATE INDEX IF NOT EXISTS idx_catalog_suggestion_votes_user ON catalog_suggestion_votes(user_id);
 CREATE INDEX IF NOT EXISTS idx_catalog_suggestions_reviewed_by ON catalog_suggestions(reviewed_by) WHERE reviewed_by IS NOT NULL;
 
--- Lower-priority indexes (smaller tables or less frequent patterns)
+-- Lower-priority indexes (smaller tables)
 CREATE INDEX IF NOT EXISTS idx_media_attachments_uploader ON media_attachments(uploader_id);
 CREATE INDEX IF NOT EXISTS idx_show_string_entries_class ON show_string_entries(class_id);
 CREATE INDEX IF NOT EXISTS idx_group_files_uploaded_by ON group_files(uploaded_by);

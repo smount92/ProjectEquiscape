@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -18,10 +19,11 @@ export default async function SuggestionsPage({ searchParams }: Props) {
     const { status: statusFilter, item: itemFilter } = await searchParams;
     const supabase = await createClient();
 
+    // Two-step fetch: FK goes to auth.users not public.users, so PostgREST can't join
     let query = supabase
         .from("catalog_suggestions")
         .select(
-            "id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at, users!catalog_suggestions_user_id_fkey(alias_name, approved_suggestions_count)",
+            "id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at",
             { count: "exact" }
         )
         .order("created_at", { ascending: false })
@@ -35,6 +37,20 @@ export default async function SuggestionsPage({ searchParams }: Props) {
     }
 
     const { data: suggestions, count } = await query;
+
+    // Enrich with user data from public.users via admin client
+    const admin = getAdminClient();
+    const userIds = [...new Set((suggestions ?? []).map((s: { user_id: string }) => s.user_id))];
+    const userMap: Record<string, { alias_name: string; approved_suggestions_count: number }> = {};
+    if (userIds.length > 0) {
+        const { data: users } = await admin
+            .from("users")
+            .select("id, alias_name, approved_suggestions_count")
+            .in("id", userIds);
+        for (const u of (users ?? []) as { id: string; alias_name: string; approved_suggestions_count: number }[]) {
+            userMap[u.id] = { alias_name: u.alias_name, approved_suggestions_count: u.approved_suggestions_count };
+        }
+    }
 
     // Get comment counts per suggestion
     const suggestionIds = (suggestions ?? []).map(
@@ -107,12 +123,9 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                         upvotes: number;
                         downvotes: number;
                         created_at: string;
-                        users: {
-                            alias_name: string;
-                            approved_suggestions_count: number;
-                        } | null;
                     }[]
                 )?.map((s) => {
+                    const userData = userMap[s.user_id];
                     const typeIcon =
                         s.suggestion_type === "correction"
                             ? "🔧"
@@ -152,7 +165,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                     }
 
                     const curatorCount =
-                        s.users?.approved_suggestions_count ?? 0;
+                        userData?.approved_suggestions_count ?? 0;
                     const curatorIcon =
                         curatorCount >= 200
                             ? "🥇"
@@ -193,7 +206,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
 
                             <div className="ref-suggestion-footer">
                                 <span className="ref-suggestion-author">
-                                    {curatorIcon} @{s.users?.alias_name ?? "Unknown"}
+                                    {curatorIcon} @{userData?.alias_name ?? "Unknown"}
                                 </span>
                                 <span className="ref-suggestion-meta">
                                     ▲ {s.upvotes} ▼ {s.downvotes}

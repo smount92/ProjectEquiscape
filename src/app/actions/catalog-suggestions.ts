@@ -237,15 +237,14 @@ export async function getSuggestions(
     page: number = 1
 ) {
     const supabase = await createClient();
+    const admin = getAdminClient();
     const pageSize = 20;
     const from = (page - 1) * pageSize;
 
+    // Two-step fetch: FK goes to auth.users, PostgREST can't join
     let query = supabase
         .from("catalog_suggestions")
-        .select(
-            "*, users!catalog_suggestions_user_id_fkey(alias_name, avatar_url, approved_suggestions_count)",
-            { count: "exact" }
-        )
+        .select("*", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(from, from + pageSize - 1);
 
@@ -256,26 +255,58 @@ export async function getSuggestions(
     const { data, count, error } = await query;
     if (error)
         return { success: false as const, error: error.message };
+
+    // Enrich with user data from public.users
+    const rows = (data ?? []) as CatalogSuggestion[];
+    const userIds = [...new Set(rows.map((r) => r.user_id))];
+    const userMap: Record<string, { alias_name: string; avatar_url: string | null; approved_suggestions_count: number }> = {};
+    if (userIds.length > 0) {
+        const { data: users } = await admin
+            .from("users")
+            .select("id, alias_name, avatar_url, approved_suggestions_count")
+            .in("id", userIds);
+        for (const u of (users ?? []) as { id: string; alias_name: string; avatar_url: string | null; approved_suggestions_count: number }[]) {
+            userMap[u.id] = { alias_name: u.alias_name, avatar_url: u.avatar_url, approved_suggestions_count: u.approved_suggestions_count };
+        }
+    }
+
+    const enriched = rows.map((r) => ({
+        ...r,
+        users: userMap[r.user_id] ?? null,
+    }));
+
     return {
         success: true as const,
-        suggestions: data ?? [],
+        suggestions: enriched,
         total: count ?? 0,
     };
 }
 
 export async function getSuggestion(id: string) {
     const supabase = await createClient();
+    const admin = getAdminClient();
 
+    // Two-step fetch: FK goes to auth.users, PostgREST can't join
     const { data: suggestion, error } = await supabase
         .from("catalog_suggestions")
-        .select(
-            "*, users!catalog_suggestions_user_id_fkey(alias_name, avatar_url, approved_suggestions_count)"
-        )
+        .select("*")
         .eq("id", id)
         .single();
 
     if (error)
         return { success: false as const, error: error.message };
+
+    // Enrich with user data
+    const s = suggestion as CatalogSuggestion;
+    let userData = null;
+    if (s) {
+        const { data: user } = await admin
+            .from("users")
+            .select("alias_name, avatar_url, approved_suggestions_count")
+            .eq("id", s.user_id)
+            .single();
+        userData = user;
+    }
 
     // Get comments
     const { data: comments } = await supabase
@@ -286,24 +317,18 @@ export async function getSuggestion(id: string) {
 
     // Get catalog item if correction
     let catalogItem = null;
-    if (
-        suggestion &&
-        (suggestion as CatalogSuggestion).catalog_item_id
-    ) {
+    if (s && s.catalog_item_id) {
         const { data: item } = await supabase
             .from("catalog_items")
             .select("*")
-            .eq(
-                "id",
-                (suggestion as CatalogSuggestion).catalog_item_id!
-            )
+            .eq("id", s.catalog_item_id!)
             .single();
         catalogItem = item;
     }
 
     return {
         success: true as const,
-        suggestion,
+        suggestion: s ? { ...s, users: userData } : suggestion,
         comments: comments ?? [],
         catalogItem,
     };
