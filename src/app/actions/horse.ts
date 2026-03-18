@@ -28,6 +28,12 @@ async function checkActiveTransaction(horseId: string): Promise<string | null> {
     return null;
 }
 
+/**
+ * Permanently delete a horse and all associated data (images, vault, records).
+ * Guards against deletion while an active Safe-Trade transaction is pending.
+ * Cleans up Supabase Storage files before removing the DB record.
+ * @param horseId - UUID of the horse to delete (must be owned by caller)
+ */
 export async function deleteHorse(horseId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -77,6 +83,12 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
     return { success: true };
 }
 
+/**
+ * Permanently delete a horse and all associated data (images, vault, records).
+ * Guards against deletion while an active Safe-Trade transaction is pending.
+ * Cleans up Supabase Storage files before removing the DB record.
+ * @param horseId - UUID of the horse to delete (must be owned by caller)
+ */
 export async function deleteHorseImageAction(recordId: string, storagePath: string | null): Promise<{ success: boolean; error?: string }> {
     try {
         const supabase = await createClient();
@@ -97,6 +109,14 @@ export async function deleteHorseImageAction(recordId: string, storagePath: stri
     }
 }
 
+/**
+ * Update a horse's details, financial vault, and/or condition grade.
+ * Applies field whitelisting to prevent column injection.
+ * Guards against mutation during active transactions (rug-pull prevention).
+ * Auto-unparks horses with expired transfers so they become editable.
+ * @param horseId - UUID of the horse to update
+ * @param data - Update payload with whitelisted horse fields, vault data, and condition change
+ */
 export async function updateHorseAction(horseId: string, data: {
     horseUpdate: Record<string, unknown> | null;
     vaultData: Record<string, unknown> | null;
@@ -405,6 +425,12 @@ export async function finalizeHorseImages(
 // BULK OPERATIONS
 // ============================================================
 
+/**
+ * Bulk update collection, trade status, or visibility for up to 200 horses.
+ * Verifies ownership of every horse in the batch before applying changes.
+ * @param horseIds - Array of horse UUIDs to update (max 200)
+ * @param updates - Fields to set across all selected horses
+ */
 export async function bulkUpdateHorses(
     horseIds: string[],
     updates: {
@@ -450,6 +476,12 @@ export async function bulkUpdateHorses(
     return { success: true, count: horseIds.length };
 }
 
+/**
+ * Bulk delete up to 100 horses and their Storage files.
+ * Guards against deletion of horses with active transactions.
+ * Verifies ownership of every horse in the batch.
+ * @param horseIds - Array of horse UUIDs to delete (max 100)
+ */
 export async function bulkDeleteHorses(
     horseIds: string[]
 ): Promise<{ success: boolean; count?: number; error?: string }> {
@@ -516,6 +548,12 @@ export async function bulkDeleteHorses(
 // QUICK ADD (Frictionless Intake)
 // ============================================================
 
+/**
+ * Quick-add a horse with minimal fields (used by /add-horse/quick).
+ * Auto-names the horse from the catalog reference if no custom name provided.
+ * Defaults to private, not-for-sale, and model category.
+ * @param data - Quick-add fields: catalogId, customName, finishType, conditionGrade, collectionId
+ */
 export async function quickAddHorse(data: {
     catalogId?: string;
     customName?: string;
@@ -567,6 +605,11 @@ export async function quickAddHorse(data: {
 // PHOTO REORDERING
 // ============================================================
 
+/**
+ * Reorder images for a horse by setting sort_order on each image.
+ * @param horseId - UUID of the horse (must be owned by caller)
+ * @param imageIds - Image UUIDs in desired display order
+ */
 export async function reorderHorseImages(
     horseId: string,
     imageIds: string[]

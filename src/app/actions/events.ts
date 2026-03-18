@@ -12,6 +12,11 @@ import { sanitizeText } from "@/lib/utils/validation";
 
 // ── User Search (for judge assignment autocomplete) ──
 
+/**
+ * Search users by alias name — used for event judge assignment.
+ * @param query - Partial alias to search for
+ * @returns Matching users with id and alias
+ */
 export async function searchUsers(query: string): Promise<{
     id: string;
     aliasName: string;

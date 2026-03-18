@@ -3,6 +3,10 @@
 import { requireAuth } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 
+/**
+ * Like or unlike an activity feed event. Idempotent toggle.
+ * @param activityId - UUID of the activity event to like/unlike
+ */
 export async function toggleActivityLike(activityId: string): Promise<{ success: boolean; action?: string; error?: string }> {
     try {
         const { user } = await requireAuth();
@@ -19,6 +23,10 @@ export async function toggleActivityLike(activityId: string): Promise<{ success:
     }
 }
 
+/**
+ * Like or unlike a group post. Idempotent toggle.
+ * @param postId - UUID of the group post
+ */
 export async function toggleGroupPostLike(postId: string): Promise<{ success: boolean; action?: string; error?: string }> {
     try {
         const { user } = await requireAuth();
@@ -35,6 +43,10 @@ export async function toggleGroupPostLike(postId: string): Promise<{ success: bo
     }
 }
 
+/**
+ * Like or unlike a comment. Idempotent toggle.
+ * @param commentId - UUID of the comment
+ */
 export async function toggleCommentLike(commentId: string): Promise<{ success: boolean; action?: string; error?: string }> {
     try {
         const { user } = await requireAuth();

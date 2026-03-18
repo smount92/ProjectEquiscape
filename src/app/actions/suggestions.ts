@@ -5,6 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Submit a suggestion for a missing catalog entry.
+ * Goes to admin review queue.
+ * @param data - Suggestion details: maker, title, description
+ */
 export async function submitSuggestion(data: {
     suggestionType: "mold" | "release" | "resin";
     name: string;
@@ -24,6 +29,10 @@ export async function submitSuggestion(data: {
 }
 
 // Admin: get all pending suggestions
+/**
+ * Get pending catalog suggestions (admin only).
+ * @returns Array of unreviewed suggestions
+ */
 export async function getPendingSuggestions() {
     const supabase = await createClient();
     const { data } = await supabase
@@ -35,6 +44,11 @@ export async function getPendingSuggestions() {
 }
 
 // Admin: approve/reject a suggestion — executes DB insertion on approve
+/**
+ * Approve or reject a catalog suggestion (admin only).
+ * @param suggestionId - UUID of the suggestion
+ * @param action - "approve" or "reject"
+ */
 export async function reviewSuggestion(
     id: string,
     status: "approved" | "rejected",

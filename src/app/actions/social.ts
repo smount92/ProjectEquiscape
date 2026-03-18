@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 // Social Actions — Favorites (Likes)
 // ============================================================
 
+/**
+ * Favorite or unfavorite a horse. Idempotent toggle.
+ * @param horseId - UUID of the horse to favorite/unfavorite
+ */
 export async function toggleFavorite(horseId: string): Promise<{
     success: boolean;
     isFavorited?: boolean;

@@ -17,6 +17,13 @@ import { after } from "next/server";
 
 // ── Create Transaction ──
 // Called internally by claim flows. NOT user-facing.
+/**
+ * Create a transaction record between two parties.
+ * Called internally by transfer/claim flows — NOT user-facing.
+ * Uses the admin client to bypass RLS (cross-user write).
+ * @param data - Transaction data including type, party IDs, and optional horse/commission/conversation IDs
+ * @returns The created transaction's UUID
+ */
 export async function createTransaction(data: {
     type: "transfer" | "parked_sale" | "commission" | "marketplace_sale";
     partyAId: string;
@@ -52,6 +59,11 @@ export async function createTransaction(data: {
 }
 
 // ── Complete Transaction ──
+/**
+ * Mark a transaction as completed. Triggers Blue Book price refresh
+ * and deferred achievement evaluation.
+ * @param transactionId - UUID of the transaction to complete
+ */
 export async function completeTransaction(
     transactionId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -86,6 +98,11 @@ export async function completeTransaction(
 }
 
 // ── Get Transactions for User ──
+/**
+ * Get all transactions where the current user is a party (buyer or seller).
+ * Includes attached reviews for each transaction.
+ * @returns Transactions with camelCase field names and nested reviews
+ */
 export async function getTransactionsForUser(): Promise<{
     id: string;
     type: string;
@@ -157,6 +174,12 @@ export async function getTransactionsForUser(): Promise<{
 
 // ── Leave Review ──
 // Replaces leaveRating(). Params: transactionId, targetId, stars, content?
+/**
+ * Leave a review on a completed transaction.
+ * Enforces one review per user per transaction (DB unique constraint).
+ * Creates a notification and activity event for the reviewed user.
+ * @param data - Review data: transactionId, targetId, stars (1-5), optional content
+ */
 export async function leaveReview(data: {
     transactionId: string;
     targetId: string;
@@ -202,6 +225,10 @@ export async function leaveReview(data: {
 }
 
 // ── Delete Review ──
+/**
+ * Delete a review the current user has written.
+ * @param reviewId - UUID of the review to delete
+ */
 export async function deleteReview(
     reviewId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -214,6 +241,12 @@ export async function deleteReview(
 
 // ── Get User Review Summary ──
 // Replaces getUserRatingSummary(). Reads from reviews table.
+/**
+ * Get a user's review summary: average stars, count, and individual reviews.
+ * Public endpoint — does not require authentication.
+ * @param userId - UUID of the user to get reviews for
+ * @returns Average rating, total count, and list of reviews with reviewer aliases
+ */
 export async function getUserReviewSummary(
     userId: string
 ): Promise<{
@@ -266,6 +299,11 @@ export async function getUserReviewSummary(
 
 // ── Get Reviewable Transactions ──
 // Returns completed transactions where the current user has NOT yet left a review.
+/**
+ * Get completed transactions where the current user has NOT yet left a review.
+ * Batch-fetches target user aliases and horse names for display.
+ * @returns Unreviewed transactions with target alias and horse name
+ */
 export async function getReviewableTransactions(): Promise<{
     transactionId: string;
     type: string;
@@ -349,6 +387,12 @@ export async function getReviewableTransactions(): Promise<{
 // ── Find or get transaction by conversation ID ──
 // Used by inbox to look up the transaction for a conversation
 // Returns full state for OfferCard rendering
+/**
+ * Look up the marketplace transaction attached to a DM conversation.
+ * Used by the inbox to render the OfferCard with current state.
+ * @param conversationId - UUID of the DM conversation
+ * @returns Full transaction state for OfferCard rendering, or null if none
+ */
 export async function getTransactionByConversation(
     conversationId: string
 ): Promise<{
@@ -399,6 +443,13 @@ export async function getTransactionByConversation(
 
 // ── Make Offer ──
 // Buyer submits an offer on a tradeable horse
+/**
+ * Buyer makes a purchase offer on a horse.
+ * Creates an offer_made transaction and a DM conversation.
+ * Validates: horse must be for sale/open to offers, no self-offers,
+ * buyer must not be blocked by seller.
+ * @param data - Offer data: horseId, sellerId, amount, optional message
+ */
 export async function makeOffer(data: {
     horseId: string;
     sellerId: string;
@@ -482,6 +533,13 @@ export async function makeOffer(data: {
 
 // ── Respond to Offer ──
 // Seller accepts or declines a buyer's offer
+/**
+ * Seller accepts or declines a buyer's offer.
+ * On accept: transitions to pending_payment and notifies buyer.
+ * On decline: transitions to declined and notifies buyer.
+ * @param transactionId - UUID of the offer_made transaction
+ * @param accept - true to accept, false to decline
+ */
 export async function respondToOffer(
     transactionId: string,
     action: "accept" | "decline"
@@ -568,6 +626,12 @@ export async function respondToOffer(
 
 // ── Mark Payment Sent ──
 // Buyer signals they have sent payment
+/**
+ * Buyer marks that they have sent payment.
+ * Transitions from pending_payment to funds_sent.
+ * Records payment timestamp and notifies seller.
+ * @param transactionId - UUID of the pending_payment transaction
+ */
 export async function markPaymentSent(
     transactionId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -609,6 +673,13 @@ export async function markPaymentSent(
 
 // ── Verify Funds & Release ──
 // Seller confirms payment, parks horse, generates claim PIN
+/**
+ * Seller verifies payment received and releases the horse.
+ * Transitions from funds_sent to completed.
+ * Transfers horse ownership, creates a provenance transaction record,
+ * and triggers market price refresh.
+ * @param transactionId - UUID of the funds_sent transaction
+ */
 export async function verifyFundsAndRelease(
     transactionId: string
 ): Promise<{ success: boolean; pin?: string; error?: string }> {
@@ -660,6 +731,12 @@ export async function verifyFundsAndRelease(
 // ── Cancel Transaction ──
 // Seller can cancel when buyer ghosts during pending_payment
 // Also handles funds_verified (PIN released but not claimed)
+/**
+ * Cancel an active transaction (available to either party).
+ * Can only cancel from: offer_made, pending_payment, or funds_sent.
+ * @param transactionId - UUID of the transaction to cancel
+ * @param reason - Optional cancellation reason
+ */
 export async function cancelTransaction(
     transactionId: string
 ): Promise<{ success: boolean; error?: string }> {

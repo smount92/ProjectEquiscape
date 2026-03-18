@@ -40,6 +40,12 @@ export interface OwnershipRecord {
 
 // ── Get Timeline (reads from v_horse_hoofprint view) ──
 
+/**
+ * Get the full Hoofprint provenance data for a horse.
+ * Reads from the v_horse_hoofprint view to build timeline events,
+ * ownership chain, show records, and pedigree data.
+ * @param horseId - UUID of the horse
+ */
 export async function getHoofprint(horseId: string): Promise<{
     timeline: TimelineEvent[];
     ownershipChain: OwnershipRecord[];
@@ -125,6 +131,11 @@ export async function getHoofprint(horseId: string): Promise<{
 // System events (condition changes, transfers, etc.) are now
 // derived automatically from the v_horse_hoofprint view.
 
+/**
+ * Add a custom timeline event to a horse's Hoofprint.
+ * @param horseId - UUID of the horse (must be owned by caller)
+ * @param data - Event data: eventType, date, title, description
+ */
 export async function addTimelineEvent(data: {
     horseId: string;
     eventType: string;
@@ -157,6 +168,10 @@ export async function addTimelineEvent(data: {
 // Only user notes (source_table = 'posts') can be deleted.
 // System events are immutable — derived from reality.
 
+/**
+ * Delete a custom timeline event from a horse's Hoofprint.
+ * @param eventId - UUID of the timeline event to delete
+ */
 export async function deleteTimelineEvent(eventId: string, horseId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -177,6 +192,12 @@ export async function deleteTimelineEvent(eventId: string, horseId: string): Pro
 // No longer writes to horse_timeline — condition_history trigger
 // and v_horse_hoofprint view handle the timeline automatically.
 
+/**
+ * Update a horse's life stage (e.g., "completed", "parked", "stripped").
+ * Also creates a timeline event recording the stage change.
+ * @param horseId - UUID of the horse (must be owned by caller)
+ * @param lifeStage - New life stage value
+ */
 export async function updateLifeStage(
     horseId: string,
     newStage: "blank" | "stripped" | "in_progress" | "completed" | "for_sale"
@@ -213,6 +234,11 @@ export async function updateLifeStage(
 // No longer writes to horse_timeline — the v_horse_hoofprint view
 // derives the "Added to stable" event from the user_horses row itself.
 
+/**
+ * Initialize a Hoofprint for a horse that doesn't have one yet.
+ * Creates the first ownership record for the current user.
+ * @param horseId - UUID of the horse (must be owned by caller)
+ */
 export async function initializeHoofprint(data: {
     horseId: string;
     horseName: string;

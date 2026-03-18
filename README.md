@@ -1,72 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🐴 Model Horse Hub
 
-## Getting Started
+**The digital stable and community platform for model horse collectors.**
 
-First, run the development server:
+Model Horse Hub is a privacy-first platform purpose-built for the model horse collecting hobby. It combines inventory management, provenance tracking, social features, a marketplace, competition tools, and an art studio — all in one place.
+
+> *"Does this feature help a collector **manage**, **show**, **sell**, or **admire** their collection?"*
+
+## ✨ Key Features
+
+| Feature | Description |
+|---------|-------------|
+| **Digital Stable** | Catalog your herd with 10,500+ reference database entries (Breyer, Stone, Artist Resins) |
+| **Hoofprint™ Provenance** | Permanent digital identity for every model — transfers, show records, and customization history follow the horse |
+| **LSQ Photo Suite** | 5 standardized photo angles (Near-Side, Off-Side, Front, Hind, Belly) + unlimited extras |
+| **Financial Vault** | Private purchase prices and estimated values — never exposed on public pages |
+| **Safe-Trade Commerce** | Formal offer → accept → pay → verify → transfer state machine |
+| **Art Studio** | Artist profiles, commission management, WIP photo portal |
+| **Competition Engine** | Photo shows, expert judging, NAMHSA-style division/class hierarchy |
+| **Groups & Events** | Community clubs, event calendars, RSVP, shared files |
+| **Social Feed** | Posts, comments, likes, follows, @mentions, DMs, notifications |
+| **Blue Book** | Market price guide aggregated from completed transactions |
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16.1.6 (App Router, Turbopack) |
+| Language | TypeScript 5, React 19 |
+| Database | Supabase (PostgreSQL + Row Level Security) |
+| Auth | Supabase Auth (PKCE flow, cookie-based SSR) |
+| Storage | Supabase Storage (private bucket, signed URLs) |
+| Hosting | Vercel (serverless) |
+| CSS | Vanilla CSS design system + 19 CSS Modules |
+| Email | Resend |
+| PDF | @react-pdf/renderer |
+
+## 📦 Quick Start
 
 ```bash
+# Clone and install
+git clone <repository-url>
+cd model-horse-hub
+npm install
+
+# Configure environment (see docs/getting-started/setup.md)
+cp .env.local.example .env.local
+# Edit .env.local with your Supabase and Resend credentials
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Verify the build
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+➡️ **Full setup guide:** [docs/getting-started/setup.md](docs/getting-started/setup.md)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📖 Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Comprehensive developer documentation lives in the [`docs/`](docs/) directory:
 
-## Learn More
+| Section | Contents |
+|---------|----------|
+| [**Getting Started**](docs/getting-started/) | [Setup](docs/getting-started/setup.md) · [Project Structure](docs/getting-started/project-structure.md) · [Test Accounts](docs/getting-started/test-accounts.md) |
+| [**Architecture**](docs/architecture/) | [Overview](docs/architecture/overview.md) · [Data Flow](docs/architecture/data-flow.md) · [Auth Flow](docs/architecture/auth-flow.md) |
+| [**Contributing**](CONTRIBUTING.md) | Code style, patterns, commit conventions |
 
-To learn more about Next.js, take a look at the following resources:
+➡️ **Full documentation index:** [docs/README.md](docs/README.md)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🧪 Testing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Testing
-
-### Unit & Integration Tests (Vitest) — 132+ tests
 ```bash
-npm run test:unit          # Single run (~600ms)
+npm run test:unit          # Vitest unit/integration tests (~600ms)
 npm run test:unit:watch    # Watch mode for development
 npm run test:unit:coverage # Coverage report (HTML at coverage/)
+npm run test:e2e           # Playwright E2E (requires dev server running)
 ```
 
-Coverage includes:
-- **4 utility files** at 100% coverage (mentions, validation, storage, rateLimit)
-- **5 server action files** with integration tests (transactions, horse, provenance, collections, hoofprint)
-- **5 API routes** tested (auth/me, export, cron/refresh-market, reference-dictionary, identify-mold)
+**Coverage includes:**
+- Utility files at 100% coverage (mentions, validation, storage, rateLimit)
+- Server action integration tests (transactions, horse, provenance, collections, hoofprint)
+- API route tests (auth, export, cron, reference-dictionary, identify-mold)
+- 7 E2E specs: smoke, auth, inventory, safe-trade, hoofprint-transfer, show-entry, accessibility
 
-### E2E Tests (Playwright) — 20+ specs
-```bash
-npm run test:e2e           # Headless Chromium (requires dev server)
-```
+**Pre-commit:** Husky runs unit tests on every commit.
 
-Includes smoke tests, auth flow, inventory CRUD, show entry, safe-trade scaffolds, hoofprint transfer scaffolds, performance benchmark, and axe-core accessibility audits.
+## 📊 Codebase Scale
 
-### Test Accounts (E2E)
-Two test accounts configured in `.env.local`:
-- `TEST_USER_A_EMAIL` / `TEST_USER_A_PASSWORD` — seller/owner role
-- `TEST_USER_B_EMAIL` / `TEST_USER_B_PASSWORD` — buyer/recipient role
+| Metric | Count |
+|--------|-------|
+| Page routes | 28+ route groups |
+| Client components | 110 |
+| Server action files | 35 |
+| Database migrations | 85 (001–089) |
+| Reference catalog entries | 10,500+ |
+| CSS Modules | 19 |
 
-### Pre-Commit
-Husky runs unit tests on every commit. E2E tests should be run manually before push.
+## 🚀 Deployment
 
-### Coverage
-Coverage thresholds enforced at 37% (statements, lines, functions, branches) on `src/lib/**`.
+- **Git push to `main`** → Vercel auto-deploys
+- **Supabase migrations** → Run via `npx supabase db push` or SQL Editor
+- **Cron:** Daily 6 AM UTC → `/api/cron/refresh-market` (Blue Book price refresh)
 
-### Environment
-Unit tests use a mocked Supabase client (no live DB connection required).
-E2E tests run against the live dev server.
+## 📄 License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Private repository. All rights reserved.

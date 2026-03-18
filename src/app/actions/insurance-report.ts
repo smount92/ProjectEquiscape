@@ -27,6 +27,12 @@ export interface InsuranceReportPayload {
     totalValue: number;
 }
 
+/**
+ * Get data needed to generate an insurance report PDF.
+ * Includes horse details, photos, financial vault, and provenance.
+ * @param collectionId - Optional: scope to a single collection
+ * @returns Array of horses with financial and provenance data
+ */
 export async function getInsuranceReportData(collectionId?: string): Promise<{
     success: boolean;
     data?: InsuranceReportPayload;

@@ -4,6 +4,10 @@ import { logger } from "@/lib/logger";
 
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * Add a catalog item to the current user's wishlist.
+ * @param catalogItemId - UUID of the catalog item
+ */
 export async function addToWishlist(
     catalogId: string | null,
     notes?: string
@@ -40,6 +44,10 @@ export async function addToWishlist(
     return { error: null, success: true };
 }
 
+/**
+ * Remove a catalog item from the current user's wishlist.
+ * @param catalogItemId - UUID of the catalog item
+ */
 export async function removeFromWishlist(wishlistId: string) {
     const supabase = await createClient();
     const {

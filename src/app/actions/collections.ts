@@ -4,6 +4,10 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Get all collections for the current user with horse counts.
+ * @returns Array of collections with metadata
+ */
 export async function getCollectionsAction() {
     const { supabase, user } = await requireAuth();
 
@@ -16,6 +20,10 @@ export async function getCollectionsAction() {
     return data || [];
 }
 
+/**
+ * Create a new collection for organizing horses.
+ * @param data - Collection name and optional description
+ */
 export async function createCollectionAction(name: string, description: string | null, isPublic: boolean) {
     const { supabase, user } = await requireAuth();
 
@@ -34,6 +42,11 @@ export async function createCollectionAction(name: string, description: string |
     return { success: true, data };
 }
 
+/**
+ * Update a collection's name or description.
+ * @param collectionId - UUID of the collection to update
+ * @param data - Fields to update
+ */
 export async function updateCollectionAction(
     collectionId: string,
     data: { name?: string; description?: string; isPublic?: boolean }
@@ -56,6 +69,10 @@ export async function updateCollectionAction(
     return { success: true };
 }
 
+/**
+ * Delete a collection. Horses in it become uncollected (not deleted).
+ * @param collectionId - UUID of the collection to delete
+ */
 export async function deleteCollectionAction(
     collectionId: string
 ): Promise<{ success: boolean; error?: string }> {

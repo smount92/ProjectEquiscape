@@ -8,6 +8,11 @@ import { revalidatePath } from "next/cache";
 // Help Me ID — Server Actions
 // ============================================================
 
+/**
+ * Create a community Help ID request for model identification.
+ * Accepts FormData with photos and description.
+ * @param formData - Multipart form with photos and details
+ */
 export async function createIdRequest(formData: FormData): Promise<{ success: boolean; error?: string; id?: string }> {
     try {
         const supabase = await createClient();
@@ -61,6 +66,11 @@ export async function createIdRequest(formData: FormData): Promise<{ success: bo
     }
 }
 
+/**
+ * Submit an identification suggestion for a Help ID request.
+ * @param requestId - UUID of the Help ID request
+ * @param suggestion - Suggested identification details
+ */
 export async function createSuggestion(
     requestId: string,
     data: {
@@ -93,6 +103,10 @@ export async function createSuggestion(
     }
 }
 
+/**
+ * Upvote an identification suggestion.
+ * @param suggestionId - UUID of the suggestion to upvote
+ */
 export async function upvoteSuggestion(
     suggestionId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -113,6 +127,10 @@ export async function upvoteSuggestion(
     }
 }
 
+/**
+ * Accept a suggestion as the correct identification (requestor only).
+ * @param suggestionId - UUID of the suggestion to accept
+ */
 export async function acceptSuggestion(
     requestId: string,
     suggestionId: string
@@ -151,6 +169,11 @@ export async function acceptSuggestion(
     }
 }
 
+/**
+ * Link a horse to a Help ID request after identification.
+ * @param requestId - UUID of the Help ID request
+ * @param horseId - UUID of the identified horse
+ */
 export async function addIdentifiedHorse(
     suggestionId: string
 ): Promise<{ success: boolean; error?: string; horseId?: string }> {

@@ -12,6 +12,10 @@ import { revalidatePath } from "next/cache";
 
 // ── Get current profile ──
 
+/**
+ * Get the current user's profile data for the settings page.
+ * @returns Profile with alias, bio, location, avatar URL, and notification prefs
+ */
 export async function getProfile(): Promise<{
     aliasName: string;
     bio: string;
@@ -75,6 +79,10 @@ export async function getProfile(): Promise<{
 
 // ── Update profile (alias, bio) ──
 
+/**
+ * Update the current user's profile fields.
+ * @param data - Profile fields to update (alias, bio, location, etc.)
+ */
 export async function updateProfile(data: {
     aliasName?: string;
     bio?: string;
@@ -140,6 +148,10 @@ export async function updateProfile(data: {
 
 // ── Update notification preferences ──
 
+/**
+ * Update the current user's notification preferences.
+ * @param prefs - Notification preference flags
+ */
 export async function updateNotificationPrefs(
     prefs: Record<string, boolean>
 ): Promise<{ success: boolean; error?: string }> {
@@ -156,6 +168,10 @@ export async function updateNotificationPrefs(
 
 // ── Change password ──
 
+/**
+ * Change the current user's password.
+ * @param newPassword - The new password (min 6 characters)
+ */
 export async function changePassword(data: {
     newPassword: string;
     confirmPassword: string;
@@ -178,6 +194,11 @@ export async function changePassword(data: {
 
 // ── Upload avatar ──
 
+/**
+ * Upload a new avatar image for the current user.
+ * Stores in Supabase Storage and updates the user's avatar_url.
+ * @param formData - FormData containing the avatar file
+ */
 export async function uploadAvatar(
     formData: FormData
 ): Promise<{ success: boolean; url?: string; error?: string }> {
@@ -243,6 +264,10 @@ export async function uploadAvatar(
 
 import { getAdminClient } from "@/lib/supabase/admin";
 
+/**
+ * Permanently delete the current user's account and all data.
+ * Uses admin client for cascade deletion.
+ */
 export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 

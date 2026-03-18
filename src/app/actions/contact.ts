@@ -10,6 +10,11 @@ export interface ContactFormState {
     success: boolean;
 }
 
+/**
+ * Submit a message via the public contact form.
+ * Stores in the database for admin review.
+ * @param data - Contact form data: name, email, subject, message
+ */
 export async function submitContactForm(
     _prevState: ContactFormState,
     formData: FormData

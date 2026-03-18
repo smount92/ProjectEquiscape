@@ -22,6 +22,11 @@ interface ImportRow {
     selectedMatch: ReferenceMatch | null;
 }
 
+/**
+ * Execute a batch import of horses from parsed/validated CSV data.
+ * Each row creates a horse record with optional catalog linking.
+ * @returns Count of successfully imported horses and any per-row errors
+ */
 export async function executeBatchImport(
     confirmedRows: ImportRow[]
 ): Promise<{ success: boolean; imported?: number; error?: string }> {

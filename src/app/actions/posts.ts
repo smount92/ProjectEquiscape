@@ -34,6 +34,11 @@ export interface Post {
 }
 
 // ── Create a post in any context ──
+/**
+ * Create a new post in the activity feed.
+ * Supports optional horse attachment and @mentions.
+ * @param data - Post content and optional attachments
+ */
 export async function createPost(data: {
     content: string;
     horseId?: string;
@@ -135,6 +140,12 @@ export async function createPost(data: {
 }
 
 // ── Reply to a post (1 level deep) ──
+/**
+ * Reply to an existing post (creates a threaded comment).
+ * Notifies the original post author.
+ * @param postId - UUID of the parent post
+ * @param content - Reply text content
+ */
 export async function replyToPost(
     parentId: string,
     content: string
@@ -155,6 +166,10 @@ export async function replyToPost(
 }
 
 // ── Delete a post ──
+/**
+ * Delete a post the current user authored.
+ * @param postId - UUID of the post to delete
+ */
 export async function deletePost(
     postId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -188,6 +203,11 @@ export async function deletePost(
 }
 
 // ── Update a post (author only) ──
+/**
+ * Update the content of a post the current user authored.
+ * @param postId - UUID of the post to update
+ * @param content - New post content
+ */
 export async function updatePost(
     postId: string,
     newContent: string
@@ -212,6 +232,11 @@ export async function updatePost(
 }
 
 // ── Toggle like (atomic RPC) ──
+/**
+ * Like or unlike a post. Idempotent toggle.
+ * Creates a notification for the post author on like.
+ * @param postId - UUID of the post to like/unlike
+ */
 export async function togglePostLike(
     postId: string
 ): Promise<{ success: boolean; action?: string; error?: string }> {
@@ -227,6 +252,12 @@ export async function togglePostLike(
 }
 
 // ── Get posts for a context ──
+/**
+ * Get posts for a given context (feed, profile, horse, or group).
+ * Supports cursor-based pagination.
+ * @param context - Query context: type, targetId, cursor, limit
+ * @returns Array of posts with author and engagement data
+ */
 export async function getPosts(context: {
     horseId?: string;
     groupId?: string;
@@ -349,6 +380,11 @@ export async function getPosts(context: {
 }
 
 // ── Get event media (replaces getEventPhotos) ──
+/**
+ * Get photos/media attached to a community event.
+ * @param eventId - UUID of the event
+ * @returns Array of media records with URLs and captions
+ */
 export async function getEventMedia(eventId: string) {
     const supabase = await createClient();
     const { data } = await supabase
@@ -378,6 +414,11 @@ export async function getEventMedia(eventId: string) {
 }
 
 // ── Add event media (replaces addEventPhoto) ──
+/**
+ * Upload a photo to a community event's media gallery.
+ * @param eventId - UUID of the event
+ * @param data - Media data: imageUrl, caption
+ */
 export async function addEventMedia(
     eventId: string,
     imagePath: string,
@@ -398,6 +439,10 @@ export async function addEventMedia(
 }
 
 // ── Delete event media ──
+/**
+ * Delete a media item from an event's gallery (uploader or admin only).
+ * @param mediaId - UUID of the media record to delete
+ */
 export async function deleteEventMedia(
     mediaId: string
 ): Promise<{ success: boolean; error?: string }> {

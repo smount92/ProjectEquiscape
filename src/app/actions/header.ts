@@ -2,6 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * Get data for the Header component: alias, avatar URL, unread notification count.
+ * Called on every page load via the root layout.
+ * @returns Header display data or null if not authenticated
+ */
 export async function getHeaderData() {
     const supabase = await createClient();
     const {

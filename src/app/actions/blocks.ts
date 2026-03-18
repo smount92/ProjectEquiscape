@@ -4,6 +4,10 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Block a user. Prevents them from messaging, following, or making offers.
+ * @param targetUserId - UUID of the user to block
+ */
 export async function blockUser(targetId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (user.id === targetId) return { success: false, error: "Cannot block yourself." };
@@ -22,6 +26,10 @@ export async function blockUser(targetId: string): Promise<{ success: boolean; e
     return { success: true };
 }
 
+/**
+ * Unblock a previously blocked user.
+ * @param targetUserId - UUID of the user to unblock
+ */
 export async function unblockUser(targetId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -36,6 +44,11 @@ export async function unblockUser(targetId: string): Promise<{ success: boolean;
     return { success: true };
 }
 
+/**
+ * Get the UUIDs of all users the current user has blocked.
+ * Used internally by feed/search to filter out blocked users.
+ * @returns Array of blocked user UUIDs
+ */
 export async function getBlockedUserIds(): Promise<string[]> {
     const { supabase, user } = await requireAuth();
 
@@ -47,6 +60,10 @@ export async function getBlockedUserIds(): Promise<string[]> {
     return (data ?? []).map((b: { blocked_id: string }) => b.blocked_id);
 }
 
+/**
+ * Check if the current user has blocked a specific user.
+ * @param targetUserId - UUID of the user to check
+ */
 export async function isBlocked(targetId: string): Promise<boolean> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
