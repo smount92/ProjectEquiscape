@@ -10,7 +10,8 @@ import { getHeaderData } from "@/app/actions/header";
 import {
   Home, Trophy, Newspaper, Users, Camera, Palette, Search,
   Building2, Calendar, TrendingUp, Heart, Package, Settings,
-  User, Zap, LogOut, Eye, EyeOff, Mail, ChevronDown, MoreHorizontal
+  User, Zap, LogOut, Eye, EyeOff, Mail, ChevronDown, MoreHorizontal,
+  BookOpen
 } from "lucide-react";
 
 // Priority-ordered nav links — highest priority first
@@ -24,6 +25,7 @@ const NAV_LINKS = [
   { href: "/community/groups", label: "Groups", Icon: Building2, id: "nav-groups" },
   { href: "/community/events", label: "Events", Icon: Calendar, id: "nav-events" },
   { href: "/community/help-id", label: "Help ID", Icon: Search, id: "nav-helpid" },
+  { href: "/reference", label: "Catalog", Icon: BookOpen, id: "nav-catalog" },
 ];
 
 // Dynamic link that depends on artist slug
@@ -418,6 +420,9 @@ export default function Header() {
           <Link href="/community/events" className="header-nav-link" id="nav-events-m" onClick={closeMobileMenu}>
             <Calendar size={16} strokeWidth={1.5} /> Events
           </Link>
+          <Link href="/reference" className="header-nav-link" id="nav-catalog-m" onClick={closeMobileMenu}>
+            <BookOpen size={16} strokeWidth={1.5} /> Catalog
+          </Link>
           <Link href="/market" className="header-nav-link" id="nav-market-m" onClick={closeMobileMenu}>
             <TrendingUp size={16} strokeWidth={1.5} /> Price Guide
           </Link>
@@ -469,6 +474,9 @@ export default function Header() {
         <nav className="header-nav header-nav-public" aria-label="Public navigation">
           <Link href="/about" className="header-nav-link" id="nav-about">
             About
+          </Link>
+          <Link href="/reference" className="header-nav-link" id="nav-catalog-public">
+            📚 Catalog
           </Link>
           <Link href="/contact" className="header-nav-link" id="nav-contact">
             Contact

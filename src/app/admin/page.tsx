@@ -66,6 +66,33 @@ export default async function AdminPage() {
     const pendingSuggestions = await getPendingSuggestions();
     const reports = await getOpenReports();
 
+    // Fetch pending catalog curation suggestions
+    const { data: catalogSuggestionRows } = await supabaseAdmin
+        .from("catalog_suggestions")
+        .select("id, user_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at")
+        .eq("status", "pending")
+        .order("created_at", { ascending: true })
+        .limit(50);
+
+    // Enrich with author info
+    const catalogSuggestions = [];
+    for (const row of (catalogSuggestionRows ?? []) as {
+        id: string; user_id: string; suggestion_type: string;
+        field_changes: Record<string, unknown>; reason: string;
+        status: string; upvotes: number; downvotes: number; created_at: string;
+    }[]) {
+        const { data: author } = await supabaseAdmin
+            .from("users")
+            .select("alias_name, approved_suggestions_count")
+            .eq("id", row.user_id)
+            .single();
+        catalogSuggestions.push({
+            ...row,
+            author_alias: (author as { alias_name: string } | null)?.alias_name ?? "Unknown",
+            author_approved_count: (author as { approved_suggestions_count: number } | null)?.approved_suggestions_count ?? 0,
+        });
+    }
+
     return (
         <div className="page-container form-page">
             <div className="animate-fade-in-up">
@@ -136,6 +163,7 @@ export default async function AdminPage() {
                     }))}
                     suggestions={pendingSuggestions}
                     reports={reports}
+                    catalogSuggestions={catalogSuggestions}
                 />
             </div>
         </div>

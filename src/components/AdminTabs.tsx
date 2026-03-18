@@ -10,6 +10,7 @@ import CreateShowForm from "@/components/CreateShowForm";
 import AdminShowManager from "@/components/AdminShowManager";
 import AdminSuggestionsPanel from "@/components/AdminSuggestionsPanel";
 import ReportActions from "@/components/ReportActions";
+import SuggestionAdminActions from "@/components/SuggestionAdminActions";
 
 interface ContactMessage {
     id: string;
@@ -50,21 +51,37 @@ interface Report {
     createdAt: string;
 }
 
+interface CatalogSuggestionAdmin {
+    id: string;
+    user_id: string;
+    suggestion_type: string;
+    field_changes: Record<string, unknown>;
+    reason: string;
+    status: string;
+    upvotes: number;
+    downvotes: number;
+    created_at: string;
+    author_alias: string;
+    author_approved_count: number;
+}
+
 interface AdminTabsProps {
     messages: ContactMessage[];
     unreadCount: number;
     shows: Show[];
     suggestions: Suggestion[];
     reports: Report[];
+    catalogSuggestions?: CatalogSuggestionAdmin[];
 }
 
-type TabKey = "mailbox" | "shows" | "content" | "reports";
+type TabKey = "mailbox" | "shows" | "content" | "reports" | "catalog";
 
 const TABS: { key: TabKey; emoji: string; label: string }[] = [
     { key: "mailbox", emoji: "📬", label: "Mailbox" },
     { key: "shows", emoji: "📸", label: "Shows" },
     { key: "content", emoji: "💡", label: "Content" },
     { key: "reports", emoji: "🚩", label: "Reports" },
+    { key: "catalog", emoji: "📚", label: "Catalog" },
 ];
 
 function formatDate(dateStr: string): string {
@@ -126,7 +143,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
     );
 }
 
-export default function AdminTabs({ messages, unreadCount, shows, suggestions, reports }: AdminTabsProps) {
+export default function AdminTabs({ messages, unreadCount, shows, suggestions, reports, catalogSuggestions = [] }: AdminTabsProps) {
     const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
 
     // Restore from localStorage
@@ -148,6 +165,7 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
             case "shows": return shows.length > 0 ? shows.length : null;
             case "content": return suggestions.length > 0 ? suggestions.length : null;
             case "reports": return reports.length > 0 ? reports.length : null;
+            case "catalog": return catalogSuggestions.length > 0 ? catalogSuggestions.length : null;
             default: return null;
         }
     };
@@ -189,6 +207,9 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
                 )}
                 {activeTab === "reports" && (
                     <ReportsTab reports={reports} />
+                )}
+                {activeTab === "catalog" && (
+                    <CatalogTab suggestions={catalogSuggestions} />
                 )}
             </div>
         </>
@@ -324,6 +345,74 @@ function ReportsTab({ reports }: { reports: Report[] }) {
                     <ReportActions reportId={report.id} />
                 </div>
             ))}
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════════
+   Catalog Tab — Catalog Curation Suggestions
+   ═══════════════════════════════════════════ */
+function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
+    if (suggestions.length === 0) {
+        return (
+            <div className="card shelf-empty">
+                <div className="shelf-empty-icon">📚</div>
+                <h2>No Pending Catalog Suggestions</h2>
+                <p>Community suggestions will appear here for review.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="admin-mailbox">
+            {suggestions.map((s) => {
+                const curatorIcon =
+                    s.author_approved_count >= 200 ? "🥇" :
+                    s.author_approved_count >= 50 ? "🥈" :
+                    s.author_approved_count >= 10 ? "🥉" :
+                    s.author_approved_count >= 1 ? "📘" : "";
+
+                const typeIcon =
+                    s.suggestion_type === "correction" ? "🔧" :
+                    s.suggestion_type === "addition" ? "📗" :
+                    s.suggestion_type === "photo" ? "📸" : "🗑";
+
+                // Build changes summary
+                let changeText = "";
+                if (s.suggestion_type === "correction" && s.field_changes) {
+                    changeText = Object.entries(s.field_changes)
+                        .map(([k, v]) => {
+                            const val = v as { from: string; to: string };
+                            return `${k}: ${val.from} → ${val.to}`;
+                        })
+                        .join(", ");
+                } else if (s.suggestion_type === "addition") {
+                    changeText = `New: ${(s.field_changes as { title?: string })?.title ?? "Untitled"}`;
+                }
+
+                return (
+                    <div key={s.id} className="admin-message">
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--space-xs)" }}>
+                            <strong>{typeIcon} {s.suggestion_type.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</strong>
+                            <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                ▲{s.upvotes} ▼{s.downvotes} · {new Date(s.created_at).toLocaleDateString()}
+                            </span>
+                        </div>
+                        <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-xs)" }}>
+                            By: {curatorIcon} @{s.author_alias}
+                        </p>
+                        {changeText && (
+                            <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", fontFamily: "monospace", background: "var(--color-surface-glass)", padding: "var(--space-xs)", borderRadius: "var(--radius-sm)", marginBottom: "var(--space-xs)" }}>
+                                {changeText}
+                            </p>
+                        )}
+                        <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)", fontStyle: "italic", marginBottom: "var(--space-sm)" }}>
+                            &ldquo;{s.reason.slice(0, 200)}{s.reason.length > 200 ? "…" : ""}&rdquo;
+                        </p>
+                        <SuggestionAdminActions suggestionId={s.id} />
+                    </div>
+                );
+            })}
         </div>
     );
 }
