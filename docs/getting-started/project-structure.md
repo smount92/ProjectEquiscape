@@ -83,14 +83,14 @@ model-horse-hub/
 │   │       ├── market/               # Blue Book price guide
 │   │       ├── shows/                # Competition center
 │   │       ├── studio/               # Art Studio (artist profiles, commissions)
-│   │       ├── catalog/             # Catalog browser, suggestions, changelog (V32)
+│   │       ├── catalog/             # Catalog browser, suggestions, changelog, suggest-new (V32/V33)
 │   │       ├── discover/             # Discover collectors
 │   │       ├── profile/[alias_name]/ # Public user profiles
 │   │       ├── admin/                # Admin console
 │   │       ├── settings/             # User settings
 │   │       └── ...                   # auth, contact, about, faq, etc.
 │   │
-│   ├── components/                   # 116 client components
+│   ├── components/                   # 117 client components
 │   │   ├── Header.tsx                # Priority+ nav with ResizeObserver
 │   │   ├── DashboardShell.tsx        # Two-column layout, search, view toggles
 │   │   ├── StableGrid.tsx            # Horse card grid with sorting/filtering

@@ -141,6 +141,13 @@ CREATE POLICY "select_unblocked" ON posts FOR SELECT
 | `reviews` | All | Authenticated (once per txn) | — | Own |
 | `horse_transfers` | Sender | Sender | Sender | — |
 
+### Help ID Tables (V33 — fixed)
+
+| Table | SELECT | INSERT | UPDATE | DELETE |
+|-------|--------|--------|--------|--------|
+| `id_requests` | All (authenticated) | Own | Own | Own (V33 fix) |
+| `id_suggestions` | All (authenticated) | Authenticated | Own | Own (V33 fix) |
+
 ### Art Studio Tables
 
 | Table | SELECT | INSERT | UPDATE | DELETE |

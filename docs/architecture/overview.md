@@ -117,12 +117,12 @@ The materialized view UNION ALLs these into a single chronological timeline.
 | Metric | Count |
 |--------|-------|
 | Page routes | 28+ route groups |
-| Client components | 110 |
+| Client components | 111 |
 | Server action files | 35 |
-| Database migrations | 88 (001–092) |
+| Database migrations | 89 (001–093) |
 | CSS files | 49 (19 Modules + 30 extracted globals) |
 | Reference catalog entries | 10,500+ |
-| Unit/component tests | 194 (across 20 test files) |
+| Unit/component tests | 227 (across 22 test files) |
 | E2E test specs | 7 |
 | CI | GitHub Actions (build + test on every push) |
 

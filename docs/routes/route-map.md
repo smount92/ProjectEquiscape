@@ -176,13 +176,14 @@ graph TD
 | `/claim` | Transfer claim | Auth | Enter 6-char transfer code |
 | `/admin` | Admin dashboard | Auth + Admin | Stats, users, reports |
 
-### Catalog (5 routes)
+### Catalog (6 routes)
 
 | Path | Page | Auth | Notes |
 |------|------|------|-------|
 | `/catalog` | Catalog browser | Public | Search, filter, sort, paginate 10,500+ entries |
 | `/catalog/[id]` | Catalog item detail | Public | View all fields, suggest edit (auth required) |
 | `/catalog/suggestions` | Suggestions list | Public | Filter by status, browse community proposals |
+| `/catalog/suggestions/new` | Suggest new entry | Auth | Form to propose a missing model for the catalog (V33) |
 | `/catalog/suggestions/[id]` | Suggestion detail | Public | Vote (auth), discuss (auth), admin review |
 | `/catalog/changelog` | Public changelog | Public | Chronological feed of approved catalog changes |
 
@@ -198,8 +199,8 @@ graph TD
 | Shows & Competition | 3 |
 | Events | 4 |
 | Utility | 4 |
-| Catalog | 5 |
-| **Total** | **57** |
+| Catalog | 6 |
+| **Total** | **58** |
 
 ---
 

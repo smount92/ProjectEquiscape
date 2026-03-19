@@ -149,6 +149,7 @@ All 101 client components live in `src/components/`. Every component is a `"use 
 | `SuggestionVoteButtons` | `SuggestionVoteButtons.tsx` | Optimistic ▲/▼ voting with toggle, switch, and net score |
 | `SuggestionCommentThread` | `SuggestionCommentThread.tsx` | Discussion threads with add/delete and relative timestamps |
 | `SuggestionAdminActions` | `SuggestionAdminActions.tsx` | Admin approve/reject with required reason for rejections |
+| `SuggestNewEntryForm` | `SuggestNewEntryForm.tsx` | Propose a new catalog model with title, type, maker, scale, mold, year (V33) |
 
 ### 🔧 Admin
 
@@ -170,7 +171,7 @@ All 101 client components live in `src/components/`. Every component is a `"use 
 | `WishlistSearch` | `WishlistSearch.tsx` | Search wishlist items |
 | `EditBioButton` | `EditBioButton.tsx` | Inline bio editing button |
 
-## Total Component Count: 101
+## Total Component Count: 102
 
 ---
 
