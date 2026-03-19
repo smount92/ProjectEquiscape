@@ -3,6 +3,10 @@
         {
             "path": "/api/cron/refresh-market",
             "schedule": "0 6 * * *"
+        },
+        {
+            "path": "/api/cron/transition-shows",
+            "schedule": "0 */6 * * *"
         }
     ]
 }

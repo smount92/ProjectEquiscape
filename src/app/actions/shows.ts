@@ -758,6 +758,7 @@ export async function saveExpertPlacings(
                         ribbon_color: ribbonColor,
                         is_nan: false,
                         notes: "Auto-generated from expert judging",
+                        judge_user_id: user.id,
                     });
                 }
             }
@@ -767,6 +768,107 @@ export async function saveExpertPlacings(
     }
 
     revalidatePath(`/community/events/${eventId}`);
+    return { success: true };
+}
+
+// ============================================================
+// Host Override Final Placings (Post-Close Safety Net)
+// ============================================================
+
+/** Override final placings for a closed or judging show (host only). */
+export async function overrideFinalPlacings(
+    eventId: string,
+    placings: { entryId: string; placing: string }[]
+): Promise<{ success: boolean; error?: string }> {
+    const { user } = await requireAuth();
+    const supabase = await createClient();
+
+    // Verify the caller is the event creator
+    const { data: ev } = await supabase
+        .from("events")
+        .select("id, name, created_by, show_status, starts_at")
+        .eq("id", eventId)
+        .single();
+
+    if (!ev) return { success: false, error: "Event not found." };
+    if ((ev as { created_by: string }).created_by !== user.id) {
+        return { success: false, error: "Only the event creator can override placings." };
+    }
+
+    const status = (ev as { show_status: string }).show_status;
+    if (status !== "judging" && status !== "closed") {
+        return { success: false, error: "Can only override placings for judging or closed shows." };
+    }
+
+    const PLACING_TO_RIBBON: Record<string, string> = {
+        "1st": "Blue", "2nd": "Red", "3rd": "Yellow", "4th": "White",
+        "5th": "Pink", "6th": "Green", "HM": "Green",
+        "Champion": "Grand Champion", "Reserve Champion": "Reserve Grand Champion",
+        "Grand Champion": "Grand Champion", "Reserve Grand Champion": "Reserve Grand Champion",
+    };
+
+    const admin = getAdminClient();
+    const today = new Date().toISOString().split("T")[0];
+
+    // Update each entry's placing
+    for (const { entryId, placing } of placings) {
+        const { error } = await supabase
+            .from("event_entries")
+            .update({ placing: placing || null })
+            .eq("id", entryId)
+            .eq("event_id", eventId);
+        if (error) return { success: false, error: error.message };
+    }
+
+    // If show is already closed, update corresponding show_records
+    if (status === "closed") {
+        const showName = (ev as { name: string }).name;
+        for (const { entryId, placing } of placings) {
+            if (!placing) continue;
+
+            // Get horse_id for this entry
+            const { data: entry } = await supabase
+                .from("event_entries")
+                .select("horse_id, user_id")
+                .eq("id", entryId)
+                .single();
+            if (!entry) continue;
+            const userId = (entry as { user_id: string }).user_id;
+            const horseId = (entry as { horse_id: string }).horse_id;
+
+            // Update or insert show_record
+            const { data: existing } = await admin
+                .from("show_records")
+                .select("id, notes")
+                .eq("horse_id", horseId)
+                .eq("show_name", showName)
+                .eq("user_id", userId)
+                .maybeSingle();
+
+            if (existing) {
+                const existingNotes = (existing as { notes: string | null }).notes || "";
+                const auditNote = `${existingNotes}\n[Override by host on ${today}]`.trim();
+                await admin.from("show_records").update({
+                    placing,
+                    ribbon_color: PLACING_TO_RIBBON[placing] || null,
+                    notes: auditNote,
+                }).eq("id", (existing as { id: string }).id);
+            } else {
+                const showDate = (ev as { starts_at: string }).starts_at?.split("T")[0];
+                await admin.from("show_records").insert({
+                    horse_id: horseId,
+                    user_id: userId,
+                    show_name: showName,
+                    show_date: showDate,
+                    placing,
+                    ribbon_color: PLACING_TO_RIBBON[placing] || null,
+                    notes: `[Override by host on ${today}]`,
+                });
+            }
+        }
+    }
+
+    revalidatePath(`/shows/${eventId}`);
     return { success: true };
 }
 
