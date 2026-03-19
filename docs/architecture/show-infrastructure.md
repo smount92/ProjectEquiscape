@@ -518,11 +518,14 @@ The `close_virtual_show()` RPC:
 2. Sets `show_status = 'closed'`
 3. Ranks all entries by `votes_count DESC, created_at ASC` (tiebreaker: earlier entry wins)
 4. Assigns placings: 1st, 2nd, 3rd, 4th, 5th, ... Nth
-5. Auto-generates `show_records` for the top 10 entries with `verification_tier: 'mhh_auto'`
+5. Auto-generates `show_records` for the top 10 entries
 
 ### Expert Judge Close
 
-For expert-judged shows, the host/admin clicks "Close Show" **after** judges have assigned placings. The `close_virtual_show()` RPC still runs, but the existing `placing` values from expert judging take precedence (the RPC overwrites them with vote-based rankings, which is a known trade-off — expert shows should have placings assigned **before** closing).
+For expert-judged shows, the host/admin clicks "Close Show" **after** judges have assigned placings. The updated `close_virtual_show()` RPC (Migration 095) now **respects pre-assigned manual placings** — it branches on `judging_method`:
+
+- `expert_judge` → Only generates `show_records` for entries with existing placings; does NOT overwrite them with vote-based rankings.
+- `community_vote` → Ranks by `votes_count DESC` as before.
 
 ---
 
@@ -803,19 +806,112 @@ Potential badges: "First Show Entry", "Show Regular" (5 entries), "Show Addict" 
 
 ---
 
+## V34 Sprint Additions
+
+### Entry Photo Preview Modal
+
+The `ShowEntryForm` component now includes a **"👁 Preview"** button that opens a portal-rendered modal showing the entry exactly as judges/voters will see it:
+
+- Photo rendered at 4:3 aspect ratio matching the entries grid
+- Caption, horse name, and class displayed
+- Two CTAs: "✅ Looks Good — Submit Entry" and "← Choose Different Photo"
+- Uses `createPortal(overlay, document.body)` per project convention
+
+### Smart Class Browser
+
+The flat class `<select>` was replaced with a **searchable, scrollable class list** that includes:
+
+- 🔍 Live search/filter
+- ✅/⚠️ **Scale match indicators** comparing the selected horse's scale against class `allowed_scales`
+- 🏅 **NAN badge** on qualifying classes
+- Entry count per class
+- Division grouping headers
+
+### Results Podium Layout
+
+Closed shows now display a **premium podium layout** instead of the basic list:
+
+- Top 3 get large photo cards with ribbon color sidebar bars
+- Champion/Reserve entries get a hero banner
+- Horse and owner names are clickable links
+- Caption displayed below entry photo
+- Graceful fallback for entry-only photos
+
+### Personalized Show Notifications
+
+When a show closes, entrants now receive **personalized notifications**:
+
+- **Placed entries:** "🥇 Your horse [name] placed 1st in [show]!"
+- **Unplaced entries:** "Thanks for entering [show]! See the results."
+- Horse names are batch-fetched for efficiency
+
+### Show History Widget
+
+The dashboard sidebar now includes a **Show History Widget** (`ShowHistoryWidget.tsx`):
+
+- Collapsible `<details>` element matching the NAN widget pattern
+- Groups results by year with expandable sections
+- Shows ribbon emoji summaries per year (🥇×2 🥈×1 etc.)
+- Individual records link to horse passports
+- "Current" badge on the current year
+- Server-side data fetch via `getShowHistory()` action
+
+### Cron Auto-Transition (`/api/cron/transition-shows`)
+
+In addition to the lazy page-view auto-transition, a **server-side cron job** now runs every 6 hours:
+
+- Finds all shows past their `ends_at` still in `open` status
+- Transitions them to `judging` with CAS guard
+- Authenticated via `CRON_SECRET` header
+- Configured in `vercel.json` alongside the existing `refresh-market` cron
+
+### Host Override Placings
+
+Show creators can now **adjust placings after a show is closed** via the `overrideFinalPlacings()` server action:
+
+- Available as a red-tinted override panel on the show detail page for the creator
+- Updates both `event_entries.placing` and corresponding `show_records`
+- Adds audit trail notes: `[Override by host on YYYY-MM-DD]`
+- Supports inserting new show records for previously unplaced entries
+
+### Enriched Show Records (Migration 095)
+
+New columns on `show_records`:
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `judge_notes` | `TEXT` | Private judge notes/critique |
+| `total_class_entries` | `INT` | Entries in the specific class |
+| `judge_user_id` | `UUID` | The judge who placed this entry |
+
+### Expert Judging Panel Enhancements
+
+`ExpertJudgingPanel.tsx` now supports:
+
+- **Collapsible judge notes** per entry (📝 toggle button)
+- **Override mode** (`overrideMode` prop) that routes to `overrideFinalPlacings()` instead of `saveExpertPlacings()`
+- Red-tinted UI in override mode for visual distinction
+- Class filter dropdown grouped by division
+
+---
+
 ## File Index
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| [shows.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/shows.ts) | 744 | All show server actions (entries, votes, create, close, expert judging) |
+| [shows.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/shows.ts) | ~950 | All show server actions (entries, votes, create, close, expert judging, override, history) |
 | [events.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/events.ts) | 851 | Event CRUD, judge management, comments |
 | [competition.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/competition.ts) | 898 | Divisions, classes, NAN tracking, show strings |
 | [shows/page.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/app/shows/page.tsx) | 128 | Show list page with judge badges |
-| [shows/[id]/page.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/app/shows/%5Bid%5D/page.tsx) | 406 | Show detail with all conditional panels |
-| [ExpertJudgingPanel.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ExpertJudgingPanel.tsx) | 221 | Placing dropdown UI for judges |
-| [ShowEntryForm.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ShowEntryForm.tsx) | 298 | Entry form with photo picker |
+| [shows/[id]/page.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/app/shows/%5Bid%5D/page.tsx) | ~500 | Show detail with all conditional panels |
+| [ExpertJudgingPanel.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ExpertJudgingPanel.tsx) | ~260 | Placing UI with judge notes + override mode |
+| [ShowEntryForm.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ShowEntryForm.tsx) | ~470 | Smart class browser + entry preview modal |
+| [ShowHistoryWidget.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ShowHistoryWidget.tsx) | ~120 | Dashboard ribbon summary widget |
 | [VoteButton.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/VoteButton.tsx) | 65 | Optimistic vote toggle |
 | [CloseShowButton.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/CloseShowButton.tsx) | 57 | Close show with confirm dialog |
 | [WithdrawButton.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/WithdrawButton.tsx) | 30 | Withdraw entry |
+| [transition-shows/route.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/api/cron/transition-shows/route.ts) | ~55 | Cron: auto-transition expired shows |
 | [046_unified_competition_engine.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/046_unified_competition_engine.sql) | 334 | Schema, RPCs, data migration |
 | [094_judge_entry_update_policy.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/094_judge_entry_update_policy.sql) | 40 | Judge RLS fix |
+| [095_show_polish.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/095_show_polish.sql) | 129 | V34: Expert judging precedence fix + enriched show_records |
+| [shows.test.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/__tests__/shows.test.ts) | ~200 | Vitest: entry validation, auth, overrides, history |

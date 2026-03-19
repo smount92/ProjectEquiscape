@@ -186,6 +186,7 @@ All of the following have been implemented, committed, and tested:
 12. Settings and Account Management
 13. Security Hardening
 14. Mobile and Desktop Responsive Polish
+15. **V34 Show Polish Sprint** — Entry preview modal, smart class browser, results podium, personalized notifications, show history widget, expert judging precedence fix, cron auto-transition, host override placings, enriched show records, judge notes UI
 
 ### What's Planned But Not Yet Built
 

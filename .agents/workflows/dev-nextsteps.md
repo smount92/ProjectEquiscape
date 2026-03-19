@@ -58,6 +58,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 ## ✅ Header Priority+ Navigation — progressive collapse nav for desktop — DONE
 ## ✅ Reference Link Bug Fix — finish type dropdown was resetting catalog_id — DONE
 ## ✅ Delete Modal Portal — createPortal to document.body for viewport centering — DONE
+## ✅ V34: Show Polish & Realism Sprint — entry preview, smart class browser, results podium, personalized notifications, show history widget, expert judging precedence, cron auto-transition, host override, enriched show records, judge notes — DONE
 
 ---
 

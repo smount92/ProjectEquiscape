@@ -378,6 +378,22 @@ export default async function ShowDetailPage({
                 <CloseShowButton showId={showId} />
             )}
 
+            {/* Host Override Panel — creator can adjust placings on closed shows */}
+            {isCreator && show.status === "closed" && (
+                <ExpertJudgingPanel
+                    showId={showId}
+                    overrideMode
+                    entries={entries.map(e => ({
+                        id: e.id,
+                        horseName: e.horseName,
+                        ownerAlias: e.ownerAlias,
+                        thumbnailUrl: e.thumbnailUrl,
+                        placing: e.placing,
+                        classId: null,
+                    }))}
+                />
+            )}
+
             {/* Entries Grid */}
             {entries.length === 0 ? (
                 <div className="card shelf-empty animate-fade-in-up">

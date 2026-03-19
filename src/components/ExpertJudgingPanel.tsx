@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveExpertPlacings } from "@/app/actions/shows";
+import { saveExpertPlacings, overrideFinalPlacings } from "@/app/actions/shows";
 
 interface EntryForJudging {
     id: string;
@@ -41,10 +41,13 @@ export default function ExpertJudgingPanel({
     showId,
     entries,
     classes,
+    overrideMode = false,
 }: {
     showId: string;
     entries: EntryForJudging[];
     classes?: ClassInfo[];
+    /** When true, uses overrideFinalPlacings() instead of saveExpertPlacings() */
+    overrideMode?: boolean;
 }) {
     const router = useRouter();
     const [placings, setPlacings] = useState<Record<string, string>>(() => {
@@ -52,6 +55,8 @@ export default function ExpertJudgingPanel({
         entries.forEach(e => { init[e.id] = e.placing || ""; });
         return init;
     });
+    const [notes, setNotes] = useState<Record<string, string>>({});
+    const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
@@ -64,6 +69,15 @@ export default function ExpertJudgingPanel({
 
     // Find current class info
     const currentClass = classes?.find(c => c.id === selectedClassId);
+
+    const toggleNotes = (entryId: string) => {
+        setExpandedNotes(prev => {
+            const next = new Set(prev);
+            if (next.has(entryId)) next.delete(entryId);
+            else next.add(entryId);
+            return next;
+        });
+    };
 
     const handleSave = async () => {
         setSaving(true);
@@ -80,7 +94,13 @@ export default function ExpertJudgingPanel({
             return;
         }
 
-        const result = await saveExpertPlacings(showId, toSave);
+        let result: { success: boolean; error?: string };
+        if (overrideMode) {
+            result = await overrideFinalPlacings(showId, toSave);
+        } else {
+            result = await saveExpertPlacings(showId, toSave);
+        }
+
         if (result.success) {
             setSuccess(true);
             router.refresh();
@@ -100,17 +120,26 @@ export default function ExpertJudgingPanel({
         }
     }
 
+    const borderColor = overrideMode ? "rgba(239, 68, 68, 0.3)" : "rgba(245, 158, 11, 0.3)";
+    const bgColor = overrideMode ? "rgba(239, 68, 68, 0.05)" : "rgba(245, 158, 11, 0.05)";
+
     return (
         <div className="card animate-fade-in-up" style={{
             marginBottom: "var(--space-lg)",
-            border: "1px solid rgba(245, 158, 11, 0.3)",
-            background: "rgba(245, 158, 11, 0.05)",
+            border: `1px solid ${borderColor}`,
+            background: bgColor,
         }}>
             <h3 style={{ marginBottom: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
-                🏅 <span className="text-gradient">Expert Judging Panel</span>
+                {overrideMode ? "⚠️" : "🏅"}{" "}
+                <span className="text-gradient">
+                    {overrideMode ? "Override Final Placings" : "Expert Judging Panel"}
+                </span>
             </h3>
             <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-md)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
-                Assign placings to each entry below. Only placed entries will appear in results and auto-generate show records.
+                {overrideMode
+                    ? "Adjust placings after the show has been judged or closed. Changes update show records with an audit trail."
+                    : "Assign placings to each entry below. Only placed entries will appear in results and auto-generate show records."
+                }
             </p>
 
             {/* Class Filter */}
@@ -155,38 +184,72 @@ export default function ExpertJudgingPanel({
                     </div>
                 ) : (
                     filteredEntries.map(entry => (
-                        <div key={entry.id} style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "var(--space-md)",
-                            padding: "var(--space-sm) var(--space-md)",
-                            background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.5)",
-                            borderRadius: "var(--radius-sm)",
-                        }}>
-                            {entry.thumbnailUrl && (
-                                <div style={{ width: 40, height: 40, borderRadius: "var(--radius-sm)", overflow: "hidden", flexShrink: 0 }}>
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <div key={entry.id}>
+                            <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "var(--space-md)",
+                                padding: "var(--space-sm) var(--space-md)",
+                                background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.5)",
+                                borderRadius: expandedNotes.has(entry.id)
+                                    ? "var(--radius-sm) var(--radius-sm) 0 0"
+                                    : "var(--radius-sm)",
+                            }}>
+                                {entry.thumbnailUrl && (
+                                    <div style={{ width: 40, height: 40, borderRadius: "var(--radius-sm)", overflow: "hidden", flexShrink: 0 }}>
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    </div>
+                                )}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontWeight: 600, fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                        🐴 {entry.horseName}
+                                    </div>
+                                    <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                        by @{entry.ownerAlias}
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleNotes(entry.id)}
+                                    title="Judge notes"
+                                    style={{
+                                        background: "none", border: "none", cursor: "pointer",
+                                        color: notes[entry.id] ? "var(--color-accent-primary)" : "var(--color-text-muted)",
+                                        fontSize: "1rem", padding: "4px", flexShrink: 0,
+                                    }}
+                                >
+                                    📝
+                                </button>
+                                <select
+                                    className="form-input"
+                                    value={placings[entry.id] || ""}
+                                    onChange={e => setPlacings(prev => ({ ...prev, [entry.id]: e.target.value }))}
+                                    style={{ width: 140, flexShrink: 0 }}
+                                >
+                                    {PLACING_OPTIONS.map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* Collapsible Judge Notes */}
+                            {expandedNotes.has(entry.id) && (
+                                <div style={{
+                                    padding: "var(--space-sm) var(--space-md)",
+                                    background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.3)",
+                                    borderRadius: "0 0 var(--radius-sm) var(--radius-sm)",
+                                    borderTop: "1px solid rgba(255,255,255,0.05)",
+                                }}>
+                                    <textarea
+                                        className="form-textarea"
+                                        value={notes[entry.id] || ""}
+                                        onChange={e => setNotes(prev => ({ ...prev, [entry.id]: e.target.value }))}
+                                        placeholder="Private judge notes (critique, reasoning)…"
+                                        rows={2}
+                                        style={{ fontSize: "calc(0.8rem * var(--font-scale))", resize: "vertical" }}
+                                    />
                                 </div>
                             )}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontWeight: 600, fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
-                                    🐴 {entry.horseName}
-                                </div>
-                                <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
-                                    by @{entry.ownerAlias}
-                                </div>
-                            </div>
-                            <select
-                                className="form-input"
-                                value={placings[entry.id] || ""}
-                                onChange={e => setPlacings(prev => ({ ...prev, [entry.id]: e.target.value }))}
-                                style={{ width: 140, flexShrink: 0 }}
-                            >
-                                {PLACING_OPTIONS.map(opt => (
-                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                ))}
-                            </select>
                         </div>
                     ))
                 )}
@@ -202,17 +265,18 @@ export default function ExpertJudgingPanel({
                     borderRadius: "var(--radius-sm)",
                     fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
                 }}>
-                    ✅ Placings saved! Show records auto-generated for placed entries.
+                    ✅ Placings saved! {overrideMode ? "Show records updated with audit trail." : "Show records auto-generated for placed entries."}
                 </div>
             )}
 
             <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)" }}>
                 <button
-                    className="btn btn-primary"
+                    className={`btn ${overrideMode ? "btn-ghost" : "btn-primary"}`}
                     onClick={handleSave}
                     disabled={saving}
+                    style={overrideMode ? { borderColor: "rgba(239, 68, 68, 0.4)", color: "#ef4444" } : undefined}
                 >
-                    {saving ? "Saving…" : "💾 Save Placings"}
+                    {saving ? "Saving…" : overrideMode ? "⚠️ Override Placings" : "💾 Save Placings"}
                 </button>
             </div>
         </div>
