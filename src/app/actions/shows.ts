@@ -472,6 +472,41 @@ export async function updateShowStatus(
     revalidatePath("/shows");
     revalidatePath(`/shows/${showId}`);
     revalidateTag("shows", "max");
+
+    // Notify all entrants when show results are announced
+    if (newStatus === "closed") {
+        const closingShowId = showId;
+        after(async () => {
+            try {
+                const adminClient = getAdminClient();
+                const { data: show } = await adminClient
+                    .from("events")
+                    .select("name")
+                    .eq("id", closingShowId)
+                    .single();
+                const showName = (show as { name: string } | null)?.name || "the show";
+
+                const { data: entries } = await adminClient
+                    .from("event_entries")
+                    .select("user_id")
+                    .eq("event_id", closingShowId)
+                    .eq("entry_type", "entered");
+
+                const entrantIds = [...new Set((entries ?? []).map((e: { user_id: string }) => e.user_id))] as string[];
+
+                const { createNotification } = await import("@/app/actions/notifications");
+                for (const entrantId of entrantIds) {
+                    await createNotification({
+                        userId: entrantId,
+                        type: "show_result",
+                        actorId: entrantId,
+                        content: `🏆 Results are in for "${showName}"! Check your placings.`,
+                    });
+                }
+            } catch { /* non-blocking */ }
+        });
+    }
+
     return { success: true };
 }
 

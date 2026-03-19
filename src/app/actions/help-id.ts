@@ -3,6 +3,7 @@
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 // ============================================================
 // Help Me ID — Server Actions
@@ -95,6 +96,36 @@ export async function createSuggestion(
         });
 
         if (error) return { success: false, error: error.message };
+
+        // Notify request author that someone suggested an ID
+        const suggesterUserId = user.id;
+        after(async () => {
+            try {
+                const supabase2 = await createClient();
+                // Get request author
+                const { data: request } = await supabase2
+                    .from("id_requests")
+                    .select("user_id")
+                    .eq("id", requestId)
+                    .single();
+                const authorId = (request as { user_id: string } | null)?.user_id;
+                if (authorId && authorId !== suggesterUserId) {
+                    const { data: suggester } = await supabase2
+                        .from("users")
+                        .select("alias_name")
+                        .eq("id", suggesterUserId)
+                        .single();
+                    const alias = (suggester as { alias_name: string } | null)?.alias_name || "Someone";
+                    const { createNotification } = await import("@/app/actions/notifications");
+                    await createNotification({
+                        userId: authorId,
+                        type: "help_id",
+                        actorId: suggesterUserId,
+                        content: `@${alias} suggested an identification for your Help ID request!`,
+                    });
+                }
+            } catch { /* non-blocking */ }
+        });
 
         revalidatePath(`/community/help-id/${requestId}`);
         return { success: true };
