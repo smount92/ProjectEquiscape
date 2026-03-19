@@ -26,6 +26,18 @@ export default async function ShowsPage() {
 
     const shows = await getPhotoShows();
 
+    // Batch-check which shows this user is a judge for
+    const showIds = shows.map(s => s.id);
+    let judgeShowIds = new Set<string>();
+    if (showIds.length > 0) {
+        const { data: judgeRows } = await supabase
+            .from("event_judges")
+            .select("event_id")
+            .eq("user_id", user.id)
+            .in("event_id", showIds);
+        judgeShowIds = new Set((judgeRows ?? []).map((r: { event_id: string }) => r.event_id));
+    }
+
     return (
         <div className="page-container">
             <div className="community-hero animate-fade-in-up">
@@ -57,6 +69,7 @@ export default async function ShowsPage() {
                 <div className="shows-grid animate-fade-in-up">
                     {shows.map((show) => {
                         const badge = statusBadge(show.status);
+                        const isUserJudge = judgeShowIds.has(show.id);
                         return (
                             <Link
                                 key={show.id}
@@ -66,9 +79,25 @@ export default async function ShowsPage() {
                             >
                                 <div className="show-card-header">
                                     <h3 className="show-card-title">{show.title}</h3>
-                                    <span className={`show-status-badge ${badge.className}`}>
-                                        {badge.label}
-                                    </span>
+                                    <div style={{ display: "flex", gap: "var(--space-xs)", alignItems: "center" }}>
+                                        {isUserJudge && (
+                                            <span style={{
+                                                fontSize: "calc(0.7rem * var(--font-scale))",
+                                                padding: "2px 8px",
+                                                borderRadius: "var(--radius-sm)",
+                                                background: "rgba(139, 92, 246, 0.2)",
+                                                color: "#a78bfa",
+                                                border: "1px solid rgba(139, 92, 246, 0.3)",
+                                                fontWeight: 600,
+                                                whiteSpace: "nowrap",
+                                            }}>
+                                                🏅 Judge
+                                            </span>
+                                        )}
+                                        <span className={`show-status-badge ${badge.className}`}>
+                                            {badge.label}
+                                        </span>
+                                    </div>
                                 </div>
                                 {show.theme && (
                                     <div className="show-card-theme">Theme: {show.theme}</div>

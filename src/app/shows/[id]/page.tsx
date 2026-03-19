@@ -149,6 +149,35 @@ export default async function ShowDetailPage({
                 </div>
             )}
 
+            {/* Judge Assignment Banner — always visible to assigned judges */}
+            {isJudge && !isCreator && (
+                <div className="card animate-fade-in-up" style={{
+                    marginBottom: "var(--space-lg)",
+                    padding: "var(--space-lg)",
+                    background: "linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.1))",
+                    border: "1px solid rgba(139, 92, 246, 0.3)",
+                    textAlign: "center",
+                }}>
+                    <div style={{ fontSize: "2rem", marginBottom: "var(--space-sm)" }}>🏅</div>
+                    <h3 style={{ marginBottom: "var(--space-sm)" }}>
+                        You Are an Assigned Judge
+                    </h3>
+                    {show.status === "open" ? (
+                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                            This show is still accepting entries. Once the host transitions it to <strong>&quot;Judging&quot;</strong> status, the judging panel will appear here for you to assign placings.
+                        </p>
+                    ) : show.status === "judging" ? (
+                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                            The judging panel is available below. Scroll down to assign placings to each entry.
+                        </p>
+                    ) : (
+                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                            Judging is complete. Results are final.
+                        </p>
+                    )}
+                </div>
+            )}
+
             {/* Entry Form */}
             {isOpen && (
                 <div className="show-entry-section animate-fade-in-up">
