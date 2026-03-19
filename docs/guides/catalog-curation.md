@@ -8,7 +8,7 @@ The Model Horse Hub reference catalog contains 10,500+ entries (molds, releases,
 
 ## Browsing the Catalog
 
-Visit **[/reference](/reference)** to browse the full catalog. Features include:
+Visit **[/catalog](/catalog)** to browse the full catalog. Features include:
 
 - **Search** — Search by name, mold, color, maker
 - **Filter chips** — Quick filter by maker (Breyer, Stone, etc.)
@@ -69,7 +69,7 @@ As your suggestions get approved, you earn curator status:
 
 ## Public Changelog
 
-View all approved changes at **[/reference/changelog](/reference/changelog)**. Each entry shows:
+View all approved changes at **[/catalog/changelog](/catalog/changelog)**. Each entry shows:
 - What changed
 - Who contributed it
 - When it was approved

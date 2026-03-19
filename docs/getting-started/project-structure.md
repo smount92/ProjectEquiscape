@@ -83,7 +83,7 @@ model-horse-hub/
 │   │       ├── market/               # Blue Book price guide
 │   │       ├── shows/                # Competition center
 │   │       ├── studio/               # Art Studio (artist profiles, commissions)
-│   │       ├── reference/            # Catalog browser, suggestions, changelog (V32)
+│   │       ├── catalog/             # Catalog browser, suggestions, changelog (V32)
 │   │       ├── discover/             # Discover collectors
 │   │       ├── profile/[alias_name]/ # Public user profiles
 │   │       ├── admin/                # Admin console
