@@ -1,0 +1,137 @@
+.widget {
+    margin-top: var(--space-lg);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(245, 158, 11, 0.04));
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    padding: var(--space-sm);
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    font-size: calc(1rem * var(--font-scale));
+    font-weight: 700;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+.toggle::-webkit-details-marker {
+    display: none;
+}
+
+.count {
+    font-size: calc(0.8rem * var(--font-scale));
+    font-weight: 400;
+    color: var(--color-text-muted);
+    margin-left: auto;
+}
+
+.content {
+    padding: var(--space-xs) var(--space-md) var(--space-sm);
+}
+
+.yearGroup {
+    margin-bottom: var(--space-xs);
+}
+
+.yearHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    font-size: calc(0.9rem * var(--font-scale));
+    font-weight: 600;
+    transition: background 0.15s ease;
+}
+
+.yearHeader:hover {
+    background: rgba(139, 92, 246, 0.08);
+}
+
+.yearExpanded {
+    background: rgba(139, 92, 246, 0.06);
+}
+
+.yearLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.currentBadge {
+    font-size: calc(0.6rem * var(--font-scale));
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: var(--radius-full);
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.yearSummary {
+    flex: 1;
+    text-align: right;
+    font-size: calc(0.8rem * var(--font-scale));
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+.chevron {
+    font-size: 0.8em;
+    color: var(--color-text-muted);
+}
+
+.records {
+    padding: var(--space-xs) 0 var(--space-xs) var(--space-md);
+}
+
+.record {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) 0;
+    font-size: calc(0.85rem * var(--font-scale));
+}
+
+.recordEmoji {
+    flex-shrink: 0;
+    font-size: 1rem;
+}
+
+.recordInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.horseName {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.horseName:hover {
+    text-decoration: underline;
+}
+
+.showName {
+    font-size: calc(0.75rem * var(--font-scale));
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

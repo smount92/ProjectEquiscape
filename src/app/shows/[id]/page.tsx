@@ -70,7 +70,15 @@ export default async function ShowDetailPage({
     // Fetch divisions/classes for the entry form
     const divisions = await getEventDivisions(showId);
     const classOptions = divisions.flatMap(d =>
-        d.classes.map(c => ({ id: c.id, name: c.name, divisionName: d.name }))
+        d.classes.map(c => ({
+            id: c.id,
+            name: c.classNumber ? `${c.classNumber}: ${c.name}` : c.name,
+            divisionName: d.name,
+            allowedScales: c.allowedScales,
+            isNanQualifying: c.isNanQualifying,
+            maxEntries: c.maxEntries,
+            currentEntryCount: c.entryCount || 0,
+        }))
     );
 
     // Sort entries by division → class → entry order
@@ -194,71 +202,139 @@ export default async function ShowDetailPage({
             </nav>
 
             {/* Winner Podium for closed shows */}
-            {show.status === "closed" && entries.length > 0 && (
-                <div className="card animate-fade-in-up" style={{
-                    textAlign: "center",
-                    padding: "var(--space-xl)",
-                    marginBottom: "var(--space-lg)",
-                }}>
-                    <h2 style={{ fontSize: "calc(1.3rem * var(--font-scale))", marginBottom: "var(--space-lg)" }}>
-                        🏆 <span className="text-gradient">Results</span>
-                    </h2>
-                    <div style={{ display: "flex", justifyContent: "center", gap: "var(--space-xl)", flexWrap: "wrap" }}>
-                        {isExpertJudged ? (
-                            // Expert-judged: show entries that have a placing assigned
-                            entries.filter(e => e.placing).slice(0, 5).map((entry) => {
-                                const medals: Record<string, string> = { "1st": "🥇", "2nd": "🥈", "3rd": "🥉", "HM": "🎗️" };
+            {show.status === "closed" && entries.length > 0 && (() => {
+                const RIBBON_MAP: Record<string, string> = {
+                    "1st": "blue", "2nd": "red", "3rd": "yellow", "4th": "white",
+                    "5th": "pink", "6th": "green", "HM": "green",
+                    "Champion": "blue", "Reserve Champion": "red",
+                    "Grand Champion": "blue", "Reserve Grand Champion": "red",
+                };
+                const MEDAL_MAP: Record<string, string> = {
+                    "1st": "🥇", "2nd": "🥈", "3rd": "🥉", "HM": "🎗️",
+                    "Champion": "🏆", "Reserve Champion": "🥈",
+                    "Grand Champion": "🏆", "Reserve Grand Champion": "🥈",
+                };
+                const PLACE_ORDER: Record<string, number> = {
+                    "Grand Champion": 0, "Reserve Grand Champion": 1,
+                    "Champion": 2, "Reserve Champion": 3,
+                    "1st": 4, "2nd": 5, "3rd": 6, "4th": 7, "5th": 8, "6th": 9, "HM": 10,
+                };
+
+                // Champions first
+                const champions = sortedEntries.filter(e =>
+                    e.placing && ["Champion", "Reserve Champion", "Grand Champion", "Reserve Grand Champion"].includes(e.placing)
+                );
+                // Top placed
+                const topPlaced = isExpertJudged
+                    ? sortedEntries.filter(e => e.placing && !["Champion", "Reserve Champion", "Grand Champion", "Reserve Grand Champion"].includes(e.placing))
+                        .sort((a, b) => (PLACE_ORDER[a.placing!] ?? 99) - (PLACE_ORDER[b.placing!] ?? 99))
+                        .slice(0, 6)
+                    : sortedEntries.slice(0, 3);
+                const podiumEntries = topPlaced.slice(0, 3);
+
+                return (
+                    <div className="card animate-fade-in-up" style={{
+                        padding: "var(--space-xl)",
+                        marginBottom: "var(--space-lg)",
+                    }}>
+                        <h2 style={{ fontSize: "calc(1.3rem * var(--font-scale))", marginBottom: "var(--space-sm)", textAlign: "center" }}>
+                            🏆 <span className="text-gradient">Results</span>
+                        </h2>
+
+                        {/* Champion Banners */}
+                        {champions.map(entry => (
+                            <div key={entry.id} className="champion-banner animate-fade-in-up">
+                                <div className="champion-banner-title">
+                                    {MEDAL_MAP[entry.placing!] || "🏆"} {entry.placing}
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--space-md)" }}>
+                                    {entry.thumbnailUrl && (
+                                        <div style={{ width: 60, height: 60, borderRadius: "var(--radius-md)", overflow: "hidden", flexShrink: 0 }}>
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <Link href={`/community/${entry.horseId}`} style={{ fontWeight: 700, fontSize: "calc(1rem * var(--font-scale))" }}>
+                                            🐴 {entry.horseName}
+                                        </Link>
+                                        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                            by <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>@{entry.ownerAlias}</Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Podium */}
+                        <div className="results-podium">
+                            {podiumEntries.map((entry, i) => {
+                                const placing = isExpertJudged ? entry.placing! : ["1st", "2nd", "3rd"][i];
+                                const ribbon = RIBBON_MAP[placing] || "blue";
+                                const medal = MEDAL_MAP[placing] || "🏅";
                                 return (
-                                    <div key={entry.id} style={{ textAlign: "center", minWidth: "120px" }}>
-                                        <div style={{ fontSize: "2.5rem" }}>{medals[entry.placing!] || "🏅"}</div>
+                                    <div key={entry.id} className={`podium-card ${i === 0 ? "podium-card-first" : ""}`}>
+                                        <div className={`podium-ribbon podium-ribbon-${ribbon}`} />
                                         {entry.thumbnailUrl && (
-                                            <div className="show-entry-thumb" style={{ width: "80px", height: "80px", margin: "var(--space-sm) auto" }}>
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={entry.thumbnailUrl} alt={entry.horseName} />
-                                            </div>
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img src={entry.thumbnailUrl} alt={entry.horseName} className="podium-photo" />
                                         )}
-                                        <div style={{ fontWeight: 600, fontSize: "calc(0.9rem * var(--font-scale))" }}>
-                                            {entry.horseName}
-                                        </div>
-                                        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
-                                            by @{entry.ownerAlias}
-                                        </div>
-                                        <div style={{ fontWeight: 700, color: "var(--color-accent, #f59e0b)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
-                                            {entry.placing}
+                                        <div className="podium-card-body">
+                                            <div className="podium-medal">{medal}</div>
+                                            <Link href={`/community/${entry.horseId}`} className="podium-horse-name">
+                                                {entry.horseName}
+                                            </Link>
+                                            <div className="podium-owner">
+                                                by <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>@{entry.ownerAlias}</Link>
+                                                {!isExpertJudged && ` · ${entry.votes} vote${entry.votes !== 1 ? "s" : ""}`}
+                                            </div>
+                                            <div className="podium-placing">{placing}</div>
+                                            {entry.caption && (
+                                                <div className="podium-caption">&ldquo;{entry.caption}&rdquo;</div>
+                                            )}
                                         </div>
                                     </div>
                                 );
-                            })
-                        ) : (
-                            // Community vote: show top 3 by vote count
-                            entries.slice(0, 3).map((entry, i) => {
-                                const medals = ["🥇", "🥈", "🥉"];
-                                const labels = ["1st Place", "2nd Place", "3rd Place"];
-                                return (
-                                    <div key={entry.id} style={{ textAlign: "center", minWidth: "120px" }}>
-                                        <div style={{ fontSize: "2.5rem" }}>{medals[i]}</div>
-                                        {entry.thumbnailUrl && (
-                                            <div className="show-entry-thumb" style={{ width: "80px", height: "80px", margin: "var(--space-sm) auto" }}>
-                                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={entry.thumbnailUrl} alt={entry.horseName} />
+                            })}
+                        </div>
+
+                        {/* Remaining placed entries below podium */}
+                        {topPlaced.length > 3 && (
+                            <div style={{ marginTop: "var(--space-md)" }}>
+                                <h3 style={{ fontSize: "calc(0.9rem * var(--font-scale))", marginBottom: "var(--space-sm)", color: "var(--color-text-muted)" }}>Also Placed</h3>
+                                {topPlaced.slice(3).map(entry => {
+                                    const placing = entry.placing!;
+                                    const ribbon = RIBBON_MAP[placing] || "green";
+                                    return (
+                                        <div key={entry.id} style={{
+                                            display: "flex", alignItems: "center", gap: "var(--space-md)",
+                                            padding: "var(--space-sm) var(--space-md)",
+                                            borderLeft: `3px solid var(--podium-${ribbon}, #22c55e)`,
+                                            marginBottom: "var(--space-xs)",
+                                        }}>
+                                            {entry.thumbnailUrl && (
+                                                <div style={{ width: 36, height: 36, borderRadius: "var(--radius-sm)", overflow: "hidden", flexShrink: 0 }}>
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                </div>
+                                            )}
+                                            <div style={{ flex: 1 }}>
+                                                <Link href={`/community/${entry.horseId}`} style={{ fontWeight: 600 }}>{entry.horseName}</Link>
+                                                <span style={{ color: "var(--color-text-muted)", marginLeft: "var(--space-xs)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                                    by @{entry.ownerAlias}
+                                                </span>
                                             </div>
-                                        )}
-                                        <div style={{ fontWeight: 600, fontSize: "calc(0.9rem * var(--font-scale))" }}>
-                                            {entry.horseName}
+                                            <span style={{ fontWeight: 700, color: "var(--color-accent, #f59e0b)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                                                {MEDAL_MAP[placing] || "🏅"} {placing}
+                                            </span>
                                         </div>
-                                        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
-                                            by @{entry.ownerAlias} · {entry.votes} vote{entry.votes !== 1 ? "s" : ""}
-                                        </div>
-                                        <div style={{ fontWeight: 700, color: "var(--color-accent, #f59e0b)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
-                                            {labels[i]}
-                                        </div>
-                                    </div>
-                                );
-                            })
+                                    );
+                                })}
+                            </div>
                         )}
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* Judging Banner */}
             {isJudging && (

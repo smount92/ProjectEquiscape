@@ -490,7 +490,7 @@ export async function updateShowStatus(
     revalidatePath(`/shows/${showId}`);
     revalidateTag("shows", "max");
 
-    // Notify all entrants when show results are announced
+    // Notify all entrants when show results are announced — personalized
     if (newStatus === "closed") {
         const closingShowId = showId;
         after(async () => {
@@ -503,22 +503,50 @@ export async function updateShowStatus(
                     .single();
                 const showName = (show as { name: string } | null)?.name || "the show";
 
+                // Get entries with placing + horse names
                 const { data: entries } = await adminClient
                     .from("event_entries")
-                    .select("user_id")
+                    .select("user_id, placing, horse_id")
                     .eq("event_id", closingShowId)
                     .eq("entry_type", "entered");
 
-                const entrantIds = [...new Set((entries ?? []).map((e: { user_id: string }) => e.user_id))] as string[];
+                if (!entries || entries.length === 0) return;
+
+                // Batch-fetch horse names
+                const horseIds = [...new Set((entries as { horse_id: string }[]).map(e => e.horse_id))];
+                const { data: horses } = await adminClient
+                    .from("user_horses")
+                    .select("id, custom_name")
+                    .in("id", horseIds);
+                const horseNameMap = new Map<string, string>();
+                (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
+
+                const MEDAL_EMOJI: Record<string, string> = {
+                    "1st": "🥇", "2nd": "🥈", "3rd": "🥉",
+                    "Champion": "🏆", "Reserve Champion": "🥈",
+                    "Grand Champion": "🏆", "Reserve Grand Champion": "🥈",
+                };
 
                 const { createNotification } = await import("@/app/actions/notifications");
-                for (const entrantId of entrantIds) {
-                    await createNotification({
-                        userId: entrantId,
-                        type: "show_result",
-                        actorId: entrantId,
-                        content: `🏆 Results are in for "${showName}"! Check your placings.`,
-                    });
+
+                for (const entry of entries as { user_id: string; placing: string | null; horse_id: string }[]) {
+                    const horseName = horseNameMap.get(entry.horse_id) || "your horse";
+                    if (entry.placing) {
+                        const medal = MEDAL_EMOJI[entry.placing] || "🏅";
+                        await createNotification({
+                            userId: entry.user_id,
+                            type: "show_result",
+                            actorId: entry.user_id,
+                            content: `${medal} Congratulations! ${horseName} took ${entry.placing} in "${showName}"!`,
+                        });
+                    } else {
+                        await createNotification({
+                            userId: entry.user_id,
+                            type: "show_result",
+                            actorId: entry.user_id,
+                            content: `📸 Results are in for "${showName}"! Thanks for entering ${horseName}.`,
+                        });
+                    }
                 }
             } catch { /* non-blocking */ }
         });
@@ -740,4 +768,78 @@ export async function saveExpertPlacings(
 
     revalidatePath(`/community/events/${eventId}`);
     return { success: true };
+}
+
+// ============================================================
+// Show History for Current User
+// ============================================================
+
+interface ShowHistoryRecord {
+    horseName: string;
+    horseId: string;
+    showName: string;
+    placing: string;
+    ribbonColor: string | null;
+    showDate: string;
+}
+
+interface ShowHistoryYear {
+    year: number;
+    records: ShowHistoryRecord[];
+}
+
+/** Get show history summary for the current user */
+export async function getShowHistory(): Promise<{
+    years: ShowHistoryYear[];
+    totalShows: number;
+    totalRibbons: number;
+}> {
+    const { user } = await requireAuth();
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("show_records")
+        .select("horse_id, show_name, placing, ribbon_color, show_date")
+        .eq("user_id", user.id)
+        .order("show_date", { ascending: false });
+
+    if (error || !data) return { years: [], totalShows: 0, totalRibbons: 0 };
+
+    // Get horse names
+    const horseIds = [...new Set((data as { horse_id: string }[]).map(r => r.horse_id))];
+    const { data: horses } = await supabase
+        .from("user_horses")
+        .select("id, custom_name")
+        .in("id", horseIds);
+    const horseNameMap = new Map<string, string>();
+    (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
+
+    // Group by year
+    const yearMap = new Map<number, ShowHistoryRecord[]>();
+    const showNames = new Set<string>();
+
+    for (const r of data as { horse_id: string; show_name: string; placing: string; ribbon_color: string | null; show_date: string }[]) {
+        const year = new Date(r.show_date).getFullYear();
+        const records = yearMap.get(year) || [];
+        records.push({
+            horseName: horseNameMap.get(r.horse_id) || "Unknown Horse",
+            horseId: r.horse_id,
+            showName: r.show_name,
+            placing: r.placing,
+            ribbonColor: r.ribbon_color,
+            showDate: r.show_date,
+        });
+        yearMap.set(year, records);
+        showNames.add(r.show_name);
+    }
+
+    const years = Array.from(yearMap.entries())
+        .sort(([a], [b]) => b - a)
+        .map(([year, records]) => ({ year, records }));
+
+    return {
+        years,
+        totalShows: showNames.size,
+        totalRibbons: data.length,
+    };
 }

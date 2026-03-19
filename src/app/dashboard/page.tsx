@@ -13,6 +13,8 @@ import ExportButton from "@/components/ExportButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
 import NanDashboardWidget from "@/components/NanDashboardWidget";
+import ShowHistoryWidget from "@/components/ShowHistoryWidget";
+import { getShowHistory } from "@/app/actions/shows";
 import styles from "./dashboard.module.css";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +41,17 @@ interface UserCollection {
 }
 
 const HORSES_PER_PAGE = 48;
+
+/** Async server-side wrapper to fetch show history data */
+async function ShowHistoryWidgetWrapper() {
+    try {
+        const data = await getShowHistory();
+        if (data.totalRibbons === 0) return null;
+        return <ShowHistoryWidget years={data.years} totalShows={data.totalShows} totalRibbons={data.totalRibbons} />;
+    } catch {
+        return null;
+    }
+}
 
 export default async function DashboardPage({
     searchParams,
@@ -343,6 +356,7 @@ export default async function DashboardPage({
                         {/* NAN Qualification Dashboard */}
                         <Suspense fallback={null}>
                             <NanDashboardWidget />
+                            <ShowHistoryWidgetWrapper />
                         </Suspense>
 
                         {/* Transfer History */}
