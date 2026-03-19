@@ -650,6 +650,9 @@ export async function saveExpertPlacings(
 
         if (entries && entries.length > 0) {
             const showDate = ev.starts_at ? ev.starts_at.split("T")[0] : null;
+            // Use admin client for show_records — the judge's auth context
+            // can't insert rows with another user's user_id (RLS blocks it)
+            const admin = getAdminClient();
 
             for (const entry of entries as { id: string; horse_id: string; user_id: string; placing: string | null }[]) {
                 if (!entry.placing) continue;
@@ -657,7 +660,7 @@ export async function saveExpertPlacings(
                 const ribbonColor = PLACING_TO_RIBBON[entry.placing] || null;
 
                 // Check if a show_record already exists for this combination
-                const { data: existing } = await supabase
+                const { data: existing } = await admin
                     .from("show_records")
                     .select("id")
                     .eq("horse_id", entry.horse_id)
@@ -666,7 +669,7 @@ export async function saveExpertPlacings(
                     .maybeSingle();
 
                 if (!existing) {
-                    await supabase.from("show_records").insert({
+                    await admin.from("show_records").insert({
                         horse_id: entry.horse_id,
                         user_id: entry.user_id,
                         show_name: ev.name,
