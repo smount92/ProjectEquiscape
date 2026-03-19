@@ -79,18 +79,25 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
     });
 
 
-    return (shows as EventRow[]).map(s => ({
-        id: s.id,
-        title: s.name,
-        description: s.description,
-        theme: s.show_theme,
-        status: s.show_status || "open",
-        entryCount: countMap.get(s.id) || 0,
-        createdAt: s.created_at,
-        endAt: s.ends_at,
-        createdBy: s.created_by,
-        creatorAlias: (Array.isArray(s.users) ? s.users[0]?.alias_name : s.users?.alias_name) || "Unknown",
-    }));
+    return (shows as EventRow[]).map(s => {
+        // Derive effective status: if entries closed but still marked open, treat as judging
+        let effectiveStatus = s.show_status || "open";
+        if (effectiveStatus === "open" && s.ends_at && new Date(s.ends_at) < new Date()) {
+            effectiveStatus = "judging";
+        }
+        return {
+            id: s.id,
+            title: s.name,
+            description: s.description,
+            theme: s.show_theme,
+            status: effectiveStatus,
+            entryCount: countMap.get(s.id) || 0,
+            createdAt: s.created_at,
+            endAt: s.ends_at,
+            createdBy: s.created_by,
+            creatorAlias: (Array.isArray(s.users) ? s.users[0]?.alias_name : s.users?.alias_name) || "Unknown",
+        };
+    });
 }
 
 /**
@@ -118,6 +125,16 @@ export async function getShowEntries(showId: string): Promise<{
         ends_at: string | null; created_at: string; created_by: string;
         judging_method: string | null;
     };
+
+    // Auto-transition: open → judging when entry deadline has passed
+    if (s.show_status === "open" && s.ends_at && new Date(s.ends_at) < new Date()) {
+        const admin = getAdminClient();
+        await admin.from("events")
+            .update({ show_status: "judging" })
+            .eq("id", showId)
+            .eq("show_status", "open"); // CAS guard — only update if still open
+        s.show_status = "judging"; // Update in-memory for this render
+    }
 
     const isExpertJudged = s.judging_method === "expert_judge";
 
