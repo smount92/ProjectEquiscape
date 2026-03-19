@@ -134,10 +134,35 @@ export default function SuggestEditModal({
             </button>
 
             {isOpen && (
-                <div className="modal-overlay" onClick={() => setIsOpen(false)}>
+                <div
+                    className="modal-overlay"
+                    onClick={() => setIsOpen(false)}
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        background: "rgba(0, 0, 0, 0.7)",
+                        backdropFilter: "blur(4px)",
+                        WebkitBackdropFilter: "blur(4px)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 1000,
+                        padding: "24px",
+                    }}
+                >
                     <div
-                        className="modal ref-suggest-modal"
+                        className="ref-suggest-modal"
                         onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: "#faf6ef",
+                            border: "1px solid #d4c9a8",
+                            borderRadius: "16px",
+                            width: "100%",
+                            maxWidth: 580,
+                            maxHeight: "85vh",
+                            overflowY: "auto",
+                            boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
+                        }}
                     >
                         <div className="modal-header">
                             <h2>✏️ Suggest Edit</h2>
