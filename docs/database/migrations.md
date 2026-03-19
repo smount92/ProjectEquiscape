@@ -91,13 +91,14 @@ All SQL migrations are located in `supabase/migrations/` and are applied sequent
 | 091 | `091_catalog_curation.sql` | Catalog curation: `catalog_suggestions`, `catalog_suggestion_votes`, `catalog_suggestion_comments`, `catalog_changelog` tables + curator columns on `users` + `increment_approved_suggestions` RPC + curator badge seeds |
 | 092 | `092_supabase_linter_fixes.sql` | Security & performance hardening: views → `security_invoker`, `SET search_path = ''` on 19 SECURITY DEFINER functions, `pg_trgm` → extensions schema, RLS initplan wraps, merged permissive policies, 6 duplicate indexes dropped, 28 FK indexes added |
 | 093 | `093_bugfixes_delete_policies.sql` | Missing RLS DELETE policies: `id_requests` (owner deletes own), `id_suggestions` (owner deletes own), `posts` (author deletes own — guard) |
+| 094 | `094_judge_entry_update_policy.sql` | Expert judging RLS fix: replaces owner-only UPDATE policy on `event_entries` with one allowing entry owner, event creator, AND assigned judges |
 
 > **Note:** Migration numbers 045, 047, 049, 051, 090 are intentionally skipped (consolidated into adjacent migrations during development).
 
 ## Adding New Migrations
 
 1. Create a new file: `supabase/migrations/NNN_description.sql`
-2. Use the next sequential number (currently: **094**)
+2. Use the next sequential number (currently: **095**)
 3. Always include RLS policies for new tables
 4. Add foreign key indexes for new FK columns
 5. Test by running the SQL in Supabase Dashboard → SQL Editor

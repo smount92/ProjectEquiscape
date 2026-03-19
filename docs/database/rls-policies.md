@@ -198,6 +198,7 @@ The `horse-images` bucket is **private** with read policies based on content typ
 7. **`pg_trgm` lives in the `extensions` schema** — not exposed via the public API
 8. **`mv_market_prices` is not accessible to `anon`** — only `authenticated` users can query the Blue Book
 9. **Avoid multiple permissive policies per table/role/action** — merge with `OR` for better performance
+10. **`event_entries` UPDATE allows three roles** — entry owner, event creator, AND assigned judges (migration 094). This enables expert judging where judges assign placings on entries they don't own.
 
 ---
 

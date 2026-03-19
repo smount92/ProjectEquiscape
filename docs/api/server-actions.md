@@ -71,7 +71,7 @@ For the full request lifecycle, see [Data Flow](../architecture/data-flow.md).
 
 | File | Functions | Purpose |
 |------|-----------|---------|
-| [`shows.ts`](actions/competition.md#shows) | `getPhotoShows`, `getShowEntries`, `enterShow`, `voteForEntry`, `createPhotoShow`, `updateShowStatus`, `deleteShow`, `withdrawEntry`, `batchRecordResults`, `saveExpertPlacings` | Photo show system |
+| [`shows.ts`](actions/competition.md#shows) | `getPhotoShows`, `getShowEntries`, `enterShow`, `voteForEntry`, `createPhotoShow`, `updateShowStatus`, `deleteShow`, `withdrawEntry`, `batchRecordResults`, `saveExpertPlacings` | Photo show system — show results notification to entrants (V33), admin client for judge show_records (V33) |
 | [`competition.ts`](actions/competition.md#competition) | `getCompetitions`, `getCompetition`, `createCompetition`, `updateCompetition`, `enterCompetition`, `getMyEntries` | Live competition engine |
 | [`events.ts`](actions/competition.md#events) | `createEvent`, `updateEvent`, `deleteEvent`, `getEvents`, `getEvent`, `rsvpToEvent`, `addEventJudge`, `removeEventJudge` | Community events — judge assignment with notification (V33) |
 | [`horse-events.ts`](actions/competition.md#horse-events) | `getHorseShowHistory`, `getHorseNanProgress` | Horse show history |
@@ -89,7 +89,7 @@ For the full request lifecycle, see [Data Flow](../architecture/data-flow.md).
 | File | Functions | Purpose |
 |------|-----------|---------|
 | [`groups.ts`](actions/community.md) | `createGroup`, `getGroups`, `getGroup`, `joinGroup`, `leaveGroup`, `updateGroup`, `deleteGroup`, `uploadGroupFile`, `getGroupFiles` + more | Group system |
-| [`help-id.ts`](actions/community.md#help-id) | `createIdRequest`, `createSuggestion`, `upvoteSuggestion`, `acceptSuggestion`, `addIdentifiedHorse`, `deleteIdRequest` | Help ID requests — delete fixed with RLS policy (V33) |
+| [`help-id.ts`](actions/community.md#help-id) | `createIdRequest`, `createSuggestion`, `upvoteSuggestion`, `acceptSuggestion`, `addIdentifiedHorse`, `deleteIdRequest` | Help ID requests — delete fixed with RLS policy (V33), suggestion notification to request author (V33) |
 | [`moderation.ts`](actions/community.md#moderation) | `submitReport`, `getReports`, `resolveReport` | Content moderation |
 | [`contact.ts`](actions/community.md#contact) | `submitContactMessage` | Contact form |
 
