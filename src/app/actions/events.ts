@@ -583,6 +583,27 @@ export async function addEventJudge(
     }
 
     revalidatePath(`/community/events/${eventId}/manage`);
+
+    // Notify the judge they've been assigned
+    const judgeUserId = (judgeUser as { id: string }).id;
+    const assignerId = user.id;
+    after(async () => {
+        try {
+            const supabaseDeferred = await createClient();
+            const { data: ev } = await supabaseDeferred.from("events").select("name").eq("id", eventId).single();
+            const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", assignerId).single();
+            const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+            const showName = (ev as { name: string } | null)?.name || "a show";
+            const { createNotification } = await import("@/app/actions/notifications");
+            await createNotification({
+                userId: judgeUserId,
+                type: "judge_assigned",
+                actorId: assignerId,
+                content: `@${alias} assigned you as an expert judge for "${showName}"`,
+            });
+        } catch { /* non-blocking */ }
+    });
+
     return { success: true };
 }
 

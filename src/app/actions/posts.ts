@@ -162,18 +162,55 @@ export async function replyToPost(
 
     if (error) return { success: false, error: error.message };
     revalidatePath("/feed");
+
+    // Deferred: notify parent post author + handle @mentions
+    const userId = user.id;
+    const trimmedContent = content.trim();
+    after(async () => {
+        try {
+            const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
+            const { data: parentPost } = await supabaseDeferred.from("posts").select("author_id").eq("id", parentId).single();
+            const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
+            const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+
+            if (parentPost && (parentPost as { author_id: string }).author_id !== userId) {
+                const { createNotification } = await import("@/app/actions/notifications");
+                await createNotification({
+                    userId: (parentPost as { author_id: string }).author_id,
+                    type: "reply",
+                    actorId: userId,
+                    content: `@${alias} replied to your post`,
+                });
+            }
+
+            // @mentions in reply
+            const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
+            await parseAndNotifyMentions(trimmedContent, userId, alias, `/feed`);
+        } catch { /* non-blocking */ }
+    });
+
     return { success: true };
 }
 
-// ── Delete a post ──
-/**
- * Delete a post the current user authored.
- * @param postId - UUID of the post to delete
- */
 export async function deletePost(
     postId: string
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
+    const isAdmin = user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase();
+
+    // Fetch post first so we know context for revalidation + ownership check
+    const { data: postRow } = await supabase
+        .from("posts")
+        .select("id, author_id, horse_id, group_id, event_id")
+        .eq("id", postId)
+        .maybeSingle();
+
+    if (!postRow) return { success: false, error: "Post not found." };
+    const pr = postRow as { id: string; author_id: string; horse_id: string | null; group_id: string | null; event_id: string | null };
+
+    if (pr.author_id !== user.id && !isAdmin) {
+        return { success: false, error: "You can only delete your own posts." };
+    }
 
     // Clean up storage files for attached media
     try {
@@ -198,7 +235,15 @@ export async function deletePost(
 
     const { error } = await supabase.from("posts").delete().eq("id", postId);
     if (error) return { success: false, error: error.message };
+
+    // Revalidate all relevant paths
     revalidatePath("/feed");
+    if (pr.horse_id) revalidatePath(`/community/${pr.horse_id}`);
+    if (pr.group_id) revalidatePath("/community/groups");
+    if (pr.event_id) {
+        revalidatePath(`/community/events/${pr.event_id}`);
+        revalidatePath(`/shows/${pr.event_id}`);
+    }
     return { success: true };
 }
 
@@ -248,7 +293,32 @@ export async function togglePostLike(
     });
 
     if (error) return { success: false, error: error.message };
-    return { success: true, action: (data as { action: string })?.action };
+
+    const action = (data as { action: string })?.action;
+
+    // Notify post author on like (not unlike)
+    if (action === "liked") {
+        const userId = user.id;
+        after(async () => {
+            try {
+                const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
+                const { data: post } = await supabaseDeferred.from("posts").select("author_id").eq("id", postId).single();
+                if (post && (post as { author_id: string }).author_id !== userId) {
+                    const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
+                    const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+                    const { createNotification } = await import("@/app/actions/notifications");
+                    await createNotification({
+                        userId: (post as { author_id: string }).author_id,
+                        type: "like",
+                        actorId: userId,
+                        content: `@${alias} liked your post`,
+                    });
+                }
+            } catch { /* non-blocking */ }
+        });
+    }
+
+    return { success: true, action };
 }
 
 // ── Get posts for a context ──

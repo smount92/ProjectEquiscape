@@ -375,14 +375,31 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
             {showReplies && (
                 <div style={{ marginLeft: "var(--space-lg)", marginTop: "var(--space-sm)", borderLeft: "2px solid var(--color-border)", paddingLeft: "var(--space-md)" }}>
                     {replies.map(r => (
-                        <div key={r.id} style={{ marginBottom: "var(--space-sm)" }}>
-                            <Link href={`/profile/${encodeURIComponent(r.authorAlias)}`} style={{ fontWeight: 600, fontSize: "calc(0.8rem * var(--font-scale))" }}>
-                                @{r.authorAlias}
-                            </Link>
-                            <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.7rem * var(--font-scale))", marginLeft: "var(--space-xs)" }}>
-                                {timeAgo(r.createdAt)}
-                            </span>
-                            <div style={{ marginTop: 2 }}><RichText content={r.content} /></div>
+                        <div key={r.id} style={{ marginBottom: "var(--space-sm)", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div style={{ flex: 1 }}>
+                                <Link href={`/profile/${encodeURIComponent(r.authorAlias)}`} style={{ fontWeight: 600, fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                    @{r.authorAlias}
+                                </Link>
+                                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.7rem * var(--font-scale))", marginLeft: "var(--space-xs)" }}>
+                                    {timeAgo(r.createdAt)}
+                                </span>
+                                <div style={{ marginTop: 2 }}><RichText content={r.content} /></div>
+                            </div>
+                            {r.authorId === currentUserId && (
+                                <button
+                                    className="btn btn-ghost btn-sm"
+                                    style={{ fontSize: "0.7rem", padding: "2px 6px", flexShrink: 0 }}
+                                    onClick={() => {
+                                        if (!confirm("Delete this reply?")) return;
+                                        startTransition(async () => {
+                                            await deletePost(r.id);
+                                            setReplies(prev => prev.filter(reply => reply.id !== r.id));
+                                            router.refresh();
+                                        });
+                                    }}
+                                    disabled={isPending}
+                                >🗑️</button>
+                            )}
                         </div>
                     ))}
                     {/* Reply composer */}

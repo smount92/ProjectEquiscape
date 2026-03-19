@@ -46,6 +46,13 @@ export default async function DiscoverPage() {
         }
     }
 
+    // Batch-fetch which users the current user follows
+    const userIds = activeUsers.map(u => u.id).filter(id => id !== user.id);
+    const { data: followRows } = userIds.length > 0
+        ? await supabase.from("user_follows").select("following_id").eq("follower_id", user.id).in("following_id", userIds)
+        : { data: [] };
+    const followedIds = new Set((followRows ?? []).map((r: { following_id: string }) => r.following_id));
+
     return (
         <div className="page-container page-container-wide">
             {/* Hero */}
@@ -68,7 +75,7 @@ export default async function DiscoverPage() {
             </div>
 
             {/* Client-side searchable grid with tags */}
-            <DiscoverGrid users={activeUsers} currentUserId={user.id} />
+            <DiscoverGrid users={activeUsers} currentUserId={user.id} followedIds={Array.from(followedIds)} />
         </div>
     );
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import RatingBadge from "@/components/RatingBadge";
 import UserAvatar from "@/components/UserAvatar";
+import { toggleFollow } from "@/app/actions/follows";
 import styles from "../app/discover/discover.module.css";
 
 interface DiscoverUser {
@@ -21,6 +22,7 @@ interface DiscoverUser {
 interface DiscoverGridProps {
     users: DiscoverUser[];
     currentUserId: string;
+    followedIds: string[];
 }
 
 type TagKey = "all" | "art_studio" | "top_rated" | "new_members" | "big_stables";
@@ -42,9 +44,24 @@ const memberSince = (dateStr: string) =>
 // "New" = joined within the last 30 days
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-export default function DiscoverGrid({ users, currentUserId }: DiscoverGridProps) {
+export default function DiscoverGrid({ users, currentUserId, followedIds }: DiscoverGridProps) {
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTag, setActiveTag] = useState<TagKey>("all");
+    const [followSet, setFollowSet] = useState<Set<string>>(new Set(followedIds));
+
+    const handleFollow = useCallback(async (userId: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const wasFollowing = followSet.has(userId);
+        // Optimistic toggle
+        setFollowSet(prev => {
+            const next = new Set(prev);
+            if (wasFollowing) next.delete(userId);
+            else next.add(userId);
+            return next;
+        });
+        await toggleFollow(userId);
+    }, [followSet]);
 
     const filteredUsers = useMemo(() => {
         let result = users;
@@ -196,6 +213,15 @@ export default function DiscoverGrid({ users, currentUserId }: DiscoverGridProps
                                                 count={u.rating_count}
                                             />
                                         </div>
+                                    )}
+                                    {!isMe && (
+                                        <button
+                                            className={`btn btn-sm ${followSet.has(u.id) ? "btn-ghost follow-btn-following" : "btn-primary"}`}
+                                            onClick={(e) => handleFollow(u.id, e)}
+                                            style={{ marginTop: "var(--space-xs)", fontSize: "calc(0.75rem * var(--font-scale))", padding: "3px 10px" }}
+                                        >
+                                            {followSet.has(u.id) ? "✓ Following" : "+ Follow"}
+                                        </button>
                                     )}
                                 </div>
                             </Link>

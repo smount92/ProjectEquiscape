@@ -132,6 +132,9 @@ export default async function ReferencePage() {
                                     </span>
                                 )}
                             </a>
+                            <a href="/catalog/suggestions/new" className="btn btn-primary btn-small ref-sidebar-btn">
+                                📗 Suggest New Entry
+                            </a>
                             <a href="/catalog/changelog" className="btn btn-secondary btn-small ref-sidebar-btn">
                                 📋 View Changelog
                             </a>
