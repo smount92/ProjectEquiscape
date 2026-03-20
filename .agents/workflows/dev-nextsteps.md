@@ -110,7 +110,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🟡 Priority: Medium
 
-## Task M-1: globals.css Continued Extraction
+## ⏭️ Task M-1: globals.css Continued Extraction — DEFERRED (4,674 lines is manageable; will revisit during full app refresh)
 
 **Why:** `globals.css` is still ~11,000 lines. The V20 CSS module extraction was partial. More page-level and component-level styles should be extracted to CSS Modules.
 
@@ -152,13 +152,13 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🟢 Priority: Nice-to-Have
 
-## Task N-1: Landing Page Refresh
+## ⏭️ Task N-1: Landing Page Refresh — DEFERRED (will revisit during full app refresh)
 
 **Why:** The landing page (`src/app/page.tsx`) could benefit from updated imagery and a more compelling value proposition now that the platform has grown substantially.
 
 ---
 
-## Task N-2: Performance Audit
+## ✅ Task N-2: Performance Audit — DONE (lazy-loaded @react-pdf/renderer 1.5MB, clean bundle, no slow queries)
 
 **Why:** With 70 migrations and growing data, query performance on pages like `/dashboard` and `/feed` should be monitored.
 
@@ -169,7 +169,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task N-3: Accessibility Audit
+## ✅ Task N-3: Accessibility Audit — DONE (strong WCAG 2.1 AA coverage, 50+ aria-labels, 40+ aria-hidden, Simple Mode)
 
 **Why:** Color contrast, keyboard navigation, and screen reader support should be verified for WCAG 2.1 AA compliance.
 
