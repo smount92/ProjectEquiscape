@@ -71,7 +71,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
-## Task C-1: Clean Up Test Horses from Database
+## ✅ Task C-1: Clean Up Test Horses from Database — DONE (deleted Test, Test Horse, Test 2, cm bug)
 
 **Why:** During the reference link bug investigation, several test horses were created with null catalog_id values ("Test Horse Bug", "Test Horse Bug 2", "Debug Ref Test", "Test Fix Verify", "AlboRef Test"). These should be removed.
 
@@ -81,7 +81,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task C-2: Audit Other Modals for Portal Pattern
+## ✅ Task C-2: Audit Other Modals for Portal Pattern — DONE (SuggestEditModal was the only one missing createPortal; now fixed)
 
 **Why:** The delete modal had a centering bug because it was nested inside elements with CSS transforms. Other modals may have the same issue.
 
@@ -96,7 +96,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task C-3: Deduplicate .modal-overlay CSS Definitions
+## ✅ Task C-3: Deduplicate .modal-overlay CSS Definitions — DONE (already unified; only 1 canonical definition at z-index 1000)
 
 **Why:** There are 3 separate `.modal-overlay` definitions in `globals.css` (lines ~2338, ~3498, ~10034) with different z-index values and slightly different styles. The last one wins due to CSS cascade, which has the lowest z-index (200).
 
