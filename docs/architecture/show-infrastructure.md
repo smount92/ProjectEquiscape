@@ -893,20 +893,73 @@ New columns on `show_records`:
 - Red-tinted UI in override mode for visual distinction
 - Class filter dropdown grouped by division
 
+### Judge Notes Persistence
+
+Judge notes entered in the `ExpertJudgingPanel` are now persisted to `show_records.judge_notes`:
+
+- `ExpertJudgingPanel` includes `notes` in the save payload alongside `entryId` and `placing`
+- `saveExpertPlacings()` writes `judge_notes` when inserting new show records, and updates them on existing records
+- `overrideFinalPlacings()` passes `judge_notes` through on both insert and update paths
+- Notes are stored per show record, associated with the judge who placed the entry
+
+### Notification Deep-Links (Migration 096)
+
+All show-related notifications now deep-link to the relevant page:
+
+- Added `link_url` TEXT column to `notifications` table
+- `createNotification()` accepts optional `linkUrl` parameter
+- `NotificationList.tsx` uses `linkUrl` as primary link with smart type-based fallbacks:
+  1. `linkUrl` (explicit deep-link) → highest priority
+  2. `horseId` → horse passport
+  3. `conversationId` → inbox thread
+  4. Type-specific defaults (`show_result` → `/shows`, `follow` → actor profile)
+  5. Actor profile → last resort
+- Show result notifications link to `/shows/{showId}`
+- Judge assignment notifications link to `/shows/{eventId}`
+
+### Playwright E2E Tests
+
+16 end-to-end tests in `e2e/show-entry.spec.ts` covering:
+
+| Test | Validates |
+|------|-----------|
+| Shows listing loads | Hero section, heading, grid or empty state |
+| Show cards display badges | Status badge, title, footer on each card |
+| Click card → detail | Navigation to show detail page |
+| Detail hero/status/entries | Hero, stats section, breadcrumb |
+| Entry form with selector | `.show-entry-section`, `.form-select` or empty state |
+| Preview modal lifecycle | Horse select → Preview button → modal → close |
+| Closed show results | Results heading, podium cards with medals |
+| Podium links to passport | `/community/` href on horse name |
+| Entries grid | Entry cards with rank, name, owner |
+| Show history widget | Dashboard sidebar widget |
+| Expert judging panel | Judge/creator viewing panel on judging show |
+| Host override panel | Override panel on closed show for creator |
+| Mobile entry targets | 375×812 viewport, adequate touch target sizes |
+| Mobile scroll | No horizontal overflow on mobile |
+| Show record in passport | Timeline entry for show participation |
+| Auth redirect | Unauthenticated → /login |
+
+Tests gracefully skip when required data state isn't present (no open shows, no closed shows, etc.).
+
+Playwright config loads `.env.local` for test user credentials (`TEST_USER_A_EMAIL`/`TEST_USER_A_PASSWORD`).
+
 ---
 
 ## File Index
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| [shows.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/shows.ts) | ~950 | All show server actions (entries, votes, create, close, expert judging, override, history) |
-| [events.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/events.ts) | 851 | Event CRUD, judge management, comments |
+| [shows.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/shows.ts) | ~960 | All show server actions (entries, votes, create, close, expert judging, override, history) |
+| [events.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/events.ts) | 853 | Event CRUD, judge management, comments |
 | [competition.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/competition.ts) | 898 | Divisions, classes, NAN tracking, show strings |
+| [notifications.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/notifications.ts) | ~165 | Notification CRUD with linkUrl deep-link support |
 | [shows/page.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/app/shows/page.tsx) | 128 | Show list page with judge badges |
 | [shows/[id]/page.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/app/shows/%5Bid%5D/page.tsx) | ~500 | Show detail with all conditional panels |
-| [ExpertJudgingPanel.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ExpertJudgingPanel.tsx) | ~260 | Placing UI with judge notes + override mode |
+| [ExpertJudgingPanel.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ExpertJudgingPanel.tsx) | ~290 | Placing UI with judge notes + override mode |
 | [ShowEntryForm.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ShowEntryForm.tsx) | ~470 | Smart class browser + entry preview modal |
 | [ShowHistoryWidget.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ShowHistoryWidget.tsx) | ~120 | Dashboard ribbon summary widget |
+| [NotificationList.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/NotificationList.tsx) | ~155 | Notification list with deep-link routing |
 | [VoteButton.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/VoteButton.tsx) | 65 | Optimistic vote toggle |
 | [CloseShowButton.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/CloseShowButton.tsx) | 57 | Close show with confirm dialog |
 | [WithdrawButton.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/WithdrawButton.tsx) | 30 | Withdraw entry |
@@ -914,4 +967,7 @@ New columns on `show_records`:
 | [046_unified_competition_engine.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/046_unified_competition_engine.sql) | 334 | Schema, RPCs, data migration |
 | [094_judge_entry_update_policy.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/094_judge_entry_update_policy.sql) | 40 | Judge RLS fix |
 | [095_show_polish.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/095_show_polish.sql) | 129 | V34: Expert judging precedence fix + enriched show_records |
+| [096_notification_deep_links.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/096_notification_deep_links.sql) | 11 | Add link_url column to notifications |
 | [shows.test.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/__tests__/shows.test.ts) | ~200 | Vitest: entry validation, auth, overrides, history |
+| [show-entry.spec.ts](file:///c:/Project%20Equispace/model-horse-hub/e2e/show-entry.spec.ts) | ~460 | Playwright E2E: 16 show system tests |
+| [playwright.config.ts](file:///c:/Project%20Equispace/model-horse-hub/playwright.config.ts) | 36 | Playwright config with .env.local loading |

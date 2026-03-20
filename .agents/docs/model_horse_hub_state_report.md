@@ -187,6 +187,9 @@ All of the following have been implemented, committed, and tested:
 13. Security Hardening
 14. Mobile and Desktop Responsive Polish
 15. **V34 Show Polish Sprint** — Entry preview modal, smart class browser, results podium, personalized notifications, show history widget, expert judging precedence fix, cron auto-transition, host override placings, enriched show records, judge notes UI
+16. **Playwright E2E Test Suite** — 16 show system tests (listing, detail, entry form, podium, override panel, mobile viewport, auth guard), Playwright config with .env.local loading
+17. **Judge Notes Wiring** — Connected judge notes textarea to `show_records.judge_notes` (was collected in UI but never persisted)
+18. **Notification Deep-Links** — Added `link_url` column to notifications (migration 096); all notifications click through to the referenced item (show, feed, studio, profile) instead of falling back to the actor's profile
 
 ### What's Planned But Not Yet Built
 
