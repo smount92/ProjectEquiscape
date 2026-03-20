@@ -600,6 +600,7 @@ export async function addEventJudge(
                 type: "judge_assigned",
                 actorId: assignerId,
                 content: `@${alias} assigned you as an expert judge for "${showName}"`,
+                linkUrl: `/shows/${eventId}`,
             });
         } catch { /* non-blocking */ }
     });
@@ -687,6 +688,7 @@ export async function addEventComment(
                     type: "comment",
                     actorId: userId,
                     content: `@${alias} commented on your event "${(event as { name: string }).name}"`,
+                    linkUrl: `/shows/${eventId}`,
                 });
                 const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
                 await parseAndNotifyMentions(trimmedContent, userId, alias, `/community/events/${eventId}`);

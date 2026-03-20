@@ -538,6 +538,7 @@ export async function updateShowStatus(
                             type: "show_result",
                             actorId: entry.user_id,
                             content: `${medal} Congratulations! ${horseName} took ${entry.placing} in "${showName}"!`,
+                            linkUrl: `/shows/${closingShowId}`,
                         });
                     } else {
                         await createNotification({
@@ -545,6 +546,7 @@ export async function updateShowStatus(
                             type: "show_result",
                             actorId: entry.user_id,
                             content: `📸 Results are in for "${showName}"! Thanks for entering ${horseName}.`,
+                            linkUrl: `/shows/${closingShowId}`,
                         });
                     }
                 }

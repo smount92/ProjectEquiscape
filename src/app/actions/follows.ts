@@ -59,6 +59,7 @@ export async function toggleFollow(
             type: "follow",
             actorId: user.id,
             content: `@${alias} started following you`,
+            linkUrl: `/profile/${encodeURIComponent(alias)}`,
         });
         await createActivityEvent({
             actorId: user.id,

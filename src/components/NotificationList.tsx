@@ -15,6 +15,7 @@ interface NotifItem {
     actorAlias: string | null;
     horseId: string | null;
     conversationId: string | null;
+    linkUrl: string | null;
     isRead: boolean;
     createdAt: string;
 }
@@ -29,14 +30,25 @@ function getNotifIcon(type: string): string {
         case "feature": return "🌟";
         case "wishlist_match": return "❤️‍🔥";
         case "show_vote": return "📸";
+        case "show_result": return "🏆";
+        case "judge_assigned": return "🏅";
         case "achievement": return "🏆";
         default: return "🔔";
     }
 }
 
 function getNotifLink(n: NotifItem): string {
+    // 1. Explicit deep-link URL — highest priority
+    if (n.linkUrl) return n.linkUrl;
+    // 2. Horse-related → horse passport
     if (n.horseId) return `/community/${n.horseId}`;
+    // 3. Conversation → inbox thread
     if (n.conversationId) return `/inbox/${n.conversationId}`;
+    // 4. Follow → actor's profile (correct destination for follows)
+    if (n.type === "follow" && n.actorAlias) return `/profile/${encodeURIComponent(n.actorAlias)}`;
+    // 5. Show-related types → shows listing page as fallback
+    if (["show_result", "show_vote", "judge_assigned"].includes(n.type)) return "/shows";
+    // 6. Actor profile as last resort
     if (n.actorAlias) return `/profile/${encodeURIComponent(n.actorAlias)}`;
     return "/notifications";
 }

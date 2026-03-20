@@ -31,6 +31,7 @@ interface NotificationDisplay {
     actorAlias: string | null;
     horseId: string | null;
     conversationId: string | null;
+    linkUrl: string | null;
     isRead: boolean;
     createdAt: string;
 }
@@ -49,7 +50,7 @@ export async function getNotifications(
 
     const { data: rawNotifs } = await supabase
         .from("notifications")
-        .select("id, type, content, actor_id, horse_id, conversation_id, is_read, created_at, users!actor_id(alias_name)")
+        .select("id, type, content, actor_id, horse_id, conversation_id, link_url, is_read, created_at, users!actor_id(alias_name)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -61,6 +62,7 @@ export async function getNotifications(
         actor_id: string | null;
         horse_id: string | null;
         conversation_id: string | null;
+        link_url: string | null;
         is_read: boolean;
         created_at: string;
         users: { alias_name: string } | null;
@@ -75,6 +77,7 @@ export async function getNotifications(
         actorAlias: n.users?.alias_name || null,
         horseId: n.horse_id,
         conversationId: n.conversation_id,
+        linkUrl: n.link_url,
         isRead: n.is_read,
         createdAt: n.created_at,
     }));
@@ -142,6 +145,8 @@ export async function createNotification(data: {
     content: string;
     horseId?: string;
     conversationId?: string;
+    /** Deep-link URL for this notification (e.g. /shows/uuid). Falls back to horse/conversation/actor profile. */
+    linkUrl?: string;
 }): Promise<void> {
     try {
         // Don't notify yourself
@@ -156,6 +161,7 @@ export async function createNotification(data: {
             content: data.content,
             horse_id: data.horseId || null,
             conversation_id: data.conversationId || null,
+            link_url: data.linkUrl || null,
         });
     } catch {
         // Fire-and-forget — never fail the parent action

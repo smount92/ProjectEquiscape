@@ -110,6 +110,7 @@ export async function createPost(data: {
                         type: "comment",
                         actorId: userId,
                         content: `@${alias} commented on your event "${(event as { name: string }).name}"`,
+                        linkUrl: `/shows/${eventId}`,
                     });
                 }
             }
@@ -123,6 +124,7 @@ export async function createPost(data: {
                         type: "comment",
                         actorId: userId,
                         content: `@${alias} commented on your studio "${(studio as { studio_name: string }).studio_name}"`,
+                        linkUrl: `/studio`,
                     });
                 }
             }
@@ -180,6 +182,7 @@ export async function replyToPost(
                     type: "reply",
                     actorId: userId,
                     content: `@${alias} replied to your post`,
+                    linkUrl: `/feed`,
                 });
             }
 
@@ -312,6 +315,7 @@ export async function togglePostLike(
                         type: "like",
                         actorId: userId,
                         content: `@${alias} liked your post`,
+                        linkUrl: `/feed`,
                     });
                 }
             } catch { /* non-blocking */ }
