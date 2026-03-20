@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import MessageSellerButton from "@/components/MessageSellerButton";
-import styles from "./MatchmakerMatches.module.css";
+
 
 interface MarketplaceMatch {
     id: string;
@@ -55,28 +55,29 @@ export default function MatchmakerMatches({
             {expanded && (
                 <div className="matchmaker-results animate-fade-in-up">
                     {matches.map((match) => (
-                        <div key={match.id} className={styles.card}>
-                            <div className={styles.thumb}>
+                        <div key={match.id} className="flex gap-sm p-sm bg-surface-glass border border-border rounded-md transition-all duration-200 hover:border-[rgba(251,146,60,0.4)] hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]">
+                            <div className="w-[52px] h-[52px] rounded-sm overflow-hidden shrink-0 bg-black/[0.03]">
                                 {match.thumbnailUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
                                         src={match.thumbnailUrl}
                                         alt={match.custom_name}
                                         loading="lazy"
+                                        className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className={styles.placeholder}>🐴</div>
+                                    <div className="w-full h-full flex items-center justify-center text-2xl opacity-40">🐴</div>
                                 )}
                             </div>
-                            <div className={styles.info}>
+                            <div className="flex-1 min-w-0">
                                 <Link
                                     href={`/community/${match.id}`}
-                                    className={styles.name}
+                                    className="font-semibold text-sm text-accent-primary no-underline block hover:underline"
                                 >
                                     {match.custom_name}
                                 </Link>
-                                <div className={styles.meta}>
-                                    <span className={match.trade_status === "For Sale" ? styles.statusSale : styles.statusOffers}>
+                                <div className="flex items-center gap-sm mt-[2px]">
+                                    <span className={`text-xs font-bold py-[2px] px-2 rounded-full ${match.trade_status === "For Sale" ? "bg-[rgba(34,197,94,0.15)] text-[#22c55e]" : "bg-[rgba(59,130,246,0.15)] text-[#3b82f6]"}`}>
                                         {match.trade_status === "For Sale" ? "💲" : "🤝"}{" "}
                                         {match.listing_price
                                             ? `$${match.listing_price.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
@@ -84,13 +85,13 @@ export default function MatchmakerMatches({
                                     </span>
                                     <Link
                                         href={`/profile/${encodeURIComponent(match.ownerAlias)}`}
-                                        className={styles.seller}
+                                        className="text-xs text-text-muted no-underline hover:text-accent-primary hover:underline"
                                     >
                                         @{match.ownerAlias}
                                     </Link>
                                 </div>
                                 {match.marketplace_notes && (
-                                    <div className={styles.notes}>
+                                    <div className="text-xs text-text-muted mt-1 italic leading-snug">
                                         {match.marketplace_notes}
                                     </div>
                                 )}

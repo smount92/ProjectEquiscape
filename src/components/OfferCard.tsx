@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { respondToOffer, markPaymentSent, verifyFundsAndRelease, cancelTransaction, retractOffer } from "@/app/actions/transactions";
-import styles from "./OfferCard.module.css";
+
 
 interface OfferCardProps {
     transaction: {
@@ -92,10 +92,10 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
     // ── Cancelled / Completed ──
     if (status === "cancelled") {
         return (
-            <div className={`${styles.card} ${styles.cardCancelled}`} id="offer-card">
-                <div className={styles.header}>
-                    <span className={`${styles.badge} ${styles.badgeCancelled}`}>❌ Offer Declined</span>
-                    {amount && <span className={styles.amount}>${amount.toFixed(2)}</span>}
+            <div className="bg-[rgba(239,68,68,0.06)] border border-[rgba(239,68,68,0.2)] rounded-lg p-lg mb-md animate-[fadeInUp_0.3s_ease] opacity-70" id="offer-card">
+                <div className="flex items-center justify-between gap-md max-sm:flex-col max-sm:items-start max-sm:gap-xs">
+                    <span className="font-semibold text-sm text-[#ef4444]">❌ Offer Declined</span>
+                    {amount && <span className="text-xl font-bold text-accent-secondary">${amount.toFixed(2)}</span>}
                 </div>
             </div>
         );
@@ -103,10 +103,10 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
 
     if (status === "completed") {
         return (
-            <div className={`${styles.card} ${styles.cardCompleted}`} id="offer-card">
-                <div className={styles.header}>
-                    <span className={`${styles.badge} ${styles.badgeCompleted}`}>✅ Transaction Complete</span>
-                    {amount && <span className={styles.amount}>${amount.toFixed(2)}</span>}
+            <div className="bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.2)] rounded-lg p-lg mb-md animate-[fadeInUp_0.3s_ease]" id="offer-card">
+                <div className="flex items-center justify-between gap-md max-sm:flex-col max-sm:items-start max-sm:gap-xs">
+                    <span className="font-semibold text-sm text-[#22c55e]">✅ Transaction Complete</span>
+                    {amount && <span className="text-xl font-bold text-accent-secondary">${amount.toFixed(2)}</span>}
                 </div>
             </div>
         );
@@ -114,21 +114,21 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
 
     // ── Active states ──
     return (
-        <div className={styles.card} id="offer-card">
-            <div className={styles.header}>
-                <span className={styles.badge}>💰 Offer</span>
-                {amount && <span className={styles.amount}>${amount.toFixed(2)}</span>}
+        <div className="bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] rounded-lg p-lg mb-md animate-[fadeInUp_0.3s_ease]" id="offer-card">
+            <div className="flex items-center justify-between gap-md max-sm:flex-col max-sm:items-start max-sm:gap-xs">
+                <span className="font-semibold text-sm text-accent-secondary">💰 Offer</span>
+                {amount && <span className="text-xl font-bold text-accent-secondary">${amount.toFixed(2)}</span>}
             </div>
 
             {transaction.offerMessage && (
-                <p className={styles.message}>&ldquo;{transaction.offerMessage}&rdquo;</p>
+                <p className="mt-sm text-sm text-text-muted italic leading-relaxed">&ldquo;{transaction.offerMessage}&rdquo;</p>
             )}
 
             {/* offer_made */}
             {status === "offer_made" && (
-                <div className={styles.state}>
+                <div className="mt-md">
                     {isSeller ? (
-                        <div className={styles.actions}>
+                        <div className="flex gap-sm mt-sm flex-wrap items-center">
                             <button
                                 className="btn btn-primary btn-sm"
                                 onClick={() => handleRespond("accept")}
@@ -146,7 +146,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         </div>
                     ) : (
                         <div>
-                            <p className={styles.statusText}>⏳ Waiting for seller response…</p>
+                            <p className="text-sm text-text-muted">⏳ Waiting for seller response…</p>
                             <button
                                 className="btn btn-ghost btn-sm"
                                 onClick={async () => {
@@ -172,12 +172,12 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
 
             {/* pending_payment */}
             {status === "pending_payment" && (
-                <div className={styles.state}>
-                    <p className={`${styles.statusText} ${styles.statusAccepted}`}>
+                <div className="mt-md">
+                    <p className="text-sm text-[#22c55e] font-medium">
                         ✅ Offer accepted! {isBuyer ? "Please send payment to the seller." : "Waiting for buyer to send payment."}
                     </p>
                     {isBuyer && !hasPaid && (
-                        <div className={styles.actions}>
+                        <div className="flex gap-sm mt-sm flex-wrap items-center">
                             <button
                                 className="btn btn-primary btn-sm"
                                 onClick={handleMarkPaid}
@@ -188,11 +188,11 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         </div>
                     )}
                     {isBuyer && hasPaid && (
-                        <p className={styles.statusText}>💳 Payment marked as sent. Waiting for seller to verify…</p>
+                        <p className="text-sm text-text-muted">💳 Payment marked as sent. Waiting for seller to verify…</p>
                     )}
                     {isSeller && hasPaid && (
-                        <div className={styles.actions}>
-                            <p className={styles.statusText}>💳 Buyer says they&apos;ve paid.</p>
+                        <div className="flex gap-sm mt-sm flex-wrap items-center">
+                            <p className="text-sm text-text-muted">💳 Buyer says they&apos;ve paid.</p>
                             <button
                                 className="btn btn-primary btn-sm"
                                 onClick={handleVerify}
@@ -211,8 +211,8 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         </div>
                     )}
                     {isSeller && !hasPaid && (
-                        <div className={styles.actions}>
-                            <p className={styles.statusText}>⏳ Waiting for buyer to send payment…</p>
+                        <div className="flex gap-sm mt-sm flex-wrap items-center">
+                            <p className="text-sm text-text-muted">⏳ Waiting for buyer to send payment…</p>
                             <button
                                 className="btn btn-ghost btn-sm"
                                 onClick={handleCancel}
@@ -228,19 +228,19 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
 
             {/* funds_verified */}
             {status === "funds_verified" && (
-                <div className={styles.state}>
+                <div className="mt-md">
                     {isBuyer && pin ? (
-                        <div className={styles.pinReveal}>
-                            <span className={styles.pinLabel}>🔑 Your Claim PIN</span>
-                            <strong className={styles.pinCode}>{pin}</strong>
+                        <div className="bg-[rgba(92,224,160,0.1)] border-2 border-accent-success rounded-lg p-lg text-center mt-sm">
+                            <span className="block text-xs text-text-muted mb-xs">🔑 Your Claim PIN</span>
+                            <strong className="block text-2xl font-extrabold tracking-[0.15em] text-[#22c55e] font-mono">{pin}</strong>
                             <Link href="/claim" className="btn btn-primary btn-sm" style={{ marginTop: "var(--space-sm)" }}>
                                 Go to Claim Page →
                             </Link>
                         </div>
                     ) : isBuyer ? (
-                        <p className={styles.statusText}>✅ Funds verified. Check notifications for your claim PIN.</p>
+                        <p className="text-sm text-text-muted">✅ Funds verified. Check notifications for your claim PIN.</p>
                     ) : (
-                        <p className={styles.statusText}>✅ PIN released to buyer. Transfer in progress…</p>
+                        <p className="text-sm text-text-muted">✅ PIN released to buyer. Transfer in progress…</p>
                     )}
                 </div>
             )}
