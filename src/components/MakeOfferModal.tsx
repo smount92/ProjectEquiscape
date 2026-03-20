@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { makeOffer } from "@/app/actions/transactions";
 import { RISKY_PAYMENT_REGEX, RISKY_PAYMENT_WARNING } from "@/lib/safety";
-import styles from "./MakeOfferModal.module.css";
+
 
 interface MakeOfferModalProps {
     horseId: string;
@@ -60,21 +60,21 @@ export default function MakeOfferModal({
 
     return createPortal(
         <div className="modal-overlay" onClick={onClose}>
-            <div className={`modal-content ${styles.modal}`} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-content max-w-[420px]" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3>💰 Make an Offer</h3>
                     <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
                 </div>
 
-                <p className={styles.horse}>
+                <p className="text-sm text-text-muted mb-md">
                     🐴 <strong>{horseName}</strong>
                 </p>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="form-label">Your Offer</label>
-                        <div className={styles.amountInput}>
-                            <span className={styles.currency}>$</span>
+                        <div className="flex items-center gap-xs">
+                            <span className="text-lg font-bold text-text-muted">$</span>
                             <input
                                 type="number"
                                 step="0.01"
@@ -118,7 +118,7 @@ export default function MakeOfferModal({
 
                     {error && <div className="comment-error">{error}</div>}
 
-                    <div className={styles.actions}>
+                    <div className="flex gap-sm justify-end mt-lg max-sm:flex-col max-sm:[&_.btn]:w-full">
                         <button
                             type="button"
                             className="btn btn-ghost"

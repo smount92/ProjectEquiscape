@@ -5,7 +5,7 @@ import {
     getGroupMembers, updateMemberRole, removeMember, togglePinPost,
     type GroupMember
 } from "@/app/actions/groups";
-import styles from "./GroupAdminPanel.module.css";
+
 
 interface Props {
     groupId: string;
@@ -89,15 +89,15 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
                             <div style={{ marginBottom: "var(--space-sm)", color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>
                                 👥 {members.length} member{members.length !== 1 ? "s" : ""}
                             </div>
-                            <div className={styles.memberList}>
+                            <div className="flex flex-col gap-[2px]">
                                 {members.map(m => (
-                                    <div key={m.userId} className={styles.memberRow}>
-                                        <div className={styles.memberInfo}>
-                                            <span className={styles.memberAlias}>@{m.alias}</span>
-                                            <span className={styles.memberRoleBadge}>{roleBadge(m.role)}</span>
+                                    <div key={m.userId} className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <div className="flex items-center gap-sm">
+                                            <span className="text-sm font-semibold text-text-primary">@{m.alias}</span>
+                                            <span className="text-xs text-text-muted">{roleBadge(m.role)}</span>
                                         </div>
                                         {m.userId !== currentUserId && m.role !== "owner" && (
-                                            <div className={styles.memberActions}>
+                                            <div className="flex items-center gap-xs">
                                                 {isOwner && (
                                                     <select
                                                         className="form-select"
