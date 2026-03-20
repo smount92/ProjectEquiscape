@@ -15,7 +15,7 @@ import TransferHistorySection from "@/components/TransferHistorySection";
 import NanDashboardWidget from "@/components/NanDashboardWidget";
 import ShowHistoryWidget from "@/components/ShowHistoryWidget";
 import { getShowHistory } from "@/app/actions/shows";
-import styles from "./dashboard.module.css";
+
 
 export const dynamic = "force-dynamic";
 
@@ -189,7 +189,7 @@ export default async function DashboardPage({
     });
 
     return (
-        <div className={styles.layout}>
+        <div className="max-w-[1600px] mx-auto px-lg max-lg:px-md">
             <div className="animate-fade-in-up">
                 {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
@@ -217,7 +217,7 @@ export default async function DashboardPage({
                 )}
 
                 {/* Shelf Header — FULL WIDTH */}
-                <div className={`shelf-header ${styles.headerFull}`}>
+                <div className="shelf-header flex-wrap">
                     <div>
                         <h1>
                             <span className="text-gradient">Digital Stable</span>
@@ -263,9 +263,9 @@ export default async function DashboardPage({
                 {/* ══════════════════════════════════════════════════════════════
                     TWO-COLUMN GRID: Main (horses) + Sidebar (widgets)
                    ══════════════════════════════════════════════════════════════ */}
-                <div className={styles.grid}>
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_360px] gap-xl">
                     {/* ── MAIN COLUMN: Horse Grid ── */}
-                    <main className={styles.main}>
+                    <main className="min-w-0">
                         <DashboardShell
                             horseCards={horseCards}
                             collections={collections.map(c => ({ id: c.id, name: c.name }))}
@@ -292,36 +292,37 @@ export default async function DashboardPage({
                     </main>
 
                     {/* ── SIDEBAR: Widgets ── */}
-                    <aside className={styles.sidebar}>
+                    <aside className="flex flex-col gap-lg max-lg:mt-lg lg:sticky lg:top-[calc(var(--header-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
                             <div className="sidebar-section">
                                 <h3 className="sidebar-section-title"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
-                                <div className={styles.stats}>
-                                    <div className={styles.statRow}>
-                                        <span className={styles.statLabel}><Plus size={14} strokeWidth={1.5} /> Total Models</span>
-                                        <span className={styles.statValue}>{totalHorseCount}</span>
+                                <div className="flex flex-col gap-[2px]">
+                                    <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-sm text-text-secondary"><Plus size={14} strokeWidth={1.5} /> Total Models</span>
+                                        <span className="text-sm font-bold text-text-primary">{totalHorseCount}</span>
                                     </div>
-                                    <div className={styles.statRow}>
-                                        <span className={styles.statLabel}><FolderOpen size={14} strokeWidth={1.5} /> Collections</span>
-                                        <span className={styles.statValue}>{collections.length}</span>
+                                    <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-sm text-text-secondary"><FolderOpen size={14} strokeWidth={1.5} /> Collections</span>
+                                        <span className="text-sm font-bold text-text-primary">{collections.length}</span>
                                     </div>
-                                    <div className={styles.statRow}>
-                                        <span className={styles.statLabel}><DollarSign size={14} strokeWidth={1.5} /> Vault Value</span>
-                                        <span className={styles.statValue}>
+                                    <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-sm text-text-secondary"><DollarSign size={14} strokeWidth={1.5} /> Vault Value</span>
+                                        <span className="text-sm font-bold text-text-primary">
                                             {totalVaultValue > 0
                                                 ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
                                                 : "—"}
                                         </span>
                                     </div>
-                                    <div className={styles.statRow}>
-                                        <span className={styles.statLabel}><Award size={14} strokeWidth={1.5} /> Show Placings</span>
-                                        <span className={styles.statValue}>{totalShowRecords ?? 0}</span>
+                                    <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-sm text-text-secondary"><Award size={14} strokeWidth={1.5} /> Show Placings</span>
+                                        <span className="text-sm font-bold text-text-primary">{totalShowRecords ?? 0}</span>
                                     </div>
+
                                     {unreadMsgCount > 0 && (
-                                        <Link href="/inbox" className={styles.statRow} style={{ textDecoration: "none" }}>
-                                            <span className={styles.statLabel}><Mail size={14} strokeWidth={1.5} /> Unread Messages</span>
-                                            <span className={styles.statValue} style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
+                                        <Link href="/inbox" className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03] no-underline" style={{ textDecoration: "none" }}>
+                                            <span className="text-sm text-text-secondary"><Mail size={14} strokeWidth={1.5} /> Unread Messages</span>
+                                            <span className="text-sm font-bold text-text-primary" style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
                                         </Link>
                                     )}
                                 </div>
@@ -332,16 +333,16 @@ export default async function DashboardPage({
                         {collections.length > 0 && (
                             <div className="sidebar-section">
                                 <h3 className="sidebar-section-title"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
-                                <div className={styles.collections}>
+                                <div className="flex flex-col gap-xs">
                                     {collections.map((col) => (
                                         <Link
                                             key={col.id}
                                             href={`/stable/collection/${col.id}`}
-                                            className={styles.collectionLink}
+                                            className="flex justify-between items-center py-sm px-md rounded-md bg-black/[0.02] border border-transparent text-text-primary text-sm no-underline transition-all hover:bg-black/[0.06] hover:border-border hover:no-underline"
                                             id={`collection-${col.id}`}
                                         >
                                             <span>{col.name}</span>
-                                            <span className={styles.collectionCount}>
+                                            <span className="text-xs text-text-muted whitespace-nowrap">
                                                 {collectionCounts.get(col.id) || 0}
                                                 {(collectionValues.get(col.id) || 0) > 0 && (
                                                     <> · ${(collectionValues.get(col.id) || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>

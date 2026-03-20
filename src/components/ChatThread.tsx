@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { sendMessage } from "@/app/actions/messaging";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import styles from "./ChatThread.module.css";
+
 
 interface ChatMessage {
     id: string;
@@ -150,10 +150,10 @@ export default function ChatThread({
     return (
         <>
             {/* Message area */}
-            <div className={styles.messages}>
+            <div className="flex-1 overflow-y-auto p-md flex flex-col gap-sm bg-surface-glass border border-border rounded-lg mb-md">
                 {messages.length === 0 ? (
-                    <div className={styles.empty}>
-                        <div className={styles.emptyIcon}>💬</div>
+                    <div className="flex-1 flex flex-col items-center justify-center gap-sm text-center text-text-muted">
+                        <div className="text-5xl opacity-50">💬</div>
                         <p>
                             Start the conversation! Say hello to <strong>@{otherAlias}</strong>.
                         </p>
@@ -169,7 +169,7 @@ export default function ChatThread({
                         return (
                             <div key={msg.id}>
                                 {showDate && (
-                                    <div className={styles.dateSeparator}>
+                                    <div className="text-center py-sm text-xs text-text-muted font-medium">
                                         {new Date(msg.createdAt).toLocaleDateString("en-US", {
                                             weekday: "short",
                                             month: "short",
@@ -178,11 +178,11 @@ export default function ChatThread({
                                     </div>
                                 )}
                                 <div
-                                    className={`${styles.bubbleRow} ${msg.isMe ? styles.bubbleMe : styles.bubbleThem}`}
+                                    className={`flex ${msg.isMe ? "justify-end" : "justify-start"}`}
                                 >
-                                    <div className={styles.bubble}>
-                                        <div className={styles.bubbleContent}>{msg.content}</div>
-                                        <div className={styles.bubbleTime}>{formatTime(msg.createdAt)}</div>
+                                    <div className={`max-w-[75%] max-md:max-w-[85%] py-2.5 px-3.5 rounded-2xl leading-relaxed text-sm animate-[bubbleIn_0.2s_ease] text-text-primary ${msg.isMe ? "bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))] border border-[rgba(44,85,69,0.3)] rounded-br-[4px]" : "bg-black/[0.05] border border-border rounded-bl-[4px]"}`}>
+                                        <div className="break-words whitespace-pre-wrap">{msg.content}</div>
+                                        <div className={`text-[0.6rem] text-text-muted mt-1 opacity-70 ${msg.isMe ? "text-right" : ""}`}>{formatTime(msg.createdAt)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -205,11 +205,11 @@ export default function ChatThread({
             )}
 
             {/* Input area */}
-            <div className={styles.inputArea}>
-                <div className={styles.inputContainer}>
+            <div className="shrink-0 p-md bg-surface-glass border border-border rounded-lg">
+                <div className="flex gap-sm items-end">
                     <textarea
                         ref={inputRef}
-                        className={styles.input}
+                        className="flex-1 py-2.5 px-3.5 bg-black/[0.05] border border-border rounded-lg text-text-primary text-sm font-inherit resize-none min-h-[42px] max-h-[120px] transition-colors focus:outline-none focus:border-[rgba(44,85,69,0.5)] focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] placeholder:text-text-muted"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -220,7 +220,7 @@ export default function ChatThread({
                         id="chat-message-input"
                     />
                     <button
-                        className={styles.sendBtn}
+                        className="flex items-center justify-center w-[42px] h-[42px] rounded-full bg-accent-primary text-white border-none cursor-pointer transition-all shrink-0 hover:enabled:scale-105 hover:enabled:shadow-[0_4px_16px_rgba(44,85,69,0.4)] disabled:opacity-40 disabled:cursor-not-allowed"
                         onClick={handleSend}
                         disabled={!newMessage.trim() || sending}
                         aria-label="Send message"
@@ -246,7 +246,7 @@ export default function ChatThread({
                         )}
                     </button>
                 </div>
-                <div className={styles.inputHint}>
+                <div className="text-[0.6rem] text-text-muted opacity-50 mt-1.5 text-center">
                     Press Enter to send · Shift+Enter for new line
                 </div>
             </div>
