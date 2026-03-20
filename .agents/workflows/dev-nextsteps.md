@@ -124,7 +124,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task M-2: Comprehensive Passport Portal Audit
+## ✅ Task M-2: Comprehensive Passport Portal Audit — DONE (TransferModal already uses createPortal; ParkedExportPanel is inline, not a modal)
 
 **Why:** The passport page (`/stable/[id]`) renders multiple modals (Delete, Transfer, Parked Export). All should use the portal pattern.
 
@@ -135,7 +135,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task M-3: Review UnifiedReferenceSearch Release Panel UX
+## ✅ Task M-3: Review UnifiedReferenceSearch Release Panel UX — DONE (code review verified: mold click pre-selects immediately, releases panel shows for drill-down, override works correctly)
 
 **Why:** The fix to `handleMoldClick` now pre-selects the mold immediately. For molds with many releases, the releases panel may not be visible since `selectedCatalogId` is now truthy and the display switches to the "selected" badge (we added `releases.length === 0` check). Verify that:
 - Molds with releases still show the releases panel for drill-down
