@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import styles from "./DashboardToast.module.css";
+
 
 const TOAST_MESSAGES: Record<string, { icon: string; message: (name?: string, photos?: string) => string }> = {
   deleted: {
@@ -76,11 +76,11 @@ export default function DashboardToast() {
   const { icon, message } = TOAST_MESSAGES[toastType];
 
   return (
-    <div className={styles.success} role="status" aria-live="polite">
-      <span className={styles.icon}>{icon}</span>
-      <span className={styles.msg}>{message(toastName ?? undefined, toastPhotos ?? undefined)}</span>
+    <div className="py-md px-xl rounded-md mb-xl flex items-center gap-md animate-[fadeInUp_0.4s_ease_forwards] text-sm font-medium bg-[rgba(92,224,160,0.1)] border border-[rgba(92,224,160,0.3)] text-accent-success" role="status" aria-live="polite">
+      <span className="text-[1.3em] shrink-0">{icon}</span>
+      <span className="flex-1">{message(toastName ?? undefined, toastPhotos ?? undefined)}</span>
       <button
-        className={styles.close}
+        className="bg-transparent border-none text-inherit cursor-pointer text-[1.1em] opacity-60 transition-opacity hover:opacity-100 p-1"
         onClick={() => setVisible(false)}
         aria-label="Dismiss notification"
       >

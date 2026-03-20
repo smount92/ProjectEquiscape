@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { leaveReview, deleteReview } from "@/app/actions/transactions";
 import RatingStars from "@/components/RatingStars";
-import styles from "./RatingForm.module.css";
+
 
 interface ExistingRating {
     id: string;
@@ -82,17 +82,17 @@ export default function RatingForm({
     // Already rated — show the existing rating
     if (rating) {
         return (
-            <div className={styles.card} id="rating-section">
-                <div className={styles.header}>
+            <div className="bg-[rgba(0,0,0,0.05)] border border-border rounded-lg p-lg mt-lg" id="rating-section">
+                <div className="text-base font-semibold mb-md flex items-center gap-sm">
                     <span>⭐ Your Rating for @{targetAlias}</span>
                 </div>
-                <div className={styles.existing}>
+                <div className="text-center py-md">
                     <RatingStars rating={rating.stars} size="md" />
                     {rating.reviewText && (
-                        <p className={styles.existingText}>&ldquo;{rating.reviewText}&rdquo;</p>
+                        <p className="mt-md italic text-text-muted text-sm">&ldquo;{rating.reviewText}&rdquo;</p>
                     )}
                     <button
-                        className={`btn btn-ghost ${styles.retractBtn}`}
+                        className="btn btn-ghost mt-md text-xs text-text-muted hover:text-[#e74c6f]"
                         onClick={handleRetract}
                         disabled={status === "retracting"}
                     >
@@ -108,8 +108,8 @@ export default function RatingForm({
 
     // Rating form
     return (
-        <div className={styles.card} id="rating-section">
-            <div className={styles.header}>
+        <div className="bg-[rgba(0,0,0,0.05)] border border-border rounded-lg p-lg mt-lg" id="rating-section">
+            <div className="text-base font-semibold mb-md flex items-center gap-sm">
                 <span>⭐ Rate your experience with @{targetAlias}</span>
             </div>
 
@@ -131,7 +131,7 @@ export default function RatingForm({
                 )
             }
             <form onSubmit={handleSubmit}>
-                <div className={styles.stars}>
+                <div className="flex justify-center py-md">
                     <RatingStars
                         rating={stars}
                         size="lg"
@@ -153,7 +153,7 @@ export default function RatingForm({
                         rows={2}
                         id="rating-review-text"
                     />
-                    <div className={styles.charCounter}>
+                    <div className="text-right text-xs text-text-muted mt-xs">
                         {reviewText.length}/300
                     </div>
                 </div>

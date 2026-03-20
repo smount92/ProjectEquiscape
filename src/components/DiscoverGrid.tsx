@@ -5,7 +5,7 @@ import Link from "next/link";
 import RatingBadge from "@/components/RatingBadge";
 import UserAvatar from "@/components/UserAvatar";
 import { toggleFollow } from "@/app/actions/follows";
-import styles from "../app/discover/discover.module.css";
+
 
 interface DiscoverUser {
     id: string;
@@ -163,7 +163,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                     <p>Try a different search or filter.</p>
                 </div>
             ) : (
-                <div className={`${styles.grid} animate-fade-in-up`}>
+                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-lg animate-fade-in-up">
                     {filteredUsers.map((u) => {
                         const publicCount = u.public_horse_count;
                         const isMe = u.id === currentUserId;
@@ -172,14 +172,14 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                             <Link
                                 key={u.id}
                                 href={`/profile/${encodeURIComponent(u.alias_name)}`}
-                                className={styles.card}
+                                className="flex items-start gap-md p-lg bg-bg-card border border-border rounded-lg no-underline text-inherit transition-all duration-base hover:border-accent-primary hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)] hover:-translate-y-0.5"
                                 id={`discover-${u.id}`}
                             >
-                                <div className={styles.avatar}>
+                                <div className="w-[52px] h-[52px] rounded-full bg-[linear-gradient(135deg,rgba(129,140,248,0.2),rgba(167,139,250,0.1))] flex items-center justify-center shrink-0 text-accent-primary">
                                     <UserAvatar avatarUrl={u.avatar_url} aliasName={u.alias_name} size={40} />
                                 </div>
-                                <div className={styles.info}>
-                                    <div className={styles.alias}>
+                                <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-base mb-xs">
                                         @{u.alias_name}
                                         {isMe && (
                                             <span
@@ -196,11 +196,11 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                                         )}
                                     </div>
                                     {u.bio && (
-                                        <div className={styles.stats} style={{ color: "var(--color-text-muted)", fontStyle: "italic" }}>
+                                        <div className="flex gap-md text-xs text-text-muted italic">
                                             {u.bio.length > 80 ? `${u.bio.slice(0, 80)}…` : u.bio}
                                         </div>
                                     )}
-                                    <div className={styles.stats}>
+                                    <div className="flex gap-md text-xs text-text-muted">
                                         <span>
                                             🐴 {publicCount} model{publicCount !== 1 ? "s" : ""}
                                         </span>
