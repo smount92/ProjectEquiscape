@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import { useToast } from "@/lib/context/ToastContext";
 
@@ -133,7 +134,7 @@ export default function SuggestEditModal({
                 ✏️ Suggest Edit
             </button>
 
-            {isOpen && (
+            {isOpen && createPortal(
                 <div
                     className="modal-overlay"
                     onClick={() => setIsOpen(false)}
@@ -274,7 +275,8 @@ export default function SuggestEditModal({
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );
