@@ -86,7 +86,11 @@ export default function ExpertJudgingPanel({
 
         const toSave = Object.entries(placings)
             .filter(([, v]) => v !== "")
-            .map(([entryId, placing]) => ({ entryId, placing }));
+            .map(([entryId, placing]) => ({
+                entryId,
+                placing,
+                notes: notes[entryId]?.trim() || undefined,
+            }));
 
         if (toSave.length === 0) {
             setError("Please assign at least one placing.");

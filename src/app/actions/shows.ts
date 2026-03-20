@@ -657,7 +657,7 @@ export async function batchRecordResults(records: {
  */
 export async function saveExpertPlacings(
     eventId: string,
-    placings: { entryId: string; placing: string }[]
+    placings: { entryId: string; placing: string; notes?: string }[]
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -749,6 +749,7 @@ export async function saveExpertPlacings(
                     .maybeSingle();
 
                 if (!existing) {
+                    const judgeNote = placings.find(p => p.entryId === entry.id)?.notes || undefined;
                     await admin.from("show_records").insert({
                         horse_id: entry.horse_id,
                         user_id: entry.user_id,
@@ -759,7 +760,16 @@ export async function saveExpertPlacings(
                         is_nan: false,
                         notes: "Auto-generated from expert judging",
                         judge_user_id: user.id,
+                        judge_notes: judgeNote || null,
                     });
+                } else {
+                    // Update judge_notes if provided
+                    const judgeNote = placings.find(p => p.entryId === entry.id)?.notes;
+                    if (judgeNote) {
+                        await admin.from("show_records").update({
+                            judge_notes: judgeNote,
+                        }).eq("id", (existing as { id: string }).id);
+                    }
                 }
             }
         }
@@ -778,7 +788,7 @@ export async function saveExpertPlacings(
 /** Override final placings for a closed or judging show (host only). */
 export async function overrideFinalPlacings(
     eventId: string,
-    placings: { entryId: string; placing: string }[]
+    placings: { entryId: string; placing: string; notes?: string }[]
 ): Promise<{ success: boolean; error?: string }> {
     const { user } = await requireAuth();
     const supabase = await createClient();
@@ -848,13 +858,16 @@ export async function overrideFinalPlacings(
             if (existing) {
                 const existingNotes = (existing as { notes: string | null }).notes || "";
                 const auditNote = `${existingNotes}\n[Override by host on ${today}]`.trim();
+                const judgeNote = placings.find(p => p.entryId === entryId)?.notes;
                 await admin.from("show_records").update({
                     placing,
                     ribbon_color: PLACING_TO_RIBBON[placing] || null,
                     notes: auditNote,
+                    ...(judgeNote ? { judge_notes: judgeNote } : {}),
                 }).eq("id", (existing as { id: string }).id);
             } else {
                 const showDate = (ev as { starts_at: string }).starts_at?.split("T")[0];
+                const judgeNote = placings.find(p => p.entryId === entryId)?.notes;
                 await admin.from("show_records").insert({
                     horse_id: horseId,
                     user_id: userId,
@@ -863,6 +876,7 @@ export async function overrideFinalPlacings(
                     placing,
                     ribbon_color: PLACING_TO_RIBBON[placing] || null,
                     notes: `[Override by host on ${today}]`,
+                    judge_notes: judgeNote || null,
                 });
             }
         }
