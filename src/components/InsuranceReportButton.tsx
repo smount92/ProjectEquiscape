@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { pdf } from "@react-pdf/renderer";
-import InsuranceReport from "@/components/pdf/InsuranceReport";
 import { getInsuranceReportData } from "@/app/actions/insurance-report";
 import type { InsuranceReportPayload } from "@/app/actions/insurance-report";
 
@@ -55,6 +53,12 @@ export default function InsuranceReportButton() {
             }
 
             const data: InsuranceReportPayload = result.data;
+
+            // Lazy-load react-pdf (1.5MB) only when generating
+            const [{ pdf }, { default: InsuranceReport }] = await Promise.all([
+                import("@react-pdf/renderer"),
+                import("@/components/pdf/InsuranceReport"),
+            ]);
 
             // Generate PDF client-side
             const blob = await pdf(<InsuranceReport data={data} />).toBlob();

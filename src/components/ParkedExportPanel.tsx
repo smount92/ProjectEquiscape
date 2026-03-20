@@ -2,9 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
-import { pdf } from "@react-pdf/renderer";
 import { parkHorse, unparkHorse, getCoaData } from "@/app/actions/parked-export";
-import CertificateOfAuthenticity from "@/components/pdf/CertificateOfAuthenticity";
 
 interface ParkedExportPanelProps {
     horseId: string;
@@ -76,6 +74,12 @@ export default function ParkedExportPanel({
             const qrDataUri = canvasEl
                 ? canvasEl.toDataURL("image/png")
                 : ""; // fallback: empty (QR will be blank in PDF, but won't crash)
+
+            // Lazy-load react-pdf (1.5MB) only when generating
+            const [{ pdf }, { default: CertificateOfAuthenticity }] = await Promise.all([
+                import("@react-pdf/renderer"),
+                import("@/components/pdf/CertificateOfAuthenticity"),
+            ]);
 
             // Generate PDF
             const blob = await pdf(
