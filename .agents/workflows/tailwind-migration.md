@@ -124,13 +124,14 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -5
 Set up the Tailwind environment and map 100% of existing CSS custom properties to `tailwind.config.ts`. The app must look **pixel-identical** after this phase — Tailwind is pulling from the same `:root` tokens.
 
 ## Definition of Done
-- [ ] `tailwindcss`, `postcss`, `autoprefixer` installed as devDependencies
-- [ ] `tailwind.config.ts` exists with **all** design tokens mapped from `:root`
-- [ ] `postcss.config.mjs` exists and configured
-- [ ] `globals.css` has `@tailwind base; @tailwind components; @tailwind utilities;` at the top
-- [ ] `:root` variables remain intact in `globals.css`
-- [ ] `npx next build` passes with 0 errors
-- [ ] Visual identity is **100% identical** (no color, spacing, font, or shadow changes)
+- [x] `tailwindcss`, `postcss`, `autoprefixer` installed as devDependencies
+- [x] Tailwind v4 CSS-first config via `@theme` directive (no `tailwind.config.ts` needed)
+- [x] `postcss.config.mjs` exists and configured with `@tailwindcss/postcss`
+- [x] `globals.css` has `@import "tailwindcss"` + `@theme` block mapping all 38 design tokens
+- [x] `:root` variables remain intact in `globals.css`
+- [x] `npx next build` passes with 0 errors
+- [x] Visual identity is **100% identical** (no color, spacing, font, or shadow changes)
+- [x] **PHASE 1 COMPLETE** — committed 2026-03-20
 
 ---
 
