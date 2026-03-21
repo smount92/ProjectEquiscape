@@ -133,12 +133,12 @@ export default async function SuggestionDetailPage({ params }: Props) {
                   : "";
 
     return (
-        <div className="page-container">
-            <nav className="ref-breadcrumb">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+            <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6">
                 <Link href="/catalog">📚 Reference Catalog</Link>
-                <span className="ref-breadcrumb-sep">›</span>
+                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
                 <Link href="/catalog/suggestions">Suggestions</Link>
-                <span className="ref-breadcrumb-sep">›</span>
+                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
                 <span>Detail</span>
             </nav>
 
@@ -165,7 +165,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                     {/* Main Content */}
                     <div className="flex flex-col gap-4">
                         {/* Header */}
-                        <div className="card p-6">
+                        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-6">
                             <div className="flex justify-between items-center flex-wrap gap-2 mb-4">
                                 <div>
                                     <span className={`ref-status-badge ${st.className}`}>
@@ -181,7 +181,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                                                 : "🗑 Removal"}
                                     </span>
                                 </div>
-                                <span className="ref-suggestion-date-detail">
+                                <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">
                                     {new Date(s.created_at).toLocaleDateString("en-US", {
                                         year: "numeric",
                                         month: "long",
@@ -263,10 +263,10 @@ export default async function SuggestionDetailPage({ params }: Props) {
                                             .filter(([, v]) => v != null && v !== "")
                                             .map(([k, v]) => (
                                                 <div key={k} className="flex flex-col gap-[2px]">
-                                                    <span className="ref-detail-label">
+                                                    <span className="text-[calc(0.75rem*var(--font-scale))] text-muted uppercase tracking-[0.05em] font-semibold">
                                                         {k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                                                     </span>
-                                                    <span className="ref-detail-value text-[#66bb6a] font-bold">
+                                                    <span className="text-[calc(0.95rem*var(--font-scale))] font-medium text-[#66bb6a] font-bold">
                                                         {String(v)}
                                                     </span>
                                                 </div>
@@ -293,7 +293,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                         </div>
 
                         {/* Discussion Thread */}
-                        <div className="card p-6">
+                        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-6">
                             <h3>
                                 💬 Discussion ({(comments ?? []).length})
                             </h3>
@@ -314,7 +314,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
                         {/* Admin Actions */}
                         {isAdmin && s.status === "pending" && (
-                            <div className="card p-6 border border-[#ffc107]">
+                            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-6 border border-[#ffc107]">
                                 <h3>🛡️ Admin Actions</h3>
                                 <SuggestionAdminActions suggestionId={s.id} />
                             </div>

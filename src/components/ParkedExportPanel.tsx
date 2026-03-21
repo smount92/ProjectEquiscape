@@ -108,7 +108,7 @@ export default function ParkedExportPanel({
     if (!isOpen) {
         return (
             <button
-                className="btn btn-ghost"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                 onClick={() => setIsOpen(true)}
                 id="park-export-btn"
                 title="Sell off-platform with a Certificate of Authenticity"
@@ -119,10 +119,10 @@ export default function ParkedExportPanel({
     }
 
     return (
-        <div className="mt-6 card animate-fade-in-up">
+        <div className="mt-6 bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
                 <h3>{isParked ? "🔒 Horse is Parked" : "📤 Sell Off-Platform"}</h3>
-                <button className="btn btn-ghost" onClick={() => setIsOpen(false)} style={{ fontSize: "1.2rem" }}>✕</button>
+                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setIsOpen(false)} style={{ fontSize: "1.2rem" }}>✕</button>
             </div>
 
             {!isParked ? (
@@ -140,7 +140,7 @@ export default function ParkedExportPanel({
                         <li>4. They scan the QR or enter the PIN to claim the horse on MHH</li>
                     </ul>
                     <button
-                        className="btn btn-primary"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                         onClick={handlePark}
                         disabled={status === "parking"}
                         id="park-horse-btn"
@@ -168,7 +168,7 @@ export default function ParkedExportPanel({
                         <span className="text-sm text-muted font-semibold">Claim PIN</span>
                         <span className="parked-export-pin">{pin}</span>
                         <button
-                            className="btn btn-ghost"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                             onClick={handleCopyPin}
                             style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                         >
@@ -212,7 +212,7 @@ export default function ParkedExportPanel({
                     {/* Actions */}
                     <div className="flex flex-col gap-2">
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={handleDownloadCoA}
                             disabled={status === "downloading"}
                             id="download-coa-btn"
@@ -224,7 +224,7 @@ export default function ParkedExportPanel({
                             )}
                         </button>
                         <button
-                            className="btn btn-ghost"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                             onClick={handleUnpark}
                             disabled={status === "unparking"}
                             id="unpark-btn"
@@ -236,7 +236,7 @@ export default function ParkedExportPanel({
                 </div>
             )}
 
-            {error && <div className="csv-error" style={{ marginTop: "var(--space-md)" }}>{error}</div>}
+            {error && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-md)" }}>{error}</div>}
         </div>
     );
 }

@@ -9,21 +9,21 @@ export const metadata: Metadata = {
 
 export default function GettingStartedPage() {
     return (
-        <div className="static-page">
-            <div className="static-page-inner animate-fade-in-up">
+        <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8">
+            <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
                 {/* Page Header */}
-                <div className="static-page-header">
+                <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h1>
                         Getting Started with{" "}
-                        <span className="text-gradient">Model Horse Hub</span>
+                        <span className="text-forest">Model Horse Hub</span>
                     </h1>
-                    <p className="static-page-lead">
+                    <p className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-lead">
                         Your digital stable is ready. Here&apos;s how to make the most of it.
                     </p>
                 </div>
 
                 {/* Step 1 */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>📸 Step 1: Add Your First Horse</h2>
                     <p>
                         Click <strong>&ldquo;🏠 Digital Stable&rdquo;</strong> in the navigation,
@@ -41,7 +41,7 @@ export default function GettingStartedPage() {
                         Hindquarters, Belly/Maker&apos;s Mark) plus unlimited extra detail shots. Set
                         your condition grade, finish type, and give your horse a name.
                     </p>
-                    <div className="getting-started-tip">
+                    <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4">
                         <strong>💡 Tip:</strong> Set your horse to <strong>&ldquo;Public&rdquo;</strong> to
                         share it in the Show Ring for the community to discover. Private horses are
                         visible only to you.
@@ -49,7 +49,7 @@ export default function GettingStartedPage() {
                 </section>
 
                 {/* Step 2 */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>🔒 Step 2: Track Your Financials (Private)</h2>
                     <p>
                         During the add-horse process, you&apos;ll see the{" "}
@@ -68,7 +68,7 @@ export default function GettingStartedPage() {
                 </section>
 
                 {/* Step 3 */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>🐾 Step 3: Meet Hoofprint™</h2>
                     <p>
                         Every horse you add automatically gets a{" "}
@@ -95,7 +95,7 @@ export default function GettingStartedPage() {
                         When you sell or trade a horse, you can generate a{" "}
                         <strong>6-character transfer code</strong> from its passport page. The buyer
                         enters the code at{" "}
-                        <Link href="/claim" className="text-gradient" style={{ fontWeight: 600 }}>
+                        <Link href="/claim" className="text-forest" style={{ fontWeight: 600 }}>
                             📦 Claim
                         </Link>{" "}
                         &mdash; and the horse moves to their stable with its entire history intact.
@@ -103,7 +103,7 @@ export default function GettingStartedPage() {
                 </section>
 
                 {/* Step 4 */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>🏆 Step 4: Explore the Community</h2>
                     <p>
                         Once you&apos;ve added a few horses, explore what other collectors are sharing:
@@ -141,7 +141,7 @@ export default function GettingStartedPage() {
                 </section>
 
                 {/* Step 5 */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>💬 Step 5: Buy, Sell &amp; Connect</h2>
                     <p>
                         Set any horse&apos;s trade status to <strong>&ldquo;For Sale&rdquo;</strong> or{" "}
@@ -155,7 +155,7 @@ export default function GettingStartedPage() {
                     </p>
                     <p>
                         Add models to your{" "}
-                        <Link href="/wishlist" className="text-gradient" style={{ fontWeight: 600 }}>
+                        <Link href="/wishlist" className="text-forest" style={{ fontWeight: 600 }}>
                             ❤️ Wishlist
                         </Link>{" "}
                         and you&apos;ll get notified when a matching model is listed for sale.
@@ -163,11 +163,11 @@ export default function GettingStartedPage() {
                 </section>
 
                 {/* Step 6 */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>⚙️ Step 6: Customize Your Experience</h2>
                     <p>
                         Visit{" "}
-                        <Link href="/settings" className="text-gradient" style={{ fontWeight: 600 }}>
+                        <Link href="/settings" className="text-forest" style={{ fontWeight: 600 }}>
                             ⚙️ Settings
                         </Link>{" "}
                         to:
@@ -186,7 +186,7 @@ export default function GettingStartedPage() {
                 </section>
 
                 {/* Beta Feedback */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>🧪 Beta Tester? We Need Your Feedback!</h2>
                     <p>
                         You&apos;re among the first collectors to use Model Horse Hub. Your feedback
@@ -195,13 +195,13 @@ export default function GettingStartedPage() {
                     </p>
                     <p>
                         Use the{" "}
-                        <Link href="/contact" className="text-gradient" style={{ fontWeight: 600 }}>
+                        <Link href="/contact" className="text-forest" style={{ fontWeight: 600 }}>
                             ✉️ Contact
                         </Link>{" "}
                         page to send us your thoughts, or message the admin directly through the
                         inbox.
                     </p>
-                    <div className="getting-started-tip">
+                    <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4">
                         <strong>🙏 Thank you</strong> for being part of the founding herd. Every
                         feature on this platform exists because a collector said &ldquo;I wish this
                         existed.&rdquo; Keep telling us what you wish for.
@@ -209,11 +209,11 @@ export default function GettingStartedPage() {
                 </section>
 
                 {/* CTA */}
-                <div className="static-cta">
+                <div className="text-center p-12 bg-card border border-edge rounded-lg">
                     <p>Ready to start?</p>
                     <Link
                         href="/dashboard"
-                        className="btn btn-primary btn-lg"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[52px] py-4 px-12 text-[calc(var(--font-size-md)*var(--font-scale))] rounded-lg"
                         id="getting-started-cta"
                     >
                         Go to Your Digital Stable →

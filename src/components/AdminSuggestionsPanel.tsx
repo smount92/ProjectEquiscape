@@ -48,8 +48,8 @@ export default function AdminSuggestionsPanel({
 
     if (items.length === 0) {
         return (
-            <div className="card shelf-empty" style={{ textAlign: "center" }}>
-                <div className="shelf-empty-icon">✅</div>
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8" style={{ textAlign: "center" }}>
+                <div className="text-center py-[var(--space-3xl)] px-8-icon">✅</div>
                 <h2>No Pending Suggestions</h2>
                 <p>All database suggestions have been reviewed.</p>
             </div>
@@ -63,7 +63,7 @@ export default function AdminSuggestionsPanel({
                     key={s.id}
                     className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all admin-message hover:opacity-[1]-unread"
                 >
-                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-header">
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                         <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sender">
                             <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-name">
                                 {typeEmoji[s.suggestion_type] || "📝"}{" "}
@@ -90,14 +90,14 @@ export default function AdminSuggestionsPanel({
                     )}
                     <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-footer" style={{ gap: "var(--space-sm)" }}>
                         <button
-                            className="btn btn-primary btn-sm"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
                             onClick={() => handleReview(s.id, "approved")}
                             disabled={isPending && processingId === s.id}
                         >
                             {isPending && processingId === s.id ? "…" : "✅ Approve"}
                         </button>
                         <button
-                            className="btn btn-ghost btn-sm"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                             onClick={() => handleReview(s.id, "rejected")}
                             disabled={isPending && processingId === s.id}
                             style={{ color: "var(--color-text-muted)" }}

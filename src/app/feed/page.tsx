@@ -40,14 +40,14 @@ export default async function FeedPage({
     }
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Hero */}
-            <div className="community-hero animate-fade-in-up">
-                <div className="community-hero-content">
+            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
                     <h1>
-                        📰 <span className="text-gradient">Activity Feed</span>
+                        📰 <span className="text-forest">Activity Feed</span>
                     </h1>
-                    <p className="community-hero-subtitle">
+                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                         Stay up to date with what's happening in the community.
                     </p>
                 </div>

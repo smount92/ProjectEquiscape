@@ -104,8 +104,8 @@ export default function HoofprintTimeline({
             {/* Header */}
             <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
                 <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)" }}>
-                    <h2 className="hoofprint-title">
-                        🐾 <span className="text-gradient">Hoofprint™</span>
+                    <h2 className="text-[calc(1.2rem*var(--font-scale))] font-bold">
+                        🐾 <span className="text-forest">Hoofprint™</span>
                     </h2>
                     <span className={`hoofprint-stage-badge stage-${lifeStage}`}>
                         {STAGE_ICONS[lifeStage] || "📋"} {STAGE_LABELS[lifeStage] || lifeStage}
@@ -128,7 +128,7 @@ export default function HoofprintTimeline({
                                 <option value="for_sale">💲 For Sale</option>
                             </select>
                             <button
-                                className="btn btn-ghost"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                 onClick={() => setShowForm(!showForm)}
                                 style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}
                             >
@@ -171,8 +171,8 @@ export default function HoofprintTimeline({
             {/* Add Event Form */}
             {showForm && (
                 <form onSubmit={handleAddEvent} className="p-4 rounded-lg bg-[rgba(0, 0, 0, 0.03)] border border-[rgba(0, 0, 0, 0.06)] mb-6">
-                    <div className="form-group">
-                        <label className="form-label">Title</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Title</label>
                         <input
                             type="text"
                             className="form-input"
@@ -182,8 +182,8 @@ export default function HoofprintTimeline({
                             required
                         />
                     </div>
-                    <div className="form-group">
-                        <label className="form-label">Description (optional)</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Description (optional)</label>
                         <textarea
                             className="form-input"
                             value={formState.description}
@@ -196,7 +196,7 @@ export default function HoofprintTimeline({
                         <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
                             📝 Notes appear on the Hoofprint™ timeline
                         </span>
-                        <button type="submit" className="btn btn-primary" disabled={saving} style={{ marginLeft: "auto" }}>
+                        <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={saving} style={{ marginLeft: "auto" }}>
                             {saving ? "Saving…" : "Add Note"}
                         </button>
                     </div>
@@ -239,7 +239,7 @@ export default function HoofprintTimeline({
                                 {/* Only user-authored notes (from posts) can be deleted */}
                                 {isOwner && currentUserId && event.userId === currentUserId && event.sourceTable === "posts" && (
                                     <button
-                                        className="btn btn-ghost"
+                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                         onClick={() => handleDelete(event.id)}
                                         style={{ fontSize: "0.7rem", padding: "2px 6px", opacity: 0.5 }}
                                         title="Delete note"

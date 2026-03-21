@@ -130,14 +130,14 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                     {isSeller ? (
                         <div className="flex gap-2 mt-2 flex-wrap items-center">
                             <button
-                                className="btn btn-primary btn-sm"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
                                 onClick={() => handleRespond("accept")}
                                 disabled={saving}
                             >
                                 {saving ? "…" : "✅ Accept Offer"}
                             </button>
                             <button
-                                className="btn btn-ghost btn-sm"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                                 onClick={() => handleRespond("decline")}
                                 disabled={saving}
                             >
@@ -148,7 +148,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         <div>
                             <p className="text-sm text-muted">⏳ Waiting for seller response…</p>
                             <button
-                                className="btn btn-ghost btn-sm"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                                 onClick={async () => {
                                     setSaving(true);
                                     const result = await retractOffer(transaction.transactionId);
@@ -179,7 +179,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                     {isBuyer && !hasPaid && (
                         <div className="flex gap-2 mt-2 flex-wrap items-center">
                             <button
-                                className="btn btn-primary btn-sm"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
                                 onClick={handleMarkPaid}
                                 disabled={saving}
                             >
@@ -194,14 +194,14 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         <div className="flex gap-2 mt-2 flex-wrap items-center">
                             <p className="text-sm text-muted">💳 Buyer says they&apos;ve paid.</p>
                             <button
-                                className="btn btn-primary btn-sm"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
                                 onClick={handleVerify}
                                 disabled={saving}
                             >
                                 {saving ? "Verifying…" : "✅ Confirm Funds & Release"}
                             </button>
                             <button
-                                className="btn btn-ghost btn-sm"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                                 onClick={handleCancel}
                                 disabled={saving}
                                 style={{ color: "#ef4444" }}
@@ -214,7 +214,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         <div className="flex gap-2 mt-2 flex-wrap items-center">
                             <p className="text-sm text-muted">⏳ Waiting for buyer to send payment…</p>
                             <button
-                                className="btn btn-ghost btn-sm"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                                 onClick={handleCancel}
                                 disabled={saving}
                                 style={{ color: "#ef4444" }}
@@ -233,7 +233,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         <div className="bg-[rgba(92,224,160,0.1)] border-2 border-success rounded-lg p-6 text-center mt-2">
                             <span className="block text-xs text-muted mb-1">🔑 Your Claim PIN</span>
                             <strong className="block text-2xl font-extrabold tracking-[0.15em] text-[#22c55e] font-mono">{pin}</strong>
-                            <Link href="/claim" className="btn btn-primary btn-sm" style={{ marginTop: "var(--space-sm)" }}>
+                            <Link href="/claim" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" style={{ marginTop: "var(--space-sm)" }}>
                                 Go to Claim Page →
                             </Link>
                         </div>

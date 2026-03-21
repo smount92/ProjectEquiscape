@@ -21,7 +21,7 @@ export default async function EventsPage() {
     const events = await getEvents({ upcoming: true });
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             <div className="page-content">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--space-md)", marginBottom: "var(--space-xl)" }}>
                     <div>
@@ -30,7 +30,7 @@ export default async function EventsPage() {
                             Shows, swap meets, meetups, and more
                         </p>
                     </div>
-                    <Link href="/community/events/create" className="btn btn-primary">+ Create Event</Link>
+                    <Link href="/community/events/create" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">+ Create Event</Link>
                 </div>
 
                 <EventBrowser events={events} typeLabels={EVENT_TYPE_LABELS} />

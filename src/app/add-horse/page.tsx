@@ -487,19 +487,19 @@ export default function AddHorsePage() {
   if (showSuccess) {
     return (
       <div className="success-overlay">
-        <div className="text-center max-w-[480px] p-[var(--space-3xl)] card animate-fade-in-up">
+        <div className="text-center max-w-[480px] p-[var(--space-3xl)] bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
           <div className="success-icon">🎉</div>
           <h2>
-            <span className="text-gradient">{savedHorseName}</span> Added!
+            <span className="text-forest">{savedHorseName}</span> Added!
           </h2>
           <p>
             Your {assetCategory === "model" ? "model" : assetCategory} has been successfully cataloged in your Digital Stable.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/add-horse" className="btn btn-primary" onClick={() => window.location.reload()}>
+            <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => window.location.reload()}>
               Add Another
             </Link>
-            <Link href="/dashboard" className="btn btn-ghost">
+            <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
               View Stable
             </Link>
           </div>
@@ -509,11 +509,11 @@ export default function AddHorsePage() {
   }
 
   return (
-    <div className="page-container form-page">
+    <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
       {/* Page Header */}
       <div className="mb-12 animate-fade-in-up">
         <h1>
-          Add to <span className="text-gradient">Stable</span>
+          Add to <span className="text-forest">Stable</span>
         </h1>
         <p>{isModel ? "Catalog a new model horse in your digital collection" :
           assetCategory === "tack" ? "Catalog tack & gear for your collection" :
@@ -560,7 +560,7 @@ export default function AddHorsePage() {
 
       {/* Error banner */}
       {submitError && (
-        <div className="form-error" role="alert" style={{ marginBottom: "var(--space-xl)" }}>
+        <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert" style={{ marginBottom: "var(--space-xl)" }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
           </svg>
@@ -573,9 +573,9 @@ export default function AddHorsePage() {
           ================================================================ */}
       {currentStep === 0 && (
         <div className="step-content" key="step-0">
-          <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
-            <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-header">
-              <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">📸</div>
+          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
+            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+              <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">📸</div>
               <div>
                 <h2>Photo Gallery</h2>
                 <p>Upload photos from specific angles to build a complete profile</p>
@@ -763,7 +763,7 @@ export default function AddHorsePage() {
 
           <div className="flex justify-between items-center gap-4 mt-8">
             <div className="flex justify-between items-center gap-4 mt-8-spacer" />
-            <button className="btn btn-primary" onClick={goNext} id="step-1-next">
+            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={goNext} id="step-1-next">
               Next: Reference Link →
             </button>
           </div>
@@ -775,9 +775,9 @@ export default function AddHorsePage() {
           — Use CSS display instead of unmounting to preserve component state
           ================================================================ */}
       <div className="step-content" key="step-1" style={{ display: currentStep === 1 ? "block" : "none" }}>
-        <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
-          <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-header">
-            <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🔗</div>
+        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
+          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🔗</div>
             <div>
               <h2>Reference Link</h2>
               <p>Search by mold name, release name (paint job), or artist resin</p>
@@ -830,11 +830,11 @@ export default function AddHorsePage() {
         </div>
 
         <div className="flex justify-between items-center gap-4 mt-8">
-          <button className="btn btn-ghost" onClick={goBack} id="step-2-back">
+          <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={goBack} id="step-2-back">
             ← Back
           </button>
           <button
-            className="btn btn-primary"
+            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
             onClick={goNext}
             disabled={!canProceedStep(1)}
             id="step-2-next"
@@ -849,25 +849,25 @@ export default function AddHorsePage() {
           ================================================================ */}
       {currentStep === 2 && (
         <div className="step-content" key="step-2">
-          <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
+          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
 
             {/* Reference summary badge */}
             {selectedCatalogItem && (
-              <div className="getting-started-tip" style={{ marginBottom: "var(--space-lg)" }}>
+              <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4" style={{ marginBottom: "var(--space-lg)" }}>
                 🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
               </div>
             )}
 
-            <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-header">
-              <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🏷️</div>
+            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+              <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🏷️</div>
               <div>
                 <h2>{isModel ? "Model Identity" : `${assetCategory.charAt(0).toUpperCase() + assetCategory.slice(1)} Details`}</h2>
                 <p>{isModel ? "Give your model a name and describe its characteristics" : `Name and describe your ${assetCategory}`}</p>
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="custom-name" className="form-label">
+            <div className="mb-6">
+              <label htmlFor="custom-name" className="block text-sm font-semibold text-ink mb-1">
                 Custom Name *
               </label>
               <input
@@ -880,13 +880,13 @@ export default function AddHorsePage() {
                 autoFocus
                 maxLength={100}
               />
-              <span className="form-hint">
+              <span className="block mt-1 text-xs text-muted">
                 What do you call this model? This can be a show name, pet name, or whatever you like.
               </span>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="sculptor" className="form-label">
+            <div className="mb-6">
+              <label htmlFor="sculptor" className="block text-sm font-semibold text-ink mb-1">
                 Sculptor / Artist
               </label>
               <input
@@ -898,13 +898,13 @@ export default function AddHorsePage() {
                 onChange={(e) => setSculptor(e.target.value)}
                 maxLength={100}
               />
-              <span className="form-hint">
+              <span className="block mt-1 text-xs text-muted">
                 Optional — tag the sculptor or artist, especially for Artist Resins or custom work.
               </span>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="finishing-artist" className="form-label">
+            <div className="mb-6">
+              <label htmlFor="finishing-artist" className="block text-sm font-semibold text-ink mb-1">
                 🎨 Finishing Artist
               </label>
               <input
@@ -916,13 +916,13 @@ export default function AddHorsePage() {
                 onChange={(e) => setFinishingArtist(e.target.value)}
                 maxLength={100}
               />
-              <span className="form-hint">
+              <span className="block mt-1 text-xs text-muted">
                 The artist who painted/finished this model (if different from sculptor).
               </span>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">📋 Edition Info</label>
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-ink mb-1">📋 Edition Info</label>
               <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
                 <input
                   type="number"
@@ -944,15 +944,15 @@ export default function AddHorsePage() {
                   min="1"
                 />
               </div>
-              <span className="form-hint">
+              <span className="block mt-1 text-xs text-muted">
                 e.g., &quot;3 of 50&quot; for limited edition runs.
               </span>
             </div>
 
             {/* Finish Type — model only */}
             {isModel && (
-              <div className="form-group">
-                <label htmlFor="finish-type" className="form-label">
+              <div className="mb-6">
+                <label htmlFor="finish-type" className="block text-sm font-semibold text-ink mb-1">
                   Finish Type *
                 </label>
                 <select
@@ -972,8 +972,8 @@ export default function AddHorsePage() {
             )}
 
             {/* Finish Details */}
-            <div className="form-group">
-              <label className="form-label">Finish Details</label>
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-ink mb-1">Finish Details</label>
               <input
                 className="form-input"
                 type="text"
@@ -986,8 +986,8 @@ export default function AddHorsePage() {
             </div>
 
             {/* Public Notes */}
-            <div className="form-group">
-              <label className="form-label">Public Notes</label>
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-ink mb-1">Public Notes</label>
               <textarea
                 className="form-input"
                 value={publicNotes}
@@ -1013,8 +1013,8 @@ export default function AddHorsePage() {
             </div>
 
             <div className="form-row" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
-              <div className="form-group" style={{ flex: "1 1 200px" }}>
-                <label className="form-label">Assigned Breed</label>
+              <div className="mb-6" style={{ flex: "1 1 200px" }}>
+                <label className="block text-sm font-semibold text-ink mb-1">Assigned Breed</label>
                 <input
                   className="form-input"
                   type="text"
@@ -1025,8 +1025,8 @@ export default function AddHorsePage() {
                   id="assigned-breed"
                 />
               </div>
-              <div className="form-group" style={{ flex: "1 1 150px" }}>
-                <label className="form-label">Assigned Gender</label>
+              <div className="mb-6" style={{ flex: "1 1 150px" }}>
+                <label className="block text-sm font-semibold text-ink mb-1">Assigned Gender</label>
                 <select
                   className="form-select"
                   value={assignedGender}
@@ -1045,8 +1045,8 @@ export default function AddHorsePage() {
             </div>
 
             <div className="form-row" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
-              <div className="form-group" style={{ flex: "1 1 150px" }}>
-                <label className="form-label">Assigned Age</label>
+              <div className="mb-6" style={{ flex: "1 1 150px" }}>
+                <label className="block text-sm font-semibold text-ink mb-1">Assigned Age</label>
                 <input
                   className="form-input"
                   type="text"
@@ -1057,8 +1057,8 @@ export default function AddHorsePage() {
                   id="assigned-age"
                 />
               </div>
-              <div className="form-group" style={{ flex: "1 1 200px" }}>
-                <label className="form-label">Regional Show ID</label>
+              <div className="mb-6" style={{ flex: "1 1 200px" }}>
+                <label className="block text-sm font-semibold text-ink mb-1">Regional Show ID</label>
                 <input
                   className="form-input"
                   type="text"
@@ -1073,8 +1073,8 @@ export default function AddHorsePage() {
 
             {/* Condition Grade — model only */}
             {isModel && (
-              <div className="form-group">
-                <label htmlFor="condition-grade" className="form-label">
+              <div className="mb-6">
+                <label htmlFor="condition-grade" className="block text-sm font-semibold text-ink mb-1">
                   Condition Grade *
                 </label>
                 <select
@@ -1095,8 +1095,8 @@ export default function AddHorsePage() {
 
             {/* Life Stage — model only */}
             {isModel && (
-              <div className="form-group">
-                <label htmlFor="life-stage" className="form-label">
+              <div className="mb-6">
+                <label htmlFor="life-stage" className="block text-sm font-semibold text-ink mb-1">
                   🐾 Life Stage
                 </label>
                 <select
@@ -1111,7 +1111,7 @@ export default function AddHorsePage() {
                   <option value="completed">✅ Completed</option>
                   <option value="for_sale">💲 For Sale</option>
                 </select>
-                <span className="form-hint">
+                <span className="block mt-1 text-xs text-muted">
                   This sets the life stage on your Hoofprint™ timeline.
                 </span>
               </div>
@@ -1123,8 +1123,8 @@ export default function AddHorsePage() {
             />
 
             {/* Trade / Marketplace Status */}
-            <div className="form-group">
-              <label htmlFor="trade-status" className="form-label">
+            <div className="mb-6">
+              <label htmlFor="trade-status" className="block text-sm font-semibold text-ink mb-1">
                 Marketplace Status
               </label>
               <select
@@ -1143,8 +1143,8 @@ export default function AddHorsePage() {
             {/* Conditional marketplace fields */}
             {(tradeStatus === "For Sale" || tradeStatus === "Open to Offers") && (
               <div className="mt-4 p-4 bg-[rgba(34, 197, 94, 0.05)] border border-[rgba(34, 197, 94, 0.15)] rounded-md animate-fade-in-up">
-                <div className="form-group">
-                  <label htmlFor="listing-price" className="form-label">
+                <div className="mb-6">
+                  <label htmlFor="listing-price" className="block text-sm font-semibold text-ink mb-1">
                     💲 Listing Price
                   </label>
                   <input
@@ -1157,17 +1157,17 @@ export default function AddHorsePage() {
                     value={listingPrice}
                     onChange={(e) => setListingPrice(e.target.value)}
                   />
-                  <span className="form-hint">
+                  <span className="block mt-1 text-xs text-muted">
                     Optional — leave blank for &ldquo;Contact for price&rdquo;
                   </span>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="marketplace-notes" className="form-label">
+                <div className="mb-6">
+                  <label htmlFor="marketplace-notes" className="block text-sm font-semibold text-ink mb-1">
                     📝 Seller Notes
                   </label>
                   <textarea
                     id="marketplace-notes"
-                    className="form-textarea"
+                    className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                     rows={3}
                     maxLength={500}
                     placeholder="e.g. Will ship anywhere, Trades welcome, Smoke-free home..."
@@ -1180,11 +1180,11 @@ export default function AddHorsePage() {
           </div>
 
           <div className="flex justify-between items-center gap-4 mt-8">
-            <button className="btn btn-ghost" onClick={goBack} id="step-3-back">
+            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={goBack} id="step-3-back">
               ← Back
             </button>
             <button
-              className="btn btn-primary"
+              className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
               onClick={goNext}
               disabled={!canProceedStep(2)}
               id="step-3-next"
@@ -1196,7 +1196,7 @@ export default function AddHorsePage() {
           {/* Community visibility selector */}
           <div className="mt-6 py-4 px-6 rounded-lg bg-[rgba(44, 85, 69, 0.04)] border border-[rgba(44, 85, 69, 0.12)]">
             <div className="flex items-center justify-between gap-6" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
-              <span className="community-toggle-label">👁️ Visibility</span>
+              <span className="text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold text-ink">👁️ Visibility</span>
               <div className="flex gap-2 flex-wrap">
                 {([
                   { value: "public" as const, icon: "🌐", label: "Public", hint: "Visible in the Show Ring" },
@@ -1231,12 +1231,12 @@ export default function AddHorsePage() {
 
             {/* Reference summary badge */}
             {selectedCatalogItem && (
-              <div className="getting-started-tip" style={{ marginBottom: "var(--space-lg)" }}>
+              <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4" style={{ marginBottom: "var(--space-lg)" }}>
                 🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
               </div>
             )}
 
-            <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible relative overflow-hidden">
+            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible relative overflow-hidden">
               {/* Vault Header */}
               <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[rgba(240, 160, 108, 0.2)]">
                 <div className="vault-icon">🔒</div>
@@ -1259,8 +1259,8 @@ export default function AddHorsePage() {
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <div className="form-group">
-                  <label htmlFor="purchase-price" className="form-label">
+                <div className="mb-6">
+                  <label htmlFor="purchase-price" className="block text-sm font-semibold text-ink mb-1">
                     Purchase Price
                   </label>
                   <input
@@ -1275,8 +1275,8 @@ export default function AddHorsePage() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="purchase-date" className="form-label">
+                <div className="mb-6">
+                  <label htmlFor="purchase-date" className="block text-sm font-semibold text-ink mb-1">
                     Purchase Date
                   </label>
                   <input
@@ -1290,8 +1290,8 @@ export default function AddHorsePage() {
               </div>
 
               {/* Fuzzy Purchase Date */}
-              <div className="form-group">
-                <label className="form-label">Approximate Purchase Date</label>
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Approximate Purchase Date</label>
                 <input
                   className="form-input"
                   type="text"
@@ -1306,8 +1306,8 @@ export default function AddHorsePage() {
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <div className="form-group">
-                  <label htmlFor="estimated-value" className="form-label">
+                <div className="mb-6">
+                  <label htmlFor="estimated-value" className="block text-sm font-semibold text-ink mb-1">
                     Estimated Current Value
                   </label>
                   <input
@@ -1322,8 +1322,8 @@ export default function AddHorsePage() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="insurance-notes" className="form-label">
+                <div className="mb-6">
+                  <label htmlFor="insurance-notes" className="block text-sm font-semibold text-ink mb-1">
                     Insurance Notes
                   </label>
                   <input
@@ -1346,18 +1346,18 @@ export default function AddHorsePage() {
             </div>
 
             <div className="flex justify-between items-center gap-4 mt-8">
-              <button className="btn btn-ghost" onClick={goBack} id="step-4-back">
+              <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={goBack} id="step-4-back">
                 ← Back
               </button>
               <button
-                className="btn btn-primary"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                 onClick={handleSubmit}
                 disabled={isSubmitting || !canProceedStep(2)}
                 id="submit-horse"
               >
                 {isSubmitting ? (
                   <>
-                    <span className="btn-spinner" aria-hidden="true" />
+                    <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
                     Saving to Stable…
                   </>
                 ) : (
@@ -1370,7 +1370,7 @@ export default function AddHorsePage() {
       }
 
       {/* ── AI Toast Notifications ── */}
-      <div className="ai-fixed top-[calc(var(--header-height) + var(--space-md))] right-[var(--space-lg)] flex flex-col gap-2 z-[10000] max-w-[420px] w-full pointer-events-none" aria-live="polite">
+      <div className="ai-fixed top-[calc(var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height) + var(--space-md))] right-[var(--space-lg)] flex flex-col gap-2 z-[10000] max-w-[420px] w-full pointer-events-none" aria-live="polite">
         {aiToasts.map((toast) => (
           <div
             key={toast.id}

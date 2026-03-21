@@ -237,7 +237,7 @@ export default function WishlistSearch() {
                                 <div className="py-6 px-4 text-center text-muted text-sm">
                                     <p>No references match &ldquo;{query}&rdquo;</p>
                                     <button
-                                        className="wishlist-search-custom-btn"
+                                        className="wishlist-search-custom-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
                                         onClick={handleCustomAdd}
                                         disabled={adding}
                                     >

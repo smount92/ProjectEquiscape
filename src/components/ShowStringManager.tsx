@@ -126,31 +126,31 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
     return (
         <div>
-            {error && <p className="form-error">{error}</p>}
+            {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
 
             {/* Create New */}
             {!creating ? (
-                <button className="btn btn-primary" onClick={() => setCreating(true)} style={{ marginBottom: "var(--space-lg)" }}>
+                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => setCreating(true)} style={{ marginBottom: "var(--space-lg)" }}>
                     + New Show String
                 </button>
             ) : (
-                <div className="glass-card" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
+                <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
                     <h3 style={{ marginBottom: "var(--space-md)" }}>Create Show String</h3>
-                    <div className="form-row-2col">
-                        <div className="form-group">
-                            <label className="form-label">Show Name *</label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Show Name *</label>
                             <input className="form-input" value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Spring Fling 2026" />
                         </div>
-                        <div className="form-group">
-                            <label className="form-label">Show Date</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Show Date</label>
                             <input className="form-input" type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
                         </div>
                     </div>
                     <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)" }}>
-                        <button className="btn btn-primary" onClick={handleCreate} disabled={saving}>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleCreate} disabled={saving}>
                             {saving ? "Creating..." : "Create"}
                         </button>
-                        <button className="btn btn-ghost" onClick={() => setCreating(false)}>Cancel</button>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setCreating(false)}>Cancel</button>
                     </div>
                 </div>
             )}
@@ -174,9 +174,9 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                     )}
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
-                                    <span className="studio-tab-badge">{ss.entryCount}</span>
-                                    <button className="btn btn-ghost btn-sm" onClick={async (e) => { e.stopPropagation(); setSaving(true); await duplicateShowString(ss.id); setSaving(false); router.refresh(); }} title="Duplicate" disabled={saving}>📋</button>
-                                    <button className="btn btn-ghost btn-sm" onClick={e => { e.stopPropagation(); handleDeleteString(ss.id); }} title="Delete">🗑️</button>
+                                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{ss.entryCount}</span>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={async (e) => { e.stopPropagation(); setSaving(true); await duplicateShowString(ss.id); setSaving(false); router.refresh(); }} title="Duplicate" disabled={saving}>📋</button>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={e => { e.stopPropagation(); handleDeleteString(ss.id); }} title="Delete">🗑️</button>
                                 </div>
                             </div>
 
@@ -212,7 +212,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                     </div>
                                                     <div style={{ marginTop: "var(--space-xs)" }}>
                                                         {conflicts.map((c, i) => (
-                                                            <div key={i} className="conflict-warning" style={{ fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                                            <div key={i} className="py-2 px-4 rounded-md bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] text-[#f59e0b] text-[calc(0.8rem*var(--font-scale))] font-semibold" style={{ fontSize: "calc(0.75rem * var(--font-scale))" }}>
                                                                 ⚠️ {c.reason}
                                                             </div>
                                                         ))}
@@ -224,12 +224,12 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                             {entries.length > 0 ? (
                                                 <div className="grid gap-1 m-[var(--space-md) 0]">
                                                     {entries.map(entry => (
-                                                        <div key={entry.id} className="show-string-entry-row">
-                                                            <span className="entry-horse">🐴 {entry.horseName}</span>
+                                                        <div key={entry.id} className="flex items-center gap-2 py-2 px-4 rounded-md bg-[rgba(0,0,0,0.03)] text-[calc(0.85rem*var(--font-scale))]">
+                                                            <span className="font-bold min-w-[140px]">🐴 {entry.horseName}</span>
                                                             <span className="flex-1">{entry.className}</span>
-                                                            {entry.division && <span className="entry-division">{entry.division}</span>}
-                                                            {entry.timeSlot && <span className="entry-timeslot">🕐 {entry.timeSlot}</span>}
-                                                            <button className="btn btn-ghost btn-sm" onClick={() => handleRemoveEntry(entry.id)} title="Remove">✕</button>
+                                                            {entry.division && <span className="text-[calc(0.75rem*var(--font-scale))] py-[2px] px-[8px] rounded-full bg-[rgba(139,92,246,0.1)] text-[#a78bfa]">{entry.division}</span>}
+                                                            {entry.timeSlot && <span className="text-[calc(0.75rem*var(--font-scale))] text-muted">🕐 {entry.timeSlot}</span>}
+                                                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => handleRemoveEntry(entry.id)} title="Remove">✕</button>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -240,30 +240,30 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                             {/* Add Entry Form */}
                                             <div className="mt-6 pt-6 border-t border-edge">
                                                 <h4>Add Entry</h4>
-                                                <div className="form-row-2col">
-                                                    <div className="form-group">
-                                                        <label className="form-label">Horse *</label>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="mb-6">
+                                                        <label className="block text-sm font-semibold text-ink mb-1">Horse *</label>
                                                         <select className="form-input" value={entryHorseId} onChange={e => setEntryHorseId(e.target.value)}>
                                                             <option value="">Select horse...</option>
                                                             {horses.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
                                                         </select>
                                                     </div>
-                                                    <div className="form-group">
-                                                        <label className="form-label">Class *</label>
+                                                    <div className="mb-6">
+                                                        <label className="block text-sm font-semibold text-ink mb-1">Class *</label>
                                                         <input className="form-input" value={entryClassName} onChange={e => setEntryClassName(e.target.value)} placeholder="e.g. Arabian Stallion" />
                                                     </div>
                                                 </div>
-                                                <div className="form-row-2col">
-                                                    <div className="form-group">
-                                                        <label className="form-label">Division</label>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="mb-6">
+                                                        <label className="block text-sm font-semibold text-ink mb-1">Division</label>
                                                         <input className="form-input" value={entryDivision} onChange={e => setEntryDivision(e.target.value)} placeholder="e.g. Breed" />
                                                     </div>
-                                                    <div className="form-group">
-                                                        <label className="form-label">Time Slot</label>
+                                                    <div className="mb-6">
+                                                        <label className="block text-sm font-semibold text-ink mb-1">Time Slot</label>
                                                         <input className="form-input" value={entryTimeSlot} onChange={e => setEntryTimeSlot(e.target.value)} placeholder="e.g. 10:00 AM" />
                                                     </div>
                                                 </div>
-                                                <button className="btn btn-primary btn-sm" onClick={handleAddEntry} disabled={saving || !entryHorseId || !entryClassName.trim()}>
+                                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={handleAddEntry} disabled={saving || !entryHorseId || !entryClassName.trim()}>
                                                     {saving ? "Adding..." : "+ Add Entry"}
                                                 </button>
                                             </div>
@@ -273,7 +273,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                 <div style={{ marginTop: "var(--space-lg)", borderTop: "1px solid var(--color-border)", paddingTop: "var(--space-md)" }}>
                                                     {!showResults ? (
                                                         <button
-                                                            className="btn btn-ghost"
+                                                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                                             onClick={() => {
                                                                 setShowResults(true);
                                                                 setResultsSaved(false);
@@ -369,7 +369,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
                                                             <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)" }}>
                                                                 <button
-                                                                    className="btn btn-primary"
+                                                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                                                     disabled={savingResults}
                                                                     onClick={async () => {
                                                                         setSavingResults(true);
@@ -395,7 +395,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                 >
                                                                     {savingResults ? "Saving..." : `💾 Save ${Object.values(results).filter(r => r.placing || r.ribbon).length} Results`}
                                                                 </button>
-                                                                <button className="btn btn-ghost" onClick={() => setShowResults(false)}>Cancel</button>
+                                                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setShowResults(false)}>Cancel</button>
                                                                 {resultsSaved && <span style={{ color: "var(--color-accent-primary)", fontWeight: 600 }}>✅ Saved!</span>}
                                                             </div>
                                                         </div>

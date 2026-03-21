@@ -43,7 +43,7 @@ export default function DeleteHorseModal({
     <>
       {/* Trigger button */}
       <button
-        className="btn bg-transparent text-danger border border-[rgba(240, 108, 126, 0.4)]"
+        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-danger border border-[rgba(240, 108, 126, 0.4)]"
         onClick={() => setShowModal(true)}
         id="delete-horse-button"
       >
@@ -76,7 +76,7 @@ export default function DeleteHorseModal({
           aria-modal="true"
           aria-labelledby="delete-modal-title"
         >
-          <div className="modal-card danger">
+          <div className="modal-bg-card border border-edge rounded-lg p-12 shadow-md transition-all danger">
             <div className="text-[3rem] text-center mb-4">⚠️</div>
             <h2 id="delete-modal-title">Delete &ldquo;{horseName}&rdquo;?</h2>
             <p>
@@ -87,7 +87,7 @@ export default function DeleteHorseModal({
 
             {error && (
               <div
-                className="form-error"
+                className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm"
                 role="alert"
                 style={{ marginBottom: "var(--space-lg)" }}
               >
@@ -109,7 +109,7 @@ export default function DeleteHorseModal({
 
             <div className="flex gap-4">
               <button
-                className="btn btn-ghost"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                 onClick={() => setShowModal(false)}
                 disabled={isDeleting}
                 id="delete-cancel"
@@ -117,14 +117,14 @@ export default function DeleteHorseModal({
                 Cancel
               </button>
               <button
-                className="btn btn-danger"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-[rgb(239,68,68)] text-white border-0 rounded-md py-[6px] px-[14px] text-sm font-[inherit] cursor-pointer transition-all"
                 onClick={handleDelete}
                 disabled={isDeleting}
                 id="delete-confirm"
               >
                 {isDeleting ? (
                   <>
-                    <span className="btn-spinner" aria-hidden="true" />
+                    <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
                     Deleting…
                   </>
                 ) : (

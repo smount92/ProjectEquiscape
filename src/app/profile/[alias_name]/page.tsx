@@ -264,7 +264,7 @@ export default async function ProfilePage({
   ).length;
 
   return (
-    <div className="page-container page-container-wide">
+    <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 max-w-[var(--max-width)]">
       {/* Profile Header */}
       <div className="profile-hero animate-fade-in-up">
         <div className="flex items-center justify-center w-[72px] h-[72px] rounded-full bg-[rgba(44, 85, 69, 0.12)] border-[2px] border-[rgba(44, 85, 69, 0.3)] text-forest shrink-0">
@@ -288,7 +288,7 @@ export default async function ProfilePage({
             </svg>
           )}
         </div>
-        <div className="profile-hero-content">
+        <div className="text-[calc(1.6rem*var(--font-scale))] font-extrabold tracking-[-0.02em] mb-1 text-forest">
           <h1>
             @{profileUser.alias_name}
             {isOwnProfile && (
@@ -319,7 +319,7 @@ export default async function ProfilePage({
           {studioSlug && (
             <Link
               href={`/studio/${studioSlug}`}
-              className="btn btn-ghost"
+              className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
               style={{ marginTop: "var(--space-xs)", display: "inline-flex", alignItems: "center", gap: "6px" }}
             >
               🎨 {isOwnProfile ? "My Studio" : `Visit ${studioName || "Studio"}`}
@@ -391,7 +391,7 @@ export default async function ProfilePage({
               <Link
                 key={col.id}
                 href={`/stable/collection/${col.id}`}
-                className="profile-collection-pill hover:0.12)] hover:0.3)] hover:translate-y-[-1px]"
+                className="inline-flex items-center gap-1 py-[6px] px-[14px] text-[calc(0.85rem*var(--font-scale))] bg-[rgba(129,140,248,0.06)] border border-[rgba(129,140,248,0.15)] rounded-md text-forest no-underline transition-all hover:0.12)] hover:0.3)] hover:translate-y-[-1px]"
               >
                 📁 {col.name}
               </Link>
@@ -424,7 +424,7 @@ export default async function ProfilePage({
 
       {/* Breadcrumb */}
       <nav
-        className="passport-breadcrumb animate-fade-in-up"
+        className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up"
         aria-label="Breadcrumb"
         style={{ marginBottom: "var(--space-lg)" }}
       >
@@ -435,8 +435,8 @@ export default async function ProfilePage({
 
       {/* Grid */}
       {profileCards.length === 0 ? (
-        <div className="card shelf-empty animate-fade-in-up">
-          <div className="shelf-empty-icon">🔒</div>
+        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+          <div className="text-center py-[var(--space-3xl)] px-8-icon">🔒</div>
           <h2>
             {isOwnProfile
               ? "You haven't made any models public yet"
@@ -448,7 +448,7 @@ export default async function ProfilePage({
               : "Check back later — they may share some soon!"}
           </p>
           {isOwnProfile && (
-            <Link href="/dashboard" className="btn btn-primary">
+            <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
               🏠 Go to My Stable
             </Link>
           )}
@@ -471,8 +471,8 @@ export default async function ProfilePage({
                     loading="lazy"
                   />
                 ) : (
-                  <div className="horse-card-placeholder">
-                    <span className="horse-card-placeholder-icon">🐴</span>
+                  <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
+                    <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
                     <span>No photo</span>
                   </div>
                 )}
@@ -482,12 +482,12 @@ export default async function ProfilePage({
                   {horse.finishType}
                 </span>
                 {horse.tradeStatus === "For Sale" && (
-                  <span className="trade-badge trade-for-sale">
+                  <span className="trade-badge bg-[rgba(34,197,94,0.85)] text-white border border-[rgba(34,197,94,0.5)]">
                     💲 {horse.listingPrice ? `$${horse.listingPrice.toLocaleString("en-US")}` : "For Sale"}
                   </span>
                 )}
                 {horse.tradeStatus === "Open to Offers" && (
-                  <span className="trade-badge trade-open-offers">
+                  <span className="trade-badge bg-[rgba(59,130,246,0.85)] text-white border border-[rgba(59,130,246,0.5)]">
                     🤝 {horse.listingPrice ? `~$${horse.listingPrice.toLocaleString("en-US")}` : "Open to Offers"}
                   </span>
                 )}
@@ -516,7 +516,7 @@ export default async function ProfilePage({
                   </span>
                 </div>
                 {horse.collectionName && (
-                  <div className="horse-card-collection">
+                  <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-collection">
                     📁 {horse.collectionName}
                   </div>
                 )}
@@ -544,7 +544,7 @@ export default async function ProfilePage({
 
       {/* Reviews Section */}
       {ratingSummary.count > 0 && (
-        <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-edge rounded-lg p-6 mt-8 animate-fade-in-up" id="reviews">
+        <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-edge rounded-lg p-6 mt-8 animate-fade-in-up" id="reviews">
           <div className="flex items-center gap-2 mb-6 [&_h2]:m-0 [&_h2]:text-[calc(1.1rem*var(--font-scale))]">
             <h2>⭐ Reviews ({ratingSummary.count})</h2>
           </div>

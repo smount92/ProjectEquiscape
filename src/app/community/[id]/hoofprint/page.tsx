@@ -75,14 +75,14 @@ export default async function HoofprintReportPage({
         : null;
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Header */}
-            <div className="community-hero animate-fade-in-up">
-                <div className="community-hero-content">
+            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
                     <h1>
-                        🐾 <span className="text-gradient">Hoofprint™ Report</span>
+                        🐾 <span className="text-forest">Hoofprint™ Report</span>
                     </h1>
-                    <p className="community-hero-subtitle">
+                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                         Full provenance record for <strong>{h.custom_name}</strong>
                     </p>
                     {refName && (
@@ -91,7 +91,7 @@ export default async function HoofprintReportPage({
                         </p>
                     )}
                     <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)", flexWrap: "wrap" }}>
-                        <Link href={`/community/${horseId}`} className="btn btn-ghost">
+                        <Link href={`/community/${horseId}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                             ← Back to Passport
                         </Link>
                         <ShareButton
@@ -117,7 +117,7 @@ export default async function HoofprintReportPage({
 
             {/* Show Records Summary */}
             {records.length > 0 && (
-                <div className="animate-fade-in-up card" style={{ marginTop: "var(--space-xl)", padding: "var(--space-lg)" }}>
+                <div className="animate-fade-in-up bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ marginTop: "var(--space-xl)", padding: "var(--space-lg)" }}>
                     <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                         🏆 Show Record
                     </h2>

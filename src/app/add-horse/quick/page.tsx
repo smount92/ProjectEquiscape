@@ -95,17 +95,17 @@ export default function QuickAddPage() {
     };
 
     return (
-        <div className="page-container form-page">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
             <div className="animate-fade-in-up" style={{ maxWidth: 640, margin: "0 auto" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
-                    <h1>⚡ <span className="text-gradient">Quick Add</span></h1>
-                    <Link href="/dashboard" className="btn btn-ghost">← Back</Link>
+                    <h1>⚡ <span className="text-forest">Quick Add</span></h1>
+                    <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Back</Link>
                 </div>
 
-                <div className="glass-card" style={{ padding: "var(--space-xl)" }}>
+                <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
                     {/* Catalog Search */}
                     <div style={{ marginBottom: "var(--space-lg)" }}>
-                        <label className="form-label">🔍 Search Catalog</label>
+                        <label className="block text-sm font-semibold text-ink mb-1">🔍 Search Catalog</label>
                         <UnifiedReferenceSearch
                             selectedCatalogId={selectedCatalog?.id || null}
                             onCatalogSelect={(catalogId, item) => {
@@ -135,7 +135,7 @@ export default function QuickAddPage() {
                     {/* Custom Name (optional if catalog selected) */}
                     {!selectedCatalog && (
                         <div style={{ marginBottom: "var(--space-lg)" }}>
-                            <label className="form-label">Name</label>
+                            <label className="block text-sm font-semibold text-ink mb-1">Name</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -149,7 +149,7 @@ export default function QuickAddPage() {
                     {/* Quick Selectors Row */}
                     <div className="quick-add-selectors">
                         <div>
-                            <label className="form-label">Finish</label>
+                            <label className="block text-sm font-semibold text-ink mb-1">Finish</label>
                             <select
                                 className="form-input"
                                 value={finishType}
@@ -162,7 +162,7 @@ export default function QuickAddPage() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Condition</label>
+                            <label className="block text-sm font-semibold text-ink mb-1">Condition</label>
                             <select
                                 className="form-input"
                                 value={conditionGrade}
@@ -175,7 +175,7 @@ export default function QuickAddPage() {
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Collection</label>
+                            <label className="block text-sm font-semibold text-ink mb-1">Collection</label>
                             <select
                                 className="form-input"
                                 value={collectionId}
@@ -192,7 +192,7 @@ export default function QuickAddPage() {
 
                     {/* Error */}
                     {error && (
-                        <div className="form-error" style={{ marginTop: "var(--space-md)" }}>
+                        <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-md)" }}>
                             ⚠️ {error}
                         </div>
                     )}
@@ -200,7 +200,7 @@ export default function QuickAddPage() {
                     {/* Action Buttons */}
                     <div className="flex gap-4 items-center flex-wrap">
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={handleAdd}
                             disabled={isAdding || (!selectedCatalog && !customName.trim())}
                             id="quick-add-submit"
@@ -209,7 +209,7 @@ export default function QuickAddPage() {
                         </button>
                         {selectedCatalog && recentAdds.length > 0 && (
                             <button
-                                className="btn btn-ghost"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                 onClick={handleDuplicate}
                                 id="quick-duplicate"
                             >
@@ -241,7 +241,7 @@ export default function QuickAddPage() {
                                 </span>
                                 <Link
                                     href={`/stable/${item.id}`}
-                                    className="btn btn-ghost"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                     style={{ padding: "2px 8px", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}
                                 >
                                     View →
@@ -249,7 +249,7 @@ export default function QuickAddPage() {
                             </div>
                         ))}
                         <button
-                            className="btn btn-ghost"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                             onClick={() => router.push("/dashboard")}
                             style={{ marginTop: "var(--space-sm)", width: "100%" }}
                         >

@@ -558,9 +558,9 @@ export default function EditHorsePage() {
 
   if (isLoading) {
     return (
-      <div className="page-container form-page">
+      <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
         <div className="py-12 px-[0] max-w-[680px] mx-auto" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
-          <div className="btn-spinner" style={{ width: 36, height: 36, margin: "0 auto var(--space-lg)", borderWidth: 3, borderColor: "var(--color-border)", borderTopColor: "var(--color-accent-primary)" }} />
+          <div className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ width: 36, height: 36, margin: "0 auto var(--space-lg)", borderWidth: 3, borderColor: "var(--color-border)", borderTopColor: "var(--color-accent-primary)" }} />
           <p>Loading horse details…</p>
         </div>
       </div>
@@ -569,20 +569,20 @@ export default function EditHorsePage() {
 
   if (error) {
     return (
-      <div className="page-container form-page">
-        <div className="text-center py-[var(--space-3xl)] px-8 card">
+      <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+        <div className="text-center py-[var(--space-3xl)] px-8 bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
           <div className="text-center py-[var(--space-3xl)] px-8-icon">🚫</div>
           <h1>Access Denied</h1>
           <p>{error}</p>
-          <Link href="/dashboard" className="btn btn-primary">Back to Stable</Link>
+          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">Back to Stable</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page-container form-page">
-      <nav className="passport-breadcrumb animate-fade-in-up" aria-label="Breadcrumb">
+    <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+      <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up" aria-label="Breadcrumb">
         <Link href="/dashboard">Digital Stable</Link>
         <span className="separator" aria-hidden="true">/</span>
         <Link href={`/stable/${horseId}`}>{customName}</Link>
@@ -592,11 +592,11 @@ export default function EditHorsePage() {
 
       <div className="py-12 px-[0] max-w-[680px] mx-auto animate-fade-in-up">
         <h1 style={{ marginBottom: "var(--space-xl)" }}>
-          Edit <span className="text-gradient">{customName}</span>
+          Edit <span className="text-forest">{customName}</span>
         </h1>
 
         {saveError && (
-          <div className="form-error" role="alert" style={{ marginBottom: "var(--space-xl)" }}>
+          <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert" style={{ marginBottom: "var(--space-xl)" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
             </svg>
@@ -605,9 +605,9 @@ export default function EditHorsePage() {
         )}
 
         {/* ===== Photo Studio ===== */}
-        <div className="bg-card border border-edge rounded-lg p-12 mb-8">
-          <div className="bg-card border border-edge rounded-lg p-12 mb-8-header">
-            <div className="bg-card border border-edge rounded-lg p-12 mb-8-icon">📸</div>
+        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">📸</div>
             <h2>Photo Studio</h2>
           </div>
           <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
@@ -825,40 +825,40 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 1: Identity ===== */}
-        <div className="bg-card border border-edge rounded-lg p-12 mb-8">
-          <div className="bg-card border border-edge rounded-lg p-12 mb-8-header">
-            <div className="bg-card border border-edge rounded-lg p-12 mb-8-icon">🏷️</div>
+        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">🏷️</div>
             <h2>Model Identity</h2>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="edit-name" className="form-label">Custom Name *</label>
+          <div className="mb-6">
+            <label htmlFor="edit-name" className="block text-sm font-semibold text-ink mb-1">Custom Name *</label>
             <input id="edit-name" type="text" className="form-input" value={customName}
               onChange={(e) => setCustomName(e.target.value)} maxLength={100} />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="edit-sculptor" className="form-label">Sculptor / Artist</label>
+          <div className="mb-6">
+            <label htmlFor="edit-sculptor" className="block text-sm font-semibold text-ink mb-1">Sculptor / Artist</label>
             <input id="edit-sculptor" type="text" className="form-input" value={sculptor}
               onChange={(e) => setSculptor(e.target.value)} maxLength={100}
               placeholder="e.g. Sarah Rose, Brigitte Eberl…" />
-            <span className="form-hint">
+            <span className="block mt-1 text-xs text-muted">
               Optional — tag the sculptor or artist, especially for Artist Resins or custom work.
             </span>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="edit-finishing-artist" className="form-label">🎨 Finishing Artist</label>
+          <div className="mb-6">
+            <label htmlFor="edit-finishing-artist" className="block text-sm font-semibold text-ink mb-1">🎨 Finishing Artist</label>
             <input id="edit-finishing-artist" type="text" className="form-input" value={finishingArtist}
               onChange={(e) => setFinishingArtist(e.target.value)} maxLength={100}
               placeholder="Who painted or customized this model?" />
-            <span className="form-hint">
+            <span className="block mt-1 text-xs text-muted">
               The artist who painted/finished this model (if different from sculptor).
             </span>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">📋 Edition Info</label>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-ink mb-1">📋 Edition Info</label>
             <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
               <input type="number" className="form-input" placeholder="#"
                 value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)}
@@ -868,21 +868,21 @@ export default function EditHorsePage() {
                 value={editionSize} onChange={(e) => setEditionSize(e.target.value)}
                 style={{ width: 80 }} min="1" />
             </div>
-            <span className="form-hint">e.g., &quot;3 of 50&quot; for limited edition runs.</span>
+            <span className="block mt-1 text-xs text-muted">e.g., &quot;3 of 50&quot; for limited edition runs.</span>
           </div>
 
           {/* Finish Details */}
-          <div className="form-group">
-            <label className="form-label">Finish Details</label>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-ink mb-1">Finish Details</label>
             <input className="form-input" type="text" value={finishDetails}
               onChange={(e) => setFinishDetails(e.target.value)}
               placeholder="e.g. Glossy, Matte, Satin, Chalky" maxLength={100} id="edit-finish-details" />
           </div>
 
           {/* Public Notes */}
-          <div className="form-group">
-            <label className="form-label">Public Notes</label>
-            <textarea className="form-textarea" value={publicNotes}
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-ink mb-1">Public Notes</label>
+            <textarea className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150" value={publicNotes}
               onChange={(e) => setPublicNotes(e.target.value)}
               placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
               maxLength={500} rows={2} id="edit-public-notes" />
@@ -901,14 +901,14 @@ export default function EditHorsePage() {
             </small>
           </div>
           <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
-            <div className="form-group" style={{ flex: "1 1 200px" }}>
-              <label className="form-label">Assigned Breed</label>
+            <div className="mb-6" style={{ flex: "1 1 200px" }}>
+              <label className="block text-sm font-semibold text-ink mb-1">Assigned Breed</label>
               <input className="form-input" type="text" value={assignedBreed}
                 onChange={(e) => setAssignedBreed(e.target.value)}
                 placeholder="e.g. Andalusian, Arabian" maxLength={100} id="edit-assigned-breed" />
             </div>
-            <div className="form-group" style={{ flex: "1 1 150px" }}>
-              <label className="form-label">Assigned Gender</label>
+            <div className="mb-6" style={{ flex: "1 1 150px" }}>
+              <label className="block text-sm font-semibold text-ink mb-1">Assigned Gender</label>
               <select className="form-select" value={assignedGender}
                 onChange={(e) => setAssignedGender(e.target.value)} id="edit-assigned-gender">
                 <option value="">Select…</option>
@@ -922,14 +922,14 @@ export default function EditHorsePage() {
             </div>
           </div>
           <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
-            <div className="form-group" style={{ flex: "1 1 150px" }}>
-              <label className="form-label">Assigned Age</label>
+            <div className="mb-6" style={{ flex: "1 1 150px" }}>
+              <label className="block text-sm font-semibold text-ink mb-1">Assigned Age</label>
               <input className="form-input" type="text" value={assignedAge}
                 onChange={(e) => setAssignedAge(e.target.value)}
                 placeholder="e.g. Foal, Yearling, Adult" maxLength={50} id="edit-assigned-age" />
             </div>
-            <div className="form-group" style={{ flex: "1 1 200px" }}>
-              <label className="form-label">Regional Show ID</label>
+            <div className="mb-6" style={{ flex: "1 1 200px" }}>
+              <label className="block text-sm font-semibold text-ink mb-1">Regional Show ID</label>
               <input className="form-input" type="text" value={regionalId}
                 onChange={(e) => setRegionalId(e.target.value)}
                 placeholder="e.g. RX number, Texas System ID" maxLength={50} id="edit-regional-id" />
@@ -939,8 +939,8 @@ export default function EditHorsePage() {
           {/* Finish Type & Condition — model only */}
           {isModel && (
             <div className="grid grid-cols-2 gap-6">
-              <div className="form-group">
-                <label htmlFor="edit-finish" className="form-label">Finish Type *</label>
+              <div className="mb-6">
+                <label htmlFor="edit-finish" className="block text-sm font-semibold text-ink mb-1">Finish Type *</label>
                 <select id="edit-finish" className="form-select" value={finishType}
                   onChange={(e) => setFinishType(e.target.value as FinishType)}>
                   <option value="">Select finish type…</option>
@@ -950,8 +950,8 @@ export default function EditHorsePage() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="edit-condition" className="form-label">Condition Grade *</label>
+              <div className="mb-6">
+                <label htmlFor="edit-condition" className="block text-sm font-semibold text-ink mb-1">Condition Grade *</label>
                 <select id="edit-condition" className="form-select" value={conditionGrade}
                   onChange={(e) => setConditionGrade(e.target.value)}>
                   <option value="">Select condition…</option>
@@ -972,7 +972,7 @@ export default function EditHorsePage() {
                       📝 Condition changed: {originalCondition} → {conditionGrade}
                     </div>
                     <textarea
-                      className="form-textarea"
+                      className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                       rows={2}
                       maxLength={300}
                       placeholder="What happened? (optional — visible on Hoofprint™)"
@@ -980,7 +980,7 @@ export default function EditHorsePage() {
                       onChange={(e) => setConditionNote(e.target.value)}
                       style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                     />
-                    <span className="form-hint">
+                    <span className="block mt-1 text-xs text-muted">
                       e.g., &quot;Minor rub discovered on left hip during cleaning&quot;
                     </span>
                   </div>
@@ -991,8 +991,8 @@ export default function EditHorsePage() {
 
           {/* Life Stage — model only */}
           {isModel && (
-            <div className="form-group">
-              <label htmlFor="edit-life-stage" className="form-label">🐾 Life Stage</label>
+            <div className="mb-6">
+              <label htmlFor="edit-life-stage" className="block text-sm font-semibold text-ink mb-1">🐾 Life Stage</label>
               <select
                 id="edit-life-stage"
                 className="form-select"
@@ -1009,7 +1009,7 @@ export default function EditHorsePage() {
                 <option value="completed">✅ Completed</option>
                 <option value="for_sale">💲 For Sale</option>
               </select>
-              <span className="form-hint">
+              <span className="block mt-1 text-xs text-muted">
                 Changing this will add a stage update to the Hoofprint™ timeline.
               </span>
             </div>
@@ -1021,8 +1021,8 @@ export default function EditHorsePage() {
           />
 
           {/* Marketplace Status */}
-          <div className="form-group">
-            <label htmlFor="edit-trade-status" className="form-label">Marketplace Status</label>
+          <div className="mb-6">
+            <label htmlFor="edit-trade-status" className="block text-sm font-semibold text-ink mb-1">Marketplace Status</label>
             <select id="edit-trade-status" className="form-select" value={tradeStatus}
               onChange={(e) => setTradeStatus(e.target.value)}>
               <option value="Not for Sale">Not for Sale</option>
@@ -1035,16 +1035,16 @@ export default function EditHorsePage() {
           {/* Conditional marketplace fields */}
           {(tradeStatus === "For Sale" || tradeStatus === "Open to Offers") && (
             <div className="mt-4 p-4 bg-[rgba(34, 197, 94, 0.05)] border border-[rgba(34, 197, 94, 0.15)] rounded-md animate-fade-in-up">
-              <div className="form-group">
-                <label htmlFor="edit-listing-price" className="form-label">💲 Listing Price</label>
+              <div className="mb-6">
+                <label htmlFor="edit-listing-price" className="block text-sm font-semibold text-ink mb-1">💲 Listing Price</label>
                 <input id="edit-listing-price" type="number" className="form-input"
                   placeholder="0.00" min="0" step="0.01" value={listingPrice}
                   onChange={(e) => setListingPrice(e.target.value)} />
-                <span className="form-hint">Optional — leave blank for &ldquo;Contact for price&rdquo;</span>
+                <span className="block mt-1 text-xs text-muted">Optional — leave blank for &ldquo;Contact for price&rdquo;</span>
               </div>
-              <div className="form-group">
-                <label htmlFor="edit-marketplace-notes" className="form-label">📝 Seller Notes</label>
-                <textarea id="edit-marketplace-notes" className="form-textarea" rows={3}
+              <div className="mb-6">
+                <label htmlFor="edit-marketplace-notes" className="block text-sm font-semibold text-ink mb-1">📝 Seller Notes</label>
+                <textarea id="edit-marketplace-notes" className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150" rows={3}
                   maxLength={500} placeholder="e.g. Will ship anywhere, Trades welcome..."
                   value={marketplaceNotes} onChange={(e) => setMarketplaceNotes(e.target.value)} />
               </div>
@@ -1055,7 +1055,7 @@ export default function EditHorsePage() {
         {/* Community visibility selector */}
         <div className="mt-6 py-4 px-6 rounded-lg bg-[rgba(44, 85, 69, 0.04)] border border-[rgba(44, 85, 69, 0.12)]">
           <div className="flex items-center justify-between gap-6" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
-            <span className="community-toggle-label">👁️ Visibility</span>
+            <span className="text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold text-ink">👁️ Visibility</span>
             <div className="flex gap-2 flex-wrap">
               {([
                 { value: "public" as const, icon: "🌐", label: "Public", hint: "Visible in the Show Ring" },
@@ -1079,9 +1079,9 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 2: Reference Link (Unified Search) ===== */}
-        <div className="bg-card border border-edge rounded-lg p-12 mb-8">
-          <div className="bg-card border border-edge rounded-lg p-12 mb-8-header">
-            <div className="bg-card border border-edge rounded-lg p-12 mb-8-icon">🔗</div>
+        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">🔗</div>
             <h2>Reference Link</h2>
           </div>
 
@@ -1104,7 +1104,7 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 3: Financial Vault ===== */}
-        <div className="bg-card border border-edge rounded-lg p-12 mb-8 relative overflow-hidden">
+        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8 relative overflow-hidden">
           <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[rgba(240, 160, 108, 0.2)]">
             <div className="vault-icon">🔒</div>
             <div>
@@ -1122,21 +1122,21 @@ export default function EditHorsePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-6">
-            <div className="form-group">
-              <label htmlFor="edit-price" className="form-label">Purchase Price</label>
+            <div className="mb-6">
+              <label htmlFor="edit-price" className="block text-sm font-semibold text-ink mb-1">Purchase Price</label>
               <input id="edit-price" type="number" className="form-input" placeholder="0.00"
                 min="0" step="0.01" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)} />
             </div>
-            <div className="form-group">
-              <label htmlFor="edit-date" className="form-label">Purchase Date</label>
+            <div className="mb-6">
+              <label htmlFor="edit-date" className="block text-sm font-semibold text-ink mb-1">Purchase Date</label>
               <input id="edit-date" type="date" className="form-input" value={purchaseDate}
                 onChange={(e) => setPurchaseDate(e.target.value)} />
             </div>
           </div>
 
           {/* Fuzzy Purchase Date */}
-          <div className="form-group">
-            <label className="form-label">Approximate Purchase Date</label>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-ink mb-1">Approximate Purchase Date</label>
             <input className="form-input" type="text" value={purchaseDateText}
               onChange={(e) => setPurchaseDateText(e.target.value)}
               placeholder="e.g. BreyerFest 2017, Summer 2015" id="edit-purchase-date-text" />
@@ -1146,13 +1146,13 @@ export default function EditHorsePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-6">
-            <div className="form-group">
-              <label htmlFor="edit-value" className="form-label">Estimated Current Value</label>
+            <div className="mb-6">
+              <label htmlFor="edit-value" className="block text-sm font-semibold text-ink mb-1">Estimated Current Value</label>
               <input id="edit-value" type="number" className="form-input" placeholder="0.00"
                 min="0" step="0.01" value={estimatedValue} onChange={(e) => setEstimatedValue(e.target.value)} />
             </div>
-            <div className="form-group">
-              <label htmlFor="edit-insurance" className="form-label">Insurance Notes</label>
+            <div className="mb-6">
+              <label htmlFor="edit-insurance" className="block text-sm font-semibold text-ink mb-1">Insurance Notes</label>
               <input id="edit-insurance" type="text" className="form-input"
                 placeholder="Policy number, coverage details, etc."
                 value={insuranceNotes} onChange={(e) => setInsuranceNotes(e.target.value)} />
@@ -1162,15 +1162,15 @@ export default function EditHorsePage() {
 
         {/* ===== Actions ===== */}
         <div className="flex gap-4 justify-end">
-          <Link href={`/stable/${horseId}`} className="btn btn-ghost" id="edit-cancel">
+          <Link href={`/stable/${horseId}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" id="edit-cancel">
             Cancel
           </Link>
-          <button className="btn btn-primary" onClick={handleSave}
+          <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleSave}
             disabled={isSaving || !customName.trim() || !finishType || !conditionGrade}
             id="edit-save">
             {isSaving ? (
               <>
-                <span className="btn-spinner" aria-hidden="true" />
+                <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
                 {Object.keys(newFiles).length > 0 ? "Uploading…" : "Saving…"}
               </>
             ) : (

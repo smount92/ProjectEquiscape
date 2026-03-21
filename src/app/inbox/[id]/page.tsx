@@ -220,7 +220,7 @@ export default async function ChatPage({
         .or(`and(sender_id.eq.${user.id},claimed_by.eq.${otherId}),and(sender_id.eq.${otherId},claimed_by.eq.${user.id})`);
 
     return (
-        <div className="page-container flex flex-col h-[calc(100vh - 70px)] max-h-[calc(100vh - 70px)] overflow-hidden">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 flex flex-col h-[calc(100vh - 70px)] max-h-[calc(100vh - 70px)] overflow-hidden">
             {/* Header */}
             <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0 animate-fade-in-up">
                 <Link href="/inbox" className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-[rgba(0, 0, 0, 0.05)] text-muted no-underline transition-all shrink-0" aria-label="Back to inbox">
@@ -300,7 +300,7 @@ export default async function ChatPage({
             {horseContext && (
                 <Link
                     href={`/community/${horseContext.id}`}
-                    className="group flex items-center gap-4 p-4 bg-[var(--color-bg-card)] border border-edge rounded-lg mb-4 no-underline text-ink transition-all hover:border-forest hover:bg-[var(--color-bg-card-hover)] hover:-translate-y-px hover:shadow-md animate-fade-in-up"
+                    className="group flex items-center gap-4 p-4 bg-[var(--color-bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all)] border border-edge rounded-lg mb-4 no-underline text-ink transition-all hover:border-forest hover:bg-[var(--color-bg-card-hover)] hover:-translate-y-px hover:shadow-md animate-fade-in-up"
                     id="chat-horse-link"
                 >
                     {horseContext.thumbnailUrl ? (

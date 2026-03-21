@@ -41,8 +41,8 @@ export default function CreateShowForm() {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-[500px]">
-            <div className="form-group">
-                <label className="form-label">Show Title</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Show Title</label>
                 <input
                     type="text"
                     className="form-input"
@@ -52,8 +52,8 @@ export default function CreateShowForm() {
                     required
                 />
             </div>
-            <div className="form-group">
-                <label className="form-label">Theme (optional)</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Theme (optional)</label>
                 <input
                     type="text"
                     className="form-input"
@@ -62,8 +62,8 @@ export default function CreateShowForm() {
                     placeholder="e.g. Best OF Breyer"
                 />
             </div>
-            <div className="form-group">
-                <label className="form-label">Description (optional)</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Description (optional)</label>
                 <textarea
                     className="form-input"
                     value={description}
@@ -73,8 +73,8 @@ export default function CreateShowForm() {
                 />
             </div>
 
-            <div className="form-group">
-                <label className="form-label">Entries Close (optional)</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Entries Close (optional)</label>
                 <input
                     type="datetime-local"
                     className="form-input"
@@ -90,10 +90,10 @@ export default function CreateShowForm() {
                 <div className="comment-error" style={{ marginBottom: "var(--space-md)" }}>{errorMsg}</div>
             )}
             {status === "saved" && (
-                <div className="comment-success" style={{ marginBottom: "var(--space-md)" }}>✅ Show created!</div>
+                <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))]" style={{ marginBottom: "var(--space-md)" }}>✅ Show created!</div>
             )}
 
-            <button type="submit" className="btn btn-primary" disabled={status === "saving"}>
+            <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={status === "saving"}>
                 {status === "saving" ? "Creating…" : "📸 Create Photo Show"}
             </button>
         </form>

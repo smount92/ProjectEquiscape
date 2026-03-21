@@ -119,13 +119,13 @@ export default function ShowRecordForm({
     };
 
     return (
-        <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-primary,rgba(108,99,255,0.3))] rounded-lg p-6 mb-6">
+        <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-primary,rgba(108,99,255,0.3))] rounded-lg p-6 mb-6">
             <div className="text-[calc(1rem*var(--font-scale))] font-semibold mb-4">
                 {isEdit ? "✏️ Edit Show Record" : "🏅 Add Show Record"}
             </div>
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label className="form-label">
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1">
                         Show Name <span style={{ color: "#e74c6f" }}>*</span>
                     </label>
                     <input
@@ -141,8 +141,8 @@ export default function ShowRecordForm({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
-                    <div className="form-group">
-                        <label className="form-label">Show Date</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Show Date</label>
                         <input
                             className="form-input"
                             type="date"
@@ -151,8 +151,8 @@ export default function ShowRecordForm({
                             id="show-record-date"
                         />
                     </div>
-                    <div className="form-group">
-                        <label className="form-label">Division / Section</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Division / Section</label>
                         <input
                             className="form-input"
                             type="text"
@@ -165,8 +165,8 @@ export default function ShowRecordForm({
                 </div>
 
                 {/* Class Name — between Division and Placing */}
-                <div className="form-group">
-                    <label className="form-label">Class Name</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1">Class Name</label>
                     <input
                         className="form-input"
                         type="text"
@@ -181,8 +181,8 @@ export default function ShowRecordForm({
                 </div>
 
                 {/* Fuzzy Date fallback */}
-                <div className="form-group">
-                    <label className="form-label">Approximate Date</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1">Approximate Date</label>
                     <input
                         className="form-input"
                         type="text"
@@ -197,8 +197,8 @@ export default function ShowRecordForm({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
-                    <div className="form-group">
-                        <label className="form-label">Placing</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Placing</label>
                         <input
                             className="form-input"
                             type="text"
@@ -208,8 +208,8 @@ export default function ShowRecordForm({
                             id="show-record-placing"
                         />
                     </div>
-                    <div className="form-group">
-                        <label className="form-label">Ribbon Color</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Ribbon Color</label>
                         <select
                             className="form-select"
                             value={ribbonColor}
@@ -225,8 +225,8 @@ export default function ShowRecordForm({
                     </div>
                 </div>
 
-                <div className="form-group">
-                    <label className="form-label">Judge</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1">Judge</label>
                     <input
                         className="form-input"
                         type="text"
@@ -237,7 +237,7 @@ export default function ShowRecordForm({
                     />
                 </div>
 
-                <div className="form-group" style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
+                <div className="mb-6" style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
                     <input
                         type="checkbox"
                         checked={isNan}
@@ -245,15 +245,15 @@ export default function ShowRecordForm({
                         id="show-record-nan"
                         style={{ width: 18, height: 18, accentColor: "#F59E0B" }}
                     />
-                    <label htmlFor="show-record-nan" className="form-label" style={{ marginBottom: 0 }}>
+                    <label htmlFor="show-record-nan" className="block text-sm font-semibold text-ink mb-1" style={{ marginBottom: 0 }}>
                         ⭐ NAN Achievement
                     </label>
                 </div>
 
-                <div className="form-group">
-                    <label className="form-label">Notes</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1">Notes</label>
                     <textarea
-                        className="form-textarea"
+                        className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Additional notes (optional)"
@@ -264,10 +264,10 @@ export default function ShowRecordForm({
                 </div>
 
                 {/* Advanced Details Toggle */}
-                <div className="form-group">
+                <div className="mb-6">
                     <button
                         type="button"
-                        className="btn btn-ghost btn-sm"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                         onClick={() => setShowAdvanced(!showAdvanced)}
                         style={{ width: "100%" }}
                         id="show-record-advanced-toggle"
@@ -279,8 +279,8 @@ export default function ShowRecordForm({
                 {showAdvanced && (
                     <>
                         <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
-                            <div className="form-group">
-                                <label className="form-label">Location</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Location</label>
                                 <input
                                     className="form-input"
                                     type="text"
@@ -290,8 +290,8 @@ export default function ShowRecordForm({
                                     id="show-record-location"
                                 />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Section</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Section</label>
                                 <input
                                     className="form-input"
                                     type="text"
@@ -304,8 +304,8 @@ export default function ShowRecordForm({
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
-                            <div className="form-group">
-                                <label className="form-label">Award Category</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Award Category</label>
                                 <select
                                     className="form-select"
                                     value={awardCategory}
@@ -321,8 +321,8 @@ export default function ShowRecordForm({
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Competition Level</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Competition Level</label>
                                 <select
                                     className="form-select"
                                     value={competitionLevel}
@@ -349,14 +349,14 @@ export default function ShowRecordForm({
                 <div className="flex justify-end gap-2 mt-6">
                     <button
                         type="button"
-                        className="btn btn-ghost"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                         onClick={onCancel}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                         disabled={!showName.trim() || status === "saving"}
                     >
                         {status === "saving" ? "Saving…" : isEdit ? "Update" : "Add Record"}

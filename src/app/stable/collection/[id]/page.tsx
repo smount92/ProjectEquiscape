@@ -171,9 +171,9 @@ export default async function CollectionPage({
   });
 
   return (
-    <div className="page-container form-page">
+    <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
       {/* Breadcrumb */}
-      <nav className="passport-breadcrumb animate-fade-in-up" aria-label="Breadcrumb">
+      <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up" aria-label="Breadcrumb">
         <Link href="/dashboard">Digital Stable</Link>
         <span className="separator" aria-hidden="true">/</span>
         <span>📁 {collection.name}</span>
@@ -182,7 +182,7 @@ export default async function CollectionPage({
       {/* Collection Header */}
       <div className="collection-hero animate-fade-in-up">
         <div className="text-[2.5rem] shrink-0">📁</div>
-        <div className="collection-hero-content">
+        <div className="text-[calc(1.5rem*var(--font-scale))] font-bold text-ink mb-1">
           <h1>{collection.name}</h1>
           {collection.description && (
             <p className="text-sm text-[var(--color-text-secondary)] mb-1">{collection.description}</p>
@@ -199,12 +199,12 @@ export default async function CollectionPage({
       {/* 🔒 Collection Stats — PRIVATE analytics */}
       {horseCards.length > 0 && (
         <div className="grid grid-cols-[repeat(3, 1fr)] gap-4 mb-8 animate-fade-in-up">
-          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
+          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge text-center transition-all relative overflow-hidden">
             <div className="text-2xl leading-none">🐴</div>
             <div className="analytics-value">{horseCards.length}</div>
             <div className="text-xs font-medium text-muted uppercase tracking-[0.05em]">Models</div>
           </div>
-          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
+          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge text-center transition-all relative overflow-hidden">
             <div className="text-2xl leading-none">💰</div>
             <div className="analytics-value">
               {collectionVaultValue > 0
@@ -213,7 +213,7 @@ export default async function CollectionPage({
             </div>
             <div className="text-xs font-medium text-muted uppercase tracking-[0.05em]">Collection Value</div>
           </div>
-          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
+          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge text-center transition-all relative overflow-hidden">
             <div className="text-2xl leading-none">📊</div>
             <div className="analytics-value">
               {avgValue > 0
@@ -227,13 +227,13 @@ export default async function CollectionPage({
 
       {/* Grid */}
       {horseCards.length === 0 ? (
-        <div className="card shelf-empty animate-fade-in-up">
-          <div className="shelf-empty-icon">📂</div>
+        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+          <div className="text-center py-[var(--space-3xl)] px-8-icon">📂</div>
           <h2>This collection is empty</h2>
           <p>
             Add models to this collection from the &quot;Add to Stable&quot; form or by editing an existing model.
           </p>
-          <Link href="/add-horse" className="btn btn-primary">
+          <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
             🐴 Add to Stable
           </Link>
         </div>
@@ -243,7 +243,7 @@ export default async function CollectionPage({
             <Link
               key={horse.id}
               href={`/stable/${horse.id}`}
-              className="horse-card"
+              className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all"
               id={`collection-horse-${horse.id}`}
             >
               <div className="w-full h-full object-contain transition-transform">
@@ -251,8 +251,8 @@ export default async function CollectionPage({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                 ) : (
-                  <div className="horse-card-placeholder">
-                    <span className="horse-card-placeholder-icon">🐴</span>
+                  <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
+                    <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
                     <span>No photo</span>
                   </div>
                 )}
@@ -260,14 +260,14 @@ export default async function CollectionPage({
                   {horse.finishType}
                 </span>
                 {horse.tradeStatus === "For Sale" && (
-                  <span className="trade-badge trade-for-sale">💲 For Sale</span>
+                  <span className="trade-badge bg-[rgba(34,197,94,0.85)] text-white border border-[rgba(34,197,94,0.5)]">💲 For Sale</span>
                 )}
                 {horse.tradeStatus === "Open to Offers" && (
-                  <span className="trade-badge trade-open-offers">🤝 Open to Offers</span>
+                  <span className="trade-badge bg-[rgba(59,130,246,0.85)] text-white border border-[rgba(59,130,246,0.5)]">🤝 Open to Offers</span>
                 )}
               </div>
               <div className="py-4 px-6">
-                <div className="horse-card-name">{horse.customName}</div>
+                <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-name">{horse.customName}</div>
                 <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis">{horse.refName}</div>
                 {horse.releaseLine && (
                   <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>

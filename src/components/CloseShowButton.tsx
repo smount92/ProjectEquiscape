@@ -28,7 +28,7 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
     };
 
     return (
-        <div className="card animate-fade-in-up" style={{
+        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
             textAlign: "center",
             padding: "var(--space-lg)",
             marginBottom: "var(--space-lg)",
@@ -41,7 +41,7 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
                 Close this show to calculate results and generate show records for the top finishers.
             </p>
             <button
-                className="btn btn-primary"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                 onClick={handleClose}
                 disabled={busy}
                 style={{ minWidth: "220px" }}
@@ -49,7 +49,7 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
                 {busy ? "Calculating Results…" : "🏆 Close Show & Calculate Results"}
             </button>
             {error && (
-                <p className="form-error" style={{ marginTop: "var(--space-sm)" }}>{error}</p>
+                <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-sm)" }}>{error}</p>
             )}
         </div>
     );

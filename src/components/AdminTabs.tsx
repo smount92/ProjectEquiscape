@@ -113,7 +113,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
         return (
             <span style={{ display: "inline-flex", gap: "var(--space-xs)", alignItems: "center" }}>
                 <button
-                    className="admin-mark-btn"
+                    className="admin-mark-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
                     style={{ background: "rgba(239, 68, 68, 0.15)", borderColor: "rgba(239, 68, 68, 0.4)", color: "#ef4444" }}
                     onClick={handleDelete}
                     disabled={deleting}
@@ -121,7 +121,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
                     {deleting ? "…" : "Confirm"}
                 </button>
                 <button
-                    className="admin-mark-btn bg-[rgba(0, 0, 0, 0.05)] border-edge text-muted"
+                    className="admin-mark-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-[rgba(0, 0, 0, 0.05)] border-edge text-muted"
                     onClick={() => setConfirming(false)}
                     disabled={deleting}
                 >
@@ -133,7 +133,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
 
     return (
         <button
-            className="admin-mark-btn"
+            className="admin-mark-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
             style={{ background: "rgba(239, 68, 68, 0.08)", borderColor: "rgba(239, 68, 68, 0.2)", color: "#ef4444" }}
             onClick={() => setConfirming(true)}
             title="Delete this message"
@@ -222,8 +222,8 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
 function MailboxTab({ messages }: { messages: ContactMessage[] }) {
     if (messages.length === 0) {
         return (
-            <div className="card shelf-empty">
-                <div className="shelf-empty-icon">📬</div>
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+                <div className="text-center py-[var(--space-3xl)] px-8-icon">📬</div>
                 <h2>No Messages Yet</h2>
                 <p>Contact form submissions will appear here.</p>
             </div>
@@ -237,7 +237,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
                     key={msg.id}
                     className={`admin-message ${msg.is_read ? "admin-message-read" : "admin-message-unread"}`}
                 >
-                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-header">
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                         <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sender">
                             <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-name">{msg.name}</span>
                             <a href={`mailto:${msg.email}`} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-email">
@@ -316,8 +316,8 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
 function ReportsTab({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="card shelf-empty">
-                <div className="shelf-empty-icon">🎉</div>
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+                <div className="text-center py-[var(--space-3xl)] px-8-icon">🎉</div>
                 <h2>All Clear</h2>
                 <p>No open reports to review.</p>
             </div>
@@ -355,8 +355,8 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
     if (suggestions.length === 0) {
         return (
-            <div className="card shelf-empty">
-                <div className="shelf-empty-icon">📚</div>
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+                <div className="text-center py-[var(--space-3xl)] px-8-icon">📚</div>
                 <h2>No Pending Catalog Suggestions</h2>
                 <p>Community suggestions will appear here for review.</p>
             </div>

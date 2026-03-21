@@ -79,15 +79,15 @@ export default async function SuggestionsPage({ searchParams }: Props) {
     ];
 
     return (
-        <div className="page-container">
-            <nav className="ref-breadcrumb">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+            <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6">
                 <Link href="/catalog">📚 Reference Catalog</Link>
-                <span className="ref-breadcrumb-sep">›</span>
+                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
                 <span>Suggestions</span>
             </nav>
 
-            <h1 className="ref-page-title">
-                📝 <span className="text-gradient">Catalog Suggestions</span>
+            <h1 className="font-sans text-[calc(1.8rem*var(--font-scale))] mb-1">
+                📝 <span className="text-forest">Catalog Suggestions</span>
             </h1>
             <p className="text-muted mb-6">
                 Community proposals to improve the reference catalog. Vote and discuss
@@ -108,7 +108,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
             </div>
 
             {/* Results */}
-            <p className="ref-results-count">{count ?? 0} suggestions</p>
+            <p className="text-[calc(0.85rem*var(--font-scale))] text-muted mb-2">{count ?? 0} suggestions</p>
 
             <div className="flex flex-col gap-2">
                 {(
@@ -181,7 +181,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                         <Link
                             key={s.id}
                             href={`/catalog/suggestions/${s.id}`}
-                            className="card p-4 no-underline text-[var(--color-text)] transition-transform block"
+                            className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-4 no-underline text-[var(--color-text)] transition-transform block"
                         >
                             <div className="flex justify-between items-center mb-1">
                                 <span className="text-[1.2rem]">
@@ -194,17 +194,17 @@ export default async function SuggestionsPage({ searchParams }: Props) {
 
                             <div className="ref-suggestion-body">
                                 {changeSummary && (
-                                    <p className="ref-suggestion-changes">
+                                    <p className="text-[calc(0.9rem*var(--font-scale))] font-medium mb-[4px]">
                                         {changeSummary}
                                     </p>
                                 )}
-                                <p className="ref-suggestion-reason">
+                                <p className="text-[calc(0.8rem*var(--font-scale))] text-muted italic">
                                     &ldquo;{s.reason.slice(0, 120)}
                                     {s.reason.length > 120 ? "…" : ""}&rdquo;
                                 </p>
                             </div>
 
-                            <div className="ref-suggestion-footer">
+                            <div className="flex items-center gap-4 mt-2 text-[calc(0.8rem*var(--font-scale))] text-muted">
                                 <span className="font-semibold">
                                     {curatorIcon} @{userData?.alias_name ?? "Unknown"}
                                 </span>
@@ -223,9 +223,9 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                 })}
 
                 {(suggestions ?? []).length === 0 && (
-                    <div className="card text-center p-8 text-muted">
+                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center p-8 text-muted">
                         <p>No suggestions yet. Be the first to contribute!</p>
-                        <Link href="/catalog" className="btn btn-primary">
+                        <Link href="/catalog" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
                             Browse Catalog
                         </Link>
                     </div>

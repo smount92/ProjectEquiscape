@@ -24,10 +24,10 @@ export default function ReportActions({ reportId }: { reportId: string }) {
 
     return (
         <div style={{ display: "flex", gap: "var(--space-xs)", marginTop: "var(--space-xs)" }}>
-            <button className="btn btn-ghost btn-sm" onClick={handleDismiss} disabled={saving}>
+            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={handleDismiss} disabled={saving}>
                 ✅ Dismiss
             </button>
-            <button className="btn btn-primary btn-sm" onClick={handleAction} disabled={saving} style={{ background: "#ef4444" }}>
+            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={handleAction} disabled={saving} style={{ background: "#ef4444" }}>
                 ⚡ Take Action
             </button>
         </div>

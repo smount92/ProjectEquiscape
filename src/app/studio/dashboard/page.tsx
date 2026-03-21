@@ -27,24 +27,24 @@ export default async function StudioDashboardPage() {
     const completedTotal = commissions.filter(c => c.status === "completed" || c.status === "delivered");
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Header */}
             <div className="py-8 px-6 rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up" style={{ marginBottom: "var(--space-xl)" }}>
                 <div className="max-w-[800px]">
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "var(--space-md)" }}>
                         <div>
                             <h1 style={{ fontSize: "calc(1.5rem * var(--font-scale))", margin: 0 }}>
-                                <span className="text-gradient">{profile.studioName}</span>
+                                <span className="text-forest">{profile.studioName}</span>
                             </h1>
                             <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
                                 Studio Dashboard
                             </p>
                         </div>
                         <div style={{ display: "flex", gap: "var(--space-sm)", flexWrap: "wrap" }}>
-                            <Link href={`/studio/${profile.studioSlug}`} className="btn btn-ghost" style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                            <Link href={`/studio/${profile.studioSlug}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>
                                 👁️ Public Page
                             </Link>
-                            <Link href="/studio/setup" className="btn btn-ghost" style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                            <Link href="/studio/setup" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>
                                 ✏️ Edit Studio
                             </Link>
                         </div>

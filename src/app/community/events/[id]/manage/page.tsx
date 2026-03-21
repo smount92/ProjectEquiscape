@@ -346,9 +346,9 @@ export default function ManageEventPage() {
 
     if (isLoading) {
         return (
-            <div className="page-container form-page">
-                <div className="card" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
-                    <div className="btn-spinner" style={{ margin: "0 auto var(--space-md)", borderTopColor: "var(--color-accent-primary)" }} />
+            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+                    <div className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ margin: "0 auto var(--space-md)", borderTopColor: "var(--color-accent-primary)" }} />
                     <p>Loading event…</p>
                 </div>
             </div>
@@ -357,10 +357,10 @@ export default function ManageEventPage() {
 
     if (error && !eventName) {
         return (
-            <div className="page-container form-page">
-                <div className="card" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
                     <p style={{ color: "var(--color-accent-danger)" }}>{error}</p>
-                    <Link href="/community/events" className="btn btn-ghost" style={{ marginTop: "var(--space-md)" }}>
+                    <Link href="/community/events" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginTop: "var(--space-md)" }}>
                         ← Back to Events
                     </Link>
                 </div>
@@ -378,7 +378,7 @@ export default function ManageEventPage() {
     ];
 
     return (
-        <div className="page-container form-page">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
             <div className="animate-fade-in-up">
                 {/* Header */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "var(--space-md)", marginBottom: "var(--space-lg)" }}>
@@ -390,7 +390,7 @@ export default function ManageEventPage() {
                         <p style={{ color: "var(--color-text-secondary)" }}>{eventName}</p>
                     </div>
                     <div style={{ display: "flex", gap: "var(--space-sm)" }}>
-                        <span className="horse-card-badge" style={{ background: "var(--color-accent-primary-glow)", color: "var(--color-accent-primary)", fontWeight: 600 }}>
+                        <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-badge" style={{ background: "var(--color-accent-primary-glow)", color: "var(--color-accent-primary)", fontWeight: 600 }}>
                             {divisions.length} Division{divisions.length !== 1 ? "s" : ""} · {totalClasses} Class{totalClasses !== 1 ? "es" : ""} · {totalEntries} Entr{totalEntries !== 1 ? "ies" : "y"}
                         </span>
                     </div>
@@ -426,7 +426,7 @@ export default function ManageEventPage() {
                 </div>
 
                 {error && (
-                    <div className="form-error" style={{ marginBottom: "var(--space-lg)" }}>
+                    <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginBottom: "var(--space-lg)" }}>
                         ⚠️ {error}
                         <button onClick={() => setError(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}>✕</button>
                     </div>
@@ -436,10 +436,10 @@ export default function ManageEventPage() {
                 {/* TAB: Edit Details                       */}
                 {/* ═══════════════════════════════════════ */}
                 {activeTab === "details" && (
-                    <div className="card" style={{ padding: "var(--space-xl)" }}>
+                    <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-lg)" }}>
-                            <div className="form-group">
-                                <label className="form-label">Event Name</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Event Name</label>
                                 <input
                                     className="form-input"
                                     value={eventData.name}
@@ -448,8 +448,8 @@ export default function ManageEventPage() {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Description</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Description</label>
                                 <textarea
                                     className="form-input"
                                     value={eventData.description}
@@ -460,8 +460,8 @@ export default function ManageEventPage() {
                             </div>
 
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
-                                <div className="form-group">
-                                    <label className="form-label">Starts At</label>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-semibold text-ink mb-1">Starts At</label>
                                     <input
                                         type="datetime-local"
                                         className="form-input"
@@ -469,8 +469,8 @@ export default function ManageEventPage() {
                                         onChange={e => setEventData(prev => ({ ...prev, startsAt: e.target.value }))}
                                     />
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Ends At (optional)</label>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-semibold text-ink mb-1">Ends At (optional)</label>
                                     <input
                                         type="datetime-local"
                                         className="form-input"
@@ -481,8 +481,8 @@ export default function ManageEventPage() {
                             </div>
 
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
-                                <div className="form-group">
-                                    <label className="form-label">Region</label>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-semibold text-ink mb-1">Region</label>
                                     <input
                                         className="form-input"
                                         value={eventData.region}
@@ -490,8 +490,8 @@ export default function ManageEventPage() {
                                         placeholder="e.g. Northeast US"
                                     />
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Timezone</label>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-semibold text-ink mb-1">Timezone</label>
                                     <select
                                         className="form-input"
                                         value={eventData.timezone}
@@ -519,27 +519,27 @@ export default function ManageEventPage() {
 
                             {!eventData.isVirtual && (
                                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
-                                    <div className="form-group">
-                                        <label className="form-label">Location Name</label>
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-semibold text-ink mb-1">Location Name</label>
                                         <input className="form-input" value={eventData.locationName} onChange={e => setEventData(prev => ({ ...prev, locationName: e.target.value }))} placeholder="Venue name" />
                                     </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Location Address</label>
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-semibold text-ink mb-1">Location Address</label>
                                         <input className="form-input" value={eventData.locationAddress} onChange={e => setEventData(prev => ({ ...prev, locationAddress: e.target.value }))} placeholder="Full address" />
                                     </div>
                                 </div>
                             )}
 
                             {eventData.isVirtual && (
-                                <div className="form-group">
-                                    <label className="form-label">Virtual URL</label>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-semibold text-ink mb-1">Virtual URL</label>
                                     <input className="form-input" value={eventData.virtualUrl} onChange={e => setEventData(prev => ({ ...prev, virtualUrl: e.target.value }))} placeholder="https://..." />
                                 </div>
                             )}
 
                             {/* Judging Method */}
-                            <div className="form-group">
-                                <label className="form-label">Judging Method</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Judging Method</label>
                                 <div style={{ display: "flex", gap: "var(--space-md)" }}>
                                     <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer", padding: "var(--space-sm) var(--space-md)", borderRadius: "var(--radius-md)", border: eventData.judgingMethod === "community_vote" ? "2px solid var(--color-accent-primary)" : "1px solid var(--color-border)", background: eventData.judgingMethod === "community_vote" ? "rgba(var(--color-accent-primary-rgb, 61, 90, 62), 0.1)" : "transparent" }}>
                                         <input type="radio" name="judging" value="community_vote" checked={eventData.judgingMethod === "community_vote"} onChange={() => setEventData(prev => ({ ...prev, judgingMethod: "community_vote" }))} />
@@ -553,7 +553,7 @@ export default function ManageEventPage() {
                             </div>
 
                             <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
-                                <button className="btn btn-primary" onClick={handleSaveDetails} disabled={isSaving || !eventData.name.trim()}>
+                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleSaveDetails} disabled={isSaving || !eventData.name.trim()}>
                                     {isSaving ? "Saving…" : "💾 Save Details"}
                                 </button>
                                 {detailsSaved && (
@@ -574,7 +574,7 @@ export default function ManageEventPage() {
                         {/* Division Tree */}
                         <div className="flex flex-col gap-4">
                             {divisions.map((div, divIndex) => (
-                                <div key={div.id} className="bg-card border border-edge rounded-lg overflow-hidden">
+                                <div key={div.id} className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden">
                                     {/* Division Header */}
                                     <div className="flex items-center gap-2 py-4 px-6 bg-glass border-b border-edge flex-wrap">
                                         <div className="division-reorder">
@@ -585,17 +585,17 @@ export default function ManageEventPage() {
                                         {editingDivision === div.id ? (
                                             <div className="flex items-center gap-1 flex-1">
                                                 <input className="form-input" value={editName} onChange={(e) => setEditName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSaveDivision(div.id)} autoFocus placeholder="Division name" />
-                                                <button className="btn btn-primary" onClick={() => handleSaveDivision(div.id)} disabled={isSaving} style={{ padding: "var(--space-xs) var(--space-md)" }}>Save</button>
-                                                <button className="btn btn-ghost" onClick={() => setEditingDivision(null)} style={{ padding: "var(--space-xs) var(--space-md)" }}>Cancel</button>
+                                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => handleSaveDivision(div.id)} disabled={isSaving} style={{ padding: "var(--space-xs) var(--space-md)" }}>Save</button>
+                                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setEditingDivision(null)} style={{ padding: "var(--space-xs) var(--space-md)" }}>Cancel</button>
                                             </div>
                                         ) : (
                                             <>
-                                                <span className="division-name">📋 {div.name}</span>
+                                                <span className="font-bold text-[calc(var(--font-size-md)*var(--font-scale))] text-ink">📋 {div.name}</span>
                                                 <span className="text-xs text-muted ml-1">{div.classes.length} class{div.classes.length !== 1 ? "es" : ""}</span>
                                                 <div className="ml-auto flex gap-1 items-center">
                                                     <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors" onClick={() => { setEditingDivision(div.id); setEditName(div.name); }} title="Edit">✏️</button>
-                                                    <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors action-btn hover:bg-[var(--color-surface-glass-hover)]-danger" onClick={() => handleDeleteDivision(div.id, div.name)} title="Delete">🗑️</button>
-                                                    <button className="btn btn-ghost" onClick={() => { setAddingClassToDivision(div.id); setNewClassName(""); setNewClassNumber(""); }} style={{ padding: "var(--space-xs) var(--space-sm)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>+ Class</button>
+                                                    <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors action-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none hover:bg-[var(--color-surface-glass-hover)]-danger" onClick={() => handleDeleteDivision(div.id, div.name)} title="Delete">🗑️</button>
+                                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => { setAddingClassToDivision(div.id); setNewClassName(""); setNewClassNumber(""); }} style={{ padding: "var(--space-xs) var(--space-sm)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>+ Class</button>
                                                 </div>
                                             </>
                                         )}
@@ -614,8 +614,8 @@ export default function ManageEventPage() {
                                                     <div className="flex items-center gap-1 flex-1">
                                                         <input className="form-input" value={editClassNumber} onChange={(e) => setEditClassNumber(e.target.value)} placeholder="#" style={{ width: "60px" }} />
                                                         <input className="form-input" value={editName} onChange={(e) => setEditName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSaveClass(cls.id)} autoFocus placeholder="Class name" />
-                                                        <button className="btn btn-primary" onClick={() => handleSaveClass(cls.id)} disabled={isSaving} style={{ padding: "var(--space-xs) var(--space-md)" }}>Save</button>
-                                                        <button className="btn btn-ghost" onClick={() => setEditingClass(null)} style={{ padding: "var(--space-xs) var(--space-md)" }}>Cancel</button>
+                                                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => handleSaveClass(cls.id)} disabled={isSaving} style={{ padding: "var(--space-xs) var(--space-md)" }}>Save</button>
+                                                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setEditingClass(null)} style={{ padding: "var(--space-xs) var(--space-md)" }}>Cancel</button>
                                                     </div>
                                                 ) : (
                                                     <>
@@ -630,7 +630,7 @@ export default function ManageEventPage() {
                                                                 {cls.isNanQualifying ? "⭐" : "☆"}
                                                             </button>
                                                             <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px]" onClick={() => { setEditingClass(cls.id); setEditName(cls.name); setEditClassNumber(cls.classNumber || ""); }} title="Edit">✏️</button>
-                                                            <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px] action-btn hover:bg-[var(--color-surface-glass-hover)]-danger" onClick={() => handleDeleteClass(cls.id, cls.name)} title="Delete">🗑️</button>
+                                                            <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px] action-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none hover:bg-[var(--color-surface-glass-hover)]-danger" onClick={() => handleDeleteClass(cls.id, cls.name)} title="Delete">🗑️</button>
                                                         </div>
                                                     </>
                                                 )}
@@ -642,8 +642,8 @@ export default function ManageEventPage() {
                                             <div className="border-b-0 bg-glass animate-fade-in-up">
                                                 <input className="form-input" value={newClassNumber} onChange={(e) => setNewClassNumber(e.target.value)} placeholder="#" style={{ width: "60px" }} />
                                                 <input className="form-input" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAddClass(div.id)} autoFocus placeholder="Class name (e.g. Arabian/Part-Arabian)" style={{ flex: 1 }} />
-                                                <button className="btn btn-primary" onClick={() => handleAddClass(div.id)} disabled={isSaving || !newClassName.trim()} style={{ padding: "var(--space-xs) var(--space-md)" }}>Add</button>
-                                                <button className="btn btn-ghost" onClick={() => setAddingClassToDivision(null)} style={{ padding: "var(--space-xs) var(--space-md)" }}>Cancel</button>
+                                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => handleAddClass(div.id)} disabled={isSaving || !newClassName.trim()} style={{ padding: "var(--space-xs) var(--space-md)" }}>Add</button>
+                                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setAddingClassToDivision(null)} style={{ padding: "var(--space-xs) var(--space-md)" }}>Cancel</button>
                                             </div>
                                         )}
 
@@ -658,7 +658,7 @@ export default function ManageEventPage() {
                         </div>
 
                         {/* Add Division */}
-                        <div className="card" style={{ marginTop: "var(--space-lg)", padding: "var(--space-lg)" }}>
+                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ marginTop: "var(--space-lg)", padding: "var(--space-lg)" }}>
                             <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
                                 <input
                                     className="form-input"
@@ -668,7 +668,7 @@ export default function ManageEventPage() {
                                     placeholder="New division name (e.g. OF Plastic Halter)"
                                     style={{ flex: 1 }}
                                 />
-                                <button className="btn btn-primary" onClick={handleAddDivision} disabled={isSaving || !newDivisionName.trim()}>
+                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleAddDivision} disabled={isSaving || !newDivisionName.trim()}>
                                     + Add Division
                                 </button>
                             </div>
@@ -676,7 +676,7 @@ export default function ManageEventPage() {
 
                         {/* Quick Actions */}
                         <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)", flexWrap: "wrap" }}>
-                            <button className="btn btn-ghost" onClick={loadUserEvents} disabled={isSaving}>
+                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={loadUserEvents} disabled={isSaving}>
                                 📋 Copy From Another Event…
                             </button>
                         </div>
@@ -687,9 +687,9 @@ export default function ManageEventPage() {
                 {/* TAB: Judges                             */}
                 {/* ═══════════════════════════════════════ */}
                 {activeTab === "judges" && (
-                    <div className="card" style={{ padding: "var(--space-xl)" }}>
+                    <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
                         <h3 style={{ marginBottom: "var(--space-md)" }}>
-                            🧑‍⚖️ <span className="text-gradient">Assigned Judges</span>
+                            🧑‍⚖️ <span className="text-forest">Assigned Judges</span>
                         </h3>
                         <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-lg)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
                             Add users by their alias to grant them access to the Expert Judging Panel. They&apos;ll be able to assign placings during the &quot;Judging&quot; phase.
@@ -771,7 +771,7 @@ export default function ManageEventPage() {
                                         </div>
                                     )}
                                 </div>
-                                <button className="btn btn-primary" onClick={handleAddJudge} disabled={!newJudgeAlias.trim()}>
+                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleAddJudge} disabled={!newJudgeAlias.trim()}>
                                     + Add Judge
                                 </button>
                             </div>
@@ -819,7 +819,7 @@ export default function ManageEventPage() {
                                             </div>
                                         </div>
                                         <button
-                                            className="btn btn-ghost"
+                                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                             onClick={() => handleRemoveJudge(judge.id)}
                                             style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-accent-danger)" }}
                                         >
@@ -856,8 +856,8 @@ export default function ManageEventPage() {
                                         ))}
                                     </select>
                                     <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end" }}>
-                                        <button className="btn btn-ghost" onClick={() => setShowCopyModal(false)}>Cancel</button>
-                                        <button className="btn btn-primary" onClick={handleCopy} disabled={!selectedSourceEvent}>Copy Classes</button>
+                                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setShowCopyModal(false)}>Cancel</button>
+                                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleCopy} disabled={!selectedSourceEvent}>Copy Classes</button>
                                     </div>
                                 </>
                             )}

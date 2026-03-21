@@ -74,7 +74,7 @@ export default function MarketFilters() {
         <div className="mb-8">
             <div className="mb-4">
                 <input
-                    className="form-input market-search-input"
+                    className="form-input w-full text-[calc(var(--font-size-md)*var(--font-scale))!important] p-[var(--space-md) var(--space-lg) !important] rounded-[var(--radius-lg) !important]"
                     type="search"
                     placeholder="Search by mold, release, or artist resin…"
                     value={searchInput}

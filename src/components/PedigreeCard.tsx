@@ -169,11 +169,11 @@ export default function PedigreeCard({
     // CTA for owner when no pedigree exists
     if (!pedigree && isOwner && !isEditing) {
         return (
-            <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+            <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
                 <div className="text-center py-4 text-muted">
                     <p>No pedigree data yet.</p>
                     <button
-                        className="btn btn-primary"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                         onClick={() => setIsEditing(true)}
                         id="add-pedigree"
                         style={{ marginTop: "var(--space-sm)" }}
@@ -188,7 +188,7 @@ export default function PedigreeCard({
     // Edit form
     if (isEditing) {
         return (
-            <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+            <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                         <span aria-hidden="true">🧬</span> {pedigree ? "Edit Pedigree" : "Add Pedigree"}
@@ -197,8 +197,8 @@ export default function PedigreeCard({
                 <form onSubmit={handleSave}>
                     <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                         {/* Sire with search */}
-                        <div className="form-group" ref={sireRef} style={{ position: "relative" }}>
-                            <label className="form-label">Sire (Father)</label>
+                        <div className="mb-6" ref={sireRef} style={{ position: "relative" }}>
+                            <label className="block text-sm font-semibold text-ink mb-1">Sire (Father)</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -243,8 +243,8 @@ export default function PedigreeCard({
                             )}
                         </div>
                         {/* Dam with search */}
-                        <div className="form-group" ref={damRef} style={{ position: "relative" }}>
-                            <label className="form-label">Dam (Mother)</label>
+                        <div className="mb-6" ref={damRef} style={{ position: "relative" }}>
+                            <label className="block text-sm font-semibold text-ink mb-1">Dam (Mother)</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -290,8 +290,8 @@ export default function PedigreeCard({
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Sculptor / Artist</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Sculptor / Artist</label>
                         <input
                             className="form-input"
                             type="text"
@@ -303,8 +303,8 @@ export default function PedigreeCard({
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
-                        <div className="form-group">
-                            <label className="form-label">Cast Number</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Cast Number</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -314,8 +314,8 @@ export default function PedigreeCard({
                                 id="pedigree-cast"
                             />
                         </div>
-                        <div className="form-group">
-                            <label className="form-label">Edition Size</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Edition Size</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -327,8 +327,8 @@ export default function PedigreeCard({
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Lineage Notes</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Lineage Notes</label>
                         <textarea
                             className="form-input"
                             value={lineageNotes}
@@ -347,12 +347,12 @@ export default function PedigreeCard({
                     )}
 
                     <div className="flex justify-end gap-2 mt-6">
-                        <button type="button" className="btn btn-ghost" onClick={handleCancel}>
+                        <button type="button" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleCancel}>
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             disabled={status === "saving"}
                         >
                             {status === "saving" ? "Saving…" : "Save Pedigree"}
@@ -365,14 +365,14 @@ export default function PedigreeCard({
 
     // Read-only display
     return (
-        <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+        <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                     <span aria-hidden="true">🧬</span> Pedigree
                 </h3>
                 {isOwner && (
                     <button
-                        className="btn btn-ghost"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                         onClick={() => setIsEditing(true)}
                         style={{ fontSize: "calc(0.8rem * var(--font-scale))", padding: "var(--space-xs) var(--space-md)" }}
                     >

@@ -69,7 +69,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
     };
 
     return (
-        <div className="bg-card border border-edge rounded-lg p-6" style={{ marginTop: "var(--space-lg)" }}>
+        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6" style={{ marginTop: "var(--space-lg)" }}>
             <div
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                 onClick={() => setExpanded(!expanded)}
@@ -112,7 +112,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
                                                     </select>
                                                 )}
                                                 <button
-                                                    className="btn btn-ghost btn-sm"
+                                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                                                     onClick={() => handleRemove(m.userId, m.alias)}
                                                     disabled={isPending}
                                                     title="Remove member"
@@ -147,7 +147,7 @@ export function PinPostButton({ postId, isPinned }: { postId: string; isPinned: 
 
     return (
         <button
-            className="btn btn-ghost btn-sm"
+            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
             onClick={handleToggle}
             disabled={isPending}
             title={pinned ? "Unpin post" : "Pin post"}

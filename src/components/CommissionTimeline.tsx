@@ -201,7 +201,7 @@ export default function CommissionTimeline({
     const isTerminal = ["delivered", "declined", "cancelled"].includes(commissionStatus);
 
     return (
-        <div className="card animate-fade-in-up" style={{ padding: "var(--space-lg)" }}>
+        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-lg)" }}>
             {/* ── Header ── */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
                 <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", margin: 0 }}>
@@ -209,7 +209,7 @@ export default function CommissionTimeline({
                 </h2>
                 {(isArtist || isClient) && !isTerminal && !showForm && (
                     <button
-                        className="btn btn-primary"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                         onClick={() => setShowForm(true)}
                         style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}
                     >
@@ -279,7 +279,7 @@ export default function CommissionTimeline({
                     />
                     <div style={{ display: "flex", gap: "var(--space-sm)" }}>
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={() => handleClientAction("approval")}
                             disabled={acting}
                             style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}
@@ -287,7 +287,7 @@ export default function CommissionTimeline({
                             ✅ Approve
                         </button>
                         <button
-                            className="btn btn-ghost"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                             onClick={() => handleClientAction("revision_request")}
                             disabled={acting}
                             style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}
@@ -300,9 +300,9 @@ export default function CommissionTimeline({
 
             {/* ── Add Update Form ── */}
             {showForm && (
-                <form onSubmit={handleAddUpdate} className="card" style={{ padding: "var(--space-md)", marginBottom: "var(--space-lg)", background: "var(--color-bg-card)" }}>
-                    <div className="form-group">
-                        <label className="form-label">Update Type</label>
+                <form onSubmit={handleAddUpdate} className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", marginBottom: "var(--space-lg)", background: "var(--color-bg-card)" }}>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Update Type</label>
                         <select
                             className="form-input"
                             value={updateType}
@@ -314,8 +314,8 @@ export default function CommissionTimeline({
                         </select>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Title (optional)</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Title (optional)</label>
                         <input
                             type="text"
                             className="form-input"
@@ -325,8 +325,8 @@ export default function CommissionTimeline({
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Details</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Details</label>
                         <textarea
                             className="form-input"
                             value={body}
@@ -337,8 +337,8 @@ export default function CommissionTimeline({
                     </div>
 
                     {/* Photo attachment — available for all update types */}
-                    <div className="form-group">
-                        <label className="form-label">
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">
                             📎 Attach Photo {updateType !== "wip_photo" && <span style={{ opacity: 0.6 }}>(optional)</span>}
                         </label>
                         <input
@@ -354,7 +354,7 @@ export default function CommissionTimeline({
                             </p>
                         )}
                         {uploadError && (
-                            <p className="form-error" style={{ marginTop: 4 }}>{uploadError}</p>
+                            <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: 4 }}>{uploadError}</p>
                         )}
                     </div>
 
@@ -370,10 +370,10 @@ export default function CommissionTimeline({
                     )}
 
                     <div style={{ display: "flex", gap: "var(--space-sm)" }}>
-                        <button type="submit" className="btn btn-primary" disabled={saving} style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                        <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={saving} style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>
                             {saving ? "Posting…" : "Post Update"}
                         </button>
-                        <button type="button" className="btn btn-ghost" onClick={() => { setShowForm(false); setUploadError(null); }} style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                        <button type="button" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => { setShowForm(false); setUploadError(null); }} style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>
                             Cancel
                         </button>
                     </div>

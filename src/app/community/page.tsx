@@ -261,24 +261,24 @@ export default async function CommunityPage({
   }
 
   return (
-    <div className="page-container page-container-wide">
+    <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 max-w-[var(--max-width)]">
       {/* Hero */}
-      <div className="community-hero animate-fade-in-up">
-        <div className="community-hero-content">
+      <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+        <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
           <h1>
-            🏆 The <span className="text-gradient">Show Ring</span>
+            🏆 The <span className="text-forest">Show Ring</span>
           </h1>
-          <p className="community-hero-subtitle">
+          <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
             Browse the latest models shared by collectors from around the world.
             Every horse has a story.
           </p>
         </div>
-        <div className="community-stats">
-          <div className="community-stat">
-            <span className="community-stat-number">{communityCards.length}</span>
-            <span className="community-stat-label">Models Showcased</span>
+        <div className="flex justify-center gap-8 mt-8">
+          <div className="flex flex-col items-center">
+            <span className="flex flex-col items-center-number">{communityCards.length}</span>
+            <span className="flex flex-col items-center-label">Models Showcased</span>
           </div>
-          <Link href="/community/help-id" className="btn btn-ghost" id="help-id-link" style={{ marginLeft: "var(--space-md)" }}>
+          <Link href="/community/help-id" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" id="help-id-link" style={{ marginLeft: "var(--space-md)" }}>
             🔍 Help Me ID
           </Link>
         </div>

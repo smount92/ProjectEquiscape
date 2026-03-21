@@ -17,7 +17,7 @@ export default function WithdrawButton({ entryId }: { entryId: string }) {
 
     return (
         <button
-            className="btn btn-ghost"
+            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
             onClick={handleWithdraw}
             disabled={busy}
             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "2px 8px", color: "var(--color-error, #ef4444)" }}

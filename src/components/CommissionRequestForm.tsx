@@ -74,8 +74,8 @@ export default function CommissionRequestForm({
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="form-group">
-                <label className="form-label">Commission Type *</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Commission Type *</label>
                 <select
                     className="form-input"
                     value={commissionType}
@@ -89,8 +89,8 @@ export default function CommissionRequestForm({
                 </select>
             </div>
 
-            <div className="form-group">
-                <label className="form-label">Link a Horse (optional)</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Link a Horse (optional)</label>
                 <select
                     className="form-input"
                     value={selectedHorseId}
@@ -101,13 +101,13 @@ export default function CommissionRequestForm({
                         <option key={h.id} value={h.id}>{h.name}</option>
                     ))}
                 </select>
-                <span className="form-hint">
+                <span className="block mt-1 text-xs text-muted">
                     Select the model you&apos;re sending in for this commission.
                 </span>
             </div>
 
-            <div className="form-group">
-                <label className="form-label">Description *</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Description *</label>
                 <textarea
                     className="form-input"
                     value={description}
@@ -119,8 +119,8 @@ export default function CommissionRequestForm({
                 />
             </div>
 
-            <div className="form-group">
-                <label className="form-label">Your Budget ($)</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Your Budget ($)</label>
                 <input
                     type="number"
                     className="form-input"
@@ -145,7 +145,7 @@ export default function CommissionRequestForm({
 
             <button
                 type="submit"
-                className="btn btn-primary"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                 disabled={saving}
                 style={{ width: "100%" }}
                 id="submit-commission-btn"

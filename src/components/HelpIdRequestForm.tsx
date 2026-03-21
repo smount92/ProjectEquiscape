@@ -66,7 +66,7 @@ export default function HelpIdRequestForm() {
     if (!isOpen) {
         return (
             <button
-                className="btn btn-primary"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                 onClick={() => setIsOpen(true)}
                 id="new-id-request-btn"
                 style={{ marginTop: "var(--space-lg)" }}
@@ -77,7 +77,7 @@ export default function HelpIdRequestForm() {
     }
 
     return (
-        <div className="help-id-form-card card animate-fade-in-up" style={{ marginTop: "var(--space-lg)" }}>
+        <div className="help-id-form-bg-card border border-edge rounded-lg p-12 shadow-md transition-all card animate-fade-in-up" style={{ marginTop: "var(--space-lg)" }}>
             <h3 style={{ marginBottom: "var(--space-md)" }}>📸 Submit a Mystery Model</h3>
 
             {status === "success" ? (
@@ -88,10 +88,10 @@ export default function HelpIdRequestForm() {
             ) : (
                 <form onSubmit={handleSubmit}>
                     {/* Photo Upload */}
-                    <div className="form-group">
-                        <label className="form-label">Photo of the model *</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Photo of the model *</label>
                         <div
-                            className="csv-dropzone"
+                            className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card cursor-pointer text-center transition-all"
                             style={{ padding: "var(--space-xl)", cursor: "pointer" }}
                             onClick={() => fileInputRef.current?.click()}
                         >
@@ -104,7 +104,7 @@ export default function HelpIdRequestForm() {
                             ) : (
                                 <>
                                     <div className="text-[3rem] mb-4 opacity-[0.7]">📷</div>
-                                    <p className="csv-dropzone-text">
+                                    <p className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card cursor-pointer text-center transition-all-text">
                                         Click to upload a photo
                                         <br />
                                         <span className="text-sm text-forest underline">Clear, well-lit photos get the best results</span>
@@ -124,8 +124,8 @@ export default function HelpIdRequestForm() {
                     </div>
 
                     {/* Description */}
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="help-id-description">
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1" htmlFor="help-id-description">
                             Description
                         </label>
                         <textarea
@@ -139,8 +139,8 @@ export default function HelpIdRequestForm() {
                     </div>
 
                     {/* Identifying Marks */}
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="help-id-marks">
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1" htmlFor="help-id-marks">
                             Any identifying marks?
                         </label>
                         <input
@@ -152,12 +152,12 @@ export default function HelpIdRequestForm() {
                         />
                     </div>
 
-                    {error && <div className="csv-error">{error}</div>}
+                    {error && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</div>}
 
                     <div style={{ display: "flex", gap: "var(--space-md)", marginTop: "var(--space-lg)" }}>
                         <button
                             type="button"
-                            className="btn btn-ghost"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                             onClick={() => {
                                 setIsOpen(false);
                                 setPreview(null);
@@ -168,7 +168,7 @@ export default function HelpIdRequestForm() {
                         </button>
                         <button
                             type="submit"
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             disabled={status === "submitting"}
                             id="submit-id-request-btn"
                         >

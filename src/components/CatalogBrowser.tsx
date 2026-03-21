@@ -153,7 +153,7 @@ export default function CatalogBrowser({
             {/* Filter Chips */}
             <div className="flex flex-wrap gap-2 mb-4 items-center">
                 <div className="flex items-center gap-[6px] flex-wrap">
-                    <span className="ref-filter-label">Maker:</span>
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-semibold">Maker:</span>
                     <button
                         className={`ref-chip ${activeMaker === null ? "ref-chip-active" : ""}`}
                         onClick={() => handleMakerFilter(null)}
@@ -174,10 +174,10 @@ export default function CatalogBrowser({
                 </div>
                 {scales.length > 0 && (
                     <div className="flex items-center gap-[6px] flex-wrap">
-                        <span className="ref-filter-label">Scale:</span>
+                        <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-semibold">Scale:</span>
                         <select
                             id="catalog-scale-filter"
-                            className="input ref-scale-select"
+                            className="input max-w-[160px] text-[calc(0.8rem*var(--font-scale))]"
                             value={activeScale ?? ""}
                             onChange={(e) =>
                                 handleScaleFilter(e.target.value || null)
@@ -195,7 +195,7 @@ export default function CatalogBrowser({
             </div>
 
             {/* Results Count */}
-            <div className="ref-results-summary">
+            <div className="flex justify-between items-center text-[calc(0.85rem*var(--font-scale))] text-muted mb-2">
                 <span>
                     {total.toLocaleString()} {total === 1 ? "entry" : "entries"} found
                 </span>
@@ -257,7 +257,7 @@ export default function CatalogBrowser({
                                 <td className="p-2 border-b border-edge">{item.scale ?? "—"}</td>
                                 <td className="p-2 border-b border-edge text-right">
                                     <button
-                                        className="ref-suggest-link"
+                                        className="bg-transparent border-0 text-forest cursor-pointer text-[calc(0.8rem*var(--font-scale))] opacity-[0] transition-all"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             router.push(`/catalog/${item.id}?suggest=true`);
@@ -284,17 +284,17 @@ export default function CatalogBrowser({
             {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-6 py-4 px-[0]">
                     <button
-                        className="btn btn-secondary btn-small"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary btn-small"
                         disabled={page <= 1}
                         onClick={() => handlePage(page - 1)}
                     >
                         ← Previous
                     </button>
-                    <span className="ref-page-info">
+                    <span className="text-[calc(0.85rem*var(--font-scale))] text-muted">
                         Page {page} of {totalPages}
                     </span>
                     <button
-                        className="btn btn-secondary btn-small"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary btn-small"
                         disabled={page >= totalPages}
                         onClick={() => handlePage(page + 1)}
                     >

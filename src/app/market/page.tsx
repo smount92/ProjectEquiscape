@@ -78,12 +78,12 @@ export default async function MarketPricePage({
     };
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             <div className="page-content" style={{ maxWidth: 900 }}>
                 <div className="animate-fade-in-up">
                     {/* Header */}
                     <div style={{ textAlign: "center", marginBottom: "var(--space-2xl)" }}>
-                        <h1>📈 Model Horse <span className="text-gradient">Price Guide</span></h1>
+                        <h1>📈 Model Horse <span className="text-forest">Price Guide</span></h1>
                         <p style={{ color: "var(--color-text-secondary)", fontSize: "calc(var(--font-size-md) * var(--font-scale))", marginTop: "var(--space-sm)" }}>
                             The Blue Book — Real sale data from real collectors
                         </p>
@@ -96,7 +96,7 @@ export default async function MarketPricePage({
 
                     {/* Results (Server-rendered) */}
                     {items.length === 0 ? (
-                        <div className="glass-card" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+                        <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
                             <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>📊</div>
                             <h3 style={{ marginBottom: "var(--space-sm)" }}>
                                 {query || itemType !== "all"
@@ -119,12 +119,12 @@ export default async function MarketPricePage({
 
                             <div className="market-bg-[var(--color-surface-secondary)] font-semibold sticky top-0">
                                 {items.map((item) => (
-                                    <div key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`} className="bg-card border border-edge rounded-lg p-6 transition-colors">
-                                        <div className="bg-card border border-edge rounded-lg p-6 transition-colors-header">
-                                            <span className="bg-card border border-edge rounded-lg p-6 transition-colors-icon">{typeIcon(item.itemType)}</span>
-                                            <div className="bg-card border border-edge rounded-lg p-6 transition-colors-info">
-                                                <span className="bg-card border border-edge rounded-lg p-6 transition-colors-title">{item.title}</span>
-                                                <span className="bg-card border border-edge rounded-lg p-6 transition-colors-maker">
+                                    <div key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`} className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors">
+                                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                                            <span className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-icon">{typeIcon(item.itemType)}</span>
+                                            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-info">
+                                                <span className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-title">{item.title}</span>
+                                                <span className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-maker">
                                                     {item.maker}{item.scale ? ` · ${item.scale}` : ""}
                                                     {item.finishType ? ` · ${item.finishType}` : ""}
                                                     {item.lifeStage && item.lifeStage !== "completed" ? ` · ${item.lifeStage === "blank" ? "Blank" : item.lifeStage === "stripped" ? "Stripped" : "In Progress"}` : ""}
@@ -132,7 +132,7 @@ export default async function MarketPricePage({
                                             </div>
                                         </div>
 
-                                        <div className="bg-card border border-edge rounded-lg p-6 transition-colors-prices">
+                                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-prices">
                                             <div className="text-lg font-bold text-forest">
                                                 {formatCurrency(item.lowestPrice)}
                                                 {item.lowestPrice !== item.highestPrice ? ` – ${formatCurrency(item.highestPrice)}` : ""}
@@ -143,7 +143,7 @@ export default async function MarketPricePage({
                                             </div>
                                         </div>
 
-                                        <div className="bg-card border border-edge rounded-lg p-6 transition-colors-footer">
+                                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-footer">
                                             <span className="inline-flex items-center py-[2px] px-[8px] rounded-full bg-[var(--color-accent-primary-glow)] text-forest font-semibold">
                                                 {item.transactionVolume} sale{item.transactionVolume !== 1 ? "s" : ""}
                                             </span>
@@ -161,21 +161,21 @@ export default async function MarketPricePage({
                             {totalPages > 1 && (
                                 <div className="flex justify-between items-center mt-8 pt-6 border-t border-edge">
                                     {page > 1 ? (
-                                        <Link href={buildPageUrl(page - 1)} className="btn btn-ghost">
+                                        <Link href={buildPageUrl(page - 1)} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                                             ← Previous
                                         </Link>
                                     ) : (
-                                        <button className="btn btn-ghost" disabled>← Previous</button>
+                                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>← Previous</button>
                                     )}
                                     <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
                                         Page {page} of {totalPages} ({total} items)
                                     </span>
                                     {page < totalPages ? (
-                                        <Link href={buildPageUrl(page + 1)} className="btn btn-ghost">
+                                        <Link href={buildPageUrl(page + 1)} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                                             Next →
                                         </Link>
                                     ) : (
-                                        <button className="btn btn-ghost" disabled>Next →</button>
+                                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>Next →</button>
                                     )}
                                 </div>
                             )}

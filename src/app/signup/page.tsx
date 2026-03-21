@@ -30,9 +30,9 @@ export default function SignupPage() {
   // Success state — show confirmation message
   if (success) {
     return (
-      <div className="auth-page">
-        <div className="card card-auth animate-fade-in-up">
-          <div className="card-header">
+      <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
+        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
+          <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
             <div
               style={{
                 fontSize: "3rem",
@@ -49,7 +49,7 @@ export default function SignupPage() {
               Stable!
             </p>
           </div>
-          <Link href="/login" className="btn btn-primary btn-full" id="back-to-login">
+          <Link href="/login" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full" id="back-to-login">
             Back to Sign In
           </Link>
         </div>
@@ -58,18 +58,18 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="card card-auth animate-fade-in-up">
-        <div className="card-header">
+    <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
+      <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
+        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
           <h1>
             Join the{" "}
-            <span className="text-gradient">Stable</span>
+            <span className="text-forest">Stable</span>
           </h1>
           <p>Create your account and start cataloging your collection</p>
         </div>
 
         {error && (
-          <div className="form-error" role="alert" id="signup-error">
+          <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert" id="signup-error">
             <svg
               width="16"
               height="16"
@@ -101,8 +101,8 @@ export default function SignupPage() {
 
         <form action={handleSubmit} noValidate>
           {/* Alias Name */}
-          <div className="form-group">
-            <label htmlFor="signup-alias" className="form-label">
+          <div className="mb-6">
+            <label htmlFor="signup-alias" className="block text-sm font-semibold text-ink mb-1">
               Choose Your Alias *
             </label>
             <input
@@ -117,15 +117,15 @@ export default function SignupPage() {
               autoFocus
               autoComplete="username"
             />
-            <span className="form-hint">
+            <span className="block mt-1 text-xs text-muted">
               This is your public display name (3–30 characters). Choose wisely —
               this is how collectors will know you!
             </span>
           </div>
 
           {/* Email */}
-          <div className="form-group">
-            <label htmlFor="signup-email" className="form-label">
+          <div className="mb-6">
+            <label htmlFor="signup-email" className="block text-sm font-semibold text-ink mb-1">
               Email Address *
             </label>
             <input
@@ -137,14 +137,14 @@ export default function SignupPage() {
               required
               autoComplete="email"
             />
-            <span className="form-hint">
+            <span className="block mt-1 text-xs text-muted">
               We&apos;ll send a confirmation link. Your email is never shared.
             </span>
           </div>
 
           {/* Password */}
-          <div className="form-group">
-            <label htmlFor="signup-password" className="form-label">
+          <div className="mb-6">
+            <label htmlFor="signup-password" className="block text-sm font-semibold text-ink mb-1">
               Password *
             </label>
             <div style={{ position: "relative" }}>
@@ -193,8 +193,8 @@ export default function SignupPage() {
           </div>
 
           {/* Confirm Password */}
-          <div className="form-group">
-            <label htmlFor="signup-confirm-password" className="form-label">
+          <div className="mb-6">
+            <label htmlFor="signup-confirm-password" className="block text-sm font-semibold text-ink mb-1">
               Confirm Password *
             </label>
             <input
@@ -210,13 +210,13 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            className="btn btn-primary btn-full"
+            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full"
             disabled={isPending}
             id="signup-submit"
           >
             {isPending ? (
               <>
-                <span className="btn-spinner" aria-hidden="true" />
+                <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
                 Creating Account...
               </>
             ) : (
@@ -225,7 +225,7 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <div className="auth-footer">
+        <div className="text-center mt-8 text-sm text-muted">
           <p>
             Already have an account?{" "}
             <Link href="/login" id="go-to-login">

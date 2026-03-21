@@ -263,7 +263,7 @@ export default function ImageCropModal({
     const overlay = (
         <div className="modal-overlay" onClick={onCancel}>
             <div
-                className="modal-card"
+                className="modal-bg-card border border-edge rounded-lg p-12 shadow-md transition-all"
                 onClick={(e) => e.stopPropagation()}
                 style={{ maxWidth: 700, width: "95vw", padding: 0, overflow: "hidden" }}
             >
@@ -282,7 +282,7 @@ export default function ImageCropModal({
                         {ASPECT_PRESETS.map((preset) => (
                             <button
                                 key={preset.label}
-                                className={`btn btn-ghost`}
+                                className={`inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge`}
                                 onClick={() => setAspectRatio(preset.value)}
                                 style={{
                                     padding: "4px 10px",
@@ -422,14 +422,14 @@ export default function ImageCropModal({
                     alignItems: "center",
                     gap: "var(--space-sm)",
                 }}>
-                    <button className="btn btn-ghost" onClick={onCancel} disabled={processing}>
+                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={onCancel} disabled={processing}>
                         Cancel
                     </button>
                     <div style={{ display: "flex", gap: "var(--space-sm)" }}>
-                        <button className="btn btn-ghost" onClick={handleSkip} disabled={processing}>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleSkip} disabled={processing}>
                             Skip Crop
                         </button>
-                        <button className="btn btn-primary" onClick={handleCropConfirm} disabled={processing || !imageLoaded}>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleCropConfirm} disabled={processing || !imageLoaded}>
                             {processing ? "Processing…" : "✂️ Apply Crop"}
                         </button>
                     </div>

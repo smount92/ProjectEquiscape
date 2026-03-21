@@ -61,9 +61,9 @@ export default function MakeOfferModal({
     return createPortal(
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content max-w-[420px]" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
+                <div className="modal-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h3>💰 Make an Offer</h3>
-                    <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
+                    <button className="bg-transparent border-0 text-muted text-[1.2rem] cursor-pointer p-1 rounded-md transition-all duration-150" onClick={onClose} aria-label="Close">×</button>
                 </div>
 
                 <p className="text-sm text-muted mb-4">
@@ -71,8 +71,8 @@ export default function MakeOfferModal({
                 </p>
 
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label className="form-label">Your Offer</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Your Offer</label>
                         <div className="flex items-center gap-1">
                             <span className="text-lg font-bold text-muted">$</span>
                             <input
@@ -88,19 +88,19 @@ export default function MakeOfferModal({
                             />
                         </div>
                         {askingPrice && (
-                            <span className="form-hint">
+                            <span className="block mt-1 text-xs text-muted">
                                 Asking price: ${askingPrice.toLocaleString("en-US")}
                             </span>
                         )}
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Message (optional)</label>
+                    <div className="mb-6">
+                        <label className="block text-sm font-semibold text-ink mb-1">Message (optional)</label>
                         <textarea
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Tell the seller about your interest…"
-                            className="form-textarea"
+                            className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                             rows={3}
                             maxLength={500}
                         />
@@ -118,10 +118,10 @@ export default function MakeOfferModal({
 
                     {error && <div className="comment-error">{error}</div>}
 
-                    <div className="flex gap-2 justify-end mt-6 max-sm:flex-col max-sm:[&_.btn]:w-full">
+                    <div className="flex gap-2 justify-end mt-6 max-sm:flex-col max-sm:[&_.inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none]:w-full">
                         <button
                             type="button"
-                            className="btn btn-ghost"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                             onClick={onClose}
                             disabled={saving}
                         >
@@ -129,7 +129,7 @@ export default function MakeOfferModal({
                         </button>
                         <button
                             type="submit"
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             disabled={saving}
                         >
                             {saving ? "Submitting…" : "Submit Offer"}

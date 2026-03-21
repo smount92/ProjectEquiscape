@@ -80,13 +80,13 @@ export default async function PublicStudioPage({
     };
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Hero */}
             <div className="py-8 px-6 rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up">
                 <div className="max-w-[800px]">
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
                         <h1 style={{ fontSize: "calc(1.8rem * var(--font-scale))", margin: 0 }}>
-                            <span className="text-gradient">{profile.studioName}</span>
+                            <span className="text-forest">{profile.studioName}</span>
                         </h1>
                         <span className={`studio-status-badge status-${profile.status}`}>
                             {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}
@@ -114,16 +114,16 @@ export default async function PublicStudioPage({
 
                     <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)", flexWrap: "wrap" }}>
                         {profile.status !== "closed" && !isOwner && (
-                            <Link href={`/studio/${slug}/request`} className="btn btn-primary" id="request-commission-btn">
+                            <Link href={`/studio/${slug}/request`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="request-commission-btn">
                                 🎨 Request a Commission
                             </Link>
                         )}
                         {isOwner && (
                             <>
-                                <Link href="/studio/dashboard" className="btn btn-primary">
+                                <Link href="/studio/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
                                     📊 Dashboard
                                 </Link>
-                                <Link href="/studio/setup" className="btn btn-ghost">
+                                <Link href="/studio/setup" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                                     ✏️ Edit Studio
                                 </Link>
                             </>
@@ -142,7 +142,7 @@ export default async function PublicStudioPage({
                 {/* Left: Details */}
                 <div>
                     {/* Pricing & Turnaround */}
-                    <div className="card" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
+                    <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
                         <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                             💰 Pricing & Timeline
                         </h2>
@@ -204,7 +204,7 @@ export default async function PublicStudioPage({
 
                     {/* Terms */}
                     {profile.termsText && (
-                        <div className="card" style={{ padding: "var(--space-lg)" }}>
+                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
                             <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                                 📄 Terms & Conditions
                             </h2>
@@ -217,7 +217,7 @@ export default async function PublicStudioPage({
 
                 {/* Right: Commission Queue */}
                 <div>
-                    <div className="card" style={{ padding: "var(--space-lg)" }}>
+                    <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
                         <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                             📋 Commission Queue
                         </h2>
@@ -247,7 +247,7 @@ export default async function PublicStudioPage({
 
                     {/* Accepting */}
                     {profile.acceptingTypes.length > 0 && (
-                        <div className="card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
                             <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                                 ✅ Currently Accepting
                             </h2>

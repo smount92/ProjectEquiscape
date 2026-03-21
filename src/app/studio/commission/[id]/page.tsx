@@ -104,9 +104,9 @@ export default async function CommissionDetailPage({
     }
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Header */}
-            <div className="card animate-fade-in-up" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "var(--space-md)" }}>
                     <div>
                         <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))", margin: 0 }}>
@@ -123,7 +123,7 @@ export default async function CommissionDetailPage({
                         </div>
                     </div>
                     <span
-                        className="commission-status-badge"
+                        className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
                         style={{
                             backgroundColor: `${STATUS_COLORS[commission.status]}20`,
                             color: STATUS_COLORS[commission.status],
@@ -214,10 +214,10 @@ export default async function CommissionDetailPage({
             {/* Navigation */}
             <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)", flexWrap: "wrap" }}>
                 {isArtist && (
-                    <Link href="/studio/dashboard" className="btn btn-ghost">← Dashboard</Link>
+                    <Link href="/studio/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Dashboard</Link>
                 )}
                 {isClient && (
-                    <Link href="/studio/my-commissions" className="btn btn-ghost">← My Commissions</Link>
+                    <Link href="/studio/my-commissions" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← My Commissions</Link>
                 )}
             </div>
         </div>

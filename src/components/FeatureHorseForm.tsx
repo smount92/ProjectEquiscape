@@ -37,8 +37,8 @@ export default function FeatureHorseForm() {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-[500px]">
-            <div className="form-group">
-                <label className="form-label">Horse ID (UUID)</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Horse ID (UUID)</label>
                 <input
                     type="text"
                     className="form-input"
@@ -48,8 +48,8 @@ export default function FeatureHorseForm() {
                     required
                 />
             </div>
-            <div className="form-group">
-                <label className="form-label">Title</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Title</label>
                 <input
                     type="text"
                     className="form-input"
@@ -58,8 +58,8 @@ export default function FeatureHorseForm() {
                     required
                 />
             </div>
-            <div className="form-group">
-                <label className="form-label">Description (optional)</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1">Description (optional)</label>
                 <textarea
                     className="form-input"
                     value={description}
@@ -76,12 +76,12 @@ export default function FeatureHorseForm() {
             )}
 
             {status === "saved" && (
-                <div className="comment-success" style={{ marginBottom: "var(--space-md)" }}>
+                <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))]" style={{ marginBottom: "var(--space-md)" }}>
                     ✅ Horse featured successfully!
                 </div>
             )}
 
-            <button type="submit" className="btn btn-primary" disabled={status === "saving"}>
+            <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={status === "saving"}>
                 {status === "saving" ? "Featuring…" : "🌟 Feature This Horse"}
             </button>
         </form>

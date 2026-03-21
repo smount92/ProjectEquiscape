@@ -90,7 +90,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
                 <div className="group-file-upload" style={{ marginBottom: "var(--space-lg)" }}>
                     <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "end", flexWrap: "wrap" }}>
                         <div style={{ flex: 1, minWidth: 200 }}>
-                            <label className="form-label">Upload File</label>
+                            <label className="block text-sm font-semibold text-ink mb-1">Upload File</label>
                             <input
                                 ref={fileRef}
                                 type="file"
@@ -99,7 +99,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
                             />
                         </div>
                         <div style={{ flex: 1, minWidth: 200 }}>
-                            <label className="form-label">Description (optional)</label>
+                            <label className="block text-sm font-semibold text-ink mb-1">Description (optional)</label>
                             <input
                                 className="form-input"
                                 value={description}
@@ -108,7 +108,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
                             />
                         </div>
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={handleUpload}
                             disabled={uploading}
                         >
@@ -139,7 +139,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
                             <div style={{ display: "flex", gap: "var(--space-xs)" }}>
                                 {canDelete && (
                                     <button
-                                        className="btn btn-ghost btn-sm"
+                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                                         onClick={() => handleDelete(f.id)}
                                         title="Delete file"
                                     >

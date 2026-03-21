@@ -93,25 +93,25 @@ export default async function ShowDetailPage({
     });
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Hero */}
-            <div className="community-hero animate-fade-in-up">
-                <div className="community-hero-content">
+            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
                     <h1>
-                        📸 <span className="text-gradient">{show.title}</span>
+                        📸 <span className="text-forest">{show.title}</span>
                     </h1>
                     {show.theme && (
-                        <p className="community-hero-subtitle">
+                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                             Theme: {show.theme}
                         </p>
                     )}
                     {show.description && (
-                        <p className="community-hero-subtitle">
+                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                             {show.description}
                         </p>
                     )}
                     {show.endAt && (
-                        <p className="community-hero-subtitle" style={{
+                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle" style={{
                             color: new Date(show.endAt) > new Date() ? "var(--color-accent, #f59e0b)" : "var(--color-text-muted)"
                         }}>
                             ⏰ {new Date(show.endAt) > new Date()
@@ -121,27 +121,27 @@ export default async function ShowDetailPage({
                         </p>
                     )}
                     {show.creatorAlias && (
-                        <p className="community-hero-subtitle" style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle" style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
                             Hosted by @{show.creatorAlias}
                         </p>
                     )}
                 </div>
-                <div className="community-stats">
-                    <div className="community-stat">
-                        <span className="community-stat-number">{entries.length}</span>
-                        <span className="community-stat-label">Entries</span>
+                <div className="flex justify-center gap-8 mt-8">
+                    <div className="flex flex-col items-center">
+                        <span className="flex flex-col items-center-number">{entries.length}</span>
+                        <span className="flex flex-col items-center-label">Entries</span>
                     </div>
-                    <div className="community-stat">
-                        <span className="community-stat-number show-status-badge-lg">
+                    <div className="flex flex-col items-center">
+                        <span className="flex flex-col items-center-number py-[3px] px-[10px] rounded-sm text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap-lg">
                             {show.status === "open" ? "🟢" : show.status === "judging" ? "🟡" : "🔴"}
                         </span>
-                        <span className="community-stat-label">{show.status.charAt(0).toUpperCase() + show.status.slice(1)}</span>
+                        <span className="flex flex-col items-center-label">{show.status.charAt(0).toUpperCase() + show.status.slice(1)}</span>
                     </div>
-                    <div className="community-stat">
-                        <span className="community-stat-number">
+                    <div className="flex flex-col items-center">
+                        <span className="flex flex-col items-center-number">
                             {isExpertJudged ? "🏅" : "🗳️"}
                         </span>
-                        <span className="community-stat-label">
+                        <span className="flex flex-col items-center-label">
                             {isExpertJudged ? "Expert Judge" : "Community Vote"}
                         </span>
                     </div>
@@ -151,7 +151,7 @@ export default async function ShowDetailPage({
             {/* Creator Actions */}
             {(isCreator || isAdmin) && (
                 <div className="animate-fade-in-up" style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end", marginBottom: "var(--space-md)" }}>
-                    <Link href={`/community/events/${showId}/manage`} className="btn btn-ghost">
+                    <Link href={`/community/events/${showId}/manage`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                         ⚙️ Manage Classes
                     </Link>
                 </div>
@@ -159,7 +159,7 @@ export default async function ShowDetailPage({
 
             {/* Judge Assignment Banner — always visible to assigned judges */}
             {isJudge && !isCreator && (
-                <div className="card animate-fade-in-up" style={{
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
                     marginBottom: "var(--space-lg)",
                     padding: "var(--space-lg)",
                     background: "linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.1))",
@@ -197,7 +197,7 @@ export default async function ShowDetailPage({
             )}
 
             {/* Breadcrumb */}
-            <nav className="passport-breadcrumb animate-fade-in-up" style={{ marginBottom: "var(--space-lg)" }}>
+            <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up" style={{ marginBottom: "var(--space-lg)" }}>
                 <Link href="/shows">← All Shows</Link>
             </nav>
 
@@ -233,18 +233,18 @@ export default async function ShowDetailPage({
                 const podiumEntries = topPlaced.slice(0, 3);
 
                 return (
-                    <div className="card animate-fade-in-up" style={{
+                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
                         padding: "var(--space-xl)",
                         marginBottom: "var(--space-lg)",
                     }}>
                         <h2 style={{ fontSize: "calc(1.3rem * var(--font-scale))", marginBottom: "var(--space-sm)", textAlign: "center" }}>
-                            🏆 <span className="text-gradient">Results</span>
+                            🏆 <span className="text-forest">Results</span>
                         </h2>
 
                         {/* Champion Banners */}
                         {champions.map(entry => (
                             <div key={entry.id} className="champion-banner animate-fade-in-up">
-                                <div className="champion-banner-title">
+                                <div className="text-[calc(1.2rem*var(--font-scale))] font-extrabold mb-2">
                                     {MEDAL_MAP[entry.placing!] || "🏆"} {entry.placing}
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--space-md)" }}>
@@ -281,16 +281,16 @@ export default async function ShowDetailPage({
                                         )}
                                         <div className="text-center min-w-[160px] max-w-[220px] bg-elevated rounded-lg overflow-hidden shadow-lg transition-transform-body">
                                             <div className="text-[2rem] mb-1">{medal}</div>
-                                            <Link href={`/community/${entry.horseId}`} className="podium-horse-name hover:underline">
+                                            <Link href={`/community/${entry.horseId}`} className="font-bold text-[calc(0.9rem*var(--font-scale))] text-ink no-underline block hover:underline">
                                                 {entry.horseName}
                                             </Link>
-                                            <div className="podium-owner">
+                                            <div className="text-muted text-[calc(0.75rem*var(--font-scale))] mt-[2px]">
                                                 by <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>@{entry.ownerAlias}</Link>
                                                 {!isExpertJudged && ` · ${entry.votes} vote${entry.votes !== 1 ? "s" : ""}`}
                                             </div>
-                                            <div className="podium-placing">{placing}</div>
+                                            <div className="font-extrabold text-[var(--color-accent, #f59e0b)] text-[calc(0.85rem*var(--font-scale))] mt-1">{placing}</div>
                                             {entry.caption && (
-                                                <div className="podium-caption">&ldquo;{entry.caption}&rdquo;</div>
+                                                <div className="italic text-ink-light text-[calc(0.7rem*var(--font-scale))] mt-1 leading-snug">&ldquo;{entry.caption}&rdquo;</div>
                                             )}
                                         </div>
                                     </div>
@@ -338,7 +338,7 @@ export default async function ShowDetailPage({
 
             {/* Judging Banner */}
             {isJudging && (
-                <div className="card animate-fade-in-up" style={{
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
                     textAlign: "center",
                     padding: "var(--space-lg)",
                     marginBottom: "var(--space-lg)",
@@ -396,8 +396,8 @@ export default async function ShowDetailPage({
 
             {/* Entries Grid */}
             {entries.length === 0 ? (
-                <div className="card shelf-empty animate-fade-in-up">
-                    <div className="shelf-empty-icon">📸</div>
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                    <div className="text-center py-[var(--space-3xl)] px-8-icon">📸</div>
                     <h2>No Entries Yet</h2>
                     <p>Be the first to enter this show!</p>
                 </div>
@@ -405,7 +405,7 @@ export default async function ShowDetailPage({
                 <div className="flex flex-col gap-[0] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg overflow-hidden animate-fade-in-up">
                     {sortedEntries.map((entry, index) => (
                         <div key={entry.id} className="flex items-center gap-4 py-4 px-6 border-b border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-colors">
-                            <div className="show-entry-rank">
+                            <div className="text-[calc(1.1rem*var(--font-scale))] font-bold text-muted min-w-[32px] text-center">
                                 {isExpertJudged && show.status === "closed" && entry.placing
                                     ? entry.placing
                                     : `#${index + 1}`
@@ -420,7 +420,7 @@ export default async function ShowDetailPage({
                             <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
                                 <Link
                                     href={`/community/${entry.horseId}`}
-                                    className="show-entry-horse-name hover:text-forest"
+                                    className="font-semibold text-[calc(0.95rem*var(--font-scale))] no-underline text-inherit hover:text-forest"
                                 >
                                     🐴 {entry.horseName}
                                 </Link>

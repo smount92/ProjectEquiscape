@@ -94,13 +94,13 @@ export default async function AdminPage() {
     }
 
     return (
-        <div className="page-container form-page">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
             <div className="animate-fade-in-up">
                 {/* Header */}
-                <div className="shelf-header">
+                <div className="shelf-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <div>
                         <h1>
-                            <span className="text-gradient">⚡ Admin Console</span>
+                            <span className="text-forest">⚡ Admin Console</span>
                         </h1>
                         <p
                             style={{

@@ -125,17 +125,17 @@ export default function StableGrid({
             )}
 
             {filteredCards.length === 0 && !searchQuery.trim() ? (
-                <div className="card shelf-empty">
-                    <div className="shelf-empty-icon">🏠</div>
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+                    <div className="text-center py-[var(--space-3xl)] px-8-icon">🏠</div>
                     <h2>Your Stable is Empty</h2>
                     <p>You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
-                    <Link href="/add-horse" className="btn btn-primary" id="add-first-horse">
+                    <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="add-first-horse">
                         🐴 Add Your First Horse
                     </Link>
                 </div>
             ) : filteredCards.length === 0 && searchQuery.trim() ? (
-                <div className="card shelf-empty">
-                    <div className="shelf-empty-icon">🔍</div>
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+                    <div className="text-center py-[var(--space-3xl)] px-8-icon">🔍</div>
                     <h2>No Results</h2>
                     <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
                 </div>
@@ -160,8 +160,8 @@ export default function StableGrid({
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                                     ) : (
-                                        <div className="horse-card-placeholder">
-                                            <span className="horse-card-placeholder-icon">🐴</span>
+                                        <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
+                                            <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
                                             <span>No photo</span>
                                         </div>
                                     )}
@@ -171,19 +171,19 @@ export default function StableGrid({
                                         </span>
                                     )}
                                     {horse.assetCategory && horse.assetCategory !== "model" && (
-                                        <span className="horse-card-badge category-badge" style={{ background: "rgba(124, 109, 240, 0.85)", color: "#fff" }}>
+                                        <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-badge category-badge" style={{ background: "rgba(124, 109, 240, 0.85)", color: "#fff" }}>
                                             {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
                                         </span>
                                     )}
                                     {horse.tradeStatus === "For Sale" && (
-                                        <span className="trade-badge trade-for-sale">💲 For Sale</span>
+                                        <span className="trade-badge bg-[rgba(34,197,94,0.85)] text-white border border-[rgba(34,197,94,0.5)]">💲 For Sale</span>
                                     )}
                                     {horse.tradeStatus === "Open to Offers" && (
-                                        <span className="trade-badge trade-open-offers">🤝 Open to Offers</span>
+                                        <span className="trade-badge bg-[rgba(59,130,246,0.85)] text-white border border-[rgba(59,130,246,0.5)]">🤝 Open to Offers</span>
                                     )}
                                 </div>
                                 <div className="py-4 px-6">
-                                    <div className="horse-card-name">{horse.customName}</div>
+                                    <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-name">{horse.customName}</div>
                                     <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis">{horse.refName}</div>
                                     {horse.releaseLine && (
                                         <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
@@ -200,7 +200,7 @@ export default function StableGrid({
                                         <span>{formatDate(horse.createdAt)}</span>
                                     </div>
                                     {horse.collectionName && (
-                                        <div className="horse-card-collection">📁 {horse.collectionName}</div>
+                                        <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-collection">📁 {horse.collectionName}</div>
                                     )}
                                 </div>
                             </CardWrapper>

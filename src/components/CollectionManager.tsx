@@ -52,7 +52,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
 
     if (!showModal) {
         return (
-            <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(true)}>
+            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => setShowModal(true)}>
                 ⚙️ Manage Collection
             </button>
         );
@@ -62,22 +62,22 @@ export default function CollectionManager({ collection }: CollectionManagerProps
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
                 <h3 style={{ marginBottom: "var(--space-lg)" }}>Manage Collection</h3>
-                <div className="form-group">
-                    <label className="form-label">Name</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1">Name</label>
                     <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
-                <div className="form-group">
-                    <label className="form-label">Description</label>
-                    <textarea className="form-textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} style={{ resize: "vertical" }} />
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1">Description</label>
+                    <textarea className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} style={{ resize: "vertical" }} />
                 </div>
-                {error && <p className="form-error">{error}</p>}
+                {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: "var(--space-lg)" }}>
-                    <button className="btn btn-ghost" style={{ color: "red" }} onClick={handleDelete} disabled={saving}>
+                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ color: "red" }} onClick={handleDelete} disabled={saving}>
                         🗑️ Delete
                     </button>
                     <div style={{ display: "flex", gap: "var(--space-sm)" }}>
-                        <button className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
-                        <button className="btn btn-primary" onClick={handleSave} disabled={saving || !name.trim()}>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setShowModal(false)}>Cancel</button>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleSave} disabled={saving || !name.trim()}>
                             {saving ? "Saving…" : "Save"}
                         </button>
                     </div>

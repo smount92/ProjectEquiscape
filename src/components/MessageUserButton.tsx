@@ -37,16 +37,16 @@ export default function MessageUserButton({
     };
 
     return (
-        <div className="message-user-btn-wrapper">
+        <div className="message-user-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-wrapper">
             <button
-                className="btn btn-ghost inline-flex items-center gap-2 !text-sm !py-2 !px-6 [&_svg]:shrink-0 hover:!text-forest hover:!border-forest"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge inline-flex items-center gap-2 !text-sm !py-2 !px-6 [&_svg]:shrink-0 hover:!text-forest hover:!border-forest"
                 onClick={handleClick}
                 disabled={loading}
                 id={`message-user-${targetAlias}`}
             >
                 {loading ? (
                     <>
-                        <span className="btn-spinner" style={{ width: 14, height: 14 }} aria-hidden="true" />
+                        <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ width: 14, height: 14 }} aria-hidden="true" />
                         Opening…
                     </>
                 ) : (
@@ -69,7 +69,7 @@ export default function MessageUserButton({
                 )}
             </button>
             {error && (
-                <p className="form-error" style={{ marginTop: "var(--space-xs)", fontSize: "0.75rem" }}>
+                <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-xs)", fontSize: "0.75rem" }}>
                     {error}
                 </p>
             )}

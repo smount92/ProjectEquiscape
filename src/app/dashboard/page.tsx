@@ -193,7 +193,7 @@ export default async function DashboardPage({
             <div className="animate-fade-in-up">
                 {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
-                    <div className="card text-center py-16 px-8 mb-8 bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] border border-[rgba(44,85,69,0.15)] animate-fade-in-up">
+                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-16 px-8 mb-8 bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] border border-[rgba(44,85,69,0.15)] animate-fade-in-up">
                         <h2>Welcome to Model Horse Hub!</h2>
                         <p>Let&apos;s get started by adding your first model to your digital stable.</p>
                         <div className="flex flex-col gap-4 max-w-[360px] mx-auto mb-8 text-left">
@@ -210,17 +210,17 @@ export default async function DashboardPage({
                                 <span><Users size={16} strokeWidth={1.5} /> Discover and follow other collectors</span>
                             </div>
                         </div>
-                        <Link href="/add-horse" className="btn btn-primary btn-lg">
+                        <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[52px] py-4 px-12 text-[calc(var(--font-size-md)*var(--font-scale))] rounded-lg">
                             <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
                         </Link>
                     </div>
                 )}
 
                 {/* Shelf Header — FULL WIDTH */}
-                <div className="shelf-header flex-wrap">
+                <div className="shelf-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all flex-wrap">
                     <div>
                         <h1>
-                            <span className="text-gradient">Digital Stable</span>
+                            <span className="text-forest">Digital Stable</span>
                             {profile?.alias_name && (
                                 <span
                                     style={{
@@ -243,13 +243,13 @@ export default async function DashboardPage({
                         )}
                         {totalHorseCount > 0 && <ExportButton />}
                         {totalHorseCount > 0 && <InsuranceReportButton />}
-                        <Link href="/stable/import" className="btn btn-ghost" id="batch-import-button">
+                        <Link href="/stable/import" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" id="batch-import-button">
                             <FileText size={16} strokeWidth={1.5} /> Batch Import
                         </Link>
-                        <Link href="/add-horse/quick" className="btn btn-ghost" id="quick-add-button">
+                        <Link href="/add-horse/quick" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" id="quick-add-button">
                             <Zap size={16} strokeWidth={1.5} /> Quick Add
                         </Link>
-                        <Link href="/add-horse" className="btn btn-primary" id="add-horse-button">
+                        <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="add-horse-button">
                             <Plus size={16} strokeWidth={1.5} /> Add to Stable
                         </Link>
                     </div>
@@ -275,27 +275,27 @@ export default async function DashboardPage({
                         {totalPages > 1 && (
                             <div className="flex justify-between items-center mt-8 pt-6 border-t border-edge" style={{ marginTop: "var(--space-lg)" }}>
                                 {page > 1 ? (
-                                    <Link href={`/dashboard?page=${page - 1}`} className="btn btn-ghost">← Previous</Link>
+                                    <Link href={`/dashboard?page=${page - 1}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Previous</Link>
                                 ) : (
-                                    <button className="btn btn-ghost" disabled>← Previous</button>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>← Previous</button>
                                 )}
                                 <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
                                     Page {page} of {totalPages}
                                 </span>
                                 {page < totalPages ? (
-                                    <Link href={`/dashboard?page=${page + 1}`} className="btn btn-ghost">Next →</Link>
+                                    <Link href={`/dashboard?page=${page + 1}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">Next →</Link>
                                 ) : (
-                                    <button className="btn btn-ghost" disabled>Next →</button>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>Next →</button>
                                 )}
                             </div>
                         )}
                     </main>
 
                     {/* ── SIDEBAR: Widgets ── */}
-                    <aside className="flex flex-col gap-6 max-lg:mt-6 lg:sticky lg:top-[calc(var(--header-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
+                    <aside className="flex flex-col gap-6 max-lg:mt-6 lg:sticky lg:top-[calc(var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
-                            <div className="bg-card border border-edge rounded-lg p-6">
+                            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6">
                                 <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.08em]"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
                                 <div className="flex flex-col gap-[2px]">
                                     <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
@@ -331,7 +331,7 @@ export default async function DashboardPage({
 
                         {/* Collections — Vertical list */}
                         {collections.length > 0 && (
-                            <div className="bg-card border border-edge rounded-lg p-6">
+                            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6">
                                 <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.08em]"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
                                 <div className="flex flex-col gap-1">
                                     {collections.map((col) => (

@@ -77,7 +77,7 @@ export default function SuggestionCommentThread({
             )}
             {initialComments.map((comment) => (
                 <div key={comment.id} className="py-2 px-[0] border-b border-edge">
-                    <div className="py-2 px-[0] border-b border-edge-header">
+                    <div className="py-2 px-[0] border-b border-edge-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                         <span className="py-2 px-[0] border-b border-edge-author">
                             @{comment.user_alias}
                         </span>
@@ -110,13 +110,13 @@ export default function SuggestionCommentThread({
                         rows={2}
                         maxLength={2000}
                     />
-                    {error && <p className="form-error">{error}</p>}
+                    {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
                     <div className="py-2 px-[0] border-b border-edge-form-actions">
                         <span className="py-2 px-[0] border-b border-edge-charcount">
                             {newComment.length}/2000
                         </span>
                         <button
-                            className="btn btn-primary btn-small"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm btn-small"
                             onClick={handleSubmit}
                             disabled={isPending || !newComment.trim()}
                         >

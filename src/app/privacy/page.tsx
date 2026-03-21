@@ -9,14 +9,14 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
     return (
-        <div className="static-page">
-            <div className="static-page-inner animate-fade-in-up">
+        <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8">
+            <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
                 {/* Page Header */}
-                <div className="static-page-header">
+                <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h1>
-                        <span className="text-gradient">Privacy</span> Policy
+                        <span className="text-forest">Privacy</span> Policy
                     </h1>
-                    <p className="static-page-lead">
+                    <p className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-lead">
                         Your data is yours. Full stop.
                     </p>
                     <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
                 </div>
 
                 {/* Overview */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>Our Privacy Philosophy</h2>
                     <p>
                         Model Horse Hub was built by collectors, for collectors. We believe your collection
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* What We Collect */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>1. Information We Collect</h2>
 
                     <h3>Account Information</h3>
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* How We Use It */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>2. How We Use Your Information</h2>
                     <p>We use your information exclusively to:</p>
                     <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* Data Security */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>3. Data Security</h2>
                     <p>
                         Your data is protected by multiple layers of security:
@@ -132,7 +132,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* Data Sharing */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>4. When We Share Data</h2>
                     <p>
                         We share data only in the following limited circumstances:
@@ -161,7 +161,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* Third-Party Services */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>5. Third-Party Services</h2>
                     <p>We use the following third-party services:</p>
                     <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
@@ -177,7 +177,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* Your Rights */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>6. Your Rights</h2>
                     <p>You have the right to:</p>
                     <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
@@ -189,7 +189,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* Cookies */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>7. Cookies</h2>
                     <p>
                         We use only <strong>essential cookies</strong> required for authentication and session
@@ -200,7 +200,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* Children */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>8. Children&apos;s Privacy</h2>
                     <p>
                         Model Horse Hub is not directed at children under 13. We do not knowingly collect
@@ -211,7 +211,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* Changes */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>9. Changes to This Policy</h2>
                     <p>
                         We may update this Privacy Policy from time to time. We will notify registered users
@@ -221,7 +221,7 @@ export default function PrivacyPage() {
                 </section>
 
                 {/* Contact */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>10. Questions?</h2>
                     <p>
                         If you have questions about this Privacy Policy or how your data is handled,

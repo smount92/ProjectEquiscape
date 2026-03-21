@@ -87,8 +87,8 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
     const router = useRouter();
     if (items.length === 0) {
         return (
-            <div className="card shelf-empty animate-fade-in-up">
-                <div className="shelf-empty-icon">📰</div>
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                <div className="text-center py-[var(--space-3xl)] px-8-icon">📰</div>
                 <h2>No Activity Yet</h2>
                 <p>{emptyMessage || "Follow some collectors to see their activity here!"}</p>
             </div>
@@ -131,7 +131,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                                         </div>
                                         {/* Image collage for casual image posts */}
                                         {item.imageUrls && item.imageUrls.length > 0 && (
-                                            <div className="feed-image-collage" data-count={Math.min(item.imageUrls.length, 4)}>
+                                            <div className="grid gap-[4px] mt-2 rounded-md overflow-hidden" data-count={Math.min(item.imageUrls.length, 4)}>
                                                 {item.imageUrls.slice(0, 4).map((url, i) => (
                                                     // eslint-disable-next-line @next/next/no-img-element
                                                     <img key={i} src={url} alt={`Post image ${i + 1}`} loading="lazy" />
@@ -165,7 +165,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                             )}
                             {currentUserId && currentUserId === item.actorId && item.eventType === "text_post" && (
                                 <button
-                                    className="btn btn-ghost"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                     style={{ padding: '2px 6px', fontSize: '0.8rem' }}
                                     onClick={() => {
                                         if (confirm("Delete post?")) {

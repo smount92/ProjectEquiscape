@@ -146,8 +146,8 @@ export default function StudioSetupPage() {
 
     if (loading) {
         return (
-            <div className="page-container form-page">
-                <div className="card" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
+            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
                     <p style={{ color: "var(--color-text-muted)" }}>Loading studio settings…</p>
                 </div>
             </div>
@@ -155,13 +155,13 @@ export default function StudioSetupPage() {
     }
 
     return (
-        <div className="page-container form-page">
-            <div className="card animate-fade-in-up" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)" }}>
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)" }}>
                 {/* Header */}
                 <div style={{ textAlign: "center", marginBottom: "var(--space-xl)" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>🎨</div>
                     <h1 style={{ fontSize: "calc(1.4rem * var(--font-scale))" }}>
-                        <span className="text-gradient">
+                        <span className="text-forest">
                             {existing ? "Edit Your Studio" : "Set Up Your Art Studio"}
                         </span>
                     </h1>
@@ -175,8 +175,8 @@ export default function StudioSetupPage() {
                     <fieldset className="border border-edge rounded-lg p-6 mb-6">
                         <legend>🏷️ Studio Identity</legend>
 
-                        <div className="form-group">
-                            <label className="form-label">Studio Name *</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Studio Name *</label>
                             <input
                                 type="text"
                                 className="form-input"
@@ -188,8 +188,8 @@ export default function StudioSetupPage() {
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Studio URL Slug</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Studio URL Slug</label>
                             <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
                                 <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))", whiteSpace: "nowrap" }}>
                                     /studio/
@@ -206,8 +206,8 @@ export default function StudioSetupPage() {
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Artist Bio</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Artist Bio</label>
                             <textarea
                                 className="form-input"
                                 value={bioArtist}
@@ -223,9 +223,9 @@ export default function StudioSetupPage() {
                     <fieldset className="border border-edge rounded-lg p-6 mb-6">
                         <legend>🛠️ Skills & Services</legend>
 
-                        <div className="form-group">
-                            <label className="form-label">Specialties</label>
-                            <div className="studio-chip-grid">
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Specialties</label>
+                            <div className="flex flex-wrap gap-1">
                                 {SPECIALTIES.map(s => (
                                     <button
                                         key={s}
@@ -239,9 +239,9 @@ export default function StudioSetupPage() {
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Mediums</label>
-                            <div className="studio-chip-grid">
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Mediums</label>
+                            <div className="flex flex-wrap gap-1">
                                 {MEDIUMS.map(m => (
                                     <button
                                         key={m}
@@ -255,9 +255,9 @@ export default function StudioSetupPage() {
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Scales Offered</label>
-                            <div className="studio-chip-grid">
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Scales Offered</label>
+                            <div className="flex flex-wrap gap-1">
                                 {SCALES.map(s => (
                                     <button
                                         key={s}
@@ -271,9 +271,9 @@ export default function StudioSetupPage() {
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">Commission Types Accepted</label>
-                            <div className="studio-chip-grid">
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Commission Types Accepted</label>
+                            <div className="flex flex-wrap gap-1">
                                 {COMMISSION_TYPES.map(t => (
                                     <button
                                         key={t}
@@ -292,8 +292,8 @@ export default function StudioSetupPage() {
                     <fieldset className="border border-edge rounded-lg p-6 mb-6">
                         <legend>📋 Commission Settings</legend>
 
-                        <div className="form-group">
-                            <label className="form-label">Commission Status</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Commission Status</label>
                             <div style={{ display: "flex", gap: "var(--space-sm)" }}>
                                 {(["open", "waitlist", "closed"] as const).map(s => (
                                     <button
@@ -309,9 +309,9 @@ export default function StudioSetupPage() {
                             </div>
                         </div>
 
-                        <div className="form-row-2col">
-                            <div className="form-group">
-                                <label className="form-label">Max Commission Slots</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Max Commission Slots</label>
                                 <input
                                     type="number"
                                     className="form-input"
@@ -330,9 +330,9 @@ export default function StudioSetupPage() {
                             <div />
                         </div>
 
-                        <div className="form-row-2col">
-                            <div className="form-group">
-                                <label className="form-label">Turnaround (min days)</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Turnaround (min days)</label>
                                 <input
                                     type="number"
                                     className="form-input"
@@ -342,8 +342,8 @@ export default function StudioSetupPage() {
                                     min={1}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Turnaround (max days)</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Turnaround (max days)</label>
                                 <input
                                     type="number"
                                     className="form-input"
@@ -355,9 +355,9 @@ export default function StudioSetupPage() {
                             </div>
                         </div>
 
-                        <div className="form-row-2col">
-                            <div className="form-group">
-                                <label className="form-label">Price Range (min $)</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Price Range (min $)</label>
                                 <input
                                     type="number"
                                     className="form-input"
@@ -368,8 +368,8 @@ export default function StudioSetupPage() {
                                     step="0.01"
                                 />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Price Range (max $)</label>
+                            <div className="mb-6">
+                                <label className="block text-sm font-semibold text-ink mb-1">Price Range (max $)</label>
                                 <input
                                     type="number"
                                     className="form-input"
@@ -387,8 +387,8 @@ export default function StudioSetupPage() {
                     <fieldset className="border border-edge rounded-lg p-6 mb-6">
                         <legend>💰 Policies & Payment</legend>
 
-                        <div className="form-group">
-                            <label className="form-label">Terms & Conditions</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Terms & Conditions</label>
                             <textarea
                                 className="form-input"
                                 value={termsText}
@@ -399,8 +399,8 @@ export default function StudioSetupPage() {
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">PayPal.me Link</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">PayPal.me Link</label>
                             <input
                                 type="url"
                                 className="form-input"
@@ -425,7 +425,7 @@ export default function StudioSetupPage() {
 
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                         disabled={saving || !studioName.trim()}
                         style={{ width: "100%" }}
                         id="save-studio-btn"
@@ -435,7 +435,7 @@ export default function StudioSetupPage() {
 
                     {existing && (
                         <div style={{ textAlign: "center", marginTop: "var(--space-md)" }}>
-                            <a href={`/studio/${existing.studioSlug}`} className="btn btn-ghost">
+                            <a href={`/studio/${existing.studioSlug}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                                 👁️ View Public Studio Page
                             </a>
                         </div>

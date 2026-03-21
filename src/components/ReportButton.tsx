@@ -53,7 +53,7 @@ export default function ReportButton({
     if (!showForm) {
         return (
             <button
-                className="btn-ghost"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-ghost"
                 onClick={() => setShowForm(true)}
                 style={{
                     fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
@@ -71,7 +71,7 @@ export default function ReportButton({
     }
 
     return (
-        <div className="card" style={{ padding: "var(--space-md)", marginTop: "var(--space-sm)" }}>
+        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", marginTop: "var(--space-sm)" }}>
             <select
                 className="form-input"
                 value={reason}
@@ -84,7 +84,7 @@ export default function ReportButton({
                 ))}
             </select>
             <textarea
-                className="form-textarea"
+                className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                 placeholder="Additional details (optional)"
                 value={details}
                 onChange={e => setDetails(e.target.value)}
@@ -94,10 +94,10 @@ export default function ReportButton({
             />
             {error && <p style={{ color: "#ef4444", fontSize: "calc(var(--font-size-xs) * var(--font-scale))", marginBottom: "var(--space-xs)" }}>{error}</p>}
             <div style={{ display: "flex", gap: "var(--space-xs)" }}>
-                <button className="btn btn-primary btn-sm" onClick={handleSubmit} disabled={saving || !reason}>
+                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={handleSubmit} disabled={saving || !reason}>
                     {saving ? "…" : "Submit Report"}
                 </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setShowForm(false)}>Cancel</button>
+                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => setShowForm(false)}>Cancel</button>
             </div>
         </div>
     );

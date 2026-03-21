@@ -54,22 +54,22 @@ export default async function DiscoverPage() {
     const followedIds = new Set((followRows ?? []).map((r: { following_id: string }) => r.following_id));
 
     return (
-        <div className="page-container page-container-wide">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 max-w-[var(--max-width)]">
             {/* Hero */}
-            <div className="community-hero animate-fade-in-up">
-                <div className="community-hero-content">
+            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
                     <h1>
-                        👥 <span className="text-gradient">Discover Collectors</span>
+                        👥 <span className="text-forest">Discover Collectors</span>
                     </h1>
-                    <p className="community-hero-subtitle">
+                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                         Find fellow collectors, browse their stables, and connect with the
                         community.
                     </p>
                 </div>
-                <div className="community-stats">
-                    <div className="community-stat">
-                        <span className="community-stat-number">{activeUsers.length}</span>
-                        <span className="community-stat-label">Active Collectors</span>
+                <div className="flex justify-center gap-8 mt-8">
+                    <div className="flex flex-col items-center">
+                        <span className="flex flex-col items-center-number">{activeUsers.length}</span>
+                        <span className="flex flex-col items-center-label">Active Collectors</span>
                     </div>
                 </div>
             </div>

@@ -57,14 +57,14 @@ export default function CookieConsent() {
                 </div>
                 <div className="flex gap-2 shrink-0 max-md:w-full max-md:justify-center">
                     <button
-                        className="btn btn-primary text-sm !py-2 !px-6 whitespace-nowrap"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm text-sm !py-2 !px-6 whitespace-nowrap"
                         onClick={handleAccept}
                         id="cookie-accept"
                     >
                         Accept
                     </button>
                     <button
-                        className="btn btn-ghost text-sm !py-2 !px-6 whitespace-nowrap"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge text-sm !py-2 !px-6 whitespace-nowrap"
                         onClick={handleDecline}
                         id="cookie-decline"
                     >

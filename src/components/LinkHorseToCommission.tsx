@@ -46,14 +46,14 @@ export default function LinkHorseToCommission({
 
     if (done) {
         return (
-            <div className="getting-started-tip" style={{ marginBottom: "var(--space-lg)" }}>
+            <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4" style={{ marginBottom: "var(--space-lg)" }}>
                 ✅ Horse linked! WIP photos will appear on its Hoofprint™ upon delivery.
             </div>
         );
     }
 
     return (
-        <div className="card" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
+        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
             <h3 style={{ marginBottom: "var(--space-sm)" }}>🔗 Link a Horse from Your Stable</h3>
             <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-md)" }}>
                 Link a horse so WIP photos are added to its Hoofprint™ when this commission is delivered.
@@ -71,7 +71,7 @@ export default function LinkHorseToCommission({
                     ))}
                 </select>
                 <button
-                    className="btn btn-primary btn-sm"
+                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
                     onClick={handleLink}
                     disabled={!selectedHorseId || saving}
                 >

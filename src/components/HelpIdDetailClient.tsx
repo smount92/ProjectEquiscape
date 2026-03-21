@@ -82,7 +82,7 @@ export default function HelpIdDetailClient({
             </h2>
 
             {suggestions.length === 0 ? (
-                <div className="card" style={{ textAlign: "center", padding: "var(--space-xl)" }}>
+                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-xl)" }}>
                     <p style={{ color: "var(--color-text-muted)" }}>No suggestions yet. Be the first to help!</p>
                 </div>
             ) : (
@@ -115,7 +115,7 @@ export default function HelpIdDetailClient({
 
                             <div className="flex items-center gap-4">
                                 <button
-                                    className="btn btn-ghost inline-flex items-center gap-1 tabular-nums"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge inline-flex items-center gap-1 tabular-nums"
                                     onClick={() => handleUpvote(s.id)}
                                     title="Upvote this suggestion"
                                 >
@@ -124,7 +124,7 @@ export default function HelpIdDetailClient({
 
                                 {isOwner && !isResolved && (
                                     <button
-                                        className="btn btn-primary"
+                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                         onClick={() => handleAccept(s.id)}
                                         style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                                     >
@@ -134,7 +134,7 @@ export default function HelpIdDetailClient({
 
                                 {s.isAccepted && (
                                     <button
-                                        className="btn btn-primary"
+                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                         onClick={() => handleAddToStable(s.id)}
                                         disabled={addingHorse === s.id}
                                     >
@@ -158,18 +158,18 @@ export default function HelpIdDetailClient({
                 <div style={{ marginTop: "var(--space-xl)" }}>
                     {!showSuggestForm ? (
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={() => setShowSuggestForm(true)}
                             id="add-suggestion-btn"
                         >
                             💡 I Know This Model
                         </button>
                     ) : (
-                        <div className="card" style={{ padding: "var(--space-lg)" }}>
+                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
                             <h3 style={{ marginBottom: "var(--space-md)" }}>Your Suggestion</h3>
-                            <div className="form-group">
+                            <div className="mb-6">
                                 <textarea
-                                    className="form-textarea"
+                                    className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                                     rows={3}
                                     value={suggestText}
                                     onChange={(e) => setSuggestText(e.target.value)}
@@ -179,7 +179,7 @@ export default function HelpIdDetailClient({
                             </div>
                             <div style={{ display: "flex", gap: "var(--space-md)" }}>
                                 <button
-                                    className="btn btn-ghost"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                     onClick={() => {
                                         setShowSuggestForm(false);
                                         setSuggestText("");
@@ -188,7 +188,7 @@ export default function HelpIdDetailClient({
                                     Cancel
                                 </button>
                                 <button
-                                    className="btn btn-primary"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                     onClick={handleSuggest}
                                     disabled={submitting || !suggestText.trim()}
                                 >
@@ -209,7 +209,7 @@ export default function HelpIdDetailClient({
             {isOwner && (
                 <div style={{ marginTop: "var(--space-xl)", textAlign: "right" }}>
                     <button
-                        className="btn btn-ghost"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                         style={{ color: "red" }}
                         onClick={async () => {
                             if (confirm("Delete this Help ID request? This cannot be undone.")) {

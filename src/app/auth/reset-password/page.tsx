@@ -78,9 +78,9 @@ export default function ResetPasswordPage() {
 
     if (success) {
         return (
-            <div className="auth-page">
-                <div className="card card-auth animate-fade-in-up">
-                    <div className="card-header">
+            <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
+                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                         <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }} aria-hidden="true">✅</div>
                         <h1>Password Updated!</h1>
                         <p style={{ marginTop: "var(--space-md)" }}>Redirecting to your stable...</p>
@@ -92,16 +92,16 @@ export default function ResetPasswordPage() {
 
     if (!ready) {
         return (
-            <div className="auth-page">
-                <div className="card card-auth animate-fade-in-up">
-                    <div className="card-header">
+            <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
+                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                         <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }} aria-hidden="true">🔐</div>
-                        <h1>Verifying <span className="text-gradient">Reset Link</span></h1>
+                        <h1>Verifying <span className="text-forest">Reset Link</span></h1>
                         <p style={{ marginTop: "var(--space-md)" }}>
                             {error || "Please wait while we verify your reset link..."}
                         </p>
                         {error && (
-                            <a href="/forgot-password" className="btn btn-primary btn-full" style={{ marginTop: "var(--space-lg)" }}>
+                            <a href="/forgot-password" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full" style={{ marginTop: "var(--space-lg)" }}>
                                 Request New Reset Link
                             </a>
                         )}
@@ -112,15 +112,15 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="auth-page">
-            <div className="card card-auth animate-fade-in-up">
-                <div className="card-header">
-                    <h1>New <span className="text-gradient">Password</span></h1>
+        <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                    <h1>New <span className="text-forest">Password</span></h1>
                     <p>Choose a new password for your account</p>
                 </div>
 
                 {error && (
-                    <div className="form-error" role="alert">
+                    <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
                         </svg>
@@ -129,8 +129,8 @@ export default function ResetPasswordPage() {
                 )}
 
                 <form onSubmit={handleSubmit} noValidate>
-                    <div className="form-group">
-                        <label htmlFor="new-password" className="form-label">New Password</label>
+                    <div className="mb-6">
+                        <label htmlFor="new-password" className="block text-sm font-semibold text-ink mb-1">New Password</label>
                         <input
                             id="new-password"
                             type="password"
@@ -144,8 +144,8 @@ export default function ResetPasswordPage() {
                             autoFocus
                         />
                     </div>
-                    <div className="form-group">
-                        <label htmlFor="confirm-new-password" className="form-label">Confirm New Password</label>
+                    <div className="mb-6">
+                        <label htmlFor="confirm-new-password" className="block text-sm font-semibold text-ink mb-1">Confirm New Password</label>
                         <input
                             id="confirm-new-password"
                             type="password"
@@ -158,10 +158,10 @@ export default function ResetPasswordPage() {
                         />
                     </div>
 
-                    <button type="submit" className="btn btn-primary btn-full" disabled={isPending} id="reset-submit">
+                    <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full" disabled={isPending} id="reset-submit">
                         {isPending ? (
                             <>
-                                <span className="btn-spinner" aria-hidden="true" />
+                                <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
                                 Updating...
                             </>
                         ) : (

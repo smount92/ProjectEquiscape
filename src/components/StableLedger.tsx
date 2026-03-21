@@ -138,8 +138,8 @@ export default function StableLedger({
             )}
 
             {filteredCards.length === 0 && !searchQuery.trim() ? (
-                <div className="card shelf-empty">
-                    <div className="shelf-empty-icon">🏠</div>
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+                    <div className="text-center py-[var(--space-3xl)] px-8-icon">🏠</div>
                     <h2>Your Stable is Empty</h2>
                     <p>Click the button above to add your first horse.</p>
                 </div>

@@ -21,20 +21,20 @@ export default function ContactPage() {
     }, [state.success]);
 
     return (
-        <div className="static-page">
-            <div className="static-page-inner animate-fade-in-up">
+        <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8">
+            <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
                 {/* Page Header */}
-                <div className="static-page-header">
+                <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h1>
-                        <span className="text-gradient">Contact</span> Us
+                        <span className="text-forest">Contact</span> Us
                     </h1>
-                    <p className="static-page-lead">
+                    <p className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-lead">
                         Have a question, suggestion, or just want to say hello? We&apos;d love to hear from
                         you.
                     </p>
                 </div>
 
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     {state.success ? (
                         <div className="text-center py-16 px-8" id="contact-success">
                             <span className="block text-[3rem] mb-6" aria-hidden="true">✅</span>
@@ -52,7 +52,7 @@ export default function ContactPage() {
                             noValidate
                         >
                             {state.error && (
-                                <div className="form-error" role="alert" id="contact-error">
+                                <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert" id="contact-error">
                                     <svg
                                         width="16"
                                         height="16"
@@ -70,8 +70,8 @@ export default function ContactPage() {
                                 </div>
                             )}
 
-                            <div className="form-group">
-                                <label htmlFor="contact-name" className="form-label">
+                            <div className="mb-6">
+                                <label htmlFor="contact-name" className="block text-sm font-semibold text-ink mb-1">
                                     Your Name
                                 </label>
                                 <input
@@ -86,8 +86,8 @@ export default function ContactPage() {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="contact-email" className="form-label">
+                            <div className="mb-6">
+                                <label htmlFor="contact-email" className="block text-sm font-semibold text-ink mb-1">
                                     Email Address
                                 </label>
                                 <input
@@ -101,8 +101,8 @@ export default function ContactPage() {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="contact-subject" className="form-label">
+                            <div className="mb-6">
+                                <label htmlFor="contact-subject" className="block text-sm font-semibold text-ink mb-1">
                                     Subject <span style={{ color: "var(--color-text-muted)", fontWeight: 400 }}>(optional)</span>
                                 </label>
                                 <input
@@ -114,8 +114,8 @@ export default function ContactPage() {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label htmlFor="contact-message" className="form-label">
+                            <div className="mb-6">
+                                <label htmlFor="contact-message" className="block text-sm font-semibold text-ink mb-1">
                                     Message
                                 </label>
                                 <textarea
@@ -131,13 +131,13 @@ export default function ContactPage() {
 
                             <button
                                 type="submit"
-                                className="btn btn-primary btn-full"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full"
                                 id="contact-submit"
                                 disabled={isPending}
                             >
                                 {isPending ? (
                                     <>
-                                        <span className="btn-spinner" aria-hidden="true" />
+                                        <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
                                         Sending…
                                     </>
                                 ) : (

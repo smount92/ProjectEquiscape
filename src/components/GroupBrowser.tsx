@@ -54,16 +54,16 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
             <div className="studio-tabs" style={{ marginBottom: "var(--space-lg)" }}>
                 <button className={`studio-tab ${tab === "browse" ? "active" : ""}`} onClick={() => setTab("browse")}>
                     🌐 Browse All
-                    <span className="studio-tab-badge">{allGroups.length}</span>
+                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{allGroups.length}</span>
                 </button>
                 <button className={`studio-tab ${tab === "mine" ? "active" : ""}`} onClick={() => setTab("mine")}>
                     ⭐ My Groups
-                    <span className="studio-tab-badge">{myGroups.length}</span>
+                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{myGroups.length}</span>
                 </button>
             </div>
 
             {/* Search */}
-            <div className="search-bar" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
                 <input
                     type="text"
                     className="form-input"
@@ -75,7 +75,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
             </div>
 
             {/* Type Filter */}
-            <div className="studio-chip-grid" style={{ marginBottom: "var(--space-lg)" }}>
+            <div className="flex flex-wrap gap-1" style={{ marginBottom: "var(--space-lg)" }}>
                 <button className={`studio-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
                 {Object.entries(typeLabels).map(([key, label]) => (
                     <button key={key} className={`studio-chip ${filter === key ? "active" : ""}`} onClick={() => setFilter(key)}>
@@ -93,7 +93,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                 <div className="grid grid-cols-[repeat(auto-fill, minmax(320px, 1fr))] gap-4">
                     {filtered.map(g => (
                         <div key={g.id} className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors">
-                            <div className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-header">
+                            <div className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                                 <span className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-icon">{TYPE_ICONS[g.groupType] || "📂"}</span>
                                 <div>
                                     <Link href={`/community/groups/${g.slug}`} className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-name">{g.name}</Link>
@@ -110,15 +110,15 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                 <span className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-members">👥 {g.memberCount} member{g.memberCount !== 1 ? "s" : ""}</span>
                                 {g.isMember ? (
                                     <div style={{ display: "flex", gap: "var(--space-xs)" }}>
-                                        <span className="commission-status-badge" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
+                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
                                             ✓ {g.memberRole || "Member"}
                                         </span>
                                         {g.memberRole !== "owner" && (
-                                            <button className="btn btn-ghost btn-sm" onClick={() => handleLeave(g.id)} disabled={joining === g.id}>Leave</button>
+                                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => handleLeave(g.id)} disabled={joining === g.id}>Leave</button>
                                         )}
                                     </div>
                                 ) : (
-                                    <button className="btn btn-primary btn-sm" onClick={() => handleJoin(g.id)} disabled={joining === g.id}>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={() => handleJoin(g.id)} disabled={joining === g.id}>
                                         {joining === g.id ? "Joining..." : "+ Join"}
                                     </button>
                                 )}

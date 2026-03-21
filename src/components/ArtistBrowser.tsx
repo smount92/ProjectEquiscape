@@ -25,7 +25,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
     return (
         <div className="animate-fade-in-up">
             {/* Search */}
-            <div className="search-bar" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
                 <input
                     type="text"
                     className="form-input"
@@ -38,7 +38,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
 
             {/* Filter Chips */}
             <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap", marginBottom: "var(--space-lg)" }}>
-                <div className="studio-chip-grid">
+                <div className="flex flex-wrap gap-1">
                     <button className={`studio-chip ${statusFilter === "all" ? "active" : ""}`} onClick={() => setStatusFilter("all")}>All Status</button>
                     {(["open", "waitlist", "closed"] as const).map(s => (
                         <button key={s} className={`studio-chip ${statusFilter === s ? "active" : ""}`} onClick={() => setStatusFilter(s)}>
@@ -67,19 +67,19 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
             ) : (
                 <div className="discover-grid">
                     {filtered.map(a => (
-                        <Link key={a.userId} href={`/studio/${a.studioSlug}`} className="discover-card" style={{ textDecoration: "none" }}>
-                            <div className="discover-card-info">
-                                <div className="discover-card-alias">
+                        <Link key={a.userId} href={`/studio/${a.studioSlug}`} className="discover-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textDecoration: "none" }}>
+                            <div className="discover-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-info">
+                                <div className="discover-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-alias">
                                     {STATUS_EMOJI[a.status]} {a.studioName}
                                 </div>
-                                <div className="discover-card-stats">
+                                <div className="discover-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-stats">
                                     <span>🎨 @{a.ownerAlias}</span>
                                     {a.priceRangeMin != null && <span>💰 ${a.priceRangeMin}–${a.priceRangeMax}</span>}
                                 </div>
                                 {a.specialties.length > 0 && (
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: "var(--space-xs)" }}>
                                         {a.specialties.slice(0, 3).map(s => (
-                                            <span key={s} className="studio-chip" style={{ fontSize: "0.7rem", padding: "2px 6px" }}>{s}</span>
+                                            <span key={s} className="py-[6px] px-[14px] rounded-full border border-edge bg-card text-ink-light text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all" style={{ fontSize: "0.7rem", padding: "2px 6px" }}>{s}</span>
                                         ))}
                                     </div>
                                 )}

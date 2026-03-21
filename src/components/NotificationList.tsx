@@ -105,12 +105,12 @@ export default function NotificationList({
             {notifs.length > 0 && (
                 <div className="flex gap-2 mb-6 pb-2 border-b border-edge">
                     {unreadCount > 0 && (
-                        <button className="btn btn-ghost btn-sm" onClick={handleMarkAllRead}>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={handleMarkAllRead}>
                             ✓ Mark All Read
                         </button>
                     )}
                     <button
-                        className="btn btn-ghost btn-sm"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                         onClick={handleClear}
                         disabled={clearing}
                         style={{ color: "var(--color-text-muted)" }}
@@ -122,8 +122,8 @@ export default function NotificationList({
 
             {/* List */}
             {notifs.length === 0 ? (
-                <div className="card shelf-empty animate-fade-in-up">
-                    <div className="shelf-empty-icon">🔔</div>
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                    <div className="text-center py-[var(--space-3xl)] px-8-icon">🔔</div>
                     <h2>All Caught Up!</h2>
                     <p>No notifications yet. Activity from the community will appear here.</p>
                 </div>

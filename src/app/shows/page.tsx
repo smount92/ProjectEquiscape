@@ -39,29 +39,29 @@ export default async function ShowsPage() {
     }
 
     return (
-        <div className="page-container">
-            <div className="community-hero animate-fade-in-up">
-                <div className="community-hero-content">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
                     <h1>
-                        📸 <span className="text-gradient">Virtual Photo Shows</span>
+                        📸 <span className="text-forest">Virtual Photo Shows</span>
                     </h1>
-                    <p className="community-hero-subtitle">
+                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                         Enter your models, vote for your favorites, and compete for community glory!
                     </p>
                 </div>
-                <div className="community-stats">
-                    <div className="community-stat">
-                        <span className="community-stat-number">
+                <div className="flex justify-center gap-8 mt-8">
+                    <div className="flex flex-col items-center">
+                        <span className="flex flex-col items-center-number">
                             {shows.filter((s) => s.status === "open").length}
                         </span>
-                        <span className="community-stat-label">Open Shows</span>
+                        <span className="flex flex-col items-center-label">Open Shows</span>
                     </div>
                 </div>
             </div>
 
             {shows.length === 0 ? (
-                <div className="card shelf-empty animate-fade-in-up">
-                    <div className="shelf-empty-icon">📸</div>
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                    <div className="text-center py-[var(--space-3xl)] px-8-icon">📸</div>
                     <h2>No Shows Yet</h2>
                     <p>Check back soon for virtual photo shows!</p>
                 </div>
@@ -74,11 +74,11 @@ export default async function ShowsPage() {
                             <Link
                                 key={show.id}
                                 href={`/shows/${show.id}`}
-                                className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all"
+                                className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all"
                                 id={`show-${show.id}`}
                             >
-                                <div className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-header">
-                                    <h3 className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-title">{show.title}</h3>
+                                <div className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                                    <h3 className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-title">{show.title}</h3>
                                     <div style={{ display: "flex", gap: "var(--space-xs)", alignItems: "center" }}>
                                         {isUserJudge && (
                                             <span style={{
@@ -100,17 +100,17 @@ export default async function ShowsPage() {
                                     </div>
                                 </div>
                                 {show.theme && (
-                                    <div className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-theme">Theme: {show.theme}</div>
+                                    <div className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-theme">Theme: {show.theme}</div>
                                 )}
                                 {show.description && (
-                                    <p className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-desc">{show.description}</p>
+                                    <p className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-desc">{show.description}</p>
                                 )}
                                 {show.creatorAlias && (
                                     <div style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
                                         Hosted by @{show.creatorAlias}
                                     </div>
                                 )}
-                                <div className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-footer">
+                                <div className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-footer">
                                     <span>🐴 {show.entryCount} entr{show.entryCount !== 1 ? "ies" : "y"}</span>
                                     {show.endAt && (
                                         <span>

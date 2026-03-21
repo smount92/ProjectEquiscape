@@ -61,7 +61,7 @@ export default function MessageSellerButton({
                     aria-label={isOfferable ? "Make Offer" : "Message Seller"}
                 >
                     {loading ? (
-                        <span className="btn-spinner" style={{ width: 12, height: 12 }} aria-hidden="true" />
+                        <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ width: 12, height: 12 }} aria-hidden="true" />
                     ) : isOfferable ? (
                         <span style={{ fontSize: 12 }}>💰</span>
                     ) : (
@@ -87,13 +87,13 @@ export default function MessageSellerButton({
     return (
         <>
             <button
-                className="message-seller-btn"
+                className="message-seller-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
                 onClick={handleClick}
                 disabled={loading}
             >
                 {loading ? (
                     <>
-                        <span className="btn-spinner" style={{ width: 14, height: 14 }} aria-hidden="true" />
+                        <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ width: 14, height: 14 }} aria-hidden="true" />
                         {isOfferable ? "Opening…" : "Opening…"}
                     </>
                 ) : isOfferable ? (

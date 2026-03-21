@@ -112,8 +112,8 @@ export default function ClaimPage() {
 
     if (success) {
         return (
-            <div className="page-container form-page">
-                <div className="card animate-fade-in-up" style={{ maxWidth: "500px", margin: "0 auto", textAlign: "center", padding: "var(--space-2xl)" }}>
+            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: "500px", margin: "0 auto", textAlign: "center", padding: "var(--space-2xl)" }}>
                     <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>🎉</div>
                     <h1 style={{ fontSize: "calc(1.5rem * var(--font-scale))" }}>
                         Welcome to your stable!
@@ -123,10 +123,10 @@ export default function ClaimPage() {
                         The full Hoofprint™ history has been preserved.
                     </p>
                     <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "center", flexWrap: "wrap" }}>
-                        <Link href={`/stable/${success.horseId}`} className="btn btn-primary">
+                        <Link href={`/stable/${success.horseId}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
                             🐴 View Passport
                         </Link>
-                        <Link href="/dashboard" className="btn btn-ghost">
+                        <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                             ← Dashboard
                         </Link>
                     </div>
@@ -146,12 +146,12 @@ export default function ClaimPage() {
     }
 
     return (
-        <div className="page-container form-page">
-            <div className="card animate-fade-in-up" style={{ maxWidth: "520px", margin: "0 auto", padding: "var(--space-2xl)" }}>
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: "520px", margin: "0 auto", padding: "var(--space-2xl)" }}>
                 <div style={{ textAlign: "center", marginBottom: "var(--space-lg)" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>📦</div>
                     <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>
-                        <span className="text-gradient">Claim a Horse</span>
+                        <span className="text-forest">Claim a Horse</span>
                     </h1>
                     <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))", marginTop: "var(--space-xs)" }}>
                         Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
@@ -160,7 +160,7 @@ export default function ClaimPage() {
 
                 {/* Preview Card (CoA PIN lookup result) */}
                 {preview && (
-                    <div className="claim-preview-card" style={{
+                    <div className="claim-preview-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{
                         border: "1px solid var(--color-border)",
                         borderRadius: "var(--radius-lg)",
                         padding: "var(--space-lg)",
@@ -224,7 +224,7 @@ export default function ClaimPage() {
                         </div>
 
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={handleClaim}
                             disabled={claiming}
                             style={{ width: "100%", marginTop: "var(--space-lg)" }}
@@ -238,8 +238,8 @@ export default function ClaimPage() {
                 {/* Code Input */}
                 {!preview && (
                     <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label className="form-label">Transfer Code or PIN</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Transfer Code or PIN</label>
                             <input
                                 type="text"
                                 className="form-input"
@@ -271,7 +271,7 @@ export default function ClaimPage() {
 
                         <button
                             type="submit"
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             disabled={claiming || lookingUp || code.trim().length < 6}
                             style={{ width: "100%" }}
                         >

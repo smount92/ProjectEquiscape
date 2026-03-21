@@ -132,10 +132,10 @@ export default function SettingsPage() {
 
     if (isLoading) {
         return (
-            <div className="page-container">
+            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
                 <div style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
                     <div
-                        className="btn-spinner"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner"
                         style={{
                             width: 36,
                             height: 36,
@@ -152,16 +152,16 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="page-container">
-            <nav className="passport-breadcrumb animate-fade-in-up" aria-label="Breadcrumb">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+            <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up" aria-label="Breadcrumb">
                 <Link href="/dashboard">Digital Stable</Link>
                 <span className="separator" aria-hidden="true">/</span>
                 <span>Settings</span>
             </nav>
 
-            <div className="static-page-inner animate-fade-in-up" style={{ maxWidth: 680 }}>
+            <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up" style={{ maxWidth: 680 }}>
                 <h1 style={{ marginBottom: "var(--space-2xl)", fontSize: "calc(1.6rem * var(--font-scale))" }}>
-                    ⚙️ <span className="text-gradient">Settings</span>
+                    ⚙️ <span className="text-forest">Settings</span>
                 </h1>
 
                 {/* ═══ Profile ═══ */}
@@ -180,7 +180,7 @@ export default function SettingsPage() {
                             </div>
                             <div>
                                 <button
-                                    className="btn btn-ghost"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                     style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                                     onClick={() => avatarInputRef.current?.click()}
                                     disabled={isUploadingAvatar}
@@ -201,8 +201,8 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Alias */}
-                        <div className="form-group">
-                            <label htmlFor="settings-alias" className="form-label">
+                        <div className="mb-6">
+                            <label htmlFor="settings-alias" className="block text-sm font-semibold text-ink mb-1">
                                 Display Name
                             </label>
                             <input
@@ -214,24 +214,24 @@ export default function SettingsPage() {
                                 maxLength={30}
                                 minLength={3}
                             />
-                            <span className="form-hint">3-30 characters. Must be unique.</span>
+                            <span className="block mt-1 text-xs text-muted">3-30 characters. Must be unique.</span>
                         </div>
 
                         {/* Bio */}
-                        <div className="form-group">
-                            <label htmlFor="settings-bio" className="form-label">
+                        <div className="mb-6">
+                            <label htmlFor="settings-bio" className="block text-sm font-semibold text-ink mb-1">
                                 Bio
                             </label>
                             <textarea
                                 id="settings-bio"
-                                className="form-textarea"
+                                className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                                 rows={3}
                                 maxLength={500}
                                 placeholder="Tell other collectors about yourself…"
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
                             />
-                            <span className="form-hint">{bio.length}/500</span>
+                            <span className="block mt-1 text-xs text-muted">{bio.length}/500</span>
                         </div>
 
                         {/* Default horse visibility */}
@@ -253,7 +253,7 @@ export default function SettingsPage() {
                                 <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
                                     📸 Watermark uploaded photos
                                 </span>
-                                <span className="form-hint" style={{ display: "block", marginTop: 2 }}>
+                                <span className="block mt-1 text-xs text-muted" style={{ display: "block", marginTop: 2 }}>
                                     Adds &ldquo;© @{aliasName} — ModelHorseHub&rdquo; to new uploads
                                 </span>
                             </div>
@@ -271,7 +271,7 @@ export default function SettingsPage() {
                                 <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
                                     🏆 Show Trophy Case on profile
                                 </span>
-                                <span className="form-hint" style={{ display: "block", marginTop: 2 }}>
+                                <span className="block mt-1 text-xs text-muted" style={{ display: "block", marginTop: 2 }}>
                                     When off, your badges are hidden from other users
                                 </span>
                             </div>
@@ -284,8 +284,8 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Currency symbol preference */}
-                        <div className="form-group">
-                            <label htmlFor="settings-currency" className="form-label">
+                        <div className="mb-6">
+                            <label htmlFor="settings-currency" className="block text-sm font-semibold text-ink mb-1">
                                 💱 Preferred Currency Symbol
                             </label>
                             <select
@@ -306,13 +306,13 @@ export default function SettingsPage() {
                                 <option value="₩">₩ — Korean Won</option>
                                 <option value="zł">zł — Polish Zloty</option>
                             </select>
-                            <span className="form-hint">
+                            <span className="block mt-1 text-xs text-muted">
                                 Shown on your vault, offers, and listing prices. Market Value (Blue Book) always shows USD.
                             </span>
                         </div>
 
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={handleSaveProfile}
                             disabled={isSavingProfile}
                             style={{ marginTop: "var(--space-lg)" }}
@@ -332,8 +332,8 @@ export default function SettingsPage() {
                 <div className="mb-12 max-sm:mb-8">
                     <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">🔒 Security</h2>
                     <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                        <div className="form-group">
-                            <label className="form-label">Email</label>
+                        <div className="mb-6">
+                            <label className="block text-sm font-semibold text-ink mb-1">Email</label>
                             <input
                                 type="email"
                                 className="form-input"
@@ -341,11 +341,11 @@ export default function SettingsPage() {
                                 disabled
                                 style={{ opacity: 0.6 }}
                             />
-                            <span className="form-hint">Email changes require verification (coming soon).</span>
+                            <span className="block mt-1 text-xs text-muted">Email changes require verification (coming soon).</span>
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="settings-new-password" className="form-label">
+                        <div className="mb-6">
+                            <label htmlFor="settings-new-password" className="block text-sm font-semibold text-ink mb-1">
                                 New Password
                             </label>
                             <input
@@ -359,8 +359,8 @@ export default function SettingsPage() {
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="settings-confirm-password" className="form-label">
+                        <div className="mb-6">
+                            <label htmlFor="settings-confirm-password" className="block text-sm font-semibold text-ink mb-1">
                                 Confirm Password
                             </label>
                             <input
@@ -374,7 +374,7 @@ export default function SettingsPage() {
                         </div>
 
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={handleChangePassword}
                             disabled={isSavingPassword || !newPassword || !confirmPassword}
                         >
@@ -416,20 +416,20 @@ export default function SettingsPage() {
                         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-lg)" }}>
                             {/* CSV Export */}
                             <div>
-                                <a href="/api/export" className="btn btn-ghost" download>
+                                <a href="/api/export" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" download>
                                     📄 Download Collection (CSV)
                                 </a>
-                                <p className="form-hint" style={{ marginTop: 4 }}>
+                                <p className="block mt-1 text-xs text-muted" style={{ marginTop: 4 }}>
                                     Spreadsheet format — compatible with Excel, Google Sheets.
                                 </p>
                             </div>
 
                             {/* Insurance PDF */}
                             <div>
-                                <a href="/api/insurance-report" className="btn btn-primary" download>
+                                <a href="/api/insurance-report" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" download>
                                     🛡️ Download Insurance Report (PDF)
                                 </a>
-                                <p className="form-hint" style={{ marginTop: 4 }}>
+                                <p className="block mt-1 text-xs text-muted" style={{ marginTop: 4 }}>
                                     Professional PDF with photos and values — share with your insurance agent.
                                 </p>
                             </div>
@@ -450,8 +450,8 @@ export default function SettingsPage() {
                             <li>Pending transfers and commissions will be cancelled</li>
                             <li>You will be signed out and cannot log in again</li>
                         </ul>
-                        <div className="form-group">
-                            <label htmlFor="delete-confirm" className="form-label">Type <strong>DELETE</strong> to confirm</label>
+                        <div className="mb-6">
+                            <label htmlFor="delete-confirm" className="block text-sm font-semibold text-ink mb-1">Type <strong>DELETE</strong> to confirm</label>
                             <input
                                 id="delete-confirm"
                                 type="text"
@@ -463,7 +463,7 @@ export default function SettingsPage() {
                             />
                         </div>
                         <button
-                            className="btn"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
                             style={{
                                 background: deleteConfirm === "DELETE" ? "#ef4444" : "var(--color-surface-elevated)",
                                 color: deleteConfirm === "DELETE" ? "#fff" : "var(--color-text-muted)",
@@ -485,7 +485,7 @@ export default function SettingsPage() {
                         >
                             {isDeleting ? "Deleting…" : "🗑️ Permanently Delete Account"}
                         </button>
-                        {deleteError && <p className="form-error" style={{ marginTop: "var(--space-sm)" }}>{deleteError}</p>}
+                        {deleteError && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-sm)" }}>{deleteError}</p>}
                     </div>
                 </div>
             </div>

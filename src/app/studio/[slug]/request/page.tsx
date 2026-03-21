@@ -35,14 +35,14 @@ export default async function CommissionRequestPage({
 
     if (profile.status === "closed") {
         return (
-            <div className="page-container form-page">
-                <div className="card animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
+            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-md)" }}>🔴</div>
                     <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>Commissions Closed</h1>
                     <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
                         {profile.studioName} is not accepting commissions right now.
                     </p>
-                    <Link href={`/studio/${slug}`} className="btn btn-ghost" style={{ marginTop: "var(--space-lg)" }}>
+                    <Link href={`/studio/${slug}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginTop: "var(--space-lg)" }}>
                         ← Back to Studio
                     </Link>
                 </div>
@@ -52,14 +52,14 @@ export default async function CommissionRequestPage({
 
     if (user.id === profile.userId) {
         return (
-            <div className="page-container form-page">
-                <div className="card animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
+            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-md)" }}>🎨</div>
                     <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>This is your studio!</h1>
                     <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
                         You can&apos;t commission yourself. Manage your commissions from the dashboard.
                     </p>
-                    <Link href="/studio/dashboard" className="btn btn-primary" style={{ marginTop: "var(--space-lg)" }}>
+                    <Link href="/studio/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" style={{ marginTop: "var(--space-lg)" }}>
                         📊 Go to Dashboard
                     </Link>
                 </div>
@@ -68,13 +68,13 @@ export default async function CommissionRequestPage({
     }
 
     return (
-        <div className="page-container form-page">
-            <div className="card animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)" }}>
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)" }}>
                 {/* Header */}
                 <div style={{ textAlign: "center", marginBottom: "var(--space-xl)" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>🎨</div>
                     <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>
-                        <span className="text-gradient">Request a Commission</span>
+                        <span className="text-forest">Request a Commission</span>
                     </h1>
                     <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))", marginTop: "var(--space-xs)" }}>
                         from <strong>{profile.studioName}</strong> by @{profile.ownerAlias}
@@ -89,7 +89,7 @@ export default async function CommissionRequestPage({
                 <CommissionRequestForm artist={profile} />
 
                 <div style={{ textAlign: "center", marginTop: "var(--space-md)" }}>
-                    <Link href={`/studio/${slug}`} className="btn btn-ghost">
+                    <Link href={`/studio/${slug}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                         ← Back to Studio
                     </Link>
                 </div>

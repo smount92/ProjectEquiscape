@@ -20,16 +20,16 @@ export default async function ChangelogPage() {
         .limit(50);
 
     return (
-        <div className="page-container">
-            <nav className="ref-breadcrumb">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+            <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6">
                 <Link href="/catalog">📚 Reference Catalog</Link>
-                <span className="ref-breadcrumb-sep">›</span>
+                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
                 <span>Changelog</span>
             </nav>
 
-            <h1 className="ref-page-title">
+            <h1 className="font-sans text-[calc(1.8rem*var(--font-scale))] mb-1">
                 📋{" "}
-                <span className="text-gradient">Catalog Changelog</span>
+                <span className="text-forest">Catalog Changelog</span>
             </h1>
             <p className="text-muted mb-6">
                 Community-approved updates to the reference catalog.{" "}
@@ -63,7 +63,7 @@ export default async function ChangelogPage() {
                                         : "🗑"}
                             </span>
                             <div className="ref-changelog-content">
-                                <p className="ref-changelog-summary">
+                                <p className="text-[calc(0.9rem*var(--font-scale))] font-medium mb-[4px]">
                                     {entry.change_summary}
                                 </p>
                                 <p className="text-forest">
@@ -93,9 +93,9 @@ export default async function ChangelogPage() {
                 })}
 
                 {(entries ?? []).length === 0 && (
-                    <div className="card text-center p-8 text-muted">
+                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center p-8 text-muted">
                         <p>No changes yet. The catalog awaits your contributions!</p>
-                        <Link href="/catalog" className="btn btn-primary">
+                        <Link href="/catalog" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
                             Browse Catalog
                         </Link>
                     </div>

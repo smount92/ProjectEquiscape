@@ -92,7 +92,7 @@ export default function RatingForm({
                         <p className="mt-4 italic text-muted text-sm">&ldquo;{rating.reviewText}&rdquo;</p>
                     )}
                     <button
-                        className="btn btn-ghost mt-4 text-xs text-muted hover:text-[#e74c6f]"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge mt-4 text-xs text-muted hover:text-[#e74c6f]"
                         onClick={handleRetract}
                         disabled={status === "retracting"}
                     >
@@ -143,7 +143,7 @@ export default function RatingForm({
                     />
                 </div>
 
-                <div className="form-group">
+                <div className="mb-6">
                     <textarea
                         className="form-input"
                         value={reviewText}
@@ -165,7 +165,7 @@ export default function RatingForm({
                 )}
 
                 {status === "saved" && (
-                    <div className="comment-success" style={{ marginBottom: "var(--space-md)" }}>
+                    <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))]" style={{ marginBottom: "var(--space-md)" }}>
                         ✅ Rating submitted! Thank you.
                     </div>
                 )}
@@ -173,7 +173,7 @@ export default function RatingForm({
                 <div className="show-record-form-actions">
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                         disabled={stars === 0 || status === "saving"}
                     >
                         {status === "saving" ? "Submitting…" : "Submit Rating"}

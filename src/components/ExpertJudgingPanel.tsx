@@ -128,14 +128,14 @@ export default function ExpertJudgingPanel({
     const bgColor = overrideMode ? "rgba(239, 68, 68, 0.05)" : "rgba(245, 158, 11, 0.05)";
 
     return (
-        <div className="card animate-fade-in-up" style={{
+        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
             marginBottom: "var(--space-lg)",
             border: `1px solid ${borderColor}`,
             background: bgColor,
         }}>
             <h3 style={{ marginBottom: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
                 {overrideMode ? "⚠️" : "🏅"}{" "}
-                <span className="text-gradient">
+                <span className="text-forest">
                     {overrideMode ? "Override Final Placings" : "Expert Judging Panel"}
                 </span>
             </h3>
@@ -245,7 +245,7 @@ export default function ExpertJudgingPanel({
                                     borderTop: "1px solid rgba(255,255,255,0.05)",
                                 }}>
                                     <textarea
-                                        className="form-textarea"
+                                        className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                                         value={notes[entry.id] || ""}
                                         onChange={e => setNotes(prev => ({ ...prev, [entry.id]: e.target.value }))}
                                         placeholder="Private judge notes (critique, reasoning)…"

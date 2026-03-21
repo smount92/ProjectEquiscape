@@ -14,17 +14,17 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="auth-page">
-      <div className="card card-auth animate-fade-in-up">
-        <div className="card-header">
+    <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
+      <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
+        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
           <h1>
-            Welcome <span className="text-gradient">Back</span>
+            Welcome <span className="text-forest">Back</span>
           </h1>
           <p>Sign in to your Digital Stable</p>
         </div>
 
         {state.error && (
-          <div className="form-error" role="alert" id="login-error">
+          <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert" id="login-error">
             <svg
               width="16"
               height="16"
@@ -43,8 +43,8 @@ export default function LoginPage() {
         )}
 
         <form action={formAction} noValidate>
-          <div className="form-group">
-            <label htmlFor="login-email" className="form-label">
+          <div className="mb-6">
+            <label htmlFor="login-email" className="block text-sm font-semibold text-ink mb-1">
               Email Address
             </label>
             <input
@@ -59,8 +59,8 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="login-password" className="form-label">
+          <div className="mb-6">
+            <label htmlFor="login-password" className="block text-sm font-semibold text-ink mb-1">
               Password
             </label>
             <div style={{ position: "relative" }}>
@@ -109,13 +109,13 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="btn btn-primary btn-full"
+            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full"
             disabled={isPending}
             id="login-submit"
           >
             {isPending ? (
               <>
-                <span className="btn-spinner" aria-hidden="true" />
+                <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
                 Signing In...
               </>
             ) : (
@@ -134,7 +134,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="auth-footer">
+        <div className="text-center mt-8 text-sm text-muted">
           <p>
             Don&apos;t have an account?{" "}
             <Link href="/signup" id="go-to-signup">

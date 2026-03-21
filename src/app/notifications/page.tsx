@@ -21,23 +21,23 @@ export default async function NotificationsPage() {
     const notifications = await getNotifications(100);
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Hero */}
-            <div className="community-hero animate-fade-in-up">
-                <div className="community-hero-content">
+            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
                     <h1>
-                        🔔 <span className="text-gradient">Notifications</span>
+                        🔔 <span className="text-forest">Notifications</span>
                     </h1>
-                    <p className="community-hero-subtitle">
+                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                         Stay updated on favorites, comments, ratings, and more.
                     </p>
                 </div>
-                <div className="community-stats">
-                    <div className="community-stat">
-                        <span className="community-stat-number">
+                <div className="flex justify-center gap-8 mt-8">
+                    <div className="flex flex-col items-center">
+                        <span className="flex flex-col items-center-number">
                             {notifications.filter((n) => !n.isRead).length}
                         </span>
-                        <span className="community-stat-label">Unread</span>
+                        <span className="flex flex-col items-center-label">Unread</span>
                     </div>
                 </div>
             </div>

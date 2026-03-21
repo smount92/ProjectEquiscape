@@ -55,7 +55,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                         >
                             {tab.label}
                             {count > 0 && (
-                                <span className="studio-tab-badge">{count}</span>
+                                <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{count}</span>
                             )}
                         </button>
                     );
@@ -64,7 +64,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
 
             {/* Commission Cards */}
             {filteredCommissions.length === 0 ? (
-                <div className="card" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
+                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
                     <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.9rem * var(--font-scale))" }}>
                         No commissions in this category.
                     </p>
@@ -76,14 +76,14 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                             <div className="flex justify-between items-center mb-2 gap-2">
                                 <span className="font-bold text-[calc(0.95rem*var(--font-scale))]">{c.commissionType}</span>
                                 <span
-                                    className="commission-status-badge"
+                                    className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
                                     style={{ backgroundColor: `${STATUS_COLORS[c.status]}20`, color: STATUS_COLORS[c.status], border: `1px solid ${STATUS_COLORS[c.status]}40` }}
                                 >
                                     {c.statusLabel}
                                 </span>
                             </div>
 
-                            <div className="studio-commission-meta">
+                            <div className="flex gap-4 text-[calc(0.8rem*var(--font-scale))] text-muted mb-2">
                                 {c.clientAlias && (
                                     <span>👤 @{c.clientAlias}</span>
                                 )}
@@ -95,7 +95,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                 )}
                             </div>
 
-                            <p className="studio-commission-desc">
+                            <p className="text-[calc(0.85rem*var(--font-scale))] text-ink-light leading-normal mb-2">
                                 {c.description.length > 120
                                     ? c.description.substring(0, 120) + "…"
                                     : c.description}
@@ -111,7 +111,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                 <div style={{ display: "flex", gap: "var(--space-xs)", flexWrap: "wrap" }}>
                                     <Link
                                         href={`/studio/commission/${c.id}`}
-                                        className="btn btn-ghost"
+                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                         style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                     >
                                         View
@@ -121,7 +121,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     {c.status === "requested" && (
                                         <>
                                             <button
-                                                className="btn btn-primary"
+                                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                                 style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                                 onClick={() => handleStatusChange(c.id, "accepted")}
                                                 disabled={acting === c.id}
@@ -129,7 +129,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                                 ✅ Accept
                                             </button>
                                             <button
-                                                className="btn btn-ghost"
+                                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                                 style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px", color: "#ef4444" }}
                                                 onClick={() => handleStatusChange(c.id, "declined")}
                                                 disabled={acting === c.id}
@@ -140,7 +140,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "accepted" && (
                                         <button
-                                            className="btn btn-primary"
+                                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "in_progress")}
                                             disabled={acting === c.id}
@@ -150,7 +150,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "in_progress" && (
                                         <button
-                                            className="btn btn-primary"
+                                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "review")}
                                             disabled={acting === c.id}
@@ -160,7 +160,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "review" && (
                                         <button
-                                            className="btn btn-primary"
+                                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "completed")}
                                             disabled={acting === c.id}
@@ -170,7 +170,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "completed" && (
                                         <button
-                                            className="btn btn-primary"
+                                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "delivered")}
                                             disabled={acting === c.id}
@@ -180,7 +180,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "revision" && (
                                         <button
-                                            className="btn btn-primary"
+                                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "in_progress")}
                                             disabled={acting === c.id}

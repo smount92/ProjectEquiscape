@@ -29,7 +29,7 @@ export default function ExportButton() {
 
     return (
         <button
-            className="export-csv-btn"
+            className="export-csv-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
             onClick={handleExport}
             disabled={loading}
             id="export-csv-button"
@@ -38,7 +38,7 @@ export default function ExportButton() {
             {loading ? (
                 <>
                     <span
-                        className="btn-spinner"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner"
                         style={{ width: 14, height: 14 }}
                         aria-hidden="true"
                     />

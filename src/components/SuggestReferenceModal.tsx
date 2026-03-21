@@ -63,7 +63,7 @@ export default function SuggestReferenceModal({
     const overlay = (
         <div className="modal-overlay" onClick={handleClose}>
             <div
-                className="modal-card"
+                className="modal-bg-card border border-edge rounded-lg p-12 shadow-md transition-all"
                 onClick={(e) => e.stopPropagation()}
                 style={{ maxWidth: 520 }}
             >
@@ -89,8 +89,8 @@ export default function SuggestReferenceModal({
                         </p>
 
                         {/* Suggestion Type */}
-                        <div className="form-group" style={{ marginBottom: "var(--space-md)" }}>
-                            <label className="form-label">What are you suggesting?</label>
+                        <div className="mb-6" style={{ marginBottom: "var(--space-md)" }}>
+                            <label className="block text-sm font-semibold text-ink mb-1">What are you suggesting?</label>
                             <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-xs)" }}>
                                 {SUGGESTION_TYPES.map((type) => (
                                     <label
@@ -132,8 +132,8 @@ export default function SuggestReferenceModal({
                         </div>
 
                         {/* Name */}
-                        <div className="form-group" style={{ marginBottom: "var(--space-md)" }}>
-                            <label className="form-label">
+                        <div className="mb-6" style={{ marginBottom: "var(--space-md)" }}>
+                            <label className="block text-sm font-semibold text-ink mb-1">
                                 Name <span style={{ color: "#e74c6f" }}>*</span>
                             </label>
                             <input
@@ -150,8 +150,8 @@ export default function SuggestReferenceModal({
                         </div>
 
                         {/* Details */}
-                        <div className="form-group" style={{ marginBottom: "var(--space-md)" }}>
-                            <label className="form-label">Additional Details</label>
+                        <div className="mb-6" style={{ marginBottom: "var(--space-md)" }}>
+                            <label className="block text-sm font-semibold text-ink mb-1">Additional Details</label>
                             <textarea
                                 className="form-input"
                                 value={details}
@@ -184,7 +184,7 @@ export default function SuggestReferenceModal({
                         <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end" }}>
                             <button
                                 type="button"
-                                className="btn btn-ghost"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                 onClick={handleClose}
                                 disabled={status === "submitting"}
                             >
@@ -192,7 +192,7 @@ export default function SuggestReferenceModal({
                             </button>
                             <button
                                 type="submit"
-                                className="btn btn-primary"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                 disabled={!name.trim() || status === "submitting"}
                             >
                                 {status === "submitting" ? "Submitting…" : "📤 Submit Suggestion"}

@@ -32,11 +32,11 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
     ]);
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             <div className="page-content">
                 {/* Group Header */}
                 <div className="pb-6 border-b border-edge mb-6">
-                    <Link href="/community/groups" className="btn btn-ghost" style={{ marginBottom: "var(--space-md)" }}>← All Groups</Link>
+                    <Link href="/community/groups" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginBottom: "var(--space-md)" }}>← All Groups</Link>
                     <h1>{group.name}</h1>
                     <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap", marginTop: "var(--space-sm)", color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
                         <span>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}</span>

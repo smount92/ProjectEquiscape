@@ -31,7 +31,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
     if (!isEditing) {
         return (
             <button
-                className="btn btn-ghost btn-sm"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                 onClick={() => setIsEditing(true)}
                 style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", opacity: 0.7 }}
                 id="edit-bio-btn"
@@ -73,7 +73,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
                 </span>
                 <div style={{ display: "flex", gap: "var(--space-sm)" }}>
                     <button
-                        className="btn btn-ghost btn-sm"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                         onClick={() => {
                             setBio(currentBio || "");
                             setIsEditing(false);
@@ -84,7 +84,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
                         Cancel
                     </button>
                     <button
-                        className="btn btn-primary btn-sm"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
                         onClick={handleSave}
                         disabled={saving}
                         id="save-bio-btn"

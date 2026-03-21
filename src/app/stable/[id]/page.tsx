@@ -301,9 +301,9 @@ export default async function HorsePassportPage({
     : null;
 
   return (
-    <div className="page-container form-page">
+    <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
       {/* Breadcrumb */}
-      <nav className="passport-breadcrumb animate-fade-in-up" aria-label="Breadcrumb">
+      <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up" aria-label="Breadcrumb">
         <Link href="/dashboard">Digital Stable</Link>
         <span className="separator" aria-hidden="true">
           /
@@ -313,7 +313,7 @@ export default async function HorsePassportPage({
 
       {/* Wishlist demand banner */}
       {wishlistDemand > 0 && (
-        <div className="getting-started-tip animate-fade-in-up" style={{ marginBottom: "var(--space-lg)", background: "rgba(239, 68, 68, 0.1)", borderColor: "rgba(239, 68, 68, 0.3)" }}>
+        <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4 animate-fade-in-up" style={{ marginBottom: "var(--space-lg)", background: "rgba(239, 68, 68, 0.1)", borderColor: "rgba(239, 68, 68, 0.3)" }}>
           🔥 <strong>{wishlistDemand} collector{wishlistDemand > 1 ? "s" : ""}</strong> {wishlistDemand > 1 ? "are" : "is"} looking for this model! List it for sale to notify them.
         </div>
       )}
@@ -329,28 +329,28 @@ export default async function HorsePassportPage({
         <div className="flex flex-col gap-2 py-8 px-6 bg-[#C8B596] min-h-[100%]">
           {/* Title */}
           <div>
-            <h1 className="passport-title">{horse.custom_name}</h1>
+            <h1 className="text-[calc(1.75rem*var(--font-scale))] mb-1 leading-[1.15] font-extrabold tracking-[-0.02em] text-[#2D2318]">{horse.custom_name}</h1>
             {refInfo ? (
-              <p className="passport-subtitle">
+              <p className="text-[calc(var(--font-size-md)*var(--font-scale))] text-[#59493A] mb-1">
                 {refInfo.maker} — {refInfo.name}
               </p>
             ) : (
-              <p className="passport-subtitle" style={{ opacity: 0.6, fontStyle: "italic" }}>
+              <p className="text-[calc(var(--font-size-md)*var(--font-scale))] text-[#59493A] mb-1" style={{ opacity: 0.6, fontStyle: "italic" }}>
                 Unlisted / Custom Entry
               </p>
             )}
           </div>
 
           {/* Model Details Card */}
-          <div className="passport-detail-card">
+          <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
             <h3>
               <span aria-hidden="true">📋</span> {(horse.asset_category || "model") === "model" ? "Model Details" : `${(horse.asset_category || "model").charAt(0).toUpperCase() + (horse.asset_category || "model").slice(1)} Details`}
             </h3>
 
             {horse.asset_category && horse.asset_category !== "model" && (
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                <span className="passport-detail-label">Category</span>
-                <span className="passport-detail-value">
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Category</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">
                   {horse.asset_category === "tack" ? "🏇 Tack & Gear" : horse.asset_category === "prop" ? "🌲 Prop" : "🎭 Diorama"}
                 </span>
               </div>
@@ -358,15 +358,15 @@ export default async function HorsePassportPage({
 
             {horse.finish_type && (
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                <span className="passport-detail-label">Finish Type</span>
-                <span className="passport-detail-value">{horse.finish_type}</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Finish Type</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{horse.finish_type}</span>
               </div>
             )}
 
             {horse.condition_grade && (
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                <span className="passport-detail-label">Condition</span>
-                <span className="passport-condition-badge">
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Condition</span>
+                <span className="inline-flex items-center gap-[4px] py-[2px] px-[10px] rounded-full bg-[rgba(92,224,160,0.1)] border border-[rgba(92,224,160,0.25)] text-success text-[calc(0.8rem*var(--font-scale))] font-semibold">
                   {horse.condition_grade}
                 </span>
               </div>
@@ -375,28 +375,28 @@ export default async function HorsePassportPage({
             {refInfo ? (
               <>
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                  <span className="passport-detail-label">{refInfo.type}</span>
-                  <span className="passport-detail-value">{refInfo.name}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">{refInfo.type}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{refInfo.name}</span>
                 </div>
 
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                  <span className="passport-detail-label">
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">
                     {refInfo.type === "Mold" ? "Manufacturer" : "Sculptor"}
                   </span>
-                  <span className="passport-detail-value">{refInfo.maker}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{refInfo.maker}</span>
                 </div>
 
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                  <span className="passport-detail-label">Scale</span>
-                  <span className="passport-detail-value">{refInfo.scale}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Scale</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{refInfo.scale}</span>
                 </div>
 
                 {refInfo.extra && (
                   <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                    <span className="passport-detail-label">
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">
                       {refInfo.type === "Mold" ? "Released" : "Medium"}
                     </span>
-                    <span className="passport-detail-value">
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">
                       {refInfo.extra}
                     </span>
                   </div>
@@ -404,8 +404,8 @@ export default async function HorsePassportPage({
               </>
             ) : (
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                <span className="passport-detail-label">Reference</span>
-                <span className="passport-detail-value" style={{ opacity: 0.6, fontStyle: "italic" }}>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Reference</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]" style={{ opacity: 0.6, fontStyle: "italic" }}>
                   Not linked to database — Custom Entry
                 </span>
               </div>
@@ -414,28 +414,28 @@ export default async function HorsePassportPage({
             {releaseInfo && (
               <>
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                  <span className="passport-detail-label">Release</span>
-                  <span className="passport-detail-value">{releaseInfo.name}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Release</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{releaseInfo.name}</span>
                 </div>
 
                 {releaseInfo.modelNumber && (
                   <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                    <span className="passport-detail-label">Model #</span>
-                    <span className="passport-detail-value">#{releaseInfo.modelNumber}</span>
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Model #</span>
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">#{releaseInfo.modelNumber}</span>
                   </div>
                 )}
 
                 {releaseInfo.color && (
                   <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                    <span className="passport-detail-label">Color</span>
-                    <span className="passport-detail-value">{releaseInfo.color}</span>
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Color</span>
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{releaseInfo.color}</span>
                   </div>
                 )}
 
                 {releaseInfo.yearStart && (
                   <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                    <span className="passport-detail-label">Release Years</span>
-                    <span className="passport-detail-value">
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Release Years</span>
+                    <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">
                       {releaseInfo.yearStart}
                       {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
                         ? `–${releaseInfo.yearEnd}`
@@ -447,8 +447,8 @@ export default async function HorsePassportPage({
             )}
 
             <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-              <span className="passport-detail-label">Added</span>
-              <span className="passport-detail-value">
+              <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Added</span>
+              <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">
                 {new Date(horse.created_at).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -458,23 +458,23 @@ export default async function HorsePassportPage({
             </div>
 
             <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-              <span className="passport-detail-label">Photos</span>
-              <span className="passport-detail-value">
+              <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Photos</span>
+              <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">
                 {images.length} uploaded
               </span>
             </div>
 
             {horse.sculptor && (
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                <span className="passport-detail-label">Sculptor / Artist</span>
-                <span className="passport-detail-value">{horse.sculptor}</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Sculptor / Artist</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{horse.sculptor}</span>
               </div>
             )}
 
             {horse.finishing_artist && (
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                <span className="passport-detail-label">🎨 Finished by</span>
-                <span className="passport-detail-value">
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">🎨 Finished by</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">
                   {horse.finishing_artist}
                   {horse.finishing_artist_verified && (
                     <span className="verified-badge" title="Verified via commission delivery"
@@ -488,8 +488,8 @@ export default async function HorsePassportPage({
 
             {(horse.edition_number || horse.edition_size) && (
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                <span className="passport-detail-label">📋 Edition</span>
-                <span className="passport-detail-value">
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">📋 Edition</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">
                   {horse.edition_number && horse.edition_size
                     ? `${horse.edition_number} of ${horse.edition_size}`
                     : horse.edition_size
@@ -502,41 +502,41 @@ export default async function HorsePassportPage({
 
           {/* Finish Details */}
           {horse.finish_details && (
-            <div className="passport-detail-card">
+            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">✨</span> Finish</h3>
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                <span className="passport-detail-label">Finish Details</span>
-                <span className="passport-detail-value">{horse.finish_details}</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Finish Details</span>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{horse.finish_details}</span>
               </div>
             </div>
           )}
 
           {/* Show Bio */}
           {(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
-            <div className="passport-detail-card">
+            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">🏅</span> Show Identity</h3>
               {horse.assigned_breed && (
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                  <span className="passport-detail-label">Breed</span>
-                  <span className="passport-detail-value">{horse.assigned_breed}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Breed</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{horse.assigned_breed}</span>
                 </div>
               )}
               {horse.assigned_gender && (
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                  <span className="passport-detail-label">Gender</span>
-                  <span className="passport-detail-value">{horse.assigned_gender}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Gender</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{horse.assigned_gender}</span>
                 </div>
               )}
               {horse.assigned_age && (
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                  <span className="passport-detail-label">Age</span>
-                  <span className="passport-detail-value">{horse.assigned_age}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Age</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{horse.assigned_age}</span>
                 </div>
               )}
               {horse.regional_id && (
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
-                  <span className="passport-detail-label">Regional ID</span>
-                  <span className="passport-detail-value">{horse.regional_id}</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Regional ID</span>
+                  <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]">{horse.regional_id}</span>
                 </div>
               )}
             </div>
@@ -544,7 +544,7 @@ export default async function HorsePassportPage({
 
           {/* Public Notes */}
           {horse.public_notes && (
-            <div className="passport-detail-card">
+            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">📝</span> Notes</h3>
               <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
                 {horse.public_notes}
@@ -586,14 +586,14 @@ export default async function HorsePassportPage({
           <div className="flex gap-4 flex-wrap">
             <Link
               href="/dashboard"
-              className="btn btn-ghost"
+              className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
               id="back-to-stable"
             >
               ← Back to Stable
             </Link>
             <Link
               href={`/stable/${horseId}/edit`}
-              className="btn btn-primary"
+              className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
               id="edit-horse-button"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

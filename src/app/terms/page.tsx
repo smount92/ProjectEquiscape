@@ -9,14 +9,14 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
     return (
-        <div className="static-page">
-            <div className="static-page-inner animate-fade-in-up">
+        <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8">
+            <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
                 {/* Page Header */}
-                <div className="static-page-header">
+                <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h1>
-                        <span className="text-gradient">Terms</span> of Service
+                        <span className="text-forest">Terms</span> of Service
                     </h1>
-                    <p className="static-page-lead">
+                    <p className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-lead">
                         Fair rules for a fair platform.
                     </p>
                     <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
@@ -25,7 +25,7 @@ export default function TermsPage() {
                 </div>
 
                 {/* Agreement */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>1. Agreement to Terms</h2>
                     <p>
                         By accessing or using Model Horse Hub (&ldquo;the Platform&rdquo;), you agree to be
@@ -36,7 +36,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Eligibility */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>2. Eligibility</h2>
                     <p>
                         You must be at least 13 years of age to create an account. If you are under 18, you
@@ -47,7 +47,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Your Account */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>3. Your Account</h2>
                     <p>
                         You are responsible for maintaining the security of your account credentials. You agree to:
@@ -65,7 +65,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Your Content */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>4. Your Content</h2>
                     <p>
                         You retain full ownership of all content you upload to Model Horse Hub, including
@@ -87,7 +87,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Commerce & Safe-Trade */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>5. Commerce &amp; Safe-Trade</h2>
                     <p>
                         Model Horse Hub provides communication and coordination tools (messaging, offers,
@@ -117,7 +117,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Community Conduct */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>6. Community Conduct</h2>
                     <p>Model Horse Hub is a hobby community. You agree to:</p>
                     <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
@@ -133,7 +133,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Hoofprint */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>7. Hoofprint&trade; Provenance</h2>
                     <p>
                         Hoofprint&trade; records are designed to be a permanent, trustworthy provenance trail
@@ -148,7 +148,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* IP */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>8. Intellectual Property</h2>
                     <p>
                         The Model Horse Hub platform, including its design, code, features, and branding,
@@ -164,7 +164,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Disclaimers */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>9. Disclaimers &amp; Limitations</h2>
                     <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>
@@ -191,7 +191,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Termination */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>10. Account Termination</h2>
                     <p>
                         You may delete your account at any time from your Settings page. Upon deletion,
@@ -206,7 +206,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Governing Law */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>11. Governing Law</h2>
                     <p>
                         These Terms are governed by the laws of the United States. Any disputes will be
@@ -216,7 +216,7 @@ export default function TermsPage() {
                 </section>
 
                 {/* Contact */}
-                <section className="static-section">
+                <section className="mb-[var(--space-3xl)]">
                     <h2>12. Questions?</h2>
                     <p>
                         If you have questions about these Terms, please reach out via

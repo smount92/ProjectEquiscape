@@ -76,7 +76,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
     return (
         <>
             <button
-                className="btn btn-ghost"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                 onClick={() => setIsOpen(true)}
                 style={{ fontSize: "calc(0.85rem * var(--font-scale))" }}
             >
@@ -96,8 +96,8 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                     <strong> The code expires in 48 hours.</strong>
                                 </p>
 
-                                <div className="form-group">
-                                    <label className="form-label">Transfer Type</label>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-semibold text-ink mb-1">Transfer Type</label>
                                     <select
                                         className="form-select"
                                         value={acquisitionType}
@@ -111,8 +111,8 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                 </div>
 
                                 {acquisitionType === "purchase" && (
-                                    <div className="form-group">
-                                        <label className="form-label">Sale Price</label>
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-semibold text-ink mb-1">Sale Price</label>
                                         <input
                                             type="number"
                                             className="form-input"
@@ -133,8 +133,8 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                     </div>
                                 )}
 
-                                <div className="form-group">
-                                    <label className="form-label">Notes (optional)</label>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-semibold text-ink mb-1">Notes (optional)</label>
                                     <textarea
                                         className="form-input"
                                         value={notes}
@@ -151,8 +151,8 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                 )}
 
                                 <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end", marginTop: "var(--space-md)" }}>
-                                    <button className="btn btn-ghost" onClick={handleClose}>Cancel</button>
-                                    <button className="btn btn-primary" onClick={handleGenerate} disabled={generating}>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleClose}>Cancel</button>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleGenerate} disabled={generating}>
                                         {generating ? "Generating…" : "Generate Code"}
                                     </button>
                                 </div>
@@ -180,7 +180,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                         {generatedCode}
                                     </div>
                                     <button
-                                        className="btn btn-ghost"
+                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                         onClick={handleCopy}
                                         style={{ marginTop: "var(--space-sm)", fontSize: "calc(0.8rem * var(--font-scale))" }}
                                     >
@@ -194,10 +194,10 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                     <span style={{ color: "var(--color-accent, #f59e0b)" }}>Expires in 48 hours.</span>
                                 </p>
                                 <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "center", marginTop: "var(--space-md)" }}>
-                                    <button className="btn btn-ghost" onClick={handleCancel} style={{ color: "#ef4444" }}>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleCancel} style={{ color: "#ef4444" }}>
                                         Cancel Transfer
                                     </button>
-                                    <button className="btn btn-primary" onClick={handleClose}>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleClose}>
                                         Done
                                     </button>
                                 </div>

@@ -303,7 +303,7 @@ export default function CsvImport() {
                         key={s.num}
                         className={`csv-step-dot ${step >= s.num ? "active" : ""} ${step === s.num ? "current" : ""}`}
                     >
-                        <span className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-card border-[2px] border-edge text-muted font-bold text-sm transition-all">{s.num}</span>
+                        <span className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border-[2px] border-edge text-muted font-bold text-sm transition-all">{s.num}</span>
                         <span className="text-xs text-muted font-medium transition-all">{s.label}</span>
                     </div>
                 ))}
@@ -329,7 +329,7 @@ export default function CsvImport() {
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <div className="text-[3rem] mb-4 opacity-[0.7]">📁</div>
-                        <p className="csv-dropzone-text">
+                        <p className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card cursor-pointer text-center transition-all-text">
                             Drag &amp; drop your CSV file here
                             <br />
                             <span className="text-sm text-forest underline">or click to browse</span>
@@ -344,10 +344,10 @@ export default function CsvImport() {
                         />
                     </div>
 
-                    {parseError && <div className="csv-error">{parseError}</div>}
+                    {parseError && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{parseError}</div>}
 
                     <div className="mt-6 text-center">
-                        <a href="/templates/mhh_import_template.csv" download className="btn btn-ghost">
+                        <a href="/templates/mhh_import_template.csv" download className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                             📥 Download CSV Template
                         </a>
                     </div>
@@ -365,9 +365,9 @@ export default function CsvImport() {
 
                     <div className="flex flex-col gap-4 mb-8">
                         {csvHeaders.map((header) => (
-                            <div key={header} className="flex items-center gap-4 py-4 px-6 bg-card border border-edge rounded-md">
+                            <div key={header} className="flex items-center gap-4 py-4 px-6 bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-md">
                                 <span className="flex-1 font-semibold text-sm text-ink min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{header}</span>
-                                <span className="csv-mapping-arrow">→</span>
+                                <span className="text-muted text-[calc(var(--font-size-md)*var(--font-scale))] shrink-0">→</span>
                                 <select
                                     className="flex-1 py-2 px-4 bg-input border border-edge-input rounded-sm text-ink font-sans text-sm cursor-pointer"
                                     value={columnMapping[header] || ""}
@@ -410,11 +410,11 @@ export default function CsvImport() {
                     </div>
 
                     <div className="flex justify-between items-center gap-4 pt-6 border-t border-edge">
-                        <button className="btn btn-ghost" onClick={() => setStep(1)}>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setStep(1)}>
                             ← Back
                         </button>
                         <button
-                            className="btn btn-primary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                             onClick={proceedToMatch}
                             disabled={isMatching || !Object.values(columnMapping).some((v) => v === "name")}
                             id="proceed-to-match-btn"
@@ -461,7 +461,7 @@ export default function CsvImport() {
                                 className={`csv-match-card ${result.status}`}
                                 id={`match-row-${result.rowIndex}`}
                             >
-                                <div className="p-6 bg-card rounded-md border-l-[4px] border-edge transition-all-header">
+                                <div className="p-6 bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all rounded-md border-l-[4px] border-edge transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                                     <span className="text-xl shrink-0">
                                         {result.status === "perfect"
                                             ? "✅"
@@ -533,7 +533,7 @@ export default function CsvImport() {
                     </div>
 
                     <div className="flex justify-between items-center gap-4 pt-6 border-t border-edge">
-                        <button className="btn btn-ghost" onClick={() => setStep(2)}>
+                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setStep(2)}>
                             ← Back
                         </button>
                         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)", alignItems: "flex-end" }}>
@@ -545,11 +545,11 @@ export default function CsvImport() {
                                 />
                                 <span>Publish imported models to the community feed</span>
                             </label>
-                            <span className="form-hint" style={{ textAlign: "right" }}>
+                            <span className="block mt-1 text-xs text-muted" style={{ textAlign: "right" }}>
                                 Models without photos will be excluded regardless.
                             </span>
                             <button
-                                className="btn btn-primary"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                 onClick={handleImport}
                                 disabled={isImporting}
                                 id="import-btn"
@@ -574,16 +574,16 @@ export default function CsvImport() {
                         <div className="text-success">
                             <div className="csv-success-icon">🎉</div>
                             <h2>Import Complete!</h2>
-                            <p className="csv-success-count">
+                            <p className="text-[calc(var(--font-size-md)*var(--font-scale))] text-ink-light mb-8">
                                 Successfully imported <strong>{importResult.imported}</strong> model
                                 {importResult.imported !== 1 ? "s" : ""} to your stable.
                             </p>
                             <div className="flex justify-center gap-4 flex-wrap">
-                                <a href="/dashboard" className="btn btn-primary btn-lg">
+                                <a href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[52px] py-4 px-12 text-[calc(var(--font-size-md)*var(--font-scale))] rounded-lg">
                                     🐴 View Your Stable
                                 </a>
                                 <button
-                                    className="btn btn-ghost"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                     onClick={() => {
                                         setStep(1);
                                         setCsvData([]);
@@ -598,11 +598,11 @@ export default function CsvImport() {
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-[var(--space-3xl)] px-8 bg-card border border-edge rounded-lg">
+                        <div className="text-center py-[var(--space-3xl)] px-8 bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg">
                             <div className="text-[4rem] mb-6">❌</div>
                             <h2>Import Failed</h2>
                             <p>{importResult?.error || "An unexpected error occurred."}</p>
-                            <button className="btn btn-primary" onClick={() => setStep(3)}>
+                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => setStep(3)}>
                                 ← Back to Review
                             </button>
                         </div>

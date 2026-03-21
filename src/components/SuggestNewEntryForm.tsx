@@ -70,10 +70,10 @@ export default function SuggestNewEntryForm() {
                     Your new entry suggestion is now pending review. The community can vote and discuss it.
                 </p>
                 <div style={{ display: "flex", gap: "var(--space-md)", justifyContent: "center" }}>
-                    <button className="btn btn-primary" onClick={() => router.push("/catalog/suggestions")}>
+                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => router.push("/catalog/suggestions")}>
                         View All Suggestions
                     </button>
-                    <button className="btn btn-ghost" onClick={() => { setSuccess(false); setTitle(""); setReason(""); }}>
+                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => { setSuccess(false); setTitle(""); setReason(""); }}>
                         Submit Another
                     </button>
                 </div>
@@ -84,8 +84,8 @@ export default function SuggestNewEntryForm() {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-md)" }}>
             {/* Title */}
-            <div className="form-group">
-                <label className="form-label" htmlFor="new-entry-title">Title / Name *</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-title">Title / Name *</label>
                 <input
                     id="new-entry-title"
                     className="form-input"
@@ -97,8 +97,8 @@ export default function SuggestNewEntryForm() {
             </div>
 
             {/* Item Type */}
-            <div className="form-group">
-                <label className="form-label" htmlFor="new-entry-type">Entry Type</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-type">Entry Type</label>
                 <select
                     id="new-entry-type"
                     className="form-input"
@@ -112,8 +112,8 @@ export default function SuggestNewEntryForm() {
             </div>
 
             {/* Maker */}
-            <div className="form-group">
-                <label className="form-label" htmlFor="new-entry-maker">Maker / Manufacturer</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-maker">Maker / Manufacturer</label>
                 <select
                     id="new-entry-maker"
                     className="form-input"
@@ -139,8 +139,8 @@ export default function SuggestNewEntryForm() {
 
             {/* Two-column row: Scale + Color */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
-                <div className="form-group">
-                    <label className="form-label" htmlFor="new-entry-scale">Scale</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-scale">Scale</label>
                     <select id="new-entry-scale" className="form-input" value={scale} onChange={e => setScale(e.target.value)}>
                         <option value="">— Select —</option>
                         <option value="Traditional">Traditional</option>
@@ -151,8 +151,8 @@ export default function SuggestNewEntryForm() {
                         <option value="Other">Other</option>
                     </select>
                 </div>
-                <div className="form-group">
-                    <label className="form-label" htmlFor="new-entry-color">Color</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-color">Color</label>
                     <input
                         id="new-entry-color"
                         className="form-input"
@@ -166,8 +166,8 @@ export default function SuggestNewEntryForm() {
 
             {/* Two-column row: Mold + Year */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
-                <div className="form-group">
-                    <label className="form-label" htmlFor="new-entry-mold">Mold Name</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-mold">Mold Name</label>
                     <input
                         id="new-entry-mold"
                         className="form-input"
@@ -177,8 +177,8 @@ export default function SuggestNewEntryForm() {
                         maxLength={200}
                     />
                 </div>
-                <div className="form-group">
-                    <label className="form-label" htmlFor="new-entry-year">Year</label>
+                <div className="mb-6">
+                    <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-year">Year</label>
                     <input
                         id="new-entry-year"
                         type="number"
@@ -193,11 +193,11 @@ export default function SuggestNewEntryForm() {
             </div>
 
             {/* Reason */}
-            <div className="form-group">
-                <label className="form-label" htmlFor="new-entry-reason">Reason / Evidence *</label>
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-reason">Reason / Evidence *</label>
                 <textarea
                     id="new-entry-reason"
-                    className="form-textarea"
+                    className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
                     value={reason}
                     onChange={e => setReason(e.target.value)}
                     rows={3}
@@ -210,13 +210,13 @@ export default function SuggestNewEntryForm() {
                 </span>
             </div>
 
-            {error && <p className="form-error">{error}</p>}
+            {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
 
             {/* Actions */}
             <div style={{ display: "flex", gap: "var(--space-md)", justifyContent: "flex-end" }}>
-                <button className="btn btn-ghost" onClick={() => router.back()} disabled={isPending}>Cancel</button>
+                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => router.back()} disabled={isPending}>Cancel</button>
                 <button
-                    className="btn btn-primary"
+                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                     onClick={handleSubmit}
                     disabled={isPending || !title.trim() || !reason.trim()}
                 >

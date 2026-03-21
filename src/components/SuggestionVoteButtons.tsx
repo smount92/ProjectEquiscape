@@ -54,7 +54,7 @@ export default function SuggestionVoteButtons({
             >
                 ▲
             </button>
-            <span className="ref-vote-score">{upvotes - downvotes}</span>
+            <span className="text-[calc(1.1rem*var(--font-scale))] font-bold text-[var(--color-text)] py-[4px] px-[0]">{upvotes - downvotes}</span>
             <button
                 className={`ref-vote-btn ref-vote-down ${currentVote === "down" ? "ref-vote-active" : ""}`}
                 onClick={() => handleVote("down")}

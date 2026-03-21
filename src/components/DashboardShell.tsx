@@ -142,7 +142,7 @@ export default function DashboardShell({
             {/* Select All / Clear */}
             {selectMode && horseCards.length > 0 && (
                 <div className="flex items-center gap-4 mb-4 py-1.5 px-3 bg-parchment-dark rounded-md">
-                    <button className="btn btn-ghost btn-sm" onClick={selectAll}>
+                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={selectAll}>
                         Select All ({horseCards.length})
                     </button>
                     {selectedIds.size > 0 && (
@@ -210,7 +210,7 @@ export default function DashboardShell({
 
                         {/* Delete */}
                         <button
-                            className="btn btn-danger btn-sm"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-[rgb(239,68,68)] text-white border-0 rounded-md py-[6px] px-[14px] text-sm font-[inherit] cursor-pointer transition-all min-h-[36px] py-1 px-6 text-sm"
                             onClick={() => setShowDeleteConfirm(true)}
                             disabled={isProcessing}
                         >
@@ -218,7 +218,7 @@ export default function DashboardShell({
                         </button>
                     </div>
 
-                    <button className="btn btn-ghost btn-sm" onClick={clearSelection}>
+                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={clearSelection}>
                         Cancel
                     </button>
                 </div>
@@ -234,11 +234,11 @@ export default function DashboardShell({
                             This cannot be undone. All photos and associated data will be permanently removed.
                         </p>
                         <div style={{ display: "flex", gap: "var(--space-md)", justifyContent: "flex-end" }}>
-                            <button className="btn btn-ghost" onClick={() => setShowDeleteConfirm(false)}>
+                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setShowDeleteConfirm(false)}>
                                 Cancel
                             </button>
                             <button
-                                className="btn btn-danger"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-[rgb(239,68,68)] text-white border-0 rounded-md py-[6px] px-[14px] text-sm font-[inherit] cursor-pointer transition-all"
                                 onClick={handleBulkDelete}
                                 disabled={isProcessing}
                             >

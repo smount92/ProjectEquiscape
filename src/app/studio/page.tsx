@@ -18,11 +18,11 @@ export default async function StudiosPage() {
     const artists = await browseArtists();
 
     return (
-        <div className="page-container page-container-wide">
-            <div className="community-hero animate-fade-in-up">
-                <div className="community-hero-content">
-                    <h1>🎨 <span className="text-gradient">Art Studios</span></h1>
-                    <p className="community-hero-subtitle">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 max-w-[var(--max-width)]">
+            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
+                    <h1>🎨 <span className="text-forest">Art Studios</span></h1>
+                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                         Find custom painters, sculptors, and tack makers.
                     </p>
                 </div>

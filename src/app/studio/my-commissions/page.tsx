@@ -51,7 +51,7 @@ export default async function MyCommissionsPage() {
                             <div className="flex justify-between items-center mb-2 gap-2">
                                 <span className="font-bold text-[calc(0.95rem*var(--font-scale))]">{c.commissionType}</span>
                                 <span
-                                    className="commission-status-badge"
+                                    className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
                                     style={{ backgroundColor: `${STATUS_COLORS[c.status]}20`, color: STATUS_COLORS[c.status], border: `1px solid ${STATUS_COLORS[c.status]}40` }}
                                 >
                                     {c.statusLabel}
@@ -75,24 +75,24 @@ export default async function MyCommissionsPage() {
     };
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Header */}
-            <div className="community-hero animate-fade-in-up">
-                <div className="community-hero-content">
+            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
+                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
                     <h1>
-                        🎨 <span className="text-gradient">My Commissions</span>
+                        🎨 <span className="text-forest">My Commissions</span>
                     </h1>
-                    <p className="community-hero-subtitle">
+                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
                         Track commissions you&apos;ve requested from artists.
                     </p>
                 </div>
             </div>
 
             {commissions.length === 0 ? (
-                <div className="card animate-fade-in-up" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
+                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
                     <p style={{ fontSize: "2rem", marginBottom: "var(--space-md)" }}>🎨</p>
                     <p style={{ color: "var(--color-text-muted)" }}>You haven&apos;t requested any commissions yet.</p>
-                    <Link href="/discover" className="btn btn-primary" style={{ marginTop: "var(--space-lg)" }}>
+                    <Link href="/discover" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" style={{ marginTop: "var(--space-lg)" }}>
                         Browse Artists →
                     </Link>
                 </div>

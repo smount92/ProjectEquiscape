@@ -31,7 +31,7 @@ export default async function ShowPlannerPage() {
     }));
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             <div className="page-content">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--space-md)", marginBottom: "var(--space-xl)" }}>
                     <div>
@@ -40,7 +40,7 @@ export default async function ShowPlannerPage() {
                             Plan your entries, detect conflicts, and convert results into records.
                         </p>
                     </div>
-                    <Link href="/shows" className="btn btn-ghost">← Back to Shows</Link>
+                    <Link href="/shows" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Back to Shows</Link>
                 </div>
 
                 <ShowStringManager showStrings={showStrings} horses={horseList} />

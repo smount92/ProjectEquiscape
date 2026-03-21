@@ -108,7 +108,7 @@ export default function ShowRecordTimeline({
     };
 
     return (
-        <div className="show-record-timeline bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="show-records">
+        <div className="show-record-timeline bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="show-records">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                     <span aria-hidden="true">🏅</span> Show Records
@@ -116,7 +116,7 @@ export default function ShowRecordTimeline({
                 </h3>
                 {isOwner && (
                     <button
-                        className="btn btn-primary text-[calc(0.8rem*var(--font-scale))] py-1 px-4"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm text-[calc(0.8rem*var(--font-scale))] py-1 px-4"
                         onClick={handleAdd}
                         id="add-show-record"
                     >

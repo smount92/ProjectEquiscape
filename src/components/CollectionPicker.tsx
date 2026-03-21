@@ -95,8 +95,8 @@ export default function CollectionPicker({
     .map((c) => c.name);
 
   return (
-    <div className="form-group">
-      <label className="form-label">
+    <div className="mb-6">
+      <label className="block text-sm font-semibold text-ink mb-1">
         📁 Collections <span style={{ opacity: 0.6, fontWeight: 400 }}>(Optional — multi-select)</span>
       </label>
 
@@ -165,7 +165,7 @@ export default function CollectionPicker({
         )}
         <button
           type="button"
-          className="btn btn-ghost collection-create-btn hover:border-[var(--color-accent-primary) hover:!important] hover:text-[var(--color-accent-primary) hover:!important]"
+          className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge whitespace-nowrap text-[calc(var(--font-size-sm)*var(--font-scale))!important] p-[var(--space-sm) var(--space-md) !important] border border-dashed border-[var(--color-border)!important] hover:border-[var(--color-accent-primary) hover:!important] hover:text-[var(--color-accent-primary) hover:!important]"
           onClick={() => setShowModal(true)}
           aria-label="Create new collection"
           id="create-collection-btn"
@@ -174,7 +174,7 @@ export default function CollectionPicker({
         </button>
       </div>
 
-      <span className="form-hint">
+      <span className="block mt-1 text-xs text-muted">
         Organize your models into collections like &quot;Childhood Herd&quot;, &quot;Show String&quot;, or &quot;Wishlist&quot;.
       </span>
 
@@ -188,11 +188,11 @@ export default function CollectionPicker({
             aria-modal="true"
             aria-label="Create new collection"
           >
-            <div className="modal-header">
+            <div className="modal-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
               <h3>📁 New Collection</h3>
               <button
                 type="button"
-                className="modal-close"
+                className="bg-transparent border-0 text-muted text-[1.2rem] cursor-pointer p-1 rounded-md transition-all duration-150"
                 onClick={() => setShowModal(false)}
                 aria-label="Close"
               >
@@ -201,8 +201,8 @@ export default function CollectionPicker({
             </div>
 
             <div className="p-8 flex flex-col gap-4">
-              <div className="form-group">
-                <label htmlFor="new-collection-name" className="form-label">
+              <div className="mb-6">
+                <label htmlFor="new-collection-name" className="block text-sm font-semibold text-ink mb-1">
                   Collection Name *
                 </label>
                 <input
@@ -220,8 +220,8 @@ export default function CollectionPicker({
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="new-collection-desc" className="form-label">
+              <div className="mb-6">
+                <label htmlFor="new-collection-desc" className="block text-sm font-semibold text-ink mb-1">
                   Description <span style={{ opacity: 0.6 }}>(Optional)</span>
                 </label>
                 <input
@@ -235,7 +235,7 @@ export default function CollectionPicker({
                 />
               </div>
 
-              <div className="form-group" style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
+              <div className="mb-6" style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
                 <input
                   id="new-collection-public"
                   type="checkbox"
@@ -243,7 +243,7 @@ export default function CollectionPicker({
                   onChange={(e) => setNewIsPublic(e.target.checked)}
                   style={{ width: "16px", height: "16px" }}
                 />
-                <label htmlFor="new-collection-public" className="form-label" style={{ margin: 0 }}>
+                <label htmlFor="new-collection-public" className="block text-sm font-semibold text-ink mb-1" style={{ margin: 0 }}>
                   🌐 Make public on profile
                 </label>
               </div>
@@ -252,14 +252,14 @@ export default function CollectionPicker({
             <div className="flex gap-4">
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                 onClick={() => setShowModal(false)}
               >
                 Cancel
               </button>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                 onClick={handleCreate}
                 disabled={creating || !newName.trim()}
               >

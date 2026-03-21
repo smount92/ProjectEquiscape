@@ -38,7 +38,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
             {shows.map((show) => (
-                <div key={show.id} className="card" style={{ padding: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
+                <div key={show.id} className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
                     <div style={{ flex: 1, minWidth: "200px" }}>
                         <div style={{ fontWeight: 600 }}>{show.title}</div>
                         <div style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)" }}>
@@ -58,7 +58,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
                         <option value="closed">🔴 Closed</option>
                     </select>
                     <button
-                        className="btn btn-ghost"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                         onClick={() => handleDelete(show.id, show.title)}
                         disabled={busy === show.id}
                         style={{ color: "var(--color-error, #ef4444)", fontSize: "calc(0.8rem * var(--font-scale))" }}

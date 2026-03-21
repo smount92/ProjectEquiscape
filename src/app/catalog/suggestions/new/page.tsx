@@ -14,14 +14,14 @@ export default async function SuggestNewEntryPage() {
     if (!user) redirect("/login");
 
     return (
-        <div className="page-container" style={{ maxWidth: 720 }}>
-            <nav className="ref-breadcrumb animate-fade-in-up">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6" style={{ maxWidth: 720 }}>
+            <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6 animate-fade-in-up">
                 <Link href="/catalog">📚 Catalog</Link>
-                <span className="ref-breadcrumb-sep">›</span>
+                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
                 <span>Suggest New Entry</span>
             </nav>
 
-            <div className="card animate-fade-in-up" style={{ padding: "var(--space-xl)" }}>
+            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-xl)" }}>
                 <h1 style={{ fontFamily: "var(--font-display)", fontSize: "calc(1.5rem * var(--font-scale))", marginBottom: "var(--space-xs)" }}>
                     📗 Suggest a New Catalog Entry
                 </h1>

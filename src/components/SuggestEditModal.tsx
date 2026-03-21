@@ -128,7 +128,7 @@ export default function SuggestEditModal({
         <>
             <button
                 id="suggest-edit-btn"
-                className="btn btn-primary"
+                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                 onClick={() => setIsOpen(true)}
             >
                 ✏️ Suggest Edit
@@ -165,10 +165,10 @@ export default function SuggestEditModal({
                             boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
                         }}
                     >
-                        <div className="modal-header">
+                        <div className="modal-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                             <h2>✏️ Suggest Edit</h2>
                             <button
-                                className="modal-close"
+                                className="bg-transparent border-0 text-muted text-[1.2rem] cursor-pointer p-1 rounded-md transition-all duration-150"
                                 onClick={() => setIsOpen(false)}
                             >
                                 ✕
@@ -204,7 +204,7 @@ export default function SuggestEditModal({
                                             }
                                         />
                                         {field.current !== field.original && (
-                                            <span className="ref-suggest-original">
+                                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted mt-[4px] italic">
                                                 Was: {field.original}
                                             </span>
                                         )}
@@ -218,19 +218,19 @@ export default function SuggestEditModal({
                                     Reason for change *
                                 </label>
                                 <textarea
-                                    className="input ref-suggest-textarea"
+                                    className="input w-full resize-y text-[calc(0.9rem*var(--font-scale))] min-h-[72px]"
                                     placeholder="Explain why this change is needed (e.g., 'The 2019 Breyer catalog lists this as Dark Bay, not Bay')"
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
                                     rows={3}
                                     maxLength={2000}
                                 />
-                                <span className="ref-suggest-charcount">
+                                <span className="text-[calc(0.7rem*var(--font-scale))] text-muted text-right block mt-[4px]">
                                     {reason.length}/2000
                                 </span>
                             </div>
 
-                            {error && <p className="form-error">{error}</p>}
+                            {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
 
                             {/* Summary */}
                             {hasChanges && (
@@ -261,13 +261,13 @@ export default function SuggestEditModal({
 
                         <div className="modal-footer">
                             <button
-                                className="btn btn-secondary"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="btn btn-primary"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                 onClick={handleSubmit}
                                 disabled={isPending || !hasChanges}
                             >

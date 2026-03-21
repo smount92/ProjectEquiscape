@@ -101,10 +101,10 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
     }
 
     return (
-        <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+        <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-md)" }}>
                 <h3>📸 Event Photos ({photos.length})</h3>
-                <label className="btn btn-primary btn-sm" style={{ cursor: "pointer" }}>
+                <label className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" style={{ cursor: "pointer" }}>
                     {uploading ? "Uploading…" : "+ Add Photo"}
                     <input
                         ref={fileInputRef}
@@ -132,7 +132,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
                                 <button
                                     onClick={() => handleDelete(p.id)}
                                     disabled={isPending}
-                                    className="btn btn-ghost btn-sm"
+                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                                     style={{
                                         position: "absolute", top: 4, right: 4,
                                         background: "rgba(0,0,0,0.6)", color: "white",

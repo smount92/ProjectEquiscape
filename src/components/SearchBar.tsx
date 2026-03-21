@@ -92,7 +92,7 @@ export default function SearchBar({
                     </svg>
                 </button>
             ) : (
-                <kbd className="search-bar-kbd">/</kbd>
+                <kbd className="sticky top-[calc(var(--header-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card border border-edge rounded-xl transition-all shadow-md-kbd">/</kbd>
             )}
         </div>
     );

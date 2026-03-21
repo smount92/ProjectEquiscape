@@ -47,13 +47,13 @@ export default function TransactionActions({
     }
 
     return (
-        <div className="mt-4 py-4 px-6 rounded-lg bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-edge" id="transaction-status">
+        <div className="mt-4 py-4 px-6 rounded-lg bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-edge" id="transaction-status">
             <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
                 <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
                     Transaction is open
                 </span>
                 <button
-                    className="btn btn-primary btn-sm"
+                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
                     onClick={handleComplete}
                     disabled={saving}
                 >

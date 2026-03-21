@@ -53,7 +53,7 @@ export default function AssignPlacings({
     if (entries.length === 0) return null;
 
     return (
-        <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+        <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
             <h3 style={{ marginBottom: "var(--space-md)" }}>🏅 Assign Placings</h3>
             <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                 As the event host, assign placings to each entry below.
@@ -91,7 +91,7 @@ export default function AssignPlacings({
 
             <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginTop: "var(--space-lg)" }}>
                 <button
-                    className="btn btn-primary"
+                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                     onClick={handleSave}
                     disabled={saving || Object.values(placings).filter(v => v).length === 0}
                     style={{ width: "100%" }}

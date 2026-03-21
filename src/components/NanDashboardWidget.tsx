@@ -18,7 +18,7 @@ export default async function NanDashboardWidget() {
             <summary className="hidden">
                 🏆 NAN {currentYear} Qualification Status
                 {totalQualified > 0 && (
-                    <span className="nan-dashboard-count">
+                    <span className="text-[calc(0.8rem*var(--font-scale))] font-normal text-muted ml-auto">
                         {totalQualified} horse{totalQualified !== 1 ? "s" : ""} across {totalDivisions} division{totalDivisions !== 1 ? "s" : ""}
                     </span>
                 )}
@@ -36,7 +36,7 @@ export default async function NanDashboardWidget() {
                             <Link href={`/community/${h.horseId}`} className="font-semibold text-ink no-underline">
                                 {h.horseName}
                             </Link>
-                            <span className="nan-horse-cards">
+                            <span className="ml-auto flex gap-1 text-[calc(0.75rem*var(--font-scale))]">
                                 {currentYearCards.length > 0 ? (
                                     currentYearCards.map((q, i) => (
                                         <span key={i} className={`nan-card nan-card-${q.cardType}`}>
@@ -57,7 +57,7 @@ export default async function NanDashboardWidget() {
                     </p>
                 )}
             </div>
-            <Link href="/shows/planner" className="btn btn-ghost" style={{ marginTop: "var(--space-md)" }}>
+            <Link href="/shows/planner" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginTop: "var(--space-md)" }}>
                 📋 View Full NAN Planner
             </Link>
         </details>

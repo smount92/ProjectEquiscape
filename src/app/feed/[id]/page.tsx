@@ -68,11 +68,11 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
     }
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             <div className="page-content" style={{ maxWidth: 640 }}>
-                <Link href="/feed" className="btn btn-ghost" style={{ marginBottom: "var(--space-md)" }}>← Back to Feed</Link>
+                <Link href="/feed" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginBottom: "var(--space-md)" }}>← Back to Feed</Link>
 
-                <div className="glass-card" style={{ padding: "var(--space-lg)" }}>
+                <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Link href={`/profile/${encodeURIComponent(actorAlias)}`} style={{ fontWeight: 600 }}>
                             @{actorAlias}
@@ -85,7 +85,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
                     {content && <div style={{ marginTop: "var(--space-md)" }}><RichText content={content} /></div>}
 
                     {signedUrls.length > 0 && (
-                        <div className="feed-image-collage" data-count={Math.min(signedUrls.length, 4)} style={{ marginTop: "var(--space-md)" }}>
+                        <div className="grid gap-[4px] mt-2 rounded-md overflow-hidden" data-count={Math.min(signedUrls.length, 4)} style={{ marginTop: "var(--space-md)" }}>
                             {signedUrls.slice(0, 4).map((item, i) => (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img key={i} src={item.url} alt={item.caption || `Image ${i + 1}`} loading="lazy" />

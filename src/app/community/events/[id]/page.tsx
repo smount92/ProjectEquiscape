@@ -89,9 +89,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     const endDate = event.endsAt ? new Date(event.endsAt) : null;
 
     return (
-        <div className="page-container">
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             <div className="page-content" style={{ maxWidth: 720 }}>
-                <Link href="/community/events" className="btn btn-ghost" style={{ marginBottom: "var(--space-md)" }}>← All Events</Link>
+                <Link href="/community/events" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginBottom: "var(--space-md)" }}>← All Events</Link>
 
                 <div className="flex gap-6 items-start mb-6">
                     <div className="flex flex-col items-center justify-center min-w-[56px] h-[56px] rounded-md bg-[linear-gradient(135deg,rgba(44,85,69,0.15),rgba(139,92,246,0.1))] border border-[rgba(44,85,69,0.3)] shrink-0">
@@ -164,7 +164,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Description */}
                 {event.description && (
-                    <div className="glass-card" style={{ padding: "var(--space-lg)" }}>
+                    <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-sm)" }}>About</h3>
                         <p style={{ lineHeight: 1.7, whiteSpace: "pre-line" }}>{event.description}</p>
                     </div>
@@ -173,7 +173,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {/* Creator Actions */}
                 {user.id === event.createdBy && (
                     <div style={{ marginTop: "var(--space-lg)", display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end", flexWrap: "wrap" }}>
-                        <Link href={`/community/events/${event.id}/manage`} className="btn btn-ghost">
+                        <Link href={`/community/events/${event.id}/manage`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                             ⚙️ Manage Classes
                         </Link>
                         <EventDeleteButton eventId={event.id} />
@@ -182,7 +182,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Division / Class Tree */}
                 {divisions.length > 0 && (
-                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                    <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-md)" }}>📋 Class List ({divisions.reduce((s, d) => s + d.classes.length, 0)} classes)</h3>
                         {divisions.map((div) => (
                             <div key={div.id} style={{ marginBottom: "var(--space-md)" }}>
@@ -210,7 +210,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {/* Show Entry Section (live_show / photo_show) */}
                 {/* ══════════════════════════════════════ */}
                 {isShowEvent && isShowOpen && (
-                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                    <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-sm)" }}>🐴 Enter Your Horse</h3>
                         <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                             Select a public horse to enter. Your horse&apos;s passport photo will be used as the entry thumbnail.
@@ -222,12 +222,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Show Entries Grid */}
                 {isShowEvent && showEntries.length > 0 && (
-                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                    <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-md)" }}>📸 Entries ({showEntries.length})</h3>
                         <div className="flex flex-col gap-[0] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg overflow-hidden">
                             {showEntries.map((entry, index) => (
                                 <div key={entry.id} className="flex items-center gap-4 py-4 px-6 border-b border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-colors">
-                                    <div className="show-entry-rank">
+                                    <div className="text-[calc(1.1rem*var(--font-scale))] font-bold text-muted min-w-[32px] text-center">
                                         {isExpertJudged && showStatus === "closed" && entry.placing
                                             ? entry.placing
                                             : `#${index + 1}`
@@ -240,7 +240,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
-                                        <Link href={`/community/${entry.horseId}`} className="show-entry-horse-name hover:text-forest">
+                                        <Link href={`/community/${entry.horseId}`} className="font-semibold text-[calc(0.95rem*var(--font-scale))] no-underline text-inherit hover:text-forest">
                                             🐴 {entry.horseName}
                                         </Link>
                                         <span className="text-forest no-underline">
@@ -289,7 +289,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 )}
 
                 {isShowEvent && showEntries.length === 0 && !isShowOpen && (
-                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)", textAlign: "center" }}>
+                    <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)", textAlign: "center" }}>
                         <p style={{ color: "var(--color-text-muted)" }}>No entries were submitted for this show.</p>
                     </div>
                 )}
@@ -301,7 +301,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Attendees */}
                 {attendees.length > 0 && (
-                    <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+                    <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-sm)" }}>👥 Who&apos;s Going ({attendees.filter(a => a.status === "going").length})</h3>
                         <div className="flex flex-wrap gap-1">
                             {attendees.filter(a => a.status === "going").map(a => (

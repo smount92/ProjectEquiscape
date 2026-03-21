@@ -45,7 +45,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
     return (
         <div>
             {/* Search */}
-            <div className="search-bar" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
                 <input
                     type="text"
                     className="form-input"
@@ -57,7 +57,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
             </div>
 
             {/* Type Filter */}
-            <div className="studio-chip-grid" style={{ marginBottom: "var(--space-lg)" }}>
+            <div className="flex flex-wrap gap-1" style={{ marginBottom: "var(--space-lg)" }}>
                 <button className={`studio-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
                 {Object.entries(typeLabels).map(([key, label]) => (
                     <button key={key} className={`studio-chip ${filter === key ? "active" : ""}`} onClick={() => setFilter(key)}>
@@ -79,8 +79,8 @@ export default function EventBrowser({ events, typeLabels }: Props) {
                         return (
                             <div key={e.id} className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors">
                                 <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-date">
-                                    <span className="event-date-month">{month}</span>
-                                    <span className="event-date-day">{day}</span>
+                                    <span className="text-[calc(0.6rem*var(--font-scale))] font-bold text-[#2C5545] uppercase tracking-[0.05em]">{month}</span>
+                                    <span className="text-[calc(1.2rem*var(--font-scale))] font-extrabold text-ink leading-none">{day}</span>
                                 </div>
                                 <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-body">
                                     <Link href={`/community/events/${e.id}`} className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-name">
@@ -97,17 +97,17 @@ export default function EventBrowser({ events, typeLabels }: Props) {
                                 </div>
                                 <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-actions">
                                     {e.userRsvp === "going" ? (
-                                        <span className="commission-status-badge" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
+                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
                                             ✓ Going
                                         </span>
                                     ) : e.userRsvp === "interested" ? (
-                                        <span className="commission-status-badge" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
                                             ⭐ Interested
                                         </span>
                                     ) : (
                                         <div style={{ display: "flex", gap: "var(--space-xs)" }}>
-                                            <button className="btn btn-primary btn-sm" onClick={() => handleRsvp(e.id, "going")} disabled={rsvping === e.id}>Going</button>
-                                            <button className="btn btn-ghost btn-sm" onClick={() => handleRsvp(e.id, "interested")} disabled={rsvping === e.id}>Interested</button>
+                                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={() => handleRsvp(e.id, "going")} disabled={rsvping === e.id}>Going</button>
+                                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => handleRsvp(e.id, "interested")} disabled={rsvping === e.id}>Interested</button>
                                         </div>
                                     )}
                                 </div>
