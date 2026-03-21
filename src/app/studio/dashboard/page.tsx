@@ -51,26 +51,26 @@ export default async function StudioDashboardPage() {
                     </div>
 
                     {/* Stats Bar */}
-                    <div className="studio-stats-bar">
-                        <div className="studio-stat">
-                            <span className="studio-stat-value">{activeCommissions.length}/{profile.maxSlots}</span>
-                            <span className="studio-stat-label">Slots Filled</span>
+                    <div className="flex gap-lg mt-lg pt-lg border-t border-[rgba(0,0,0,0.06)] flex-wrap">
+                        <div className="flex flex-col items-center gap-[2px]">
+                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-accent-primary">{activeCommissions.length}/{profile.maxSlots}</span>
+                            <span className="text-[calc(0.7rem*var(--font-scale))] text-text-muted uppercase tracking-wider">Slots Filled</span>
                         </div>
-                        <div className="studio-stat">
-                            <span className="studio-stat-value" style={{ color: pendingRequests.length > 0 ? "var(--color-accent-warm)" : undefined }}>
+                        <div className="flex flex-col items-center gap-[2px]">
+                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-accent-primary" style={{ color: pendingRequests.length > 0 ? "var(--color-accent-warm)" : undefined }}>
                                 {pendingRequests.length}
                             </span>
-                            <span className="studio-stat-label">Pending Requests</span>
+                            <span className="text-[calc(0.7rem*var(--font-scale))] text-text-muted uppercase tracking-wider">Pending Requests</span>
                         </div>
-                        <div className="studio-stat">
-                            <span className="studio-stat-value">{completedTotal.length}</span>
-                            <span className="studio-stat-label">Completed</span>
+                        <div className="flex flex-col items-center gap-[2px]">
+                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-accent-primary">{completedTotal.length}</span>
+                            <span className="text-[calc(0.7rem*var(--font-scale))] text-text-muted uppercase tracking-wider">Completed</span>
                         </div>
-                        <div className="studio-stat">
+                        <div className="flex flex-col items-center gap-[2px]">
                             <span className={`studio-status-badge status-${profile.status}`} style={{ fontSize: "calc(0.75rem * var(--font-scale))" }}>
                                 {profile.status === "open" ? "🟢" : profile.status === "waitlist" ? "🟡" : "🔴"} {profile.status.charAt(0).toUpperCase() + profile.status.slice(1)}
                             </span>
-                            <span className="studio-stat-label">Status</span>
+                            <span className="text-[calc(0.7rem*var(--font-scale))] text-text-muted uppercase tracking-wider">Status</span>
                         </div>
                     </div>
                 </div>

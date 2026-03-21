@@ -295,8 +295,8 @@ export default async function DashboardPage({
                     <aside className="flex flex-col gap-lg max-lg:mt-lg lg:sticky lg:top-[calc(var(--header-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
-                            <div className="sidebar-section">
-                                <h3 className="sidebar-section-title"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
+                            <div className="bg-bg-card border border-border rounded-lg p-lg">
+                                <h3 className="text-xs font-bold text-text-muted mb-md uppercase tracking-[0.08em]"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
                                 <div className="flex flex-col gap-[2px]">
                                     <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
                                         <span className="text-sm text-text-secondary"><Plus size={14} strokeWidth={1.5} /> Total Models</span>
@@ -331,8 +331,8 @@ export default async function DashboardPage({
 
                         {/* Collections — Vertical list */}
                         {collections.length > 0 && (
-                            <div className="sidebar-section">
-                                <h3 className="sidebar-section-title"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
+                            <div className="bg-bg-card border border-border rounded-lg p-lg">
+                                <h3 className="text-xs font-bold text-text-muted mb-md uppercase tracking-[0.08em]"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
                                 <div className="flex flex-col gap-xs">
                                     {collections.map((col) => (
                                         <Link

@@ -115,10 +115,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 </div>
 
                 {/* Details */}
-                <div className="studio-info-grid" style={{ marginBottom: "var(--space-lg)" }}>
-                    <div className="studio-info-item">
-                        <span className="studio-info-label">📅 Date</span>
-                        <span className="studio-info-value">
+                <div className="grid gap-sm" style={{ marginBottom: "var(--space-lg)" }}>
+                    <div className="flex justify-between items-center py-xs">
+                        <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">📅 Date</span>
+                        <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
                             {event.isAllDay ? "All Day" : date.toLocaleString("en-US", {
                                 weekday: "short", month: "short", day: "numeric",
                                 hour: "numeric", minute: "2-digit",
@@ -131,34 +131,34 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         </span>
                     </div>
                     {!event.isVirtual && event.locationName && (
-                        <div className="studio-info-item">
-                            <span className="studio-info-label">📍 Location</span>
-                            <span className="studio-info-value">{event.locationName}{event.locationAddress && <><br />{event.locationAddress}</>}</span>
+                        <div className="flex justify-between items-center py-xs">
+                            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">📍 Location</span>
+                            <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">{event.locationName}{event.locationAddress && <><br />{event.locationAddress}</>}</span>
                         </div>
                     )}
                     {event.isVirtual && event.virtualUrl && (
-                        <div className="studio-info-item">
-                            <span className="studio-info-label">🌐 Virtual Link</span>
-                            <a href={event.virtualUrl} target="_blank" rel="noopener noreferrer" className="studio-info-value" style={{ color: "var(--color-accent-primary)" }}>
+                        <div className="flex justify-between items-center py-xs">
+                            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">🌐 Virtual Link</span>
+                            <a href={event.virtualUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-[calc(0.9rem*var(--font-scale))]" style={{ color: "var(--color-accent-primary)" }}>
                                 Join Online →
                             </a>
                         </div>
                     )}
                     {event.region && (
-                        <div className="studio-info-item">
-                            <span className="studio-info-label">🗺️ Region</span>
-                            <span className="studio-info-value">{event.region}</span>
+                        <div className="flex justify-between items-center py-xs">
+                            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">🗺️ Region</span>
+                            <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">{event.region}</span>
                         </div>
                     )}
                     {event.groupName && (
-                        <div className="studio-info-item">
-                            <span className="studio-info-label">🏛️ Hosted by</span>
-                            <span className="studio-info-value">{event.groupName}</span>
+                        <div className="flex justify-between items-center py-xs">
+                            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">🏛️ Hosted by</span>
+                            <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">{event.groupName}</span>
                         </div>
                     )}
-                    <div className="studio-info-item">
-                        <span className="studio-info-label">Created by</span>
-                        <span className="studio-info-value">@{event.creatorAlias}</span>
+                    <div className="flex justify-between items-center py-xs">
+                        <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">Created by</span>
+                        <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">@{event.creatorAlias}</span>
                     </div>
                 </div>
 

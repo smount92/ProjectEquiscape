@@ -183,7 +183,7 @@ export default async function MarketPricePage({
                     )}
 
                     {/* Disclaimer */}
-                    <div className="market-disclaimer">
+                    <div className="mt-2xl p-lg rounded-lg bg-[var(--color-surface-glass)] border border-border text-xs">
                         <p>
                             📋 Prices based on completed transactions recorded on Model Horse Hub.
                             This is not a professional appraisal. Market conditions vary.

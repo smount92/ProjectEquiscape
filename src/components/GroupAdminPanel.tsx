@@ -69,12 +69,12 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
     };
 
     return (
-        <div className="sidebar-section" style={{ marginTop: "var(--space-lg)" }}>
+        <div className="bg-bg-card border border-border rounded-lg p-lg" style={{ marginTop: "var(--space-lg)" }}>
             <div
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                 onClick={() => setExpanded(!expanded)}
             >
-                <h3 className="sidebar-section-title" style={{ margin: 0 }}>⚙️ Admin Panel</h3>
+                <h3 className="text-xs font-bold text-text-muted uppercase tracking-[0.08em]" style={{ margin: 0 }}>⚙️ Admin Panel</h3>
                 <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
                     {expanded ? "▲" : "▼"}
                 </span>

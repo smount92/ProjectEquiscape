@@ -146,11 +146,11 @@ export default async function PublicStudioPage({
                         <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                             💰 Pricing & Timeline
                         </h2>
-                        <div className="studio-info-grid">
+                        <div className="grid gap-sm">
                             {(profile.priceRangeMin || profile.priceRangeMax) && (
-                                <div className="studio-info-item">
-                                    <span className="studio-info-label">Price Range</span>
-                                    <span className="studio-info-value">
+                                <div className="flex justify-between items-center py-xs">
+                                    <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">Price Range</span>
+                                    <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
                                         {profile.priceRangeMin && profile.priceRangeMax
                                             ? `$${profile.priceRangeMin} – $${profile.priceRangeMax}`
                                             : profile.priceRangeMin
@@ -160,9 +160,9 @@ export default async function PublicStudioPage({
                                 </div>
                             )}
                             {(profile.turnaroundMinDays || profile.turnaroundMaxDays) && (
-                                <div className="studio-info-item">
-                                    <span className="studio-info-label">Turnaround</span>
-                                    <span className="studio-info-value">
+                                <div className="flex justify-between items-center py-xs">
+                                    <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">Turnaround</span>
+                                    <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
                                         {profile.turnaroundMinDays && profile.turnaroundMaxDays
                                             ? `${profile.turnaroundMinDays}–${profile.turnaroundMaxDays} days`
                                             : profile.turnaroundMinDays
@@ -230,11 +230,11 @@ export default async function PublicStudioPage({
                                 {queue.map((item, i) => {
                                     const st = COMMISSION_STATUS_LABELS[item.status] || { label: item.status, emoji: "📋" };
                                     return (
-                                        <div key={item.id} className="studio-queue-item">
-                                            <span className="studio-queue-slot">
+                                        <div key={item.id} className="flex items-center gap-sm py-sm px-md rounded-md bg-[rgba(0,0,0,0.03)]">
+                                            <span className="text-xs font-bold text-accent-primary min-w-[50px]">
                                                 Slot {item.slot_number || i + 1}
                                             </span>
-                                            <span className="studio-queue-type">{item.commission_type}</span>
+                                            <span className="flex-1 text-[calc(0.85rem*var(--font-scale))] font-semibold">{item.commission_type}</span>
                                             <span className={`commission-status-badge status-${item.status.replace("_", "-")}`}>
                                                 {st.emoji} {st.label}
                                             </span>
