@@ -152,15 +152,15 @@ export default function FaqPage() {
  };
 
  return (
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8 py-[var(--space-3xl)] max-sm:py-[0]">
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up max-w-[860px] py-[var(--space-3xl)] max-sm:py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <div className="animate-fade-in-up mx-auto max-w-[860px]">
  {/* Page Header */}
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-sticky bg-parchment-dark border-edge top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b px-8 py-[0] py-[var(--space-3xl)] transition-all max-sm:py-[0]">
+ <div className="mb-8">
  <h1>
  Frequently Asked <span className="text-forest">Questions</span>
  </h1>
- <p className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-lead py-[var(--space-3xl)] max-sm:py-[0]">
- Everything you need to know about Model Horse Hub. Can&apos;t find your answer?{""}
+ <p className="mt-2 text-lg text-muted">
+ Everything you need to know about Model Horse Hub. Can&apos;t find your answer?{" "}
  <Link href="/contact">Contact us</Link>.
  </p>
  </div>
@@ -182,7 +182,7 @@ export default function FaqPage() {
  </div>
 
  {/* FAQ Items */}
- <div className="flex flex-col gap-2">
+ <div className="flex flex-col gap-3">
  {filteredItems.map((item, idx) => {
  const isOpen = openIndex === idx;
  return (
@@ -191,7 +191,7 @@ export default function FaqPage() {
  className={`overflow-hidden rounded-lg border transition-colors ${isOpen ?"border-[rgba(44,85,69,0.3)]" :"border-edge"}`}
  >
  <button
- className="bg-[var(--color-bg-card border-edge transition-all)] text-ink flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border border-none px-8 py-6 text-left text-base font-[var(--font-family)] font-semibold shadow-md transition-colors hover:bg-[var(--color-bg-card-hover)]"
+ className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-card px-6 py-5 text-left text-base font-semibold text-ink transition-colors hover:bg-[var(--color-bg-card-hover)]"
  onClick={() => toggle(idx)}
  aria-expanded={isOpen}
  id={`faq-q-${idx}`}
@@ -214,7 +214,7 @@ export default function FaqPage() {
  </button>
  {isOpen && (
  <div
- className="bg-[var(--color-bg-card border-edge transition-all)] animate-fade-in-up [&_p]:text-ink-light rounded-lg border px-8 pb-6 shadow-md [&_p]:m-0 [&_p]:text-base [&_p]:leading-[1.8]"
+ className="animate-fade-in-up rounded-lg bg-card px-6 pb-5 text-base leading-[1.8] text-ink-light"
  id={`faq-a-${idx}`}
  >
  <p>{item.a}</p>

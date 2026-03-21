@@ -9,21 +9,22 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
  return (
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8 py-[var(--space-3xl)] max-sm:py-[0]">
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up py-[var(--space-3xl)] max-sm:py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <div className="animate-fade-in-up">
  {/* Page Header */}
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-sticky bg-parchment-dark border-edge top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b px-8 py-[0] py-[var(--space-3xl)] transition-all max-sm:py-[0]">
+ <div className="mb-8">
  <h1>
  About <span className="text-forest">Model Horse Hub</span>
  </h1>
- <p className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-lead py-[var(--space-3xl)] max-sm:py-[0]">
+ <p className="mt-2 text-lg text-muted">
  Built by a collector who was tired of the status quo.
  </p>
  </div>
 
  {/* Our Story */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>Our Story</h2>
+ <div className="space-y-4 text-base leading-relaxed text-ink-light">
  <p>
  It started the way it starts for most of us: a notebook. Then a spreadsheet. Then another
  spreadsheet because the first one got too messy. Then Facebook albums and mental notes about
@@ -47,12 +48,13 @@ export default function AboutPage() {
  Horse Hub is designed to grow with your herd — from a handful of childhood favorites to a
  serious collection of hundreds.
  </p>
+ </div>
  </section>
 
  {/* What Makes Us Different */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>What Makes Us Different</h2>
- <div className="grid-cols-[repeat(3,1fr)] grid gap-6">
+ <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
  <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  🔒
@@ -92,15 +94,17 @@ export default function AboutPage() {
  </section>
 
  {/* The Vision */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>Where We&apos;re Going</h2>
+ <div className="space-y-4 text-base leading-relaxed text-ink-light">
  <p>
  Model Horse Hub isn&apos;t just a collection manager &mdash; it&apos;s becoming the operating
  system for the hobby. Every feature on this platform exists because a real collector said
  &ldquo;I wish this existed.&rdquo;
  </p>
  <p>Here&apos;s what&apos;s on the roadmap:</p>
- <div className="grid-cols-[repeat(3,1fr)] mt-4 grid gap-6">
+ </div>
+ <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
  <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  🎨
