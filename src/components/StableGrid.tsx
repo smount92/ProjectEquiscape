@@ -160,10 +160,10 @@ export default function StableGrid({
  const wrapperProps = selectMode
  ? {
  onClick: () => onToggleSelect?.(horse.id),
- className: `horse-card ${isSelected ?"horse-card-selected" :""}`,
+ className: `group relative flex flex-col overflow-hidden rounded-lg border border-edge bg-card shadow-sm transition-all hover:shadow-md ${isSelected ? "ring-2 ring-forest" : ""}`,
  id: `horse-card-${horse.id}`,
  }
- : { href: `/stable/${horse.id}`, className:"horse-card", id: `horse-card-${horse.id}` };
+ : { href: `/stable/${horse.id}`, className: "group relative flex flex-col overflow-hidden rounded-lg border border-edge bg-card no-underline shadow-sm transition-all hover:shadow-md", id: `horse-card-${horse.id}` };
  return (
  // @ts-expect-error — dynamic component type
  <CardWrapper key={horse.id} {...wrapperProps}>

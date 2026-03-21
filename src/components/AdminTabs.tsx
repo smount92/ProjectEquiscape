@@ -190,20 +190,28 @@ export default function AdminTabs({
  return (
  <>
  {/* Tab bar */}
- <div className="text-muted hover:text-ink-bar mb-[-2px] flex cursor-pointer items-center gap-1 border-0 border-b-[3px] border-[transparent] bg-transparent px-4 py-2 font-[inherit] text-sm font-semibold whitespace-nowrap transition-all">
+ <div className="mb-6 flex gap-1 border-b border-edge">
  {TABS.map((tab) => {
  const badge = getBadge(tab.key);
  return (
  <button
  key={tab.key}
- className={`admin-tab ${activeTab === tab.key ?"admin-tab-active" :""}`}
+ className={`flex cursor-pointer items-center gap-1.5 border-0 border-b-[3px] bg-transparent px-4 py-2 text-sm font-semibold whitespace-nowrap transition-all ${
+ activeTab === tab.key
+ ? "border-forest text-forest"
+ : "border-transparent text-muted hover:text-ink"
+ }`}
  onClick={() => handleTabChange(tab.key)}
  >
  <span className="text-[1.1em]">{tab.emoji}</span>
- <span className="inline">{tab.label}</span>
+ <span>{tab.label}</span>
  {badge !== null && (
  <span
- className={`admin-tab-badge ${tab.key ==="reports" && reports.length > 0 ?"admin-tab-badge-alert" :""}`}
+ className={`ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[0.65rem] font-bold text-white ${
+ tab.key === "reports" && reports.length > 0
+ ? "bg-[#ef4444]"
+ : "bg-forest"
+ }`}
  >
  {badge}
  </span>
@@ -240,40 +248,38 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  }
 
  return (
- <div className="flex flex-col gap-2">
+ <div className="flex flex-col gap-3">
  {messages.map((msg) => (
  <div
  key={msg.id}
- className={`admin-message ${msg.is_read ?"admin-message-read" :"admin-message-unread"}`}
+ className={`rounded-lg border border-edge p-4 transition-all ${msg.is_read ? "bg-card opacity-75" : "bg-card shadow-md"}`}
  >
- <div className="bg-glass border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
- <span className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+ <div className="mb-2 flex items-center justify-between">
+ <div className="flex items-center gap-2">
+ <span className="text-sm font-semibold text-ink">
  {msg.name}
  </span>
  <a
  href={`mailto:${msg.email}`}
- className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all"
+ className="text-xs text-forest no-underline hover:underline"
  >
  {msg.email}
  </a>
  </div>
- <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
- <span className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+ <span className="text-xs text-muted">
  {formatDate(msg.created_at)}
  </span>
  </div>
- </div>
  {msg.subject && (
- <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
- {!msg.is_read && <span className="bg-forest h-[8px] w-[8px] shrink-0 rounded-full" />}
+ <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+ {!msg.is_read && <span className="h-2 w-2 shrink-0 rounded-full bg-forest" />}
  {msg.subject}
  </div>
  )}
- <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+ <div className="mb-3 text-sm leading-relaxed text-ink-light whitespace-pre-wrap">
  {msg.message}
  </div>
- <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+ <div className="flex flex-wrap items-center gap-2 border-t border-edge pt-3">
  <AdminReplyForm
  messageId={msg.id}
  recipientEmail={msg.email}
@@ -295,7 +301,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  ═══════════════════════════════════════════ */
 function ShowsTab({ shows }: { shows: Show[] }) {
  return (
- <div className="admin-grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
+ <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
  <div>
  <h3 className="mb-4 flex items-center gap-2 text-base font-bold">📸 Create Photo Show</h3>
  <CreateShowForm />
