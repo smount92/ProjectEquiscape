@@ -193,20 +193,20 @@ export default async function DashboardPage({
             <div className="animate-fade-in-up">
                 {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
-                    <div className="welcome-card card animate-fade-in-up">
+                    <div className="card text-center py-3xl px-xl mb-xl bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] border border-[rgba(44,85,69,0.15)] animate-fade-in-up">
                         <h2>Welcome to Model Horse Hub!</h2>
                         <p>Let&apos;s get started by adding your first model to your digital stable.</p>
-                        <div className="welcome-steps">
-                            <div className="welcome-step">
-                                <span className="welcome-step-number">1</span>
+                        <div className="flex flex-col gap-md max-w-[360px] mx-auto mb-xl text-left">
+                            <div className="flex items-center gap-md text-[calc(0.95rem*var(--font-scale))]">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-accent-primary font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">1</span>
                                 <span><Camera size={16} strokeWidth={1.5} /> Add your first horse with photos</span>
                             </div>
-                            <div className="welcome-step">
-                                <span className="welcome-step-number">2</span>
+                            <div className="flex items-center gap-md text-[calc(0.95rem*var(--font-scale))]">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-accent-primary font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">2</span>
                                 <span><Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring</span>
                             </div>
-                            <div className="welcome-step">
-                                <span className="welcome-step-number">3</span>
+                            <div className="flex items-center gap-md text-[calc(0.95rem*var(--font-scale))]">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-accent-primary font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">3</span>
                                 <span><Users size={16} strokeWidth={1.5} /> Discover and follow other collectors</span>
                             </div>
                         </div>

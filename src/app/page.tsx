@@ -295,14 +295,14 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Who It's For ─── */}
-      <section className="personas-section" id="who-its-for">
+      <section className="py-3xl px-xl text-center" id="who-its-for">
         <div className="features-inner">
           <h2 className="features-title">
             Built for <span className="text-gradient">Every Part of the Hobby</span>
           </h2>
-          <div className="personas-grid">
-            <div className="persona-card">
-              <div className="persona-emoji"><Home size={32} strokeWidth={1.5} /></div>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-xl mt-2xl">
+            <div className="p-xl rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+              <div className="text-[3rem] mb-md"><Home size={32} strokeWidth={1.5} /></div>
               <h3>The Collector</h3>
               <p>
                 From 20 models to 2,000+. Catalog your herd with reference data,
@@ -310,8 +310,8 @@ export default function LandingPage() {
                 spreadsheet in minutes — not months.
               </p>
             </div>
-            <div className="persona-card">
-              <div className="persona-emoji"><Palette size={32} strokeWidth={1.5} /></div>
+            <div className="p-xl rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+              <div className="text-[3rem] mb-md"><Palette size={32} strokeWidth={1.5} /></div>
               <h3>The Artist &amp; Customizer</h3>
               <p>
                 Manage commissions, share WIP progress with clients, and build
@@ -319,8 +319,8 @@ export default function LandingPage() {
                 your creation story becomes part of its Hoofprint&trade; — forever.
               </p>
             </div>
-            <div className="persona-card">
-              <div className="persona-emoji"><Trophy size={32} strokeWidth={1.5} /></div>
+            <div className="p-xl rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+              <div className="text-[3rem] mb-md"><Trophy size={32} strokeWidth={1.5} /></div>
               <h3>The Shower &amp; Competitor</h3>
               <p>
                 Log show records, track NAN qualifications digitally, and plan
@@ -358,7 +358,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Coming Soon ─── */}
-      <section className="personas-section" id="coming-soon">
+      <section className="py-3xl px-xl text-center" id="coming-soon">
         <div className="features-inner">
           <h2 className="features-title">
             On the <span className="text-gradient">Horizon</span>
@@ -366,9 +366,9 @@ export default function LandingPage() {
           <p className="features-subtitle">
             We&apos;re building the operating system for the hobby. Here&apos;s what&apos;s next.
           </p>
-          <div className="personas-grid">
-            <div className="persona-card">
-              <div className="persona-emoji"><Palette size={32} strokeWidth={1.5} /></div>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-xl mt-2xl">
+            <div className="p-xl rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+              <div className="text-[3rem] mb-md"><Palette size={32} strokeWidth={1.5} /></div>
               <h3>Art Studio</h3>
               <p>
                 Commission tracking, WIP photo portals, and artist portfolios.
@@ -376,16 +376,16 @@ export default function LandingPage() {
                 Every brushstroke becomes provenance.
               </p>
             </div>
-            <div className="persona-card">
-              <div className="persona-emoji"><Package size={32} strokeWidth={1.5} /></div>
+            <div className="p-xl rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+              <div className="text-[3rem] mb-md"><Package size={32} strokeWidth={1.5} /></div>
               <h3>Bulk Import</h3>
               <p>
                 Upload your entire spreadsheet and we&apos;ll fuzzy-match every row against
                 our 10,500+ reference database. Go from CSV to cataloged in minutes.
               </p>
             </div>
-            <div className="persona-card">
-              <div className="persona-emoji"><TrendingUp size={32} strokeWidth={1.5} /></div>
+            <div className="p-xl rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+              <div className="text-[3rem] mb-md"><TrendingUp size={32} strokeWidth={1.5} /></div>
               <h3>Price Guide</h3>
               <p>
                 Real sale data from real collectors. Search market values for 10,500+

@@ -124,16 +124,16 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
             </div>
 
             {/* Tag Chips */}
-            <div className="discover-tags" style={{ marginBottom: "var(--space-lg)" }}>
+            <div className="flex gap-xs overflow-x-auto pb-xs mb-lg" style={{ WebkitOverflowScrolling: "touch" }}>
                 {TAGS.map((tag) => (
                     <button
                         key={tag.key}
-                        className={`discover-tag ${activeTag === tag.key ? "discover-tag-active" : ""}`}
+                        className={`inline-flex items-center gap-1 py-1.5 px-3 rounded-full border text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all whitespace-nowrap font-medium ${activeTag === tag.key ? "bg-accent-primary text-white border-accent-primary shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : "bg-[rgba(0,0,0,0.03)] border-border text-text-muted hover:border-accent-primary hover:text-text-primary"}`}
                         onClick={() => setActiveTag(tag.key)}
                     >
                         <span>{tag.emoji}</span>
                         <span>{tag.label}</span>
-                        <span className="discover-tag-count">{tagCounts[tag.key]}</span>
+                        <span className="text-[0.7rem] opacity-60">{tagCounts[tag.key]}</span>
                     </button>
                 ))}
             </div>

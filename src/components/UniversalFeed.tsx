@@ -171,7 +171,7 @@ export default function UniversalFeed({
 
             {/* ── Composer ── */}
             {showComposer && (
-                <div className="feed-compose-bar" style={{ marginBottom: "var(--space-lg)" }}>
+                <div className="bg-[var(--color-surface-1)] border border-border rounded-lg p-md mb-lg">
                     <textarea
                         className="form-textarea feed-compose-input"
                         placeholder={composerPlaceholder}
@@ -196,14 +196,14 @@ export default function UniversalFeed({
                             ))}
                         </div>
                     )}
-                    <div className="feed-compose-footer">
+                    <div className="flex justify-between items-center">
                         <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
                             <button type="button" className="btn btn-ghost btn-sm" onClick={() => fileInputRef.current?.click()}
                                 disabled={imageFiles.length >= 4} title="Attach images (up to 4)" style={{ padding: "4px 8px" }}>
                                 📷 {imageFiles.length > 0 ? `(${imageFiles.length}/4)` : ""}
                             </button>
                             <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageSelect} style={{ display: "none" }} />
-                            <span className="feed-compose-count">{composerText.length}/2000</span>
+                            <span className="text-xs text-text-muted">{composerText.length}/2000</span>
                         </div>
                         <button className="btn btn-primary btn-sm" onClick={handlePost}
                             disabled={isPosting || (!composerText.trim() && imageFiles.length === 0)}>
