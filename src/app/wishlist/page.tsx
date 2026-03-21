@@ -179,7 +179,7 @@ export default async function WishlistPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="wishlist-grid animate-fade-in-up">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-6 max-[600px]:grid-cols-1 animate-fade-in-up">
                         {items.map((item) => {
                             const catalogItem = item.catalog_items;
                             const title = catalogItem?.title || "Custom Entry";
@@ -190,22 +190,22 @@ export default async function WishlistPage() {
                             const matches = matchMap.get(item.id) ?? [];
 
                             return (
-                                <div key={item.id} className="wishlist-card" id={`wishlist-${item.id}`}>
-                                    <div className="wishlist-card-icon">🐴</div>
-                                    <div className="wishlist-card-info">
-                                        <div className="wishlist-card-mold">{typeIcon} {title}</div>
+                                <div key={item.id} className="group/card flex gap-4 p-6 bg-[var(--color-surface-glass)] border border-edge rounded-lg transition-all duration-250 relative hover:border-forest hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)] hover:-translate-y-0.5" id={`wishlist-${item.id}`}>
+                                    <div className="text-[2rem] shrink-0 leading-none mt-[2px]">🐴</div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-semibold text-ink text-base mb-1">{typeIcon} {title}</div>
                                         {maker && (
-                                            <div className="wishlist-card-release">
+                                            <div className="text-sm text-forest mb-1">
                                                 {maker}
                                             </div>
                                         )}
                                         {scale && (
-                                            <div className="wishlist-card-detail">📏 {scale}</div>
+                                            <div className="text-sm text-muted mb-[2px]">📏 {scale}</div>
                                         )}
                                         {item.notes && (
-                                            <div className="wishlist-card-notes">📝 {item.notes}</div>
+                                            <div className="text-sm text-muted italic mt-1">📝 {item.notes}</div>
                                         )}
-                                        <div className="wishlist-card-date">
+                                        <div className="text-xs text-muted opacity-70 mt-2">
                                             Added {new Date(item.created_at).toLocaleDateString("en-US", {
                                                 month: "short",
                                                 day: "numeric",
