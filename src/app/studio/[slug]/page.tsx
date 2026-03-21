@@ -82,8 +82,8 @@ export default async function PublicStudioPage({
     return (
         <div className="page-container">
             {/* Hero */}
-            <div className="studio-hero animate-fade-in-up">
-                <div className="studio-hero-content">
+            <div className="py-xl px-lg rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up">
+                <div className="max-w-[800px]">
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
                         <h1 style={{ fontSize: "calc(1.8rem * var(--font-scale))", margin: 0 }}>
                             <span className="text-gradient">{profile.studioName}</span>
@@ -107,7 +107,7 @@ export default async function PublicStudioPage({
                     {profile.specialties.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)", marginTop: "var(--space-md)" }}>
                             {profile.specialties.map(s => (
-                                <span key={s} className="studio-tag">{s}</span>
+                                <span key={s} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(139,92,246,0.15)] text-[#a78bfa] border border-[rgba(139,92,246,0.25)]">{s}</span>
                             ))}
                         </div>
                     )}
@@ -138,7 +138,7 @@ export default async function PublicStudioPage({
                 </div>
             </div>
 
-            <div className="studio-grid animate-fade-in-up">
+            <div className="grid grid-cols-2 max-md:grid-cols-1 gap-xl mt-xl animate-fade-in-up">
                 {/* Left: Details */}
                 <div>
                     {/* Pricing & Turnaround */}
@@ -184,7 +184,7 @@ export default async function PublicStudioPage({
                                 <span className="studio-info-label" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Mediums</span>
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)" }}>
                                     {profile.mediums.map(m => (
-                                        <span key={m} className="studio-tag tag-secondary">{m}</span>
+                                        <span key={m} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{m}</span>
                                     ))}
                                 </div>
                             </div>
@@ -195,7 +195,7 @@ export default async function PublicStudioPage({
                                 <span className="studio-info-label" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Scales</span>
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)" }}>
                                     {profile.scalesOffered.map(s => (
-                                        <span key={s} className="studio-tag tag-secondary">{s}</span>
+                                        <span key={s} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{s}</span>
                                     ))}
                                 </div>
                             </div>

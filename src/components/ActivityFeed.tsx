@@ -126,7 +126,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                                         <span className="text-[calc(0.9rem*var(--font-scale))] font-semibold">
                                             @{item.actorAlias}
                                         </span>
-                                        <div className="feed-item-text-post">
+                                        <div className="text-base leading-relaxed text-text-primary py-xs whitespace-pre-wrap [&_p]:m-0">
                                             <RichText content={(item.metadata as { text?: string })?.text || ""} />
                                         </div>
                                         {/* Image collage for casual image posts */}

@@ -29,8 +29,8 @@ export default async function StudioDashboardPage() {
     return (
         <div className="page-container">
             {/* Header */}
-            <div className="studio-hero animate-fade-in-up" style={{ marginBottom: "var(--space-xl)" }}>
-                <div className="studio-hero-content">
+            <div className="py-xl px-lg rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up" style={{ marginBottom: "var(--space-xl)" }}>
+                <div className="max-w-[800px]">
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "var(--space-md)" }}>
                         <div>
                             <h1 style={{ fontSize: "calc(1.5rem * var(--font-scale))", margin: 0 }}>
