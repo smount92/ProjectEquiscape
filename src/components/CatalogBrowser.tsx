@@ -270,7 +270,7 @@ export default function CatalogBrowser({
                         ))}
                         {items.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="ref-empty">
+                                <td colSpan={6} className="text-center p-8 text-muted">
                                     No entries match your search.{" "}
                                     <a href="/catalog/suggestions">Suggest a new entry?</a>
                                 </td>

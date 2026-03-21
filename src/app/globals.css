@@ -4977,11 +4977,6 @@ p {
     opacity: 1;
 }
 
-.ref-empty {
-    text-align: center;
-    padding: var(--space-xl);
-    color: var(--color-text-muted);
-}
 
 /* Pagination */
 
