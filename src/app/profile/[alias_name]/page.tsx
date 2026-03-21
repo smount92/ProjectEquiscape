@@ -267,7 +267,7 @@ export default async function ProfilePage({
     <div className="page-container page-container-wide">
       {/* Profile Header */}
       <div className="profile-hero animate-fade-in-up">
-        <div className="profile-avatar">
+        <div className="flex items-center justify-center w-[72px] h-[72px] rounded-full bg-[rgba(44, 85, 69, 0.12)] border-[2px] border-[rgba(44, 85, 69, 0.3)] text-forest shrink-0">
           {profileUser.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={profileUser.avatar_url} alt={profileUser.alias_name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
@@ -325,7 +325,7 @@ export default async function ProfilePage({
               🎨 {isOwnProfile ? "My Studio" : `Visit ${studioName || "Studio"}`}
             </Link>
           )}
-          <div className="profile-hero-stats">
+          <div className="flex gap-6 flex-wrap">
             <span className="profile-stat">
               🐴 {profileCards.length} public model{profileCards.length !== 1 ? "s" : ""}
             </span>
@@ -382,11 +382,11 @@ export default async function ProfilePage({
 
       {/* Public Collections */}
       {publicCollections && publicCollections.length > 0 && (
-        <div className="profile-public-collections animate-fade-in-up">
+        <div className="mb-6 animate-fade-in-up">
           <h3 style={{ fontSize: "calc(0.9rem * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
             📁 Public Collections
           </h3>
-          <div className="profile-collection-pills">
+          <div className="flex flex-wrap gap-2">
             {(publicCollections as { id: string; name: string }[]).map((col) => (
               <Link
                 key={col.id}
@@ -454,15 +454,15 @@ export default async function ProfilePage({
           )}
         </div>
       ) : (
-        <div className="community-grid animate-fade-in-up">
+        <div className="grid grid-cols-[repeat(auto-fill, minmax(300px, 1fr))] gap-6 animate-fade-in-up">
           {profileCards.map((horse) => (
             <Link
               key={horse.id}
               href={`/community/${horse.id}`}
-              className="community-card"
+              className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all"
               id={`profile-card-${horse.id}`}
             >
-              <div className="community-card-image">
+              <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-image">
                 {horse.thumbnailUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -492,12 +492,12 @@ export default async function ProfilePage({
                   </span>
                 )}
               </div>
-              <div className="community-card-info">
-                <div className="community-card-name">{horse.customName}</div>
-                <div className="community-card-ref">{horse.refName}</div>
+              <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-info">
+                <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-name">{horse.customName}</div>
+                <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref">{horse.refName}</div>
                 {horse.releaseLine && (
                   <div
-                    className="community-card-ref"
+                    className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref"
                     style={{
                       fontSize: "calc(0.7rem * var(--font-scale))",
                       opacity: 0.7,
@@ -507,11 +507,11 @@ export default async function ProfilePage({
                     🎨 {horse.releaseLine}
                   </div>
                 )}
-                <div className="community-card-footer">
-                  <span className="community-card-ref">
+                <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-footer">
+                  <span className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref">
                     {horse.conditionGrade}
                   </span>
-                  <span className="community-card-time">
+                  <span className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-time">
                     {formatDate(horse.createdAt)}
                   </span>
                 </div>

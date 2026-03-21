@@ -220,10 +220,10 @@ export default async function ChatPage({
         .or(`and(sender_id.eq.${user.id},claimed_by.eq.${otherId}),and(sender_id.eq.${otherId},claimed_by.eq.${user.id})`);
 
     return (
-        <div className="page-container chat-page">
+        <div className="page-container flex flex-col h-[calc(100vh - 70px)] max-h-[calc(100vh - 70px)] overflow-hidden">
             {/* Header */}
-            <div className="chat-header animate-fade-in-up">
-                <Link href="/inbox" className="chat-back" aria-label="Back to inbox">
+            <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0 animate-fade-in-up">
+                <Link href="/inbox" className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-[rgba(0, 0, 0, 0.05)] text-muted no-underline transition-all shrink-0" aria-label="Back to inbox">
                     <svg
                         width="20"
                         height="20"
@@ -238,8 +238,8 @@ export default async function ChatPage({
                         <polyline points="15 18 9 12 15 6" />
                     </svg>
                 </Link>
-                <div className="chat-header-info">
-                    <div className="chat-header-alias">
+                <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0-info">
+                    <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0-alias">
                         <Link href={`/profile/${encodeURIComponent(otherAlias)}`}>
                             @{otherAlias}
                         </Link>
@@ -272,7 +272,7 @@ export default async function ChatPage({
                         </span>
                     )}
                 </div>
-                <div className="chat-header-badge">
+                <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0-badge">
                     <svg
                         width="12"
                         height="12"

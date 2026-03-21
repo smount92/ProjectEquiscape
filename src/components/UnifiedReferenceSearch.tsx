@@ -148,20 +148,20 @@ export default function UnifiedReferenceSearch({
   const noResults = query.trim().length >= 2 && !isSearching && !hasResults;
 
   return (
-    <div className="ref-search-container" ref={containerRef}>
+    <div className="relative" ref={containerRef}>
       {/* AI Detection Notice */}
       {aiNotice}
 
       {/* Selected Item Display (hide when browsing releases) */}
       {selectedItem && selectedCatalogId && releases.length === 0 ? (
         <>
-          <div className="ref-selected-item">
-            <div className="ref-selected-info">
-              <span className="ref-type-badge">
+          <div className="flex items-center justify-between gap-4 py-4 px-6 bg-[rgba(44, 85, 69, 0.06)] border border-[rgba(44, 85, 69, 0.2)] rounded-lg">
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border border-[rgba(92, 224, 160, 0.25)]">
                 {TYPE_BADGES[selectedItem.itemType]?.icon || "📋"}{" "}
                 {TYPE_BADGES[selectedItem.itemType]?.label || selectedItem.itemType}
               </span>
-              <span className="ref-selected-title">{selectedItem.title}</span>
+              <span className="font-bold text-ink">{selectedItem.title}</span>
               <span className="ref-selected-maker">{selectedItem.maker}</span>
               {selectedItem.parentTitle && (
                 <span className="ref-selected-parent"> on {selectedItem.parentTitle}</span>
@@ -190,14 +190,14 @@ export default function UnifiedReferenceSearch({
       ) : (
         <>
           {/* Search Input */}
-          <div className="ref-search-bar">
+          <div className="relative mb-4">
             <svg className="ref-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
               type="text"
-              className="ref-search-input"
+              className="text-muted"
               placeholder="Search molds, releases, or resins…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -214,7 +214,7 @@ export default function UnifiedReferenceSearch({
 
           {/* Dropdown Results */}
           {showDropdown && (
-            <div className="ref-dropdown animate-fade-in-up">
+            <div className="w-[6px] animate-fade-in-up">
               {isSearching ? (
                 <div className="ref-search-status">Searching…</div>
               ) : (
@@ -224,9 +224,9 @@ export default function UnifiedReferenceSearch({
                     <>
                       <div className="ref-group-header">🏭 Base Molds</div>
                       {molds.map((item) => (
-                        <button key={item.id} className="ref-result-item" onClick={() => handleMoldClick(item)}>
-                          <div className="ref-result-info">
-                            <span className="ref-result-name">{item.title}</span>
+                        <button key={item.id} className="border-b-0" onClick={() => handleMoldClick(item)}>
+                          <div className="flex-1 min-w-0">
+                            <span className="font-semibold text-ink">{item.title}</span>
                             <span className="ref-result-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                           </div>
                           <span className="ref-result-action">▸ Releases</span>
@@ -240,9 +240,9 @@ export default function UnifiedReferenceSearch({
                     <>
                       <div className="ref-group-header">📦 Releases</div>
                       {releaseResults.map((item) => (
-                        <button key={item.id} className="ref-result-item" onClick={() => handleSelect(item)}>
-                          <div className="ref-result-info">
-                            <span className="ref-result-name">{item.title}</span>
+                        <button key={item.id} className="border-b-0" onClick={() => handleSelect(item)}>
+                          <div className="flex-1 min-w-0">
+                            <span className="font-semibold text-ink">{item.title}</span>
                             {!!item.attributes.model_number && (
                               <span className="ref-result-meta"> (#{String(item.attributes.model_number)})</span>
                             )}
@@ -259,9 +259,9 @@ export default function UnifiedReferenceSearch({
                     <>
                       <div className="ref-group-header">🎨 Artist Resins</div>
                       {resins.map((item) => (
-                        <button key={item.id} className="ref-result-item" onClick={() => handleSelect(item)}>
-                          <div className="ref-result-info">
-                            <span className="ref-result-name">{item.title}</span>
+                        <button key={item.id} className="border-b-0" onClick={() => handleSelect(item)}>
+                          <div className="flex-1 min-w-0">
+                            <span className="font-semibold text-ink">{item.title}</span>
                             <span className="ref-result-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                           </div>
                           <span className="ref-result-action">Select</span>
@@ -289,16 +289,16 @@ export default function UnifiedReferenceSearch({
 
           {/* Expanded Releases (when a mold is clicked) */}
           {releases.length > 0 && selectedItem && selectedItem.itemType === "plastic_mold" && (
-            <div className="ref-releases-panel animate-fade-in-up">
+            <div className="mt-4 border border-edge rounded-lg overflow-hidden bg-card animate-fade-in-up">
               <div className="ref-releases-header">
                 <span>Releases for <strong>{selectedItem.title}</strong></span>
                 <button className="btn btn-ghost" onClick={handleClear} style={{ fontSize: "0.75rem" }}>✕ Clear</button>
               </div>
 
               {/* Option: Select mold directly */}
-              <button className="ref-result-item ref-mold-direct" onClick={() => handleSelect(selectedItem)}>
-                <div className="ref-result-info">
-                  <span className="ref-result-name">🏭 {selectedItem.title} (any release)</span>
+              <button className="border-b-0 bg-[rgba(92, 224, 160, 0.04)] border-b border-[var(--color-border) !important]" onClick={() => handleSelect(selectedItem)}>
+                <div className="flex-1 min-w-0">
+                  <span className="font-semibold text-ink">🏭 {selectedItem.title} (any release)</span>
                 </div>
                 <span className="ref-result-action">Select Mold</span>
               </button>
@@ -307,9 +307,9 @@ export default function UnifiedReferenceSearch({
                 <div className="ref-search-status">Loading releases…</div>
               ) : (
                 releases.map((rel) => (
-                  <button key={rel.id} className="ref-result-item" onClick={() => handleSelect(rel)}>
-                    <div className="ref-result-info">
-                      <span className="ref-result-name">{rel.title}</span>
+                  <button key={rel.id} className="border-b-0" onClick={() => handleSelect(rel)}>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-ink">{rel.title}</span>
                       {!!rel.attributes.model_number && (
                         <span className="ref-result-meta"> (#{String(rel.attributes.model_number)})</span>
                       )}

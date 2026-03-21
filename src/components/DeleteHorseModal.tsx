@@ -43,7 +43,7 @@ export default function DeleteHorseModal({
     <>
       {/* Trigger button */}
       <button
-        className="btn btn-outline-danger"
+        className="btn bg-transparent text-danger border border-[rgba(240, 108, 126, 0.4)]"
         onClick={() => setShowModal(true)}
         id="delete-horse-button"
       >
@@ -77,7 +77,7 @@ export default function DeleteHorseModal({
           aria-labelledby="delete-modal-title"
         >
           <div className="modal-card danger">
-            <div className="modal-icon">⚠️</div>
+            <div className="text-[3rem] text-center mb-4">⚠️</div>
             <h2 id="delete-modal-title">Delete &ldquo;{horseName}&rdquo;?</h2>
             <p>
               <strong>This cannot be undone.</strong> All photos, financial vault
@@ -107,7 +107,7 @@ export default function DeleteHorseModal({
               </div>
             )}
 
-            <div className="modal-actions">
+            <div className="flex gap-4">
               <button
                 className="btn btn-ghost"
                 onClick={() => setShowModal(false)}

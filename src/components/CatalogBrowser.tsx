@@ -137,11 +137,11 @@ export default function CatalogBrowser({
     return (
         <div className="ref-browser">
             {/* Search */}
-            <div className="ref-search-bar">
+            <div className="relative mb-4">
                 <input
                     id="catalog-search"
                     type="text"
-                    className="input ref-search-input"
+                    className="input text-muted"
                     placeholder="Search by name, mold, color, maker…"
                     value={search}
                     onChange={(e) => handleSearch(e.target.value)}
@@ -151,8 +151,8 @@ export default function CatalogBrowser({
             </div>
 
             {/* Filter Chips */}
-            <div className="ref-filters">
-                <div className="ref-filter-group">
+            <div className="flex flex-wrap gap-2 mb-4 items-center">
+                <div className="flex items-center gap-[6px] flex-wrap">
                     <span className="ref-filter-label">Maker:</span>
                     <button
                         className={`ref-chip ${activeMaker === null ? "ref-chip-active" : ""}`}
@@ -173,7 +173,7 @@ export default function CatalogBrowser({
                     ))}
                 </div>
                 {scales.length > 0 && (
-                    <div className="ref-filter-group">
+                    <div className="flex items-center gap-[6px] flex-wrap">
                         <span className="ref-filter-label">Scale:</span>
                         <select
                             id="catalog-scale-filter"
@@ -221,41 +221,41 @@ export default function CatalogBrowser({
                     <thead>
                         <tr>
                             <th
-                                className="ref-th ref-th-sortable"
+                                className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap cursor-pointer select-none"
                                 onClick={() => handleSort("title")}
                             >
                                 Name {sortIndicator("title")}
                             </th>
                             <th
-                                className="ref-th ref-th-sortable"
+                                className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap cursor-pointer select-none"
                                 onClick={() => handleSort("maker")}
                             >
                                 Maker {sortIndicator("maker")}
                             </th>
-                            <th className="ref-th">Color</th>
-                            <th className="ref-th">Mold</th>
+                            <th className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap">Color</th>
+                            <th className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap">Mold</th>
                             <th
-                                className="ref-th ref-th-sortable"
+                                className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap cursor-pointer select-none"
                                 onClick={() => handleSort("scale")}
                             >
                                 Scale {sortIndicator("scale")}
                             </th>
-                            <th className="ref-th ref-th-actions">Actions</th>
+                            <th className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap w-[120px]">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {items.map((item) => (
                             <tr
                                 key={item.id}
-                                className="ref-row"
+                                className="cursor-pointer transition-colors"
                                 onClick={() => router.push(`/catalog/${item.id}`)}
                             >
-                                <td className="ref-td ref-td-title">{item.title}</td>
-                                <td className="ref-td">{item.maker}</td>
-                                <td className="ref-td">{getAttr(item, "color")}</td>
-                                <td className="ref-td">{getAttr(item, "mold")}</td>
-                                <td className="ref-td">{item.scale ?? "—"}</td>
-                                <td className="ref-td ref-td-actions">
+                                <td className="p-2 border-b border-edge font-semibold text-[var(--color-text)]">{item.title}</td>
+                                <td className="p-2 border-b border-edge">{item.maker}</td>
+                                <td className="p-2 border-b border-edge">{getAttr(item, "color")}</td>
+                                <td className="p-2 border-b border-edge">{getAttr(item, "mold")}</td>
+                                <td className="p-2 border-b border-edge">{item.scale ?? "—"}</td>
+                                <td className="p-2 border-b border-edge text-right">
                                     <button
                                         className="ref-suggest-link"
                                         onClick={(e) => {
@@ -282,7 +282,7 @@ export default function CatalogBrowser({
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="ref-pagination">
+                <div className="flex justify-center items-center gap-4 mt-6 py-4 px-[0]">
                     <button
                         className="btn btn-secondary btn-small"
                         disabled={page <= 1}

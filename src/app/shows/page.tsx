@@ -66,7 +66,7 @@ export default async function ShowsPage() {
                     <p>Check back soon for virtual photo shows!</p>
                 </div>
             ) : (
-                <div className="shows-grid animate-fade-in-up">
+                <div className="grid grid-cols-[repeat(auto-fill, minmax(300px, 1fr))] gap-6 animate-fade-in-up">
                     {shows.map((show) => {
                         const badge = statusBadge(show.status);
                         const isUserJudge = judgeShowIds.has(show.id);
@@ -74,11 +74,11 @@ export default async function ShowsPage() {
                             <Link
                                 key={show.id}
                                 href={`/shows/${show.id}`}
-                                className="show-card"
+                                className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all"
                                 id={`show-${show.id}`}
                             >
-                                <div className="show-card-header">
-                                    <h3 className="show-card-title">{show.title}</h3>
+                                <div className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-header">
+                                    <h3 className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-title">{show.title}</h3>
                                     <div style={{ display: "flex", gap: "var(--space-xs)", alignItems: "center" }}>
                                         {isUserJudge && (
                                             <span style={{
@@ -100,17 +100,17 @@ export default async function ShowsPage() {
                                     </div>
                                 </div>
                                 {show.theme && (
-                                    <div className="show-card-theme">Theme: {show.theme}</div>
+                                    <div className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-theme">Theme: {show.theme}</div>
                                 )}
                                 {show.description && (
-                                    <p className="show-card-desc">{show.description}</p>
+                                    <p className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-desc">{show.description}</p>
                                 )}
                                 {show.creatorAlias && (
                                     <div style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
                                         Hosted by @{show.creatorAlias}
                                     </div>
                                 )}
-                                <div className="show-card-footer">
+                                <div className="flex flex-col gap-2 p-6 bg-[var(--color-card-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-footer">
                                     <span>🐴 {show.entryCount} entr{show.entryCount !== 1 ? "ies" : "y"}</span>
                                     {show.endAt && (
                                         <span>

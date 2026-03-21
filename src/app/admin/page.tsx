@@ -130,21 +130,21 @@ export default async function AdminPage() {
                 </div>
 
                 {/* Metrics Row — always visible */}
-                <div className="admin-metrics-row">
-                    <div className="admin-metric-card">
-                        <div className="admin-metric-icon">👥</div>
+                <div className="grid grid-cols-[repeat(auto-fit, minmax(200px, 1fr))] gap-4 mb-8">
+                    <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all">
+                        <div className="text-[2rem] mb-1">👥</div>
                         <div className="admin-metric-value">{totalUsers}</div>
                         <div className="admin-metric-label">Registered Users</div>
                     </div>
-                    <div className="admin-metric-card">
-                        <div className="admin-metric-icon">🐴</div>
+                    <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all">
+                        <div className="text-[2rem] mb-1">🐴</div>
                         <div className="admin-metric-value">
                             {totalHorses.toLocaleString()}
                         </div>
                         <div className="admin-metric-label">Horses in Database</div>
                     </div>
-                    <div className="admin-metric-card admin-metric-alert">
-                        <div className="admin-metric-icon">📨</div>
+                    <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all text-[#ef4444]">
+                        <div className="text-[2rem] mb-1">📨</div>
                         <div className="admin-metric-value">{unreadMessages}</div>
                         <div className="admin-metric-label">Unread Messages</div>
                     </div>

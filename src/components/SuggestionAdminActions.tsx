@@ -53,9 +53,9 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
     };
 
     return (
-        <div className="ref-admin-actions">
+        <div className="flex flex-col gap-2 mt-2">
             {!showRejectForm ? (
-                <div className="ref-admin-buttons">
+                <div className="flex gap-2">
                     <button
                         className="btn btn-primary"
                         onClick={handleApprove}
@@ -72,7 +72,7 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
                     </button>
                 </div>
             ) : (
-                <div className="ref-admin-reject-form">
+                <div className="flex flex-col gap-2">
                     <textarea
                         className="input"
                         placeholder="Reason for rejection (required)…"
@@ -80,7 +80,7 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
                         onChange={(e) => setNotes(e.target.value)}
                         rows={2}
                     />
-                    <div className="ref-admin-buttons">
+                    <div className="flex gap-2">
                         <button
                             className="btn btn-danger"
                             onClick={handleReject}
@@ -102,7 +102,7 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
             {!showRejectForm && (
                 <input
                     type="text"
-                    className="input ref-admin-notes-input"
+                    className="input border-l-[3px] border-[#f9a825] py-2 px-4 bg-[rgba(255, 193, 7, 0.05)] rounded-[0 var(--radius-md) var(--radius-md) 0] m-[var(--space-md) 0]-input"
                     placeholder="Optional admin notes…"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}

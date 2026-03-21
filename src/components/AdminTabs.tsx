@@ -121,7 +121,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
                     {deleting ? "…" : "Confirm"}
                 </button>
                 <button
-                    className="admin-mark-btn admin-mark-unread"
+                    className="admin-mark-btn bg-[rgba(0, 0, 0, 0.05)] border-edge text-muted"
                     onClick={() => setConfirming(false)}
                     disabled={deleting}
                 >
@@ -182,8 +182,8 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
                             className={`admin-tab ${activeTab === tab.key ? "admin-tab-active" : ""}`}
                             onClick={() => handleTabChange(tab.key)}
                         >
-                            <span className="admin-tab-emoji">{tab.emoji}</span>
-                            <span className="admin-tab-label">{tab.label}</span>
+                            <span className="text-[1.1em]">{tab.emoji}</span>
+                            <span className="inline">{tab.label}</span>
                             {badge !== null && (
                                 <span className={`admin-tab-badge ${tab.key === "reports" && reports.length > 0 ? "admin-tab-badge-alert" : ""}`}>
                                     {badge}
@@ -195,7 +195,7 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
             </div>
 
             {/* Tab content */}
-            <div className="admin-tab-content">
+            <div className="min-h-[300px]">
                 {activeTab === "mailbox" && (
                     <MailboxTab messages={messages} />
                 )}
@@ -231,33 +231,33 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
     }
 
     return (
-        <div className="admin-mailbox">
+        <div className="flex flex-col gap-2">
             {messages.map((msg) => (
                 <div
                     key={msg.id}
                     className={`admin-message ${msg.is_read ? "admin-message-read" : "admin-message-unread"}`}
                 >
-                    <div className="admin-message-header">
-                        <div className="admin-message-sender">
-                            <span className="admin-message-name">{msg.name}</span>
-                            <a href={`mailto:${msg.email}`} className="admin-message-email">
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-header">
+                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sender">
+                            <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-name">{msg.name}</span>
+                            <a href={`mailto:${msg.email}`} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-email">
                                 {msg.email}
                             </a>
                         </div>
-                        <div className="admin-message-actions">
-                            <span className="admin-message-date">
+                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-actions">
+                            <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-date">
                                 {formatDate(msg.created_at)}
                             </span>
                         </div>
                     </div>
                     {msg.subject && (
-                        <div className="admin-message-subject">
-                            {!msg.is_read && <span className="admin-unread-dot" />}
+                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-subject">
+                            {!msg.is_read && <span className="w-[8px] h-[8px] rounded-full bg-forest shrink-0" />}
                             {msg.subject}
                         </div>
                     )}
-                    <div className="admin-message-body">{msg.message}</div>
-                    <div className="admin-message-footer">
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-body">{msg.message}</div>
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-footer">
                         <AdminReplyForm
                             messageId={msg.id}
                             recipientEmail={msg.email}
@@ -279,13 +279,13 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
    ═══════════════════════════════════════════ */
 function ShowsTab({ shows }: { shows: Show[] }) {
     return (
-        <div className="admin-shows-grid">
+        <div className="admin-grid grid-cols-[repeat(auto-fill, minmax(300px, 1fr))] gap-6">
             <div>
                 <h3 className="admin-sub-title">📸 Create Photo Show</h3>
                 <CreateShowForm />
             </div>
             <div>
-                <h3 className="admin-sub-title">🎛️ Manage Shows <span className="admin-section-count">{shows.length}</span></h3>
+                <h3 className="admin-sub-title">🎛️ Manage Shows <span className="mt-6-count">{shows.length}</span></h3>
                 <AdminShowManager shows={shows} />
             </div>
         </div>
@@ -299,7 +299,7 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
     return (
         <div className="admin-content-grid">
             <div>
-                <h3 className="admin-sub-title">💡 Database Suggestions <span className="admin-section-count">{suggestions.length} pending</span></h3>
+                <h3 className="admin-sub-title">💡 Database Suggestions <span className="mt-6-count">{suggestions.length} pending</span></h3>
                 <AdminSuggestionsPanel suggestions={suggestions} />
             </div>
             <div>
@@ -325,9 +325,9 @@ function ReportsTab({ reports }: { reports: Report[] }) {
     }
 
     return (
-        <div className="admin-mailbox">
+        <div className="flex flex-col gap-2">
             {reports.map(report => (
-                <div key={report.id} className="admin-message">
+                <div key={report.id} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all">
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--space-xs)" }}>
                         <strong>{report.reason}</strong>
                         <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
@@ -364,7 +364,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
     }
 
     return (
-        <div className="admin-mailbox">
+        <div className="flex flex-col gap-2">
             {suggestions.map((s) => {
                 const curatorIcon =
                     s.author_approved_count >= 200 ? "🥇" :
@@ -391,7 +391,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
                 }
 
                 return (
-                    <div key={s.id} className="admin-message">
+                    <div key={s.id} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all">
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--space-xs)" }}>
                             <strong>{typeIcon} {s.suggestion_type.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</strong>
                             <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>

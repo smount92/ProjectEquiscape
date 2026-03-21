@@ -72,20 +72,20 @@ export default async function ReferencePage() {
     return (
         <div className="page-container page-container-wide">
             {/* Hero Section */}
-            <div className="ref-hero animate-fade-in-up">
-                <div className="ref-hero-content">
+            <div className="text-center py-8 px-[0] animate-fade-in-up">
+                <div className="text-center py-8 px-[0]-content">
                     <h1>
                         📚{" "}
                         <span className="text-gradient">
                             Reference Catalog
                         </span>
                     </h1>
-                    <p className="ref-hero-subtitle">
+                    <p className="text-center py-8 px-[0]-subtitle">
                         {(count ?? 0).toLocaleString()}+ model horse entries, maintained by the
                         community
                     </p>
                 </div>
-                <div className="ref-hero-stats">
+                <div className="text-center py-8 px-[0]-stats">
                     <div className="community-stat">
                         <span className="community-stat-number">
                             {(count ?? 0).toLocaleString()}
@@ -107,7 +107,7 @@ export default async function ReferencePage() {
                 </div>
             </div>
 
-            <div className="ref-layout">
+            <div className="grid grid-cols-[1fr 280px] gap-8 mt-6">
                 {/* Main Content */}
                 <div className="ref-main">
                     <CatalogBrowser
@@ -119,23 +119,23 @@ export default async function ReferencePage() {
                 </div>
 
                 {/* Sidebar */}
-                <aside className="ref-sidebar">
+                <aside className="flex flex-col gap-4">
                     {/* Quick Links */}
-                    <div className="card ref-sidebar-card">
-                        <h3 className="ref-sidebar-title">📋 Community</h3>
-                        <div className="ref-sidebar-links">
-                            <a href="/catalog/suggestions" className="btn btn-secondary btn-small ref-sidebar-btn">
+                    <div className="card flex flex-col gap-4-card">
+                        <h3 className="flex flex-col gap-4-title">📋 Community</h3>
+                        <div className="flex flex-col gap-4-links">
+                            <a href="/catalog/suggestions" className="btn btn-secondary btn-small flex flex-col gap-4-btn">
                                 View Suggestions
                                 {(pendingSuggestions ?? 0) > 0 && (
-                                    <span className="ref-badge">
+                                    <span className="bg-forest text-white text-[0.7rem] py-[2px] px-[6px] rounded-[10px] font-bold">
                                         {pendingSuggestions}
                                     </span>
                                 )}
                             </a>
-                            <a href="/catalog/suggestions/new" className="btn btn-primary btn-small ref-sidebar-btn">
+                            <a href="/catalog/suggestions/new" className="btn btn-primary btn-small flex flex-col gap-4-btn">
                                 📗 Suggest New Entry
                             </a>
-                            <a href="/catalog/changelog" className="btn btn-secondary btn-small ref-sidebar-btn">
+                            <a href="/catalog/changelog" className="btn btn-secondary btn-small flex flex-col gap-4-btn">
                                 📋 View Changelog
                             </a>
                         </div>
@@ -143,9 +143,9 @@ export default async function ReferencePage() {
 
                     {/* Top Curators */}
                     {(curators ?? []).length > 0 && (
-                        <div className="card ref-sidebar-card">
-                            <h3 className="ref-sidebar-title">🏆 Top Curators</h3>
-                            <ul className="ref-curator-list">
+                        <div className="card flex flex-col gap-4-card">
+                            <h3 className="flex flex-col gap-4-title">🏆 Top Curators</h3>
+                            <ul className="list-none p-0 m-0">
                                 {(
                                     curators as {
                                         id: string;
@@ -154,13 +154,13 @@ export default async function ReferencePage() {
                                         approved_suggestions_count: number;
                                     }[]
                                 ).map((curator, i) => (
-                                    <li key={curator.id} className="ref-curator-item">
-                                        <span className="ref-curator-rank">
+                                    <li key={curator.id} className="border-b-0">
+                                        <span className="min-w-[24px]">
                                             {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
                                         </span>
                                         <a
                                             href={`/profile/${curator.alias_name}`}
-                                            className="ref-curator-name"
+                                            className="text-forest font-semibold"
                                         >
                                             @{curator.alias_name}
                                         </a>

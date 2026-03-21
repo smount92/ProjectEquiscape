@@ -319,14 +319,14 @@ export default async function HorsePassportPage({
       )}
 
       {/* Two-column layout: Gallery | Info */}
-      <div className="passport-layout animate-fade-in-up">
+      <div className="grid grid-cols-[1fr 420px] gap-[0] items-stretch rounded-lg overflow-hidden shadow-lg animate-fade-in-up">
         {/* Left: Gallery */}
         <div>
           <PassportGallery images={galleryImages} />
         </div>
 
         {/* Right: Info sidebar */}
-        <div className="passport-sidebar">
+        <div className="flex flex-col gap-2 py-8 px-6 bg-[#C8B596] min-h-[100%]">
           {/* Title */}
           <div>
             <h1 className="passport-title">{horse.custom_name}</h1>
@@ -348,7 +348,7 @@ export default async function HorsePassportPage({
             </h3>
 
             {horse.asset_category && horse.asset_category !== "model" && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Category</span>
                 <span className="passport-detail-value">
                   {horse.asset_category === "tack" ? "🏇 Tack & Gear" : horse.asset_category === "prop" ? "🌲 Prop" : "🎭 Diorama"}
@@ -357,14 +357,14 @@ export default async function HorsePassportPage({
             )}
 
             {horse.finish_type && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Finish Type</span>
                 <span className="passport-detail-value">{horse.finish_type}</span>
               </div>
             )}
 
             {horse.condition_grade && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Condition</span>
                 <span className="passport-condition-badge">
                   {horse.condition_grade}
@@ -374,25 +374,25 @@ export default async function HorsePassportPage({
 
             {refInfo ? (
               <>
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">{refInfo.type}</span>
                   <span className="passport-detail-value">{refInfo.name}</span>
                 </div>
 
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">
                     {refInfo.type === "Mold" ? "Manufacturer" : "Sculptor"}
                   </span>
                   <span className="passport-detail-value">{refInfo.maker}</span>
                 </div>
 
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Scale</span>
                   <span className="passport-detail-value">{refInfo.scale}</span>
                 </div>
 
                 {refInfo.extra && (
-                  <div className="passport-detail-row">
+                  <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                     <span className="passport-detail-label">
                       {refInfo.type === "Mold" ? "Released" : "Medium"}
                     </span>
@@ -403,7 +403,7 @@ export default async function HorsePassportPage({
                 )}
               </>
             ) : (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Reference</span>
                 <span className="passport-detail-value" style={{ opacity: 0.6, fontStyle: "italic" }}>
                   Not linked to database — Custom Entry
@@ -413,27 +413,27 @@ export default async function HorsePassportPage({
 
             {releaseInfo && (
               <>
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Release</span>
                   <span className="passport-detail-value">{releaseInfo.name}</span>
                 </div>
 
                 {releaseInfo.modelNumber && (
-                  <div className="passport-detail-row">
+                  <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                     <span className="passport-detail-label">Model #</span>
                     <span className="passport-detail-value">#{releaseInfo.modelNumber}</span>
                   </div>
                 )}
 
                 {releaseInfo.color && (
-                  <div className="passport-detail-row">
+                  <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                     <span className="passport-detail-label">Color</span>
                     <span className="passport-detail-value">{releaseInfo.color}</span>
                   </div>
                 )}
 
                 {releaseInfo.yearStart && (
-                  <div className="passport-detail-row">
+                  <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                     <span className="passport-detail-label">Release Years</span>
                     <span className="passport-detail-value">
                       {releaseInfo.yearStart}
@@ -446,7 +446,7 @@ export default async function HorsePassportPage({
               </>
             )}
 
-            <div className="passport-detail-row">
+            <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
               <span className="passport-detail-label">Added</span>
               <span className="passport-detail-value">
                 {new Date(horse.created_at).toLocaleDateString("en-US", {
@@ -457,7 +457,7 @@ export default async function HorsePassportPage({
               </span>
             </div>
 
-            <div className="passport-detail-row">
+            <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
               <span className="passport-detail-label">Photos</span>
               <span className="passport-detail-value">
                 {images.length} uploaded
@@ -465,14 +465,14 @@ export default async function HorsePassportPage({
             </div>
 
             {horse.sculptor && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Sculptor / Artist</span>
                 <span className="passport-detail-value">{horse.sculptor}</span>
               </div>
             )}
 
             {horse.finishing_artist && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">🎨 Finished by</span>
                 <span className="passport-detail-value">
                   {horse.finishing_artist}
@@ -487,7 +487,7 @@ export default async function HorsePassportPage({
             )}
 
             {(horse.edition_number || horse.edition_size) && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">📋 Edition</span>
                 <span className="passport-detail-value">
                   {horse.edition_number && horse.edition_size
@@ -504,7 +504,7 @@ export default async function HorsePassportPage({
           {horse.finish_details && (
             <div className="passport-detail-card">
               <h3><span aria-hidden="true">✨</span> Finish</h3>
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Finish Details</span>
                 <span className="passport-detail-value">{horse.finish_details}</span>
               </div>
@@ -516,25 +516,25 @@ export default async function HorsePassportPage({
             <div className="passport-detail-card">
               <h3><span aria-hidden="true">🏅</span> Show Identity</h3>
               {horse.assigned_breed && (
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Breed</span>
                   <span className="passport-detail-value">{horse.assigned_breed}</span>
                 </div>
               )}
               {horse.assigned_gender && (
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Gender</span>
                   <span className="passport-detail-value">{horse.assigned_gender}</span>
                 </div>
               )}
               {horse.assigned_age && (
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Age</span>
                   <span className="passport-detail-value">{horse.assigned_age}</span>
                 </div>
               )}
               {horse.regional_id && (
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Regional ID</span>
                   <span className="passport-detail-value">{horse.regional_id}</span>
                 </div>
@@ -583,7 +583,7 @@ export default async function HorsePassportPage({
           <VaultReveal vault={vault} currencySymbol={currencySymbol} />
 
           {/* Actions */}
-          <div className="passport-actions">
+          <div className="flex gap-4 flex-wrap">
             <Link
               href="/dashboard"
               className="btn btn-ghost"

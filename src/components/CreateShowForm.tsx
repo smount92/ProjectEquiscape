@@ -40,7 +40,7 @@ export default function CreateShowForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="admin-feature-form">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-[500px]">
             <div className="form-group">
                 <label className="form-label">Show Title</label>
                 <input

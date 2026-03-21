@@ -172,7 +172,7 @@ export default function StudioSetupPage() {
 
                 <form onSubmit={handleSubmit}>
                     {/* Studio Identity */}
-                    <fieldset className="studio-fieldset">
+                    <fieldset className="border border-edge rounded-lg p-6 mb-6">
                         <legend>🏷️ Studio Identity</legend>
 
                         <div className="form-group">
@@ -220,7 +220,7 @@ export default function StudioSetupPage() {
                     </fieldset>
 
                     {/* Skills & Services */}
-                    <fieldset className="studio-fieldset">
+                    <fieldset className="border border-edge rounded-lg p-6 mb-6">
                         <legend>🛠️ Skills & Services</legend>
 
                         <div className="form-group">
@@ -289,7 +289,7 @@ export default function StudioSetupPage() {
                     </fieldset>
 
                     {/* Commission Settings */}
-                    <fieldset className="studio-fieldset">
+                    <fieldset className="border border-edge rounded-lg p-6 mb-6">
                         <legend>📋 Commission Settings</legend>
 
                         <div className="form-group">
@@ -384,7 +384,7 @@ export default function StudioSetupPage() {
                     </fieldset>
 
                     {/* Policies & Payment */}
-                    <fieldset className="studio-fieldset">
+                    <fieldset className="border border-edge rounded-lg p-6 mb-6">
                         <legend>💰 Policies & Payment</legend>
 
                         <div className="form-group">

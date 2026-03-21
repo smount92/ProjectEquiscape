@@ -26,7 +26,7 @@ function linkifyMentions(text: string): React.ReactNode[] {
 
 export default function RichText({ content }: { content: string }) {
     return (
-        <div className="activity-post-content">
+        <div className="text-forest underline">
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{

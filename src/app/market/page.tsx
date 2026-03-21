@@ -111,20 +111,20 @@ export default async function MarketPricePage({
                         </div>
                     ) : (
                         <>
-                            <div className="market-results-header">
+                            <div className="mb-4">
                                 <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
                                     {total} item{total !== 1 ? "s" : ""} with price data
                                 </span>
                             </div>
 
-                            <div className="market-results-grid">
+                            <div className="market-bg-[var(--color-surface-secondary)] font-semibold sticky top-0">
                                 {items.map((item) => (
-                                    <div key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`} className="market-card">
-                                        <div className="market-card-header">
-                                            <span className="market-card-icon">{typeIcon(item.itemType)}</span>
-                                            <div className="market-card-info">
-                                                <span className="market-card-title">{item.title}</span>
-                                                <span className="market-card-maker">
+                                    <div key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`} className="bg-card border border-edge rounded-lg p-6 transition-colors">
+                                        <div className="bg-card border border-edge rounded-lg p-6 transition-colors-header">
+                                            <span className="bg-card border border-edge rounded-lg p-6 transition-colors-icon">{typeIcon(item.itemType)}</span>
+                                            <div className="bg-card border border-edge rounded-lg p-6 transition-colors-info">
+                                                <span className="bg-card border border-edge rounded-lg p-6 transition-colors-title">{item.title}</span>
+                                                <span className="bg-card border border-edge rounded-lg p-6 transition-colors-maker">
                                                     {item.maker}{item.scale ? ` · ${item.scale}` : ""}
                                                     {item.finishType ? ` · ${item.finishType}` : ""}
                                                     {item.lifeStage && item.lifeStage !== "completed" ? ` · ${item.lifeStage === "blank" ? "Blank" : item.lifeStage === "stripped" ? "Stripped" : "In Progress"}` : ""}
@@ -132,7 +132,7 @@ export default async function MarketPricePage({
                                             </div>
                                         </div>
 
-                                        <div className="market-card-prices">
+                                        <div className="bg-card border border-edge rounded-lg p-6 transition-colors-prices">
                                             <div className="market-price-range">
                                                 {formatCurrency(item.lowestPrice)}
                                                 {item.lowestPrice !== item.highestPrice ? ` – ${formatCurrency(item.highestPrice)}` : ""}
@@ -143,12 +143,12 @@ export default async function MarketPricePage({
                                             </div>
                                         </div>
 
-                                        <div className="market-card-footer">
-                                            <span className="market-volume-badge">
+                                        <div className="bg-card border border-edge rounded-lg p-6 transition-colors-footer">
+                                            <span className="inline-flex items-center py-[2px] px-[8px] rounded-full bg-[var(--color-accent-primary-glow)] text-forest font-semibold">
                                                 {item.transactionVolume} sale{item.transactionVolume !== 1 ? "s" : ""}
                                             </span>
                                             {item.lastSoldAt && (
-                                                <span className="market-last-sold">
+                                                <span className="text-muted">
                                                     Last sold: {formatRelativeTime(item.lastSoldAt)}
                                                 </span>
                                             )}

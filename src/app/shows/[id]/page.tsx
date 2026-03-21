@@ -188,7 +188,7 @@ export default async function ShowDetailPage({
 
             {/* Entry Form */}
             {isOpen && (
-                <div className="show-entry-section animate-fade-in-up">
+                <div className="mb-8 p-6 bg-[rgba(129, 140, 248, 0.04)] border border-[rgba(129, 140, 248, 0.15)] rounded-lg animate-fade-in-up">
                     <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                         Enter Your Horse
                     </h2>
@@ -267,7 +267,7 @@ export default async function ShowDetailPage({
                         ))}
 
                         {/* Podium */}
-                        <div className="results-podium">
+                        <div className="flex justify-center gap-8 flex-wrap py-8 px-[0] items-end">
                             {podiumEntries.map((entry, i) => {
                                 const placing = isExpertJudged ? entry.placing! : ["1st", "2nd", "3rd"][i];
                                 const ribbon = RIBBON_MAP[placing] || "blue";
@@ -279,8 +279,8 @@ export default async function ShowDetailPage({
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img src={entry.thumbnailUrl} alt={entry.horseName} className="podium-photo" />
                                         )}
-                                        <div className="podium-card-body">
-                                            <div className="podium-medal">{medal}</div>
+                                        <div className="text-center min-w-[160px] max-w-[220px] bg-elevated rounded-lg overflow-hidden shadow-lg transition-transform-body">
+                                            <div className="text-[2rem] mb-1">{medal}</div>
                                             <Link href={`/community/${entry.horseId}`} className="podium-horse-name">
                                                 {entry.horseName}
                                             </Link>
@@ -402,9 +402,9 @@ export default async function ShowDetailPage({
                     <p>Be the first to enter this show!</p>
                 </div>
             ) : (
-                <div className="show-entries-grid animate-fade-in-up">
+                <div className="flex flex-col gap-[0] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg overflow-hidden animate-fade-in-up">
                     {sortedEntries.map((entry, index) => (
-                        <div key={entry.id} className="show-entry-card">
+                        <div key={entry.id} className="flex items-center gap-4 py-4 px-6 border-b border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-colors">
                             <div className="show-entry-rank">
                                 {isExpertJudged && show.status === "closed" && entry.placing
                                     ? entry.placing
@@ -412,19 +412,19 @@ export default async function ShowDetailPage({
                                 }
                             </div>
                             {entry.thumbnailUrl && (
-                                <div className="show-entry-thumb">
+                                <div className="w-[64px] h-[64px] rounded-md overflow-hidden shrink-0">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
                                 </div>
                             )}
-                            <div className="show-entry-info">
+                            <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
                                 <Link
                                     href={`/community/${entry.horseId}`}
                                     className="show-entry-horse-name"
                                 >
                                     🐴 {entry.horseName}
                                 </Link>
-                                <span className="show-entry-owner">
+                                <span className="text-forest no-underline">
                                     by{" "}
                                     <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
                                         @{entry.ownerAlias}

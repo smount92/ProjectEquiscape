@@ -198,7 +198,7 @@ export default function QuickAddPage() {
                     )}
 
                     {/* Action Buttons */}
-                    <div className="quick-add-actions">
+                    <div className="flex gap-4 items-center flex-wrap">
                         <button
                             className="btn btn-primary"
                             onClick={handleAdd}
@@ -229,12 +229,12 @@ export default function QuickAddPage() {
 
                 {/* Recent Adds */}
                 {recentAdds.length > 0 && (
-                    <div className="quick-add-recent">
+                    <div className="mt-8 p-6 bg-[var(--color-surface-primary)] border border-edge rounded-lg">
                         <h3 style={{ marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-md) * var(--font-scale))" }}>
                             Recently Added
                         </h3>
                         {recentAdds.map((item) => (
-                            <div key={item.id} className="quick-add-recent-item">
+                            <div key={item.id} className="mt-8 p-6 bg-[var(--color-surface-primary)] border border-edge rounded-lg-item">
                                 <span>✅ {item.name}</span>
                                 <span style={{ color: "var(--color-text-muted)" }}>
                                     {item.finish} · {item.condition} — {timeSince(item.timestamp)}

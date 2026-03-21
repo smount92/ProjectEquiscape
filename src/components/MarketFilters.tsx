@@ -71,8 +71,8 @@ export default function MarketFilters() {
     }, [searchInput]); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <div className="market-filters">
-            <div className="market-search-row">
+        <div className="mb-8">
+            <div className="mb-4">
                 <input
                     className="form-input market-search-input"
                     type="search"
@@ -82,8 +82,8 @@ export default function MarketFilters() {
                     id="market-search"
                 />
             </div>
-            <div className="market-filter-row">
-                <div className="market-type-filters">
+            <div className="flex justify-between items-center gap-4 flex-wrap">
+                <div className="flex gap-1 flex-wrap">
                     {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
                         <button
                             key={value}
@@ -116,7 +116,7 @@ export default function MarketFilters() {
                         ))}
                     </select>
                     <select
-                        className="form-select market-sort-select"
+                        className="form-select min-w-[160px]"
                         value={currentSort}
                         onChange={(e) => pushParams({ sort: e.target.value })}
                         id="market-sort"

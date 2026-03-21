@@ -224,9 +224,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {isShowEvent && showEntries.length > 0 && (
                     <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-md)" }}>📸 Entries ({showEntries.length})</h3>
-                        <div className="show-entries-grid">
+                        <div className="flex flex-col gap-[0] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg overflow-hidden">
                             {showEntries.map((entry, index) => (
-                                <div key={entry.id} className="show-entry-card">
+                                <div key={entry.id} className="flex items-center gap-4 py-4 px-6 border-b border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-colors">
                                     <div className="show-entry-rank">
                                         {isExpertJudged && showStatus === "closed" && entry.placing
                                             ? entry.placing
@@ -234,16 +234,16 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                                         }
                                     </div>
                                     {entry.thumbnailUrl && (
-                                        <div className="show-entry-thumb">
+                                        <div className="w-[64px] h-[64px] rounded-md overflow-hidden shrink-0">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
                                         </div>
                                     )}
-                                    <div className="show-entry-info">
+                                    <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
                                         <Link href={`/community/${entry.horseId}`} className="show-entry-horse-name">
                                             🐴 {entry.horseName}
                                         </Link>
-                                        <span className="show-entry-owner">
+                                        <span className="text-forest no-underline">
                                             by{" "}
                                             <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
                                                 @{entry.ownerAlias}

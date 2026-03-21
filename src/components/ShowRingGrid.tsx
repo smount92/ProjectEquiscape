@@ -177,15 +177,15 @@ export default function ShowRingGrid({
                     <p>No models match your search. Try different filters.</p>
                 </div>
             ) : (
-                <div className="community-grid animate-fade-in-up">
+                <div className="grid grid-cols-[repeat(auto-fill, minmax(300px, 1fr))] gap-6 animate-fade-in-up">
                     {communityCards.map((horse) => {
                         const priceLabel = formatPrice(horse.listingPrice);
                         const isListed = horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers";
 
                         return (
-                            <div key={horse.id} className="community-card" id={`community-card-${horse.id}`}>
-                                <Link href={`/community/${horse.id}`} className="community-card-link">
-                                    <div className="community-card-image">
+                            <div key={horse.id} className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all" id={`community-card-${horse.id}`}>
+                                <Link href={`/community/${horse.id}`} className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-link">
+                                    <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-image">
                                         {horse.thumbnailUrl ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
@@ -217,22 +217,22 @@ export default function ShowRingGrid({
                                             </span>
                                         )}
                                     </div>
-                                        <div className="community-card-info">
-                                            <div className="community-card-name">
+                                        <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-info">
+                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-name">
                                                 {horse.customName}
                                                 {(horse.hoofprintCount ?? 0) > 0 && (
-                                                    <span className="hoofprint-badge" title="Has Hoofprint" style={{ marginLeft: "6px" }}>🐾</span>
+                                                    <span className="text-[0.65rem] py-[2px] px-[8px] rounded-[999px] bg-[rgba(245, 158, 11, 0.15)] text-[#f59e0b] font-semibold" title="Has Hoofprint" style={{ marginLeft: "6px" }}>🐾</span>
                                                 )}
                                             </div>
-                                            <div className="community-card-ref">{horse.refName}</div>
-                                            <div className="community-card-time">{timeAgo(horse.createdAt)}</div>
+                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref">{horse.refName}</div>
+                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-time">{timeAgo(horse.createdAt)}</div>
                                         {horse.releaseLine && (
-                                            <div className="community-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
                                                 🎨 {horse.releaseLine}
                                             </div>
                                         )}
                                         {horse.sculptor && (
-                                            <div className="community-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
                                                 ✂️ {horse.sculptor}
                                             </div>
                                         )}
@@ -251,8 +251,8 @@ export default function ShowRingGrid({
                                         )}
                                     </div>
                                 </Link>
-                                <div className="community-card-footer">
-                                    <Link href={`/profile/${encodeURIComponent(horse.ownerAlias)}`} className="community-card-owner">
+                                <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-footer">
+                                    <Link href={`/profile/${encodeURIComponent(horse.ownerAlias)}`} className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-owner">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                             <circle cx="12" cy="7" r="4" />

@@ -140,7 +140,7 @@ export default function StableGrid({
                     <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
                 </div>
             ) : (
-                <div className="shelf-grid">
+                <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6">
                     {filteredCards.map((horse) => {
                         const isSelected = selectedIds.has(horse.id);
                         const CardWrapper = selectMode ? "div" : Link;
@@ -151,11 +151,11 @@ export default function StableGrid({
                             // @ts-expect-error — dynamic component type
                             <CardWrapper key={horse.id} {...wrapperProps}>
                                 {selectMode && (
-                                    <div className="horse-card-checkbox">
+                                    <div className="absolute top-[8px] left-[8px] z-[5] pointer-events-none">
                                         <input type="checkbox" checked={isSelected} readOnly />
                                     </div>
                                 )}
-                                <div className="horse-card-image">
+                                <div className="w-full h-full object-contain transition-transform">
                                     {horse.thumbnailUrl ? (
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
@@ -182,7 +182,7 @@ export default function StableGrid({
                                         <span className="trade-badge trade-open-offers">🤝 Open to Offers</span>
                                     )}
                                 </div>
-                                <div className="horse-card-info">
+                                <div className="py-4 px-6">
                                     <div className="horse-card-name">{horse.customName}</div>
                                     <div className="horse-card-ref">{horse.refName}</div>
                                     {horse.releaseLine && (

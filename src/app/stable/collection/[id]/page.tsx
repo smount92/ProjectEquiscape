@@ -181,7 +181,7 @@ export default async function CollectionPage({
 
       {/* Collection Header */}
       <div className="collection-hero animate-fade-in-up">
-        <div className="collection-hero-icon">📁</div>
+        <div className="text-[2.5rem] shrink-0">📁</div>
         <div className="collection-hero-content">
           <h1>{collection.name}</h1>
           {collection.description && (
@@ -198,14 +198,14 @@ export default async function CollectionPage({
 
       {/* 🔒 Collection Stats — PRIVATE analytics */}
       {horseCards.length > 0 && (
-        <div className="analytics-row animate-fade-in-up">
-          <div className="analytics-card">
-            <div className="analytics-icon">🐴</div>
+        <div className="grid grid-cols-[repeat(3, 1fr)] gap-4 mb-8 animate-fade-in-up">
+          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
+            <div className="text-2xl leading-none">🐴</div>
             <div className="analytics-value">{horseCards.length}</div>
             <div className="analytics-label">Models</div>
           </div>
-          <div className="analytics-card">
-            <div className="analytics-icon">💰</div>
+          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
+            <div className="text-2xl leading-none">💰</div>
             <div className="analytics-value">
               {collectionVaultValue > 0
                 ? `$${collectionVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
@@ -213,8 +213,8 @@ export default async function CollectionPage({
             </div>
             <div className="analytics-label">Collection Value</div>
           </div>
-          <div className="analytics-card">
-            <div className="analytics-icon">📊</div>
+          <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
+            <div className="text-2xl leading-none">📊</div>
             <div className="analytics-value">
               {avgValue > 0
                 ? `$${avgValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
@@ -238,7 +238,7 @@ export default async function CollectionPage({
           </Link>
         </div>
       ) : (
-        <div className="shelf-grid animate-fade-in-up">
+        <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6 animate-fade-in-up">
           {horseCards.map((horse) => (
             <Link
               key={horse.id}
@@ -246,7 +246,7 @@ export default async function CollectionPage({
               className="horse-card"
               id={`collection-horse-${horse.id}`}
             >
-              <div className="horse-card-image">
+              <div className="w-full h-full object-contain transition-transform">
                 {horse.thumbnailUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
@@ -266,7 +266,7 @@ export default async function CollectionPage({
                   <span className="trade-badge trade-open-offers">🤝 Open to Offers</span>
                 )}
               </div>
-              <div className="horse-card-info">
+              <div className="py-4 px-6">
                 <div className="horse-card-name">{horse.customName}</div>
                 <div className="horse-card-ref">{horse.refName}</div>
                 {horse.releaseLine && (

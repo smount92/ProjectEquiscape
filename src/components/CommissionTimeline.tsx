@@ -386,13 +386,13 @@ export default function CommissionTimeline({
                     No updates yet.
                 </p>
             ) : (
-                <div className="commission-timeline">
+                <div className="grid gap-4">
                     {updates.map(update => (
-                        <div key={update.id} className="commission-timeline-event">
-                            <div className="commission-timeline-dot">
+                        <div key={update.id} className="commission-relative pb-6">
+                            <div className="grid gap-4-dot">
                                 {UPDATE_ICONS[update.updateType] || "📋"}
                             </div>
-                            <div className="commission-timeline-content">
+                            <div className="grid gap-4-content">
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                                     <div>
                                         {update.title && (

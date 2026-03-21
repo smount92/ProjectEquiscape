@@ -52,7 +52,7 @@ export default function TermsPage() {
                     <p>
                         You are responsible for maintaining the security of your account credentials. You agree to:
                     </p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>Provide a valid email address</li>
                         <li>Keep your password secure and not share it with others</li>
                         <li>Notify us immediately if you suspect unauthorized access</li>
@@ -74,7 +74,7 @@ export default function TermsPage() {
                         that content on the Platform.
                     </p>
                     <p>You agree not to upload content that:</p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>You do not own or have the right to share</li>
                         <li>Contains illegal, abusive, or harmful material</li>
                         <li>Infringes on any third party&apos;s intellectual property rights</li>
@@ -93,7 +93,7 @@ export default function TermsPage() {
                         Model Horse Hub provides communication and coordination tools (messaging, offers,
                         PIN-based transfers) to facilitate transactions between users. However:
                     </p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>
                             <strong>We are not a payment processor.</strong> All payments are arranged
                             directly between buyer and seller through external services (PayPal, Venmo, etc.).
@@ -120,7 +120,7 @@ export default function TermsPage() {
                 <section className="static-section">
                     <h2>6. Community Conduct</h2>
                     <p>Model Horse Hub is a hobby community. You agree to:</p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>Treat other users with respect in messages, comments, and group posts</li>
                         <li>Not harass, bully, or threaten other users</li>
                         <li>Not engage in price manipulation, shill bidding, or deceptive trade practices</li>
@@ -139,7 +139,7 @@ export default function TermsPage() {
                         Hoofprint&trade; records are designed to be a permanent, trustworthy provenance trail
                         for model horses. By using Hoofprint&trade;, you understand that:
                     </p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>Provenance events (ownership transfers, show results, customization records) are permanent and cannot be deleted</li>
                         <li>When you transfer a horse, the Hoofprint&trade; history travels with the horse to the new owner</li>
                         <li>Your display alias will appear in the ownership chain of any horse you&apos;ve owned</li>
@@ -166,7 +166,7 @@ export default function TermsPage() {
                 {/* Disclaimers */}
                 <section className="static-section">
                     <h2>9. Disclaimers &amp; Limitations</h2>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>
                             The Platform is provided &ldquo;as is&rdquo; without warranties of any kind,
                             express or implied.

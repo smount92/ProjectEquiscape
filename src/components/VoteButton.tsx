@@ -46,7 +46,7 @@ export default function VoteButton({
                 title={disabled ? "Voting is closed" : undefined}
             >
                 <span className="vote-icon">{hasVoted ? "❤️" : "🤍"}</span>
-                <span className="vote-count">{votes}</span>
+                <span className="font-semibold">{votes}</span>
             </button>
             {error && (
                 <span style={{

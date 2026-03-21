@@ -6,12 +6,12 @@ export default async function TransferHistorySection() {
     if (history.length === 0) return null;
 
     return (
-        <details className="transfer-history-section" id="transfer-history">
-            <summary className="transfer-history-toggle">
+        <details className="mt-8" id="transfer-history">
+            <summary className="hidden">
                 📤 Transfer History
                 <span className="transfer-history-count">{history.length}</span>
             </summary>
-            <div className="transfer-ghost-grid">
+            <div className="grid grid-cols-[repeat(auto-fill, minmax(240px, 1fr))] gap-4 mt-2">
                 {history.map((item) => (
                     <Link
                         key={item.id}
@@ -29,7 +29,7 @@ export default async function TransferHistorySection() {
                                 🐴
                             </div>
                         )}
-                        <div className="transfer-ghost-info">
+                        <div className="flex flex-col gap-[2px] min-w-0">
                             <span className="transfer-ghost-name">
                                 {item.horseName || "Unknown Horse"}
                             </span>

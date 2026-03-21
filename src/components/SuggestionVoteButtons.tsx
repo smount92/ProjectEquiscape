@@ -45,7 +45,7 @@ export default function SuggestionVoteButtons({
     };
 
     return (
-        <div className="ref-vote-buttons">
+        <div className="flex flex-col items-center gap-[4px]">
             <button
                 className={`ref-vote-btn ref-vote-up ${currentVote === "up" ? "ref-vote-active" : ""}`}
                 onClick={() => handleVote("up")}

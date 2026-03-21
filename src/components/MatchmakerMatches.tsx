@@ -26,14 +26,14 @@ export default function MatchmakerMatches({
     const [expanded, setExpanded] = useState(false);
 
     return (
-        <div className="matchmaker-section">
+        <div className="mt-4">
             <button
                 className="matchmaker-badge"
                 onClick={() => setExpanded(!expanded)}
                 aria-expanded={expanded}
             >
                 <span className="matchmaker-badge-fire">🔥</span>
-                <span className="matchmaker-badge-text">
+                <span className="flex-1">
                     {matchCount} Available in Marketplace
                 </span>
                 <svg
@@ -53,7 +53,7 @@ export default function MatchmakerMatches({
             </button>
 
             {expanded && (
-                <div className="matchmaker-results animate-fade-in-up">
+                <div className="mt-2 flex flex-col gap-2 animate-fade-in-up">
                     {matches.map((match) => (
                         <div key={match.id} className="flex gap-2 p-2 bg-surface-glass border border-edge rounded-md transition-all duration-200 hover:border-[rgba(251,146,60,0.4)] hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]">
                             <div className="w-[52px] h-[52px] rounded-sm overflow-hidden shrink-0 bg-black/[0.03]">

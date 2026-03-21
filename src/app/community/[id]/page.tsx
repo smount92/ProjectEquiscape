@@ -345,14 +345,14 @@ export default async function PublicPassportPage({
       </nav>
 
       {/* Two-column layout: Gallery | Info */}
-      <div className="passport-layout animate-fade-in-up">
+      <div className="grid grid-cols-[1fr 420px] gap-[0] items-stretch rounded-lg overflow-hidden shadow-lg animate-fade-in-up">
         {/* Left: Gallery */}
-        <div className="passport-gallery-col">
+        <div className="p-6 bg-[var(--color-bg-primary)]">
           <PassportGallery images={galleryImages} />
         </div>
 
         {/* Right: Info sidebar */}
-        <div className="passport-sidebar">
+        <div className="flex flex-col gap-2 py-8 px-6 bg-[#C8B596] min-h-[100%]">
           {/* Stolen/Missing Banner */}
           {horse.trade_status === "Stolen/Missing" && (
             <div style={{
@@ -375,7 +375,7 @@ export default async function PublicPassportPage({
           )}
 
           {/* Free-floating Title — no card wrapper */}
-          <div className="passport-header-block">
+          <div className="p-0">
             <h1 className="passport-title">{horse.custom_name}</h1>
             {refInfo ? (
               <p className="passport-subtitle">
@@ -396,7 +396,7 @@ export default async function PublicPassportPage({
             href={`/profile/${encodeURIComponent(ownerAlias)}`}
             className="passport-owner-pill"
           >
-            <span className="passport-owner-avatar">
+            <span className="flex items-center justify-center w-[28px] h-[28px] rounded-full bg-elevated border border-edge text-muted shrink-0">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
@@ -425,7 +425,7 @@ export default async function PublicPassportPage({
             </h3>
 
             {horse.asset_category && horse.asset_category !== "model" && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Category</span>
                 <span className="passport-detail-value">
                   {horse.asset_category === "tack" ? "🏇 Tack & Gear" : horse.asset_category === "prop" ? "🌲 Prop" : "🎭 Diorama"}
@@ -434,7 +434,7 @@ export default async function PublicPassportPage({
             )}
 
             {horse.finish_type && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Finish Type</span>
                 <span className="passport-detail-value">
                   {horse.finish_type}
@@ -443,7 +443,7 @@ export default async function PublicPassportPage({
             )}
 
             {horse.condition_grade && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Condition</span>
                 <span className="passport-condition-badge">
                   {horse.condition_grade}
@@ -453,25 +453,25 @@ export default async function PublicPassportPage({
 
             {refInfo ? (
               <>
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">{refInfo.type}</span>
                   <span className="passport-detail-value">{refInfo.name}</span>
                 </div>
 
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">
                     {refInfo.type === "Mold" ? "Manufacturer" : "Sculptor"}
                   </span>
                   <span className="passport-detail-value">{refInfo.maker}</span>
                 </div>
 
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Scale</span>
                   <span className="passport-detail-value">{refInfo.scale}</span>
                 </div>
 
                 {refInfo.extra && (
-                  <div className="passport-detail-row">
+                  <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                     <span className="passport-detail-label">
                       {refInfo.type === "Mold" ? "Released" : "Medium"}
                     </span>
@@ -482,7 +482,7 @@ export default async function PublicPassportPage({
                 )}
               </>
             ) : (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Reference</span>
                 <span
                   className="passport-detail-value"
@@ -495,7 +495,7 @@ export default async function PublicPassportPage({
 
             {releaseInfo && (
               <>
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Release</span>
                   <span className="passport-detail-value">
                     {releaseInfo.name}
@@ -503,7 +503,7 @@ export default async function PublicPassportPage({
                 </div>
 
                 {releaseInfo.modelNumber && (
-                  <div className="passport-detail-row">
+                  <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                     <span className="passport-detail-label">Model #</span>
                     <span className="passport-detail-value">
                       #{releaseInfo.modelNumber}
@@ -512,7 +512,7 @@ export default async function PublicPassportPage({
                 )}
 
                 {releaseInfo.color && (
-                  <div className="passport-detail-row">
+                  <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                     <span className="passport-detail-label">Color</span>
                     <span className="passport-detail-value">
                       {releaseInfo.color}
@@ -521,7 +521,7 @@ export default async function PublicPassportPage({
                 )}
 
                 {releaseInfo.yearStart && (
-                  <div className="passport-detail-row">
+                  <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                     <span className="passport-detail-label">Release Years</span>
                     <span className="passport-detail-value">
                       {releaseInfo.yearStart}
@@ -536,7 +536,7 @@ export default async function PublicPassportPage({
             )}
 
             {horse.finishing_artist && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">🎨 Finished by</span>
                 <span className="passport-detail-value">
                   {horse.finishing_artist}
@@ -551,7 +551,7 @@ export default async function PublicPassportPage({
             )}
 
             {(horse.edition_number || horse.edition_size) && (
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">📋 Edition</span>
                 <span className="passport-detail-value">
                   {horse.edition_number && horse.edition_size
@@ -563,7 +563,7 @@ export default async function PublicPassportPage({
               </div>
             )}
 
-            <div className="passport-detail-row">
+            <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
               <span className="passport-detail-label">Added</span>
               <span className="passport-detail-value">
                 {new Date(horse.created_at).toLocaleDateString("en-US", {
@@ -579,7 +579,7 @@ export default async function PublicPassportPage({
           {horse.finish_details && (
             <div className="passport-detail-card">
               <h3><span aria-hidden="true">✨</span> Finish</h3>
-              <div className="passport-detail-row">
+              <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="passport-detail-label">Finish Details</span>
                 <span className="passport-detail-value">{horse.finish_details}</span>
               </div>
@@ -591,25 +591,25 @@ export default async function PublicPassportPage({
             <div className="passport-detail-card">
               <h3><span aria-hidden="true">🏅</span> Show Identity</h3>
               {horse.assigned_breed && (
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Breed</span>
                   <span className="passport-detail-value">{horse.assigned_breed}</span>
                 </div>
               )}
               {horse.assigned_gender && (
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Gender</span>
                   <span className="passport-detail-value">{horse.assigned_gender}</span>
                 </div>
               )}
               {horse.assigned_age && (
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Age</span>
                   <span className="passport-detail-value">{horse.assigned_age}</span>
                 </div>
               )}
               {horse.regional_id && (
-                <div className="passport-detail-row">
+                <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                   <span className="passport-detail-label">Regional ID</span>
                   <span className="passport-detail-value">{horse.regional_id}</span>
                 </div>
@@ -634,7 +634,7 @@ export default async function PublicPassportPage({
 
           {/* Action Bar — split layout: icon row + full-width CTA */}
           <div className="passport-action-bar">
-            <div className="passport-action-icons">
+            <div className="flex gap-1 items-center justify-center flex-wrap">
               <FavoriteButton
                 horseId={horseId}
                 initialIsFavorited={!!userFav}
@@ -667,7 +667,7 @@ export default async function PublicPassportPage({
                 </Link>
               )}
             </div>
-            <Link href={`/community/${horseId}/hoofprint`} className="btn btn-ghost passport-action-full">
+            <Link href={`/community/${horseId}/hoofprint`} className="btn btn-ghost w-full justify-center border-t border-[rgba(0, 0, 0, 0.08)] pt-[var(--space-sm) !important] mt-1 rounded-[0]">
               🐾 View Hoofprint
             </Link>
           </div>

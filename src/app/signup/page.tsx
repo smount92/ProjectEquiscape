@@ -88,8 +88,8 @@ export default function SignupPage() {
         )}
 
         {/* ---- Privacy Callout (PRD Requirement) ---- */}
-        <div className="privacy-callout" role="note" aria-label="Privacy information">
-          <span className="privacy-callout-icon" aria-hidden="true">
+        <div className="flex items-start gap-2 p-4 bg-[rgba(44, 85, 69, 0.08)] border border-[rgba(44, 85, 69, 0.2)] rounded-md mb-6" role="note" aria-label="Privacy information">
+          <span className="flex items-start gap-2 p-4 bg-[rgba(44, 85, 69, 0.08)] border border-[rgba(44, 85, 69, 0.2)] rounded-md mb-6-icon" aria-hidden="true">
             🛡️
           </span>
           <p>

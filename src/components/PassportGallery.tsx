@@ -34,8 +34,8 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
   if (images.length === 0) {
     return (
       <div>
-        <div className="passport-hero">
-          <div className="passport-hero-placeholder">
+        <div className="w-full h-full object-contain bg-[rgba(0, 0, 0, 0.15)]">
+          <div className="w-full h-full object-contain bg-[rgba(0, 0, 0, 0.15)]-placeholder">
             <span>📷</span>
             <p
               style={{
@@ -60,7 +60,7 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
   return (
     <div>
       {/* Hero Image — click to open lightbox */}
-      <div className="passport-hero" onClick={() => setLightboxIndex(activeIndex)} style={{ cursor: "zoom-in" }}>
+      <div className="w-full h-full object-contain bg-[rgba(0, 0, 0, 0.15)]" onClick={() => setLightboxIndex(activeIndex)} style={{ cursor: "zoom-in" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={activeImage.signedUrl}
@@ -71,7 +71,7 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
 
       {/* Thumbnail Strip */}
       {images.length > 1 && (
-        <div className="passport-thumbs">
+        <div className="grid grid-cols-[repeat(auto-fill, minmax(72px, 1fr))] gap-1">
           {images.map((img, i) => (
             <div
               key={img.signedUrl}

@@ -45,7 +45,7 @@ export default function VaultReveal({ vault, currencySymbol = "$" }: VaultReveal
   return (
     <div className={`vault-reveal bg-[var(--color-bg-card)] border border-[rgba(240,160,108,0.25)] rounded-lg overflow-hidden relative ${isUnlocked ? "unlocked" : ""}`}>
       <div className="p-8 flex items-center gap-4">
-        <div className="vault-reveal-lock w-11 h-11 rounded-md flex items-center justify-center text-[1.4rem] bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] border border-[rgba(240,160,108,0.25)] shrink-0 transition-all" aria-hidden="true">
+        <div className="max-h-[500px] p-[0 var(--space-xl) var(--space-xl) var(--space-xl)]-lock w-11 h-11 rounded-md flex items-center justify-center text-[1.4rem] bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] border border-[rgba(240,160,108,0.25)] shrink-0 transition-all" aria-hidden="true">
           {isUnlocked ? "🔓" : "🔒"}
         </div>
         <div style={{ flex: 1 }}>
@@ -101,7 +101,7 @@ export default function VaultReveal({ vault, currencySymbol = "$" }: VaultReveal
         </button>
       </div>
 
-      <div className="vault-reveal-body" id="vault-data">
+      <div className="max-h-[0] overflow-hidden transition-all py-[0] px-8" id="vault-data">
         {!hasData ? (
           <div className="text-center py-6 text-muted text-sm">
             <p>

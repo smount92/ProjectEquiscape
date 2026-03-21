@@ -111,7 +111,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                             className="flex items-center gap-4 py-4 px-6 border-b border-edge no-underline text-inherit transition-colors last:border-b-0 hover:bg-black/[0.03]"
                         >
                             {item.thumbnailUrl ? (
-                                <div className="feed-item-thumb">
+                                <div className="w-[48px] h-[48px] rounded-md overflow-hidden shrink-0">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={item.thumbnailUrl} alt="" loading="lazy" />
                                 </div>

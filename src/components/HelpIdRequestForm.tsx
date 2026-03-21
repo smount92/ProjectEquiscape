@@ -103,7 +103,7 @@ export default function HelpIdRequestForm() {
                                 />
                             ) : (
                                 <>
-                                    <div className="csv-dropzone-icon">📷</div>
+                                    <div className="text-[3rem] mb-4 opacity-[0.7]">📷</div>
                                     <p className="csv-dropzone-text">
                                         Click to upload a photo
                                         <br />

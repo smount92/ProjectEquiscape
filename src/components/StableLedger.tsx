@@ -145,7 +145,7 @@ export default function StableLedger({
                 </div>
             ) : filteredCards.length > 0 ? (
                 <div className="overflow-x-auto rounded-lg border border-edge bg-surface-primary">
-                    <table className="ledger-table">
+                    <table className="sticky top-0 z-[2]">
                         <thead>
                             <tr>
                                 {selectMode && <th style={{ width: 36 }}>☑</th>}

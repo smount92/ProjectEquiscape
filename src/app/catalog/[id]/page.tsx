@@ -94,10 +94,10 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                 <span>{catalogItem.title}</span>
             </nav>
 
-            <div className="ref-detail-layout">
+            <div className="flex flex-col gap-6">
                 {/* Main Card */}
-                <div className="card ref-detail-card animate-fade-in-up">
-                    <div className="ref-detail-header">
+                <div className="card p-6 animate-fade-in-up">
+                    <div className="flex justify-between items-start mb-6">
                         <div>
                             <h1 className="ref-detail-title">{catalogItem.title}</h1>
                             <p className="ref-detail-maker">by {catalogItem.maker}</p>
@@ -107,9 +107,9 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                         </span>
                     </div>
 
-                    <div className="ref-detail-grid">
+                    <div className="grid grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] gap-4 mb-6">
                         {displayFields.map((field) => (
-                            <div key={field.label} className="ref-detail-field">
+                            <div key={field.label} className="flex flex-col gap-[2px]">
                                 <span className="ref-detail-label">{field.label}</span>
                                 <span className="ref-detail-value">{field.value}</span>
                             </div>
@@ -117,7 +117,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="ref-detail-actions">
+                    <div className="flex gap-2">
                         {user ? (
                             <SuggestEditModal
                                 catalogItem={catalogItem}
@@ -133,9 +133,9 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
 
                 {/* Pending Suggestions */}
                 {(suggestionCount ?? 0) > 0 && (
-                    <div className="card ref-pending-card">
+                    <div className="card p-4">
                         <h3>📝 Pending Suggestions ({suggestionCount})</h3>
-                        <ul className="ref-pending-list">
+                        <ul className="list-none p-0 m-[var(--space-sm) 0]">
                             {(
                                 suggestions as {
                                     id: string;
@@ -145,7 +145,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                                     created_at: string;
                                 }[]
                             )?.map((s) => (
-                                <li key={s.id} className="ref-pending-item">
+                                <li key={s.id} className="flex items-center gap-2 py-1 px-[0] text-[var(--color-text)] no-underline">
                                     <Link href={`/catalog/suggestions/${s.id}`}>
                                         <span className="ref-pending-type">
                                             {s.suggestion_type === "correction"

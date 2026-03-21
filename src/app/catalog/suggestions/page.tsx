@@ -89,7 +89,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
             <h1 className="ref-page-title">
                 📝 <span className="text-gradient">Catalog Suggestions</span>
             </h1>
-            <p className="ref-page-subtitle">
+            <p className="text-muted mb-6">
                 Community proposals to improve the reference catalog. Vote and discuss
                 to help admins review.
             </p>
@@ -110,7 +110,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
             {/* Results */}
             <p className="ref-results-count">{count ?? 0} suggestions</p>
 
-            <div className="ref-suggestions-list">
+            <div className="flex flex-col gap-2">
                 {(
                     suggestions as unknown as {
                         id: string;
@@ -181,10 +181,10 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                         <Link
                             key={s.id}
                             href={`/catalog/suggestions/${s.id}`}
-                            className="card ref-suggestion-card"
+                            className="card p-4 no-underline text-[var(--color-text)] transition-transform block"
                         >
-                            <div className="ref-suggestion-header">
-                                <span className="ref-suggestion-type">
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-[1.2rem]">
                                     {typeIcon}
                                 </span>
                                 <span className={`ref-status-badge ${statusBadge}`}>
@@ -205,10 +205,10 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                             </div>
 
                             <div className="ref-suggestion-footer">
-                                <span className="ref-suggestion-author">
+                                <span className="font-semibold">
                                     {curatorIcon} @{userData?.alias_name ?? "Unknown"}
                                 </span>
-                                <span className="ref-suggestion-meta">
+                                <span className="ml-auto">
                                     ▲ {s.upvotes} ▼ {s.downvotes}
                                     {(commentCounts[s.id] ?? 0) > 0 && (
                                         <> · 💬 {commentCounts[s.id]}</>
@@ -223,7 +223,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                 })}
 
                 {(suggestions ?? []).length === 0 && (
-                    <div className="card ref-empty-state">
+                    <div className="card text-center p-8 text-muted">
                         <p>No suggestions yet. Be the first to contribute!</p>
                         <Link href="/catalog" className="btn btn-primary">
                             Browse Catalog

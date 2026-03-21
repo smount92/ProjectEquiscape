@@ -290,9 +290,9 @@ export default function CsvImport() {
     // ── Render ──────────────────────────────────────────────────
 
     return (
-        <div className="csv-import-container">
+        <div className="mt-8">
             {/* Step Indicator */}
-            <div className="csv-step-indicator">
+            <div className="flex justify-center gap-12 mb-12 relative">
                 {[
                     { num: 1, label: "Upload" },
                     { num: 2, label: "Map Columns" },
@@ -311,7 +311,7 @@ export default function CsvImport() {
 
             {/* ═══ Step 1: Upload ═══ */}
             {step === 1 && (
-                <div className="csv-step-content animate-fade-in-up">
+                <div className="max-w-[900px] mx-auto animate-fade-in-up">
                     <h2>📄 Upload Your CSV</h2>
                     <p className="csv-step-desc">
                         Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against
@@ -328,7 +328,7 @@ export default function CsvImport() {
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        <div className="csv-dropzone-icon">📁</div>
+                        <div className="text-[3rem] mb-4 opacity-[0.7]">📁</div>
                         <p className="csv-dropzone-text">
                             Drag &amp; drop your CSV file here
                             <br />
@@ -346,7 +346,7 @@ export default function CsvImport() {
 
                     {parseError && <div className="csv-error">{parseError}</div>}
 
-                    <div className="csv-template-link">
+                    <div className="mt-6 text-center">
                         <a href="/templates/mhh_import_template.csv" download className="btn btn-ghost">
                             📥 Download CSV Template
                         </a>
@@ -356,16 +356,16 @@ export default function CsvImport() {
 
             {/* ═══ Step 2: Column Mapping ═══ */}
             {step === 2 && (
-                <div className="csv-step-content animate-fade-in-up">
+                <div className="max-w-[900px] mx-auto animate-fade-in-up">
                     <h2>🔗 Map Your Columns</h2>
                     <p className="csv-step-desc">
                         We detected <strong>{csvHeaders.length}</strong> columns and{" "}
                         <strong>{csvData.length}</strong> rows. Map each column to a Model Horse Hub field.
                     </p>
 
-                    <div className="csv-mapping-grid">
+                    <div className="flex flex-col gap-4 mb-8">
                         {csvHeaders.map((header) => (
-                            <div key={header} className="csv-mapping-row">
+                            <div key={header} className="flex items-center gap-4 py-4 px-6 bg-card border border-edge rounded-md">
                                 <span className="csv-mapping-csv-col">{header}</span>
                                 <span className="csv-mapping-arrow">→</span>
                                 <select
@@ -385,10 +385,10 @@ export default function CsvImport() {
                     </div>
 
                     {/* Preview first 5 rows */}
-                    <div className="csv-preview-section">
+                    <div className="mb-8">
                         <h3>Preview (first {Math.min(5, csvData.length)} rows)</h3>
-                        <div className="csv-preview-table-wrapper">
-                            <table className="csv-preview-table">
+                        <div className="overflow-x-auto rounded-md border border-edge">
+                            <table className="bg-elevated py-2 px-4 text-left font-semibold text-ink border-b border-edge whitespace-nowrap">
                                 <thead>
                                     <tr>
                                         {csvHeaders.map((h) => (
@@ -409,7 +409,7 @@ export default function CsvImport() {
                         </div>
                     </div>
 
-                    <div className="csv-step-actions">
+                    <div className="flex justify-between items-center gap-4 pt-6 border-t border-edge">
                         <button className="btn btn-ghost" onClick={() => setStep(1)}>
                             ← Back
                         </button>
@@ -439,7 +439,7 @@ export default function CsvImport() {
 
             {/* ═══ Step 3: Reconciliation ═══ */}
             {step === 3 && (
-                <div className="csv-step-content animate-fade-in-up">
+                <div className="max-w-[900px] mx-auto animate-fade-in-up">
                     <h2>🔍 Review Matches</h2>
                     <p className="csv-step-desc">
                         We matched your {matchResults.length} rows against the reference database. Review and
@@ -447,22 +447,22 @@ export default function CsvImport() {
                     </p>
 
                     {/* Match summary badges */}
-                    <div className="csv-match-summary">
-                        <span className="csv-match-badge perfect">✅ {perfectCount} perfect</span>
-                        <span className="csv-match-badge review">⚠️ {reviewCount} review</span>
-                        <span className="csv-match-badge no-match">❌ {noMatchCount} no match</span>
+                    <div className="flex gap-4 mb-8 flex-wrap">
+                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border border-[rgba(92, 224, 160, 0.25)] perfect">✅ {perfectCount} perfect</span>
+                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border border-[rgba(92, 224, 160, 0.25)] review">⚠️ {reviewCount} review</span>
+                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border border-[rgba(92, 224, 160, 0.25)] no-match">❌ {noMatchCount} no match</span>
                     </div>
 
                     {/* Match cards */}
-                    <div className="csv-match-list">
+                    <div className="flex flex-col gap-4 mb-8 max-h-[600px] overflow-y-auto pr-2">
                         {matchResults.map((result) => (
                             <div
                                 key={result.rowIndex}
                                 className={`csv-match-card ${result.status}`}
                                 id={`match-row-${result.rowIndex}`}
                             >
-                                <div className="csv-match-card-header">
-                                    <span className="csv-match-status-icon">
+                                <div className="p-6 bg-card rounded-md border-l-[4px] border-edge transition-all-header">
+                                    <span className="text-xl shrink-0">
                                         {result.status === "perfect"
                                             ? "✅"
                                             : result.status === "review"
@@ -478,7 +478,7 @@ export default function CsvImport() {
                                 </div>
 
                                 {/* CSV row preview */}
-                                <div className="csv-match-csv-preview">
+                                <div className="flex flex-wrap gap-1 mb-4">
                                     {Object.entries(result.csvRow)
                                         .filter(([, v]) => v)
                                         .slice(0, 4)
@@ -491,16 +491,16 @@ export default function CsvImport() {
 
                                 {/* Match options */}
                                 {result.matches.length > 0 && (
-                                    <div className="csv-match-options">
+                                    <div className="flex flex-col gap-2">
                                         {result.matches.map((match) => (
-                                            <label key={match.id} className="csv-match-option">
+                                            <label key={match.id} className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors">
                                                 <input
                                                     type="radio"
                                                     name={`match-${result.rowIndex}`}
                                                     checked={result.selectedMatch?.id === match.id}
                                                     onChange={() => handleSelectMatch(result.rowIndex, match)}
                                                 />
-                                                <span className="csv-match-option-text">
+                                                <span className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors-text">
                                                     <span className="csv-match-display">{match.display}</span>
                                                     <span className="csv-match-score">
                                                         Score: {match.score > 0 ? `+${match.score}` : match.score}
@@ -508,14 +508,14 @@ export default function CsvImport() {
                                                 </span>
                                             </label>
                                         ))}
-                                        <label className="csv-match-option">
+                                        <label className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors">
                                             <input
                                                 type="radio"
                                                 name={`match-${result.rowIndex}`}
                                                 checked={result.selectedMatch === null}
                                                 onChange={() => handleSelectMatch(result.rowIndex, null)}
                                             />
-                                            <span className="csv-match-option-text">
+                                            <span className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors-text">
                                                 <span className="csv-match-display">Custom / Unknown — no reference link</span>
                                             </span>
                                         </label>
@@ -532,7 +532,7 @@ export default function CsvImport() {
                         ))}
                     </div>
 
-                    <div className="csv-step-actions">
+                    <div className="flex justify-between items-center gap-4 pt-6 border-t border-edge">
                         <button className="btn btn-ghost" onClick={() => setStep(2)}>
                             ← Back
                         </button>
@@ -569,16 +569,16 @@ export default function CsvImport() {
 
             {/* ═══ Step 4: Import Result ═══ */}
             {step === 4 && (
-                <div className="csv-step-content animate-fade-in-up">
+                <div className="max-w-[900px] mx-auto animate-fade-in-up">
                     {importResult?.success ? (
-                        <div className="csv-success-card">
+                        <div className="text-success">
                             <div className="csv-success-icon">🎉</div>
                             <h2>Import Complete!</h2>
                             <p className="csv-success-count">
                                 Successfully imported <strong>{importResult.imported}</strong> model
                                 {importResult.imported !== 1 ? "s" : ""} to your stable.
                             </p>
-                            <div className="csv-success-actions">
+                            <div className="flex justify-center gap-4 flex-wrap">
                                 <a href="/dashboard" className="btn btn-primary btn-lg">
                                     🐴 View Your Stable
                                 </a>
@@ -598,8 +598,8 @@ export default function CsvImport() {
                             </div>
                         </div>
                     ) : (
-                        <div className="csv-error-card">
-                            <div className="csv-error-icon">❌</div>
+                        <div className="text-center py-[var(--space-3xl)] px-8 bg-card border border-edge rounded-lg">
+                            <div className="text-[4rem] mb-6">❌</div>
                             <h2>Import Failed</h2>
                             <p>{importResult?.error || "An unexpected error occurred."}</p>
                             <button className="btn btn-primary" onClick={() => setStep(3)}>

@@ -57,24 +57,24 @@ export default function AdminSuggestionsPanel({
     }
 
     return (
-        <div className="admin-mailbox">
+        <div className="flex flex-col gap-2">
             {items.map((s) => (
                 <div
                     key={s.id}
-                    className="admin-message admin-message-unread"
+                    className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all admin-message-unread"
                 >
-                    <div className="admin-message-header">
-                        <div className="admin-message-sender">
-                            <span className="admin-message-name">
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-header">
+                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sender">
+                            <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-name">
                                 {typeEmoji[s.suggestion_type] || "📝"}{" "}
                                 {typeLabel[s.suggestion_type] || s.suggestion_type}
                             </span>
-                            <span className="admin-message-email" style={{ cursor: "default" }}>
+                            <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-email" style={{ cursor: "default" }}>
                                 {s.name}
                             </span>
                         </div>
-                        <div className="admin-message-actions">
-                            <span className="admin-message-date">
+                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-actions">
+                            <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-date">
                                 {new Date(s.created_at).toLocaleDateString("en-US", {
                                     month: "short",
                                     day: "numeric",
@@ -86,9 +86,9 @@ export default function AdminSuggestionsPanel({
                         </div>
                     </div>
                     {s.details && (
-                        <div className="admin-message-body">{s.details}</div>
+                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-body">{s.details}</div>
                     )}
-                    <div className="admin-message-footer" style={{ gap: "var(--space-sm)" }}>
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-footer" style={{ gap: "var(--space-sm)" }}>
                         <button
                             className="btn btn-primary btn-sm"
                             onClick={() => handleReview(s.id, "approved")}

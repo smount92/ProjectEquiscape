@@ -572,18 +572,18 @@ export default function ManageEventPage() {
                 {activeTab === "classes" && (
                     <>
                         {/* Division Tree */}
-                        <div className="division-tree">
+                        <div className="flex flex-col gap-4">
                             {divisions.map((div, divIndex) => (
-                                <div key={div.id} className="division-card">
+                                <div key={div.id} className="bg-card border border-edge rounded-lg overflow-hidden">
                                     {/* Division Header */}
-                                    <div className="division-header">
+                                    <div className="flex items-center gap-2 py-4 px-6 bg-glass border-b border-edge flex-wrap">
                                         <div className="division-reorder">
                                             <button className="reorder-btn" onClick={() => handleMoveDivision(divIndex, -1)} disabled={divIndex === 0} title="Move up">▲</button>
                                             <button className="reorder-btn" onClick={() => handleMoveDivision(divIndex, 1)} disabled={divIndex === divisions.length - 1} title="Move down">▼</button>
                                         </div>
 
                                         {editingDivision === div.id ? (
-                                            <div className="inline-edit">
+                                            <div className="flex items-center gap-1 flex-1">
                                                 <input className="form-input" value={editName} onChange={(e) => setEditName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSaveDivision(div.id)} autoFocus placeholder="Division name" />
                                                 <button className="btn btn-primary" onClick={() => handleSaveDivision(div.id)} disabled={isSaving} style={{ padding: "var(--space-xs) var(--space-md)" }}>Save</button>
                                                 <button className="btn btn-ghost" onClick={() => setEditingDivision(null)} style={{ padding: "var(--space-xs) var(--space-md)" }}>Cancel</button>
@@ -592,9 +592,9 @@ export default function ManageEventPage() {
                                             <>
                                                 <span className="division-name">📋 {div.name}</span>
                                                 <span className="division-count">{div.classes.length} class{div.classes.length !== 1 ? "es" : ""}</span>
-                                                <div className="division-actions">
-                                                    <button className="action-btn" onClick={() => { setEditingDivision(div.id); setEditName(div.name); }} title="Edit">✏️</button>
-                                                    <button className="action-btn action-btn-danger" onClick={() => handleDeleteDivision(div.id, div.name)} title="Delete">🗑️</button>
+                                                <div className="ml-auto flex gap-1 items-center">
+                                                    <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors" onClick={() => { setEditingDivision(div.id); setEditName(div.name); }} title="Edit">✏️</button>
+                                                    <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors action-btn-danger" onClick={() => handleDeleteDivision(div.id, div.name)} title="Delete">🗑️</button>
                                                     <button className="btn btn-ghost" onClick={() => { setAddingClassToDivision(div.id); setNewClassName(""); setNewClassNumber(""); }} style={{ padding: "var(--space-xs) var(--space-sm)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>+ Class</button>
                                                 </div>
                                             </>
@@ -602,16 +602,16 @@ export default function ManageEventPage() {
                                     </div>
 
                                     {/* Classes */}
-                                    <div className="class-list">
+                                    <div className="py-1 px-[0]">
                                         {div.classes.map((cls, clsIndex) => (
-                                            <div key={cls.id} className="class-row">
-                                                <div className="class-reorder">
-                                                    <button className="reorder-btn reorder-btn-sm" onClick={() => handleMoveClass(div.id, clsIndex, -1)} disabled={clsIndex === 0}>▲</button>
-                                                    <button className="reorder-btn reorder-btn-sm" onClick={() => handleMoveClass(div.id, clsIndex, 1)} disabled={clsIndex === div.classes.length - 1}>▼</button>
+                                            <div key={cls.id} className="border-b-0">
+                                                <div className="flex flex-col gap-[2px]">
+                                                    <button className="reorder-btn w-[20px] h-[14px] text-[0.5rem]" onClick={() => handleMoveClass(div.id, clsIndex, -1)} disabled={clsIndex === 0}>▲</button>
+                                                    <button className="reorder-btn w-[20px] h-[14px] text-[0.5rem]" onClick={() => handleMoveClass(div.id, clsIndex, 1)} disabled={clsIndex === div.classes.length - 1}>▼</button>
                                                 </div>
 
                                                 {editingClass === cls.id ? (
-                                                    <div className="inline-edit">
+                                                    <div className="flex items-center gap-1 flex-1">
                                                         <input className="form-input" value={editClassNumber} onChange={(e) => setEditClassNumber(e.target.value)} placeholder="#" style={{ width: "60px" }} />
                                                         <input className="form-input" value={editName} onChange={(e) => setEditName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSaveClass(cls.id)} autoFocus placeholder="Class name" />
                                                         <button className="btn btn-primary" onClick={() => handleSaveClass(cls.id)} disabled={isSaving} style={{ padding: "var(--space-xs) var(--space-md)" }}>Save</button>
@@ -620,17 +620,17 @@ export default function ManageEventPage() {
                                                 ) : (
                                                     <>
                                                         <span className="class-number">{cls.classNumber || "—"}</span>
-                                                        <span className="class-name">{cls.name}</span>
+                                                        <span className="flex-1 text-[var(--color-text-secondary)]">{cls.name}</span>
                                                         {cls.isNanQualifying && <span className="nan-badge" title="NAN Qualifying">⭐ NAN</span>}
                                                         {(cls.entryCount || 0) > 0 && (
                                                             <span className="entry-count-badge">{cls.entryCount} entr{cls.entryCount === 1 ? "y" : "ies"}</span>
                                                         )}
-                                                        <div className="class-actions">
-                                                            <button className="action-btn action-btn-sm" onClick={() => handleToggleNan(cls.id, cls.isNanQualifying)} title={cls.isNanQualifying ? "Remove NAN" : "Mark NAN"}>
+                                                        <div className="flex gap-[2px] opacity-0 transition-opacity">
+                                                            <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px]" onClick={() => handleToggleNan(cls.id, cls.isNanQualifying)} title={cls.isNanQualifying ? "Remove NAN" : "Mark NAN"}>
                                                                 {cls.isNanQualifying ? "⭐" : "☆"}
                                                             </button>
-                                                            <button className="action-btn action-btn-sm" onClick={() => { setEditingClass(cls.id); setEditName(cls.name); setEditClassNumber(cls.classNumber || ""); }} title="Edit">✏️</button>
-                                                            <button className="action-btn action-btn-sm action-btn-danger" onClick={() => handleDeleteClass(cls.id, cls.name)} title="Delete">🗑️</button>
+                                                            <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px]" onClick={() => { setEditingClass(cls.id); setEditName(cls.name); setEditClassNumber(cls.classNumber || ""); }} title="Edit">✏️</button>
+                                                            <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px] action-btn-danger" onClick={() => handleDeleteClass(cls.id, cls.name)} title="Delete">🗑️</button>
                                                         </div>
                                                     </>
                                                 )}
@@ -639,7 +639,7 @@ export default function ManageEventPage() {
 
                                         {/* Add class inline form */}
                                         {addingClassToDivision === div.id && (
-                                            <div className="class-row add-class-row animate-fade-in-up">
+                                            <div className="border-b-0 bg-glass animate-fade-in-up">
                                                 <input className="form-input" value={newClassNumber} onChange={(e) => setNewClassNumber(e.target.value)} placeholder="#" style={{ width: "60px" }} />
                                                 <input className="form-input" value={newClassName} onChange={(e) => setNewClassName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAddClass(div.id)} autoFocus placeholder="Class name (e.g. Arabian/Part-Arabian)" style={{ flex: 1 }} />
                                                 <button className="btn btn-primary" onClick={() => handleAddClass(div.id)} disabled={isSaving || !newClassName.trim()} style={{ padding: "var(--space-xs) var(--space-md)" }}>Add</button>
@@ -648,7 +648,7 @@ export default function ManageEventPage() {
                                         )}
 
                                         {div.classes.length === 0 && addingClassToDivision !== div.id && (
-                                            <div className="class-row" style={{ color: "var(--color-text-muted)", fontStyle: "italic" }}>
+                                            <div className="border-b-0" style={{ color: "var(--color-text-muted)", fontStyle: "italic" }}>
                                                 No classes yet — click &quot;+ Class&quot; to add one
                                             </div>
                                         )}

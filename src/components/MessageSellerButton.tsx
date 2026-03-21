@@ -54,7 +54,7 @@ export default function MessageSellerButton({
         return (
             <>
                 <button
-                    className="message-seller-btn-compact"
+                    className="flex items-center justify-center w-[28px] h-[28px] p-0 bg-[rgba(44, 85, 69, 0.1)] border border-[rgba(44, 85, 69, 0.25)] rounded-full text-[#2C5545] cursor-pointer transition-all"
                     onClick={handleClick}
                     disabled={loading}
                     title={isOfferable ? "Make Offer" : "Message Seller"}

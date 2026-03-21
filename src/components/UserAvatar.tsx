@@ -8,7 +8,7 @@ interface UserAvatarProps {
 export default function UserAvatar({ avatarUrl, aliasName, size = 32 }: UserAvatarProps) {
     return (
         <div
-            className="user-avatar"
+            className="rounded-full bg-[rgba(0, 0, 0, 0.06)] inline-flex items-center justify-center overflow-hidden shrink-0 font-bold text-muted"
             style={{ width: size, height: size, fontSize: size * 0.4 }}
         >
             {avatarUrl ? (

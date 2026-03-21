@@ -152,7 +152,7 @@ export default function SuggestEditModal({
                     }}
                 >
                     <div
-                        className="ref-suggest-modal"
+                        className="flex items-center justify-between py-6 px-8 border-b border-edge bg-glass rounded-[var(--radius-xl) var(--radius-xl) 0 0]"
                         onClick={(e) => e.stopPropagation()}
                         style={{
                             background: "#faf6ef",
@@ -174,23 +174,23 @@ export default function SuggestEditModal({
                                 ✕
                             </button>
                         </div>
-                        <p className="ref-suggest-subtitle">
+                        <p className="text-[var(--color-text)]">
                             Editing: <strong>{catalogItem.title}</strong> by{" "}
                             {catalogItem.maker}
                         </p>
 
-                        <div className="ref-suggest-body">
+                        <div className="py-6 px-8">
                             {/* Editable Fields */}
-                            <div className="ref-suggest-fields">
+                            <div className="flex flex-col gap-4 mb-6">
                                 {fields.map((field, i) => (
                                     <div
                                         key={field.key}
                                         className={`ref-suggest-field ${field.current !== field.original ? "ref-suggest-field-changed" : ""}`}
                                     >
-                                        <label className="ref-suggest-field-label">
+                                        <label className="p-2 rounded-md transition-colors border-l-[3px] border-[transparent]-label">
                                             {field.label}
                                             {field.current !== field.original && (
-                                                <span className="ref-suggest-changed-badge">
+                                                <span className="bg-[#ffc107] text-[#1a1a1a] text-[0.62rem] py-[2px] px-[7px] rounded-[8px] font-extrabold uppercase tracking-[0.03em]">
                                                     Changed
                                                 </span>
                                             )}
@@ -213,8 +213,8 @@ export default function SuggestEditModal({
                             </div>
 
                             {/* Reason */}
-                            <div className="ref-suggest-reason">
-                                <label className="ref-suggest-field-label">
+                            <div className="mb-6">
+                                <label className="p-2 rounded-md transition-colors border-l-[3px] border-[transparent]-label">
                                     Reason for change *
                                 </label>
                                 <textarea
@@ -234,7 +234,7 @@ export default function SuggestEditModal({
 
                             {/* Summary */}
                             {hasChanges && (
-                                <div className="ref-suggest-summary">
+                                <div className="list-none p-0 m-0">
                                     <strong>
                                         {changedFields.length} field
                                         {changedFields.length > 1 ? "s" : ""} changed:
@@ -242,14 +242,14 @@ export default function SuggestEditModal({
                                     <ul>
                                         {changedFields.map((f) => (
                                             <li key={f.key}>
-                                                <span className="ref-diff-label">
+                                                <span className="font-bold text-[var(--color-text)]">
                                                     {f.label}:
                                                 </span>{" "}
                                                 <span className="ref-diff-from">
                                                     {f.original}
                                                 </span>{" "}
                                                 →{" "}
-                                                <span className="ref-diff-to">
+                                                <span className="text-[#66bb6a] font-bold">
                                                     {f.current}
                                                 </span>
                                             </li>

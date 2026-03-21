@@ -68,25 +68,25 @@ export default function SuggestionCommentThread({
     };
 
     return (
-        <div className="ref-comments">
+        <div className="mt-4">
             {/* Comment List */}
             {initialComments.length === 0 && (
-                <p className="ref-comments-empty">
+                <p className="mt-4-empty">
                     No comments yet. Be the first to discuss this suggestion.
                 </p>
             )}
             {initialComments.map((comment) => (
-                <div key={comment.id} className="ref-comment">
-                    <div className="ref-comment-header">
-                        <span className="ref-comment-author">
+                <div key={comment.id} className="py-2 px-[0] border-b border-edge">
+                    <div className="py-2 px-[0] border-b border-edge-header">
+                        <span className="py-2 px-[0] border-b border-edge-author">
                             @{comment.user_alias}
                         </span>
-                        <span className="ref-comment-time">
+                        <span className="py-2 px-[0] border-b border-edge-time">
                             {timeAgo(comment.created_at)}
                         </span>
                         {currentUserId === comment.user_id && (
                             <button
-                                className="ref-comment-delete"
+                                className="py-2 px-[0] border-b border-edge-delete"
                                 onClick={() => handleDelete(comment.id)}
                                 disabled={isPending}
                                 title="Delete comment"
@@ -95,15 +95,15 @@ export default function SuggestionCommentThread({
                             </button>
                         )}
                     </div>
-                    <p className="ref-comment-body">{comment.body}</p>
+                    <p className="py-2 px-[0] border-b border-edge-body">{comment.body}</p>
                 </div>
             ))}
 
             {/* Add Comment */}
             {currentUserId ? (
-                <div className="ref-comment-form">
+                <div className="py-2 px-[0] border-b border-edge-form">
                     <textarea
-                        className="input ref-comment-textarea"
+                        className="input py-2 px-[0] border-b border-edge-textarea"
                         placeholder="Share evidence, discuss this change…"
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
@@ -111,8 +111,8 @@ export default function SuggestionCommentThread({
                         maxLength={2000}
                     />
                     {error && <p className="form-error">{error}</p>}
-                    <div className="ref-comment-form-actions">
-                        <span className="ref-comment-charcount">
+                    <div className="py-2 px-[0] border-b border-edge-form-actions">
+                        <span className="py-2 px-[0] border-b border-edge-charcount">
                             {newComment.length}/2000
                         </span>
                         <button
@@ -125,7 +125,7 @@ export default function SuggestionCommentThread({
                     </div>
                 </div>
             ) : (
-                <p className="ref-comments-login">
+                <p className="mt-4-login">
                     <a href="/login">Log in</a> to join the discussion.
                 </p>
             )}

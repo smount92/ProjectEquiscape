@@ -142,7 +142,7 @@ export default function ShowRecordTimeline({
                         : "No show records yet."}
                 </div>
             ) : (
-                <div className="show-record-list">
+                <div className="relative pl-8">
                     {records.map((record) => (
                         <div
                             key={record.id}

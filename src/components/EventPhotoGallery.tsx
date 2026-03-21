@@ -123,7 +123,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
             {photos.length === 0 ? (
                 <p style={{ color: "var(--color-text-muted)" }}>No photos yet — share yours!</p>
             ) : (
-                <div className="event-photo-grid">
+                <div className="grid grid-cols-[repeat(auto-fill, minmax(140px, 1fr))] gap-2 mt-2">
                     {photos.map(p => (
                         <div key={p.id} style={{ position: "relative" }}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}

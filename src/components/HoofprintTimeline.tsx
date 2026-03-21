@@ -100,9 +100,9 @@ export default function HoofprintTimeline({
     };
 
     return (
-        <div className="hoofprint-section">
+        <div className="mt-8">
             {/* Header */}
-            <div className="hoofprint-header">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
                 <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)" }}>
                     <h2 className="hoofprint-title">
                         🐾 <span className="text-gradient">Hoofprint™</span>
@@ -141,13 +141,13 @@ export default function HoofprintTimeline({
 
             {/* Ownership Chain */}
             {ownershipChain.length > 0 && (
-                <div className="ownership-chain">
+                <div className="flex items-center gap-2 flex-wrap mb-6 p-4 rounded-lg bg-[rgba(0, 0, 0, 0.03)] border border-[rgba(0, 0, 0, 0.06)]">
                     <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginRight: "var(--space-xs)" }}>
                         Chain of Custody:
                     </span>
                     {ownershipChain.map((owner, i) => (
                         <span key={owner.id} style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-xs)" }}>
-                            {i > 0 && <span className="ownership-arrow">→</span>}
+                            {i > 0 && <span className="text-muted text-[0.8rem]">→</span>}
                             {owner.ownerId ? (
                                 <Link
                                     href={`/profile/${encodeURIComponent(owner.ownerAlias)}`}
@@ -159,7 +159,7 @@ export default function HoofprintTimeline({
                                     </span>
                                 </Link>
                             ) : (
-                                <span className="ownership-link">
+                                <span className="border border-[var(--color-accent, #f59e0b)]">
                                     {owner.ownerAlias}
                                 </span>
                             )}
@@ -170,7 +170,7 @@ export default function HoofprintTimeline({
 
             {/* Add Event Form */}
             {showForm && (
-                <form onSubmit={handleAddEvent} className="timeline-add-form">
+                <form onSubmit={handleAddEvent} className="p-4 rounded-lg bg-[rgba(0, 0, 0, 0.03)] border border-[rgba(0, 0, 0, 0.06)] mb-6">
                     <div className="form-group">
                         <label className="form-label">Title</label>
                         <input
@@ -210,21 +210,21 @@ export default function HoofprintTimeline({
                     {isOwner && <p style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>Add events to build this horse&apos;s Hoofprint!</p>}
                 </div>
             ) : (
-                <div className="timeline-list">
+                <div className="relative pl-[32px]">
                     {timeline.map((event) => (
-                        <div key={event.id} className="timeline-event">
-                            <div className="timeline-event-dot">
+                        <div key={event.id} className="relative pb-6">
+                            <div className="relative pb-6-dot">
                                 {EVENT_ICONS[event.eventType] || "📋"}
                             </div>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                                 <div>
-                                    <div className="timeline-event-title">
+                                    <div className="relative pb-6-title">
                                         {event.title}
                                         {!event.isPublic && (
                                             <span style={{ fontSize: "0.65rem", marginLeft: "6px", opacity: 0.5 }}>🔒 Private</span>
                                         )}
                                     </div>
-                                    <div className="timeline-event-meta">
+                                    <div className="relative pb-6-meta">
                                         {event.eventDate && new Date(event.eventDate).toLocaleDateString("en-US", {
                                             month: "short",
                                             day: "numeric",
@@ -233,7 +233,7 @@ export default function HoofprintTimeline({
                                         {" · "}by @{event.userAlias}
                                     </div>
                                     {event.description && (
-                                        <div className="timeline-event-desc">{event.description}</div>
+                                        <div className="relative pb-6-desc">{event.description}</div>
                                     )}
                                 </div>
                                 {/* Only user-authored notes (from posts) can be deleted */}

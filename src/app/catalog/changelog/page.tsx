@@ -31,12 +31,12 @@ export default async function ChangelogPage() {
                 📋{" "}
                 <span className="text-gradient">Catalog Changelog</span>
             </h1>
-            <p className="ref-page-subtitle">
+            <p className="text-muted mb-6">
                 Community-approved updates to the reference catalog.{" "}
                 {count ?? 0} total changes.
             </p>
 
-            <div className="ref-changelog-list">
+            <div className="flex flex-col gap-[0]">
                 {(
                     entries as unknown as {
                         id: string;
@@ -52,8 +52,8 @@ export default async function ChangelogPage() {
                     const timeAgo = getTimeAgo(entry.created_at);
 
                     return (
-                        <div key={entry.id} className="ref-changelog-entry">
-                            <span className="ref-changelog-icon">
+                        <div key={entry.id} className="flex gap-4 py-4 px-[0] border-b border-edge">
+                            <span className="text-[1.3rem] min-w-[28px]">
                                 {entry.change_type === "correction"
                                     ? "🔧"
                                     : entry.change_type === "addition"
@@ -66,11 +66,11 @@ export default async function ChangelogPage() {
                                 <p className="ref-changelog-summary">
                                     {entry.change_summary}
                                 </p>
-                                <p className="ref-changelog-meta">
+                                <p className="text-forest">
                                     Contributed by{" "}
                                     <Link
                                         href={`/profile/${entry.contributor_alias}`}
-                                        className="ref-author-link"
+                                        className="text-forest font-semibold"
                                     >
                                         @{entry.contributor_alias}
                                     </Link>
@@ -93,7 +93,7 @@ export default async function ChangelogPage() {
                 })}
 
                 {(entries ?? []).length === 0 && (
-                    <div className="card ref-empty-state">
+                    <div className="card text-center p-8 text-muted">
                         <p>No changes yet. The catalog awaits your contributions!</p>
                         <Link href="/catalog" className="btn btn-primary">
                             Browse Catalog

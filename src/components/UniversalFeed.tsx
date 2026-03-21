@@ -173,7 +173,7 @@ export default function UniversalFeed({
             {showComposer && (
                 <div className="bg-[var(--color-surface-1)] border border-edge rounded-lg p-4 mb-6">
                     <textarea
-                        className="form-textarea feed-compose-input"
+                        className="form-textarea text-muted"
                         placeholder={composerPlaceholder}
                         value={composerText}
                         onChange={e => setComposerText(e.target.value)}

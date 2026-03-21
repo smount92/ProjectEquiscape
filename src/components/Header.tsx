@@ -217,7 +217,7 @@ export default function Header() {
         className="header-logo"
         aria-label="Model Horse Hub — Home"
       >
-        <span className="header-logo-icon" aria-hidden="true">
+        <span className="text-[1.5em]" aria-hidden="true">
           🐴
         </span>
         <span>Model Horse Hub</span>
@@ -226,7 +226,7 @@ export default function Header() {
       {/* ── Hamburger Button (mobile only) ── */}
       {user && (
         <button
-          className="header-hamburger"
+          className="hidden items-center justify-center w-[40px] h-[40px] bg-transparent border border-edge rounded-md text-[var(--color-text-secondary)] cursor-pointer transition-all"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileMenuOpen}
@@ -251,9 +251,9 @@ export default function Header() {
       {/* DESKTOP NAVIGATION — Priority+ progressive collapse       */}
       {/* ═══════════════════════════════════════════════════════════ */}
       {user && (
-        <div className="header-desktop-nav">
+        <div className="flex items-center gap-4 flex-1 min-w-0 justify-end">
           {/* Primary text links — measured by ResizeObserver */}
-          <nav className="header-nav-primary" aria-label="Main navigation" ref={primaryNavRef}>
+          <nav className="flex items-center gap-[2px] flex-1 min-w-0 overflow-hidden relative" aria-label="Main navigation" ref={primaryNavRef}>
             {allLinks.map((link, i) => (
               <Link
                 key={link.id}
@@ -270,7 +270,7 @@ export default function Header() {
 
           {/* "More" dropdown for overflow items */}
           {hasOverflow && (
-            <div className="header-user-menu" ref={moreMenuRef} style={{ flexShrink: 0 }}>
+            <div className="relative" ref={moreMenuRef} style={{ flexShrink: 0 }}>
               <button
                 className="header-nav-link"
                 onClick={() => setMoreMenuOpen(!moreMenuOpen)}
@@ -282,7 +282,7 @@ export default function Header() {
                 <ChevronDown size={12} strokeWidth={2} style={{ marginLeft: 2 }} />
               </button>
               {moreMenuOpen && (
-                <div className="header-user-dropdown">
+                <div className="absolute top-[calc(100% + 8px)] right-0 min-w-[200px] bg-[var(--color-bg-secondary)] border border-edge rounded-lg p-1 shadow-lg z-[200] flex flex-col">
                   {overflowLinks.map((link) => (
                     <Link
                       key={link.id}
@@ -299,9 +299,9 @@ export default function Header() {
           )}
 
           {/* Icon action buttons */}
-          <div className="header-icon-actions">
+          <div className="flex items-center gap-1">
             <NotificationBell />
-            <Link href="/inbox" className="header-icon-btn" title="Inbox" id="nav-inbox-icon">
+            <Link href="/inbox" className="flex items-center justify-center relative w-[36px] h-[36px] rounded-full bg-glass border border-edge transition-all no-underline text-base text-[var(--color-text-secondary)]" title="Inbox" id="nav-inbox-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -311,20 +311,20 @@ export default function Header() {
                 <span className="inbox-unread-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
               )}
             </Link>
-            <Link href="/wishlist" className="header-icon-btn" title="Wishlist" id="nav-wishlist-icon">
+            <Link href="/wishlist" className="flex items-center justify-center relative w-[36px] h-[36px] rounded-full bg-glass border border-edge transition-all no-underline text-base text-[var(--color-text-secondary)]" title="Wishlist" id="nav-wishlist-icon">
               <Heart size={18} strokeWidth={1.5} />
             </Link>
           </div>
 
           {/* User menu dropdown */}
-          <div className="header-user-menu" ref={userMenuRef}>
+          <div className="relative" ref={userMenuRef}>
             <button
-              className="header-user-menu-trigger"
+              className="relative-trigger"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               aria-expanded={userMenuOpen}
               aria-label="User menu"
             >
-              <span className="header-user-avatar">
+              <span className="header-rounded-full bg-[rgba(0, 0, 0, 0.06)] inline-flex items-center justify-center overflow-hidden shrink-0 font-bold text-muted">
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatarUrl} alt={aliasName || "User"} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
@@ -339,7 +339,7 @@ export default function Header() {
               </svg>
             </button>
             {userMenuOpen && (
-              <div className="header-user-dropdown">
+              <div className="absolute top-[calc(100% + 8px)] right-0 min-w-[200px] bg-[var(--color-bg-secondary)] border border-edge rounded-lg p-1 shadow-lg z-[200] flex flex-col">
                 <Link
                   href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
                   className="header-dropdown-link"
@@ -357,11 +357,11 @@ export default function Header() {
                   <Palette size={16} strokeWidth={1.5} /> My Commissions
                 </Link>
                 {isAdmin && (
-                  <Link href="/admin" className="header-dropdown-link header-dropdown-admin" onClick={() => setUserMenuOpen(false)}>
+                  <Link href="/admin" className="header-dropdown-link text-forest" onClick={() => setUserMenuOpen(false)}>
                     <Zap size={16} strokeWidth={1.5} /> Admin
                   </Link>
                 )}
-                <div className="header-dropdown-divider" />
+                <div className="h-[1px] bg-edge m-[var(--space-xs) 0]" />
                 <button
                   className="header-dropdown-link"
                   onClick={() => { setUserMenuOpen(false); toggleSimpleMode(); }}
@@ -369,7 +369,7 @@ export default function Header() {
                   {isSimpleMode ? <><Eye size={16} strokeWidth={1.5} /> Simple Mode: ON</> : <><EyeOff size={16} strokeWidth={1.5} /> Simple Mode</>}
                 </button>
                 <button
-                  className="header-dropdown-link header-dropdown-signout"
+                  className="header-dropdown-link text-muted"
                   onClick={() => { setUserMenuOpen(false); handleSignOut(); }}
                 >
                   <LogOut size={16} strokeWidth={1.5} /> Sign Out
@@ -435,7 +435,7 @@ export default function Header() {
           <Link href="/settings" className="header-nav-link" id="nav-settings-m" onClick={closeMobileMenu}>
             <Settings size={16} strokeWidth={1.5} /> Settings
           </Link>
-          <Link href="/inbox" className="header-nav-link inbox-nav-link" id="nav-inbox-m" onClick={closeMobileMenu}>
+          <Link href="/inbox" className="header-nav-link relative flex items-center gap-[4px]" id="nav-inbox-m" onClick={closeMobileMenu}>
             <Mail size={16} strokeWidth={1.5} />
             Inbox
             {unreadCount > 0 && (
@@ -449,7 +449,7 @@ export default function Header() {
             </Link>
           )}
           {/* ── Mobile-only: Sign Out + Simple Mode ── */}
-          <div className="header-auth-actions-mobile">
+          <div className="hidden">
             <button
               className="btn btn-ghost"
               onClick={() => { closeMobileMenu(); handleSignOut(); }}
@@ -458,7 +458,7 @@ export default function Header() {
               <LogOut size={16} strokeWidth={1.5} /> Sign Out
             </button>
             <button
-              className="simple-mode-toggle"
+              className="flex items-center justify-center w-[40px] h-[40px] rounded-full border border-edge bg-glass text-[var(--color-text-secondary)] cursor-pointer text-[1.2rem] transition-all relative"
               onClick={() => { toggleSimpleMode(); }}
               aria-pressed={isSimpleMode}
               style={{ justifyContent: "flex-start", gap: "var(--space-sm)", width: "100%" }}
@@ -471,7 +471,7 @@ export default function Header() {
 
       {/* ── Public Navigation (not signed in) ── */}
       {!user && (
-        <nav className="header-nav header-nav-public" aria-label="Public navigation">
+        <nav className="header-nav flex flex-row items-center gap-4" aria-label="Public navigation">
           <Link href="/about" className="header-nav-link" id="nav-about">
             About
           </Link>
@@ -486,7 +486,7 @@ export default function Header() {
 
       {/* ── Desktop auth actions for logged-out users ── */}
       {!user && (
-        <div className="header-actions">
+        <div className="flex items-center gap-4 shrink-0">
           <Link
             href="/login"
             className="btn btn-primary btn-sm"
@@ -495,7 +495,7 @@ export default function Header() {
             Log In
           </Link>
           <button
-            className="simple-mode-toggle"
+            className="flex items-center justify-center w-[40px] h-[40px] rounded-full border border-edge bg-glass text-[var(--color-text-secondary)] cursor-pointer text-[1.2rem] transition-all relative"
             onClick={toggleSimpleMode}
             aria-pressed={isSimpleMode}
             aria-label={
@@ -517,7 +517,7 @@ export default function Header() {
                 <line x1="1" y1="1" x2="23" y2="23" />
               </svg>
             )}
-            <span className="simple-mode-tooltip">
+            <span className="absolute bottom-[-36px] right-0 bg-elevated text-[var(--color-text-secondary)] text-[var(--font-size-xs)] py-[4px] px-[10px] rounded-sm whitespace-nowrap opacity-0 pointer-events-none transition-opacity border border-edge">
               {isSimpleMode ? "Simple Mode: ON" : "Simple Mode: OFF"}
             </span>
           </button>

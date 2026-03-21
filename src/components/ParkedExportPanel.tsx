@@ -119,7 +119,7 @@ export default function ParkedExportPanel({
     }
 
     return (
-        <div className="parked-export-panel card animate-fade-in-up">
+        <div className="mt-6 card animate-fade-in-up">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
                 <h3>{isParked ? "🔒 Horse is Parked" : "📤 Sell Off-Platform"}</h3>
                 <button className="btn btn-ghost" onClick={() => setIsOpen(false)} style={{ fontSize: "1.2rem" }}>✕</button>
@@ -133,7 +133,7 @@ export default function ParkedExportPanel({
                         Park it here and get a <strong>Certificate of Authenticity</strong> with a QR code
                         the buyer can scan to claim the horse — and inherit its full Hoofprint™ history.
                     </p>
-                    <ul className="parked-export-steps">
+                    <ul className="list-none p-0 m-[0 0 var(--space-md)]">
                         <li>1. Click &quot;Park This Horse&quot; — a unique claim PIN is generated</li>
                         <li>2. Download or print the Certificate of Authenticity</li>
                         <li>3. Give it to the buyer with the model</li>
@@ -164,7 +164,7 @@ export default function ParkedExportPanel({
                     </div>
 
                     {/* PIN Display */}
-                    <div className="parked-export-pin-box">
+                    <div className="flex items-center gap-4 p-6 bg-elevated border-[2px] border-forest rounded-lg mb-6">
                         <span className="parked-export-pin-label">Claim PIN</span>
                         <span className="parked-export-pin">{pin}</span>
                         <button
@@ -178,7 +178,7 @@ export default function ParkedExportPanel({
 
                     {/* QR Code (visible) */}
                     {pin && (
-                        <div className="parked-export-qr">
+                        <div className="flex flex-col items-center p-6 bg-elevated border border-edge rounded-lg mb-6">
                             <QRCodeSVG
                                 value={claimUrl}
                                 size={180}
@@ -210,7 +210,7 @@ export default function ParkedExportPanel({
                     )}
 
                     {/* Actions */}
-                    <div className="parked-export-actions">
+                    <div className="flex flex-col gap-2">
                         <button
                             className="btn btn-primary"
                             onClick={handleDownloadCoA}

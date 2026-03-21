@@ -54,9 +54,9 @@ export default function AboutPage() {
                 {/* What Makes Us Different */}
                 <section className="static-section">
                     <h2>What Makes Us Different</h2>
-                    <div className="about-values-grid">
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">🔒</span>
+                    <div className="grid grid-cols-[repeat(3, 1fr)] gap-6">
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">🔒</span>
                             <h3>Your Data is YOURS</h3>
                             <p>
                                 Row-level security means even our team can&apos;t see your financial vault.
@@ -65,8 +65,8 @@ export default function AboutPage() {
                                 notes stay locked behind cryptographic access controls. Period.
                             </p>
                         </div>
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">✨</span>
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">✨</span>
                             <h3>Built for the Hobby&apos;s Nuances</h3>
                             <p>
                                 We know what LSQ means. We know the difference between OF and CM.
@@ -75,8 +75,8 @@ export default function AboutPage() {
                                 not how a generic inventory app thinks you should.
                             </p>
                         </div>
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">🐾</span>
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">🐾</span>
                             <h3>Hoofprint™ — A First for the Hobby</h3>
                             <p>
                                 No platform has ever built provenance tracking for model horses.
@@ -99,9 +99,9 @@ export default function AboutPage() {
                     <p>
                         Here&apos;s what&apos;s on the roadmap:
                     </p>
-                    <div className="about-values-grid" style={{ marginTop: "var(--space-md)" }}>
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">🎨</span>
+                    <div className="grid grid-cols-[repeat(3, 1fr)] gap-6" style={{ marginTop: "var(--space-md)" }}>
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">🎨</span>
                             <h3>Art Studio &amp; Commission Tracking</h3>
                             <p>
                                 Artists will manage their commission queue, share WIP photos with
@@ -110,8 +110,8 @@ export default function AboutPage() {
                                 permanently.
                             </p>
                         </div>
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">📦</span>
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">📦</span>
                             <h3>Bulk Import &amp; Insurance Reports</h3>
                             <p>
                                 Upload your spreadsheet and we&apos;ll fuzzy-match every row against
@@ -119,8 +119,8 @@ export default function AboutPage() {
                                 insurance company with photos, values, and condition grades.
                             </p>
                         </div>
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">🏆</span>
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">🏆</span>
                             <h3>Competition Engine</h3>
                             <p>
                                 Digital NAN qualification tracking, show string planning, and
@@ -128,8 +128,8 @@ export default function AboutPage() {
                                 Hoofprint&trade; transfers &mdash; no more mailing paper cards.
                             </p>
                         </div>
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">🌍</span>
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">🌍</span>
                             <h3>Groups &amp; Regional Community</h3>
                             <p>
                                 Join collector clubs, find hobbyists in your region, and
@@ -137,8 +137,8 @@ export default function AboutPage() {
                                 scattered across Facebook and Discord.
                             </p>
                         </div>
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">📱</span>
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">📱</span>
                             <h3>Mobile &amp; Offline</h3>
                             <p>
                                 Take your collection to live shows. Quick photo capture,
@@ -146,8 +146,8 @@ export default function AboutPage() {
                                 all from your phone.
                             </p>
                         </div>
-                        <div className="about-value-card">
-                            <span className="about-value-icon" aria-hidden="true">🤝</span>
+                        <div className="bg-card border border-edge rounded-lg p-8 text-center transition-all">
+                            <span className="block text-[2rem] mb-4" aria-hidden="true">🤝</span>
                             <h3>Your Ideas</h3>
                             <p>
                                 We build what you ask for. Every feature request from the

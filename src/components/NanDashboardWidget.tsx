@@ -15,7 +15,7 @@ export default async function NanDashboardWidget() {
 
     return (
         <details className="nan-dashboard-widget" id="nan-dashboard">
-            <summary className="nan-dashboard-toggle">
+            <summary className="hidden">
                 🏆 NAN {currentYear} Qualification Status
                 {totalQualified > 0 && (
                     <span className="nan-dashboard-count">
@@ -23,17 +23,17 @@ export default async function NanDashboardWidget() {
                     </span>
                 )}
             </summary>
-            <div className="nan-dashboard-list">
+            <div className="py-2 px-4">
                 {horses.slice(0, 10).map(h => {
                     const currentYearCards = h.qualifications.filter(q => q.year === currentYear);
                     const status = h.totalCards >= 3 ? "full" : h.totalCards > 0 ? "partial" : "none";
 
                     return (
                         <div key={h.horseId} className={`nan-horse-row nan-status-${status}`}>
-                            <span className="nan-horse-dot">
+                            <span className="text-xs shrink-0">
                                 {status === "full" ? "🟢" : status === "partial" ? "🟡" : "🔴"}
                             </span>
-                            <Link href={`/community/${h.horseId}`} className="nan-horse-name">
+                            <Link href={`/community/${h.horseId}`} className="font-semibold text-ink no-underline">
                                 {h.horseName}
                             </Link>
                             <span className="nan-horse-cards">
@@ -45,7 +45,7 @@ export default async function NanDashboardWidget() {
                                         </span>
                                     ))
                                 ) : (
-                                    <span className="nan-none">No cards yet</span>
+                                    <span className="text-muted">No cards yet</span>
                                 )}
                             </span>
                         </div>

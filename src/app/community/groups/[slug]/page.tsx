@@ -35,7 +35,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
         <div className="page-container">
             <div className="page-content">
                 {/* Group Header */}
-                <div className="group-detail-header">
+                <div className="pb-6 border-b border-edge mb-6">
                     <Link href="/community/groups" className="btn btn-ghost" style={{ marginBottom: "var(--space-md)" }}>← All Groups</Link>
                     <h1>{group.name}</h1>
                     <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap", marginTop: "var(--space-sm)", color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>

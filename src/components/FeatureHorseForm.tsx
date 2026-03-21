@@ -36,7 +36,7 @@ export default function FeatureHorseForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="admin-feature-form">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-[500px]">
             <div className="form-group">
                 <label className="form-label">Horse ID (UUID)</label>
                 <input

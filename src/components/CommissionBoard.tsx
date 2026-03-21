@@ -101,7 +101,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     : c.description}
                             </p>
 
-                            <div className="studio-commission-footer">
+                            <div className="flex justify-between items-center mt-auto pt-2 border-t border-edge">
                                 <span style={{ fontSize: "calc(0.7rem * var(--font-scale))", color: "var(--color-text-muted)" }}>
                                     {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
                                         month: "short", day: "numeric",

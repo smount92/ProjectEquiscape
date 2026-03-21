@@ -144,7 +144,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
 
     if (userHorses.length === 0) {
         return (
-            <div className="show-entry-form-empty">
+            <div className="flex flex-col gap-4-empty">
                 <p style={{ color: "var(--color-text-muted)" }}>
                     You need at least one public horse to enter shows.
                 </p>
@@ -175,7 +175,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
     const previewModal = showPreview && selectedPhotoObj && typeof document !== "undefined"
         ? createPortal(
             <div className="modal-overlay" onClick={() => setShowPreview(false)}>
-                <div className="modal-content show-preview-modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-content max-w-[480px] text-center" onClick={e => e.stopPropagation()}>
                     <div className="show-preview-label">This is what judges & voters will see</div>
                     <div style={{ textAlign: "center", marginBottom: "var(--space-sm)" }}>
                         <span style={{ fontWeight: 700, fontSize: "calc(1rem * var(--font-scale))" }}>
@@ -198,7 +198,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                             &ldquo;{caption.trim()}&rdquo;
                         </p>
                     )}
-                    <div className="show-preview-actions">
+                    <div className="flex gap-2 justify-center mt-6 flex-wrap">
                         <button
                             className="btn btn-primary"
                             onClick={() => handleSubmit()}
@@ -221,7 +221,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="show-entry-form">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 {/* Guidance tip */}
                 <div className="getting-started-tip show-entry-tip">
                     💡 <strong>How it works:</strong> Select a horse, pick your best photo, add an optional caption, then submit.
@@ -229,7 +229,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                 </div>
 
                 {/* Top row: Horse selector */}
-                <div className="show-entry-selectors">
+                <div className="grid grid-cols-2 gap-4">
                     <select
                         className="form-select"
                         value={selectedHorse}
@@ -249,7 +249,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
 
                 {/* Smart Class Browser */}
                 {classes && classes.length > 0 && selectedHorse && (
-                    <div className="class-browser-wrapper">
+                    <div className="mb-4">
                         <label className="form-label">📋 Select Class</label>
                         <input
                             type="text"
@@ -259,7 +259,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                             onChange={(e) => setClassSearch(e.target.value)}
                             style={{ marginBottom: "var(--space-xs)" }}
                         />
-                        <div className="class-browser">
+                        <div className="max-h-[240px] overflow-y-auto border border-edge rounded-md bg-elevated">
                             {/* No class option */}
                             <button
                                 type="button"
@@ -270,7 +270,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                             </button>
                             {Array.from(divisionGroups.entries()).map(([divName, items]) => (
                                 <div key={divName}>
-                                    <div className="class-browser-division">{divName}</div>
+                                    <div className="max-h-[240px] overflow-y-auto border border-edge rounded-md bg-elevated-division">{divName}</div>
                                     {items.map((c) => {
                                         const scaleMatch = c.allowedScales && c.allowedScales.length > 0 && horseScale
                                             ? c.allowedScales.includes(horseScale)
@@ -282,8 +282,8 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                                 className={`class-browser-item ${selectedClassId === c.id ? "selected" : ""}`}
                                                 onClick={() => setSelectedClassId(c.id)}
                                             >
-                                                <span className="class-browser-name">{c.name}</span>
-                                                <span className="class-browser-meta">
+                                                <span className="max-h-[240px] overflow-y-auto border border-edge rounded-md bg-elevated-name">{c.name}</span>
+                                                <span className="max-h-[240px] overflow-y-auto border border-edge rounded-md bg-elevated-meta">
                                                     {c.currentEntryCount !== undefined && (
                                                         <span className="class-entry-count">
                                                             {c.currentEntryCount} {c.currentEntryCount === 1 ? "entry" : "entries"}
@@ -292,7 +292,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                                     {c.isNanQualifying && (
                                                         <span className="class-nan-badge">NAN</span>
                                                     )}
-                                                    {scaleMatch === true && <span className="class-scale-match" title="Scale matches!">✅</span>}
+                                                    {scaleMatch === true && <span className="text-[0.85em]" title="Scale matches!">✅</span>}
                                                     {scaleMatch === false && (
                                                         <span
                                                             className="class-scale-warn"
@@ -306,7 +306,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                 </div>
                             ))}
                             {filteredClasses.length === 0 && classSearch && (
-                                <div className="class-browser-empty">No classes match &ldquo;{classSearch}&rdquo;</div>
+                                <div className="max-h-[240px] overflow-y-auto border border-edge rounded-md bg-elevated-empty">No classes match &ldquo;{classSearch}&rdquo;</div>
                             )}
                         </div>
                     </div>
@@ -316,7 +316,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                 {selectedHorse && (
                     <div className="show-entry-body">
                         {/* LEFT: Photo picker */}
-                        <div className="show-entry-photos">
+                        <div className="flex flex-col gap-1">
                             <label className="form-label">
                                 📸 Choose Entry Photo
                             </label>
@@ -330,7 +330,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                 </p>
                             ) : (
                                 <>
-                                    <div className="show-entry-photo-grid">
+                                    <div className="grid grid-cols-[repeat(auto-fill, minmax(72px, 1fr))] gap-1">
                                         {horsePhotos.map((photo) => (
                                             <button
                                                 key={photo.id}
@@ -346,7 +346,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                                     loading="lazy"
                                                 />
                                                 {selectedPhoto === photo.storagePath && (
-                                                    <div className="show-entry-photo-check">✓</div>
+                                                    <div className="absolute top-[2px] right-[2px] bg-[var(--color-accent-primary, #d4a574)] text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[0.65rem] font-bold">✓</div>
                                                 )}
                                                 <div className="show-entry-photo-label">
                                                     {ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
@@ -362,10 +362,10 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                         </div>
 
                         {/* RIGHT: Preview + Caption + Submit */}
-                        <div className="show-entry-details">
+                        <div className="flex flex-col gap-4">
                             {/* Preview of selected photo */}
                             {selectedPhotoObj && (
-                                <div className="show-entry-preview">
+                                <div className="w-full h-full object-cover">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={selectedPhotoObj.publicUrl}

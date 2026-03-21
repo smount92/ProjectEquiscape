@@ -80,7 +80,7 @@ export default function PrivacyPage() {
                 <section className="static-section">
                     <h2>2. How We Use Your Information</h2>
                     <p>We use your information exclusively to:</p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>Provide and operate the Model Horse Hub platform</li>
                         <li>Display your public collection in the Show Ring (only when you opt in)</li>
                         <li>Facilitate messaging and commerce features between users</li>
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
                     <p style={{ marginTop: "var(--space-md)" }}>
                         <strong>We do NOT:</strong>
                     </p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>Sell your data to third parties &mdash; ever</li>
                         <li>Display ads or share data with advertisers</li>
                         <li>Use your collection data for machine learning training</li>
@@ -106,7 +106,7 @@ export default function PrivacyPage() {
                     <p>
                         Your data is protected by multiple layers of security:
                     </p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>
                             <strong>Row-Level Security (RLS)</strong> &mdash; enforced at the PostgreSQL database
                             level, meaning even if our application code had a bug, the database itself would
@@ -137,7 +137,7 @@ export default function PrivacyPage() {
                     <p>
                         We share data only in the following limited circumstances:
                     </p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li>
                             <strong>Public profiles</strong> &mdash; if you choose to make horses public,
                             their name, photos, reference link, condition, and finish type are visible in
@@ -164,7 +164,7 @@ export default function PrivacyPage() {
                 <section className="static-section">
                     <h2>5. Third-Party Services</h2>
                     <p>We use the following third-party services:</p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li><strong>Supabase</strong> &mdash; database hosting, authentication, and file storage (hosted in the US)</li>
                         <li><strong>Vercel</strong> &mdash; application hosting and edge delivery</li>
                         <li><strong>Resend</strong> &mdash; transactional email delivery</li>
@@ -180,7 +180,7 @@ export default function PrivacyPage() {
                 <section className="static-section">
                     <h2>6. Your Rights</h2>
                     <p>You have the right to:</p>
-                    <ul className="static-list">
+                    <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
                         <li><strong>Export your data</strong> &mdash; download your entire collection as CSV at any time from your dashboard</li>
                         <li><strong>Delete your account</strong> &mdash; request full account deletion from your Settings page, which removes all your data including photos</li>
                         <li><strong>Control visibility</strong> &mdash; set any horse to private, unlisted, or public at any time</li>

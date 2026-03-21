@@ -152,22 +152,22 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
                 </div>
 
                 {/* Main content grid */}
-                <div className="help-id-detail-layout">
+                <div className="grid grid-cols-2 gap-8 mt-8">
                     {/* Photo */}
-                    <div className="help-id-detail-photo">
+                    <div className="rounded-lg overflow-hidden bg-card border border-edge">
                         {signedImageUrl ? (
                             <img
                                 src={signedImageUrl}
                                 alt="Mystery model"
-                                className="help-id-detail-img"
+                                className="w-full h-auto block object-contain max-h-[500px]"
                             />
                         ) : (
-                            <div className="help-id-card-placeholder" style={{ height: 300 }}>🐴</div>
+                            <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-placeholder" style={{ height: 300 }}>🐴</div>
                         )}
                     </div>
 
                     {/* Description */}
-                    <div className="help-id-detail-info">
+                    <div className="p-6 bg-card border border-edge rounded-lg">
                         <h2 style={{ fontSize: "calc(var(--font-size-md) * var(--font-scale))", fontWeight: 600, marginBottom: "var(--space-md)" }}>
                             Description
                         </h2>

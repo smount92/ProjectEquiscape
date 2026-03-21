@@ -161,10 +161,10 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                     <p>No show strings yet. Create one to start planning!</p>
                 </div>
             ) : (
-                <div className="show-string-list">
+                <div className="grid gap-2">
                     {showStrings.map(ss => (
                         <div key={ss.id} className={`show-string-item ${activeStringId === ss.id ? "active" : ""}`}>
-                            <div className="show-string-header" onClick={() => handleSelectString(ss.id)} style={{ cursor: "pointer" }}>
+                            <div className="flex justify-between items-center py-4 px-6 gap-2" onClick={() => handleSelectString(ss.id)} style={{ cursor: "pointer" }}>
                                 <div>
                                     <strong>{ss.name}</strong>
                                     {ss.showDate && (
@@ -182,7 +182,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
                             {/* Expanded: entries + add form */}
                             {activeStringId === ss.id && (
-                                <div className="show-string-detail">
+                                <div className="p-[0 var(--space-lg) var(--space-lg)] border-t border-edge">
                                     {loadingEntries ? (
                                         <p style={{ color: "var(--color-text-muted)" }}>Loading entries...</p>
                                     ) : (
@@ -222,11 +222,11 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
                                             {/* Entries Table */}
                                             {entries.length > 0 ? (
-                                                <div className="show-string-entries">
+                                                <div className="grid gap-1 m-[var(--space-md) 0]">
                                                     {entries.map(entry => (
                                                         <div key={entry.id} className="show-string-entry-row">
                                                             <span className="entry-horse">🐴 {entry.horseName}</span>
-                                                            <span className="entry-class">{entry.className}</span>
+                                                            <span className="flex-1">{entry.className}</span>
                                                             {entry.division && <span className="entry-division">{entry.division}</span>}
                                                             {entry.timeSlot && <span className="entry-timeslot">🕐 {entry.timeSlot}</span>}
                                                             <button className="btn btn-ghost btn-sm" onClick={() => handleRemoveEntry(entry.id)} title="Remove">✕</button>
@@ -238,7 +238,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                             )}
 
                                             {/* Add Entry Form */}
-                                            <div className="add-entry-form">
+                                            <div className="mt-6 pt-6 border-t border-edge">
                                                 <h4>Add Entry</h4>
                                                 <div className="form-row-2col">
                                                     <div className="form-group">
@@ -291,7 +291,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                             <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))", marginBottom: "var(--space-sm)" }}>
                                                                 Tab through to enter placing and ribbon for each entry. Results will be saved as show records.
                                                             </p>
-                                                            <table className="results-grid">
+                                                            <table className="bg-[var(--color-surface-secondary)] font-semibold sticky top-0">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>Horse</th>

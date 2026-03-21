@@ -115,35 +115,35 @@ export default async function HelpIdPage() {
                         <h2 style={{ fontSize: "calc(var(--font-size-lg) * var(--font-scale))", fontWeight: 700, marginBottom: "var(--space-lg)" }}>
                             🔍 Open Requests ({openRequests.length})
                         </h2>
-                        <div className="help-id-grid">
+                        <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6">
                             {openRequests.map((req) => (
                                 <Link
                                     key={req.id}
                                     href={`/community/help-id/${req.id}`}
-                                    className="help-id-card"
+                                    className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col"
                                     id={`help-id-${req.id}`}
                                 >
-                                    <div className="help-id-card-image">
+                                    <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-image">
                                         {signedUrlMap.get(req.id) ? (
                                             <img
                                                 src={signedUrlMap.get(req.id)!}
                                                 alt="Mystery model"
-                                                className="help-id-card-img"
+                                                className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-img"
                                             />
                                         ) : (
-                                            <div className="help-id-card-placeholder">🐴</div>
+                                            <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-placeholder">🐴</div>
                                         )}
-                                        <span className="help-id-status-badge open">Open</span>
+                                        <span className="bg-[rgba(240, 208, 108, 0.85)] text-white border border-[rgba(240, 208, 108, 0.5)] open">Open</span>
                                     </div>
-                                    <div className="help-id-card-info">
-                                        <p className="help-id-card-desc">
+                                    <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-info">
+                                        <p className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-desc">
                                             {req.description
                                                 ? req.description.length > 100
                                                     ? req.description.substring(0, 100) + "…"
                                                     : req.description
                                                 : "No description provided"}
                                         </p>
-                                        <div className="help-id-card-meta">
+                                        <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-meta">
                                             <span>by {req.userName}</span>
                                             <span>💬 {suggestionCounts.get(req.id) || 0} suggestion{(suggestionCounts.get(req.id) || 0) !== 1 ? "s" : ""}</span>
                                         </div>
@@ -160,35 +160,35 @@ export default async function HelpIdPage() {
                         <h2 style={{ fontSize: "calc(var(--font-size-lg) * var(--font-scale))", fontWeight: 700, marginBottom: "var(--space-lg)", color: "var(--color-text-secondary)" }}>
                             ✅ Resolved ({resolvedRequests.length})
                         </h2>
-                        <div className="help-id-grid">
+                        <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6">
                             {resolvedRequests.map((req) => (
                                 <Link
                                     key={req.id}
                                     href={`/community/help-id/${req.id}`}
-                                    className="help-id-card resolved"
+                                    className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col resolved"
                                     id={`help-id-${req.id}`}
                                 >
-                                    <div className="help-id-card-image">
+                                    <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-image">
                                         {signedUrlMap.get(req.id) ? (
                                             <img
                                                 src={signedUrlMap.get(req.id)!}
                                                 alt="Identified model"
-                                                className="help-id-card-img"
+                                                className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-img"
                                             />
                                         ) : (
-                                            <div className="help-id-card-placeholder">🐴</div>
+                                            <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-placeholder">🐴</div>
                                         )}
-                                        <span className="help-id-status-badge resolved">Resolved</span>
+                                        <span className="bg-[rgba(240, 208, 108, 0.85)] text-white border border-[rgba(240, 208, 108, 0.5)] resolved">Resolved</span>
                                     </div>
-                                    <div className="help-id-card-info">
-                                        <p className="help-id-card-desc">
+                                    <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-info">
+                                        <p className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-desc">
                                             {req.description
                                                 ? req.description.length > 100
                                                     ? req.description.substring(0, 100) + "…"
                                                     : req.description
                                                 : "No description"}
                                         </p>
-                                        <div className="help-id-card-meta">
+                                        <div className="bg-card border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-meta">
                                             <span>by {req.userName}</span>
                                             <span>💬 {suggestionCounts.get(req.id) || 0}</span>
                                         </div>

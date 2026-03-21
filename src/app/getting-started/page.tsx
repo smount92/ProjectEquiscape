@@ -55,7 +55,7 @@ export default function GettingStartedPage() {
                         During the add-horse process, you&apos;ll see the{" "}
                         <strong>Financial Vault</strong> section. This is where you can record:
                     </p>
-                    <ul className="getting-started-list">
+                    <ul className="list-none p-0 m-[var(--space-md) 0]">
                         <li>Purchase price and date</li>
                         <li>Estimated current value</li>
                         <li>Insurance notes</li>
@@ -76,7 +76,7 @@ export default function GettingStartedPage() {
                         like a passport that follows the horse, not the owner.
                     </p>
                     <p>Your Hoofprint timeline tracks:</p>
-                    <ul className="getting-started-list">
+                    <ul className="list-none p-0 m-[var(--space-md) 0]">
                         <li>
                             <strong>Life stages</strong> &mdash; from blank resin to work-in-progress
                             to completed custom
@@ -108,7 +108,7 @@ export default function GettingStartedPage() {
                     <p>
                         Once you&apos;ve added a few horses, explore what other collectors are sharing:
                     </p>
-                    <ul className="getting-started-list">
+                    <ul className="list-none p-0 m-[var(--space-md) 0]">
                         <li>
                             <strong>
                                 <Link href="/community">🏆 Show Ring</Link>
@@ -172,7 +172,7 @@ export default function GettingStartedPage() {
                         </Link>{" "}
                         to:
                     </p>
-                    <ul className="getting-started-list">
+                    <ul className="list-none p-0 m-[var(--space-md) 0]">
                         <li>Upload a profile avatar</li>
                         <li>Update your bio and alias</li>
                         <li>Manage notification preferences</li>

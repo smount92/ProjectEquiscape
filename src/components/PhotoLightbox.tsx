@@ -50,14 +50,14 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
             aria-label={`Photo viewer — ${current.label || `Image ${currentIndex + 1}`}`}
         >
             {/* Close */}
-            <button className="lightbox-close" onClick={onClose} aria-label="Close lightbox">
+            <button className="fixed top-[var(--space-lg)] right-[var(--space-lg)] bg-[rgba(255, 255, 255, 0.12)] border-0 text-white w-[40px] h-[40px] rounded-full cursor-pointer text-[1.2rem] flex items-center justify-center transition-colors z-[1001]" onClick={onClose} aria-label="Close lightbox">
                 ✕
             </button>
 
             {/* Prev arrow */}
             {images.length > 1 && (
                 <button
-                    className="lightbox-nav lightbox-nav-prev"
+                    className="lightbox-nav left-[var(--space-lg)]"
                     onClick={(e) => { e.stopPropagation(); goPrev(); }}
                     aria-label="Previous photo"
                 >
@@ -78,7 +78,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
             {/* Next arrow */}
             {images.length > 1 && (
                 <button
-                    className="lightbox-nav lightbox-nav-next"
+                    className="lightbox-nav right-[var(--space-lg)]"
                     onClick={(e) => { e.stopPropagation(); goNext(); }}
                     aria-label="Next photo"
                 >

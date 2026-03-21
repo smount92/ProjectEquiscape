@@ -86,14 +86,14 @@ export default function HelpIdDetailClient({
                     <p style={{ color: "var(--color-text-muted)" }}>No suggestions yet. Be the first to help!</p>
                 </div>
             ) : (
-                <div className="help-id-suggestions-list">
+                <div className="flex flex-col gap-4">
                     {suggestions.map((s) => (
                         <div
                             key={s.id}
                             className={`help-id-suggestion-card ${s.isAccepted ? "accepted" : ""}`}
                             id={`suggestion-${s.id}`}
                         >
-                            <div className="help-id-suggestion-header">
+                            <div className="flex items-center gap-4 mb-4 flex-wrap">
                                 <span className="help-id-suggestion-user">{s.userName}</span>
                                 {s.isAccepted && <span className="help-id-accepted-badge">✅ Accepted Answer</span>}
                                 <span className="help-id-suggestion-date">
@@ -101,7 +101,7 @@ export default function HelpIdDetailClient({
                                 </span>
                             </div>
 
-                            <div className="help-id-suggestion-content">
+                            <div className="mb-4">
                                 {s.releaseDisplay && (
                                     <p className="help-id-suggestion-reference">🏷️ {s.releaseDisplay}</p>
                                 )}
@@ -113,7 +113,7 @@ export default function HelpIdDetailClient({
                                 )}
                             </div>
 
-                            <div className="help-id-suggestion-actions">
+                            <div className="flex items-center gap-4">
                                 <button
                                     className="btn btn-ghost help-id-upvote-btn"
                                     onClick={() => handleUpvote(s.id)}

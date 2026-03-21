@@ -39,7 +39,7 @@ export default function SearchBar({
         <div className={`search-bar ${isFocused ? "search-bar-focused" : ""}`} id={id}>
             {/* Search icon */}
             <svg
-                className="search-bar-icon"
+                className="shrink-0 text-muted transition-colors"
                 width="18"
                 height="18"
                 viewBox="0 0 24 24"
@@ -57,7 +57,7 @@ export default function SearchBar({
             <input
                 ref={inputRef}
                 type="text"
-                className="search-bar-input"
+                className="text-muted transition-colors"
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -69,7 +69,7 @@ export default function SearchBar({
             {/* Keyboard hint or clear button */}
             {value ? (
                 <button
-                    className="search-bar-clear"
+                    className="flex items-center justify-center w-[32px] h-[32px] rounded-full bg-[rgba(0, 0, 0, 0.06)] border border-[rgba(0, 0, 0, 0.06)] text-muted cursor-pointer shrink-0 transition-all"
                     onClick={() => {
                         onChange("");
                         inputRef.current?.focus();

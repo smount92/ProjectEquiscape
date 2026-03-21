@@ -144,9 +144,9 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
             <div className="ref-suggestion-detail">
                 {/* Vote Panel + Main Content */}
-                <div className="ref-suggestion-detail-layout">
+                <div className="grid grid-cols-[60px 1fr] gap-4">
                     {/* Vote Panel */}
-                    <div className="ref-vote-panel">
+                    <div className="flex flex-col items-center sticky top-[80px]">
                         {user ? (
                             <SuggestionVoteButtons
                                 suggestionId={s.id}
@@ -155,23 +155,23 @@ export default async function SuggestionDetailPage({ params }: Props) {
                                 downvotes={s.downvotes}
                             />
                         ) : (
-                            <div className="ref-vote-static">
-                                <span className="ref-vote-count">▲ {s.upvotes}</span>
-                                <span className="ref-vote-count">▼ {s.downvotes}</span>
+                            <div className="flex flex-col items-center gap-1 text-muted">
+                                <span className="ref-font-semibold">▲ {s.upvotes}</span>
+                                <span className="ref-font-semibold">▼ {s.downvotes}</span>
                             </div>
                         )}
                     </div>
 
                     {/* Main Content */}
-                    <div className="ref-suggestion-content">
+                    <div className="flex flex-col gap-4">
                         {/* Header */}
-                        <div className="card ref-suggestion-detail-card">
-                            <div className="ref-suggestion-detail-header">
+                        <div className="card p-6">
+                            <div className="flex justify-between items-center flex-wrap gap-2 mb-4">
                                 <div>
                                     <span className={`ref-status-badge ${st.className}`}>
                                         {st.icon} {st.label}
                                     </span>
-                                    <span className="ref-suggestion-type-label">
+                                    <span className="text-[1.2rem]-label">
                                         {s.suggestion_type === "correction"
                                             ? "🔧 Correction"
                                             : s.suggestion_type === "addition"
@@ -191,12 +191,12 @@ export default async function SuggestionDetailPage({ params }: Props) {
                             </div>
 
                             {/* Author */}
-                            <div className="ref-suggestion-author-row">
+                            <div className="font-semibold-row">
                                 <span>
                                     Suggested by{" "}
                                     <Link
                                         href={`/profile/${authorInfo?.alias_name ?? ""}`}
-                                        className="ref-author-link"
+                                        className="text-forest font-semibold"
                                     >
                                         @{authorInfo?.alias_name ?? "Unknown"}
                                     </Link>
@@ -214,7 +214,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
                             {/* Catalog Item Reference */}
                             {catalogItem && (
-                                <div className="ref-suggestion-item-ref">
+                                <div className="text-forest">
                                     <span>For: </span>
                                     <Link href={`/catalog/${catalogItem.id}`}>
                                         {catalogItem.title} by {catalogItem.maker}
@@ -224,9 +224,9 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
                             {/* Diff View */}
                             {s.suggestion_type === "correction" && s.field_changes && (
-                                <div className="ref-diff-panel">
+                                <div className="m-[var(--space-md) 0]">
                                     <h3>Changes</h3>
-                                    <table className="ref-diff-table">
+                                    <table className="py-1 px-2 border-b border-edge">
                                         <thead>
                                             <tr>
                                                 <th>Field</th>
@@ -240,12 +240,12 @@ export default async function SuggestionDetailPage({ params }: Props) {
                                                 const v = val as { from: string; to: string };
                                                 return (
                                                     <tr key={key}>
-                                                        <td className="ref-diff-field">
+                                                        <td className="font-semibold">
                                                             {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                                                         </td>
                                                         <td className="ref-diff-from">{v.from}</td>
-                                                        <td className="ref-diff-arrow">→</td>
-                                                        <td className="ref-diff-to">{v.to}</td>
+                                                        <td className="text-center text-muted">→</td>
+                                                        <td className="text-[#66bb6a] font-bold">{v.to}</td>
                                                     </tr>
                                                 );
                                             })}
@@ -256,17 +256,17 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
                             {/* Addition Details */}
                             {s.suggestion_type === "addition" && (
-                                <div className="ref-diff-panel">
+                                <div className="m-[var(--space-md) 0]">
                                     <h3>Proposed Entry</h3>
-                                    <div className="ref-detail-grid">
+                                    <div className="grid grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] gap-4 mb-6">
                                         {Object.entries(s.field_changes)
                                             .filter(([, v]) => v != null && v !== "")
                                             .map(([k, v]) => (
-                                                <div key={k} className="ref-detail-field">
+                                                <div key={k} className="flex flex-col gap-[2px]">
                                                     <span className="ref-detail-label">
                                                         {k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                                                     </span>
-                                                    <span className="ref-detail-value ref-diff-to">
+                                                    <span className="ref-detail-value text-[#66bb6a] font-bold">
                                                         {String(v)}
                                                     </span>
                                                 </div>
@@ -276,16 +276,16 @@ export default async function SuggestionDetailPage({ params }: Props) {
                             )}
 
                             {/* Reason */}
-                            <div className="ref-suggestion-reason-section">
+                            <div className="m-[var(--space-md) 0]">
                                 <h3>Reason</h3>
-                                <blockquote className="ref-reason-quote">
+                                <blockquote className="border-l-[3px] border-forest py-2 px-4 bg-glass rounded-[0 var(--radius-md) var(--radius-md) 0] italic text-[var(--color-text)]">
                                     {s.reason}
                                 </blockquote>
                             </div>
 
                             {/* Admin Notes */}
                             {s.admin_notes && (
-                                <div className="ref-admin-notes">
+                                <div className="border-l-[3px] border-[#f9a825] py-2 px-4 bg-[rgba(255, 193, 7, 0.05)] rounded-[0 var(--radius-md) var(--radius-md) 0] m-[var(--space-md) 0]">
                                     <h3>Admin Notes</h3>
                                     <p>{s.admin_notes}</p>
                                 </div>
@@ -293,7 +293,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                         </div>
 
                         {/* Discussion Thread */}
-                        <div className="card ref-discussion-card">
+                        <div className="card p-6">
                             <h3>
                                 💬 Discussion ({(comments ?? []).length})
                             </h3>
@@ -314,7 +314,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
                         {/* Admin Actions */}
                         {isAdmin && s.status === "pending" && (
-                            <div className="card ref-admin-card">
+                            <div className="card p-6 border border-[#ffc107]">
                                 <h3>🛡️ Admin Actions</h3>
                                 <SuggestionAdminActions suggestionId={s.id} />
                             </div>

@@ -75,26 +75,26 @@ export default function AdminReplyForm({
 
     return (
         <div className="admin-reply-form">
-            <div className="admin-reply-form-header">
+            <div className="flex justify-between items-center mb-2">
                 <span className="admin-reply-form-to">
                     To: <strong>{recipientName}</strong> &lt;{recipientEmail}&gt;
                 </span>
                 <button
-                    className="admin-reply-form-close"
+                    className="flex items-center justify-center w-[24px] h-[24px] rounded-full bg-[rgba(0, 0, 0, 0.05)] border-0 text-muted cursor-pointer text-[0.7rem] transition-all"
                     onClick={() => { setIsOpen(false); setStatus(null); }}
                     aria-label="Close reply form"
                 >
                     ✕
                 </button>
             </div>
-            <div className="admin-reply-original">
-                <div className="admin-reply-original-label">
+            <div className="mb-2 py-[10px] px-[14px] bg-[rgba(0, 0, 0, 0.03)] border-l-[3px] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0]">
+                <div className="mb-2 py-[10px] px-[14px] bg-[rgba(0, 0, 0, 0.03)] border-l-[3px] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0]-label">
                     {originalSubject ? `Re: ${originalSubject}` : "Original message"}
                 </div>
-                <div className="admin-reply-original-body">{originalMessage}</div>
+                <div className="mb-2 py-[10px] px-[14px] bg-[rgba(0, 0, 0, 0.03)] border-l-[3px] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0]-body">{originalMessage}</div>
             </div>
             <textarea
-                className="admin-reply-textarea"
+                className="text-muted"
                 placeholder={`Write your reply to ${recipientName}…`}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
@@ -106,7 +106,7 @@ export default function AdminReplyForm({
                     {status.msg}
                 </div>
             )}
-            <div className="admin-reply-form-actions">
+            <div className="flex items-center gap-2 mt-2">
                 <button
                     className="admin-reply-send-btn"
                     onClick={handleSend}

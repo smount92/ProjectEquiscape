@@ -487,7 +487,7 @@ export default function AddHorsePage() {
   if (showSuccess) {
     return (
       <div className="success-overlay">
-        <div className="success-card card animate-fade-in-up">
+        <div className="text-center max-w-[480px] p-[var(--space-3xl)] card animate-fade-in-up">
           <div className="success-icon">🎉</div>
           <h2>
             <span className="text-gradient">{savedHorseName}</span> Added!
@@ -495,7 +495,7 @@ export default function AddHorsePage() {
           <p>
             Your {assetCategory === "model" ? "model" : assetCategory} has been successfully cataloged in your Digital Stable.
           </p>
-          <div className="success-actions">
+          <div className="flex gap-4 justify-center">
             <Link href="/add-horse" className="btn btn-primary" onClick={() => window.location.reload()}>
               Add Another
             </Link>
@@ -511,7 +511,7 @@ export default function AddHorsePage() {
   return (
     <div className="page-container form-page">
       {/* Page Header */}
-      <div className="form-page-header animate-fade-in-up">
+      <div className="mb-12 animate-fade-in-up">
         <h1>
           Add to <span className="text-gradient">Stable</span>
         </h1>
@@ -522,7 +522,7 @@ export default function AddHorsePage() {
       </div>
 
       {/* Asset Category Toggle */}
-      <div className="asset-category-toggle animate-fade-in-up">
+      <div className="flex gap-2 mb-8 animate-fade-in-up">
         {([
           { value: "model" as const, icon: "🐎", label: "Model Horse" },
           { value: "tack" as const, icon: "🏇", label: "Tack & Gear" },
@@ -536,24 +536,24 @@ export default function AddHorsePage() {
             onClick={() => setAssetCategory(cat.value)}
             id={`category-${cat.value}`}
           >
-            <span className="category-icon">{cat.icon}</span>
+            <span className="text-2xl">{cat.icon}</span>
             <span className="category-label">{cat.label}</span>
           </button>
         ))}
       </div>
 
       {/* Step Indicator */}
-      <div className="stepper" role="navigation" aria-label="Form progress">
+      <div className="flex items-center justify-center gap-[0] mb-12 relative" role="navigation" aria-label="Form progress">
         {STEPS.map((step, i) => (
           <div
             key={step.label}
             className={`stepper-step ${i === currentStep ? "active" : ""
               } ${i < currentStep ? "completed" : ""}`}
           >
-            <div className="stepper-dot" aria-current={i === currentStep ? "step" : undefined}>
+            <div className="flex items-center justify-center gap-[0] mb-12 relative-dot" aria-current={i === currentStep ? "step" : undefined}>
               {i < currentStep ? "✓" : i + 1}
             </div>
-            <span className="stepper-label">{step.label}</span>
+            <span className="flex items-center justify-center gap-[0] mb-12 relative-label">{step.label}</span>
           </div>
         ))}
       </div>
@@ -573,9 +573,9 @@ export default function AddHorsePage() {
           ================================================================ */}
       {currentStep === 0 && (
         <div className="step-content" key="step-0">
-          <div className="step-card">
-            <div className="step-card-header">
-              <div className="step-card-icon">📸</div>
+          <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
+            <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-header">
+              <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">📸</div>
               <div>
                 <h2>Photo Gallery</h2>
                 <p>Upload photos from specific angles to build a complete profile</p>
@@ -588,7 +588,7 @@ export default function AddHorsePage() {
               be shown on your Digital Shelf.
             </p>
 
-            <div className="gallery-grid">
+            <div className="grid grid-cols-[repeat(3, 1fr)] gap-4">
               {GALLERY_SLOTS.map((slot) => {
                 const existing = imageSlots[slot.angle];
                 const isPrimary = slot.angle === "Primary_Thumbnail";
@@ -607,7 +607,7 @@ export default function AddHorsePage() {
                           className="gallery-preview"
                         />
                         <button
-                          className="gallery-remove"
+                          className="absolute top-[6px] right-[6px] w-[28px] h-[28px] rounded-full bg-[rgba(0, 0, 0, 0.7)] text-white border-0 cursor-pointer flex items-center justify-center text-[0.85rem] z-[2] transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleImageRemove(slot.angle);
@@ -616,7 +616,7 @@ export default function AddHorsePage() {
                         >
                           ✕
                         </button>
-                        <div className="gallery-slot-check">✓</div>
+                        <div className="absolute bottom-[6px] left-[6px] w-[24px] h-[24px] rounded-full bg-success text-inverse flex items-center justify-center text-[0.7rem] font-extrabold z-[2]">✓</div>
 
                         {/* AI Auto-Detect button — hidden for now */}
                         {false && isPrimary && (
@@ -649,7 +649,7 @@ export default function AddHorsePage() {
                       </>
                     ) : (
                       <>
-                        <span className="gallery-slot-icon">{isPrimary ? "🖼️" : "📷"}</span>
+                        <span className="text-[1.8rem] text-muted transition-colors">{isPrimary ? "🖼️" : "📷"}</span>
                         <span className="gallery-slot-label">{slot.label}</span>
                         {/* AI hint hidden for now */}
                       </>
@@ -670,9 +670,9 @@ export default function AddHorsePage() {
             </div>
 
             {/* Extra Details Multi-Upload Zone */}
-            <div className="extras-upload-zone">
+            <div className="mt-6 border-t border-edge pt-6">
               <div
-                className="extras-dropzone"
+                className="opacity-[0.4]"
                 onClick={() => extraInputRef.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
@@ -713,13 +713,13 @@ export default function AddHorsePage() {
                 <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>{extraFiles.length}/10 photos · Click or drag files here</span>
               </div>
               {extraFiles.length > 0 && (
-                <div className="extras-preview-grid">
+                <div className="flex flex-wrap gap-2 mt-4">
                   {extraFiles.map((ef, i) => (
-                      <div key={i} className="extras-preview-item">
+                      <div key={i} className="relative w-[100px] h-[100px] rounded-md overflow-hidden border border-edge">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={ef.previewUrl} alt={`Extra detail ${i + 1}`} />
                       <button
-                        className="gallery-remove"
+                        className="absolute top-[6px] right-[6px] w-[28px] h-[28px] rounded-full bg-[rgba(0, 0, 0, 0.7)] text-white border-0 cursor-pointer flex items-center justify-center text-[0.85rem] z-[2] transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           URL.revokeObjectURL(ef.previewUrl);
@@ -730,7 +730,7 @@ export default function AddHorsePage() {
                         ✕
                       </button>
                       <button
-                        className="gallery-recrop"
+                        className="absolute bottom-[4px] right-[4px] w-[22px] h-[22px] rounded-full bg-[rgba(0, 0, 0, 0.7)] text-white border-0 cursor-pointer text-[13px] flex items-center justify-center opacity-0 transition-opacity leading-none"
                         onClick={(e) => {
                           e.stopPropagation();
                           setReCropExtraIdx(i);
@@ -750,7 +750,7 @@ export default function AddHorsePage() {
 
             {/* AI result badge (shown after detection) */}
             {aiResult && (
-              <div className="ai-result-badge">
+              <div className="shrink-0 text-forest">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
                 </svg>
@@ -761,8 +761,8 @@ export default function AddHorsePage() {
             )}
           </div>
 
-          <div className="step-nav">
-            <div className="step-nav-spacer" />
+          <div className="flex justify-between items-center gap-4 mt-8">
+            <div className="flex justify-between items-center gap-4 mt-8-spacer" />
             <button className="btn btn-primary" onClick={goNext} id="step-1-next">
               Next: Reference Link →
             </button>
@@ -775,9 +775,9 @@ export default function AddHorsePage() {
           — Use CSS display instead of unmounting to preserve component state
           ================================================================ */}
       <div className="step-content" key="step-1" style={{ display: currentStep === 1 ? "block" : "none" }}>
-        <div className="step-card">
-          <div className="step-card-header">
-            <div className="step-card-icon">🔗</div>
+        <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
+          <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-header">
+            <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🔗</div>
             <div>
               <h2>Reference Link</h2>
               <p>Search by mold name, release name (paint job), or artist resin</p>
@@ -816,7 +816,7 @@ export default function AddHorsePage() {
             externalSearchQuery={aiSearchQuery}
             aiNotice={
               aiResult ? (
-                <div className="ai-result-badge" style={{ marginBottom: "var(--space-lg)" }}>
+                <div className="shrink-0 text-forest" style={{ marginBottom: "var(--space-lg)" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
                   </svg>
@@ -829,7 +829,7 @@ export default function AddHorsePage() {
           />
         </div>
 
-        <div className="step-nav">
+        <div className="flex justify-between items-center gap-4 mt-8">
           <button className="btn btn-ghost" onClick={goBack} id="step-2-back">
             ← Back
           </button>
@@ -849,7 +849,7 @@ export default function AddHorsePage() {
           ================================================================ */}
       {currentStep === 2 && (
         <div className="step-content" key="step-2">
-          <div className="step-card">
+          <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
 
             {/* Reference summary badge */}
             {selectedCatalogItem && (
@@ -858,8 +858,8 @@ export default function AddHorsePage() {
               </div>
             )}
 
-            <div className="step-card-header">
-              <div className="step-card-icon">🏷️</div>
+            <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-header">
+              <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🏷️</div>
               <div>
                 <h2>{isModel ? "Model Identity" : `${assetCategory.charAt(0).toUpperCase() + assetCategory.slice(1)} Details`}</h2>
                 <p>{isModel ? "Give your model a name and describe its characteristics" : `Name and describe your ${assetCategory}`}</p>
@@ -1142,7 +1142,7 @@ export default function AddHorsePage() {
 
             {/* Conditional marketplace fields */}
             {(tradeStatus === "For Sale" || tradeStatus === "Open to Offers") && (
-              <div className="marketplace-fields animate-fade-in-up">
+              <div className="mt-4 p-4 bg-[rgba(34, 197, 94, 0.05)] border border-[rgba(34, 197, 94, 0.15)] rounded-md animate-fade-in-up">
                 <div className="form-group">
                   <label htmlFor="listing-price" className="form-label">
                     💲 Listing Price
@@ -1179,7 +1179,7 @@ export default function AddHorsePage() {
             )}
           </div>
 
-          <div className="step-nav">
+          <div className="flex justify-between items-center gap-4 mt-8">
             <button className="btn btn-ghost" onClick={goBack} id="step-3-back">
               ← Back
             </button>
@@ -1194,8 +1194,8 @@ export default function AddHorsePage() {
           </div>
 
           {/* Community visibility selector */}
-          <div className="community-toggle-section">
-            <div className="community-toggle-row" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
+          <div className="mt-6 py-4 px-6 rounded-lg bg-[rgba(44, 85, 69, 0.04)] border border-[rgba(44, 85, 69, 0.12)]">
+            <div className="flex items-center justify-between gap-6" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
               <span className="community-toggle-label">👁️ Visibility</span>
               <div className="flex gap-2 flex-wrap">
                 {([
@@ -1236,9 +1236,9 @@ export default function AddHorsePage() {
               </div>
             )}
 
-            <div className="step-card vault-section">
+            <div className="bg-card border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible relative overflow-hidden">
               {/* Vault Header */}
-              <div className="vault-header">
+              <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[rgba(240, 160, 108, 0.2)]">
                 <div className="vault-icon">🔒</div>
                 <div>
                   <h2>The Financial Vault</h2>
@@ -1247,7 +1247,7 @@ export default function AddHorsePage() {
               </div>
 
               {/* Privacy reassurance */}
-              <div className="vault-privacy-notice" role="note" aria-label="Financial privacy notice">
+              <div className="flex items-start gap-2 p-4 bg-[rgba(240, 160, 108, 0.08)] border border-[rgba(240, 160, 108, 0.2)] rounded-md mb-8" role="note" aria-label="Financial privacy notice">
                 <span style={{ fontSize: "1.3em", flexShrink: 0, marginTop: "2px" }}>🛡️</span>
                 <p>
                   <strong>This data is encrypted and only visible to you.</strong> No
@@ -1258,7 +1258,7 @@ export default function AddHorsePage() {
                 </p>
               </div>
 
-              <div className="vault-row">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="form-group">
                   <label htmlFor="purchase-price" className="form-label">
                     Purchase Price
@@ -1305,7 +1305,7 @@ export default function AddHorsePage() {
                 </small>
               </div>
 
-              <div className="vault-row">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="form-group">
                   <label htmlFor="estimated-value" className="form-label">
                     Estimated Current Value
@@ -1337,7 +1337,7 @@ export default function AddHorsePage() {
                 </div>
               </div>
 
-              <div className="vault-skip">
+              <div className="text-center mt-6 pt-6 border-t border-edge">
                 <p>
                   💡 All fields are optional. You can always add or update financial
                   details later from your Horse Passport view.
@@ -1345,7 +1345,7 @@ export default function AddHorsePage() {
               </div>
             </div>
 
-            <div className="step-nav">
+            <div className="flex justify-between items-center gap-4 mt-8">
               <button className="btn btn-ghost" onClick={goBack} id="step-4-back">
                 ← Back
               </button>
@@ -1370,17 +1370,17 @@ export default function AddHorsePage() {
       }
 
       {/* ── AI Toast Notifications ── */}
-      <div className="ai-toast-container" aria-live="polite">
+      <div className="ai-fixed top-[calc(var(--header-height) + var(--space-md))] right-[var(--space-lg)] flex flex-col gap-2 z-[10000] max-w-[420px] w-full pointer-events-none" aria-live="polite">
         {aiToasts.map((toast) => (
           <div
             key={toast.id}
             className={`ai-toast ai-toast-${toast.type}`}
             role="status"
           >
-            <span className="ai-toast-icon">
+            <span className="ai-text-[1.1rem] shrink-0">
               {toast.type === "success" ? "✨" : toast.type === "error" ? "⚠️" : "ℹ️"}
             </span>
-            <span className="ai-toast-msg">{toast.message}</span>
+            <span className="flex-1">{toast.message}</span>
           </div>
         ))}
       </div>

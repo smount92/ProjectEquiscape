@@ -153,7 +153,7 @@ export default function CollectionPicker({
         </div>
       )}
 
-      <div className="collection-picker-row" style={{ marginTop: "var(--space-sm)" }}>
+      <div className="flex gap-2 items-center" style={{ marginTop: "var(--space-sm)" }}>
         {selectedNames.length > 0 && (
           <div style={{
             fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
@@ -182,7 +182,7 @@ export default function CollectionPicker({
       {showModal && createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div
-            className="modal-content collection-modal"
+            className="modal-content max-w-[480px]"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -200,7 +200,7 @@ export default function CollectionPicker({
               </button>
             </div>
 
-            <div className="modal-body">
+            <div className="p-8 flex flex-col gap-4">
               <div className="form-group">
                 <label htmlFor="new-collection-name" className="form-label">
                   Collection Name *
@@ -249,7 +249,7 @@ export default function CollectionPicker({
               </div>
             </div>
 
-            <div className="modal-actions">
+            <div className="flex gap-4">
               <button
                 type="button"
                 className="btn btn-ghost"

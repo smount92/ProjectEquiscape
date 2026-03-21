@@ -90,24 +90,24 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                     <p>{tab === "mine" ? "You haven't joined any groups yet." : "No groups found."}</p>
                 </div>
             ) : (
-                <div className="group-card-grid">
+                <div className="grid grid-cols-[repeat(auto-fill, minmax(320px, 1fr))] gap-4">
                     {filtered.map(g => (
-                        <div key={g.id} className="group-card">
-                            <div className="group-card-header">
-                                <span className="group-card-icon">{TYPE_ICONS[g.groupType] || "📂"}</span>
+                        <div key={g.id} className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors">
+                            <div className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-header">
+                                <span className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-icon">{TYPE_ICONS[g.groupType] || "📂"}</span>
                                 <div>
-                                    <Link href={`/community/groups/${g.slug}`} className="group-card-name">{g.name}</Link>
-                                    <div className="group-card-meta">
+                                    <Link href={`/community/groups/${g.slug}`} className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-name">{g.name}</Link>
+                                    <div className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-meta">
                                         {typeLabels[g.groupType] || g.groupType}
                                         {g.region && <> · {g.region}</>}
                                     </div>
                                 </div>
                             </div>
                             {g.description && (
-                                <p className="group-card-desc">{g.description.slice(0, 120)}{g.description.length > 120 ? "..." : ""}</p>
+                                <p className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-desc">{g.description.slice(0, 120)}{g.description.length > 120 ? "..." : ""}</p>
                             )}
-                            <div className="group-card-footer">
-                                <span className="group-card-members">👥 {g.memberCount} member{g.memberCount !== 1 ? "s" : ""}</span>
+                            <div className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-footer">
+                                <span className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-members">👥 {g.memberCount} member{g.memberCount !== 1 ? "s" : ""}</span>
                                 {g.isMember ? (
                                     <div style={{ display: "flex", gap: "var(--space-xs)" }}>
                                         <span className="commission-status-badge" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>

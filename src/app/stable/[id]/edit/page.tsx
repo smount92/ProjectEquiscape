@@ -559,7 +559,7 @@ export default function EditHorsePage() {
   if (isLoading) {
     return (
       <div className="page-container form-page">
-        <div className="edit-page" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+        <div className="py-12 px-[0] max-w-[680px] mx-auto" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
           <div className="btn-spinner" style={{ width: 36, height: 36, margin: "0 auto var(--space-lg)", borderWidth: 3, borderColor: "var(--color-border)", borderTopColor: "var(--color-accent-primary)" }} />
           <p>Loading horse details…</p>
         </div>
@@ -570,8 +570,8 @@ export default function EditHorsePage() {
   if (error) {
     return (
       <div className="page-container form-page">
-        <div className="passport-not-found card">
-          <div className="passport-not-found-icon">🚫</div>
+        <div className="text-center py-[var(--space-3xl)] px-8 card">
+          <div className="text-center py-[var(--space-3xl)] px-8-icon">🚫</div>
           <h1>Access Denied</h1>
           <p>{error}</p>
           <Link href="/dashboard" className="btn btn-primary">Back to Stable</Link>
@@ -590,7 +590,7 @@ export default function EditHorsePage() {
         <span>Edit</span>
       </nav>
 
-      <div className="edit-page animate-fade-in-up">
+      <div className="py-12 px-[0] max-w-[680px] mx-auto animate-fade-in-up">
         <h1 style={{ marginBottom: "var(--space-xl)" }}>
           Edit <span className="text-gradient">{customName}</span>
         </h1>
@@ -605,23 +605,23 @@ export default function EditHorsePage() {
         )}
 
         {/* ===== Photo Studio ===== */}
-        <div className="edit-section">
-          <div className="edit-section-header">
-            <div className="edit-section-icon">📸</div>
+        <div className="bg-card border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-card border border-edge rounded-lg p-12 mb-8-header">
+            <div className="bg-card border border-edge rounded-lg p-12 mb-8-icon">📸</div>
             <h2>Photo Studio</h2>
           </div>
           <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
             Upload up to 4 standardized angles. The primary photo is used as the thumbnail everywhere.
           </p>
 
-          <div className="photo-studio-grid">
+          <div className="grid grid-cols-2 gap-4">
             {PHOTO_STUDIO_SLOTS.map((slot) => {
               const preview = previews[slot.angle];
               const hasNew = !!newFiles[slot.angle];
               const isDrag = draggingAngle === slot.angle;
 
               return (
-                <div key={slot.angle} className="photo-studio-slot">
+                <div key={slot.angle} className="flex flex-col">
                   <div className="photo-studio-label">
                     {slot.label}
                     {slot.primary && <span className="photo-studio-required">Required</span>}
@@ -647,7 +647,7 @@ export default function EditHorsePage() {
                       style={{ display: "none" }}
                     />
                     {preview ? (
-                      <div className="image-upload-preview">
+                      <div className="relative w-full">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={preview} alt={slot.label} />
                         <div className="image-upload-overlay">
@@ -661,7 +661,7 @@ export default function EditHorsePage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="image-upload-placeholder">
+                      <div className="flex flex-col items-center gap-2 p-8 text-muted">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                           strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -697,13 +697,13 @@ export default function EditHorsePage() {
           </div>
 
           {/* Extra Details Multi-Upload Zone */}
-          <div className="extras-upload-zone">
+          <div className="mt-6 border-t border-edge pt-6">
             <div className="photo-studio-label" style={{ marginBottom: "var(--space-xs)" }}>
               Extra Details & Flaws
               <span style={{ fontWeight: 400, color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>{existingExtras.length + newExtraFiles.length}/10</span>
             </div>
             <div
-              className="extras-dropzone"
+              className="opacity-[0.4]"
               onClick={() => extraInputRef.current?.click()}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
@@ -745,7 +745,7 @@ export default function EditHorsePage() {
 
             {/* Existing extras — drag to reorder */}
             {(existingExtras.length > 0 || newExtraFiles.length > 0) && (
-              <div className="extras-preview-grid">
+              <div className="flex flex-wrap gap-2 mt-4">
                 {existingExtras.map((ex, idx) => (
                   <div
                     key={ex.recordId}
@@ -777,7 +777,7 @@ export default function EditHorsePage() {
                     <img src={ex.imageUrl} alt="Extra detail" />
                     <div className="absolute top-1 right-7 bg-black/50 text-white w-5.5 h-5.5 rounded-sm flex items-center justify-center text-xs cursor-grab opacity-0 group-hover:opacity-100 transition-opacity z-[3]" title="Drag to reorder">⠇</div>
                     <button
-                      className="gallery-remove"
+                      className="absolute top-[6px] right-[6px] w-[28px] h-[28px] rounded-full bg-[rgba(0, 0, 0, 0.7)] text-white border-0 cursor-pointer flex items-center justify-center text-[0.85rem] z-[2] transition-colors"
                       onClick={async (e) => {
                         e.stopPropagation();
                         await deleteHorseImageAction(ex.recordId, ex.storagePath || null);
@@ -790,11 +790,11 @@ export default function EditHorsePage() {
                   </div>
                 ))}
                 {newExtraFiles.map((ef, i) => (
-                  <div key={`new-${i}`} className="extras-preview-item">
+                  <div key={`new-${i}`} className="relative w-[100px] h-[100px] rounded-md overflow-hidden border border-edge">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={ef.previewUrl} alt={`New extra ${i + 1}`} />
                     <button
-                      className="gallery-remove"
+                      className="absolute top-[6px] right-[6px] w-[28px] h-[28px] rounded-full bg-[rgba(0, 0, 0, 0.7)] text-white border-0 cursor-pointer flex items-center justify-center text-[0.85rem] z-[2] transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         URL.revokeObjectURL(ef.previewUrl);
@@ -805,7 +805,7 @@ export default function EditHorsePage() {
                       ✕
                     </button>
                     <button
-                      className="gallery-recrop"
+                      className="absolute bottom-[4px] right-[4px] w-[22px] h-[22px] rounded-full bg-[rgba(0, 0, 0, 0.7)] text-white border-0 cursor-pointer text-[13px] flex items-center justify-center opacity-0 transition-opacity leading-none"
                       onClick={(e) => {
                         e.stopPropagation();
                         setReCropExtraIdx(i);
@@ -825,9 +825,9 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 1: Identity ===== */}
-        <div className="edit-section">
-          <div className="edit-section-header">
-            <div className="edit-section-icon">🏷️</div>
+        <div className="bg-card border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-card border border-edge rounded-lg p-12 mb-8-header">
+            <div className="bg-card border border-edge rounded-lg p-12 mb-8-icon">🏷️</div>
             <h2>Model Identity</h2>
           </div>
 
@@ -938,7 +938,7 @@ export default function EditHorsePage() {
 
           {/* Finish Type & Condition — model only */}
           {isModel && (
-            <div className="edit-row">
+            <div className="grid grid-cols-2 gap-6">
               <div className="form-group">
                 <label htmlFor="edit-finish" className="form-label">Finish Type *</label>
                 <select id="edit-finish" className="form-select" value={finishType}
@@ -1034,7 +1034,7 @@ export default function EditHorsePage() {
 
           {/* Conditional marketplace fields */}
           {(tradeStatus === "For Sale" || tradeStatus === "Open to Offers") && (
-            <div className="marketplace-fields animate-fade-in-up">
+            <div className="mt-4 p-4 bg-[rgba(34, 197, 94, 0.05)] border border-[rgba(34, 197, 94, 0.15)] rounded-md animate-fade-in-up">
               <div className="form-group">
                 <label htmlFor="edit-listing-price" className="form-label">💲 Listing Price</label>
                 <input id="edit-listing-price" type="number" className="form-input"
@@ -1053,8 +1053,8 @@ export default function EditHorsePage() {
         </div>
 
         {/* Community visibility selector */}
-        <div className="community-toggle-section">
-          <div className="community-toggle-row" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
+        <div className="mt-6 py-4 px-6 rounded-lg bg-[rgba(44, 85, 69, 0.04)] border border-[rgba(44, 85, 69, 0.12)]">
+          <div className="flex items-center justify-between gap-6" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
             <span className="community-toggle-label">👁️ Visibility</span>
             <div className="flex gap-2 flex-wrap">
               {([
@@ -1079,9 +1079,9 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 2: Reference Link (Unified Search) ===== */}
-        <div className="edit-section">
-          <div className="edit-section-header">
-            <div className="edit-section-icon">🔗</div>
+        <div className="bg-card border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-card border border-edge rounded-lg p-12 mb-8-header">
+            <div className="bg-card border border-edge rounded-lg p-12 mb-8-icon">🔗</div>
             <h2>Reference Link</h2>
           </div>
 
@@ -1104,8 +1104,8 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 3: Financial Vault ===== */}
-        <div className="edit-section vault-section">
-          <div className="vault-header">
+        <div className="bg-card border border-edge rounded-lg p-12 mb-8 relative overflow-hidden">
+          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[rgba(240, 160, 108, 0.2)]">
             <div className="vault-icon">🔒</div>
             <div>
               <h2>Financial Vault</h2>
@@ -1113,7 +1113,7 @@ export default function EditHorsePage() {
             </div>
           </div>
 
-          <div className="vault-privacy-notice" role="note">
+          <div className="flex items-start gap-2 p-4 bg-[rgba(240, 160, 108, 0.08)] border border-[rgba(240, 160, 108, 0.2)] rounded-md mb-8" role="note">
             <span style={{ fontSize: "1.3em", flexShrink: 0, marginTop: "2px" }}>🛡️</span>
             <p>
               <strong>This data is encrypted and only visible to you.</strong> Protected by
@@ -1121,7 +1121,7 @@ export default function EditHorsePage() {
             </p>
           </div>
 
-          <div className="vault-row">
+          <div className="grid grid-cols-2 gap-6">
             <div className="form-group">
               <label htmlFor="edit-price" className="form-label">Purchase Price</label>
               <input id="edit-price" type="number" className="form-input" placeholder="0.00"
@@ -1145,7 +1145,7 @@ export default function EditHorsePage() {
             </small>
           </div>
 
-          <div className="vault-row">
+          <div className="grid grid-cols-2 gap-6">
             <div className="form-group">
               <label htmlFor="edit-value" className="form-label">Estimated Current Value</label>
               <input id="edit-value" type="number" className="form-input" placeholder="0.00"
@@ -1161,7 +1161,7 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Actions ===== */}
-        <div className="edit-actions">
+        <div className="flex gap-4 justify-end">
           <Link href={`/stable/${horseId}`} className="btn btn-ghost" id="edit-cancel">
             Cancel
           </Link>
