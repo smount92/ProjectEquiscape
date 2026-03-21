@@ -94,9 +94,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 <Link href="/community/events" className="btn btn-ghost" style={{ marginBottom: "var(--space-md)" }}>← All Events</Link>
 
                 <div className="flex gap-lg items-start mb-lg">
-                    <div className="event-detail-date-badge">
-                        <span className="event-date-month">{date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}</span>
-                        <span className="event-date-day">{date.getDate()}</span>
+                    <div className="flex flex-col items-center justify-center min-w-[56px] h-[56px] rounded-md bg-[linear-gradient(135deg,rgba(44,85,69,0.15),rgba(139,92,246,0.1))] border border-[rgba(44,85,69,0.3)] shrink-0">
+                        <span className="text-[calc(0.6rem*var(--font-scale))] font-bold text-[#2C5545] uppercase tracking-wider">{date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}</span>
+                        <span className="text-[calc(1.2rem*var(--font-scale))] font-extrabold text-text-primary leading-none">{date.getDate()}</span>
                     </div>
                     <div>
                         <h1>{event.name}</h1>

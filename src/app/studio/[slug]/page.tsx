@@ -171,9 +171,9 @@ export default async function PublicStudioPage({
                                     </span>
                                 </div>
                             )}
-                            <div className="studio-info-item">
-                                <span className="studio-info-label">Commission Slots</span>
-                                <span className="studio-info-value">
+                            <div className="flex justify-between items-center py-xs">
+                                <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">Commission Slots</span>
+                                <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
                                     {slotsUsed} / {profile.maxSlots} filled
                                 </span>
                             </div>
@@ -181,7 +181,7 @@ export default async function PublicStudioPage({
 
                         {profile.mediums.length > 0 && (
                             <div style={{ marginTop: "var(--space-md)" }}>
-                                <span className="studio-info-label" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Mediums</span>
+                                <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Mediums</span>
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)" }}>
                                     {profile.mediums.map(m => (
                                         <span key={m} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{m}</span>
@@ -192,7 +192,7 @@ export default async function PublicStudioPage({
 
                         {profile.scalesOffered.length > 0 && (
                             <div style={{ marginTop: "var(--space-md)" }}>
-                                <span className="studio-info-label" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Scales</span>
+                                <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Scales</span>
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)" }}>
                                     {profile.scalesOffered.map(s => (
                                         <span key={s} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{s}</span>
