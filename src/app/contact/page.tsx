@@ -36,8 +36,8 @@ export default function ContactPage() {
 
                 <section className="static-section">
                     {state.success ? (
-                        <div className="contact-success" id="contact-success">
-                            <span className="contact-success-icon" aria-hidden="true">✅</span>
+                        <div className="text-center py-3xl px-xl" id="contact-success">
+                            <span className="block text-[3rem] mb-lg" aria-hidden="true">✅</span>
                             <h2>Message Sent!</h2>
                             <p>
                                 Thanks for reaching out. We&apos;ll get back to you as soon as possible.
@@ -47,7 +47,7 @@ export default function ContactPage() {
                         <form
                             ref={formRef}
                             action={formAction}
-                            className="contact-form"
+                            className="max-w-[560px] mx-auto"
                             id="contact-form"
                             noValidate
                         >
@@ -121,7 +121,7 @@ export default function ContactPage() {
                                 <textarea
                                     id="contact-message"
                                     name="message"
-                                    className="form-input contact-textarea"
+                                    className="form-input resize-y min-h-[140px]"
                                     placeholder="Tell us what's on your mind..."
                                     rows={6}
                                     required

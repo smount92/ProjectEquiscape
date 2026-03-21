@@ -93,7 +93,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             <div className="page-content" style={{ maxWidth: 720 }}>
                 <Link href="/community/events" className="btn btn-ghost" style={{ marginBottom: "var(--space-md)" }}>← All Events</Link>
 
-                <div className="event-detail-header">
+                <div className="flex gap-lg items-start mb-lg">
                     <div className="event-detail-date-badge">
                         <span className="event-date-month">{date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}</span>
                         <span className="event-date-day">{date.getDate()}</span>
