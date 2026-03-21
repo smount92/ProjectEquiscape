@@ -247,10 +247,6 @@ p {
   color: var(--color-text-secondary);
 }
 
-
-
-
-
 @media (max-width: 768px) {
   .header-desktop-nav {
     display: none !important;
@@ -278,40 +274,19 @@ p {
   }
 }
 
-
-
-
-
-
-
-
-
-
 .form-input,
 .form-select,
-
 
 .form-input::placeholder,
 
 .form-input:focus,
 .form-select:focus,
 
-
-
 .form-divider::before,
-
-
-
-
-
 
 .btn-primary:active:not(:disabled) {
   transform: translateY(0);
 }
-
-
-
-
 
 @keyframes spin {
   to {
@@ -340,7 +315,6 @@ p {
   50% { transform: scale(1.4); }
   100% { transform: scale(1); }
 }
-
 
 .vault-reveal::before {
   content: '';
@@ -371,7 +345,6 @@ p {
   .showring-filters { flex-direction: column; align-items: stretch; }
   .filter-pill-group { justify-content: center; }
 }
-
 
 .show-record-list::before { content: ""; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--color-border, rgba(0,0,0,0.1)); }
 .show-record-item::before { content: ""; position: absolute; left: calc(-1 * var(--space-xl) + 4px); top: var(--space-md); width: 10px; height: 10px; border-radius: 50%; background: var(--color-text-muted); border: 2px solid var(--color-bg-card); }
@@ -414,8 +387,6 @@ p {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 .settings-toggle-active::after { transform: translateX(20px); }
-
-
 
 @keyframes fadeInUp {
   from {
@@ -472,7 +443,6 @@ p {
     width: 100%;
   }
 }
-
 
 .category-card.active {
   border-color: var(--color-accent-primary);
@@ -547,7 +517,6 @@ p {
   }
 }
 
-
 @keyframes modal-slide-up {
   from {
     opacity: 0;
@@ -575,9 +544,6 @@ p {
   background: linear-gradient(90deg, var(--color-accent-danger), #d44060);
 }
 
-
-
-
 @keyframes shake {
 
   0%,
@@ -595,7 +561,6 @@ p {
     transform: translateX(6px);
   }
 }
-
 
 @media (max-width: 480px) {
   .passport-actions {
@@ -617,15 +582,7 @@ p {
   }
 }
 
-
 .ref-selected-parent,
-
-
-
-
-
-
-
 
 .community-card:hover {
   transform: translateY(-4px);
@@ -640,24 +597,8 @@ p {
    RESPONSIVE — COMMUNITY
    ================================================================ */
 
-@media (max-width: 640px) {
-  .community-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .community-hero {
-    padding: var(--space-xl) var(--space-md);
-  }
-
-  .community-hero h1 {
-    font-size: calc(1.6rem * var(--font-scale));
-  }
-
-}
-
    COMMUNITY TOGGLE SECTION (Intake & Edit Forms)
    ================================================================ */
-
 
 .profile-hero {
   display: flex;
@@ -671,7 +612,6 @@ p {
       rgba(74, 222, 222, 0.06) 100%);
   border: 1px solid var(--color-border);
 }
-
 
 @media (max-width: 640px) {
   .profile-hero {
@@ -693,7 +633,6 @@ p {
    COLLECTIONS — Horse Card Badge
    ================================================================ */
 
-
 .collection-hero {
   display: flex;
   align-items: center;
@@ -706,8 +645,6 @@ p {
       rgba(74, 222, 222, 0.04) 100%);
   border: 1px solid var(--color-border);
 }
-
-
 
 .modal-overlay {
   position: fixed;
@@ -732,10 +669,6 @@ p {
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.2s ease-out;
 }
-
-
-
-
 
 @keyframes fadeIn {
   from {
@@ -775,8 +708,6 @@ p {
     max-width: 100%;
   }
 }
-
-
 
 @media (max-width: 640px) {
   .search-bar {
@@ -891,7 +822,6 @@ p {
   }
 }
 
-
 .hero-glow,
 
 @keyframes glow-float {
@@ -903,11 +833,6 @@ p {
     transform: translate(30px, 20px) scale(1.1);
   }
 }
-
-
-
-
-
 
    LANDING PAGE — RESPONSIVE
    ============================================================ */
@@ -977,8 +902,6 @@ p {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-
-
 .marketplace-notes-snippet {
   font-size: calc(var(--font-size-xs) * var(--font-scale));
   color: var(--color-text-muted);
@@ -990,7 +913,6 @@ p {
   cursor: help;
   line-height: 1.4;
 }
-
 
 @keyframes matchmaker-pulse {
 
@@ -1045,7 +967,6 @@ p {
   transform: rotate(180deg);
 }
 
-
 .inbox-unread-badge {
   display: inline-flex;
   align-items: center;
@@ -1091,7 +1012,6 @@ p {
   z-index: 100;
 }
 
-
 .wishlist-toast {
   position: fixed;
   top: 80px;
@@ -1114,13 +1034,6 @@ p {
   100% {
     transform: translateX(0);
     opacity: 1;
-  }
-}
-
-
-@media (max-width: 600px) {
-  .export-csv-btn span:not(.btn-spinner) {
-    display: none;
   }
 }
 
@@ -1351,15 +1264,6 @@ p {
   }
 }
 
-
-@media (min-width: 1200px) {
-  .page-container-wide {
-    max-width: 1400px;
-  }
-}
-
-
-
 .parked-export-pin {
   font-family: monospace;
   font-size: 2rem;
@@ -1367,18 +1271,6 @@ p {
   letter-spacing: 0.25em;
   color: var(--color-accent-primary);
   flex: 1;
-}
-
-@media (min-width: 1400px) {
-  .page-container-wide {
-    max-width: 1600px;
-  }
-}
-
-@media (min-width: 1800px) {
-  .page-container-wide {
-    max-width: 1800px;
-  }
 }
 
 @media (min-width: 1200px) {
@@ -1438,23 +1330,9 @@ p {
   pointer-events: auto;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 .help-id-card.resolved:hover {
   opacity: 1;
 }
-
 
 .division-reorder,
 
@@ -1483,7 +1361,6 @@ p {
     display: none;
   }
 }
-
 
 .image-upload-zone.drag-active {
   border-color: var(--color-accent-primary);
@@ -1519,9 +1396,6 @@ p {
   }
 }
 
-
-
-
 .passport-breadcrumb .separator {
   color: var(--color-border);
 }
@@ -1530,13 +1404,6 @@ p {
   border-color: var(--color-accent-primary);
   box-shadow: 0 0 8px var(--color-accent-primary-glow);
 }
-
-
-
-
-
-
-
 
 .passport-action-bar {
   display: flex;
@@ -1558,7 +1425,6 @@ p {
   white-space: nowrap;
 }
 
-
 .market-filter-chip.active {
   background: var(--color-accent-primary);
   border-color: var(--color-accent-primary);
@@ -1570,10 +1436,6 @@ p {
     grid-template-columns: 1fr;
   }
 }
-
-
-
-
 
 .horse-card-selected {
   outline: 3px solid var(--color-accent-primary);
@@ -1644,7 +1506,6 @@ p {
   cursor: wait;
 }
 
-
 .admin-reply-form {
   width: 100%;
   margin-top: var(--space-sm);
@@ -1671,16 +1532,12 @@ p {
   color: var(--color-text-primary);
 }
 
-
 .csv-dropzone:hover,
 .csv-dropzone.dragover {
   border-color: var(--color-accent-primary);
   background: rgba(44, 85, 69, 0.05);
   box-shadow: 0 0 30px rgba(44, 85, 69, 0.1);
 }
-
-
-
 
 .spinner-inline {
   display: inline-block;
@@ -1715,7 +1572,6 @@ p {
 .csv-success-card,
 
 .csv-success-icon,
-
 
 @media (max-width: 640px) {
   .csv-step-indicator {
@@ -1753,8 +1609,6 @@ p {
   }
 }
 
-
-
 .show-entry-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1777,10 +1631,6 @@ p {
   }
 }
 
-
-
-
-
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -1802,8 +1652,6 @@ p {
   animation: shimmer 1.5s ease-in-out infinite;
   margin-bottom: var(--space-xl);
 }
-
-
 
 .gallery-slot.has-image {
   border-style: solid;
@@ -2004,15 +1852,6 @@ p {
   }
 }
 
-
-
-
-
-
-
-
-
-
 .horse-card-badge.of {
   background: rgba(92, 224, 160, 0.2);
   color: var(--color-accent-success);
@@ -2031,16 +1870,6 @@ p {
   border: 1px solid rgba(240, 160, 108, 0.3);
 }
 
-
-
-
-
-
-
-
-
-
-
 .ref-table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -2052,33 +1881,15 @@ p {
     font-size: calc(0.85rem * var(--font-scale));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .ref-suggest-field .input {
     width: 100%;
     font-size: calc(0.92rem * var(--font-scale));
 }
 
-
-
-
 .ref-diff-from {
     color: #e57373;
     text-decoration: line-through;
 }
-
 
 .ref-filter-tabs {
     display: flex;
@@ -2088,20 +1899,9 @@ p {
     -webkit-overflow-scrolling: touch;
 }
 
-
-
-
-
-
-
-
 .ref-curator-inline {
     cursor: help;
 }
-
-
-
-
 
 @media (max-width: 640px) {
   .feed-tabs {
@@ -2151,15 +1951,11 @@ p {
   }
 }
 
-
-
-
 .hoofprint-teaser-section {
   padding: var(--space-3xl) var(--space-xl);
   text-align: center;
   background: linear-gradient(180deg, transparent 0%, rgba(245, 158, 11, 0.03) 50%, transparent 100%);
 }
-
 
 .lightbox-overlay {
   position: fixed;
@@ -2196,9 +1992,6 @@ p {
 
 .activity-post-content ul,
 
-
-
-
 .studio-chip:hover {
     border-color: rgba(139, 92, 246, 0.4);
     background: rgba(139, 92, 246, 0.08);
@@ -2210,7 +2003,6 @@ p {
     color: #c4b5fd;
     font-weight: 600;
 }
-
 
 .studio-status-btn.active-open {
     background: rgba(34, 197, 94, 0.12);
@@ -2233,7 +2025,6 @@ p {
     font-weight: 600;
 }
 
-
 .studio-tabs {
     display: flex;
     gap: var(--space-xs);
@@ -2243,27 +2034,12 @@ p {
     -webkit-overflow-scrolling: touch;
 }
 
-
-
 .studio-tab.active {
     background: rgba(139, 92, 246, 0.15);
     border-color: rgba(139, 92, 246, 0.3);
     color: #c4b5fd;
     font-weight: 600;
 }
-
-
-
-
-
-
-@media (max-width: 500px) {
-    .form-row-2col {
-        grid-template-columns: 1fr;
-    }
-}
-
-
 
 .transfer-ghost-thumb {
     width: 56px;
@@ -2283,9 +2059,6 @@ p {
     filter: grayscale(1);
 }
 
-
-
-
 .nan-dashboard-widget {
     margin-top: var(--space-lg);
     border-radius: var(--radius-lg);
@@ -2298,17 +2071,9 @@ p {
     transform: rotate(90deg);
 }
 
-
-
-
 .show-string-item.active {
     border-color: rgba(139, 92, 246, 0.4);
 }
-
-
-
-
-
 
 .group-post-card.pinned {
     border-color: rgba(245, 158, 11, 0.3);
@@ -2317,16 +2082,11 @@ p {
 
 .event-card-date,
 
-
-
 .verification-badge.verified {
     background: rgba(245, 158, 11, 0.12);
     color: #f59e0b;
     border: 1px solid rgba(245, 158, 11, 0.3);
 }
-
-
-
 
 .class-browser-item.selected {
     background: rgba(var(--color-accent-rgb, 44, 85, 69), 0.12);
@@ -2334,15 +2094,10 @@ p {
     font-weight: 600;
 }
 
-
 .class-scale-warn {
     font-size: 0.85em;
     cursor: help;
 }
-
-
-
-
 
 .champion-banner {
     text-align: center;
@@ -2353,7 +2108,6 @@ p {
     border: 2px solid rgba(245, 158, 11, 0.4);
     box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
 }
-
 
 @media (max-width: 768px) {
     .show-entry-photo-btn {
