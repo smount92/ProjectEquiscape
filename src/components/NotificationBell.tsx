@@ -35,7 +35,7 @@ export default function NotificationBell() {
     return (
         <Link
             href="/notifications"
-            className="header-nav-link notification-bell-link"
+            className="header-nav-link relative"
             id="nav-notifications"
             title="Notifications"
         >
@@ -54,7 +54,7 @@ export default function NotificationBell() {
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
             {unreadCount > 0 && (
-                <span className="notification-badge notification-badge-pop">
+                <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 text-[10px] font-bold leading-4 text-center text-white bg-[#ef4444] rounded-lg animate-[notification-pop_0.3s_ease-out]">
                     {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
             )}

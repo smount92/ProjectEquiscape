@@ -35,10 +35,10 @@ export default function TransactionActions({
 
     if (status === "completed") {
         return (
-            <div className="transaction-status-card transaction-complete" id="transaction-status">
-                <span className="transaction-badge">✅ Transaction Complete</span>
+            <div className="mt-md py-md px-lg rounded-lg bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.2)]" id="transaction-status">
+                <span className="font-semibold text-[calc(0.95rem*var(--font-scale))] text-[#22C55E]">✅ Transaction Complete</span>
                 {!hasRating && (
-                    <span className="transaction-rate-cta">
+                    <span className="block mt-sm text-[calc(0.8rem*var(--font-scale))] text-text-muted">
                         Leave a rating below to close the loop! ⬇️
                     </span>
                 )}
@@ -47,8 +47,8 @@ export default function TransactionActions({
     }
 
     return (
-        <div className="transaction-status-card" id="transaction-status">
-            <div className="transaction-open">
+        <div className="mt-md py-md px-lg rounded-lg bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-border" id="transaction-status">
+            <div className="flex items-center justify-between gap-md max-sm:flex-col max-sm:items-start">
                 <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
                     Transaction is open
                 </span>

@@ -103,7 +103,7 @@ export default function NotificationList({
         <div>
             {/* Actions Bar */}
             {notifs.length > 0 && (
-                <div className="notif-actions-bar">
+                <div className="flex gap-sm mb-lg pb-sm border-b border-border">
                     {unreadCount > 0 && (
                         <button className="btn btn-ghost btn-sm" onClick={handleMarkAllRead}>
                             ✓ Mark All Read
@@ -128,22 +128,22 @@ export default function NotificationList({
                     <p>No notifications yet. Activity from the community will appear here.</p>
                 </div>
             ) : (
-                <div className="notif-list">
+                <div className="flex flex-col">
                     {notifs.map((n) => (
                         <Link
                             key={n.id}
                             href={getNotifLink(n)}
-                            className={`notif-item ${n.isRead ? "notif-item-read" : "notif-item-unread"}`}
+                            className={`flex items-center gap-md py-md px-lg border-b border-border no-underline text-inherit transition-colors hover:bg-black/[0.03] ${n.isRead ? "" : "bg-[rgba(129,140,248,0.04)]"}`}
                             onClick={() => handleClick(n.id)}
                         >
-                            <span className="notif-icon">{getNotifIcon(n.type)}</span>
-                            <div className="notif-content">
-                                <span className="notif-text">
+                            <span className="text-[calc(1.2rem*var(--font-scale))] shrink-0">{getNotifIcon(n.type)}</span>
+                            <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                                <span className="text-[calc(0.9rem*var(--font-scale))]">
                                     {n.content || "New notification"}
                                 </span>
-                                <span className="notif-time">{timeAgo(n.createdAt)}</span>
+                                <span className="text-[calc(0.75rem*var(--font-scale))] text-text-muted">{timeAgo(n.createdAt)}</span>
                             </div>
-                            {!n.isRead && <span className="notif-unread-dot" />}
+                            {!n.isRead && <span className="w-2 h-2 rounded-full bg-accent-primary shrink-0" />}
                         </Link>
                     ))}
                 </div>

@@ -18,7 +18,7 @@ import "@/components/TrophyCase.css";
 
 import "@/components/CsvImport.css";
 // Social components
-import "@/components/Notifications.css";
+
 import "@/components/FollowFeed.css";
 import "@/components/ChatGuardrails.css";
 import "@/components/SocialFoundation.css";
