@@ -110,23 +110,23 @@ export default function DashboardShell({
         <>
             {/* View Toggle + Select Mode */}
             {horseCards.length > 0 && (
-                <div className="flex justify-end max-md:justify-center mb-md">
-                    <div className="inline-flex bg-bg-secondary rounded-full p-[3px] gap-[2px]" id="dashboard-view-toggle">
+                <div className="flex justify-end max-md:justify-center mb-4">
+                    <div className="inline-flex bg-parchment-dark rounded-full p-[3px] gap-[2px]" id="dashboard-view-toggle">
                         <button
-                            className={`py-1.5 px-4 border-none rounded-full bg-transparent text-text-muted text-sm cursor-pointer transition-all duration-200 font-inherit hover:text-text-primary ${view === "grid" ? "bg-accent-primary text-white font-semibold" : ""}`}
+                            className={`py-1.5 px-4 border-none rounded-full bg-transparent text-muted text-sm cursor-pointer transition-all duration-200 font-inherit hover:text-ink ${view === "grid" ? "bg-forest text-white font-semibold" : ""}`}
                             onClick={() => handleViewChange("grid")}
                         >
                             🖼️ Gallery
                         </button>
                         <button
-                            className={`py-1.5 px-4 border-none rounded-full bg-transparent text-text-muted text-sm cursor-pointer transition-all duration-200 font-inherit hover:text-text-primary ${view === "ledger" ? "bg-accent-primary text-white font-semibold" : ""}`}
+                            className={`py-1.5 px-4 border-none rounded-full bg-transparent text-muted text-sm cursor-pointer transition-all duration-200 font-inherit hover:text-ink ${view === "ledger" ? "bg-forest text-white font-semibold" : ""}`}
                             onClick={() => handleViewChange("ledger")}
                         >
                             📋 Ledger
                         </button>
                     </div>
                     <button
-                        className={`py-1.5 px-4 border-none rounded-full bg-transparent text-text-muted text-sm cursor-pointer transition-all duration-200 font-inherit hover:text-text-primary ${selectMode ? "bg-accent-primary text-white font-semibold" : ""}`}
+                        className={`py-1.5 px-4 border-none rounded-full bg-transparent text-muted text-sm cursor-pointer transition-all duration-200 font-inherit hover:text-ink ${selectMode ? "bg-forest text-white font-semibold" : ""}`}
                         onClick={() => {
                             if (selectMode) clearSelection();
                             else setSelectMode(true);
@@ -141,7 +141,7 @@ export default function DashboardShell({
 
             {/* Select All / Clear */}
             {selectMode && horseCards.length > 0 && (
-                <div className="flex items-center gap-md mb-md py-1.5 px-3 bg-bg-secondary rounded-md">
+                <div className="flex items-center gap-4 mb-4 py-1.5 px-3 bg-parchment-dark rounded-md">
                     <button className="btn btn-ghost btn-sm" onClick={selectAll}>
                         Select All ({horseCards.length})
                     </button>
@@ -172,13 +172,13 @@ export default function DashboardShell({
 
             {/* Floating Bulk Action Bar */}
             {selectMode && selectedIds.size > 0 && (
-                <div className="fixed bottom-lg left-1/2 -translate-x-1/2 flex items-center gap-md py-3 px-5 bg-bg-primary border border-border rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] z-[100] max-w-[90vw] flex-wrap justify-center">
-                    <span className="font-semibold text-sm text-accent-primary whitespace-nowrap">✅ {selectedIds.size} selected</span>
+                <div className="fixed bottom-lg left-1/2 -translate-x-1/2 flex items-center gap-4 py-3 px-5 bg-parchment border border-edge rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] z-[100] max-w-[90vw] flex-wrap justify-center">
+                    <span className="font-semibold text-sm text-forest whitespace-nowrap">✅ {selectedIds.size} selected</span>
 
-                    <div className="flex gap-sm items-center flex-wrap">
+                    <div className="flex gap-2 items-center flex-wrap">
                         {/* Move to Collection */}
                         <select
-                            className="form-select py-1.5 px-2.5 rounded-md border border-border bg-bg-secondary text-text-primary text-sm font-inherit cursor-pointer"
+                            className="form-select py-1.5 px-2.5 rounded-md border border-edge bg-parchment-dark text-ink text-sm font-inherit cursor-pointer"
                             value=""
                             onChange={(e) => {
                                 const val = e.target.value;
@@ -196,7 +196,7 @@ export default function DashboardShell({
 
                         {/* Trade Status */}
                         <select
-                            className="form-select py-1.5 px-2.5 rounded-md border border-border bg-bg-secondary text-text-primary text-sm font-inherit cursor-pointer"
+                            className="form-select py-1.5 px-2.5 rounded-md border border-edge bg-parchment-dark text-ink text-sm font-inherit cursor-pointer"
                             value=""
                             onChange={(e) => { if (e.target.value) handleBulkTradeStatus(e.target.value); }}
                             disabled={isProcessing}

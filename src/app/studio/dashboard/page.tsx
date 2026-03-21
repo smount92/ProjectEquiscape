@@ -29,7 +29,7 @@ export default async function StudioDashboardPage() {
     return (
         <div className="page-container">
             {/* Header */}
-            <div className="py-xl px-lg rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up" style={{ marginBottom: "var(--space-xl)" }}>
+            <div className="py-8 px-6 rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up" style={{ marginBottom: "var(--space-xl)" }}>
                 <div className="max-w-[800px]">
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "var(--space-md)" }}>
                         <div>
@@ -51,26 +51,26 @@ export default async function StudioDashboardPage() {
                     </div>
 
                     {/* Stats Bar */}
-                    <div className="flex gap-lg mt-lg pt-lg border-t border-[rgba(0,0,0,0.06)] flex-wrap">
+                    <div className="flex gap-6 mt-6 pt-6 border-t border-[rgba(0,0,0,0.06)] flex-wrap">
                         <div className="flex flex-col items-center gap-[2px]">
-                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-accent-primary">{activeCommissions.length}/{profile.maxSlots}</span>
-                            <span className="text-[calc(0.7rem*var(--font-scale))] text-text-muted uppercase tracking-wider">Slots Filled</span>
+                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-forest">{activeCommissions.length}/{profile.maxSlots}</span>
+                            <span className="text-[calc(0.7rem*var(--font-scale))] text-muted uppercase tracking-wider">Slots Filled</span>
                         </div>
                         <div className="flex flex-col items-center gap-[2px]">
-                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-accent-primary" style={{ color: pendingRequests.length > 0 ? "var(--color-accent-warm)" : undefined }}>
+                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-forest" style={{ color: pendingRequests.length > 0 ? "var(--color-accent-warm)" : undefined }}>
                                 {pendingRequests.length}
                             </span>
-                            <span className="text-[calc(0.7rem*var(--font-scale))] text-text-muted uppercase tracking-wider">Pending Requests</span>
+                            <span className="text-[calc(0.7rem*var(--font-scale))] text-muted uppercase tracking-wider">Pending Requests</span>
                         </div>
                         <div className="flex flex-col items-center gap-[2px]">
-                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-accent-primary">{completedTotal.length}</span>
-                            <span className="text-[calc(0.7rem*var(--font-scale))] text-text-muted uppercase tracking-wider">Completed</span>
+                            <span className="text-[calc(1.3rem*var(--font-scale))] font-extrabold text-forest">{completedTotal.length}</span>
+                            <span className="text-[calc(0.7rem*var(--font-scale))] text-muted uppercase tracking-wider">Completed</span>
                         </div>
                         <div className="flex flex-col items-center gap-[2px]">
                             <span className={`studio-status-badge status-${profile.status}`} style={{ fontSize: "calc(0.75rem * var(--font-scale))" }}>
                                 {profile.status === "open" ? "🟢" : profile.status === "waitlist" ? "🟡" : "🔴"} {profile.status.charAt(0).toUpperCase() + profile.status.slice(1)}
                             </span>
-                            <span className="text-[calc(0.7rem*var(--font-scale))] text-text-muted uppercase tracking-wider">Status</span>
+                            <span className="text-[calc(0.7rem*var(--font-scale))] text-muted uppercase tracking-wider">Status</span>
                         </div>
                     </div>
                 </div>

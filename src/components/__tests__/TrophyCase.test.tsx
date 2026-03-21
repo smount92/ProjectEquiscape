@@ -87,7 +87,7 @@ describe("TrophyCase", () => {
         expect(container.innerHTML).toContain("border-[#cd7f32]"); // tier 1
         expect(container.innerHTML).toContain("border-[#c0c0c0]"); // tier 2
         expect(container.innerHTML).toContain("border-[#ffd700]"); // tier 3
-        expect(container.innerHTML).toContain("border-accent-primary"); // tier 5
+        expect(container.innerHTML).toContain("border-forest"); // tier 5
     });
 
     it("sorts categories in predefined order (exclusive first)", () => {

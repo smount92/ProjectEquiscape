@@ -35,10 +35,10 @@ export default function TransactionActions({
 
     if (status === "completed") {
         return (
-            <div className="mt-md py-md px-lg rounded-lg bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.2)]" id="transaction-status">
+            <div className="mt-4 py-4 px-6 rounded-lg bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.2)]" id="transaction-status">
                 <span className="font-semibold text-[calc(0.95rem*var(--font-scale))] text-[#22C55E]">✅ Transaction Complete</span>
                 {!hasRating && (
-                    <span className="block mt-sm text-[calc(0.8rem*var(--font-scale))] text-text-muted">
+                    <span className="block mt-2 text-[calc(0.8rem*var(--font-scale))] text-muted">
                         Leave a rating below to close the loop! ⬇️
                     </span>
                 )}
@@ -47,8 +47,8 @@ export default function TransactionActions({
     }
 
     return (
-        <div className="mt-md py-md px-lg rounded-lg bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-border" id="transaction-status">
-            <div className="flex items-center justify-between gap-md max-sm:flex-col max-sm:items-start">
+        <div className="mt-4 py-4 px-6 rounded-lg bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-edge" id="transaction-status">
+            <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
                 <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
                     Transaction is open
                 </span>

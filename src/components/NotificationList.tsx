@@ -103,7 +103,7 @@ export default function NotificationList({
         <div>
             {/* Actions Bar */}
             {notifs.length > 0 && (
-                <div className="flex gap-sm mb-lg pb-sm border-b border-border">
+                <div className="flex gap-2 mb-6 pb-2 border-b border-edge">
                     {unreadCount > 0 && (
                         <button className="btn btn-ghost btn-sm" onClick={handleMarkAllRead}>
                             ✓ Mark All Read
@@ -133,7 +133,7 @@ export default function NotificationList({
                         <Link
                             key={n.id}
                             href={getNotifLink(n)}
-                            className={`flex items-center gap-md py-md px-lg border-b border-border no-underline text-inherit transition-colors hover:bg-black/[0.03] ${n.isRead ? "" : "bg-[rgba(129,140,248,0.04)]"}`}
+                            className={`flex items-center gap-4 py-4 px-6 border-b border-edge no-underline text-inherit transition-colors hover:bg-black/[0.03] ${n.isRead ? "" : "bg-[rgba(129,140,248,0.04)]"}`}
                             onClick={() => handleClick(n.id)}
                         >
                             <span className="text-[calc(1.2rem*var(--font-scale))] shrink-0">{getNotifIcon(n.type)}</span>
@@ -141,9 +141,9 @@ export default function NotificationList({
                                 <span className="text-[calc(0.9rem*var(--font-scale))]">
                                     {n.content || "New notification"}
                                 </span>
-                                <span className="text-[calc(0.75rem*var(--font-scale))] text-text-muted">{timeAgo(n.createdAt)}</span>
+                                <span className="text-[calc(0.75rem*var(--font-scale))] text-muted">{timeAgo(n.createdAt)}</span>
                             </div>
-                            {!n.isRead && <span className="w-2 h-2 rounded-full bg-accent-primary shrink-0" />}
+                            {!n.isRead && <span className="w-2 h-2 rounded-full bg-forest shrink-0" />}
                         </Link>
                     ))}
                 </div>

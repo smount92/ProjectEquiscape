@@ -25,21 +25,21 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
     return (
         <>
             {/* Tab Bar */}
-            <div className="flex gap-[2px] my-lg bg-black/[0.03] rounded-lg p-1 border border-border">
+            <div className="flex gap-[2px] my-6 bg-black/[0.03] rounded-lg p-1 border border-edge">
                 <button
-                    className={`flex-1 py-sm px-md bg-transparent border-none rounded-md text-text-muted text-sm font-semibold cursor-pointer transition-all hover:text-text-primary hover:bg-black/[0.05] ${activeTab === "feed" ? "text-text-primary bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
+                    className={`flex-1 py-2 px-4 bg-transparent border-none rounded-md text-muted text-sm font-semibold cursor-pointer transition-all hover:text-ink hover:bg-black/[0.05] ${activeTab === "feed" ? "text-ink bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
                     onClick={() => setActiveTab("feed")}
                 >
                     💬 Feed
                 </button>
                 <button
-                    className={`flex-1 py-sm px-md bg-transparent border-none rounded-md text-text-muted text-sm font-semibold cursor-pointer transition-all hover:text-text-primary hover:bg-black/[0.05] ${activeTab === "files" ? "text-text-primary bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
+                    className={`flex-1 py-2 px-4 bg-transparent border-none rounded-md text-muted text-sm font-semibold cursor-pointer transition-all hover:text-ink hover:bg-black/[0.05] ${activeTab === "files" ? "text-ink bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
                     onClick={() => setActiveTab("files")}
                 >
                     📁 Files
                 </button>
                 <button
-                    className={`flex-1 py-sm px-md bg-transparent border-none rounded-md text-text-muted text-sm font-semibold cursor-pointer transition-all hover:text-text-primary hover:bg-black/[0.05] ${activeTab === "registry" ? "text-text-primary bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
+                    className={`flex-1 py-2 px-4 bg-transparent border-none rounded-md text-muted text-sm font-semibold cursor-pointer transition-all hover:text-ink hover:bg-black/[0.05] ${activeTab === "registry" ? "text-ink bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
                     onClick={() => setActiveTab("registry")}
                 >
                     📋 Registry
@@ -48,9 +48,9 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
 
             {/* Channel Pills (only on Feed tab) */}
             {activeTab === "feed" && channels.length > 1 && (
-                <div className="flex gap-xs mb-lg overflow-x-auto pb-xs scrollbar-none">
+                <div className="flex gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
                     <button
-                        className={`py-1.5 px-3.5 bg-black/[0.04] border border-border rounded-full text-text-muted text-xs font-semibold cursor-pointer whitespace-nowrap transition-all hover:bg-black/[0.06] hover:text-text-primary ${activeChannel === null ? "bg-[rgba(44,85,69,0.15)] border-[rgba(44,85,69,0.4)] text-accent-primary" : ""}`}
+                        className={`py-1.5 px-3.5 bg-black/[0.04] border border-edge rounded-full text-muted text-xs font-semibold cursor-pointer whitespace-nowrap transition-all hover:bg-black/[0.06] hover:text-ink ${activeChannel === null ? "bg-[rgba(44,85,69,0.15)] border-[rgba(44,85,69,0.4)] text-forest" : ""}`}
                         onClick={() => setActiveChannel(null)}
                     >
                         # all
@@ -58,7 +58,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
                     {channels.map(ch => (
                         <button
                             key={ch.id}
-                            className={`py-1.5 px-3.5 bg-black/[0.04] border border-border rounded-full text-text-muted text-xs font-semibold cursor-pointer whitespace-nowrap transition-all hover:bg-black/[0.06] hover:text-text-primary ${activeChannel === ch.id ? "bg-[rgba(44,85,69,0.15)] border-[rgba(44,85,69,0.4)] text-accent-primary" : ""}`}
+                            className={`py-1.5 px-3.5 bg-black/[0.04] border border-edge rounded-full text-muted text-xs font-semibold cursor-pointer whitespace-nowrap transition-all hover:bg-black/[0.06] hover:text-ink ${activeChannel === ch.id ? "bg-[rgba(44,85,69,0.15)] border-[rgba(44,85,69,0.4)] text-forest" : ""}`}
                             onClick={() => setActiveChannel(ch.id)}
                         >
                             # {ch.name.toLowerCase()}

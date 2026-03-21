@@ -55,7 +55,7 @@ export default function MatchmakerMatches({
             {expanded && (
                 <div className="matchmaker-results animate-fade-in-up">
                     {matches.map((match) => (
-                        <div key={match.id} className="flex gap-sm p-sm bg-surface-glass border border-border rounded-md transition-all duration-200 hover:border-[rgba(251,146,60,0.4)] hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]">
+                        <div key={match.id} className="flex gap-2 p-2 bg-surface-glass border border-edge rounded-md transition-all duration-200 hover:border-[rgba(251,146,60,0.4)] hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]">
                             <div className="w-[52px] h-[52px] rounded-sm overflow-hidden shrink-0 bg-black/[0.03]">
                                 {match.thumbnailUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
@@ -72,11 +72,11 @@ export default function MatchmakerMatches({
                             <div className="flex-1 min-w-0">
                                 <Link
                                     href={`/community/${match.id}`}
-                                    className="font-semibold text-sm text-accent-primary no-underline block hover:underline"
+                                    className="font-semibold text-sm text-forest no-underline block hover:underline"
                                 >
                                     {match.custom_name}
                                 </Link>
-                                <div className="flex items-center gap-sm mt-[2px]">
+                                <div className="flex items-center gap-2 mt-[2px]">
                                     <span className={`text-xs font-bold py-[2px] px-2 rounded-full ${match.trade_status === "For Sale" ? "bg-[rgba(34,197,94,0.15)] text-[#22c55e]" : "bg-[rgba(59,130,246,0.15)] text-[#3b82f6]"}`}>
                                         {match.trade_status === "For Sale" ? "💲" : "🤝"}{" "}
                                         {match.listing_price
@@ -85,13 +85,13 @@ export default function MatchmakerMatches({
                                     </span>
                                     <Link
                                         href={`/profile/${encodeURIComponent(match.ownerAlias)}`}
-                                        className="text-xs text-text-muted no-underline hover:text-accent-primary hover:underline"
+                                        className="text-xs text-muted no-underline hover:text-forest hover:underline"
                                     >
                                         @{match.ownerAlias}
                                     </Link>
                                 </div>
                                 {match.marketplace_notes && (
-                                    <div className="text-xs text-text-muted mt-1 italic leading-snug">
+                                    <div className="text-xs text-muted mt-1 italic leading-snug">
                                         {match.marketplace_notes}
                                     </div>
                                 )}

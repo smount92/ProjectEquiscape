@@ -49,7 +49,7 @@ export default function FavoriteButton({
             className={`inline-flex items-center gap-1 bg-transparent border-none cursor-pointer px-1.5 py-1 rounded-sm text-xs transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
                 isFavorited
                     ? "text-[#e74c6f]"
-                    : "text-text-muted hover:text-[#e74c6f] hover:scale-110"
+                    : "text-muted hover:text-[#e74c6f] hover:scale-110"
             }`}
             onClick={handleClick}
             disabled={status === "saving"}

@@ -150,9 +150,9 @@ export default function ChatThread({
     return (
         <>
             {/* Message area */}
-            <div className="flex-1 overflow-y-auto p-md flex flex-col gap-sm bg-surface-glass border border-border rounded-lg mb-md">
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 bg-surface-glass border border-edge rounded-lg mb-4">
                 {messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-sm text-center text-text-muted">
+                    <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center text-muted">
                         <div className="text-5xl opacity-50">💬</div>
                         <p>
                             Start the conversation! Say hello to <strong>@{otherAlias}</strong>.
@@ -169,7 +169,7 @@ export default function ChatThread({
                         return (
                             <div key={msg.id}>
                                 {showDate && (
-                                    <div className="text-center py-sm text-xs text-text-muted font-medium">
+                                    <div className="text-center py-2 text-xs text-muted font-medium">
                                         {new Date(msg.createdAt).toLocaleDateString("en-US", {
                                             weekday: "short",
                                             month: "short",
@@ -180,9 +180,9 @@ export default function ChatThread({
                                 <div
                                     className={`flex ${msg.isMe ? "justify-end" : "justify-start"}`}
                                 >
-                                    <div className={`max-w-[75%] max-md:max-w-[85%] py-2.5 px-3.5 rounded-2xl leading-relaxed text-sm animate-[bubbleIn_0.2s_ease] text-text-primary ${msg.isMe ? "bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))] border border-[rgba(44,85,69,0.3)] rounded-br-[4px]" : "bg-black/[0.05] border border-border rounded-bl-[4px]"}`}>
+                                    <div className={`max-w-[75%] max-md:max-w-[85%] py-2.5 px-3.5 rounded-2xl leading-relaxed text-sm animate-[bubbleIn_0.2s_ease] text-ink ${msg.isMe ? "bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))] border border-[rgba(44,85,69,0.3)] rounded-br-[4px]" : "bg-black/[0.05] border border-edge rounded-bl-[4px]"}`}>
                                         <div className="break-words whitespace-pre-wrap">{msg.content}</div>
-                                        <div className={`text-[0.6rem] text-text-muted mt-1 opacity-70 ${msg.isMe ? "text-right" : ""}`}>{formatTime(msg.createdAt)}</div>
+                                        <div className={`text-[0.6rem] text-muted mt-1 opacity-70 ${msg.isMe ? "text-right" : ""}`}>{formatTime(msg.createdAt)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -194,7 +194,7 @@ export default function ChatThread({
 
             {/* Risky Payment Warning */}
             {showPaymentWarning && (
-                <div className="flex items-start gap-sm py-sm px-md bg-[rgba(245,158,11,0.12)] border border-[rgba(245,158,11,0.35)] rounded-md mx-md text-xs text-[#f59e0b] leading-relaxed animate-[fadeInUp_0.2s_ease]" role="alert">
+                <div className="flex items-start gap-2 py-2 px-4 bg-[rgba(245,158,11,0.12)] border border-[rgba(245,158,11,0.35)] rounded-md mx-4 text-xs text-[#f59e0b] leading-relaxed animate-[fadeInUp_0.2s_ease]" role="alert">
                     <span className="text-[1.2rem] shrink-0 mt-px">🛡️</span>
                     <span>
                         <strong>Protect yourself:</strong> Always use PayPal Goods &amp; Services for
@@ -205,11 +205,11 @@ export default function ChatThread({
             )}
 
             {/* Input area */}
-            <div className="shrink-0 p-md bg-surface-glass border border-border rounded-lg">
-                <div className="flex gap-sm items-end">
+            <div className="shrink-0 p-4 bg-surface-glass border border-edge rounded-lg">
+                <div className="flex gap-2 items-end">
                     <textarea
                         ref={inputRef}
-                        className="flex-1 py-2.5 px-3.5 bg-black/[0.05] border border-border rounded-lg text-text-primary text-sm font-inherit resize-none min-h-[42px] max-h-[120px] transition-colors focus:outline-none focus:border-[rgba(44,85,69,0.5)] focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] placeholder:text-text-muted"
+                        className="flex-1 py-2.5 px-3.5 bg-black/[0.05] border border-edge rounded-lg text-ink text-sm font-inherit resize-none min-h-[42px] max-h-[120px] transition-colors focus:outline-none focus:border-[rgba(44,85,69,0.5)] focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] placeholder:text-text-muted"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -220,7 +220,7 @@ export default function ChatThread({
                         id="chat-message-input"
                     />
                     <button
-                        className="flex items-center justify-center w-[42px] h-[42px] rounded-full bg-accent-primary text-white border-none cursor-pointer transition-all shrink-0 hover:enabled:scale-105 hover:enabled:shadow-[0_4px_16px_rgba(44,85,69,0.4)] disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="flex items-center justify-center w-[42px] h-[42px] rounded-full bg-forest text-white border-none cursor-pointer transition-all shrink-0 hover:enabled:scale-105 hover:enabled:shadow-[0_4px_16px_rgba(44,85,69,0.4)] disabled:opacity-40 disabled:cursor-not-allowed"
                         onClick={handleSend}
                         disabled={!newMessage.trim() || sending}
                         aria-label="Send message"
@@ -246,7 +246,7 @@ export default function ChatThread({
                         )}
                     </button>
                 </div>
-                <div className="text-[0.6rem] text-text-muted opacity-50 mt-1.5 text-center">
+                <div className="text-[0.6rem] text-muted opacity-50 mt-1.5 text-center">
                     Press Enter to send · Shift+Enter for new line
                 </div>
             </div>

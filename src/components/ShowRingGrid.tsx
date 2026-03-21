@@ -156,7 +156,7 @@ export default function ShowRingGrid({
             )}
 
             {isFiltering && (
-                <div className="text-sm text-text-muted mb-lg pl-xs">
+                <div className="text-sm text-muted mb-6 pl-1">
                     {communityCards.length === 0
                         ? "No models match your filters"
                         : `Showing ${communityCards.length} models`}

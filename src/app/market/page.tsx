@@ -159,7 +159,7 @@ export default async function MarketPricePage({
 
                             {/* Pagination */}
                             {totalPages > 1 && (
-                                <div className="flex justify-between items-center mt-xl pt-lg border-t border-border">
+                                <div className="flex justify-between items-center mt-8 pt-6 border-t border-edge">
                                     {page > 1 ? (
                                         <Link href={buildPageUrl(page - 1)} className="btn btn-ghost">
                                             ← Previous
@@ -183,7 +183,7 @@ export default async function MarketPricePage({
                     )}
 
                     {/* Disclaimer */}
-                    <div className="mt-2xl p-lg rounded-lg bg-[var(--color-surface-glass)] border border-border text-xs">
+                    <div className="mt-12 p-6 rounded-lg bg-[var(--color-surface-glass)] border border-edge text-xs">
                         <p>
                             📋 Prices based on completed transactions recorded on Model Horse Hub.
                             This is not a professional appraisal. Market conditions vary.

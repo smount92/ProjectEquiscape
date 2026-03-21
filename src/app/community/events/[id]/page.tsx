@@ -93,10 +93,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             <div className="page-content" style={{ maxWidth: 720 }}>
                 <Link href="/community/events" className="btn btn-ghost" style={{ marginBottom: "var(--space-md)" }}>← All Events</Link>
 
-                <div className="flex gap-lg items-start mb-lg">
+                <div className="flex gap-6 items-start mb-6">
                     <div className="flex flex-col items-center justify-center min-w-[56px] h-[56px] rounded-md bg-[linear-gradient(135deg,rgba(44,85,69,0.15),rgba(139,92,246,0.1))] border border-[rgba(44,85,69,0.3)] shrink-0">
                         <span className="text-[calc(0.6rem*var(--font-scale))] font-bold text-[#2C5545] uppercase tracking-wider">{date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}</span>
-                        <span className="text-[calc(1.2rem*var(--font-scale))] font-extrabold text-text-primary leading-none">{date.getDate()}</span>
+                        <span className="text-[calc(1.2rem*var(--font-scale))] font-extrabold text-ink leading-none">{date.getDate()}</span>
                     </div>
                     <div>
                         <h1>{event.name}</h1>
@@ -115,9 +115,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 </div>
 
                 {/* Details */}
-                <div className="grid gap-sm" style={{ marginBottom: "var(--space-lg)" }}>
-                    <div className="flex justify-between items-center py-xs">
-                        <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">📅 Date</span>
+                <div className="grid gap-2" style={{ marginBottom: "var(--space-lg)" }}>
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">📅 Date</span>
                         <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
                             {event.isAllDay ? "All Day" : date.toLocaleString("en-US", {
                                 weekday: "short", month: "short", day: "numeric",
@@ -131,33 +131,33 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         </span>
                     </div>
                     {!event.isVirtual && event.locationName && (
-                        <div className="flex justify-between items-center py-xs">
-                            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">📍 Location</span>
+                        <div className="flex justify-between items-center py-1">
+                            <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">📍 Location</span>
                             <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">{event.locationName}{event.locationAddress && <><br />{event.locationAddress}</>}</span>
                         </div>
                     )}
                     {event.isVirtual && event.virtualUrl && (
-                        <div className="flex justify-between items-center py-xs">
-                            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">🌐 Virtual Link</span>
+                        <div className="flex justify-between items-center py-1">
+                            <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">🌐 Virtual Link</span>
                             <a href={event.virtualUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-[calc(0.9rem*var(--font-scale))]" style={{ color: "var(--color-accent-primary)" }}>
                                 Join Online →
                             </a>
                         </div>
                     )}
                     {event.region && (
-                        <div className="flex justify-between items-center py-xs">
-                            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">🗺️ Region</span>
+                        <div className="flex justify-between items-center py-1">
+                            <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">🗺️ Region</span>
                             <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">{event.region}</span>
                         </div>
                     )}
                     {event.groupName && (
-                        <div className="flex justify-between items-center py-xs">
-                            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">🏛️ Hosted by</span>
+                        <div className="flex justify-between items-center py-1">
+                            <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">🏛️ Hosted by</span>
                             <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">{event.groupName}</span>
                         </div>
                     )}
-                    <div className="flex justify-between items-center py-xs">
-                        <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">Created by</span>
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">Created by</span>
                         <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">@{event.creatorAlias}</span>
                     </div>
                 </div>
@@ -303,9 +303,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {attendees.length > 0 && (
                     <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-sm)" }}>👥 Who&apos;s Going ({attendees.filter(a => a.status === "going").length})</h3>
-                        <div className="flex flex-wrap gap-xs">
+                        <div className="flex flex-wrap gap-1">
                             {attendees.filter(a => a.status === "going").map(a => (
-                                <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="py-1 px-2.5 rounded-full bg-[var(--color-surface-hover)] text-text-primary text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white">
+                                <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="py-1 px-2.5 rounded-full bg-[var(--color-surface-hover)] text-ink text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white">
                                     @{a.alias}
                                 </Link>
                             ))}
@@ -313,9 +313,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         {attendees.filter(a => a.status === "interested").length > 0 && (
                             <>
                                 <h4 style={{ marginTop: "var(--space-md)", color: "var(--color-text-muted)" }}>⭐ Interested ({attendees.filter(a => a.status === "interested").length})</h4>
-                                <div className="flex flex-wrap gap-xs">
+                                <div className="flex flex-wrap gap-1">
                                     {attendees.filter(a => a.status === "interested").map(a => (
-                                        <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="py-1 px-2.5 rounded-full bg-[var(--color-surface-hover)] text-text-primary text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white">
+                                        <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="py-1 px-2.5 rounded-full bg-[var(--color-surface-hover)] text-ink text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white">
                                             @{a.alias}
                                         </Link>
                                     ))}

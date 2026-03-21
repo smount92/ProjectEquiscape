@@ -202,7 +202,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                             return (
                                                                 <div
                                                                     key={entry.id}
-                                                                    className={`flex-1 flex items-center justify-center text-xs font-semibold text-white transition-opacity relative ${isConflict ? "bg-[#ef4444] animate-pulse" : "bg-accent-primary"}`}
+                                                                    className={`flex-1 flex items-center justify-center text-xs font-semibold text-white transition-opacity relative ${isConflict ? "bg-[#ef4444] animate-pulse" : "bg-forest"}`}
                                                                     title={`${entry.horseName} — ${entry.className}${entry.timeSlot ? ` @ ${entry.timeSlot}` : ""}`}
                                                                 >
                                                                     {entry.className.slice(0, 3)}
@@ -350,18 +350,18 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                 const points = champs * 4 + reserves * 3 + topTens * 2 + (filled.length - champs - reserves - topTens);
                                                                 if (filled.length === 0) return null;
                                                                 return (
-                                                                    <div className="flex gap-lg p-md bg-surface-secondary rounded-lg mt-md flex-wrap">
+                                                                    <div className="flex gap-6 p-4 bg-surface-secondary rounded-lg mt-4 flex-wrap">
                                                                         <div className="flex flex-col gap-0.5">
-                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-accent-primary">{filled.length}</span>
-                                                                            <span className="text-xs text-text-muted">Results</span>
+                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-forest">{filled.length}</span>
+                                                                            <span className="text-xs text-muted">Results</span>
                                                                         </div>
                                                                         <div className="flex flex-col gap-0.5">
-                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-accent-primary">{champs}🏆 {reserves}🎖️ {topTens}🔟</span>
-                                                                            <span className="text-xs text-text-muted">Major Ribbons</span>
+                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-forest">{champs}🏆 {reserves}🎖️ {topTens}🔟</span>
+                                                                            <span className="text-xs text-muted">Major Ribbons</span>
                                                                         </div>
                                                                         <div className="flex flex-col gap-0.5">
-                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-accent-primary">~{points}</span>
-                                                                            <span className="text-xs text-text-muted">Est. NAN Points</span>
+                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-forest">~{points}</span>
+                                                                            <span className="text-xs text-muted">Est. NAN Points</span>
                                                                         </div>
                                                                     </div>
                                                                 );

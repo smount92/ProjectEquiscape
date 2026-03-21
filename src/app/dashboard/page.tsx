@@ -189,24 +189,24 @@ export default async function DashboardPage({
     });
 
     return (
-        <div className="max-w-[1600px] mx-auto px-lg max-lg:px-md">
+        <div className="max-w-[1600px] mx-auto px-6 max-lg:px-4">
             <div className="animate-fade-in-up">
                 {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
-                    <div className="card text-center py-3xl px-xl mb-xl bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] border border-[rgba(44,85,69,0.15)] animate-fade-in-up">
+                    <div className="card text-center py-16 px-8 mb-8 bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] border border-[rgba(44,85,69,0.15)] animate-fade-in-up">
                         <h2>Welcome to Model Horse Hub!</h2>
                         <p>Let&apos;s get started by adding your first model to your digital stable.</p>
-                        <div className="flex flex-col gap-md max-w-[360px] mx-auto mb-xl text-left">
-                            <div className="flex items-center gap-md text-[calc(0.95rem*var(--font-scale))]">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-accent-primary font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">1</span>
+                        <div className="flex flex-col gap-4 max-w-[360px] mx-auto mb-8 text-left">
+                            <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-forest font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">1</span>
                                 <span><Camera size={16} strokeWidth={1.5} /> Add your first horse with photos</span>
                             </div>
-                            <div className="flex items-center gap-md text-[calc(0.95rem*var(--font-scale))]">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-accent-primary font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">2</span>
+                            <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-forest font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">2</span>
                                 <span><Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring</span>
                             </div>
-                            <div className="flex items-center gap-md text-[calc(0.95rem*var(--font-scale))]">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-accent-primary font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">3</span>
+                            <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
+                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-forest font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">3</span>
                                 <span><Users size={16} strokeWidth={1.5} /> Discover and follow other collectors</span>
                             </div>
                         </div>
@@ -263,7 +263,7 @@ export default async function DashboardPage({
                 {/* ══════════════════════════════════════════════════════════════
                     TWO-COLUMN GRID: Main (horses) + Sidebar (widgets)
                    ══════════════════════════════════════════════════════════════ */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_360px] gap-xl">
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_360px] gap-8">
                     {/* ── MAIN COLUMN: Horse Grid ── */}
                     <main className="min-w-0">
                         <DashboardShell
@@ -273,7 +273,7 @@ export default async function DashboardPage({
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="flex justify-between items-center mt-xl pt-lg border-t border-border" style={{ marginTop: "var(--space-lg)" }}>
+                            <div className="flex justify-between items-center mt-8 pt-6 border-t border-edge" style={{ marginTop: "var(--space-lg)" }}>
                                 {page > 1 ? (
                                     <Link href={`/dashboard?page=${page - 1}`} className="btn btn-ghost">← Previous</Link>
                                 ) : (
@@ -292,37 +292,37 @@ export default async function DashboardPage({
                     </main>
 
                     {/* ── SIDEBAR: Widgets ── */}
-                    <aside className="flex flex-col gap-lg max-lg:mt-lg lg:sticky lg:top-[calc(var(--header-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
+                    <aside className="flex flex-col gap-6 max-lg:mt-6 lg:sticky lg:top-[calc(var(--header-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
-                            <div className="bg-bg-card border border-border rounded-lg p-lg">
-                                <h3 className="text-xs font-bold text-text-muted mb-md uppercase tracking-[0.08em]"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
+                            <div className="bg-card border border-edge rounded-lg p-6">
+                                <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.08em]"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
                                 <div className="flex flex-col gap-[2px]">
-                                    <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <span className="text-sm text-text-secondary"><Plus size={14} strokeWidth={1.5} /> Total Models</span>
-                                        <span className="text-sm font-bold text-text-primary">{totalHorseCount}</span>
+                                    <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-sm text-ink-light"><Plus size={14} strokeWidth={1.5} /> Total Models</span>
+                                        <span className="text-sm font-bold text-ink">{totalHorseCount}</span>
                                     </div>
-                                    <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <span className="text-sm text-text-secondary"><FolderOpen size={14} strokeWidth={1.5} /> Collections</span>
-                                        <span className="text-sm font-bold text-text-primary">{collections.length}</span>
+                                    <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-sm text-ink-light"><FolderOpen size={14} strokeWidth={1.5} /> Collections</span>
+                                        <span className="text-sm font-bold text-ink">{collections.length}</span>
                                     </div>
-                                    <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <span className="text-sm text-text-secondary"><DollarSign size={14} strokeWidth={1.5} /> Vault Value</span>
-                                        <span className="text-sm font-bold text-text-primary">
+                                    <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-sm text-ink-light"><DollarSign size={14} strokeWidth={1.5} /> Vault Value</span>
+                                        <span className="text-sm font-bold text-ink">
                                             {totalVaultValue > 0
                                                 ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
                                                 : "—"}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <span className="text-sm text-text-secondary"><Award size={14} strokeWidth={1.5} /> Show Placings</span>
-                                        <span className="text-sm font-bold text-text-primary">{totalShowRecords ?? 0}</span>
+                                    <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-sm text-ink-light"><Award size={14} strokeWidth={1.5} /> Show Placings</span>
+                                        <span className="text-sm font-bold text-ink">{totalShowRecords ?? 0}</span>
                                     </div>
 
                                     {unreadMsgCount > 0 && (
-                                        <Link href="/inbox" className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03] no-underline" style={{ textDecoration: "none" }}>
-                                            <span className="text-sm text-text-secondary"><Mail size={14} strokeWidth={1.5} /> Unread Messages</span>
-                                            <span className="text-sm font-bold text-text-primary" style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
+                                        <Link href="/inbox" className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03] no-underline" style={{ textDecoration: "none" }}>
+                                            <span className="text-sm text-ink-light"><Mail size={14} strokeWidth={1.5} /> Unread Messages</span>
+                                            <span className="text-sm font-bold text-ink" style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
                                         </Link>
                                     )}
                                 </div>
@@ -331,18 +331,18 @@ export default async function DashboardPage({
 
                         {/* Collections — Vertical list */}
                         {collections.length > 0 && (
-                            <div className="bg-bg-card border border-border rounded-lg p-lg">
-                                <h3 className="text-xs font-bold text-text-muted mb-md uppercase tracking-[0.08em]"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
-                                <div className="flex flex-col gap-xs">
+                            <div className="bg-card border border-edge rounded-lg p-6">
+                                <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.08em]"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
+                                <div className="flex flex-col gap-1">
                                     {collections.map((col) => (
                                         <Link
                                             key={col.id}
                                             href={`/stable/collection/${col.id}`}
-                                            className="flex justify-between items-center py-sm px-md rounded-md bg-black/[0.02] border border-transparent text-text-primary text-sm no-underline transition-all hover:bg-black/[0.06] hover:border-border hover:no-underline"
+                                            className="flex justify-between items-center py-2 px-4 rounded-md bg-black/[0.02] border border-transparent text-ink text-sm no-underline transition-all hover:bg-black/[0.06] hover:border-border hover:no-underline"
                                             id={`collection-${col.id}`}
                                         >
                                             <span>{col.name}</span>
-                                            <span className="text-xs text-text-muted whitespace-nowrap">
+                                            <span className="text-xs text-muted whitespace-nowrap">
                                                 {collectionCounts.get(col.id) || 0}
                                                 {(collectionValues.get(col.id) || 0) > 0 && (
                                                     <> · ${(collectionValues.get(col.id) || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>

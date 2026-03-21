@@ -69,12 +69,12 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
     };
 
     return (
-        <div className="bg-bg-card border border-border rounded-lg p-lg" style={{ marginTop: "var(--space-lg)" }}>
+        <div className="bg-card border border-edge rounded-lg p-6" style={{ marginTop: "var(--space-lg)" }}>
             <div
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                 onClick={() => setExpanded(!expanded)}
             >
-                <h3 className="text-xs font-bold text-text-muted uppercase tracking-[0.08em]" style={{ margin: 0 }}>⚙️ Admin Panel</h3>
+                <h3 className="text-xs font-bold text-muted uppercase tracking-[0.08em]" style={{ margin: 0 }}>⚙️ Admin Panel</h3>
                 <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
                     {expanded ? "▲" : "▼"}
                 </span>
@@ -91,13 +91,13 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
                             </div>
                             <div className="flex flex-col gap-[2px]">
                                 {members.map(m => (
-                                    <div key={m.userId} className="flex justify-between items-center py-sm px-xs rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <div className="flex items-center gap-sm">
-                                            <span className="text-sm font-semibold text-text-primary">@{m.alias}</span>
-                                            <span className="text-xs text-text-muted">{roleBadge(m.role)}</span>
+                                    <div key={m.userId} className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-semibold text-ink">@{m.alias}</span>
+                                            <span className="text-xs text-muted">{roleBadge(m.role)}</span>
                                         </div>
                                         {m.userId !== currentUserId && m.role !== "owner" && (
-                                            <div className="flex items-center gap-xs">
+                                            <div className="flex items-center gap-1">
                                                 {isOwner && (
                                                     <select
                                                         className="form-select"

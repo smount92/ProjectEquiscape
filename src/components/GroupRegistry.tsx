@@ -74,17 +74,17 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
                                 style={{ marginBottom: "var(--space-md)", maxWidth: 300 }}
                             />
 
-                            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-md">
+                            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
                                 {Array.from(byOwner.entries()).map(([ownerAlias, horses]) => (
-                                    <div key={ownerAlias} className="bg-surface-secondary border border-border rounded-lg p-lg transition-all hover:border-accent-primary hover:-translate-y-0.5">
-                                        <div className="flex items-center gap-sm mb-sm">
+                                    <div key={ownerAlias} className="bg-surface-secondary border border-edge rounded-lg p-6 transition-all hover:border-forest hover:-translate-y-0.5">
+                                        <div className="flex items-center gap-2 mb-2">
                                             <Link
                                                 href={`/profile/${encodeURIComponent(ownerAlias)}`}
                                                 style={{ fontWeight: 600 }}
                                             >
                                                 @{ownerAlias}
                                             </Link>
-                                            <span className="text-xs text-text-muted">
+                                            <span className="text-xs text-muted">
                                                 {horses.length} model{horses.length !== 1 ? "s" : ""}
                                             </span>
                                         </div>
@@ -93,7 +93,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
                                                 <Link
                                                     key={h.horseId}
                                                     href={`/community/${h.horseId}`}
-                                                    className="flex items-center gap-sm py-1.5 border-b border-border text-sm last:border-b-0 no-underline text-text-primary hover:text-accent-primary"
+                                                    className="flex items-center gap-2 py-1.5 border-b border-edge text-sm last:border-b-0 no-underline text-ink hover:text-forest"
                                                 >
                                                     <span>🐴 {h.horseName}</span>
                                                     <span style={{ marginLeft: "auto", fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>

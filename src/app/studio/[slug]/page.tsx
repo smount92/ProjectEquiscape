@@ -82,7 +82,7 @@ export default async function PublicStudioPage({
     return (
         <div className="page-container">
             {/* Hero */}
-            <div className="py-xl px-lg rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up">
+            <div className="py-8 px-6 rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up">
                 <div className="max-w-[800px]">
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
                         <h1 style={{ fontSize: "calc(1.8rem * var(--font-scale))", margin: 0 }}>
@@ -138,7 +138,7 @@ export default async function PublicStudioPage({
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 max-md:grid-cols-1 gap-xl mt-xl animate-fade-in-up">
+            <div className="grid grid-cols-2 max-md:grid-cols-1 gap-8 mt-8 animate-fade-in-up">
                 {/* Left: Details */}
                 <div>
                     {/* Pricing & Turnaround */}
@@ -146,10 +146,10 @@ export default async function PublicStudioPage({
                         <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                             💰 Pricing & Timeline
                         </h2>
-                        <div className="grid gap-sm">
+                        <div className="grid gap-2">
                             {(profile.priceRangeMin || profile.priceRangeMax) && (
-                                <div className="flex justify-between items-center py-xs">
-                                    <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">Price Range</span>
+                                <div className="flex justify-between items-center py-1">
+                                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">Price Range</span>
                                     <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
                                         {profile.priceRangeMin && profile.priceRangeMax
                                             ? `$${profile.priceRangeMin} – $${profile.priceRangeMax}`
@@ -160,8 +160,8 @@ export default async function PublicStudioPage({
                                 </div>
                             )}
                             {(profile.turnaroundMinDays || profile.turnaroundMaxDays) && (
-                                <div className="flex justify-between items-center py-xs">
-                                    <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">Turnaround</span>
+                                <div className="flex justify-between items-center py-1">
+                                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">Turnaround</span>
                                     <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
                                         {profile.turnaroundMinDays && profile.turnaroundMaxDays
                                             ? `${profile.turnaroundMinDays}–${profile.turnaroundMaxDays} days`
@@ -171,8 +171,8 @@ export default async function PublicStudioPage({
                                     </span>
                                 </div>
                             )}
-                            <div className="flex justify-between items-center py-xs">
-                                <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">Commission Slots</span>
+                            <div className="flex justify-between items-center py-1">
+                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">Commission Slots</span>
                                 <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
                                     {slotsUsed} / {profile.maxSlots} filled
                                 </span>
@@ -181,7 +181,7 @@ export default async function PublicStudioPage({
 
                         {profile.mediums.length > 0 && (
                             <div style={{ marginTop: "var(--space-md)" }}>
-                                <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Mediums</span>
+                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Mediums</span>
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)" }}>
                                     {profile.mediums.map(m => (
                                         <span key={m} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{m}</span>
@@ -192,7 +192,7 @@ export default async function PublicStudioPage({
 
                         {profile.scalesOffered.length > 0 && (
                             <div style={{ marginTop: "var(--space-md)" }}>
-                                <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Scales</span>
+                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Scales</span>
                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)" }}>
                                     {profile.scalesOffered.map(s => (
                                         <span key={s} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{s}</span>
@@ -230,8 +230,8 @@ export default async function PublicStudioPage({
                                 {queue.map((item, i) => {
                                     const st = COMMISSION_STATUS_LABELS[item.status] || { label: item.status, emoji: "📋" };
                                     return (
-                                        <div key={item.id} className="flex items-center gap-sm py-sm px-md rounded-md bg-[rgba(0,0,0,0.03)]">
-                                            <span className="text-xs font-bold text-accent-primary min-w-[50px]">
+                                        <div key={item.id} className="flex items-center gap-2 py-2 px-4 rounded-md bg-[rgba(0,0,0,0.03)]">
+                                            <span className="text-xs font-bold text-forest min-w-[50px]">
                                                 Slot {item.slot_number || i + 1}
                                             </span>
                                             <span className="flex-1 text-[calc(0.85rem*var(--font-scale))] font-semibold">{item.commission_type}</span>

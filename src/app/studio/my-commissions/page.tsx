@@ -40,15 +40,15 @@ export default async function MyCommissionsPage() {
                 <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                     {emoji} {title} ({items.length})
                 </h2>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] max-md:grid-cols-1 gap-md">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] max-md:grid-cols-1 gap-4">
                     {items.map(c => (
                         <Link
                             key={c.id}
                             href={`/studio/commission/${c.id}`}
-                            className="flex flex-col p-lg rounded-lg bg-[var(--color-bg-elevated)] border border-border transition-all hover:border-[rgba(139,92,246,0.3)] hover:-translate-y-[1px]"
+                            className="flex flex-col p-6 rounded-lg bg-[var(--color-bg-elevated)] border border-edge transition-all hover:border-[rgba(139,92,246,0.3)] hover:-translate-y-[1px]"
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
-                            <div className="flex justify-between items-center mb-sm gap-sm">
+                            <div className="flex justify-between items-center mb-2 gap-2">
                                 <span className="font-bold text-[calc(0.95rem*var(--font-scale))]">{c.commissionType}</span>
                                 <span
                                     className="commission-status-badge"
@@ -57,11 +57,11 @@ export default async function MyCommissionsPage() {
                                     {c.statusLabel}
                                 </span>
                             </div>
-                            <div className="flex gap-md text-[calc(0.8rem*var(--font-scale))] text-text-muted mb-sm">
+                            <div className="flex gap-4 text-[calc(0.8rem*var(--font-scale))] text-muted mb-2">
                                 <span>🎨 @{c.artistAlias}</span>
                                 {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
                             </div>
-                            <p className="text-[calc(0.85rem*var(--font-scale))] text-text-secondary leading-normal mb-sm">
+                            <p className="text-[calc(0.85rem*var(--font-scale))] text-ink-light leading-normal mb-2">
                                 {c.description.length > 100 ? c.description.substring(0, 100) + "…" : c.description}
                             </p>
                             <div style={{ marginTop: "auto", paddingTop: "var(--space-sm)", fontSize: "calc(0.7rem * var(--font-scale))", color: "var(--color-text-muted)" }}>

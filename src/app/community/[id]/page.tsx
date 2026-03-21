@@ -404,7 +404,7 @@ export default async function PublicPassportPage({
             </span>
             <span>@{ownerAlias}</span>
             {isOwnHorse && (
-              <span className="inline-flex py-[2px] px-2 rounded-sm bg-[var(--gradient-accent)] text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider">You</span>
+              <span className="inline-flex py-[2px] px-2 rounded-sm bg-forest text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider">You</span>
             )}
           </Link>
 

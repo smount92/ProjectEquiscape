@@ -70,10 +70,10 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                     </p>
                 </div>
             ) : (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] max-md:grid-cols-1 gap-md">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] max-md:grid-cols-1 gap-4">
                     {filteredCommissions.map(c => (
-                        <div key={c.id} className="flex flex-col p-lg rounded-lg bg-[var(--color-bg-elevated)] border border-border transition-all hover:border-[rgba(139,92,246,0.3)] hover:-translate-y-[1px]">
-                            <div className="flex justify-between items-center mb-sm gap-sm">
+                        <div key={c.id} className="flex flex-col p-6 rounded-lg bg-[var(--color-bg-elevated)] border border-edge transition-all hover:border-[rgba(139,92,246,0.3)] hover:-translate-y-[1px]">
+                            <div className="flex justify-between items-center mb-2 gap-2">
                                 <span className="font-bold text-[calc(0.95rem*var(--font-scale))]">{c.commissionType}</span>
                                 <span
                                     className="commission-status-badge"

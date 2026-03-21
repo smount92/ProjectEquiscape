@@ -76,7 +76,7 @@ export default function DashboardToast() {
   const { icon, message } = TOAST_MESSAGES[toastType];
 
   return (
-    <div className="py-md px-xl rounded-md mb-xl flex items-center gap-md animate-[fadeInUp_0.4s_ease_forwards] text-sm font-medium bg-[rgba(92,224,160,0.1)] border border-[rgba(92,224,160,0.3)] text-accent-success" role="status" aria-live="polite">
+    <div className="py-4 px-8 rounded-md mb-8 flex items-center gap-4 animate-[fadeInUp_0.4s_ease_forwards] text-sm font-medium bg-[rgba(92,224,160,0.1)] border border-[rgba(92,224,160,0.3)] text-success" role="status" aria-live="polite">
       <span className="text-[1.3em] shrink-0">{icon}</span>
       <span className="flex-1">{message(toastName ?? undefined, toastPhotos ?? undefined)}</span>
       <button

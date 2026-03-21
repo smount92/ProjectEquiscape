@@ -82,17 +82,17 @@ export default function RatingForm({
     // Already rated — show the existing rating
     if (rating) {
         return (
-            <div className="bg-[rgba(0,0,0,0.05)] border border-border rounded-lg p-lg mt-lg" id="rating-section">
-                <div className="text-base font-semibold mb-md flex items-center gap-sm">
+            <div className="bg-[rgba(0,0,0,0.05)] border border-edge rounded-lg p-6 mt-6" id="rating-section">
+                <div className="text-base font-semibold mb-4 flex items-center gap-2">
                     <span>⭐ Your Rating for @{targetAlias}</span>
                 </div>
-                <div className="text-center py-md">
+                <div className="text-center py-4">
                     <RatingStars rating={rating.stars} size="md" />
                     {rating.reviewText && (
-                        <p className="mt-md italic text-text-muted text-sm">&ldquo;{rating.reviewText}&rdquo;</p>
+                        <p className="mt-4 italic text-muted text-sm">&ldquo;{rating.reviewText}&rdquo;</p>
                     )}
                     <button
-                        className="btn btn-ghost mt-md text-xs text-text-muted hover:text-[#e74c6f]"
+                        className="btn btn-ghost mt-4 text-xs text-muted hover:text-[#e74c6f]"
                         onClick={handleRetract}
                         disabled={status === "retracting"}
                     >
@@ -108,8 +108,8 @@ export default function RatingForm({
 
     // Rating form
     return (
-        <div className="bg-[rgba(0,0,0,0.05)] border border-border rounded-lg p-lg mt-lg" id="rating-section">
-            <div className="text-base font-semibold mb-md flex items-center gap-sm">
+        <div className="bg-[rgba(0,0,0,0.05)] border border-edge rounded-lg p-6 mt-6" id="rating-section">
+            <div className="text-base font-semibold mb-4 flex items-center gap-2">
                 <span>⭐ Rate your experience with @{targetAlias}</span>
             </div>
 
@@ -131,7 +131,7 @@ export default function RatingForm({
                 )
             }
             <form onSubmit={handleSubmit}>
-                <div className="flex justify-center py-md">
+                <div className="flex justify-center py-4">
                     <RatingStars
                         rating={stars}
                         size="lg"
@@ -153,7 +153,7 @@ export default function RatingForm({
                         rows={2}
                         id="rating-review-text"
                     />
-                    <div className="text-right text-xs text-text-muted mt-xs">
+                    <div className="text-right text-xs text-muted mt-1">
                         {reviewText.length}/300
                     </div>
                 </div>

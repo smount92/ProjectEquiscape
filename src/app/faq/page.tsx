@@ -169,11 +169,11 @@ export default function FaqPage() {
                 </div>
 
                 {/* Category Filter */}
-                <div className="flex flex-wrap gap-sm justify-center mb-2xl">
+                <div className="flex flex-wrap gap-2 justify-center mb-12">
                     {categories.map((cat) => (
                         <button
                             key={cat}
-                            className={`py-xs px-md font-[var(--font-family)] text-sm font-semibold border border-border rounded-full cursor-pointer transition-all whitespace-nowrap ${activeCategory === cat ? "text-white bg-accent-primary !border-accent-primary" : "text-text-muted bg-[var(--color-bg-input)] hover:text-text-primary hover:border-accent-primary"}`}
+                            className={`py-1 px-4 font-[var(--font-family)] text-sm font-semibold border border-edge rounded-full cursor-pointer transition-all whitespace-nowrap ${activeCategory === cat ? "text-white bg-forest !border-accent-primary" : "text-muted bg-[var(--color-bg-input)] hover:text-ink hover:border-forest"}`}
                             onClick={() => {
                                 setActiveCategory(cat);
                                 setOpenIndex(null);
@@ -185,23 +185,23 @@ export default function FaqPage() {
                 </div>
 
                 {/* FAQ Items */}
-                <div className="flex flex-col gap-sm">
+                <div className="flex flex-col gap-2">
                     {filteredItems.map((item, idx) => {
                         const isOpen = openIndex === idx;
                         return (
                             <div
                                 key={`${item.category}-${idx}`}
-                                className={`border rounded-lg overflow-hidden transition-colors ${isOpen ? "border-[rgba(44,85,69,0.3)]" : "border-border"}`}
+                                className={`border rounded-lg overflow-hidden transition-colors ${isOpen ? "border-[rgba(44,85,69,0.3)]" : "border-edge"}`}
                             >
                                 <button
-                                    className="flex items-center justify-between w-full py-lg px-xl bg-[var(--color-bg-card)] border-none text-text-primary font-[var(--font-family)] text-base font-semibold text-left cursor-pointer transition-colors gap-md hover:bg-[var(--color-bg-card-hover)]"
+                                    className="flex items-center justify-between w-full py-6 px-8 bg-[var(--color-bg-card)] border-none text-ink font-[var(--font-family)] text-base font-semibold text-left cursor-pointer transition-colors gap-4 hover:bg-[var(--color-bg-card-hover)]"
                                     onClick={() => toggle(idx)}
                                     aria-expanded={isOpen}
                                     id={`faq-q-${idx}`}
                                 >
                                     <span>{item.q}</span>
                                     <svg
-                                        className={`shrink-0 transition-transform ${isOpen ? "rotate-180 text-accent-primary" : "text-text-muted"}`}
+                                        className={`shrink-0 transition-transform ${isOpen ? "rotate-180 text-forest" : "text-muted"}`}
                                         width="20"
                                         height="20"
                                         viewBox="0 0 24 24"
@@ -216,7 +216,7 @@ export default function FaqPage() {
                                     </svg>
                                 </button>
                                 {isOpen && (
-                                    <div className="px-xl pb-lg bg-[var(--color-bg-card)] animate-fade-in-up [&_p]:text-base [&_p]:text-text-secondary [&_p]:leading-[1.8] [&_p]:m-0" id={`faq-a-${idx}`}>
+                                    <div className="px-8 pb-6 bg-[var(--color-bg-card)] animate-fade-in-up [&_p]:text-base [&_p]:text-text-secondary [&_p]:leading-[1.8] [&_p]:m-0" id={`faq-a-${idx}`}>
                                         <p>{item.a}</p>
                                     </div>
                                 )}

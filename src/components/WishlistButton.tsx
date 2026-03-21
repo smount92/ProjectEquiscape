@@ -33,7 +33,7 @@ export default function WishlistButton({ catalogId }: WishlistButtonProps) {
 
     return (
         <button
-            className={`flex items-center justify-center w-8 h-8 border-none bg-transparent cursor-pointer rounded-full p-0 transition-all duration-200 ${status === "saved" ? "text-accent-secondary animate-[wishlistPop_0.3s_ease]" : "text-text-muted hover:text-accent-secondary hover:bg-[rgba(139,90,43,0.08)] hover:scale-115"}`}
+            className={`flex items-center justify-center w-8 h-8 border-none bg-transparent cursor-pointer rounded-full p-0 transition-all duration-200 ${status === "saved" ? "text-saddle animate-[wishlistPop_0.3s_ease]" : "text-muted hover:text-saddle hover:bg-[rgba(139,90,43,0.08)] hover:scale-115"}`}
             onClick={handleClick}
             disabled={status === "saving"}
             title={status === "saved" ? "In your wishlist" : "Add to wishlist"}

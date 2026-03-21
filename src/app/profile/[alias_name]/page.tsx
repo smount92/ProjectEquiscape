@@ -292,7 +292,7 @@ export default async function ProfilePage({
           <h1>
             @{profileUser.alias_name}
             {isOwnProfile && (
-              <span className="inline-flex py-[2px] px-2 rounded-sm bg-[var(--gradient-accent)] text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider" style={{ marginLeft: "var(--space-sm)", verticalAlign: "middle" }}>
+              <span className="inline-flex py-[2px] px-2 rounded-sm bg-forest text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider" style={{ marginLeft: "var(--space-sm)", verticalAlign: "middle" }}>
                 You
               </span>
             )}
@@ -358,14 +358,14 @@ export default async function ProfilePage({
             isOwnProfile={isOwnProfile}
           />
           {(followStats.followerCount > 0 || followStats.followingCount > 0) && (
-            <div className="flex items-center gap-sm text-[calc(0.85rem*var(--font-scale))] text-text-muted mt-xs">
+            <div className="flex items-center gap-2 text-[calc(0.85rem*var(--font-scale))] text-muted mt-1">
               <span>{followStats.followerCount} follower{followStats.followerCount !== 1 ? "s" : ""}</span>
               <span>·</span>
               <span>{followStats.followingCount} following</span>
             </div>
           )}
           {!isOwnProfile && (
-            <div className="flex items-center gap-sm mt-sm flex-wrap">
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
               <MessageUserButton
                 targetUserId={profileUser.id}
                 targetAlias={profileUser.alias_name}
@@ -544,22 +544,22 @@ export default async function ProfilePage({
 
       {/* Reviews Section */}
       {ratingSummary.count > 0 && (
-        <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-border rounded-lg p-lg mt-xl animate-fade-in-up" id="reviews">
-          <div className="flex items-center gap-sm mb-lg [&_h2]:m-0 [&_h2]:text-[calc(1.1rem*var(--font-scale))]">
+        <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-edge rounded-lg p-6 mt-8 animate-fade-in-up" id="reviews">
+          <div className="flex items-center gap-2 mb-6 [&_h2]:m-0 [&_h2]:text-[calc(1.1rem*var(--font-scale))]">
             <h2>⭐ Reviews ({ratingSummary.count})</h2>
           </div>
           {ratingSummary.ratings.map((r) => (
-            <div key={r.id} className="py-md border-b border-border last:border-b-0">
-              <div className="flex items-center justify-between mb-xs max-sm:flex-col max-sm:items-start max-sm:gap-xs">
-                <span className="text-[calc(0.85rem*var(--font-scale))] text-text-muted">
+            <div key={r.id} className="py-4 border-b border-edge last:border-b-0">
+              <div className="flex items-center justify-between mb-1 max-sm:flex-col max-sm:items-start max-sm:gap-xs">
+                <span className="text-[calc(0.85rem*var(--font-scale))] text-muted">
                   @{r.reviewerAlias} — {"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}
                 </span>
-                <span className="text-[calc(0.75rem*var(--font-scale))] text-text-muted opacity-70">
+                <span className="text-[calc(0.75rem*var(--font-scale))] text-muted opacity-70">
                   {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               </div>
               {r.reviewText && (
-                <p className="text-[calc(0.9rem*var(--font-scale))] text-text-muted italic mt-xs">&ldquo;{r.reviewText}&rdquo;</p>
+                <p className="text-[calc(0.9rem*var(--font-scale))] text-muted italic mt-1">&ldquo;{r.reviewText}&rdquo;</p>
               )}
             </div>
           ))}

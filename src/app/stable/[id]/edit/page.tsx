@@ -1056,7 +1056,7 @@ export default function EditHorsePage() {
         <div className="community-toggle-section">
           <div className="community-toggle-row" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
             <span className="community-toggle-label">👁️ Visibility</span>
-            <div className="flex gap-sm flex-wrap">
+            <div className="flex gap-2 flex-wrap">
               {([
                 { value: "public" as const, icon: "🌐", label: "Public", hint: "Visible in the Show Ring" },
                 { value: "unlisted" as const, icon: "🔗", label: "Unlisted", hint: "Anyone with the link can see it" },
@@ -1065,13 +1065,13 @@ export default function EditHorsePage() {
                 <button
                   key={opt.value}
                   type="button"
-                  className={`flex-1 min-w-[120px] flex flex-col items-center gap-1 py-3 px-2 border-2 rounded-lg bg-surface-primary cursor-pointer transition-all font-inherit text-text-primary hover:border-accent-primary hover:bg-surface-secondary ${visibility === opt.value ? "border-accent-primary bg-[rgba(44,85,69,0.1)]" : "border-border"}`}
+                  className={`flex-1 min-w-[120px] flex flex-col items-center gap-1 py-3 px-2 border-2 rounded-lg bg-surface-primary cursor-pointer transition-all font-inherit text-ink hover:border-forest hover:bg-surface-secondary ${visibility === opt.value ? "border-forest bg-[rgba(44,85,69,0.1)]" : "border-edge"}`}
                   onClick={() => setVisibility(opt.value)}
                   id={`edit-visibility-${opt.value}`}
                 >
                   <span className="text-2xl">{opt.icon}</span>
                   <span className="font-semibold text-sm">{opt.label}</span>
-                  <span className="text-xs text-text-muted text-center">{opt.hint}</span>
+                  <span className="text-xs text-muted text-center">{opt.hint}</span>
                 </button>
               ))}
             </div>

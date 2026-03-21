@@ -124,11 +124,11 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
             </div>
 
             {/* Tag Chips */}
-            <div className="flex gap-xs overflow-x-auto pb-xs mb-lg" style={{ WebkitOverflowScrolling: "touch" }}>
+            <div className="flex gap-1 overflow-x-auto pb-1 mb-6" style={{ WebkitOverflowScrolling: "touch" }}>
                 {TAGS.map((tag) => (
                     <button
                         key={tag.key}
-                        className={`inline-flex items-center gap-1 py-1.5 px-3 rounded-full border text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all whitespace-nowrap font-medium ${activeTag === tag.key ? "bg-accent-primary text-white border-accent-primary shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : "bg-[rgba(0,0,0,0.03)] border-border text-text-muted hover:border-accent-primary hover:text-text-primary"}`}
+                        className={`inline-flex items-center gap-1 py-1.5 px-3 rounded-full border text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all whitespace-nowrap font-medium ${activeTag === tag.key ? "bg-forest text-white border-forest shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : "bg-[rgba(0,0,0,0.03)] border-edge text-muted hover:border-forest hover:text-ink"}`}
                         onClick={() => setActiveTag(tag.key)}
                     >
                         <span>{tag.emoji}</span>
@@ -140,7 +140,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
 
             {/* Results count */}
             {(searchQuery.trim() || activeTag !== "all") && (
-                <div className="text-sm text-text-muted mb-lg pl-xs" style={{ marginBottom: "var(--space-md)" }}>
+                <div className="text-sm text-muted mb-6 pl-1" style={{ marginBottom: "var(--space-md)" }}>
                     {filteredUsers.length === 0
                         ? searchQuery.trim()
                             ? `No collectors match "${searchQuery}"`
@@ -163,7 +163,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                     <p>Try a different search or filter.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-lg animate-fade-in-up">
+                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6 animate-fade-in-up">
                     {filteredUsers.map((u) => {
                         const publicCount = u.public_horse_count;
                         const isMe = u.id === currentUserId;
@@ -172,18 +172,18 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                             <Link
                                 key={u.id}
                                 href={`/profile/${encodeURIComponent(u.alias_name)}`}
-                                className="flex items-start gap-md p-lg bg-bg-card border border-border rounded-lg no-underline text-inherit transition-all duration-base hover:border-accent-primary hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)] hover:-translate-y-0.5"
+                                className="flex items-start gap-4 p-6 bg-card border border-edge rounded-lg no-underline text-inherit transition-all duration-250 hover:border-forest hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)] hover:-translate-y-0.5"
                                 id={`discover-${u.id}`}
                             >
-                                <div className="w-[52px] h-[52px] rounded-full bg-[linear-gradient(135deg,rgba(129,140,248,0.2),rgba(167,139,250,0.1))] flex items-center justify-center shrink-0 text-accent-primary">
+                                <div className="w-[52px] h-[52px] rounded-full bg-[linear-gradient(135deg,rgba(129,140,248,0.2),rgba(167,139,250,0.1))] flex items-center justify-center shrink-0 text-forest">
                                     <UserAvatar avatarUrl={u.avatar_url} aliasName={u.alias_name} size={40} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-base mb-xs">
+                                    <div className="font-semibold text-base mb-1">
                                         @{u.alias_name}
                                         {isMe && (
                                             <span
-                                                className="inline-flex py-[2px] px-2 rounded-sm bg-[var(--gradient-accent)] text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider"
+                                                className="inline-flex py-[2px] px-2 rounded-sm bg-forest text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider"
                                                 style={{ marginLeft: "6px" }}
                                             >
                                                 You
@@ -196,11 +196,11 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                                         )}
                                     </div>
                                     {u.bio && (
-                                        <div className="flex gap-md text-xs text-text-muted italic">
+                                        <div className="flex gap-4 text-xs text-muted italic">
                                             {u.bio.length > 80 ? `${u.bio.slice(0, 80)}…` : u.bio}
                                         </div>
                                     )}
-                                    <div className="flex gap-md text-xs text-text-muted">
+                                    <div className="flex gap-4 text-xs text-muted">
                                         <span>
                                             🐴 {publicCount} model{publicCount !== 1 ? "s" : ""}
                                         </span>

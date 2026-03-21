@@ -225,15 +225,15 @@ export default async function InboxPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-[2px] bg-surface-glass border border-border rounded-lg overflow-hidden animate-fade-in-up">
+                    <div className="flex flex-col gap-[2px] bg-surface-glass border border-edge rounded-lg overflow-hidden animate-fade-in-up">
                         {inboxItems.map((item) => (
                             <Link
                                 key={item.id}
                                 href={`/inbox/${item.id}`}
-                                className={`flex items-center gap-md max-md:gap-sm py-md max-md:py-sm px-lg max-md:px-md no-underline text-text-primary transition-all border-b border-border last:border-b-0 ${item.unreadCount > 0 ? "bg-[rgba(44,85,69,0.05)] hover:bg-[rgba(44,85,69,0.08)]" : "hover:bg-black/[0.03]"}`}
+                                className={`flex items-center gap-4 max-md:gap-sm py-4 max-md:py-sm px-6 max-md:px-md no-underline text-ink transition-all border-b border-edge last:border-b-0 ${item.unreadCount > 0 ? "bg-[rgba(44,85,69,0.05)] hover:bg-[rgba(44,85,69,0.08)]" : "hover:bg-black/[0.03]"}`}
                                 id={`inbox-item-${item.id}`}
                             >
-                                <div className="w-11 max-md:w-9 h-11 max-md:h-9 rounded-full bg-[rgba(44,85,69,0.15)] flex items-center justify-center shrink-0 text-accent-secondary">
+                                <div className="w-11 max-md:w-9 h-11 max-md:h-9 rounded-full bg-[rgba(44,85,69,0.15)] flex items-center justify-center shrink-0 text-saddle">
                                     <svg
                                         width="24"
                                         height="24"
@@ -250,17 +250,17 @@ export default async function InboxPage() {
                                     </svg>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-center gap-sm">
-                                        <span className={`font-semibold text-sm ${item.unreadCount > 0 ? "text-accent-primary" : "text-text-primary"}`}>@{item.otherAlias}</span>
+                                    <div className="flex justify-between items-center gap-2">
+                                        <span className={`font-semibold text-sm ${item.unreadCount > 0 ? "text-forest" : "text-ink"}`}>@{item.otherAlias}</span>
                                         {item.isRated && (
-                                            <span className="text-[calc(0.7rem*var(--font-scale))] text-[#F59E0B] ml-xs">⭐ Rated</span>
+                                            <span className="text-[calc(0.7rem*var(--font-scale))] text-[#F59E0B] ml-1">⭐ Rated</span>
                                         )}
-                                        <span className="text-xs text-text-muted shrink-0">
+                                        <span className="text-xs text-muted shrink-0">
                                             {timeAgo(item.latestTime)}
                                         </span>
                                     </div>
                                     {item.horseName ? (
-                                        <div className="text-xs text-text-muted mt-[2px] flex items-center gap-xs">
+                                        <div className="text-xs text-muted mt-[2px] flex items-center gap-1">
                                             🐴 Re: {item.horseName}
                                             {item.horseTradeStatus &&
                                                 item.horseTradeStatus !== "Not for Sale" && (
@@ -277,15 +277,15 @@ export default async function InboxPage() {
                                                 )}
                                         </div>
                                     ) : (
-                                        <div className="text-xs text-text-muted mt-[2px] flex items-center gap-xs">
+                                        <div className="text-xs text-muted mt-[2px] flex items-center gap-1">
                                             💬 Direct Message
                                         </div>
                                     )}
-                                    <div className="text-xs text-text-muted mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <div className="text-xs text-muted mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
                                         {item.latestMessage ? (
                                             <>
                                                 {item.latestSenderIsMe && (
-                                                    <span className="font-semibold text-text-primary">You: </span>
+                                                    <span className="font-semibold text-ink">You: </span>
                                                 )}
                                                 {item.latestMessage.length > 80
                                                     ? item.latestMessage.slice(0, 80) + "…"
@@ -297,7 +297,7 @@ export default async function InboxPage() {
                                     </div>
                                 </div>
                                 {item.unreadCount > 0 && (
-                                    <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-accent-primary text-white rounded-full text-[0.7rem] font-bold shrink-0">{item.unreadCount}</div>
+                                    <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-forest text-white rounded-full text-[0.7rem] font-bold shrink-0">{item.unreadCount}</div>
                                 )}
                             </Link>
                         ))}

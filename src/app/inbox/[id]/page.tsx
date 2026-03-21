@@ -246,28 +246,28 @@ export default async function ChatPage({
                         <span className="chat-role-badge">{isBuyer ? "Seller" : "Buyer"}</span>
                     </div>
                     {horseContext ? (
-                        <span className="text-xs text-text-muted mt-0.5">
+                        <span className="text-xs text-muted mt-0.5">
                             🐴 Re: {horseContext.name}
                         </span>
                     ) : (
-                        <span className="text-xs text-text-muted mt-0.5 opacity-70">
+                        <span className="text-xs text-muted mt-0.5 opacity-70">
                             💬 Direct Message
                         </span>
                     )}
                 </div>
 
                 {/* Trust Signals */}
-                <div className="flex flex-wrap gap-xs mt-0.5">
+                <div className="flex flex-wrap gap-1 mt-0.5">
                     {memberSince && (
-                        <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-border rounded-sm text-[calc(0.65rem*var(--font-scale))] text-text-muted whitespace-nowrap" title="Account age">
+                        <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-edge rounded-sm text-[calc(0.65rem*var(--font-scale))] text-muted whitespace-nowrap" title="Account age">
                             📅 Member since {memberSince}
                         </span>
                     )}
-                    <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-border rounded-sm text-[calc(0.65rem*var(--font-scale))] text-text-muted whitespace-nowrap" title="Completed Hoofprint transfers">
+                    <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-edge rounded-sm text-[calc(0.65rem*var(--font-scale))] text-muted whitespace-nowrap" title="Completed Hoofprint transfers">
                         📦 {transferCount || 0} transfer{transferCount !== 1 ? "s" : ""}
                     </span>
                     {avgRating !== null && (
-                        <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-border rounded-sm text-[calc(0.65rem*var(--font-scale))] text-text-muted whitespace-nowrap" title="Average user rating">
+                        <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-edge rounded-sm text-[calc(0.65rem*var(--font-scale))] text-muted whitespace-nowrap" title="Average user rating">
                             ⭐ {avgRating} ({ratingsArr.length})
                         </span>
                     )}
@@ -300,7 +300,7 @@ export default async function ChatPage({
             {horseContext && (
                 <Link
                     href={`/community/${horseContext.id}`}
-                    className="group flex items-center gap-md p-md bg-[var(--color-bg-card)] border border-border rounded-lg mb-md no-underline text-text-primary transition-all hover:border-accent-primary hover:bg-[var(--color-bg-card-hover)] hover:-translate-y-px hover:shadow-md animate-fade-in-up"
+                    className="group flex items-center gap-4 p-4 bg-[var(--color-bg-card)] border border-edge rounded-lg mb-4 no-underline text-ink transition-all hover:border-forest hover:bg-[var(--color-bg-card-hover)] hover:-translate-y-px hover:shadow-md animate-fade-in-up"
                     id="chat-horse-link"
                 >
                     {horseContext.thumbnailUrl ? (
@@ -318,7 +318,7 @@ export default async function ChatPage({
                     <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                         <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis">{horseContext.name}</span>
                         {horseContext.refLine && (
-                            <span className="text-xs text-text-muted whitespace-nowrap overflow-hidden text-ellipsis">{horseContext.refLine}</span>
+                            <span className="text-xs text-muted whitespace-nowrap overflow-hidden text-ellipsis">{horseContext.refLine}</span>
                         )}
                         {horseContext.tradeStatus !== "Not for Sale" && (
                             <span className={`inline-flex items-center gap-[3px] text-[calc(0.7rem*var(--font-scale))] font-bold py-0.5 px-2 rounded-full w-fit ${horseContext.tradeStatus === "For Sale" ? "bg-[rgba(34,197,94,0.12)] text-[#22c55e]" : "bg-[rgba(59,130,246,0.12)] text-[#3b82f6]"
@@ -330,7 +330,7 @@ export default async function ChatPage({
                             </span>
                         )}
                     </div>
-                    <span className="text-text-muted text-[1.1rem] shrink-0 transition-transform group-hover:translate-x-[3px] group-hover:text-accent-primary">→</span>
+                    <span className="text-muted text-[1.1rem] shrink-0 transition-transform group-hover:translate-x-[3px] group-hover:text-accent-primary">→</span>
                 </Link>
             )}
 

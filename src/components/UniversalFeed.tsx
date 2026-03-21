@@ -171,7 +171,7 @@ export default function UniversalFeed({
 
             {/* ── Composer ── */}
             {showComposer && (
-                <div className="bg-[var(--color-surface-1)] border border-border rounded-lg p-md mb-lg">
+                <div className="bg-[var(--color-surface-1)] border border-edge rounded-lg p-4 mb-6">
                     <textarea
                         className="form-textarea feed-compose-input"
                         placeholder={composerPlaceholder}
@@ -203,7 +203,7 @@ export default function UniversalFeed({
                                 📷 {imageFiles.length > 0 ? `(${imageFiles.length}/4)` : ""}
                             </button>
                             <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageSelect} style={{ display: "none" }} />
-                            <span className="text-xs text-text-muted">{composerText.length}/2000</span>
+                            <span className="text-xs text-muted">{composerText.length}/2000</span>
                         </div>
                         <button className="btn btn-primary btn-sm" onClick={handlePost}
                             disabled={isPosting || (!composerText.trim() && imageFiles.length === 0)}>

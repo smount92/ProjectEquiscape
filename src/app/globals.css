@@ -1,62 +1,46 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-/* ── Tailwind v4 Theme: map :root design tokens ── */
+/* ── Tailwind v4 Theme: flat semantic tokens for utility generation ── */
 @theme {
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-serif: var(--font-serif-theme, Georgia), 'Times New Roman', Times, serif;
 
-  --text-xs: calc(var(--font-size-xs) * var(--font-scale));
-  --text-sm: calc(var(--font-size-sm) * var(--font-scale));
-  --text-base: calc(var(--font-size-base) * var(--font-scale));
-  --text-md: calc(var(--font-size-md) * var(--font-scale));
-  --text-lg: calc(var(--font-size-lg) * var(--font-scale));
-  --text-xl: calc(var(--font-size-xl) * var(--font-scale));
-  --text-2xl: calc(var(--font-size-2xl) * var(--font-scale));
-  --text-3xl: calc(var(--font-size-3xl) * var(--font-scale));
+  /* Spacing — multiplier-based (p-4 = 4 × 0.25rem = 1rem) */
+  --spacing: 0.25rem;
 
-  /* Background Colors */
-  --color-bg-primary: #F0EAD6;
-  --color-bg-secondary: #E8DFC9;
-  --color-bg-card: #FBF7ED;
-  --color-bg-card-hover: #F5EFE0;
-  --color-bg-input: #F8F3E8;
-  --color-bg-elevated: #FBF7ED;
+  /* Background Colors — flat names, no "bg-" prefix */
+  --color-parchment: #F0EAD6;
+  --color-parchment-dark: #E8DFC9;
+  --color-card: #FBF7ED;
+  --color-card-hover: #F5EFE0;
+  --color-input: #F8F3E8;
+  --color-elevated: #FBF7ED;
 
   /* Surface Colors */
-  --color-surface-glass: rgba(139, 90, 43, 0.04);
-  --color-surface-glass-hover: rgba(139, 90, 43, 0.08);
+  --color-glass: rgba(139, 90, 43, 0.04);
+  --color-glass-hover: rgba(139, 90, 43, 0.08);
 
-  /* Text Colors */
-  --color-text-primary: #2D2318;
-  --color-text-secondary: #59493A;
-  --color-text-muted: #8B7B6A;
-  --color-text-inverse: #FFFFFF;
+  /* Text Colors — flat names, no "text-" prefix */
+  --color-ink: #2D2318;
+  --color-ink-light: #59493A;
+  --color-muted: #8B7B6A;
+  --color-inverse: #FFFFFF;
 
-  /* Accent Colors */
-  --color-accent-primary: #2C5545;
-  --color-accent-primary-hover: #1E3D31;
-  --color-accent-primary-glow: rgba(44, 85, 69, 0.15);
-  --color-accent-secondary: #8B5A2B;
-  --color-accent-success: #356845;
-  --color-accent-danger: #9B3028;
-  --color-accent-warning: #B8860B;
+  /* Accent Colors — flat names, no "accent-" prefix */
+  --color-forest: #2C5545;
+  --color-forest-dark: #1E3D31;
+  --color-forest-glow: rgba(44, 85, 69, 0.15);
+  --color-saddle: #8B5A2B;
+  --color-success: #356845;
+  --color-danger: #9B3028;
+  --color-warning: #B8860B;
 
-  /* Border Colors */
-  --color-border: #D4C9B5;
-  --color-border-focus: #2C5545;
-  --color-border-input: #C5B99D;
-
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  --spacing-3xl: 4rem;
-  --spacing-header: 64px;
+  /* Border Colors — flat names, no "border-" prefix */
+  --color-edge: #D4C9B5;
+  --color-edge-focus: #2C5545;
+  --color-edge-input: #C5B99D;
 
   /* Border Radius */
   --radius-sm: 6px;

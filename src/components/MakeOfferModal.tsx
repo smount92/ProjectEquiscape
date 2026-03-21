@@ -66,15 +66,15 @@ export default function MakeOfferModal({
                     <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
                 </div>
 
-                <p className="text-sm text-text-muted mb-md">
+                <p className="text-sm text-muted mb-4">
                     🐴 <strong>{horseName}</strong>
                 </p>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="form-label">Your Offer</label>
-                        <div className="flex items-center gap-xs">
-                            <span className="text-lg font-bold text-text-muted">$</span>
+                        <div className="flex items-center gap-1">
+                            <span className="text-lg font-bold text-muted">$</span>
                             <input
                                 type="number"
                                 step="0.01"
@@ -118,7 +118,7 @@ export default function MakeOfferModal({
 
                     {error && <div className="comment-error">{error}</div>}
 
-                    <div className="flex gap-sm justify-end mt-lg max-sm:flex-col max-sm:[&_.btn]:w-full">
+                    <div className="flex gap-2 justify-end mt-6 max-sm:flex-col max-sm:[&_.btn]:w-full">
                         <button
                             type="button"
                             className="btn btn-ghost"

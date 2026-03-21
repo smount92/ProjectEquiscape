@@ -43,7 +43,7 @@ export default function RatingStars({
                 </span>
             ))}
             {interactive && displayValue > 0 && (
-                <span className="ml-sm text-[calc(0.85rem*var(--font-scale))] text-[#F59E0B] font-medium">{STAR_LABELS[displayValue]}</span>
+                <span className="ml-2 text-[calc(0.85rem*var(--font-scale))] text-[#F59E0B] font-medium">{STAR_LABELS[displayValue]}</span>
             )}
         </div>
     );

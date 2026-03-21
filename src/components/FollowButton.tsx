@@ -33,7 +33,7 @@ export default function FollowButton({
     };
 
     return (
-        <div className="flex items-center gap-sm mt-sm">
+        <div className="flex items-center gap-2 mt-2">
             <button
                 className={`btn btn-sm ${isFollowing ? "btn-ghost !border-[rgba(34,197,94,0.3)] !text-[#22C55E] hover:!border-[rgba(239,68,68,0.4)] hover:!text-[#ef4444]" : "btn-primary"}`}
                 onClick={handleToggle}
@@ -46,7 +46,7 @@ export default function FollowButton({
                         ? "✓ Following"
                         : "+ Follow"}
             </button>
-            <span className="text-[calc(0.8rem*var(--font-scale))] text-text-muted">
+            <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">
                 {followerCount} follower{followerCount !== 1 ? "s" : ""}
             </span>
         </div>

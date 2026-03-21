@@ -124,13 +124,13 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
                     <p>No files uploaded yet.</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-xs">
+                <div className="flex flex-col gap-1">
                     {files.map(f => (
-                        <div key={f.id} className="flex items-center gap-md p-md bg-black/[0.02] border border-border rounded-md transition-colors hover:bg-black/[0.05]">
+                        <div key={f.id} className="flex items-center gap-4 p-4 bg-black/[0.02] border border-edge rounded-md transition-colors hover:bg-black/[0.05]">
                             <div className="text-2xl shrink-0">{fileIcon(f.fileType)}</div>
                             <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
-                                <span className="font-semibold text-sm text-text-primary overflow-hidden text-ellipsis whitespace-nowrap">{f.fileName}</span>
-                                <span className="text-xs text-text-muted">
+                                <span className="font-semibold text-sm text-ink overflow-hidden text-ellipsis whitespace-nowrap">{f.fileName}</span>
+                                <span className="text-xs text-muted">
                                     {formatSize(f.fileSize)}
                                     {f.description && <> · {f.description}</>}
                                     {" · "}@{f.uploaderAlias} · {timeAgo(f.createdAt)}

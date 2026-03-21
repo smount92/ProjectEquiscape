@@ -96,7 +96,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
     }
 
     return (
-        <div className="flex flex-col border border-border rounded-lg overflow-hidden animate-fade-in-up">
+        <div className="flex flex-col border border-edge rounded-lg overflow-hidden animate-fade-in-up">
             {items.map((item) => {
                 const link = item.horseId
                     ? `/community/${item.horseId}`
@@ -108,7 +108,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                     <div key={item.id} className="activity-feed-item-wrapper">
                         <Link
                             href={link}
-                            className="flex items-center gap-md py-md px-lg border-b border-border no-underline text-inherit transition-colors last:border-b-0 hover:bg-black/[0.03]"
+                            className="flex items-center gap-4 py-4 px-6 border-b border-edge no-underline text-inherit transition-colors last:border-b-0 hover:bg-black/[0.03]"
                         >
                             {item.thumbnailUrl ? (
                                 <div className="feed-item-thumb">
@@ -126,7 +126,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                                         <span className="text-[calc(0.9rem*var(--font-scale))] font-semibold">
                                             @{item.actorAlias}
                                         </span>
-                                        <div className="text-base leading-relaxed text-text-primary py-xs whitespace-pre-wrap [&_p]:m-0">
+                                        <div className="text-base leading-relaxed text-ink py-1 whitespace-pre-wrap [&_p]:m-0">
                                             <RichText content={(item.metadata as { text?: string })?.text || ""} />
                                         </div>
                                         {/* Image collage for casual image posts */}
@@ -138,7 +138,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                                                 ))}
                                             </div>
                                         )}
-                                        <span className="text-[calc(0.75rem*var(--font-scale))] text-text-muted">
+                                        <span className="text-[calc(0.75rem*var(--font-scale))] text-muted">
                                             {timeAgo(item.createdAt)}
                                         </span>
                                     </>
@@ -147,7 +147,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                                         <span className="text-[calc(0.9rem*var(--font-scale))]">
                                             {getEventText(item)}
                                         </span>
-                                        <span className="text-[calc(0.75rem*var(--font-scale))] text-text-muted">
+                                        <span className="text-[calc(0.75rem*var(--font-scale))] text-muted">
                                             {timeAgo(item.createdAt)}
                                         </span>
                                     </>
@@ -155,7 +155,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                             </div>
                         </Link>
                         {/* Action row: Like + Delete (outside the Link to avoid navigation) */}
-                        <div className="flex items-center gap-sm mt-xs">
+                        <div className="flex items-center gap-2 mt-1">
                             {currentUserId && (
                                 <LikeToggle
                                     initialLiked={item.isLiked}

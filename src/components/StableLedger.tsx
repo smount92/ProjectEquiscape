@@ -31,7 +31,7 @@ function getFinishBadgeClass(finishType: string): string {
         case "OF": return `${base} bg-[rgba(59,130,246,0.15)] text-[rgb(59,130,246)]`;
         case "Custom": return `${base} bg-[rgba(168,85,247,0.15)] text-[rgb(168,85,247)]`;
         case "Artist Resin": return `${base} bg-[rgba(236,72,153,0.15)] text-[rgb(236,72,153)]`;
-        default: return `${base} bg-surface-secondary text-text-secondary`;
+        default: return `${base} bg-surface-secondary text-ink-light`;
     }
 }
 
@@ -130,7 +130,7 @@ export default function StableLedger({
             )}
 
             {searchQuery.trim() && (
-                <div className="text-sm text-text-muted mb-lg pl-xs">
+                <div className="text-sm text-muted mb-6 pl-1">
                     {filteredCards.length === 0
                         ? "No models match your search"
                         : `Showing ${filteredCards.length} of ${horseCards.length} models`}
@@ -144,34 +144,34 @@ export default function StableLedger({
                     <p>Click the button above to add your first horse.</p>
                 </div>
             ) : filteredCards.length > 0 ? (
-                <div className="overflow-x-auto rounded-lg border border-border bg-surface-primary">
+                <div className="overflow-x-auto rounded-lg border border-edge bg-surface-primary">
                     <table className="ledger-table">
                         <thead>
                             <tr>
                                 {selectMode && <th style={{ width: 36 }}>☑</th>}
                                 <th style={{ width: 50 }}>📷</th>
-                                <th onClick={() => toggleSort("name")} className="cursor-pointer select-none transition-colors hover:text-accent-primary">
+                                <th onClick={() => toggleSort("name")} className="cursor-pointer select-none transition-colors hover:text-forest">
                                     Name{sortIndicator("name")}
                                 </th>
-                                <th onClick={() => toggleSort("ref")} className="cursor-pointer select-none transition-colors hover:text-accent-primary max-md:hidden">
+                                <th onClick={() => toggleSort("ref")} className="cursor-pointer select-none transition-colors hover:text-forest max-md:hidden">
                                     Reference{sortIndicator("ref")}
                                 </th>
-                                <th onClick={() => toggleSort("finish")} className="cursor-pointer select-none transition-colors hover:text-accent-primary">
+                                <th onClick={() => toggleSort("finish")} className="cursor-pointer select-none transition-colors hover:text-forest">
                                     Finish{sortIndicator("finish")}
                                 </th>
-                                <th onClick={() => toggleSort("condition")} className="cursor-pointer select-none transition-colors hover:text-accent-primary max-md:hidden">
+                                <th onClick={() => toggleSort("condition")} className="cursor-pointer select-none transition-colors hover:text-forest max-md:hidden">
                                     Condition{sortIndicator("condition")}
                                 </th>
-                                <th onClick={() => toggleSort("collection")} className="cursor-pointer select-none transition-colors hover:text-accent-primary max-md:hidden">
+                                <th onClick={() => toggleSort("collection")} className="cursor-pointer select-none transition-colors hover:text-forest max-md:hidden">
                                     Collection{sortIndicator("collection")}
                                 </th>
-                                <th onClick={() => toggleSort("trade")} className="cursor-pointer select-none transition-colors hover:text-accent-primary max-md:hidden">
+                                <th onClick={() => toggleSort("trade")} className="cursor-pointer select-none transition-colors hover:text-forest max-md:hidden">
                                     Status{sortIndicator("trade")}
                                 </th>
-                                <th onClick={() => toggleSort("value")} className="cursor-pointer select-none transition-colors hover:text-accent-primary max-md:hidden">
+                                <th onClick={() => toggleSort("value")} className="cursor-pointer select-none transition-colors hover:text-forest max-md:hidden">
                                     Value{sortIndicator("value")}
                                 </th>
-                                <th onClick={() => toggleSort("added")} className="cursor-pointer select-none transition-colors hover:text-accent-primary">
+                                <th onClick={() => toggleSort("added")} className="cursor-pointer select-none transition-colors hover:text-forest">
                                     Added{sortIndicator("added")}
                                 </th>
                             </tr>
@@ -205,18 +205,18 @@ export default function StableLedger({
                                         </Link>
                                     </td>
                                     <td>
-                                        <Link href={`/stable/${horse.id}`} className="text-text-primary no-underline font-semibold transition-colors hover:text-accent-primary">
+                                        <Link href={`/stable/${horse.id}`} className="text-ink no-underline font-semibold transition-colors hover:text-forest">
                                             {horse.customName}
                                         </Link>
                                     </td>
-                                    <td className="max-md:hidden text-text-secondary max-w-[180px] overflow-hidden text-ellipsis">{horse.refName}</td>
+                                    <td className="max-md:hidden text-ink-light max-w-[180px] overflow-hidden text-ellipsis">{horse.refName}</td>
                                     <td>
                                         <span className={getFinishBadgeClass(horse.finishType)}>
                                             {horse.finishType || "—"}
                                         </span>
                                     </td>
                                     <td className="max-md:hidden">{horse.conditionGrade || "—"}</td>
-                                    <td className="max-md:hidden text-text-secondary text-xs">
+                                    <td className="max-md:hidden text-ink-light text-xs">
                                         {horse.collectionName ? `📁 ${horse.collectionName}` : "—"}
                                     </td>
                                     <td className="max-md:hidden">
@@ -227,7 +227,7 @@ export default function StableLedger({
                                     <td className="max-md:hidden">
                                         {horse.vaultValue ? `$${horse.vaultValue.toLocaleString()}` : "—"}
                                     </td>
-                                    <td className="text-text-muted text-xs">{formatRelDate(horse.createdAt)}</td>
+                                    <td className="text-muted text-xs">{formatRelDate(horse.createdAt)}</td>
                                 </tr>
                             ))}
                         </tbody>

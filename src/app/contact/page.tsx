@@ -36,8 +36,8 @@ export default function ContactPage() {
 
                 <section className="static-section">
                     {state.success ? (
-                        <div className="text-center py-3xl px-xl" id="contact-success">
-                            <span className="block text-[3rem] mb-lg" aria-hidden="true">✅</span>
+                        <div className="text-center py-16 px-8" id="contact-success">
+                            <span className="block text-[3rem] mb-6" aria-hidden="true">✅</span>
                             <h2>Message Sent!</h2>
                             <p>
                                 Thanks for reaching out. We&apos;ll get back to you as soon as possible.
