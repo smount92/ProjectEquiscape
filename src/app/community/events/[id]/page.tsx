@@ -303,9 +303,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {attendees.length > 0 && (
                     <div className="glass-card" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
                         <h3 style={{ marginBottom: "var(--space-sm)" }}>👥 Who&apos;s Going ({attendees.filter(a => a.status === "going").length})</h3>
-                        <div className="event-attendee-grid">
+                        <div className="flex flex-wrap gap-xs">
                             {attendees.filter(a => a.status === "going").map(a => (
-                                <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="event-attendee-chip">
+                                <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="py-1 px-2.5 rounded-full bg-[var(--color-surface-hover)] text-text-primary text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white">
                                     @{a.alias}
                                 </Link>
                             ))}
@@ -313,9 +313,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         {attendees.filter(a => a.status === "interested").length > 0 && (
                             <>
                                 <h4 style={{ marginTop: "var(--space-md)", color: "var(--color-text-muted)" }}>⭐ Interested ({attendees.filter(a => a.status === "interested").length})</h4>
-                                <div className="event-attendee-grid">
+                                <div className="flex flex-wrap gap-xs">
                                     {attendees.filter(a => a.status === "interested").map(a => (
-                                        <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="event-attendee-chip">
+                                        <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="py-1 px-2.5 rounded-full bg-[var(--color-surface-hover)] text-text-primary text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white">
                                             @{a.alias}
                                         </Link>
                                     ))}

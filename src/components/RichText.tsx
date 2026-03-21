@@ -15,7 +15,7 @@ function linkifyMentions(text: string): React.ReactNode[] {
                 ? part.slice(2, -1)
                 : part.slice(1);
             return (
-                <Link key={i} href={`/profile/${encodeURIComponent(alias)}`} className="mention-link">
+                <Link key={i} href={`/profile/${encodeURIComponent(alias)}`} className="text-[var(--color-accent)] font-semibold no-underline hover:underline">
                     @{alias}
                 </Link>
             );

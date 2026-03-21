@@ -32,15 +32,15 @@ export default function LikeToggle({ initialLiked, initialCount, onToggle }: Lik
 
     return (
         <button
-            className={`like-toggle ${liked ? "like-toggle-active" : ""}`}
+            className={`inline-flex items-center gap-1 bg-transparent border-none cursor-pointer text-[calc(0.85rem*var(--font-scale))] text-text-muted py-0.5 px-1.5 rounded-sm transition-colors hover:bg-[var(--color-surface-hover)] ${liked ? "text-[var(--color-accent)]" : ""}`}
             onClick={handleClick}
             disabled={isPending}
             aria-label={liked ? "Unlike" : "Like"}
         >
-            <span className={`like-heart ${liked ? "like-heart-pop" : ""}`}>
+            <span className={liked ? "animate-[heart-pop_0.3s_ease-out]" : ""}>
                 {liked ? "❤️" : "🤍"}
             </span>
-            {count > 0 && <span className="like-count">{count}</span>}
+            {count > 0 && <span className="text-[calc(0.75rem*var(--font-scale))]">{count}</span>}
         </button>
     );
 }

@@ -21,7 +21,7 @@ import "@/components/CsvImport.css";
 
 
 
-import "@/components/SocialFoundation.css";
+
 // Page-specific styles
 import "./WelcomeOnboarding.css";
 
