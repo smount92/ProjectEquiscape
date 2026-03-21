@@ -369,7 +369,7 @@ export default function CsvImport() {
                                 <span className="flex-1 font-semibold text-sm text-ink min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{header}</span>
                                 <span className="csv-mapping-arrow">→</span>
                                 <select
-                                    className="csv-mapping-select"
+                                    className="flex-1 py-2 px-4 bg-input border border-edge-input rounded-sm text-ink font-sans text-sm cursor-pointer"
                                     value={columnMapping[header] || ""}
                                     onChange={(e) => handleMappingChange(header, e.target.value)}
                                     id={`mapping-${header.replace(/\s+/g, "-")}`}
@@ -470,7 +470,7 @@ export default function CsvImport() {
                                                 : "❌"}
                                     </span>
                                     <input
-                                        className="csv-match-name-input"
+                                        className="flex-1 py-2 px-4 bg-input border border-edge-input rounded-sm text-ink font-sans text-base font-semibold"
                                         value={result.customName}
                                         onChange={(e) => handleCustomNameChange(result.rowIndex, e.target.value)}
                                         placeholder="Horse name..."
@@ -502,7 +502,7 @@ export default function CsvImport() {
                                                 />
                                                 <span className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors-text">
                                                     <span className="text-sm text-ink">{match.display}</span>
-                                                    <span className="csv-match-score">
+                                                    <span className="text-xs text-muted tabular-nums">
                                                         Score: {match.score > 0 ? `+${match.score}` : match.score}
                                                     </span>
                                                 </span>

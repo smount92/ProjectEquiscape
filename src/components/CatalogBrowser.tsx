@@ -147,7 +147,7 @@ export default function CatalogBrowser({
                     onChange={(e) => handleSearch(e.target.value)}
                     autoComplete="off"
                 />
-                {isPending && <span className="ref-loading-indicator">⏳</span>}
+                {isPending && <span className="absolute right-[12px] top-[50%] translate-y-[-50%]">⏳</span>}
             </div>
 
             {/* Filter Chips */}

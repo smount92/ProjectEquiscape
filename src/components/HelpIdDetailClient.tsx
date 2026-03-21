@@ -115,7 +115,7 @@ export default function HelpIdDetailClient({
 
                             <div className="flex items-center gap-4">
                                 <button
-                                    className="btn btn-ghost help-id-upvote-btn"
+                                    className="btn btn-ghost inline-flex items-center gap-1 tabular-nums"
                                     onClick={() => handleUpvote(s.id)}
                                     title="Upvote this suggestion"
                                 >

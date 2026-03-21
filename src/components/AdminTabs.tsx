@@ -173,7 +173,7 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
     return (
         <>
             {/* Tab bar */}
-            <div className="admin-tab hover:text-ink-bar">
+            <div className="flex items-center gap-1 py-2 px-4 bg-transparent border-0 border-b-[3px] border-[transparent] mb-[-2px] cursor-pointer font-[inherit] text-sm font-semibold text-muted whitespace-nowrap transition-all hover:text-ink-bar">
                 {TABS.map((tab) => {
                     const badge = getBadge(tab.key);
                     return (

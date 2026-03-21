@@ -650,7 +650,7 @@ export default function EditHorsePage() {
                       <div className="relative w-full">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={preview} alt={slot.label} />
-                        <div className="image-upload-overlay">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[rgba(0,0,0,0.6)] opacity-[0] transition-all text-white text-sm font-medium">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -675,7 +675,7 @@ export default function EditHorsePage() {
                   {hasNew && (
                     <button
                       type="button"
-                      className="image-revert-btn hover:0.2)] hover:0.5)]"
+                      className="inline-flex items-center gap-[4px] mt-2 py-[6px] px-[14px] bg-[rgba(251,146,60,0.1)] border border-[rgba(251,146,60,0.3)] rounded-full text-[#fb923c] text-xs font-semibold cursor-pointer font-[inherit] transition-all hover:0.2)] hover:0.5)]"
                       onClick={(e) => { e.stopPropagation(); handleSlotRevert(slot.angle); }}
                     >
                       ↩ Revert
@@ -684,7 +684,7 @@ export default function EditHorsePage() {
                   {!hasNew && preview && !slot.primary && (
                     <button
                       type="button"
-                      className="image-revert-btn hover:0.2)] hover:0.5)]"
+                      className="inline-flex items-center gap-[4px] mt-2 py-[6px] px-[14px] bg-[rgba(251,146,60,0.1)] border border-[rgba(251,146,60,0.3)] rounded-full text-[#fb923c] text-xs font-semibold cursor-pointer font-[inherit] transition-all hover:0.2)] hover:0.5)]"
                       style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.3)" }}
                       onClick={(e) => { e.stopPropagation(); handleSlotRemove(slot.angle); }}
                     >

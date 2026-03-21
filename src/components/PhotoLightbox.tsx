@@ -57,7 +57,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
             {/* Prev arrow */}
             {images.length > 1 && (
                 <button
-                    className="lightbox-nav hover:0.2)] left-[var(--space-lg)]"
+                    className="fixed top-[50%] translate-y-[-50%] bg-[rgba(255,255,255,0.1)] border-0 text-white w-[48px] h-[48px] rounded-full cursor-pointer text-[1.4rem] flex items-center justify-center transition-all z-[1001] hover:0.2)] left-[var(--space-lg)]"
                     onClick={(e) => { e.stopPropagation(); goPrev(); }}
                     aria-label="Previous photo"
                 >
@@ -78,7 +78,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
             {/* Next arrow */}
             {images.length > 1 && (
                 <button
-                    className="lightbox-nav hover:0.2)] right-[var(--space-lg)]"
+                    className="fixed top-[50%] translate-y-[-50%] bg-[rgba(255,255,255,0.1)] border-0 text-white w-[48px] h-[48px] rounded-full cursor-pointer text-[1.4rem] flex items-center justify-center transition-all z-[1001] hover:0.2)] right-[var(--space-lg)]"
                     onClick={(e) => { e.stopPropagation(); goNext(); }}
                     aria-label="Next photo"
                 >
@@ -88,12 +88,12 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
 
             {/* Label */}
             {current.label && (
-                <div className="lightbox-label">{current.label}</div>
+                <div className="fixed bottom-[calc(var(--space-lg) + 24px)] left-[50%] translate-x-[-50%] text-[rgba(255,255,255,0.85)] text-sm font-semibold z-[1001]">{current.label}</div>
             )}
 
             {/* Counter */}
             {images.length > 1 && (
-                <div className="lightbox-counter">
+                <div className="fixed bottom-[var(--space-lg)] left-[50%] translate-x-[-50%] text-[rgba(255,255,255,0.6)] text-sm z-[1001]">
                     {currentIndex + 1} of {images.length}
                 </div>
             )}

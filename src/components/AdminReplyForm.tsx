@@ -108,7 +108,7 @@ export default function AdminReplyForm({
             )}
             <div className="flex items-center gap-2 mt-2">
                 <button
-                    className="admin-reply-send-btn disabled:opacity-[0.5] disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-[6px] py-[7px] px-[16px] bg-forest border-0 rounded-full text-white text-xs font-semibold cursor-pointer font-[inherit] transition-all disabled:opacity-[0.5] disabled:cursor-not-allowed"
                     onClick={handleSend}
                     disabled={sending || !replyText.trim()}
                 >
@@ -138,7 +138,7 @@ export default function AdminReplyForm({
                     )}
                 </button>
                 <button
-                    className="admin-reply-cancel-btn hover:0.05)] hover:text-ink"
+                    className="py-[7px] px-[14px] bg-transparent border border-edge rounded-full text-muted text-xs font-medium cursor-pointer font-[inherit] transition-all hover:0.05)] hover:text-ink"
                     onClick={() => { setIsOpen(false); setStatus(null); }}
                     disabled={sending}
                 >

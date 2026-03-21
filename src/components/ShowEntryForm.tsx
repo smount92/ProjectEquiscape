@@ -191,7 +191,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                     <img
                         src={selectedPhotoObj.publicUrl}
                         alt={selectedHorseName}
-                        className="show-preview-photo"
+                        className="aspect-[4/3] object-cover rounded-md max-w-[400px] w-full mx-auto block shadow-lg"
                     />
                     {caption.trim() && (
                         <p className="show-preview-caption">

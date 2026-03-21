@@ -191,7 +191,7 @@ export default function UnifiedReferenceSearch({
         <>
           {/* Search Input */}
           <div className="relative mb-4">
-            <svg className="ref-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            <svg className="absolute left-[16px] top-[50%] translate-y-[-50%] text-muted pointer-events-none z-[1]" width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
@@ -206,7 +206,7 @@ export default function UnifiedReferenceSearch({
               autoComplete="off"
             />
             {query && (
-              <button className="ref-search-clear hover:0.1)] hover:text-ink" onClick={() => { setQuery(""); setShowDropdown(false); }} aria-label="Clear">
+              <button className="absolute right-[12px] top-[50%] translate-y-[-50%] w-[28px] h-[28px] flex items-center justify-center border-0 bg-[rgba(0,0,0,0.06)] text-muted rounded-full cursor-pointer text-[0.8rem] transition-all duration-150 hover:0.1)] hover:text-ink" onClick={() => { setQuery(""); setShowDropdown(false); }} aria-label="Clear">
                 ✕
               </button>
             )}

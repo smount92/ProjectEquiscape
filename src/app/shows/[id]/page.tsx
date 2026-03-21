@@ -277,7 +277,7 @@ export default async function ShowDetailPage({
                                         <div className={`podium-ribbon podium-ribbon-${ribbon}`} />
                                         {entry.thumbnailUrl && (
                                             // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={entry.thumbnailUrl} alt={entry.horseName} className="podium-photo" />
+                                            <img src={entry.thumbnailUrl} alt={entry.horseName} className="w-full aspect-[4/3] object-cover" />
                                         )}
                                         <div className="text-center min-w-[160px] max-w-[220px] bg-elevated rounded-lg overflow-hidden shadow-lg transition-transform-body">
                                             <div className="text-[2rem] mb-1">{medal}</div>

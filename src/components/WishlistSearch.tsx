@@ -173,13 +173,13 @@ export default function WishlistSearch() {
                                     {molds.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="wishlist-search-result hover:0.25)] hover:0.08)]"
+                                            className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-name">{item.title}</span>
-                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-name">{item.title}</span>
+                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                                             </div>
                                             <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
                                         </button>
@@ -194,16 +194,16 @@ export default function WishlistSearch() {
                                     {releases.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="wishlist-search-result hover:0.25)] hover:0.08)]"
+                                            className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-name">{item.title}</span>
+                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-name">{item.title}</span>
                                                 {!!item.attributes.model_number && (
-                                                    <span className="wishlist-search-result hover:0.25)] hover:0.08)]-meta"> (#{String(item.attributes.model_number)})</span>
+                                                    <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-meta"> (#{String(item.attributes.model_number)})</span>
                                                 )}
-                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-meta"> · {item.maker}</span>
+                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-meta"> · {item.maker}</span>
                                             </div>
                                             <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
                                         </button>
@@ -218,13 +218,13 @@ export default function WishlistSearch() {
                                     {resins.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="wishlist-search-result hover:0.25)] hover:0.08)]"
+                                            className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-name">{item.title}</span>
-                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-name">{item.title}</span>
+                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                                             </div>
                                             <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
                                         </button>

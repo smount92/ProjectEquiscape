@@ -604,7 +604,7 @@ export default function AddHorsePage() {
                         <img
                           src={existing.previewUrl}
                           alt={slot.label}
-                          className="gallery-preview"
+                          className="absolute inset-0 object-cover w-full h-full"
                         />
                         <button
                           className="absolute top-[6px] right-[6px] w-[28px] h-[28px] rounded-full bg-[rgba(0, 0, 0, 0.7)] text-white border-0 cursor-pointer flex items-center justify-center text-[0.85rem] z-[2] transition-colors"
@@ -650,7 +650,7 @@ export default function AddHorsePage() {
                     ) : (
                       <>
                         <span className="text-[1.8rem] text-muted transition-colors">{isPrimary ? "🖼️" : "📷"}</span>
-                        <span className="gallery-slot hover:text-forest hover:border-forest hover:bg-[var(--color-accent-primary-glow)]-label">{slot.label}</span>
+                        <span className="absolute inset-0 opacity-[0] cursor-pointer hover:text-forest hover:border-forest hover:bg-[var(--color-accent-primary-glow)]-label">{slot.label}</span>
                         {/* AI hint hidden for now */}
                       </>
                     )}
