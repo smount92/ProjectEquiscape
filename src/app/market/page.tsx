@@ -96,7 +96,7 @@ export default async function MarketPricePage({
 
                     {/* Results (Server-rendered) */}
                     {items.length === 0 ? (
-                        <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+                        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
                             <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>📊</div>
                             <h3 style={{ marginBottom: "var(--space-sm)" }}>
                                 {query || itemType !== "all"
@@ -119,12 +119,12 @@ export default async function MarketPricePage({
 
                             <div className="market-bg-[var(--color-surface-secondary)] font-semibold sticky top-0">
                                 {items.map((item) => (
-                                    <div key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`} className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors">
-                                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                                            <span className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-icon">{typeIcon(item.itemType)}</span>
-                                            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-info">
-                                                <span className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-title">{item.title}</span>
-                                                <span className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-maker">
+                                    <div key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`} className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors">
+                                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                                            <span className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-icon">{typeIcon(item.itemType)}</span>
+                                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-info">
+                                                <span className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-title">{item.title}</span>
+                                                <span className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-maker">
                                                     {item.maker}{item.scale ? ` · ${item.scale}` : ""}
                                                     {item.finishType ? ` · ${item.finishType}` : ""}
                                                     {item.lifeStage && item.lifeStage !== "completed" ? ` · ${item.lifeStage === "blank" ? "Blank" : item.lifeStage === "stripped" ? "Stripped" : "In Progress"}` : ""}
@@ -132,7 +132,7 @@ export default async function MarketPricePage({
                                             </div>
                                         </div>
 
-                                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-prices">
+                                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-prices">
                                             <div className="text-lg font-bold text-forest">
                                                 {formatCurrency(item.lowestPrice)}
                                                 {item.lowestPrice !== item.highestPrice ? ` – ${formatCurrency(item.highestPrice)}` : ""}
@@ -143,7 +143,7 @@ export default async function MarketPricePage({
                                             </div>
                                         </div>
 
-                                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-footer">
+                                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-footer">
                                             <span className="inline-flex items-center py-[2px] px-[8px] rounded-full bg-[var(--color-accent-primary-glow)] text-forest font-semibold">
                                                 {item.transactionVolume} sale{item.transactionVolume !== 1 ? "s" : ""}
                                             </span>

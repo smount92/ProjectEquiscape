@@ -284,7 +284,7 @@ export default function CatalogBrowser({
             {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-6 py-4 px-[0]">
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary btn-small"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary btn-small"
                         disabled={page <= 1}
                         onClick={() => handlePage(page - 1)}
                     >
@@ -294,7 +294,7 @@ export default function CatalogBrowser({
                         Page {page} of {totalPages}
                     </span>
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary btn-small"
+                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary btn-small"
                         disabled={page >= totalPages}
                         onClick={() => handlePage(page + 1)}
                     >

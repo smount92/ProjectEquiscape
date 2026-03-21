@@ -159,7 +159,7 @@ export default async function ShowDetailPage({
 
             {/* Judge Assignment Banner — always visible to assigned judges */}
             {isJudge && !isCreator && (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
                     marginBottom: "var(--space-lg)",
                     padding: "var(--space-lg)",
                     background: "linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.1))",
@@ -233,7 +233,7 @@ export default async function ShowDetailPage({
                 const podiumEntries = topPlaced.slice(0, 3);
 
                 return (
-                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
+                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
                         padding: "var(--space-xl)",
                         marginBottom: "var(--space-lg)",
                     }}>
@@ -338,7 +338,7 @@ export default async function ShowDetailPage({
 
             {/* Judging Banner */}
             {isJudging && (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
                     textAlign: "center",
                     padding: "var(--space-lg)",
                     marginBottom: "var(--space-lg)",
@@ -396,7 +396,7 @@ export default async function ShowDetailPage({
 
             {/* Entries Grid */}
             {entries.length === 0 ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
                     <div className="text-center py-[var(--space-3xl)] px-8-icon">📸</div>
                     <h2>No Entries Yet</h2>
                     <p>Be the first to enter this show!</p>

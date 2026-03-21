@@ -159,7 +159,7 @@ export default function SettingsPage() {
                 <span>Settings</span>
             </nav>
 
-            <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up" style={{ maxWidth: 680 }}>
+            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up" style={{ maxWidth: 680 }}>
                 <h1 style={{ marginBottom: "var(--space-2xl)", fontSize: "calc(1.6rem * var(--font-scale))" }}>
                     ⚙️ <span className="text-forest">Settings</span>
                 </h1>

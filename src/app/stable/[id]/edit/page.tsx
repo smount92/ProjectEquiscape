@@ -570,7 +570,7 @@ export default function EditHorsePage() {
   if (error) {
     return (
       <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-        <div className="text-center py-[var(--space-3xl)] px-8 bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+        <div className="text-center py-[var(--space-3xl)] px-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
           <div className="text-center py-[var(--space-3xl)] px-8-icon">🚫</div>
           <h1>Access Denied</h1>
           <p>{error}</p>
@@ -605,9 +605,9 @@ export default function EditHorsePage() {
         )}
 
         {/* ===== Photo Studio ===== */}
-        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
-          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">📸</div>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">📸</div>
             <h2>Photo Studio</h2>
           </div>
           <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
@@ -825,9 +825,9 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 1: Identity ===== */}
-        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
-          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">🏷️</div>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">🏷️</div>
             <h2>Model Identity</h2>
           </div>
 
@@ -1079,9 +1079,9 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 2: Reference Link (Unified Search) ===== */}
-        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
-          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">🔗</div>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8">
+          <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">🔗</div>
             <h2>Reference Link</h2>
           </div>
 
@@ -1104,7 +1104,7 @@ export default function EditHorsePage() {
         </div>
 
         {/* ===== Section 3: Financial Vault ===== */}
-        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8 relative overflow-hidden">
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8 relative overflow-hidden">
           <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[rgba(240, 160, 108, 0.2)]">
             <div className="vault-icon">🔒</div>
             <div>

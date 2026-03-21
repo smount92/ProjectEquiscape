@@ -165,7 +165,7 @@ export default function SuggestEditModal({
                             boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
                         }}
                     >
-                        <div className="modal-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                        <div className="modal-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                             <h2>✏️ Suggest Edit</h2>
                             <button
                                 className="bg-transparent border-0 text-muted text-[1.2rem] cursor-pointer p-1 rounded-md transition-all duration-150"
@@ -261,7 +261,7 @@ export default function SuggestEditModal({
 
                         <div className="modal-footer">
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary"
+                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Cancel

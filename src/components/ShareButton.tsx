@@ -98,7 +98,7 @@ export default function ShareButton({
 
             {/* "Link Copied!" Toast */}
             {showToast && (
-                <div className="share-toast" role="status" aria-live="polite">
+                <div className="share-toast max-[400px]:left-[var(--space-md)] max-[400px]:right-[var(--space-md)] max-[400px]:transform-none max-[400px]:justify-center" role="status" aria-live="polite">
                     <svg
                         width="16"
                         height="16"

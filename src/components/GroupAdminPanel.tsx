@@ -69,7 +69,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
     };
 
     return (
-        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6" style={{ marginTop: "var(--space-lg)" }}>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6" style={{ marginTop: "var(--space-lg)" }}>
             <div
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                 onClick={() => setExpanded(!expanded)}

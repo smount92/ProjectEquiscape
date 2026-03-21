@@ -342,7 +342,7 @@ export default async function HorsePassportPage({
           </div>
 
           {/* Model Details Card */}
-          <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+          <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
             <h3>
               <span aria-hidden="true">📋</span> {(horse.asset_category || "model") === "model" ? "Model Details" : `${(horse.asset_category || "model").charAt(0).toUpperCase() + (horse.asset_category || "model").slice(1)} Details`}
             </h3>
@@ -502,7 +502,7 @@ export default async function HorsePassportPage({
 
           {/* Finish Details */}
           {horse.finish_details && (
-            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+            <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">✨</span> Finish</h3>
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Finish Details</span>
@@ -513,7 +513,7 @@ export default async function HorsePassportPage({
 
           {/* Show Bio */}
           {(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
-            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+            <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">🏅</span> Show Identity</h3>
               {horse.assigned_breed && (
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
@@ -544,7 +544,7 @@ export default async function HorsePassportPage({
 
           {/* Public Notes */}
           {horse.public_notes && (
-            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+            <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">📝</span> Notes</h3>
               <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
                 {horse.public_notes}

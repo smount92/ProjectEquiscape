@@ -97,7 +97,7 @@ export default async function AdminPage() {
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
             <div className="animate-fade-in-up">
                 {/* Header */}
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <div>
                         <h1>
                             <span className="text-forest">⚡ Admin Console</span>
@@ -111,7 +111,7 @@ export default async function AdminPage() {
                             Founder&apos;s Command Center — Full system overview
                         </p>
                     </div>
-                    <div className="admin-shield-badge">
+                    <div className="admin-shield-badge max-md:hidden">
                         <svg
                             width="14"
                             height="14"

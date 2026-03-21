@@ -82,7 +82,7 @@ export default function HelpIdDetailClient({
             </h2>
 
             {suggestions.length === 0 ? (
-                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-xl)" }}>
+                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-xl)" }}>
                     <p style={{ color: "var(--color-text-muted)" }}>No suggestions yet. Be the first to help!</p>
                 </div>
             ) : (
@@ -165,7 +165,7 @@ export default function HelpIdDetailClient({
                             💡 I Know This Model
                         </button>
                     ) : (
-                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
+                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
                             <h3 style={{ marginBottom: "var(--space-md)" }}>Your Suggestion</h3>
                             <div className="mb-6">
                                 <textarea

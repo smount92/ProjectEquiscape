@@ -487,7 +487,7 @@ export default function AddHorsePage() {
   if (showSuccess) {
     return (
       <div className="success-overlay">
-        <div className="text-center max-w-[480px] p-[var(--space-3xl)] bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
+        <div className="text-center max-w-[480px] p-[var(--space-3xl)] bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
           <div className="success-icon">🎉</div>
           <h2>
             <span className="text-forest">{savedHorseName}</span> Added!
@@ -573,9 +573,9 @@ export default function AddHorsePage() {
           ================================================================ */}
       {currentStep === 0 && (
         <div className="step-content" key="step-0">
-          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-              <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">📸</div>
+          <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+              <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">📸</div>
               <div>
                 <h2>Photo Gallery</h2>
                 <p>Upload photos from specific angles to build a complete profile</p>
@@ -775,9 +775,9 @@ export default function AddHorsePage() {
           — Use CSS display instead of unmounting to preserve component state
           ================================================================ */}
       <div className="step-content" key="step-1" style={{ display: currentStep === 1 ? "block" : "none" }}>
-        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
-          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🔗</div>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
+          <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🔗</div>
             <div>
               <h2>Reference Link</h2>
               <p>Search by mold name, release name (paint job), or artist resin</p>
@@ -849,7 +849,7 @@ export default function AddHorsePage() {
           ================================================================ */}
       {currentStep === 2 && (
         <div className="step-content" key="step-2">
-          <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
+          <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible">
 
             {/* Reference summary badge */}
             {selectedCatalogItem && (
@@ -858,8 +858,8 @@ export default function AddHorsePage() {
               </div>
             )}
 
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-              <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🏷️</div>
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+              <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible-icon">🏷️</div>
               <div>
                 <h2>{isModel ? "Model Identity" : `${assetCategory.charAt(0).toUpperCase() + assetCategory.slice(1)} Details`}</h2>
                 <p>{isModel ? "Give your model a name and describe its characteristics" : `Name and describe your ${assetCategory}`}</p>
@@ -1012,7 +1012,7 @@ export default function AddHorsePage() {
               </small>
             </div>
 
-            <div className="form-row" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+            <div className="form-row max-md:flex-col max-md:gap-4" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
               <div className="mb-6" style={{ flex: "1 1 200px" }}>
                 <label className="block text-sm font-semibold text-ink mb-1">Assigned Breed</label>
                 <input
@@ -1044,7 +1044,7 @@ export default function AddHorsePage() {
               </div>
             </div>
 
-            <div className="form-row" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+            <div className="form-row max-md:flex-col max-md:gap-4" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
               <div className="mb-6" style={{ flex: "1 1 150px" }}>
                 <label className="block text-sm font-semibold text-ink mb-1">Assigned Age</label>
                 <input
@@ -1236,7 +1236,7 @@ export default function AddHorsePage() {
               </div>
             )}
 
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible relative overflow-hidden">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-[rgba(44, 85, 69, 0.2)] rounded-lg p-12 shadow-md relative overflow-visible relative overflow-hidden">
               {/* Vault Header */}
               <div className="flex items-center gap-4 mb-8 pb-6 border-b border-[rgba(240, 160, 108, 0.2)]">
                 <div className="vault-icon">🔒</div>
@@ -1370,7 +1370,7 @@ export default function AddHorsePage() {
       }
 
       {/* ── AI Toast Notifications ── */}
-      <div className="ai-fixed top-[calc(var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height) + var(--space-md))] right-[var(--space-lg)] flex flex-col gap-2 z-[10000] max-w-[420px] w-full pointer-events-none" aria-live="polite">
+      <div className="ai-fixed top-[calc(var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height) + var(--space-md))] right-[var(--space-lg)] flex flex-col gap-2 z-[10000] max-w-[420px] w-full pointer-events-none" aria-live="polite">
         {aiToasts.map((toast) => (
           <div
             key={toast.id}

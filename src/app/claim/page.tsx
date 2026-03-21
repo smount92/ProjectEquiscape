@@ -113,7 +113,7 @@ export default function ClaimPage() {
     if (success) {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: "500px", margin: "0 auto", textAlign: "center", padding: "var(--space-2xl)" }}>
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: "500px", margin: "0 auto", textAlign: "center", padding: "var(--space-2xl)" }}>
                     <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>🎉</div>
                     <h1 style={{ fontSize: "calc(1.5rem * var(--font-scale))" }}>
                         Welcome to your stable!
@@ -147,7 +147,7 @@ export default function ClaimPage() {
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: "520px", margin: "0 auto", padding: "var(--space-2xl)" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: "520px", margin: "0 auto", padding: "var(--space-2xl)" }}>
                 <div style={{ textAlign: "center", marginBottom: "var(--space-lg)" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>📦</div>
                     <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>
@@ -160,7 +160,7 @@ export default function ClaimPage() {
 
                 {/* Preview Card (CoA PIN lookup result) */}
                 {preview && (
-                    <div className="claim-preview-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{
+                    <div className="claim-preview-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{
                         border: "1px solid var(--color-border)",
                         borderRadius: "var(--radius-lg)",
                         padding: "var(--space-lg)",

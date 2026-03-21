@@ -128,7 +128,7 @@ export default function ExpertJudgingPanel({
     const bgColor = overrideMode ? "rgba(239, 68, 68, 0.05)" : "rgba(245, 158, 11, 0.05)";
 
     return (
-        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
+        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
             marginBottom: "var(--space-lg)",
             border: `1px solid ${borderColor}`,
             background: bgColor,

@@ -134,7 +134,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                     + New Show String
                 </button>
             ) : (
-                <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
+                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
                     <h3 style={{ marginBottom: "var(--space-md)" }}>Create Show String</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="mb-6">
@@ -174,7 +174,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                     )}
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
-                                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{ss.entryCount}</span>
+                                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card max-[480px]:rounded-[var(--radius-md)] text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{ss.entryCount}</span>
                                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={async (e) => { e.stopPropagation(); setSaving(true); await duplicateShowString(ss.id); setSaving(false); router.refresh(); }} title="Duplicate" disabled={saving}>📋</button>
                                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={e => { e.stopPropagation(); handleDeleteString(ss.id); }} title="Delete">🗑️</button>
                                 </div>

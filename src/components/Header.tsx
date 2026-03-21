@@ -211,7 +211,7 @@ export default function Header() {
   const overflowLinks = allLinks.slice(visibleCount);
 
   return (
-    <header className="sticky top-0 z-[100] h-[var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all" role="banner">
+    <header className="sticky top-0 z-[100] h-[var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all" role="banner">
       <Link
         href={user ? "/dashboard" : "/"}
         className="flex items-center gap-2 text-lg font-extrabold text-ink no-underline tracking-[-0.02em] shrink-0 mr-6"
@@ -324,7 +324,7 @@ export default function Header() {
               aria-expanded={userMenuOpen}
               aria-label="User menu"
             >
-              <span className="sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-rounded-full bg-[rgba(0, 0, 0, 0.06)] inline-flex items-center justify-center overflow-hidden shrink-0 font-bold text-muted">
+              <span className="sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-rounded-full bg-[rgba(0, 0, 0, 0.06)] inline-flex items-center justify-center overflow-hidden shrink-0 font-bold text-muted">
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatarUrl} alt={aliasName || "User"} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
@@ -471,7 +471,7 @@ export default function Header() {
 
       {/* ── Public Navigation (not signed in) ── */}
       {!user && (
-        <nav className="sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-nav flex flex-row items-center gap-4" aria-label="Public navigation">
+        <nav className="sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-nav flex flex-row items-center gap-4" aria-label="Public navigation">
           <Link href="/about" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-about">
             About
           </Link>

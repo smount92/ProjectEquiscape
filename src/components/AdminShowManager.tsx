@@ -38,7 +38,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
             {shows.map((show) => (
-                <div key={show.id} className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
+                <div key={show.id} className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
                     <div style={{ flex: 1, minWidth: "200px" }}>
                         <div style={{ fontWeight: 600 }}>{show.title}</div>
                         <div style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)" }}>

@@ -111,7 +111,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
     return (
         <>
             {/* Search Bar */}
-            <div className="sticky top-[calc(var(--header-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card border border-edge rounded-xl transition-all shadow-md-container" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md-container" style={{ marginBottom: "var(--space-md)" }}>
                 <input
                     type="text"
                     value={searchQuery}
@@ -151,13 +151,13 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
 
             {/* Grid */}
             {filteredUsers.length === 0 && !searchQuery.trim() && activeTag === "all" ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
                     <div className="text-center py-[var(--space-3xl)] px-8-icon">👥</div>
                     <h2>No Active Collectors Yet</h2>
                     <p>Be the first to make your models public!</p>
                 </div>
             ) : filteredUsers.length === 0 ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
                     <div className="text-center py-[var(--space-3xl)] px-8-icon">🔍</div>
                     <h2>No Results</h2>
                     <p>Try a different search or filter.</p>
@@ -172,7 +172,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                             <Link
                                 key={u.id}
                                 href={`/profile/${encodeURIComponent(u.alias_name)}`}
-                                className="flex items-start gap-4 p-6 bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg no-underline text-inherit transition-all duration-250 hover:border-forest hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)] hover:-translate-y-0.5"
+                                className="flex items-start gap-4 p-6 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg no-underline text-inherit transition-all duration-250 hover:border-forest hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)] hover:-translate-y-0.5"
                                 id={`discover-${u.id}`}
                             >
                                 <div className="w-[52px] h-[52px] rounded-full bg-[linear-gradient(135deg,rgba(129,140,248,0.2),rgba(167,139,250,0.1))] flex items-center justify-center shrink-0 text-forest">

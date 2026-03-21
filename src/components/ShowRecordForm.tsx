@@ -119,7 +119,7 @@ export default function ShowRecordForm({
     };
 
     return (
-        <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-primary,rgba(108,99,255,0.3))] rounded-lg p-6 mb-6">
+        <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-primary,rgba(108,99,255,0.3))] rounded-lg p-6 mb-6">
             <div className="text-[calc(1rem*var(--font-scale))] font-semibold mb-4">
                 {isEdit ? "✏️ Edit Show Record" : "🏅 Add Show Record"}
             </div>

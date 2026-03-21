@@ -201,7 +201,7 @@ export default function CommissionTimeline({
     const isTerminal = ["delivered", "declined", "cancelled"].includes(commissionStatus);
 
     return (
-        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-lg)" }}>
+        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-lg)" }}>
             {/* ── Header ── */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
                 <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", margin: 0 }}>
@@ -300,7 +300,7 @@ export default function CommissionTimeline({
 
             {/* ── Add Update Form ── */}
             {showForm && (
-                <form onSubmit={handleAddUpdate} className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", marginBottom: "var(--space-lg)", background: "var(--color-bg-card)" }}>
+                <form onSubmit={handleAddUpdate} className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", marginBottom: "var(--space-lg)", background: "var(--color-bg-card)" }}>
                     <div className="mb-6">
                         <label className="block text-sm font-semibold text-ink mb-1">Update Type</label>
                         <select

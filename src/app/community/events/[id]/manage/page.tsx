@@ -347,7 +347,7 @@ export default function ManageEventPage() {
     if (isLoading) {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
                     <div className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ margin: "0 auto var(--space-md)", borderTopColor: "var(--color-accent-primary)" }} />
                     <p>Loading event…</p>
                 </div>
@@ -358,7 +358,7 @@ export default function ManageEventPage() {
     if (error && !eventName) {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
                     <p style={{ color: "var(--color-accent-danger)" }}>{error}</p>
                     <Link href="/community/events" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginTop: "var(--space-md)" }}>
                         ← Back to Events
@@ -390,7 +390,7 @@ export default function ManageEventPage() {
                         <p style={{ color: "var(--color-text-secondary)" }}>{eventName}</p>
                     </div>
                     <div style={{ display: "flex", gap: "var(--space-sm)" }}>
-                        <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-badge" style={{ background: "var(--color-accent-primary-glow)", color: "var(--color-accent-primary)", fontWeight: 600 }}>
+                        <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-badge" style={{ background: "var(--color-accent-primary-glow)", color: "var(--color-accent-primary)", fontWeight: 600 }}>
                             {divisions.length} Division{divisions.length !== 1 ? "s" : ""} · {totalClasses} Class{totalClasses !== 1 ? "es" : ""} · {totalEntries} Entr{totalEntries !== 1 ? "ies" : "y"}
                         </span>
                     </div>
@@ -436,7 +436,7 @@ export default function ManageEventPage() {
                 {/* TAB: Edit Details                       */}
                 {/* ═══════════════════════════════════════ */}
                 {activeTab === "details" && (
-                    <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
+                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-lg)" }}>
                             <div className="mb-6">
                                 <label className="block text-sm font-semibold text-ink mb-1">Event Name</label>
@@ -574,10 +574,10 @@ export default function ManageEventPage() {
                         {/* Division Tree */}
                         <div className="flex flex-col gap-4">
                             {divisions.map((div, divIndex) => (
-                                <div key={div.id} className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden">
+                                <div key={div.id} className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden">
                                     {/* Division Header */}
                                     <div className="flex items-center gap-2 py-4 px-6 bg-glass border-b border-edge flex-wrap">
-                                        <div className="division-reorder">
+                                        <div className="division-reorder max-sm:hidden">
                                             <button className="bg-transparent border border-edge rounded-sm w-[24px] h-[18px] text-[0.6rem] text-muted cursor-pointer flex items-center justify-center transition-all duration-150 p-0 font-sans disabled:opacity-[0.3] disabled:cursor-not-allowed hover:border-forest hover:text-forest" onClick={() => handleMoveDivision(divIndex, -1)} disabled={divIndex === 0} title="Move up">▲</button>
                                             <button className="bg-transparent border border-edge rounded-sm w-[24px] h-[18px] text-[0.6rem] text-muted cursor-pointer flex items-center justify-center transition-all duration-150 p-0 font-sans disabled:opacity-[0.3] disabled:cursor-not-allowed hover:border-forest hover:text-forest" onClick={() => handleMoveDivision(divIndex, 1)} disabled={divIndex === divisions.length - 1} title="Move down">▼</button>
                                         </div>
@@ -658,7 +658,7 @@ export default function ManageEventPage() {
                         </div>
 
                         {/* Add Division */}
-                        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ marginTop: "var(--space-lg)", padding: "var(--space-lg)" }}>
+                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ marginTop: "var(--space-lg)", padding: "var(--space-lg)" }}>
                             <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
                                 <input
                                     className="form-input"
@@ -687,7 +687,7 @@ export default function ManageEventPage() {
                 {/* TAB: Judges                             */}
                 {/* ═══════════════════════════════════════ */}
                 {activeTab === "judges" && (
-                    <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
+                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
                         <h3 style={{ marginBottom: "var(--space-md)" }}>
                             🧑‍⚖️ <span className="text-forest">Assigned Judges</span>
                         </h3>
@@ -835,7 +835,7 @@ export default function ManageEventPage() {
                 {/* Copy Modal */}
                 {showCopyModal && createPortal(
                     <div className="modal-overlay" onClick={() => setShowCopyModal(false)}>
-                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
                             <h3>📋 Copy Division Tree From…</h3>
                             <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-secondary)", marginBottom: "var(--space-md)" }}>
                                 This will copy all divisions and classes from the selected event. Existing divisions in this event will NOT be removed.

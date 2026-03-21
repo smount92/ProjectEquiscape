@@ -117,7 +117,7 @@ export default async function HoofprintReportPage({
 
             {/* Show Records Summary */}
             {records.length > 0 && (
-                <div className="animate-fade-in-up bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ marginTop: "var(--space-xl)", padding: "var(--space-lg)" }}>
+                <div className="animate-fade-in-up bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ marginTop: "var(--space-xl)", padding: "var(--space-lg)" }}>
                     <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                         🏆 Show Record
                     </h2>

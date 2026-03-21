@@ -36,7 +36,7 @@ export default async function CommissionRequestPage({
     if (profile.status === "closed") {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-md)" }}>🔴</div>
                     <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>Commissions Closed</h1>
                     <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
@@ -53,7 +53,7 @@ export default async function CommissionRequestPage({
     if (user.id === profile.userId) {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-md)" }}>🎨</div>
                     <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>This is your studio!</h1>
                     <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
@@ -69,7 +69,7 @@ export default async function CommissionRequestPage({
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 600, margin: "0 auto", padding: "var(--space-2xl)" }}>
                 {/* Header */}
                 <div style={{ textAlign: "center", marginBottom: "var(--space-xl)" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>🎨</div>

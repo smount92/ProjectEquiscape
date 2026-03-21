@@ -21,14 +21,14 @@ export default function ContactPage() {
     }, [state.success]);
 
     return (
-        <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8">
-            <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
+        <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8">
+            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
                 {/* Page Header */}
-                <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h1>
                         <span className="text-forest">Contact</span> Us
                     </h1>
-                    <p className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-lead">
+                    <p className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-lead">
                         Have a question, suggestion, or just want to say hello? We&apos;d love to hear from
                         you.
                     </p>

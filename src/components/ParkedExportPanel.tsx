@@ -119,7 +119,7 @@ export default function ParkedExportPanel({
     }
 
     return (
-        <div className="mt-6 bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
+        <div className="mt-6 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
                 <h3>{isParked ? "🔒 Horse is Parked" : "📤 Sell Off-Platform"}</h3>
                 <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setIsOpen(false)} style={{ fontSize: "1.2rem" }}>✕</button>

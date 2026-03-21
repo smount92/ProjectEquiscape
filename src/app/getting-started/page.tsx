@@ -9,15 +9,15 @@ export const metadata: Metadata = {
 
 export default function GettingStartedPage() {
     return (
-        <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8">
-            <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
+        <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8">
+            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
                 {/* Page Header */}
-                <div className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h1>
                         Getting Started with{" "}
                         <span className="text-forest">Model Horse Hub</span>
                     </h1>
-                    <p className="min-h-[calc(100vh - var(--header-height))] py-[var(--space-3xl)] px-8-lead">
+                    <p className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-lead">
                         Your digital stable is ready. Here&apos;s how to make the most of it.
                     </p>
                 </div>
@@ -209,7 +209,7 @@ export default function GettingStartedPage() {
                 </section>
 
                 {/* CTA */}
-                <div className="text-center p-12 bg-card border border-edge rounded-lg">
+                <div className="text-center p-12 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg">
                     <p>Ready to start?</p>
                     <Link
                         href="/dashboard"

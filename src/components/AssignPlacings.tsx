@@ -53,7 +53,7 @@ export default function AssignPlacings({
     if (entries.length === 0) return null;
 
     return (
-        <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
             <h3 style={{ marginBottom: "var(--space-md)" }}>🏅 Assign Placings</h3>
             <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                 As the event host, assign placings to each entry below.

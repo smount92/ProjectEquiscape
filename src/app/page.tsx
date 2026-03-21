@@ -15,7 +15,7 @@ export default function LandingPage() {
   return (
     <div className="overflow-x-hidden">
       {/* ─── Hero Section ─── */}
-      <section className="relative flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] py-[var(--space-3xl)] px-8 text-center overflow-hidden" id="hero">
+      <section className="relative flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] py-[var(--space-3xl)] px-8 text-center overflow-hidden" id="hero">
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-glow hidden" aria-hidden="true" />
         <div className="relative z-[1] max-w-[780px] animate-fade-in-up">
@@ -103,7 +103,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-[repeat(auto-fit, minmax(300px, 1fr))] gap-8">
             {/* Feature 1 — Reference Database */}
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-reference">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-reference">
               <div className="flex items-center justify-center w-[56px] h-[56px] rounded-md bg-[var(--color-accent-primary-glow)] text-forest mb-6">
                 <svg
                   width="32"
@@ -118,8 +118,8 @@ export default function LandingPage() {
                   <path d="M12 2L9.5 8.5 3 10l5 4.5L6.5 21 12 17.5 17.5 21 16 14.5l5-4.5-6.5-1.5z" />
                 </svg>
               </div>
-              <h3 className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">10,500+ Reference Releases</h3>
-              <p className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
+              <h3 className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">10,500+ Reference Releases</h3>
+              <p className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
                 Stop Googling &ldquo;Breyer palomino 1995.&rdquo; Our database covers 7,000+ Breyer and Stone
                 releases plus 3,500+ artist resins from the Equine Resin Directory. Search by mold,
                 sculptor, scale, or year — and identify any model in seconds.
@@ -127,7 +127,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2 — Financial Vault */}
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-vault">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-vault">
               <div className="flex items-center justify-center w-[56px] h-[56px] rounded-md bg-[var(--color-accent-primary-glow)] text-forest mb-6 bg-[rgba(240, 160, 108, 0.15)] text-[var(--color-accent-secondary)]">
                 <svg
                   width="32"
@@ -143,8 +143,8 @@ export default function LandingPage() {
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
               </div>
-              <h3 className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Private Financial Vault</h3>
-              <p className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
+              <h3 className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Private Financial Vault</h3>
+              <p className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
                 Know what your collection is really worth — without anyone else seeing.
                 Track purchase prices, estimated values, and insurance notes in a vault
                 that only you can access. Even our team can&apos;t see your data.
@@ -152,7 +152,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3 — Community Show Ring */}
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-showring">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-showring">
               <div className="flex items-center justify-center w-[56px] h-[56px] rounded-md bg-[var(--color-accent-primary-glow)] text-forest mb-6 bg-[rgba(92, 224, 160, 0.12)] text-success">
                 <svg
                   width="32"
@@ -168,8 +168,8 @@ export default function LandingPage() {
                   <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
                 </svg>
               </div>
-              <h3 className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Community Show Ring</h3>
-              <p className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
+              <h3 className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Community Show Ring</h3>
+              <p className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
                 Your proudest models deserve an audience. Browse other collectors&apos; herds,
                 filter by scale, manufacturer, and finish type, and discover
                 your next obsession — or your next purchase.
@@ -177,7 +177,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 4 — Social Community */}
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-social">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-social">
               <div className="flex items-center justify-center w-[56px] h-[56px] rounded-md bg-[var(--color-accent-primary-glow)] text-forest mb-6 feature-icon-social">
                 <svg
                   width="32"
@@ -195,8 +195,8 @@ export default function LandingPage() {
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </div>
-              <h3 className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Follow Your Favorite Collectors</h3>
-              <p className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
+              <h3 className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Follow Your Favorite Collectors</h3>
+              <p className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
                 No more scrolling through Facebook groups hoping to see updates.
                 Follow the collectors you care about, see their new additions in your feed,
                 and build real connections in a space made for the hobby.
@@ -204,7 +204,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 5 — Virtual Photo Shows */}
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-shows">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-shows">
               <div className="flex items-center justify-center w-[56px] h-[56px] rounded-md bg-[var(--color-accent-primary-glow)] text-forest mb-6 feature-icon-shows">
                 <svg
                   width="32"
@@ -221,8 +221,8 @@ export default function LandingPage() {
                   <polyline points="21 15 16 10 5 21" />
                 </svg>
               </div>
-              <h3 className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Virtual Photo Shows</h3>
-              <p className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
+              <h3 className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Virtual Photo Shows</h3>
+              <p className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
                 Can&apos;t make it to a live show? Enter themed virtual shows, vote for your favorites,
                 and compete for placement — all from home. Shows run on deadlines with
                 real results.
@@ -230,7 +230,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 6 — Trusted Marketplace */}
-            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-marketplace">
+            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden" id="feature-marketplace">
               <div className="flex items-center justify-center w-[56px] h-[56px] rounded-md bg-[var(--color-accent-primary-glow)] text-forest mb-6 feature-icon-market">
                 <svg
                   width="32"
@@ -245,8 +245,8 @@ export default function LandingPage() {
                   <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
                 </svg>
               </div>
-              <h3 className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Buy, Sell &amp; Trade with Confidence</h3>
-              <p className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
+              <h3 className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-title">Buy, Sell &amp; Trade with Confidence</h3>
+              <p className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 text-left relative transition-all overflow-hidden-desc">
                 List models for sale with multi-angle photos, message buyers directly,
                 and build your seller rating. Wishlist matchmaking alerts you when your
                 dream horse goes on the market.

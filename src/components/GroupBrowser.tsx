@@ -54,16 +54,16 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
             <div className="studio-tabs" style={{ marginBottom: "var(--space-lg)" }}>
                 <button className={`studio-tab ${tab === "browse" ? "active" : ""}`} onClick={() => setTab("browse")}>
                     🌐 Browse All
-                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{allGroups.length}</span>
+                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card max-[480px]:rounded-[var(--radius-md)] text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{allGroups.length}</span>
                 </button>
                 <button className={`studio-tab ${tab === "mine" ? "active" : ""}`} onClick={() => setTab("mine")}>
                     ⭐ My Groups
-                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{myGroups.length}</span>
+                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card max-[480px]:rounded-[var(--radius-md)] text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{myGroups.length}</span>
                 </button>
             </div>
 
             {/* Search */}
-            <div className="sticky top-[calc(var(--header-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
                 <input
                     type="text"
                     className="form-input"
@@ -93,7 +93,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                 <div className="grid grid-cols-[repeat(auto-fill, minmax(320px, 1fr))] gap-4">
                     {filtered.map(g => (
                         <div key={g.id} className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors">
-                            <div className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                            <div className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                                 <span className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-icon">{TYPE_ICONS[g.groupType] || "📂"}</span>
                                 <div>
                                     <Link href={`/community/groups/${g.slug}`} className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-name">{g.name}</Link>

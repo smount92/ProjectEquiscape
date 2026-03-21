@@ -53,7 +53,7 @@ export default function LinkHorseToCommission({
     }
 
     return (
-        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
             <h3 style={{ marginBottom: "var(--space-sm)" }}>🔗 Link a Horse from Your Stable</h3>
             <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-md)" }}>
                 Link a horse so WIP photos are added to its Hoofprint™ when this commission is delivered.

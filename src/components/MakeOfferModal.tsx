@@ -60,8 +60,8 @@ export default function MakeOfferModal({
 
     return createPortal(
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content max-w-[420px]" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="modal-content max-sm:max-w-full max-w-[420px]" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h3>💰 Make an Offer</h3>
                     <button className="bg-transparent border-0 text-muted text-[1.2rem] cursor-pointer p-1 rounded-md transition-all duration-150" onClick={onClose} aria-label="Close">×</button>
                 </div>

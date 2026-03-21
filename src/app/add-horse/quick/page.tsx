@@ -102,7 +102,7 @@ export default function QuickAddPage() {
                     <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Back</Link>
                 </div>
 
-                <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
+                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
                     {/* Catalog Search */}
                     <div style={{ marginBottom: "var(--space-lg)" }}>
                         <label className="block text-sm font-semibold text-ink mb-1">🔍 Search Catalog</label>
@@ -147,7 +147,7 @@ export default function QuickAddPage() {
                     )}
 
                     {/* Quick Selectors Row */}
-                    <div className="quick-add-selectors">
+                    <div className="quick-add-selectors max-sm:grid-cols-1">
                         <div>
                             <label className="block text-sm font-semibold text-ink mb-1">Finish</label>
                             <select

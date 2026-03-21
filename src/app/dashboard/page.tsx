@@ -193,7 +193,7 @@ export default async function DashboardPage({
             <div className="animate-fade-in-up">
                 {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
-                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-16 px-8 mb-8 bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] border border-[rgba(44,85,69,0.15)] animate-fade-in-up">
+                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-16 px-8 mb-8 bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] border border-[rgba(44,85,69,0.15)] animate-fade-in-up">
                         <h2>Welcome to Model Horse Hub!</h2>
                         <p>Let&apos;s get started by adding your first model to your digital stable.</p>
                         <div className="flex flex-col gap-4 max-w-[360px] mx-auto mb-8 text-left">
@@ -217,7 +217,7 @@ export default async function DashboardPage({
                 )}
 
                 {/* Shelf Header — FULL WIDTH */}
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all flex-wrap">
+                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all flex-wrap">
                     <div>
                         <h1>
                             <span className="text-forest">Digital Stable</span>
@@ -292,10 +292,10 @@ export default async function DashboardPage({
                     </main>
 
                     {/* ── SIDEBAR: Widgets ── */}
-                    <aside className="flex flex-col gap-6 max-lg:mt-6 lg:sticky lg:top-[calc(var(--sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
+                    <aside className="flex flex-col gap-6 max-lg:mt-6 lg:sticky lg:top-[calc(var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
-                            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6">
+                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6">
                                 <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.08em]"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
                                 <div className="flex flex-col gap-[2px]">
                                     <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
@@ -331,7 +331,7 @@ export default async function DashboardPage({
 
                         {/* Collections — Vertical list */}
                         {collections.length > 0 && (
-                            <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6">
+                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6">
                                 <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.08em]"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
                                 <div className="flex flex-col gap-1">
                                     {collections.map((col) => (

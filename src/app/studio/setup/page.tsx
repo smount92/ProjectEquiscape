@@ -147,7 +147,7 @@ export default function StudioSetupPage() {
     if (loading) {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
+                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
                     <p style={{ color: "var(--color-text-muted)" }}>Loading studio settings…</p>
                 </div>
             </div>
@@ -156,7 +156,7 @@ export default function StudioSetupPage() {
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)" }}>
                 {/* Header */}
                 <div style={{ textAlign: "center", marginBottom: "var(--space-xl)" }}>
                     <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>🎨</div>

@@ -125,7 +125,7 @@ export default function StableGrid({
             )}
 
             {filteredCards.length === 0 && !searchQuery.trim() ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
                     <div className="text-center py-[var(--space-3xl)] px-8-icon">🏠</div>
                     <h2>Your Stable is Empty</h2>
                     <p>You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
@@ -134,7 +134,7 @@ export default function StableGrid({
                     </Link>
                 </div>
             ) : filteredCards.length === 0 && searchQuery.trim() ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
                     <div className="text-center py-[var(--space-3xl)] px-8-icon">🔍</div>
                     <h2>No Results</h2>
                     <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
@@ -160,8 +160,8 @@ export default function StableGrid({
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                                     ) : (
-                                        <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
-                                            <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
+                                        <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
+                                            <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
                                             <span>No photo</span>
                                         </div>
                                     )}
@@ -171,7 +171,7 @@ export default function StableGrid({
                                         </span>
                                     )}
                                     {horse.assetCategory && horse.assetCategory !== "model" && (
-                                        <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-badge category-badge" style={{ background: "rgba(124, 109, 240, 0.85)", color: "#fff" }}>
+                                        <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-badge category-badge" style={{ background: "rgba(124, 109, 240, 0.85)", color: "#fff" }}>
                                             {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
                                         </span>
                                     )}
@@ -183,7 +183,7 @@ export default function StableGrid({
                                     )}
                                 </div>
                                 <div className="py-4 px-6">
-                                    <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-name">{horse.customName}</div>
+                                    <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-name">{horse.customName}</div>
                                     <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis">{horse.refName}</div>
                                     {horse.releaseLine && (
                                         <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
@@ -200,7 +200,7 @@ export default function StableGrid({
                                         <span>{formatDate(horse.createdAt)}</span>
                                     </div>
                                     {horse.collectionName && (
-                                        <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-collection">📁 {horse.collectionName}</div>
+                                        <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-collection">📁 {horse.collectionName}</div>
                                     )}
                                 </div>
                             </CardWrapper>

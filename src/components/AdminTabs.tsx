@@ -222,7 +222,7 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
 function MailboxTab({ messages }: { messages: ContactMessage[] }) {
     if (messages.length === 0) {
         return (
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
                 <div className="text-center py-[var(--space-3xl)] px-8-icon">📬</div>
                 <h2>No Messages Yet</h2>
                 <p>Contact form submissions will appear here.</p>
@@ -237,7 +237,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
                     key={msg.id}
                     className={`admin-message ${msg.is_read ? "admin-message-read" : "admin-message-unread"}`}
                 >
-                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                         <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sender">
                             <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-name">{msg.name}</span>
                             <a href={`mailto:${msg.email}`} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-email">
@@ -316,7 +316,7 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
 function ReportsTab({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
                 <div className="text-center py-[var(--space-3xl)] px-8-icon">🎉</div>
                 <h2>All Clear</h2>
                 <p>No open reports to review.</p>
@@ -355,7 +355,7 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
     if (suggestions.length === 0) {
         return (
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
                 <div className="text-center py-[var(--space-3xl)] px-8-icon">📚</div>
                 <h2>No Pending Catalog Suggestions</h2>
                 <p>Community suggestions will appear here for review.</p>

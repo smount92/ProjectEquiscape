@@ -89,7 +89,7 @@ export default async function MyCommissionsPage() {
             </div>
 
             {commissions.length === 0 ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
                     <p style={{ fontSize: "2rem", marginBottom: "var(--space-md)" }}>🎨</p>
                     <p style={{ color: "var(--color-text-muted)" }}>You haven&apos;t requested any commissions yet.</p>
                     <Link href="/discover" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" style={{ marginTop: "var(--space-lg)" }}>

@@ -21,7 +21,7 @@ export default async function SuggestNewEntryPage() {
                 <span>Suggest New Entry</span>
             </nav>
 
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-xl)" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-xl)" }}>
                 <h1 style={{ fontFamily: "var(--font-display)", fontSize: "calc(1.5rem * var(--font-scale))", marginBottom: "var(--space-xs)" }}>
                     📗 Suggest a New Catalog Entry
                 </h1>

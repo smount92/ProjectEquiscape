@@ -32,8 +32,8 @@ export default function FeaturedHorseCard({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={thumbnailUrl} alt={horseName} loading="eager" className="w-full h-full object-contain bg-black/15" />
                 ) : (
-                    <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
-                        <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
+                    <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
+                        <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
                     </div>
                 )}
                 <div className="absolute top-2 left-2 py-1 px-2.5 bg-[linear-gradient(135deg,#F59E0B,#D97706)] text-white text-[0.7rem] font-bold rounded-sm whitespace-nowrap">🌟 {title}</div>

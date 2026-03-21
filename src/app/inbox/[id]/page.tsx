@@ -300,7 +300,7 @@ export default async function ChatPage({
             {horseContext && (
                 <Link
                     href={`/community/${horseContext.id}`}
-                    className="group flex items-center gap-4 p-4 bg-[var(--color-bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all)] border border-edge rounded-lg mb-4 no-underline text-ink transition-all hover:border-forest hover:bg-[var(--color-bg-card-hover)] hover:-translate-y-px hover:shadow-md animate-fade-in-up"
+                    className="group flex items-center gap-4 p-4 bg-[var(--color-bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all)] border border-edge rounded-lg mb-4 no-underline text-ink transition-all hover:border-forest hover:bg-[var(--color-bg-card-hover)] hover:-translate-y-px hover:shadow-md animate-fade-in-up"
                     id="chat-horse-link"
                 >
                     {horseContext.thumbnailUrl ? (

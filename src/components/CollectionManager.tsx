@@ -60,7 +60,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
 
     return createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <div className="modal-content max-sm:max-w-full" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
                 <h3 style={{ marginBottom: "var(--space-lg)" }}>Manage Collection</h3>
                 <div className="mb-6">
                     <label className="block text-sm font-semibold text-ink mb-1">Name</label>

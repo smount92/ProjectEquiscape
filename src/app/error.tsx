@@ -9,7 +9,7 @@ export default function Error({
 }) {
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up" style={{ maxWidth: "500px", margin: "0 auto" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up" style={{ maxWidth: "500px", margin: "0 auto" }}>
                 <div className="text-center py-[var(--space-3xl)] px-8-icon">⚠️</div>
                 <h2>Something Went Wrong</h2>
                 <p>An unexpected error occurred. Please try again.</p>

@@ -72,7 +72,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
             <div className="page-content" style={{ maxWidth: 640 }}>
                 <Link href="/feed" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginBottom: "var(--space-md)" }}>← Back to Feed</Link>
 
-                <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
+                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Link href={`/profile/${encodeURIComponent(actorAlias)}`} style={{ fontWeight: 600 }}>
                             @{actorAlias}

@@ -108,7 +108,7 @@ export default function ShowRecordTimeline({
     };
 
     return (
-        <div className="show-record-timeline bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="show-records">
+        <div className="show-record-timeline bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="show-records">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                     <span aria-hidden="true">🏅</span> Show Records

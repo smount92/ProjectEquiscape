@@ -121,10 +121,10 @@ export default async function ReferencePage() {
                 {/* Sidebar */}
                 <aside className="flex flex-col gap-4">
                     {/* Quick Links */}
-                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all flex flex-col gap-4-card">
+                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all flex flex-col gap-4-card">
                         <h3 className="flex flex-col gap-4-title">📋 Community</h3>
                         <div className="flex flex-col gap-4-links">
-                            <a href="/catalog/suggestions" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary btn-small flex flex-col gap-4-btn">
+                            <a href="/catalog/suggestions" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary btn-small flex flex-col gap-4-btn">
                                 View Suggestions
                                 {(pendingSuggestions ?? 0) > 0 && (
                                     <span className="bg-forest text-white text-[0.7rem] py-[2px] px-[6px] rounded-[10px] font-bold">
@@ -132,10 +132,10 @@ export default async function ReferencePage() {
                                     </span>
                                 )}
                             </a>
-                            <a href="/catalog/suggestions/new" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm btn-small flex flex-col gap-4-btn">
+                            <a href="/catalog/suggestions/new" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm btn max-md:min-h-[44px]-small flex flex-col gap-4-btn">
                                 📗 Suggest New Entry
                             </a>
-                            <a href="/catalog/changelog" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary btn-small flex flex-col gap-4-btn">
+                            <a href="/catalog/changelog" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary btn-small flex flex-col gap-4-btn">
                                 📋 View Changelog
                             </a>
                         </div>
@@ -143,7 +143,7 @@ export default async function ReferencePage() {
 
                     {/* Top Curators */}
                     {(curators ?? []).length > 0 && (
-                        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all flex flex-col gap-4-card">
+                        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all flex flex-col gap-4-card">
                             <h3 className="flex flex-col gap-4-title">🏆 Top Curators</h3>
                             <ul className="list-none p-0 m-0">
                                 {(

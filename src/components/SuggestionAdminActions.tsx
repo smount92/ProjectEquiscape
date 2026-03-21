@@ -89,7 +89,7 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
                             {isPending ? "Rejecting…" : "Confirm Reject"}
                         </button>
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn-secondary"
+                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary"
                             onClick={() => setShowRejectForm(false)}
                         >
                             Cancel

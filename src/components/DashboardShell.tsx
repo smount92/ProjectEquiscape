@@ -227,7 +227,7 @@ export default function DashboardShell({
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && createPortal(
                 <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal-content max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
                         <h3 style={{ marginBottom: "var(--space-md)" }}>🗑️ Confirm Delete</h3>
                         <p style={{ marginBottom: "var(--space-lg)", color: "var(--color-text-secondary)" }}>
                             Are you sure you want to delete <strong>{selectedIds.size}</strong> item{selectedIds.size !== 1 ? "s" : ""}?

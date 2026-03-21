@@ -303,7 +303,7 @@ export default function CsvImport() {
                         key={s.num}
                         className={`csv-step-dot ${step >= s.num ? "active" : ""} ${step === s.num ? "current" : ""}`}
                     >
-                        <span className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border-[2px] border-edge text-muted font-bold text-sm transition-all">{s.num}</span>
+                        <span className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border-[2px] border-edge text-muted font-bold text-sm transition-all">{s.num}</span>
                         <span className="text-xs text-muted font-medium transition-all">{s.label}</span>
                     </div>
                 ))}
@@ -329,7 +329,7 @@ export default function CsvImport() {
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <div className="text-[3rem] mb-4 opacity-[0.7]">📁</div>
-                        <p className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card cursor-pointer text-center transition-all-text">
+                        <p className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card max-[480px]:rounded-[var(--radius-md)] cursor-pointer text-center transition-all-text">
                             Drag &amp; drop your CSV file here
                             <br />
                             <span className="text-sm text-forest underline">or click to browse</span>
@@ -365,7 +365,7 @@ export default function CsvImport() {
 
                     <div className="flex flex-col gap-4 mb-8">
                         {csvHeaders.map((header) => (
-                            <div key={header} className="flex items-center gap-4 py-4 px-6 bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-md">
+                            <div key={header} className="flex items-center gap-4 py-4 px-6 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-md">
                                 <span className="flex-1 font-semibold text-sm text-ink min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{header}</span>
                                 <span className="text-muted text-[calc(var(--font-size-md)*var(--font-scale))] shrink-0">→</span>
                                 <select
@@ -461,7 +461,7 @@ export default function CsvImport() {
                                 className={`csv-match-card ${result.status}`}
                                 id={`match-row-${result.rowIndex}`}
                             >
-                                <div className="p-6 bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all rounded-md border-l-[4px] border-edge transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                                <div className="p-6 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all rounded-md border-l-[4px] border-edge transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                                     <span className="text-xl shrink-0">
                                         {result.status === "perfect"
                                             ? "✅"
@@ -598,7 +598,7 @@ export default function CsvImport() {
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-[var(--space-3xl)] px-8 bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg">
+                        <div className="text-center py-[var(--space-3xl)] px-8 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg">
                             <div className="text-[4rem] mb-6">❌</div>
                             <h2>Import Failed</h2>
                             <p>{importResult?.error || "An unexpected error occurred."}</p>

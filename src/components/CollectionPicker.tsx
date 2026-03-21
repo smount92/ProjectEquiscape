@@ -182,13 +182,13 @@ export default function CollectionPicker({
       {showModal && createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div
-            className="modal-content max-w-[480px]"
+            className="modal-content max-sm:max-w-full max-w-[480px]"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-label="Create new collection"
           >
-            <div className="modal-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="modal-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
               <h3>📁 New Collection</h3>
               <button
                 type="button"

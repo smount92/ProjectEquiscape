@@ -266,7 +266,7 @@ export default async function ProfilePage({
   return (
     <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 max-w-[var(--max-width)]">
       {/* Profile Header */}
-      <div className="profile-hero animate-fade-in-up">
+      <div className="profile-hero max-md:flex-col max-md:items-center max-md:text-center max-sm:flex-col max-sm:text-center max-sm:py-8 max-sm:px-4 animate-fade-in-up">
         <div className="flex items-center justify-center w-[72px] h-[72px] rounded-full bg-[rgba(44, 85, 69, 0.12)] border-[2px] border-[rgba(44, 85, 69, 0.3)] text-forest shrink-0">
           {profileUser.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -435,7 +435,7 @@ export default async function ProfilePage({
 
       {/* Grid */}
       {profileCards.length === 0 ? (
-        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
           <div className="text-center py-[var(--space-3xl)] px-8-icon">🔒</div>
           <h2>
             {isOwnProfile
@@ -471,8 +471,8 @@ export default async function ProfilePage({
                     loading="lazy"
                   />
                 ) : (
-                  <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
-                    <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
+                  <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
+                    <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
                     <span>No photo</span>
                   </div>
                 )}
@@ -516,7 +516,7 @@ export default async function ProfilePage({
                   </span>
                 </div>
                 {horse.collectionName && (
-                  <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-collection">
+                  <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-collection">
                     📁 {horse.collectionName}
                   </div>
                 )}
@@ -544,7 +544,7 @@ export default async function ProfilePage({
 
       {/* Reviews Section */}
       {ratingSummary.count > 0 && (
-        <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-edge rounded-lg p-6 mt-8 animate-fade-in-up" id="reviews">
+        <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-edge rounded-lg p-6 mt-8 animate-fade-in-up" id="reviews">
           <div className="flex items-center gap-2 mb-6 [&_h2]:m-0 [&_h2]:text-[calc(1.1rem*var(--font-scale))]">
             <h2>⭐ Reviews ({ratingSummary.count})</h2>
           </div>

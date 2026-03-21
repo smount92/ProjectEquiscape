@@ -165,7 +165,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                     {/* Main Content */}
                     <div className="flex flex-col gap-4">
                         {/* Header */}
-                        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-6">
+                        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6">
                             <div className="flex justify-between items-center flex-wrap gap-2 mb-4">
                                 <div>
                                     <span className={`ref-status-badge ${st.className}`}>
@@ -293,7 +293,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                         </div>
 
                         {/* Discussion Thread */}
-                        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-6">
+                        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6">
                             <h3>
                                 💬 Discussion ({(comments ?? []).length})
                             </h3>
@@ -314,7 +314,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
                         {/* Admin Actions */}
                         {isAdmin && s.status === "pending" && (
-                            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-6 border border-[#ffc107]">
+                            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 border border-[#ffc107]">
                                 <h3>🛡️ Admin Actions</h3>
                                 <SuggestionAdminActions suggestionId={s.id} />
                             </div>

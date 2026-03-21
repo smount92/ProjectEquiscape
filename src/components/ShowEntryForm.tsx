@@ -175,7 +175,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
     const previewModal = showPreview && selectedPhotoObj && typeof document !== "undefined"
         ? createPortal(
             <div className="modal-overlay" onClick={() => setShowPreview(false)}>
-                <div className="modal-content max-w-[480px] text-center" onClick={e => e.stopPropagation()}>
+                <div className="modal-content max-sm:max-w-full max-w-[480px] text-center" onClick={e => e.stopPropagation()}>
                     <div className="text-[calc(0.75rem*var(--font-scale))] text-muted text-center mb-4 uppercase tracking-[0.05em]">This is what judges & voters will see</div>
                     <div style={{ textAlign: "center", marginBottom: "var(--space-sm)" }}>
                         <span style={{ fontWeight: 700, fontSize: "calc(1rem * var(--font-scale))" }}>
@@ -314,7 +314,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
 
                 {/* Two-column layout: Photo picker left, Caption + Submit right */}
                 {selectedHorse && (
-                    <div className="show-entry-body">
+                    <div className="show-entry-body max-sm:grid-cols-1">
                         {/* LEFT: Photo picker */}
                         <div className="flex flex-col gap-1">
                             <label className="block text-sm font-semibold text-ink mb-1">

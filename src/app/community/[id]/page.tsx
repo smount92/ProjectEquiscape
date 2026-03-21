@@ -394,7 +394,7 @@ export default async function PublicPassportPage({
           {/* Owner Pill */}
           <Link
             href={`/profile/${encodeURIComponent(ownerAlias)}`}
-            className="inline-flex items-center gap-1 p-[6px 14px 6px 6px] rounded-full bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge no-underline text-ink text-sm font-semibold transition-all w-fit"
+            className="inline-flex items-center gap-1 p-[6px 14px 6px 6px] rounded-full bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge no-underline text-ink text-sm font-semibold transition-all w-fit"
           >
             <span className="flex items-center justify-center w-[28px] h-[28px] rounded-full bg-elevated border border-edge text-muted shrink-0">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -419,7 +419,7 @@ export default async function PublicPassportPage({
           )}
 
           {/* Model Details Card */}
-          <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+          <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
             <h3>
               <span aria-hidden="true">📋</span> {(horse.asset_category || "model") === "model" ? "Model Details" : `${(horse.asset_category || "model").charAt(0).toUpperCase() + (horse.asset_category || "model").slice(1)} Details`}
             </h3>
@@ -577,7 +577,7 @@ export default async function PublicPassportPage({
 
           {/* Finish Details */}
           {horse.finish_details && (
-            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+            <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">✨</span> Finish</h3>
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Finish Details</span>
@@ -588,7 +588,7 @@ export default async function PublicPassportPage({
 
           {/* Show Bio */}
           {(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
-            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+            <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">🏅</span> Show Identity</h3>
               {horse.assigned_breed && (
                 <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
@@ -619,7 +619,7 @@ export default async function PublicPassportPage({
 
           {/* Public Notes */}
           {horse.public_notes && (
-            <div className="passport-detail-bg-card border border-edge rounded-lg p-12 shadow-md transition-all">
+            <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">📝</span> Notes</h3>
               <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
                 {horse.public_notes}

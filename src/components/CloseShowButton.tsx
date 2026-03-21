@@ -28,7 +28,7 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
     };
 
     return (
-        <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
+        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
             textAlign: "center",
             padding: "var(--space-lg)",
             marginBottom: "var(--space-lg)",

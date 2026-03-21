@@ -96,7 +96,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
 
             <div className="flex flex-col gap-6">
                 {/* Main Card */}
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-6 animate-fade-in-up">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 animate-fade-in-up">
                     <div className="flex justify-between items-start mb-6">
                         <div>
                             <h1 className="font-sans text-[calc(1.6rem*var(--font-scale))] m-0">{catalogItem.title}</h1>
@@ -133,7 +133,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
 
                 {/* Pending Suggestions */}
                 {(suggestionCount ?? 0) > 0 && (
-                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all p-4">
+                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-4">
                         <h3>📝 Pending Suggestions ({suggestionCount})</h3>
                         <ul className="list-none p-0 m-[var(--space-sm) 0]">
                             {(

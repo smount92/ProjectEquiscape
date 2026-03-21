@@ -76,7 +76,7 @@ export default function DeleteHorseModal({
           aria-modal="true"
           aria-labelledby="delete-modal-title"
         >
-          <div className="modal-bg-card border border-edge rounded-lg p-12 shadow-md transition-all danger">
+          <div className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all danger">
             <div className="text-[3rem] text-center mb-4">⚠️</div>
             <h2 id="delete-modal-title">Delete &ldquo;{horseName}&rdquo;?</h2>
             <p>

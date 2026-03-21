@@ -21,7 +21,7 @@ export default function WishlistRemoveButton({ wishlistId }: { wishlistId: strin
 
     return (
         <button
-            className="absolute top-2 right-2 flex items-center justify-center w-7 h-7 border-none bg-transparent text-muted cursor-pointer rounded-full transition-all p-0 opacity-0 group-hover/bg-card border border-edge rounded-lg p-12 shadow-md transition-all:opacity-100 max-[600px]:opacity-100 hover:text-[#ef4444] hover:bg-[rgba(239,68,68,0.1)]"
+            className="absolute top-2 right-2 flex items-center justify-center w-7 h-7 border-none bg-transparent text-muted cursor-pointer rounded-full transition-all p-0 opacity-0 group-hover/bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all:opacity-100 max-[600px]:opacity-100 hover:text-[#ef4444] hover:bg-[rgba(239,68,68,0.1)]"
             onClick={handleRemove}
             disabled={removing}
             title="Remove from wishlist"

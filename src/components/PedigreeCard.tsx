@@ -169,7 +169,7 @@ export default function PedigreeCard({
     // CTA for owner when no pedigree exists
     if (!pedigree && isOwner && !isEditing) {
         return (
-            <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+            <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
                 <div className="text-center py-4 text-muted">
                     <p>No pedigree data yet.</p>
                     <button
@@ -188,7 +188,7 @@ export default function PedigreeCard({
     // Edit form
     if (isEditing) {
         return (
-            <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+            <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                         <span aria-hidden="true">🧬</span> {pedigree ? "Edit Pedigree" : "Add Pedigree"}
@@ -365,7 +365,7 @@ export default function PedigreeCard({
 
     // Read-only display
     return (
-        <div className="bg-[var(--color-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+        <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                     <span aria-hidden="true">🧬</span> Pedigree

@@ -222,7 +222,7 @@ export default function UnifiedReferenceSearch({
                   {/* Molds */}
                   {molds.length > 0 && (
                     <>
-                      <div className="ref-group-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">🏭 Base Molds</div>
+                      <div className="ref-group-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">🏭 Base Molds</div>
                       {molds.map((item) => (
                         <button key={item.id} className="border-b-0" onClick={() => handleMoldClick(item)}>
                           <div className="flex-1 min-w-0">
@@ -238,7 +238,7 @@ export default function UnifiedReferenceSearch({
                   {/* Releases */}
                   {releaseResults.length > 0 && (
                     <>
-                      <div className="ref-group-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">📦 Releases</div>
+                      <div className="ref-group-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">📦 Releases</div>
                       {releaseResults.map((item) => (
                         <button key={item.id} className="border-b-0" onClick={() => handleSelect(item)}>
                           <div className="flex-1 min-w-0">
@@ -257,7 +257,7 @@ export default function UnifiedReferenceSearch({
                   {/* Resins */}
                   {resins.length > 0 && (
                     <>
-                      <div className="ref-group-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">🎨 Artist Resins</div>
+                      <div className="ref-group-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">🎨 Artist Resins</div>
                       {resins.map((item) => (
                         <button key={item.id} className="border-b-0" onClick={() => handleSelect(item)}>
                           <div className="flex-1 min-w-0">
@@ -289,7 +289,7 @@ export default function UnifiedReferenceSearch({
 
           {/* Expanded Releases (when a mold is clicked) */}
           {releases.length > 0 && selectedItem && selectedItem.itemType === "plastic_mold" && (
-            <div className="mt-4 border border-edge rounded-lg overflow-hidden bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
+            <div className="mt-4 border border-edge rounded-lg overflow-hidden bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
               <div className="flex items-center justify-between py-2 px-4 bg-[rgba(44, 85, 69, 0.06)] border-b border-edge text-sm text-[var(--color-text-secondary)]">
                 <span>Releases for <strong>{selectedItem.title}</strong></span>
                 <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleClear} style={{ fontSize: "0.75rem" }}>✕ Clear</button>

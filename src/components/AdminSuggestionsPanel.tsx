@@ -48,7 +48,7 @@ export default function AdminSuggestionsPanel({
 
     if (items.length === 0) {
         return (
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8" style={{ textAlign: "center" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8" style={{ textAlign: "center" }}>
                 <div className="text-center py-[var(--space-3xl)] px-8-icon">✅</div>
                 <h2>No Pending Suggestions</h2>
                 <p>All database suggestions have been reviewed.</p>
@@ -63,7 +63,7 @@ export default function AdminSuggestionsPanel({
                     key={s.id}
                     className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all admin-message hover:opacity-[1]-unread"
                 >
-                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                         <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sender">
                             <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-name">
                                 {typeEmoji[s.suggestion_type] || "📝"}{" "}

@@ -85,7 +85,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
 
             {isOpen && createPortal(
                 <div className="modal-overlay" onClick={handleClose}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px" }}>
+                    <div className="modal-content max-sm:max-w-full" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px" }}>
                         {step === "form" ? (
                             <>
                                 <h3 style={{ marginBottom: "var(--space-md)" }}>

@@ -122,7 +122,7 @@ export default function NotificationList({
 
             {/* List */}
             {notifs.length === 0 ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
                     <div className="text-center py-[var(--space-3xl)] px-8-icon">🔔</div>
                     <h2>All Caught Up!</h2>
                     <p>No notifications yet. Activity from the community will appear here.</p>

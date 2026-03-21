@@ -63,7 +63,7 @@ export default function SuggestReferenceModal({
     const overlay = (
         <div className="modal-overlay" onClick={handleClose}>
             <div
-                className="modal-bg-card border border-edge rounded-lg p-12 shadow-md transition-all"
+                className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all"
                 onClick={(e) => e.stopPropagation()}
                 style={{ maxWidth: 520 }}
             >

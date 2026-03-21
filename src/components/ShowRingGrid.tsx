@@ -132,7 +132,7 @@ export default function ShowRingGrid({
     return (
         <>
             {communityCards.length > 0 && (
-                <div className="sticky top-[calc(var(--header-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card border border-edge rounded-xl transition-all shadow-md-container" style={{ marginBottom: "var(--space-md)" }}>
+                <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md-container" style={{ marginBottom: "var(--space-md)" }}>
                     <input
                         type="text"
                         value={searchInput}
@@ -164,14 +164,14 @@ export default function ShowRingGrid({
             )}
 
             {communityCards.length === 0 && !isFiltering ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
                     <div className="text-center py-[var(--space-3xl)] px-8-icon">🏟️</div>
                     <h2>The Show Ring is Empty</h2>
                     <p>No models have been shared yet. Be the first to showcase your collection!</p>
                     <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">🐴 Add to Stable</Link>
                 </div>
             ) : communityCards.length === 0 && isFiltering ? (
-                <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
                     <div className="text-center py-[var(--space-3xl)] px-8-icon">🔍</div>
                     <h2>No Results</h2>
                     <p>No models match your search. Try different filters.</p>
@@ -190,8 +190,8 @@ export default function ShowRingGrid({
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                                         ) : (
-                                            <div className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
-                                                <span className="horse-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
+                                            <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
+                                                <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
                                                 <span>No photo</span>
                                             </div>
                                         )}

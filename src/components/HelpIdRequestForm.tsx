@@ -77,7 +77,7 @@ export default function HelpIdRequestForm() {
     }
 
     return (
-        <div className="help-id-form-bg-card border border-edge rounded-lg p-12 shadow-md transition-all card animate-fade-in-up" style={{ marginTop: "var(--space-lg)" }}>
+        <div className="help-id-form-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all card animate-fade-in-up" style={{ marginTop: "var(--space-lg)" }}>
             <h3 style={{ marginBottom: "var(--space-md)" }}>📸 Submit a Mystery Model</h3>
 
             {status === "success" ? (
@@ -91,7 +91,7 @@ export default function HelpIdRequestForm() {
                     <div className="mb-6">
                         <label className="block text-sm font-semibold text-ink mb-1">Photo of the model *</label>
                         <div
-                            className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card cursor-pointer text-center transition-all"
+                            className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card max-[480px]:rounded-[var(--radius-md)] cursor-pointer text-center transition-all"
                             style={{ padding: "var(--space-xl)", cursor: "pointer" }}
                             onClick={() => fileInputRef.current?.click()}
                         >
@@ -104,7 +104,7 @@ export default function HelpIdRequestForm() {
                             ) : (
                                 <>
                                     <div className="text-[3rem] mb-4 opacity-[0.7]">📷</div>
-                                    <p className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card cursor-pointer text-center transition-all-text">
+                                    <p className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card max-[480px]:rounded-[var(--radius-md)] cursor-pointer text-center transition-all-text">
                                         Click to upload a photo
                                         <br />
                                         <span className="text-sm text-forest underline">Clear, well-lit photos get the best results</span>

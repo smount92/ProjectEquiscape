@@ -125,7 +125,7 @@ export default function InsuranceReportButton() {
             {/* Collection Picker Modal */}
             {status === "picking" && (
                 <div className="modal-backdrop" onClick={handleCancel}>
-                    <div className="modal-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
+                    <div className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
                         <h3 style={{ marginBottom: "var(--space-md)" }}>📄 Insurance Report Scope</h3>
                         <p style={{ color: "var(--color-text-secondary)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-lg)" }}>
                             Choose which horses to include in your insurance report.

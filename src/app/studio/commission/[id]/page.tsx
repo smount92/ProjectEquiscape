@@ -106,7 +106,7 @@ export default async function CommissionDetailPage({
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Header */}
-            <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "var(--space-md)" }}>
                     <div>
                         <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))", margin: 0 }}>

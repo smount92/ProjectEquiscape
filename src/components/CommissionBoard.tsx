@@ -55,7 +55,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                         >
                             {tab.label}
                             {count > 0 && (
-                                <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{count}</span>
+                                <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card max-[480px]:rounded-[var(--radius-md)] text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{count}</span>
                             )}
                         </button>
                     );
@@ -64,7 +64,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
 
             {/* Commission Cards */}
             {filteredCommissions.length === 0 ? (
-                <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
+                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
                     <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.9rem * var(--font-scale))" }}>
                         No commissions in this category.
                     </p>

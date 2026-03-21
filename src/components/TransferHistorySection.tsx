@@ -16,7 +16,7 @@ export default async function TransferHistorySection() {
                     <Link
                         key={item.id}
                         href={`/community/${item.horseId}`}
-                        className="transfer-ghost-bg-card border border-edge rounded-lg p-12 shadow-md transition-all hover:opacity-[0.85]"
+                        className="transfer-ghost-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all hover:opacity-[0.85]"
                     >
                         {item.horseThumbnail ? (
                             <img

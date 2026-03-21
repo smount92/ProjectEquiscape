@@ -193,7 +193,7 @@ export default async function InboxPage() {
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
             <div className="animate-fade-in-up">
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <div>
                         <h1>
                             <span className="text-forest">✉️ Inbox</span>
@@ -214,7 +214,7 @@ export default async function InboxPage() {
                 </div>
 
                 {inboxItems.length === 0 ? (
-                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
+                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
                         <div className="text-center py-[var(--space-3xl)] px-8-icon">✉️</div>
                         <h2>Your Inbox is Empty</h2>
                         <p>

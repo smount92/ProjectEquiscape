@@ -71,7 +71,7 @@ export default function ReportButton({
     }
 
     return (
-        <div className="bg-bg-card border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", marginTop: "var(--space-sm)" }}>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", marginTop: "var(--space-sm)" }}>
             <select
                 className="form-input"
                 value={reason}

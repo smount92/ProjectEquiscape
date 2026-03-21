@@ -93,7 +93,7 @@ export default async function ChangelogPage() {
                 })}
 
                 {(entries ?? []).length === 0 && (
-                    <div className="bg-card border border-edge rounded-lg p-12 shadow-md transition-all text-center p-8 text-muted">
+                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center p-8 text-muted">
                         <p>No changes yet. The catalog awaits your contributions!</p>
                         <Link href="/catalog" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
                             Browse Catalog

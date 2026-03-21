@@ -25,7 +25,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
     return (
         <div className="animate-fade-in-up">
             {/* Search */}
-            <div className="sticky top-[calc(var(--header-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
                 <input
                     type="text"
                     className="form-input"
@@ -65,21 +65,21 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
             {filtered.length === 0 ? (
                 <div className="empty-state"><p>No studios match your search.</p></div>
             ) : (
-                <div className="discover-grid">
+                <div className="discover-grid max-sm:grid-cols-1">
                     {filtered.map(a => (
-                        <Link key={a.userId} href={`/studio/${a.studioSlug}`} className="discover-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textDecoration: "none" }}>
-                            <div className="discover-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-info">
-                                <div className="discover-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-alias">
+                        <Link key={a.userId} href={`/studio/${a.studioSlug}`} className="discover-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textDecoration: "none" }}>
+                            <div className="discover-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-info">
+                                <div className="discover-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-alias">
                                     {STATUS_EMOJI[a.status]} {a.studioName}
                                 </div>
-                                <div className="discover-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-stats">
+                                <div className="discover-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-stats">
                                     <span>🎨 @{a.ownerAlias}</span>
                                     {a.priceRangeMin != null && <span>💰 ${a.priceRangeMin}–${a.priceRangeMax}</span>}
                                 </div>
                                 {a.specialties.length > 0 && (
                                     <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: "var(--space-xs)" }}>
                                         {a.specialties.slice(0, 3).map(s => (
-                                            <span key={s} className="py-[6px] px-[14px] rounded-full border border-edge bg-card text-ink-light text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all" style={{ fontSize: "0.7rem", padding: "2px 6px" }}>{s}</span>
+                                            <span key={s} className="py-[6px] px-[14px] rounded-full border border-edge bg-card max-[480px]:rounded-[var(--radius-md)] text-ink-light text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all" style={{ fontSize: "0.7rem", padding: "2px 6px" }}>{s}</span>
                                         ))}
                                     </div>
                                 )}

@@ -166,7 +166,7 @@ export default function UniversalFeed({
     };
 
     return (
-        <div className="glass-bg-card border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
             <h3 style={{ marginBottom: "var(--space-md)" }}>💬 {label} ({posts.length}{hasMore ? "+" : ""})</h3>
 
             {/* ── Composer ── */}
@@ -335,13 +335,13 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                     return (
                         <Link
                             href={`/community/${horseId}`}
-                            className="embed-bg-card border border-edge rounded-lg p-12 shadow-md transition-all"
+                            className="embed-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all"
                             style={{ marginTop: "var(--space-sm)" }}
                         >
-                            <div className="embed-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-body">
-                                <div className="embed-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-title">🐴 View Horse Passport</div>
-                                <div className="embed-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-desc">Click to view this model on Model Horse Hub</div>
-                                <div className="embed-bg-card border border-edge rounded-lg p-12 shadow-md transition-all-domain">modelhorsehub.com/community/{horseId.slice(0, 8)}…</div>
+                            <div className="embed-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-body">
+                                <div className="embed-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-title">🐴 View Horse Passport</div>
+                                <div className="embed-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-desc">Click to view this model on Model Horse Hub</div>
+                                <div className="embed-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-domain">modelhorsehub.com/community/{horseId.slice(0, 8)}…</div>
                             </div>
                         </Link>
                     );
