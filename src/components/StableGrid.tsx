@@ -117,7 +117,7 @@ export default function StableGrid({
             )}
 
             {searchQuery.trim() && (
-                <div className="search-results-count">
+                <div className="text-sm text-text-muted mb-lg pl-xs">
                     {filteredCards.length === 0
                         ? "No models match your search"
                         : `Showing ${filteredCards.length} of ${horseCards.length} models`}

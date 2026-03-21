@@ -159,7 +159,7 @@ export default async function MarketPricePage({
 
                             {/* Pagination */}
                             {totalPages > 1 && (
-                                <div className="market-pagination">
+                                <div className="flex justify-between items-center mt-xl pt-lg border-t border-border">
                                     {page > 1 ? (
                                         <Link href={buildPageUrl(page - 1)} className="btn btn-ghost">
                                             ← Previous

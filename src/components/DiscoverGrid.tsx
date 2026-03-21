@@ -140,7 +140,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
 
             {/* Results count */}
             {(searchQuery.trim() || activeTag !== "all") && (
-                <div className="search-results-count" style={{ marginBottom: "var(--space-md)" }}>
+                <div className="text-sm text-text-muted mb-lg pl-xs" style={{ marginBottom: "var(--space-md)" }}>
                     {filteredUsers.length === 0
                         ? searchQuery.trim()
                             ? `No collectors match "${searchQuery}"`

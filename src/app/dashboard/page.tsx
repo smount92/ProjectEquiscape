@@ -273,7 +273,7 @@ export default async function DashboardPage({
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="market-pagination" style={{ marginTop: "var(--space-lg)" }}>
+                            <div className="flex justify-between items-center mt-xl pt-lg border-t border-border" style={{ marginTop: "var(--space-lg)" }}>
                                 {page > 1 ? (
                                     <Link href={`/dashboard?page=${page - 1}`} className="btn btn-ghost">← Previous</Link>
                                 ) : (

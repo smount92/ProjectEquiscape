@@ -156,7 +156,7 @@ export default function ShowRingGrid({
             )}
 
             {isFiltering && (
-                <div className="search-results-count">
+                <div className="text-sm text-text-muted mb-lg pl-xs">
                     {communityCards.length === 0
                         ? "No models match your filters"
                         : `Showing ${communityCards.length} models`}
