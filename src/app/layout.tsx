@@ -2,42 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import "./studio.css";
-import "./competition.css";
 
-/* ── Extracted CSS (globals.css modularization sprint) ── */
-// Layout components
-
-
-// Core UI components
-
-
-
-
-
-
-import "@/components/CsvImport.css";
-// Social components
-
-
-
-
-// Page-specific styles
-import "./WelcomeOnboarding.css";
-
-import "./about/static.css";
-import "./admin/admin.css";
-import "./market/market.css";
-import "./community/HelpId.css";
-import "./shows/shows.css";
-import "./shows/ShowBuilder.css";
-
-import "./stable/passport.css";
-import "./stable/PhotoUpload.css";
-
-
-import "./add-horse/gallery.css";
-import "./catalog/reference.css";
 import { SimpleModeProvider } from "@/lib/context/SimpleModeContext";
 import { ToastProvider } from "@/lib/context/ToastContext";
 import Header from "@/components/Header";
