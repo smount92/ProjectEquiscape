@@ -11,9 +11,9 @@ import "./competition.css";
 
 // Core UI components
 
-import "@/components/CommentSection.css";
+
 import "@/components/Provenance.css";
-import "@/components/Ratings.css";
+
 
 
 import "@/components/CsvImport.css";

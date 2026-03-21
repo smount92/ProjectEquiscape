@@ -253,7 +253,7 @@ export default async function InboxPage() {
                                     <div className="flex justify-between items-center gap-sm">
                                         <span className={`font-semibold text-sm ${item.unreadCount > 0 ? "text-accent-primary" : "text-text-primary"}`}>@{item.otherAlias}</span>
                                         {item.isRated && (
-                                            <span className="inbox-item-rated">⭐ Rated</span>
+                                            <span className="text-[calc(0.7rem*var(--font-scale))] text-[#F59E0B] ml-xs">⭐ Rated</span>
                                         )}
                                         <span className="text-xs text-text-muted shrink-0">
                                             {timeAgo(item.latestTime)}

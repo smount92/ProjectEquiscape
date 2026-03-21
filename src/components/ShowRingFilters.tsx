@@ -28,7 +28,7 @@ export default function ShowRingFilters({
     };
 
     return (
-        <div className="showring-filters" id="showring-filters">
+        <div className="showring-filters flex items-center gap-sm flex-wrap mb-lg py-sm" id="showring-filters">
             {/* Finish Type Pills */}
             <div className="filter-pill-group">
                 <button

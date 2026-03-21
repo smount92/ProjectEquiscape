@@ -544,22 +544,22 @@ export default async function ProfilePage({
 
       {/* Reviews Section */}
       {ratingSummary.count > 0 && (
-        <div className="reviews-section animate-fade-in-up" id="reviews">
-          <div className="reviews-section-header">
+        <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-border rounded-lg p-lg mt-xl animate-fade-in-up" id="reviews">
+          <div className="flex items-center gap-sm mb-lg [&_h2]:m-0 [&_h2]:text-[calc(1.1rem*var(--font-scale))]">
             <h2>⭐ Reviews ({ratingSummary.count})</h2>
           </div>
           {ratingSummary.ratings.map((r) => (
-            <div key={r.id} className="review-item">
-              <div className="review-item-header">
-                <span className="review-item-author">
+            <div key={r.id} className="py-md border-b border-border last:border-b-0">
+              <div className="flex items-center justify-between mb-xs max-sm:flex-col max-sm:items-start max-sm:gap-xs">
+                <span className="text-[calc(0.85rem*var(--font-scale))] text-text-muted">
                   @{r.reviewerAlias} — {"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}
                 </span>
-                <span className="review-item-date">
+                <span className="text-[calc(0.75rem*var(--font-scale))] text-text-muted opacity-70">
                   {new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               </div>
               {r.reviewText && (
-                <p className="review-item-text">&ldquo;{r.reviewText}&rdquo;</p>
+                <p className="text-[calc(0.9rem*var(--font-scale))] text-text-muted italic mt-xs">&ldquo;{r.reviewText}&rdquo;</p>
               )}
             </div>
           ))}
