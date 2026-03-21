@@ -180,7 +180,7 @@ export default async function InboxPage() {
     return (
         <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
-                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                     <div>
                         <h1>
                             <span className="text-forest">✉️ Inbox</span>
@@ -196,7 +196,7 @@ export default async function InboxPage() {
                     </div>
                     <Link
                         href="/community"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         id="browse-showring"
                     >
                         🏆 Browse Show Ring
@@ -210,7 +210,7 @@ export default async function InboxPage() {
                         <p>Browse the Show Ring and message sellers about models you&apos;re interested in!</p>
                         <Link
                             href="/community"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         >
                             🏆 Browse the Show Ring
                         </Link>

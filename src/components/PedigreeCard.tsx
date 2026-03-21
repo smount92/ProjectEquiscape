@@ -166,13 +166,13 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
     if (!pedigree && isOwner && !isEditing) {
         return (
             <div
-                className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] rounded-lg border border-[var(--color-border,rgba(0,0,0,0.08))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+                className="rounded-lg border border-edge bg-card p-4 shadow-sm transition-all"
                 id="pedigree-card"
             >
                 <div className="text-muted py-4 text-center">
                     <p>No pedigree data yet.</p>
                     <button
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         onClick={() => setIsEditing(true)}
                         id="add-pedigree"
                         style={{ marginTop: "var(--space-sm)" }}
@@ -188,7 +188,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
     if (isEditing) {
         return (
             <div
-                className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] rounded-lg border border-[var(--color-border,rgba(0,0,0,0.08))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+                className="rounded-lg border border-edge bg-card p-4 shadow-sm transition-all"
                 id="pedigree-card"
             >
                 <div className="mb-4 flex items-center justify-between">
@@ -401,14 +401,14 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
                     <div className="mt-6 flex justify-end gap-2">
                         <button
                             type="button"
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={handleCancel}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             disabled={status === "saving"}
                         >
                             {status === "saving" ? "Saving…" : "Save Pedigree"}
@@ -422,7 +422,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
     // Read-only display
     return (
         <div
-            className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] rounded-lg border border-[var(--color-border,rgba(0,0,0,0.08))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+            className="rounded-lg border border-edge bg-card p-4 shadow-sm transition-all"
             id="pedigree-card"
         >
             <div className="mb-4 flex items-center justify-between">
@@ -431,7 +431,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
                 </h3>
                 {isOwner && (
                     <button
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         onClick={() => setIsEditing(true)}
                         style={{
                             fontSize: "calc(0.8rem * var(--font-scale))",

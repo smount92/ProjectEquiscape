@@ -170,7 +170,7 @@ export default function UnifiedReferenceSearch({
                             <MarketValueBadge catalogId={selectedCatalogId} compact />
                         </div>
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] shrink-0 cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={handleClear}
                             aria-label="Clear selection"
                         >
@@ -247,7 +247,7 @@ export default function UnifiedReferenceSearch({
                                     {/* Molds */}
                                     {molds.length > 0 && (
                                         <>
-                                            <div className="ref-group-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                                            <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                                 🏭 Base Molds
                                             </div>
                                             {molds.map((item) => (
@@ -275,7 +275,7 @@ export default function UnifiedReferenceSearch({
                                     {/* Releases */}
                                     {releaseResults.length > 0 && (
                                         <>
-                                            <div className="ref-group-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                                            <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                                 📦 Releases
                                             </div>
                                             {releaseResults.map((item) => (
@@ -305,7 +305,7 @@ export default function UnifiedReferenceSearch({
                                     {/* Resins */}
                                     {resins.length > 0 && (
                                         <>
-                                            <div className="ref-group-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                                            <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                                 🎨 Artist Resins
                                             </div>
                                             {resins.map((item) => (
@@ -342,7 +342,7 @@ export default function UnifiedReferenceSearch({
                                                 for market data, or use the button below.
                                             </p>
                                             <button
-                                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                 onClick={() => {
                                                     setShowSuggestModal(true);
                                                     setShowDropdown(false);
@@ -365,7 +365,7 @@ export default function UnifiedReferenceSearch({
                                     Releases for <strong>{selectedItem.title}</strong>
                                 </span>
                                 <button
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base text-xs leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     onClick={handleClear}
                                 >
                                     ✕ Clear

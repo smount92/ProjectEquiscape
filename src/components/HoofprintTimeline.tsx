@@ -128,7 +128,7 @@ export default function HoofprintTimeline({
                                 <option value="for_sale">💲 For Sale</option>
                             </select>
                             <button
-                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                 onClick={() => setShowForm(!showForm)}
                                 style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}
                             >
@@ -195,7 +195,7 @@ export default function HoofprintTimeline({
                         <span className="text-muted text-xs">📝 Notes appear on the Hoofprint™ timeline</span>
                         <button
                             type="submit"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             disabled={saving}
                             style={{ marginLeft: "auto" }}
                         >
@@ -245,7 +245,7 @@ export default function HoofprintTimeline({
                                     event.userId === currentUserId &&
                                     event.sourceTable === "posts" && (
                                         <button
-                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                             onClick={() => handleDelete(event.id)}
                                             style={{ fontSize: "0.7rem", padding: "2px 6px", opacity: 0.5 }}
                                             title="Delete note"

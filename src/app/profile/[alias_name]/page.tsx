@@ -326,7 +326,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
                     {studioSlug && (
                         <Link
                             href={`/studio/${studioSlug}`}
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             style={{
                                 marginTop: "var(--space-xs)",
                                 display: "inline-flex",
@@ -459,7 +459,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
                     {isOwnProfile && (
                         <Link
                             href="/dashboard"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         >
                             🏠 Go to My Stable
                         </Link>
@@ -474,13 +474,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
                             className="border-edge text-ink flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline transition-all"
                             id={`profile-card-${horse.id}`}
                         >
-                            <div className="border-edge text-ink transition-all-image flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                            <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                 {horse.thumbnailUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                                 ) : (
-                                    <div className="horse-bg-card border-edge transition-all-placeholder rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
-                                        <span className="horse-bg-card border-edge transition-all-placeholder-icon rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                                        <span className="flex items-center justify-center rounded-lg border border-edge bg-card p-12 text-4xl shadow-md">
                                             🐴
                                         </span>
                                         <span>No photo</span>
@@ -506,16 +506,16 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
                                     </span>
                                 )}
                             </div>
-                            <div className="border-edge text-ink transition-all-info flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
-                                <div className="border-edge text-ink transition-all-name flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                            <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
+                                <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                     {horse.customName}
                                 </div>
-                                <div className="border-edge text-ink transition-all-ref flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                                <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                     {horse.refName}
                                 </div>
                                 {horse.releaseLine && (
                                     <div
-                                        className="border-edge text-ink transition-all-ref flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline"
+                                        className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline"
                                         style={{
                                             fontSize: "calc(0.7rem * var(--font-scale))",
                                             opacity: 0.7,
@@ -525,16 +525,16 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
                                         🎨 {horse.releaseLine}
                                     </div>
                                 )}
-                                <div className="border-edge text-ink transition-all-footer flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
-                                    <span className="border-edge text-ink transition-all-ref flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                                <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
+                                    <span className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                         {horse.conditionGrade}
                                     </span>
-                                    <span className="border-edge text-ink transition-all-time flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                                    <span className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                         {formatDate(horse.createdAt)}
                                     </span>
                                 </div>
                                 {horse.collectionName && (
-                                    <div className="horse-bg-card border-edge transition-all-collection rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                         📁 {horse.collectionName}
                                     </div>
                                 )}
@@ -568,7 +568,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
             {/* Reviews Section */}
             {ratingSummary.count > 0 && (
                 <div
-                    className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] border-edge animate-fade-in-up mt-8 rounded-lg border p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+                    className="bg-card border border-edge border-edge animate-fade-in-up mt-8 rounded-lg border p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
                     id="reviews"
                 >
                     <div className="mb-6 flex items-center gap-2 [&_h2]:m-0 [&_h2]:text-[calc(1.1rem*var(--font-scale))]">

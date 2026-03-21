@@ -37,8 +37,8 @@ export default function FeaturedHorseCard({
                         className="h-full w-full bg-black/15 object-contain"
                     />
                 ) : (
-                    <div className="horse-bg-card border-edge transition-all-placeholder rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
-                        <span className="horse-bg-card border-edge transition-all-placeholder-icon rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                        <span className="flex items-center justify-center rounded-lg border border-edge bg-card p-12 text-4xl shadow-md">
                             🐴
                         </span>
                     </div>

@@ -271,7 +271,7 @@ export default function WishlistSearch() {
                                 <div className="text-muted px-4 py-6 text-center text-sm">
                                     <p>No references match &ldquo;{query}&rdquo;</p>
                                     <button
-                                        className="wishlist-search-custom-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                                         onClick={handleCustomAdd}
                                         disabled={adding}
                                     >

@@ -263,7 +263,7 @@ export default function ExpertJudgingPanel({
                                     }}
                                 >
                                     <textarea
-                                        className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                                         value={notes[entry.id] || ""}
                                         onChange={(e) => setNotes((prev) => ({ ...prev, [entry.id]: e.target.value }))}
                                         placeholder="Private judge notes (critique, reasoning)…"

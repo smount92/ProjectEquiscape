@@ -126,7 +126,7 @@ export default function HelpIdDetailClient({
 
                             <div className="flex items-center gap-4">
                                 <button
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-1 gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold tabular-nums no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     onClick={() => handleUpvote(s.id)}
                                     title="Upvote this suggestion"
                                 >
@@ -135,7 +135,7 @@ export default function HelpIdDetailClient({
 
                                 {isOwner && !isResolved && (
                                     <button
-                                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                         onClick={() => handleAccept(s.id)}
                                         style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                                     >
@@ -145,7 +145,7 @@ export default function HelpIdDetailClient({
 
                                 {s.isAccepted && (
                                     <button
-                                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                         onClick={() => handleAddToStable(s.id)}
                                         disabled={addingHorse === s.id}
                                     >
@@ -169,7 +169,7 @@ export default function HelpIdDetailClient({
                 <div className="mt-8">
                     {!showSuggestForm ? (
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={() => setShowSuggestForm(true)}
                             id="add-suggestion-btn"
                         >
@@ -180,7 +180,7 @@ export default function HelpIdDetailClient({
                             <h3 className="mb-4">Your Suggestion</h3>
                             <div className="mb-6">
                                 <textarea
-                                    className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                                     rows={3}
                                     value={suggestText}
                                     onChange={(e) => setSuggestText(e.target.value)}
@@ -190,7 +190,7 @@ export default function HelpIdDetailClient({
                             </div>
                             <div className="gap-4" style={{ display: "flex" }}>
                                 <button
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     onClick={() => {
                                         setShowSuggestForm(false);
                                         setSuggestText("");
@@ -199,7 +199,7 @@ export default function HelpIdDetailClient({
                                     Cancel
                                 </button>
                                 <button
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                     onClick={handleSuggest}
                                     disabled={submitting || !suggestText.trim()}
                                 >
@@ -220,7 +220,7 @@ export default function HelpIdDetailClient({
             {isOwner && (
                 <div className="mt-8" style={{ textAlign: "right" }}>
                     <button
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         style={{ color: "red" }}
                         onClick={async () => {
                             if (confirm("Delete this Help ID request? This cannot be undone.")) {

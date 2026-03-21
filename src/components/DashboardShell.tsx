@@ -146,7 +146,7 @@ export default function DashboardShell({
             {selectMode && horseCards.length > 0 && (
                 <div className="bg-parchment-dark mb-4 flex items-center gap-4 rounded-md px-3 py-1.5">
                     <button
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         onClick={selectAll}
                     >
                         Select All ({horseCards.length})
@@ -218,7 +218,7 @@ export default function DashboardShell({
 
                         {/* Delete */}
                         <button
-                            className="hover:no-underline-min-h)] inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] bg-[rgb(239,68,68)] px-6 px-8 px-[14px] py-1 py-2 py-[6px] font-[inherit] font-sans text-base text-sm leading-none font-semibold text-white no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                             onClick={() => setShowDeleteConfirm(true)}
                             disabled={isProcessing}
                         >
@@ -227,7 +227,7 @@ export default function DashboardShell({
                     </div>
 
                     <button
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         onClick={clearSelection}
                     >
                         Cancel
@@ -248,13 +248,13 @@ export default function DashboardShell({
                             </p>
                             <div className="justify-end gap-4" style={{ display: "flex" }}>
                                 <button
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     onClick={() => setShowDeleteConfirm(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className="hover:no-underline-min-h)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] bg-[rgb(239,68,68)] px-8 px-[14px] py-2 py-[6px] font-[inherit] font-sans text-base text-sm leading-none font-semibold text-white no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                                     onClick={handleBulkDelete}
                                     disabled={isProcessing}
                                 >

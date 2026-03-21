@@ -23,7 +23,7 @@ export default async function ImportPage() {
     return (
         <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
-                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                     <div>
                         <h1>
                             <span className="text-forest">Batch Import</span>
@@ -32,7 +32,7 @@ export default async function ImportPage() {
                     </div>
                     <Link
                         href="/dashboard"
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     >
                         ← Back to Stable
                     </Link>

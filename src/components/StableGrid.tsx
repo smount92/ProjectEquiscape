@@ -140,7 +140,7 @@ export default function StableGrid({
                     <p>You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
                     <Link
                         href="/add-horse"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         id="add-first-horse"
                     >
                         🐴 Add Your First Horse
@@ -177,8 +177,8 @@ export default function StableGrid({
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                                     ) : (
-                                        <div className="horse-bg-card border-edge transition-all-placeholder rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
-                                            <span className="horse-bg-card border-edge transition-all-placeholder-icon rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                        <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                                            <span className="flex items-center justify-center rounded-lg border border-edge bg-card p-12 text-4xl shadow-md">
                                                 🐴
                                             </span>
                                             <span>No photo</span>
@@ -190,7 +190,7 @@ export default function StableGrid({
                                         </span>
                                     )}
                                     {horse.assetCategory && horse.assetCategory !== "model" && (
-                                        <span className="horse-bg-card border-edge transition-all-badge category-badge rounded-lg border bg-[rgba(124,109,240,0.85)] p-12 text-white shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                        <span className="absolute top-2 right-2 rounded-md bg-[rgba(124,109,240,0.15)] px-2 py-0.5 text-xs font-bold p-12 text-white shadow-md max-[480px]:rounded-[var(--radius-md)]">
                                             {horse.assetCategory === "tack"
                                                 ? "🏇 Tack"
                                                 : horse.assetCategory === "prop"
@@ -210,7 +210,7 @@ export default function StableGrid({
                                     )}
                                 </div>
                                 <div className="px-6 py-4">
-                                    <div className="horse-bg-card border-edge transition-all-name rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                         {horse.customName}
                                     </div>
                                     <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
@@ -231,7 +231,7 @@ export default function StableGrid({
                                         <span>{formatDate(horse.createdAt)}</span>
                                     </div>
                                     {horse.collectionName && (
-                                        <div className="horse-bg-card border-edge transition-all-collection rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                        <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                             📁 {horse.collectionName}
                                         </div>
                                     )}

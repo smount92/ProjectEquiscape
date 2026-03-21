@@ -49,7 +49,7 @@ export default function ReportButton({
     if (!showForm) {
         return (
             <button
-                className="hover:no-underline-min-h)] leading-none-ghost inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                 onClick={() => setShowForm(true)}
                 style={{
                     fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
@@ -82,7 +82,7 @@ export default function ReportButton({
                 ))}
             </select>
             <textarea
-                className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                 placeholder="Additional details (optional)"
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
@@ -93,14 +93,14 @@ export default function ReportButton({
             {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
             <div className="gap-1" style={{ display: "flex" }}>
                 <button
-                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                     onClick={handleSubmit}
                     disabled={saving || !reason}
                 >
                     {saving ? "…" : "Submit Report"}
                 </button>
                 <button
-                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     onClick={() => setShowForm(false)}
                 >
                     Cancel

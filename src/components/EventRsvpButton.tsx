@@ -38,7 +38,7 @@ export default function EventRsvpButton({ eventId, currentStatus }: Props) {
             </button>
             {currentStatus && currentStatus !== "not_going" && (
                 <button
-                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     onClick={() => handleRsvp("not_going")}
                     disabled={saving}
                 >

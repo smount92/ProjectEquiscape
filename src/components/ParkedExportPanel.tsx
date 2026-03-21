@@ -102,7 +102,7 @@ export default function ParkedExportPanel({
     if (!isOpen) {
         return (
             <button
-                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                 onClick={() => setIsOpen(true)}
                 id="park-export-btn"
                 title="Sell off-platform with a Certificate of Authenticity"
@@ -117,7 +117,7 @@ export default function ParkedExportPanel({
             <div className="mb-6 justify-between" style={{ display: "flex", alignItems: "center" }}>
                 <h3>{isParked ? "🔒 Horse is Parked" : "📤 Sell Off-Platform"}</h3>
                 <button
-                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base text-[1.2rem] leading-none font-semibold no-underline transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     onClick={() => setIsOpen(false)}
                 >
                     ✕
@@ -139,7 +139,7 @@ export default function ParkedExportPanel({
                         <li>4. They scan the QR or enter the PIN to claim the horse on MHH</li>
                     </ul>
                     <button
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         onClick={handlePark}
                         disabled={status === "parking"}
                         id="park-horse-btn"
@@ -169,7 +169,7 @@ export default function ParkedExportPanel({
                         <span className="text-muted text-sm font-semibold">Claim PIN</span>
                         <span className="parked-export-pin">{pin}</span>
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={handleCopyPin}
                             style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                         >
@@ -199,7 +199,7 @@ export default function ParkedExportPanel({
                     {/* Actions */}
                     <div className="flex flex-col gap-2">
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={handleDownloadCoA}
                             disabled={status === "downloading"}
                             id="download-coa-btn"
@@ -213,7 +213,7 @@ export default function ParkedExportPanel({
                             )}
                         </button>
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={handleUnpark}
                             disabled={status === "unparking"}
                             id="unpark-btn"

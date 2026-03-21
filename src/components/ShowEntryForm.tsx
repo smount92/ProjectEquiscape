@@ -208,14 +208,14 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                           )}
                           <div className="mt-6 flex flex-wrap justify-center gap-2">
                               <button
-                                  className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                   onClick={() => handleSubmit()}
                                   disabled={status === "submitting"}
                               >
                                   {status === "submitting" ? "Entering…" : "✅ Looks Good — Submit Entry"}
                               </button>
                               <button
-                                  className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                   onClick={() => setShowPreview(false)}
                               >
                                   ← Choose Different Photo
@@ -403,7 +403,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                 </label>
                                 <textarea
                                     id="entry-caption"
-                                    className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                                     value={caption}
                                     onChange={(e) => setCaption(e.target.value)}
                                     maxLength={280}
@@ -425,7 +425,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                             <div className="mt-2 gap-2" style={{ display: "flex", flexWrap: "wrap" }}>
                                 <button
                                     type="submit"
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                     disabled={!selectedHorse || status === "submitting"}
                                 >
                                     {status === "submitting" ? "Entering…" : "🐴 Enter Show"}
@@ -433,7 +433,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                 {canPreview && (
                                     <button
                                         type="button"
-                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                         onClick={() => setShowPreview(true)}
                                     >
                                         👁 Preview
@@ -454,7 +454,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                 {!selectedHorse && (
                     <button
                         type="submit"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         disabled={true}
                     >
                         🐴 Enter Show

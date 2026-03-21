@@ -49,13 +49,13 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
 
     return (
         <div
-            className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] border-edge mt-4 rounded-lg border p-12 px-6 py-4 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+            className="bg-card border border-edge border-edge mt-4 rounded-lg border p-12 px-6 py-4 shadow-md max-[480px]:rounded-[var(--radius-md)]"
             id="transaction-status"
         >
             <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
                 <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Transaction is open</span>
                 <button
-                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                     onClick={handleComplete}
                     disabled={saving}
                 >

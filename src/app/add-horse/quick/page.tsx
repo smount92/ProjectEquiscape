@@ -121,7 +121,7 @@ export default function QuickAddPage() {
                     </h1>
                     <Link
                         href="/dashboard"
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     >
                         ← Back
                     </Link>
@@ -227,7 +227,7 @@ export default function QuickAddPage() {
                     {/* Action Buttons */}
                     <div className="flex flex-wrap items-center gap-4">
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={handleAdd}
                             disabled={isAdding || (!selectedCatalog && !customName.trim())}
                             id="quick-add-submit"
@@ -236,7 +236,7 @@ export default function QuickAddPage() {
                         </button>
                         {selectedCatalog && recentAdds.length > 0 && (
                             <button
-                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                 onClick={handleDuplicate}
                                 id="quick-duplicate"
                             >
@@ -269,7 +269,7 @@ export default function QuickAddPage() {
                                 </span>
                                 <Link
                                     href={`/stable/${item.id}`}
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     style={{
                                         padding: "2px 8px",
                                         fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
@@ -280,7 +280,7 @@ export default function QuickAddPage() {
                             </div>
                         ))}
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={() => router.push("/dashboard")}
                             style={{ marginTop: "var(--space-sm)", width: "100%" }}
                         >

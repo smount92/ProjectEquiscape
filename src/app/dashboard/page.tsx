@@ -262,7 +262,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                         </div>
                         <Link
                             href="/add-horse"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[52px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-lg rounded-md border border-0 border-[transparent] px-8 px-12 py-2 py-4 font-sans text-base text-[calc(var(--font-size-md)*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                         >
                             <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
                         </Link>
@@ -270,7 +270,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                 )}
 
                 {/* Shelf Header — FULL WIDTH */}
-                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex flex-wrap items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                     <div>
                         <h1>
                             <span className="text-forest">Digital Stable</span>
@@ -298,21 +298,21 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                         {totalHorseCount > 0 && <InsuranceReportButton />}
                         <Link
                             href="/stable/import"
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             id="batch-import-button"
                         >
                             <FileText size={16} strokeWidth={1.5} /> Batch Import
                         </Link>
                         <Link
                             href="/add-horse/quick"
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             id="quick-add-button"
                         >
                             <Zap size={16} strokeWidth={1.5} /> Quick Add
                         </Link>
                         <Link
                             href="/add-horse"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             id="add-horse-button"
                         >
                             <Plus size={16} strokeWidth={1.5} /> Add to Stable
@@ -342,13 +342,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                                 {page > 1 ? (
                                     <Link
                                         href={`/dashboard?page=${page - 1}`}
-                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     >
                                         ← Previous
                                     </Link>
                                 ) : (
                                     <button
-                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                         disabled
                                     >
                                         ← Previous
@@ -360,13 +360,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                                 {page < totalPages ? (
                                     <Link
                                         href={`/dashboard?page=${page + 1}`}
-                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     >
                                         Next →
                                     </Link>
                                 ) : (
                                     <button
-                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                         disabled
                                     >
                                         Next →
@@ -377,7 +377,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     </main>
 
                     {/* ── SIDEBAR: Widgets ── */}
-                    <aside className="lg:top-[calc(var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height,64px)+var(--space-lg))] lg:scrollbar-thin top-0 z-[100] flex flex-col items-center justify-between gap-6 border-b px-8 py-[0] max-lg:mt-6 max-sm:py-[0] lg:sticky lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto">
+                    <aside className="lg:top-[calc(var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
                             <div className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">

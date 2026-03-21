@@ -135,7 +135,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
             {/* Create New */}
             {!creating ? (
                 <button
-                    className="hover:no-underline-min-h)] bg-forest text-inverse mb-6 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                     onClick={() => setCreating(true)}
                 >
                     + New Show String
@@ -165,14 +165,14 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                     </div>
                     <div className="mt-4 gap-2" style={{ display: "flex" }}>
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={handleCreate}
                             disabled={saving}
                         >
                             {saving ? "Creating..." : "Create"}
                         </button>
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={() => setCreating(false)}
                         >
                             Cancel
@@ -209,11 +209,11 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                     )}
                                 </div>
                                 <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
-                                    <span className="bg-card text-muted transition-all-badge flex cursor-pointer items-center gap-1 rounded-md border border-[transparent] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] whitespace-nowrap max-[480px]:rounded-[var(--radius-md)]">
+                                    <span className="flex cursor-pointer items-center gap-1 rounded-md border border-edge bg-card px-2 py-1 text-xs text-muted transition-all">
                                         {ss.entryCount}
                                     </span>
                                     <button
-                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                         onClick={async (e) => {
                                             e.stopPropagation();
                                             setSaving(true);
@@ -227,7 +227,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                         📋
                                     </button>
                                     <button
-                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             handleDeleteString(ss.id);
@@ -311,7 +311,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                 </span>
                                                             )}
                                                             <button
-                                                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                                 onClick={() => handleRemoveEntry(entry.id)}
                                                                 title="Remove"
                                                             >
@@ -384,7 +384,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                     </div>
                                                 </div>
                                                 <button
-                                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                                     onClick={handleAddEntry}
                                                     disabled={saving || !entryHorseId || !entryClassName.trim()}
                                                 >
@@ -400,7 +400,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                 >
                                                     {!showResults ? (
                                                         <button
-                                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                             onClick={() => {
                                                                 setShowResults(true);
                                                                 setResultsSaved(false);
@@ -561,7 +561,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
                                                             <div className="mt-4 gap-2" style={{ display: "flex" }}>
                                                                 <button
-                                                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                                                     disabled={savingResults}
                                                                     onClick={async () => {
                                                                         setSavingResults(true);
@@ -598,7 +598,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                         : `💾 Save ${Object.values(results).filter((r) => r.placing || r.ribbon).length} Results`}
                                                                 </button>
                                                                 <button
-                                                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                                     onClick={() => setShowResults(false)}
                                                                 >
                                                                     Cancel

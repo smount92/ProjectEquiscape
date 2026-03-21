@@ -146,7 +146,7 @@ export default async function WishlistPage() {
         <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
                 {/* Header */}
-                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                     <div>
                         <h1>
                             <span className="text-forest">❤️ My Wishlist</span>
@@ -154,7 +154,7 @@ export default async function WishlistPage() {
                         <p className="text-muted mt-1">
                             Models you&apos;re hunting for — {items.length} item{items.length !== 1 ? "s" : ""}
                             {totalMatches > 0 && (
-                                <span className="matchmaker-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-badge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] max-sm:py-[0]">
+                                <span className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                     🔥 {totalMatches} marketplace match{totalMatches !== 1 ? "es" : ""} found!
                                 </span>
                             )}
@@ -162,7 +162,7 @@ export default async function WishlistPage() {
                     </div>
                     <Link
                         href="/community"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         id="browse-showring"
                     >
                         🏆 Browse Show Ring
@@ -180,7 +180,7 @@ export default async function WishlistPage() {
                         <p>Browse the Show Ring and tap the heart icon on models you love to start your hunt!</p>
                         <Link
                             href="/community"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         >
                             🏆 Browse the Show Ring
                         </Link>

@@ -283,7 +283,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
             {totalPages > 1 && (
                 <div className="mt-6 flex items-center justify-center gap-4 px-[0] py-4">
                     <button
-                        className="hover:no-underline-min-h)] btn max-md:min-h-[44px]-secondary btn-small inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                         disabled={page <= 1}
                         onClick={() => handlePage(page - 1)}
                     >
@@ -293,7 +293,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                         Page {page} of {totalPages}
                     </span>
                     <button
-                        className="hover:no-underline-min-h)] btn max-md:min-h-[44px]-secondary btn-small inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                         disabled={page >= totalPages}
                         onClick={() => handlePage(page + 1)}
                     >

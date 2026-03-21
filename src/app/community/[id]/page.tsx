@@ -746,7 +746,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
                             {isOwnHorse && (
                                 <Link
                                     href={`/stable/${horse.id}`}
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                 >
                                     🔒 My Passport
                                 </Link>
@@ -754,7 +754,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
                         </div>
                         <Link
                             href={`/community/${horseId}/hoofprint`}
-                            className="hover:no-underline-min-h)] text-ink-light border-edge border-[rgba(0, 0, 0, 0.08)] pt-[var(--space-sm) !important] mt-1 inline-flex min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-[0] rounded-md border border-t border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         >
                             🐾 View Hoofprint
                         </Link>

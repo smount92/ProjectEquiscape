@@ -54,7 +54,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
     return createPortal(
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content max-w-[420px] max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                     <h3>💰 Make an Offer</h3>
                     <button
                         className="text-muted cursor-pointer rounded-md border-0 bg-transparent p-1 text-[1.2rem] transition-all duration-150"
@@ -99,7 +99,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Tell the seller about your interest…"
-                            className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                             rows={3}
                             maxLength={500}
                         />
@@ -123,10 +123,10 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
 
                     {error && <div className="comment-error">{error}</div>}
 
-                    <div className="max-sm:[&_.inline-flex hover:no-underline-min-h)] leading-none]:w-full mt-6 flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center justify-end gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 max-sm:flex-col">
+                    <div className="mt-6 flex gap-3 max-sm:flex-col">
                         <button
                             type="button"
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={onClose}
                             disabled={saving}
                         >
@@ -134,7 +134,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
                         </button>
                         <button
                             type="submit"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             disabled={saving}
                         >
                             {saving ? "Submitting…" : "Submit Offer"}

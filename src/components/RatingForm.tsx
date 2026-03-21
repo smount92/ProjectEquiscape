@@ -91,7 +91,7 @@ export default function RatingForm({
                         <p className="text-muted mt-4 text-sm italic">&ldquo;{rating.reviewText}&rdquo;</p>
                     )}
                     <button
-                        className="hover:no-underline-min-h)] text-ink-light border-edge text-muted mt-4 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base text-xs leading-none font-semibold no-underline transition-all duration-150 hover:text-[#e74c6f]"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         onClick={handleRetract}
                         disabled={status === "retracting"}
                     >
@@ -164,7 +164,7 @@ export default function RatingForm({
                 <div className="show-record-form-actions">
                     <button
                         type="submit"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         disabled={stars === 0 || status === "saving"}
                     >
                         {status === "saving" ? "Submitting…" : "Submit Rating"}

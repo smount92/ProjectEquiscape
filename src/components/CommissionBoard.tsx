@@ -55,7 +55,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                         >
                             {tab.label}
                             {count > 0 && (
-                                <span className="bg-card text-muted transition-all-badge flex cursor-pointer items-center gap-1 rounded-md border border-[transparent] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] whitespace-nowrap max-[480px]:rounded-[var(--radius-md)]">
+                                <span className="flex cursor-pointer items-center gap-1 rounded-md border border-edge bg-card px-2 py-1 text-xs text-muted transition-all">
                                     {count}
                                 </span>
                             )}
@@ -116,7 +116,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                 <div className="gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
                                     <Link
                                         href={`/studio/commission/${c.id}`}
-                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                         style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                     >
                                         View
@@ -126,7 +126,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     {c.status === "requested" && (
                                         <>
                                             <button
-                                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                                 style={{
                                                     fontSize: "calc(0.7rem * var(--font-scale))",
                                                     padding: "4px 8px",
@@ -137,7 +137,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                                 ✅ Accept
                                             </button>
                                             <button
-                                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                 style={{
                                                     fontSize: "calc(0.7rem * var(--font-scale))",
                                                     padding: "4px 8px",
@@ -152,7 +152,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "accepted" && (
                                         <button
-                                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "in_progress")}
                                             disabled={acting === c.id}
@@ -162,7 +162,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "in_progress" && (
                                         <button
-                                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "review")}
                                             disabled={acting === c.id}
@@ -172,7 +172,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "review" && (
                                         <button
-                                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "completed")}
                                             disabled={acting === c.id}
@@ -182,7 +182,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "completed" && (
                                         <button
-                                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "delivered")}
                                             disabled={acting === c.id}
@@ -192,7 +192,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                                     )}
                                     {c.status === "revision" && (
                                         <button
-                                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                             style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "4px 8px" }}
                                             onClick={() => handleStatusChange(c.id, "in_progress")}
                                             disabled={acting === c.id}

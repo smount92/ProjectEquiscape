@@ -105,7 +105,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
     return (
         <div
-            className="show-record-timeline bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] rounded-lg border border-[var(--color-border,rgba(0,0,0,0.08))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+            className="show-record-timeline rounded-lg border border-edge bg-card p-4 shadow-sm transition-all"
             id="show-records"
         >
             <div className="mb-6 flex items-center justify-between">
@@ -115,7 +115,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
                 </h3>
                 {isOwner && (
                     <button
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-4 px-8 py-1 py-2 font-sans text-base text-[calc(0.8rem*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         onClick={handleAdd}
                         id="add-show-record"
                     >

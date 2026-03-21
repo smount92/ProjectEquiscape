@@ -113,7 +113,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
         return (
             <span className="inline-flex gap-1" style={{ alignItems: "center" }}>
                 <button
-                    className="admin-mark-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                     style={{
                         background: "rgba(239, 68, 68, 0.15)",
                         borderColor: "rgba(239, 68, 68, 0.4)",
@@ -125,7 +125,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
                     {deleting ? "…" : "Confirm"}
                 </button>
                 <button
-                    className="admin-mark-inline-flex hover:no-underline-min-h)] bg-[rgba(0, 0, 0, 0.05)] border-edge text-muted min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                     onClick={() => setConfirming(false)}
                     disabled={deleting}
                 >
@@ -137,7 +137,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
 
     return (
         <button
-            className="admin-mark-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
             style={{ background: "rgba(239, 68, 68, 0.08)", borderColor: "rgba(239, 68, 68, 0.2)", color: "#ef4444" }}
             onClick={() => setConfirming(true)}
             title="Delete this message"
@@ -246,34 +246,34 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
                     key={msg.id}
                     className={`admin-message ${msg.is_read ? "admin-message-read" : "admin-message-unread"}`}
                 >
-                    <div className="bg-glass border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b px-6 px-8 py-4 py-[0] transition-all max-sm:py-[0]">
-                        <div className="bg-glass border-edge transition-all-sender rounded-lg border px-6 py-4">
-                            <span className="bg-glass border-edge transition-all-name rounded-lg border px-6 py-4">
+                    <div className="bg-glass border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
+                        <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+                            <span className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
                                 {msg.name}
                             </span>
                             <a
                                 href={`mailto:${msg.email}`}
-                                className="bg-glass border-edge transition-all-email rounded-lg border px-6 py-4"
+                                className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all"
                             >
                                 {msg.email}
                             </a>
                         </div>
-                        <div className="bg-glass border-edge transition-all-actions rounded-lg border px-6 py-4">
-                            <span className="bg-glass border-edge transition-all-date rounded-lg border px-6 py-4">
+                        <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+                            <span className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
                                 {formatDate(msg.created_at)}
                             </span>
                         </div>
                     </div>
                     {msg.subject && (
-                        <div className="bg-glass border-edge transition-all-subject rounded-lg border px-6 py-4">
+                        <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
                             {!msg.is_read && <span className="bg-forest h-[8px] w-[8px] shrink-0 rounded-full" />}
                             {msg.subject}
                         </div>
                     )}
-                    <div className="bg-glass border-edge transition-all-body rounded-lg border px-6 py-4">
+                    <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
                         {msg.message}
                     </div>
-                    <div className="bg-glass border-edge transition-all-footer rounded-lg border px-6 py-4">
+                    <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
                         <AdminReplyForm
                             messageId={msg.id}
                             recipientEmail={msg.email}

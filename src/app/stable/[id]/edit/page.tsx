@@ -603,7 +603,7 @@ export default function EditHorsePage() {
                     style={{ textAlign: "center" }}
                 >
                     <div
-                        className="hover:no-underline-min-h)] leading-none-spinner m-[0 auto var(--space-lg)] inline-flex h-[36] min-h-[var(--opacity-[0.5] w-[36] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[3] border-[transparent] border-[var(--color-border)] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                         style={{ borderTopColor: "var(--color-accent-primary)" }}
                     />
                     <p>Loading horse details…</p>
@@ -621,7 +621,7 @@ export default function EditHorsePage() {
                     <p>{error}</p>
                     <Link
                         href="/dashboard"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                     >
                         Back to Stable
                     </Link>
@@ -672,7 +672,7 @@ export default function EditHorsePage() {
 
                 {/* ===== Photo Studio ===== */}
                 <div className="bg-bg-card border-edge border-edge mb-8 rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="bg-bg-card border-edge border-edge mb-8-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                    <div className="bg-bg-card border-edge border-edge mb-8sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                         <div className="bg-bg-card border-edge border-edge mb-8-icon rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                             📸
                         </div>
@@ -956,7 +956,7 @@ export default function EditHorsePage() {
 
                 {/* ===== Section 1: Identity ===== */}
                 <div className="bg-bg-card border-edge border-edge mb-8 rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="bg-bg-card border-edge border-edge mb-8-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                    <div className="bg-bg-card border-edge border-edge mb-8sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                         <div className="bg-bg-card border-edge border-edge mb-8-icon rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                             🏷️
                         </div>
@@ -1059,7 +1059,7 @@ export default function EditHorsePage() {
                     <div className="mb-6">
                         <label className="text-ink mb-1 block text-sm font-semibold">Public Notes</label>
                         <textarea
-                            className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                             value={publicNotes}
                             onChange={(e) => setPublicNotes(e.target.value)}
                             placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
@@ -1192,7 +1192,7 @@ export default function EditHorsePage() {
                                             📝 Condition changed: {originalCondition} → {conditionGrade}
                                         </div>
                                         <textarea
-                                            className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                                             rows={2}
                                             maxLength={300}
                                             placeholder="What happened? (optional — visible on Hoofprint™)"
@@ -1301,7 +1301,7 @@ export default function EditHorsePage() {
                                 </label>
                                 <textarea
                                     id="edit-marketplace-notes"
-                                    className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                                     rows={3}
                                     maxLength={500}
                                     placeholder="e.g. Will ship anywhere, Trades welcome..."
@@ -1358,7 +1358,7 @@ export default function EditHorsePage() {
 
                 {/* ===== Section 2: Reference Link (Unified Search) ===== */}
                 <div className="bg-bg-card border-edge border-edge mb-8 rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="bg-bg-card border-edge border-edge mb-8-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                    <div className="bg-bg-card border-edge border-edge mb-8sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                         <div className="bg-bg-card border-edge border-edge mb-8-icon rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                             🔗
                         </div>
@@ -1486,13 +1486,13 @@ export default function EditHorsePage() {
                 <div className="flex justify-end gap-4">
                     <Link
                         href={`/stable/${horseId}`}
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         id="edit-cancel"
                     >
                         Cancel
                     </Link>
                     <button
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         onClick={handleSave}
                         disabled={isSaving || !customName.trim() || !finishType || !conditionGrade}
                         id="edit-save"
@@ -1500,7 +1500,7 @@ export default function EditHorsePage() {
                         {isSaving ? (
                             <>
                                 <span
-                                    className="hover:no-underline-min-h)] leading-none-spinner inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                                     aria-hidden="true"
                                 />
                                 {Object.keys(newFiles).length > 0 ? "Uploading…" : "Saving…"}

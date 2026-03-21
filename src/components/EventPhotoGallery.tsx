@@ -108,7 +108,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
             <div className="mb-4 justify-between" style={{ display: "flex", alignItems: "center" }}>
                 <h3>📸 Event Photos ({photos.length})</h3>
                 <label
-                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                     style={{ cursor: "pointer" }}
                 >
                     {uploading ? "Uploading…" : "+ Add Photo"}
@@ -138,7 +138,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
                                 <button
                                     onClick={() => handleDelete(p.id)}
                                     disabled={isPending}
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     style={{
                                         position: "absolute",
                                         top: 4,

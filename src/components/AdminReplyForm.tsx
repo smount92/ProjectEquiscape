@@ -54,7 +54,7 @@ export default function AdminReplyForm({
     if (!isOpen) {
         return (
             <button
-                className="admin-reply-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                 onClick={() => setIsOpen(true)}
             >
                 <svg
@@ -123,7 +123,7 @@ export default function AdminReplyForm({
                     {sending ? (
                         <>
                             <span
-                                className="hover:no-underline-min-h)] leading-none-spinner inline-flex h-[12] min-h-[var(--opacity-[0.5] w-[12] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                                 aria-hidden="true"
                             />
                             Sending…

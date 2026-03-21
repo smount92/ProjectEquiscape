@@ -389,7 +389,7 @@ export default function CsvImport() {
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <div className="mb-4 text-[3rem] opacity-[0.7]">📁</div>
-                        <p className="border-edge bg-card transition-all-text flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-[var(--space-3xl)] text-center max-[480px]:rounded-[var(--radius-md)]">
+                        <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-edge bg-card p-8 text-center transition-all">
                             Drag &amp; drop your CSV file here
                             <br />
                             <span className="text-forest text-sm underline">or click to browse</span>
@@ -414,7 +414,7 @@ export default function CsvImport() {
                         <a
                             href="/templates/mhh_import_template.csv"
                             download
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         >
                             📥 Download CSV Template
                         </a>
@@ -486,13 +486,13 @@ export default function CsvImport() {
 
                     <div className="border-edge flex items-center justify-between gap-4 border-t pt-6">
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={() => setStep(1)}
                         >
                             ← Back
                         </button>
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={proceedToMatch}
                             disabled={isMatching || !Object.values(columnMapping).some((v) => v === "name")}
                             id="proceed-to-match-btn"
@@ -545,7 +545,7 @@ export default function CsvImport() {
                                 className={`csv-match-card ${result.status}`}
                                 id={`match-row-${result.rowIndex}`}
                             >
-                                <div className="bg-bg-card border-edge border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg rounded-md border border-b border-l-[4px] p-6 p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                                <div className="bg-bg-card border-edge border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                     <span className="shrink-0 text-xl">
                                         {result.status === "perfect" ? "✅" : result.status === "review" ? "⚠️" : "❌"}
                                     </span>
@@ -622,7 +622,7 @@ export default function CsvImport() {
 
                     <div className="border-edge flex items-center justify-between gap-4 border-t pt-6">
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={() => setStep(2)}
                         >
                             ← Back
@@ -643,7 +643,7 @@ export default function CsvImport() {
                                 Models without photos will be excluded regardless.
                             </span>
                             <button
-                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                 onClick={handleImport}
                                 disabled={isImporting}
                                 id="import-btn"
@@ -675,12 +675,12 @@ export default function CsvImport() {
                             <div className="flex flex-wrap justify-center gap-4">
                                 <a
                                     href="/dashboard"
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[52px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-lg rounded-md border border-0 border-[transparent] px-8 px-12 py-2 py-4 font-sans text-base text-[calc(var(--font-size-md)*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                                 >
                                     🐴 View Your Stable
                                 </a>
                                 <button
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     onClick={() => {
                                         setStep(1);
                                         setCsvData([]);
@@ -700,7 +700,7 @@ export default function CsvImport() {
                             <h2>Import Failed</h2>
                             <p>{importResult?.error || "An unexpected error occurred."}</p>
                             <button
-                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                 onClick={() => setStep(3)}
                             >
                                 ← Back to Review

@@ -161,7 +161,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
                 )}
                 <button
                     type="button"
-                    className="hover:no-underline-min-h)] text-ink-light border-edge p-[var(--space-sm) var(--space-md) !important] hover:border-[var(--color-accent-primary) hover:!important] hover:text-[var(--color-accent-primary) hover:!important] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-[transparent] border-[var(--color-border)!important] bg-transparent px-8 py-2 font-sans text-base text-[calc(var(--font-size-sm)*var(--font-scale))!important] leading-none font-semibold whitespace-nowrap no-underline transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     onClick={() => setShowModal(true)}
                     aria-label="Create new collection"
                     id="create-collection-btn"
@@ -186,7 +186,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
                             aria-modal="true"
                             aria-label="Create new collection"
                         >
-                            <div className="modal-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                            <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                 <h3>📁 New Collection</h3>
                                 <button
                                     type="button"
@@ -259,14 +259,14 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
                             <div className="flex gap-4">
                                 <button
                                     type="button"
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     onClick={() => setShowModal(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                     onClick={handleCreate}
                                     disabled={creating || !newName.trim()}
                                 >

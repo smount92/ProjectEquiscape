@@ -90,11 +90,11 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
                             className="discover-bg-card border-edge rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                             style={{ textDecoration: "none" }}
                         >
-                            <div className="discover-bg-card border-edge transition-all-info rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
-                                <div className="discover-bg-card border-edge transition-all-alias rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                            <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                                <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                     {STATUS_EMOJI[a.status]} {a.studioName}
                                 </div>
-                                <div className="discover-bg-card border-edge transition-all-stats rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                     <span>🎨 @{a.ownerAlias}</span>
                                     {a.priceRangeMin != null && (
                                         <span>

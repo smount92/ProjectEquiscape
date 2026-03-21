@@ -374,7 +374,7 @@ export default function ManageEventPage() {
                     style={{ textAlign: "center" }}
                 >
                     <div
-                        className="hover:no-underline-min-h)] leading-none-spinner m-[0 auto var(--space-md)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                         style={{ borderTopColor: "var(--color-accent-primary)" }}
                     />
                     <p>Loading event…</p>
@@ -393,7 +393,7 @@ export default function ManageEventPage() {
                     <p className="text-danger">{error}</p>
                     <Link
                         href="/community/events"
-                        className="hover:no-underline-min-h)] text-ink-light border-edge mt-4 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     >
                         ← Back to Events
                     </Link>
@@ -424,7 +424,7 @@ export default function ManageEventPage() {
                         <p className="text-ink-light">{eventName}</p>
                     </div>
                     <div className="gap-2" style={{ display: "flex" }}>
-                        <span className="horse-bg-card border-edge transition-all-badge text-forest rounded-lg border bg-[var(--color-accent-primary-glow)] p-12 font-semibold shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                        <span className="rounded-md bg-[var(--color-accent-primary)] px-2 py-0.5 text-xs font-bold text-forest">
                             {divisions.length} Division{divisions.length !== 1 ? "s" : ""} · {totalClasses} Class
                             {totalClasses !== 1 ? "es" : ""} · {totalEntries} Entr{totalEntries !== 1 ? "ies" : "y"}
                         </span>
@@ -679,7 +679,7 @@ export default function ManageEventPage() {
 
                             <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
                                 <button
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                     onClick={handleSaveDetails}
                                     disabled={isSaving || !eventData.name.trim()}
                                 >
@@ -735,14 +735,14 @@ export default function ManageEventPage() {
                                                     placeholder="Division name"
                                                 />
                                                 <button
-                                                    className="hover:no-underline-min-h)] bg-forest text-inverse p-[var(--space-xs) var(--space-md)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                                     onClick={() => handleSaveDivision(div.id)}
                                                     disabled={isSaving}
                                                 >
                                                     Save
                                                 </button>
                                                 <button
-                                                    className="hover:no-underline-min-h)] text-ink-light border-edge p-[var(--space-xs) var(--space-md)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                     onClick={() => setEditingDivision(null)}
                                                 >
                                                     Cancel
@@ -768,14 +768,14 @@ export default function ManageEventPage() {
                                                         ✏️
                                                     </button>
                                                     <button
-                                                        className="action-inline-flex hover:no-underline-min-h)] hover:bg-[var(--color-surface-glass-hover)]-danger min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md rounded-sm border border-0 border-[transparent] bg-transparent p-[4px] px-8 py-2 font-sans text-base text-[0.9rem] leading-none font-semibold no-underline transition-all transition-colors duration-150"
+                                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-red-300 bg-transparent px-6 py-2 text-sm font-semibold text-red-600 no-underline transition-all hover:bg-red-50"
                                                         onClick={() => handleDeleteDivision(div.id, div.name)}
                                                         title="Delete"
                                                     >
                                                         🗑️
                                                     </button>
                                                     <button
-                                                        className="hover:no-underline-min-h)] text-ink-light border-edge p-[var(--space-xs) var(--space-sm)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base text-xs leading-none font-semibold no-underline transition-all duration-150"
+                                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                         onClick={() => {
                                                             setAddingClassToDivision(div.id);
                                                             setNewClassName("");
@@ -829,14 +829,14 @@ export default function ManageEventPage() {
                                                             placeholder="Class name"
                                                         />
                                                         <button
-                                                            className="hover:no-underline-min-h)] bg-forest text-inverse p-[var(--space-xs) var(--space-md)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                                             onClick={() => handleSaveClass(cls.id)}
                                                             disabled={isSaving}
                                                         >
                                                             Save
                                                         </button>
                                                         <button
-                                                            className="hover:no-underline-min-h)] text-ink-light border-edge p-[var(--space-xs) var(--space-md)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                             onClick={() => setEditingClass(null)}
                                                         >
                                                             Cancel
@@ -886,7 +886,7 @@ export default function ManageEventPage() {
                                                                 ✏️
                                                             </button>
                                                             <button
-                                                                className="action-inline-flex hover:no-underline-min-h)] hover:bg-[var(--color-surface-glass-hover)]-danger min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md rounded-sm border border-0 border-[transparent] bg-transparent p-[2px] p-[4px] px-8 py-2 font-sans text-base text-xs text-[0.9rem] leading-none font-semibold no-underline transition-all transition-colors duration-150"
+                                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-red-300 bg-transparent px-6 py-2 text-sm font-semibold text-red-600 no-underline transition-all hover:bg-red-50"
                                                                 onClick={() => handleDeleteClass(cls.id, cls.name)}
                                                                 title="Delete"
                                                             >
@@ -916,14 +916,14 @@ export default function ManageEventPage() {
                                                     placeholder="Class name (e.g. Arabian/Part-Arabian)"
                                                 />
                                                 <button
-                                                    className="hover:no-underline-min-h)] bg-forest text-inverse p-[var(--space-xs) var(--space-md)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                                     onClick={() => handleAddClass(div.id)}
                                                     disabled={isSaving || !newClassName.trim()}
                                                 >
                                                     Add
                                                 </button>
                                                 <button
-                                                    className="hover:no-underline-min-h)] text-ink-light border-edge p-[var(--space-xs) var(--space-md)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                     onClick={() => setAddingClassToDivision(null)}
                                                 >
                                                     Cancel
@@ -953,7 +953,7 @@ export default function ManageEventPage() {
                                     style={{ flex: 1 }}
                                 />
                                 <button
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                     onClick={handleAddDivision}
                                     disabled={isSaving || !newDivisionName.trim()}
                                 >
@@ -965,7 +965,7 @@ export default function ManageEventPage() {
                         {/* Quick Actions */}
                         <div className="mt-6 gap-2" style={{ display: "flex", flexWrap: "wrap" }}>
                             <button
-                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                 onClick={loadUserEvents}
                                 disabled={isSaving}
                             >
@@ -1090,7 +1090,7 @@ export default function ManageEventPage() {
                                     )}
                                 </div>
                                 <button
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                     onClick={handleAddJudge}
                                     disabled={!newJudgeAlias.trim()}
                                 >
@@ -1154,7 +1154,7 @@ export default function ManageEventPage() {
                                             <div className="text-sm font-semibold">@{judge.aliasName}</div>
                                         </div>
                                         <button
-                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                             onClick={() => handleRemoveJudge(judge.id)}
                                             style={{
                                                 fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
@@ -1199,13 +1199,13 @@ export default function ManageEventPage() {
                                         </select>
                                         <div className="justify-end gap-2" style={{ display: "flex" }}>
                                             <button
-                                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                 onClick={() => setShowCopyModal(false)}
                                             >
                                                 Cancel
                                             </button>
                                             <button
-                                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                                 onClick={handleCopy}
                                                 disabled={!selectedSourceEvent}
                                             >

@@ -96,7 +96,7 @@ export default async function AdminPage() {
         <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
                 {/* Header */}
-                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                     <div>
                         <h1>
                             <span className="text-forest">⚡ Admin Console</span>

@@ -24,7 +24,7 @@ export default function LandingPage() {
         <div className="overflow-x-hidden">
             {/* ─── Hero Section ─── */}
             <section
-                className="min-h-[calc(100vh - var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height))] relative top-0 z-[100] flex items-center justify-between justify-center overflow-hidden border-b px-8 py-[0] py-[var(--space-3xl)] text-center max-sm:py-[0]"
+                className="min-h-[calc(100vh - var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
                 id="hero"
             >
                 <div className="hero-glow" aria-hidden="true" />
@@ -45,14 +45,14 @@ export default function LandingPage() {
                     <div className="mb-8 flex flex-wrap items-center justify-center gap-4">
                         <Link
                             href="/signup"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[52px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-lg rounded-md border border-0 border-[transparent] px-8 px-12 py-2 py-4 font-sans text-base text-[calc(var(--font-size-md)*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                             id="hero-cta-signup"
                         >
                             Create Free Account
                         </Link>
                         <Link
                             href="/community"
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[52px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-lg rounded-md border border-[transparent] bg-transparent px-8 px-12 py-2 py-4 font-sans text-base text-[calc(var(--font-size-md)*var(--font-scale))] leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                             id="hero-cta-explore"
                         >
                             Explore the Show Ring
@@ -499,7 +499,7 @@ export default function LandingPage() {
                     </p>
                     <Link
                         href="/signup"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[52px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-lg rounded-md border border-0 border-[transparent] px-8 px-12 py-2 py-4 font-sans text-base text-[calc(var(--font-size-md)*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                         id="final-cta-signup"
                     >
                         Create Your Free Account →

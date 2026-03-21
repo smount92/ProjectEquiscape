@@ -178,7 +178,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
                     <p>No models have been shared yet. Be the first to showcase your collection!</p>
                     <Link
                         href="/add-horse"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                     >
                         🐴 Add to Stable
                     </Link>
@@ -203,15 +203,15 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
                             >
                                 <Link
                                     href={`/community/${horse.id}`}
-                                    className="border-edge text-ink transition-all-link flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline"
+                                    className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline"
                                 >
-                                    <div className="border-edge text-ink transition-all-image flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                                    <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                         {horse.thumbnailUrl ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                                         ) : (
-                                            <div className="horse-bg-card border-edge transition-all-placeholder rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
-                                                <span className="horse-bg-card border-edge transition-all-placeholder-icon rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                            <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                                                <span className="flex items-center justify-center rounded-lg border border-edge bg-card p-12 text-4xl shadow-md">
                                                     🐴
                                                 </span>
                                                 <span>No photo</span>
@@ -243,8 +243,8 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
                                             </span>
                                         )}
                                     </div>
-                                    <div className="border-edge text-ink transition-all-info flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
-                                        <div className="border-edge text-ink transition-all-name flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                                    <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
+                                        <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                             {horse.customName}
                                             {(horse.hoofprintCount ?? 0) > 0 && (
                                                 <span
@@ -255,19 +255,19 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="border-edge text-ink transition-all-ref flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                                        <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                             {horse.refName}
                                         </div>
-                                        <div className="border-edge text-ink transition-all-time flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                                        <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                             {timeAgo(horse.createdAt)}
                                         </div>
                                         {horse.releaseLine && (
-                                            <div className="border-edge text-ink transition-all-ref mt-[2px] flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] text-[calc(0.7rem*var(--font-scale))] no-underline opacity-[0.7]">
+                                            <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all mt-[2px] text-[calc(0.7rem*var(--font-scale))] no-underline opacity-[0.7]">
                                                 🎨 {horse.releaseLine}
                                             </div>
                                         )}
                                         {horse.sculptor && (
-                                            <div className="border-edge text-ink transition-all-ref mt-[2px] flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] text-[calc(0.7rem*var(--font-scale))] no-underline opacity-[0.7]">
+                                            <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all mt-[2px] text-[calc(0.7rem*var(--font-scale))] no-underline opacity-[0.7]">
                                                 ✂️ {horse.sculptor}
                                             </div>
                                         )}
@@ -281,7 +281,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
                                         )}
                                         {isListed && (
                                             <span
-                                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                                 style={{
                                                     fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
                                                     padding: "var(--space-xs) var(--space-sm)",
@@ -294,10 +294,10 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
                                         )}
                                     </div>
                                 </Link>
-                                <div className="border-edge text-ink transition-all-footer flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline">
+                                <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
                                     <Link
                                         href={`/profile/${encodeURIComponent(horse.ownerAlias)}`}
-                                        className="border-edge text-ink transition-all-owner flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline"
+                                        className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline"
                                     >
                                         <svg
                                             width="12"

@@ -80,11 +80,11 @@ export default async function ShowsPage() {
                             <Link
                                 key={show.id}
                                 href={`/shows/${show.id}`}
-                                className="bg-[var(--color-bg-card border-edge transition-all-bg, rgba(0, 0, 0, 0.05))] border-[var(--color-border, rgba(0, 0, 0, 0.06))] flex flex-col gap-2 rounded-lg border p-6 p-12 text-inherit no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                                className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all"
                                 id={`show-${show.id}`}
                             >
-                                <div className="bg-[var(--color-bg-card border-edge transition-all-bg, rgba(0, 0, 0, 0.05))] border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex flex-col items-center justify-between gap-2 rounded-lg border border-b p-6 p-12 px-8 py-[0] text-inherit no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
-                                    <h3 className="bg-[var(--color-bg-card border-edge transition-all-bg, rgba(0, 0, 0, 0.05))] border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-all-title flex flex-col gap-2 rounded-lg border p-6 p-12 text-inherit no-underline shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                                    <h3 className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                         {show.title}
                                     </h3>
                                     <div className="gap-1" style={{ display: "flex", alignItems: "center" }}>
@@ -108,19 +108,19 @@ export default async function ShowsPage() {
                                     </div>
                                 </div>
                                 {show.theme && (
-                                    <div className="bg-[var(--color-bg-card border-edge transition-all-bg, rgba(0, 0, 0, 0.05))] border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-all-theme flex flex-col gap-2 rounded-lg border p-6 p-12 text-inherit no-underline shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                         Theme: {show.theme}
                                     </div>
                                 )}
                                 {show.description && (
-                                    <p className="bg-[var(--color-bg-card border-edge transition-all-bg, rgba(0, 0, 0, 0.05))] border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-all-desc flex flex-col gap-2 rounded-lg border p-6 p-12 text-inherit no-underline shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                    <p className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                         {show.description}
                                     </p>
                                 )}
                                 {show.creatorAlias && (
                                     <div className="text-muted mt-1 text-xs">Hosted by @{show.creatorAlias}</div>
                                 )}
-                                <div className="bg-[var(--color-bg-card border-edge transition-all-bg, rgba(0, 0, 0, 0.05))] border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-all-footer flex flex-col gap-2 rounded-lg border p-6 p-12 text-inherit no-underline shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                     <span>
                                         🐴 {show.entryCount} entr{show.entryCount !== 1 ? "ies" : "y"}
                                     </span>

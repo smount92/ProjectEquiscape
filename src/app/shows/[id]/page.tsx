@@ -153,7 +153,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
                 <div className="animate-fade-in-up mb-4 justify-end gap-2" style={{ display: "flex" }}>
                     <Link
                         href={`/community/events/${showId}/manage`}
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     >
                         ⚙️ Manage Classes
                     </Link>

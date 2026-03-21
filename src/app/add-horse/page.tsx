@@ -506,14 +506,14 @@ export default function AddHorsePage() {
                     <div className="flex justify-center gap-4">
                         <Link
                             href="/add-horse"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={() => window.location.reload()}
                         >
                             Add Another
                         </Link>
                         <Link
                             href="/dashboard"
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         >
                             View Stable
                         </Link>
@@ -609,7 +609,7 @@ export default function AddHorsePage() {
             {currentStep === 0 && (
                 <div className="step-content" key="step-0">
                     <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] relative overflow-visible rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                        <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] overflow-visible-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge relative top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                        <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                             <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] overflow-visible-icon relative rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                 📸
                             </div>
@@ -849,7 +849,7 @@ export default function AddHorsePage() {
                     <div className="mt-8 flex items-center justify-between gap-4">
                         <div className="mt-8-spacer flex items-center justify-between gap-4" />
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={goNext}
                             id="step-1-next"
                         >
@@ -865,7 +865,7 @@ export default function AddHorsePage() {
           ================================================================ */}
             <div className="step-content" key="step-1" style={{ display: currentStep === 1 ? "block" : "none" }}>
                 <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] relative overflow-visible rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] overflow-visible-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge relative top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                    <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                         <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] overflow-visible-icon relative rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                             🔗
                         </div>
@@ -931,14 +931,14 @@ export default function AddHorsePage() {
 
                 <div className="mt-8 flex items-center justify-between gap-4">
                     <button
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         onClick={goBack}
                         id="step-2-back"
                     >
                         ← Back
                     </button>
                     <button
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         onClick={goNext}
                         disabled={!canProceedStep(1)}
                         id="step-2-next"
@@ -961,7 +961,7 @@ export default function AddHorsePage() {
                             </div>
                         )}
 
-                        <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] overflow-visible-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge relative top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                        <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                             <div className="bg-bg-card border-edge border-[rgba(44, 85, 69, 0.2)] overflow-visible-icon relative rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                 🏷️
                             </div>
@@ -1293,7 +1293,7 @@ export default function AddHorsePage() {
                                     </label>
                                     <textarea
                                         id="marketplace-notes"
-                                        className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                                         rows={3}
                                         maxLength={500}
                                         placeholder="e.g. Will ship anywhere, Trades welcome, Smoke-free home..."
@@ -1307,14 +1307,14 @@ export default function AddHorsePage() {
 
                     <div className="mt-8 flex items-center justify-between gap-4">
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={goBack}
                             id="step-3-back"
                         >
                             ← Back
                         </button>
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={goNext}
                             disabled={!canProceedStep(2)}
                             id="step-3-next"
@@ -1499,14 +1499,14 @@ export default function AddHorsePage() {
 
                     <div className="mt-8 flex items-center justify-between gap-4">
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={goBack}
                             id="step-4-back"
                         >
                             ← Back
                         </button>
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={handleSubmit}
                             disabled={isSubmitting || !canProceedStep(2)}
                             id="submit-horse"
@@ -1514,7 +1514,7 @@ export default function AddHorsePage() {
                             {isSubmitting ? (
                                 <>
                                     <span
-                                        className="hover:no-underline-min-h)] leading-none-spinner inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                                         aria-hidden="true"
                                     />
                                     Saving to Stable…
@@ -1529,7 +1529,7 @@ export default function AddHorsePage() {
 
             {/* ── AI Toast Notifications ── */}
             <div
-                className="ai-fixed top-[calc(var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height) + var(--space-md))] pointer-events-none top-0 right-[var(--space-lg)] z-[100] z-[10000] flex w-full max-w-[420px] flex-col items-center justify-between gap-2 border-b px-8 py-[0] max-sm:py-[0]"
+                className="ai-fixed top-[calc(var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
                 aria-live="polite"
             >
                 {aiToasts.map((toast) => (

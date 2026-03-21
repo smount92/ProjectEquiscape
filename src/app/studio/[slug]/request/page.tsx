@@ -37,7 +37,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
                     <p className="text-muted mt-2">{profile.studioName} is not accepting commissions right now.</p>
                     <Link
                         href={`/studio/${slug}`}
-                        className="hover:no-underline-min-h)] text-ink-light border-edge mt-6 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     >
                         ← Back to Studio
                     </Link>
@@ -60,7 +60,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
                     </p>
                     <Link
                         href="/studio/dashboard"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse mt-6 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                     >
                         📊 Go to Dashboard
                     </Link>
@@ -93,7 +93,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
                 <div className="mt-4" style={{ textAlign: "center" }}>
                     <Link
                         href={`/studio/${slug}`}
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     >
                         ← Back to Studio
                     </Link>

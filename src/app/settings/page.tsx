@@ -141,7 +141,7 @@ export default function SettingsPage() {
             <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
                 <div className="p-[var(--space-3xl)]" style={{ textAlign: "center" }}>
                     <div
-                        className="hover:no-underline-min-h)] leading-none-spinner inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                         style={{
                             width: 36,
                             height: 36,
@@ -190,7 +190,7 @@ export default function SettingsPage() {
                             </div>
                             <div>
                                 <button
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                                     onClick={() => avatarInputRef.current?.click()}
                                     disabled={isUploadingAvatar}
@@ -234,7 +234,7 @@ export default function SettingsPage() {
                             </label>
                             <textarea
                                 id="settings-bio"
-                                className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                                 rows={3}
                                 maxLength={500}
                                 placeholder="Tell other collectors about yourself…"
@@ -323,7 +323,7 @@ export default function SettingsPage() {
                         </div>
 
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={handleSaveProfile}
                             disabled={isSavingProfile}
                             style={{ marginTop: "var(--space-lg)" }}
@@ -397,7 +397,7 @@ export default function SettingsPage() {
                         </div>
 
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={handleChangePassword}
                             disabled={isSavingPassword || !newPassword || !confirmPassword}
                         >
@@ -450,7 +450,7 @@ export default function SettingsPage() {
                             <div>
                                 <a
                                     href="/api/export"
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     download
                                 >
                                     📄 Download Collection (CSV)
@@ -464,7 +464,7 @@ export default function SettingsPage() {
                             <div>
                                 <a
                                     href="/api/insurance-report"
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                     download
                                 >
                                     🛡️ Download Insurance Report (PDF)
@@ -510,7 +510,7 @@ export default function SettingsPage() {
                             />
                         </div>
                         <button
-                            className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="min-h-[var(--inline-flex inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                             style={{
                                 background: deleteConfirm === "DELETE" ? "#ef4444" : "var(--color-surface-elevated)",
                                 color: deleteConfirm === "DELETE" ? "#fff" : "var(--color-text-muted)",

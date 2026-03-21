@@ -131,7 +131,7 @@ export default async function MarketPricePage({
                                         key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`}
                                         className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all transition-colors max-[480px]:rounded-[var(--radius-md)]"
                                     >
-                                        <div className="bg-bg-card border-edge border-edge transition-colors-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-6 p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                                        <div className="bg-bg-card border-edge border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                             <span className="bg-bg-card border-edge border-edge transition-colors-icon rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                                 {typeIcon(item.itemType)}
                                             </span>
@@ -183,13 +183,13 @@ export default async function MarketPricePage({
                                     {page > 1 ? (
                                         <Link
                                             href={buildPageUrl(page - 1)}
-                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                         >
                                             ← Previous
                                         </Link>
                                     ) : (
                                         <button
-                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                             disabled
                                         >
                                             ← Previous
@@ -201,13 +201,13 @@ export default async function MarketPricePage({
                                     {page < totalPages ? (
                                         <Link
                                             href={buildPageUrl(page + 1)}
-                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                         >
                                             Next →
                                         </Link>
                                     ) : (
                                         <button
-                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                             disabled
                                         >
                                             Next →

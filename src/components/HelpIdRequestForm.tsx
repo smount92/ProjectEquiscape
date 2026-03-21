@@ -66,7 +66,7 @@ export default function HelpIdRequestForm() {
     if (!isOpen) {
         return (
             <button
-                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                 onClick={() => setIsOpen(true)}
                 id="new-id-request-btn"
                 style={{ marginTop: "var(--space-lg)" }}
@@ -104,7 +104,7 @@ export default function HelpIdRequestForm() {
                             ) : (
                                 <>
                                     <div className="mb-4 text-[3rem] opacity-[0.7]">📷</div>
-                                    <p className="border-edge bg-card transition-all-text flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-[var(--space-3xl)] text-center max-[480px]:rounded-[var(--radius-md)]">
+                                    <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-edge bg-card p-8 text-center transition-all">
                                         Click to upload a photo
                                         <br />
                                         <span className="text-forest text-sm underline">
@@ -163,7 +163,7 @@ export default function HelpIdRequestForm() {
                     <div className="mt-6 gap-4" style={{ display: "flex" }}>
                         <button
                             type="button"
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={() => {
                                 setIsOpen(false);
                                 setPreview(null);
@@ -174,7 +174,7 @@ export default function HelpIdRequestForm() {
                         </button>
                         <button
                             type="submit"
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             disabled={status === "submitting"}
                             id="submit-id-request-btn"
                         >

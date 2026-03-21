@@ -57,14 +57,14 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
             {!showRejectForm ? (
                 <div className="flex gap-2">
                     <button
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         onClick={handleApprove}
                         disabled={isPending}
                     >
                         {isPending ? "Applying…" : "✅ Approve"}
                     </button>
                     <button
-                        className="hover:no-underline-min-h)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] bg-[rgb(239,68,68)] px-8 px-[14px] py-2 py-[6px] font-[inherit] font-sans text-base text-sm leading-none font-semibold text-white no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                         onClick={() => setShowRejectForm(true)}
                         disabled={isPending}
                     >
@@ -82,14 +82,14 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
                     />
                     <div className="flex gap-2">
                         <button
-                            className="hover:no-underline-min-h)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] bg-[rgb(239,68,68)] px-8 px-[14px] py-2 py-[6px] font-[inherit] font-sans text-base text-sm leading-none font-semibold text-white no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                             onClick={handleReject}
                             disabled={isPending || !notes.trim()}
                         >
                             {isPending ? "Rejecting…" : "Confirm Reject"}
                         </button>
                         <button
-                            className="hover:no-underline-min-h)] btn max-md:min-h-[44px]-secondary inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                             onClick={() => setShowRejectForm(false)}
                         >
                             Cancel

@@ -11,9 +11,9 @@ export default function ForgotPasswordPage() {
 
     if (state.success) {
         return (
-            <div className="min-h-[calc(100vh - var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height))] top-0 z-[100] flex items-center justify-between justify-center border-b p-8 px-8 py-[0] max-sm:py-[0]">
+            <div className="min-h-[calc(100vh - var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                 <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="bg-card border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                    <div className="bg-card border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                         <div aria-hidden="true" className="mb-4 text-[3rem]">
                             ✉️
                         </div>
@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
                     </div>
                     <Link
                         href="/login"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse flex inline-flex min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         id="back-to-login"
                     >
                         Back to Sign In
@@ -36,9 +36,9 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <div className="min-h-[calc(100vh - var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height))] top-0 z-[100] flex items-center justify-between justify-center border-b p-8 px-8 py-[0] max-sm:py-[0]">
+        <div className="min-h-[calc(100vh - var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
             <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                <div className="bg-card border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                <div className="bg-card border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                     <h1>
                         Reset <span className="text-forest">Password</span>
                     </h1>
@@ -87,14 +87,14 @@ export default function ForgotPasswordPage() {
 
                     <button
                         type="submit"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse flex inline-flex min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         disabled={isPending}
                         id="forgot-submit"
                     >
                         {isPending ? (
                             <>
                                 <span
-                                    className="hover:no-underline-min-h)] leading-none-spinner inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                                     aria-hidden="true"
                                 />
                                 Sending...

@@ -196,7 +196,7 @@ export default function UniversalFeed({
             {showComposer && (
                 <div className="border-edge mb-6 rounded-lg border bg-[var(--color-surface-1)] p-4">
                     <textarea
-                        className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input text-muted block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                         placeholder={composerPlaceholder}
                         value={composerText}
                         onChange={(e) => setComposerText(e.target.value)}
@@ -241,7 +241,7 @@ export default function UniversalFeed({
                         <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
                             <button
                                 type="button"
-                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={imageFiles.length >= 4}
                                 title="Attach images (up to 4)"
@@ -260,7 +260,7 @@ export default function UniversalFeed({
                             <span className="text-muted text-xs">{composerText.length}/2000</span>
                         </div>
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={handlePost}
                             disabled={isPosting || (!composerText.trim() && imageFiles.length === 0)}
                         >
@@ -389,7 +389,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                     {post.authorId === currentUserId && (
                         <>
                             <button
-                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                 onClick={() => {
                                     setIsEditing(!isEditing);
                                     setEditText(displayContent);
@@ -400,7 +400,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                                 ✏️
                             </button>
                             <button
-                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                 onClick={handleDelete}
                                 disabled={isPending}
                                 style={{ fontSize: "0.75rem", padding: "2px 6px" }}
@@ -417,7 +417,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                 {isEditing ? (
                     <div className="gap-1" style={{ display: "flex", flexDirection: "column" }}>
                         <textarea
-                            className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
                             rows={3}
@@ -426,14 +426,14 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                         />
                         <div className="gap-1" style={{ display: "flex" }}>
                             <button
-                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                 onClick={handleEdit}
                                 disabled={isPending || !editText.trim()}
                             >
                                 {isPending ? "Saving…" : "Save"}
                             </button>
                             <button
-                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                 onClick={() => setIsEditing(false)}
                             >
                                 Cancel
@@ -457,14 +457,14 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                                 className="embed-bg-card border-edge rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                                 style={{ marginTop: "var(--space-sm)" }}
                             >
-                                <div className="embed-bg-card border-edge transition-all-body rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
-                                    <div className="embed-bg-card border-edge transition-all-title rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                         🐴 View Horse Passport
                                     </div>
-                                    <div className="embed-bg-card border-edge transition-all-desc rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                         Click to view this model on Model Horse Hub
                                     </div>
-                                    <div className="embed-bg-card border-edge transition-all-domain rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
                                         modelhorsehub.com/community/{horseId.slice(0, 8)}…
                                     </div>
                                 </div>
@@ -494,7 +494,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                     onToggle={() => togglePostLike(post.id)}
                 />
                 <button
-                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                     onClick={() => setShowReplies(!showReplies)}
                     style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}
                 >
@@ -523,7 +523,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                             </div>
                             {r.authorId === currentUserId && (
                                 <button
-                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     style={{ fontSize: "0.7rem", padding: "2px 6px", flexShrink: 0 }}
                                     onClick={() => {
                                         if (!confirm("Delete this reply?")) return;
@@ -551,7 +551,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
                             style={{ flex: 1, fontSize: "calc(0.8rem * var(--font-scale))" }}
                         />
                         <button
-                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                             onClick={handleReply}
                             disabled={isPending || !replyText.trim()}
                             style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}

@@ -8,7 +8,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
                 <h2>Something Went Wrong</h2>
                 <p>An unexpected error occurred. Please try again.</p>
                 <button
-                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                     onClick={reset}
                 >
                     Try Again

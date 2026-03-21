@@ -125,7 +125,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
         <>
             <button
                 id="suggest-edit-btn"
-                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                 onClick={() => setIsOpen(true)}
             >
                 ✏️ Suggest Edit
@@ -163,7 +163,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
                                 boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
                             }}
                         >
-                            <div className="modal-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
+                            <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                 <h2>✏️ Suggest Edit</h2>
                                 <button
                                     className="text-muted cursor-pointer rounded-md border-0 bg-transparent p-1 text-[1.2rem] transition-all duration-150"
@@ -255,13 +255,13 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
 
                             <div className="modal-footer">
                                 <button
-                                    className="hover:no-underline-min-h)] btn max-md:min-h-[44px]-secondary inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                     onClick={() => setIsOpen(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                     onClick={handleSubmit}
                                     disabled={isPending || !hasChanges}
                                 >

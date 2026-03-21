@@ -62,7 +62,7 @@ export default function VaultReveal({ vault, currencySymbol = "$" }: VaultReveal
                     </p>
                 </div>
                 <button
-                    className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[rgba(240,160,108,0.4)] border-[transparent] bg-[rgba(240,160,108,0.1)] px-6 px-8 py-2 font-sans text-base text-sm font-[var(--font-family)] font-semibold text-[var(--color-accent-secondary)] no-underline transition-all duration-150 hover:border-[var(--color-accent-secondary)] hover:bg-[rgba(240,160,108,0.2)]"
+                    className="min-h-[var(--inline-flex inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
                     onClick={() => setIsUnlocked(!isUnlocked)}
                     aria-expanded={isUnlocked}
                     aria-controls="vault-data"

@@ -58,13 +58,13 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
             <div className="studio-tabs mb-6">
                 <button className={`studio-tab ${tab === "browse" ? "active" : ""}`} onClick={() => setTab("browse")}>
                     🌐 Browse All
-                    <span className="bg-card text-muted transition-all-badge flex cursor-pointer items-center gap-1 rounded-md border border-[transparent] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] whitespace-nowrap max-[480px]:rounded-[var(--radius-md)]">
+                    <span className="flex cursor-pointer items-center gap-1 rounded-md border border-edge bg-card px-2 py-1 text-xs text-muted transition-all">
                         {allGroups.length}
                     </span>
                 </button>
                 <button className={`studio-tab ${tab === "mine" ? "active" : ""}`} onClick={() => setTab("mine")}>
                     ⭐ My Groups
-                    <span className="bg-card text-muted transition-all-badge flex cursor-pointer items-center gap-1 rounded-md border border-[transparent] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] whitespace-nowrap max-[480px]:rounded-[var(--radius-md)]">
+                    <span className="flex cursor-pointer items-center gap-1 rounded-md border border-edge bg-card px-2 py-1 text-xs text-muted transition-all">
                         {myGroups.length}
                     </span>
                 </button>
@@ -110,7 +110,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                             key={g.id}
                             className="bg-elevated border-edge flex flex-col rounded-lg border p-6 transition-colors"
                         >
-                            <div className="bg-elevated border-edge transition-colors-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex flex-col items-center justify-between rounded-lg border border-b p-6 px-8 py-[0] transition-all max-sm:py-[0]">
+                            <div className="bg-elevated border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
                                 <span className="bg-elevated border-edge transition-colors-icon flex flex-col rounded-lg border p-6">
                                     {TYPE_ICONS[g.groupType] || "📂"}
                                 </span>
@@ -147,7 +147,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                         </span>
                                         {g.memberRole !== "owner" && (
                                             <button
-                                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                                                 onClick={() => handleLeave(g.id)}
                                                 disabled={joining === g.id}
                                             >
@@ -157,7 +157,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                     </div>
                                 ) : (
                                     <button
-                                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                                         onClick={() => handleJoin(g.id)}
                                         disabled={joining === g.id}
                                     >

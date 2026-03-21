@@ -118,7 +118,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
     };
 
     return (
-        <div className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] mb-6 rounded-lg border border-[var(--color-primary,rgba(108,99,255,0.3))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+        <div className="rounded-lg border border-edge bg-card p-6 shadow-md transition-all">
             <div className="mb-4 text-[calc(1rem*var(--font-scale))] font-semibold">
                 {isEdit ? "✏️ Edit Show Record" : "🏅 Add Show Record"}
             </div>
@@ -252,7 +252,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
                 <div className="mb-6">
                     <label className="text-ink mb-1 block text-sm font-semibold">Notes</label>
                     <textarea
-                        className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Additional notes (optional)"
@@ -266,7 +266,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
                 <div className="mb-6">
                     <button
                         type="button"
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         onClick={() => setShowAdvanced(!showAdvanced)}
                         style={{ width: "100%" }}
                         id="show-record-advanced-toggle"
@@ -344,14 +344,14 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
                 <div className="mt-6 flex justify-end gap-2">
                     <button
                         type="button"
-                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
                         onClick={onCancel}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         disabled={!showName.trim() || status === "saving"}
                     >
                         {status === "saving" ? "Saving…" : isEdit ? "Update" : "Add Record"}
