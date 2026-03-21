@@ -279,7 +279,6 @@ p {
   transition: background-color var(--transition-base), border-color var(--transition-base);
 }
 
-
 @media (max-width: 768px) {
   .header-desktop-nav {
     display: none !important;
@@ -698,8 +697,6 @@ p {
   padding: var(--space-2xl) 0;
 }
 
-
-
 .category-card.active {
   border-color: var(--color-accent-primary);
   background: var(--color-accent-primary-glow);
@@ -900,8 +897,6 @@ p {
   gap: var(--space-sm);
 }
 
-
-
 .ref-selected-parent,
 
 .community-hero {
@@ -966,7 +961,6 @@ p {
   text-decoration: none;
   color: var(--color-text-primary);
 }
-
 
    RESPONSIVE — COMMUNITY
    ================================================================ */
@@ -1238,7 +1232,6 @@ p {
   transform: scale(1.08);
   box-shadow: 0 0 16px rgba(44, 85, 69, 0.2);
 }
-
 
 .share-toast {
   position: fixed;
@@ -1584,7 +1577,6 @@ p {
   }
 }
 
-
 .wishlist-search-dropdown {
   position: absolute;
   top: 100%;
@@ -1599,8 +1591,6 @@ p {
   overflow-y: auto;
   z-index: 100;
 }
-
-
 
 .wishlist-search-custom-btn {
   display: inline-flex;
@@ -2106,7 +2096,6 @@ p {
   opacity: 1;
 }
 
-
 .division-name {
   font-weight: 700;
   font-size: calc(var(--font-size-md) * var(--font-scale));
@@ -2114,8 +2103,6 @@ p {
 }
 
 .division-reorder,
-
-
 
 .inline-edit .form-input {
   min-height: 32px;
@@ -2168,8 +2155,6 @@ p {
   border-color: var(--color-border);
 }
 
-
-
 @media (max-width: 768px) {
   .admin-metrics-row {
     grid-template-columns: 1fr;
@@ -2214,7 +2199,6 @@ p {
 .passport-breadcrumb .separator {
   color: var(--color-border);
 }
-
 
 .passport-thumb.active {
   border-color: var(--color-accent-primary);
@@ -2312,7 +2296,6 @@ p {
   border-radius: var(--radius-lg) !important;
 }
 
-
 .market-filter-chip.active {
   background: var(--color-accent-primary);
   border-color: var(--color-accent-primary);
@@ -2370,7 +2353,6 @@ p {
   color: #f59e0b;
   white-space: nowrap;
 }
-
 
 .admin-tab-active {
   color: var(--color-accent-primary);
@@ -2453,9 +2435,6 @@ p {
   animation: bubble-in 0.2s ease;
 }
 
-
-
-
 .csv-step-dot.active .csv-step-number {
   background: var(--color-accent-primary);
   border-color: var(--color-accent-primary);
@@ -2515,8 +2494,6 @@ p {
   flex-shrink: 0;
 }
 
-
-
 .spinner-inline {
   display: inline-block;
   width: 16px;
@@ -2546,9 +2523,6 @@ p {
 .csv-match-card.no_match {
   border-left-color: var(--color-accent-danger);
 }
-
-
-
 
 .csv-success-card,
 
@@ -2733,8 +2707,6 @@ p {
   grid-column: span 2;
   grid-row: span 2;
 }
-
-
 
 .ai-detect-btn {
   position: absolute;
@@ -3049,7 +3021,6 @@ p {
     color: var(--color-text-muted);
     font-size: calc(0.75rem * var(--font-scale));
 }
-
 
 .ref-filter-label {
     font-size: calc(0.8rem * var(--font-scale));
@@ -3436,9 +3407,6 @@ p {
   display: block;
 }
 
-
-
-
 .passport-gallery img,
 
 .activity-post-content ul,
@@ -3776,7 +3744,6 @@ p {
     border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-
 .show-preview-caption {
     font-style: italic;
     color: var(--color-text-secondary);
@@ -3826,7 +3793,6 @@ p {
     cursor: help;
 }
 
-
 .podium-horse-name {
     font-weight: 700;
     font-size: calc(0.9rem * var(--font-scale));
@@ -3855,8 +3821,6 @@ p {
     margin-top: var(--space-xs);
     line-height: 1.4;
 }
-
-
 
 .champion-banner {
     text-align: center;
