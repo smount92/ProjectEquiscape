@@ -445,7 +445,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
             {/* Grid */}
             {profileCards.length === 0 ? (
                 <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🔒</div>
+                    <div className="mb-4 text-5xl">🔒</div>
                     <h2>
                         {isOwnProfile
                             ? "You haven't made any models public yet"
@@ -466,7 +466,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
                     )}
                 </div>
             ) : (
-                <div className="grid-cols-[repeat(auto-fill, minmax(300px, 1fr))] animate-fade-in-up grid gap-6">
+                <div className="grid-cols-[repeat(auto-fill,minmax(300px,1fr))] animate-fade-in-up grid gap-6">
                     {profileCards.map((horse) => (
                         <Link
                             key={horse.id}

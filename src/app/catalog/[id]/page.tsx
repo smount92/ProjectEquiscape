@@ -103,7 +103,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                         </span>
                     </div>
 
-                    <div className="grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] mb-6 grid gap-4">
+                    <div className="grid-cols-[repeat(auto-fill,minmax(200px,1fr))] mb-6 grid gap-4">
                         {displayFields.map((field) => (
                             <div key={field.label} className="flex flex-col gap-[2px]">
                                 <span className="text-muted text-[calc(0.75rem*var(--font-scale))] font-semibold tracking-[0.05em] uppercase">

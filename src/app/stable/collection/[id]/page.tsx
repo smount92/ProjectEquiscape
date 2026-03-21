@@ -194,7 +194,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
 
             {/* 🔒 Collection Stats — PRIVATE analytics */}
             {horseCards.length > 0 && (
-                <div className="grid-cols-[repeat(3, 1fr)] animate-fade-in-up mb-8 grid gap-4">
+                <div className="grid-cols-[repeat(3,1fr)] animate-fade-in-up mb-8 grid gap-4">
                     <div className="bg-bg-card border-edge border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border p-12 px-4 py-6 text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                         <div className="text-2xl leading-none">🐴</div>
                         <div className="analytics-value max-[400px]:text-[calc(1.2rem*var(--font-scale))]">
@@ -228,7 +228,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
             {/* Grid */}
             {horseCards.length === 0 ? (
                 <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="px-8-icon py-[var(--space-3xl)] text-center">📂</div>
+                    <div className="mb-4 text-5xl">📂</div>
                     <h2>This collection is empty</h2>
                     <p>
                         Add models to this collection from the &quot;Add to Stable&quot; form or by editing an existing
@@ -242,7 +242,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
                     </Link>
                 </div>
             ) : (
-                <div className="grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] animate-fade-in-up grid gap-6">
+                <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] animate-fade-in-up grid gap-6">
                     {horseCards.map((horse) => (
                         <Link
                             key={horse.id}

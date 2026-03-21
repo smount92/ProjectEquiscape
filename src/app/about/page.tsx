@@ -52,7 +52,7 @@ export default function AboutPage() {
                 {/* What Makes Us Different */}
                 <section className="mb-[var(--space-3xl)]">
                     <h2>What Makes Us Different</h2>
-                    <div className="grid-cols-[repeat(3, 1fr)] grid gap-6">
+                    <div className="grid-cols-[repeat(3,1fr)] grid gap-6">
                         <div className="bg-bg-card border-edge border-edge rounded-lg border p-8 p-12 text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                             <span className="mb-4 block text-[2rem]" aria-hidden="true">
                                 🔒
@@ -100,7 +100,7 @@ export default function AboutPage() {
                         &ldquo;I wish this existed.&rdquo;
                     </p>
                     <p>Here&apos;s what&apos;s on the roadmap:</p>
-                    <div className="grid-cols-[repeat(3, 1fr)] mt-4 grid gap-6">
+                    <div className="grid-cols-[repeat(3,1fr)] mt-4 grid gap-6">
                         <div className="bg-bg-card border-edge border-edge rounded-lg border p-8 p-12 text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                             <span className="mb-4 block text-[2rem]" aria-hidden="true">
                                 🎨

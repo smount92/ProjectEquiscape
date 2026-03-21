@@ -48,7 +48,7 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
                 className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                 style={{ textAlign: "center" }}
             >
-                <div className="px-8-icon py-[var(--space-3xl)] text-center">✅</div>
+                <div className="mb-4 text-5xl">✅</div>
                 <h2>No Pending Suggestions</h2>
                 <p>All database suggestions have been reviewed.</p>
             </div>

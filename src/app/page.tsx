@@ -141,7 +141,7 @@ export default function LandingPage() {
                         Every feature exists because a real collector said &ldquo;I wish this existed.&rdquo;
                     </p>
 
-                    <div className="grid-cols-[repeat(auto-fit, minmax(300px, 1fr))] grid gap-8">
+                    <div className="grid-cols-[repeat(auto-fit,minmax(300px,1fr))] grid gap-8">
                         {/* Feature 1 — Reference Database */}
                         <div
                             className="bg-bg-card border-edge border-edge relative overflow-hidden rounded-lg border p-12 text-left shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"

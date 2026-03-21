@@ -260,7 +260,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                             {s.suggestion_type === "addition" && (
                                 <div className="m-[var(--space-md) 0]">
                                     <h3>Proposed Entry</h3>
-                                    <div className="grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] mb-6 grid gap-4">
+                                    <div className="grid-cols-[repeat(auto-fill,minmax(200px,1fr))] mb-6 grid gap-4">
                                         {Object.entries(s.field_changes)
                                             .filter(([, v]) => v != null && v !== "")
                                             .map(([k, v]) => (

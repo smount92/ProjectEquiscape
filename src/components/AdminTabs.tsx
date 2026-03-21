@@ -232,7 +232,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
     if (messages.length === 0) {
         return (
             <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                <div className="px-8-icon py-[var(--space-3xl)] text-center">📬</div>
+                <div className="mb-4 text-5xl">📬</div>
                 <h2>No Messages Yet</h2>
                 <p>Contact form submissions will appear here.</p>
             </div>
@@ -295,7 +295,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
    ═══════════════════════════════════════════ */
 function ShowsTab({ shows }: { shows: Show[] }) {
     return (
-        <div className="admin-grid grid-cols-[repeat(auto-fill, minmax(300px, 1fr))] gap-6">
+        <div className="admin-grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
             <div>
                 <h3 className="mb-4 flex items-center gap-2 text-base font-bold">📸 Create Photo Show</h3>
                 <CreateShowForm />
@@ -337,7 +337,7 @@ function ReportsTab({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
             <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                <div className="px-8-icon py-[var(--space-3xl)] text-center">🎉</div>
+                <div className="mb-4 text-5xl">🎉</div>
                 <h2>All Clear</h2>
                 <p>No open reports to review.</p>
             </div>
@@ -372,7 +372,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
     if (suggestions.length === 0) {
         return (
             <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                <div className="px-8-icon py-[var(--space-3xl)] text-center">📚</div>
+                <div className="mb-4 text-5xl">📚</div>
                 <h2>No Pending Catalog Suggestions</h2>
                 <p>Community suggestions will appear here for review.</p>
             </div>

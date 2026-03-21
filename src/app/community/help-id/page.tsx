@@ -111,7 +111,7 @@ export default async function HelpIdPage() {
                 {openRequests.length > 0 && (
                     <section className="mt-12">
                         <h2 className="mb-6 text-lg font-bold">🔍 Open Requests ({openRequests.length})</h2>
-                        <div className="grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] grid gap-6">
+                        <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
                             {openRequests.map((req) => (
                                 <Link
                                     key={req.id}
@@ -163,7 +163,7 @@ export default async function HelpIdPage() {
                         <h2 className="text-ink-light mb-6 text-lg font-bold">
                             ✅ Resolved ({resolvedRequests.length})
                         </h2>
-                        <div className="grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] grid gap-6">
+                        <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
                             {resolvedRequests.map((req) => (
                                 <Link
                                     key={req.id}

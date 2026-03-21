@@ -152,7 +152,7 @@ export default async function CommissionDetailPage({
 
                 {/* Details Grid */}
                 <div
-                    className="grid-cols-[repeat(auto-fit, minmax(150px, 1fr))] mt-6 gap-4"
+                    className="grid-cols-[repeat(auto-fit,minmax(150px,1fr))] mt-6 gap-4"
                     style={{ display: "grid" }}
                 >
                     {commission.priceQuoted && (

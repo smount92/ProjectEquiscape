@@ -129,7 +129,7 @@ export default async function AdminPage() {
                 </div>
 
                 {/* Metrics Row — always visible */}
-                <div className="grid-cols-[repeat(auto-fit, minmax(200px, 1fr))] mb-8 grid gap-4">
+                <div className="grid-cols-[repeat(auto-fit,minmax(200px,1fr))] mb-8 grid gap-4">
                     <div className="bg-glass border-edge rounded-lg border p-6 text-center transition-all">
                         <div className="mb-1 text-[2rem]">👥</div>
                         <div className="text-ink text-3xl leading-none font-bold">{totalUsers}</div>

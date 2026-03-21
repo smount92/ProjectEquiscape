@@ -75,7 +75,7 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
 
             {/* Thumbnail Strip */}
             {images.length > 1 && (
-                <div className="grid-cols-[repeat(auto-fill, minmax(72px, 1fr))] grid gap-1">
+                <div className="grid-cols-[repeat(auto-fill,minmax(72px,1fr))] grid gap-1">
                     {images.map((img, i) => (
                         <div
                             key={img.signedUrl}

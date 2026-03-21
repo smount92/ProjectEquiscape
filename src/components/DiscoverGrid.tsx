@@ -114,7 +114,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
     return (
         <>
             {/* Search Bar */}
-            <div className="top-[calc(var(--header max-sm:px-4-height) + var(--space-md))] bg-card border-edge shadow-md-container sticky z-[10] mb-4 mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+            <div className="sticky top-[calc(var(--header-height)+var(--space-md))] bg-card border-edge shadow-md z-[10] mb-4 mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
                 <input
                     type="text"
                     value={searchQuery}
@@ -155,13 +155,13 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
             {/* Grid */}
             {filteredUsers.length === 0 && !searchQuery.trim() && activeTag === "all" ? (
                 <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="px-8-icon py-[var(--space-3xl)] text-center">👥</div>
+                    <div className="mb-4 text-5xl">👥</div>
                     <h2>No Active Collectors Yet</h2>
                     <p>Be the first to make your models public!</p>
                 </div>
             ) : filteredUsers.length === 0 ? (
                 <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🔍</div>
+                    <div className="mb-4 text-5xl">🔍</div>
                     <h2>No Results</h2>
                     <p>Try a different search or filter.</p>
                 </div>

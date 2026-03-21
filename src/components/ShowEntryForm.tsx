@@ -307,7 +307,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                                         </span>
                                                     )}
                                                     {c.isNanQualifying && (
-                                                        <span className="class-inline-flex bg-[rgba(245, 158, 11, 0.15)] items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]">
+                                                        <span className="class-inline-flex bg-[rgba(245,158,11,0.15)] items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]">
                                                             NAN
                                                         </span>
                                                     )}
@@ -353,7 +353,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                 </p>
                             ) : (
                                 <>
-                                    <div className="grid-cols-[repeat(auto-fill, minmax(72px, 1fr))] grid gap-1">
+                                    <div className="grid-cols-[repeat(auto-fill,minmax(72px,1fr))] grid gap-1">
                                         {horsePhotos.map((photo) => (
                                             <button
                                                 key={photo.id}

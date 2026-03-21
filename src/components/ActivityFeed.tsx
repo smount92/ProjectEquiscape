@@ -97,7 +97,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
     if (items.length === 0) {
         return (
             <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                <div className="px-8-icon py-[var(--space-3xl)] text-center">📰</div>
+                <div className="mb-4 text-5xl">📰</div>
                 <h2>No Activity Yet</h2>
                 <p>{emptyMessage || "Follow some collectors to see their activity here!"}</p>
             </div>

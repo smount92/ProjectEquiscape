@@ -624,7 +624,7 @@ export default function AddHorsePage() {
                             The <strong>Primary Thumbnail</strong> will be shown on your Digital Shelf.
                         </p>
 
-                        <div className="grid-cols-[repeat(3, 1fr)] grid gap-4">
+                        <div className="grid-cols-[repeat(3,1fr)] grid gap-4">
                             {GALLERY_SLOTS.map((slot) => {
                                 const existing = imageSlots[slot.angle];
                                 const isPrimary = slot.angle === "Primary_Thumbnail";

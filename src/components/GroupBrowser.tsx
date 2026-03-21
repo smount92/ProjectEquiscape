@@ -104,7 +104,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                     <p>{tab === "mine" ? "You haven't joined any groups yet." : "No groups found."}</p>
                 </div>
             ) : (
-                <div className="grid-cols-[repeat(auto-fill, minmax(320px, 1fr))] grid gap-4">
+                <div className="grid-cols-[repeat(auto-fill,minmax(320px,1fr))] grid gap-4">
                     {filtered.map((g) => (
                         <div
                             key={g.id}

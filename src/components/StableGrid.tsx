@@ -135,7 +135,7 @@ export default function StableGrid({
 
             {filteredCards.length === 0 && !searchQuery.trim() ? (
                 <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🏠</div>
+                    <div className="mb-4 text-5xl">🏠</div>
                     <h2>Your Stable is Empty</h2>
                     <p>You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
                     <Link
@@ -148,12 +148,12 @@ export default function StableGrid({
                 </div>
             ) : filteredCards.length === 0 && searchQuery.trim() ? (
                 <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🔍</div>
+                    <div className="mb-4 text-5xl">🔍</div>
                     <h2>No Results</h2>
                     <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
                 </div>
             ) : (
-                <div className="grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] grid gap-6">
+                <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
                     {filteredCards.map((horse) => {
                         const isSelected = selectedIds.has(horse.id);
                         const CardWrapper = selectMode ? "div" : Link;
@@ -190,7 +190,7 @@ export default function StableGrid({
                                         </span>
                                     )}
                                     {horse.assetCategory && horse.assetCategory !== "model" && (
-                                        <span className="absolute top-2 right-2 rounded-md bg-[rgba(124,109,240,0.15)] px-2 py-0.5 text-xs font-bold p-12 text-white shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                        <span className="absolute top-2 right-2 rounded-md bg-[rgba(124,109,240,0.15)] px-2 py-0.5 text-xs font-bold text-white">
                                             {horse.assetCategory === "tack"
                                                 ? "🏇 Tack"
                                                 : horse.assetCategory === "prop"
@@ -210,7 +210,7 @@ export default function StableGrid({
                                     )}
                                 </div>
                                 <div className="px-6 py-4">
-                                    <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                                    <div className="truncate text-sm font-semibold">
                                         {horse.customName}
                                     </div>
                                     <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
@@ -231,7 +231,7 @@ export default function StableGrid({
                                         <span>{formatDate(horse.createdAt)}</span>
                                     </div>
                                     {horse.collectionName && (
-                                        <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+                                        <div className="mt-1 truncate text-xs text-muted">
                                             📁 {horse.collectionName}
                                         </div>
                                     )}

@@ -13,7 +13,7 @@ export default async function TransferHistorySection() {
                     {history.length}
                 </span>
             </summary>
-            <div className="grid-cols-[repeat(auto-fill, minmax(240px, 1fr))] mt-2 grid gap-4">
+            <div className="grid-cols-[repeat(auto-fill,minmax(240px,1fr))] mt-2 grid gap-4">
                 {history.map((item) => (
                     <Link
                         key={item.id}

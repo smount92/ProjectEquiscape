@@ -162,7 +162,7 @@ export default function StableLedger({
 
             {filteredCards.length === 0 && !searchQuery.trim() ? (
                 <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🏠</div>
+                    <div className="mb-4 text-5xl">🏠</div>
                     <h2>Your Stable is Empty</h2>
                     <p>Click the button above to add your first horse.</p>
                 </div>

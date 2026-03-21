@@ -852,7 +852,7 @@ export default function ManageEventPage() {
                                                         </span>
                                                         {cls.isNanQualifying && (
                                                             <span
-                                                                className="bg-[rgba(245, 158, 11, 0.15)] inline-flex items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]"
+                                                                className="bg-[rgba(245,158,11,0.15)] inline-flex items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]"
                                                                 title="NAN Qualifying"
                                                             >
                                                                 ⭐ NAN
