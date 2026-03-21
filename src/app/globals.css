@@ -594,10 +594,10 @@ p {
   color: var(--color-text-primary);
 }
 
-   RESPONSIVE — COMMUNITY
+/* RESPONSIVE — COMMUNITY
    ================================================================ */
 
-   COMMUNITY TOGGLE SECTION (Intake & Edit Forms)
+/* COMMUNITY TOGGLE SECTION (Intake & Edit Forms)
    ================================================================ */
 
 .profile-hero {
@@ -630,7 +630,7 @@ p {
   }
 }
 
-   COLLECTIONS — Horse Card Badge
+/* COLLECTIONS — Horse Card Badge
    ================================================================ */
 
 .collection-hero {
@@ -822,7 +822,6 @@ p {
   }
 }
 
-.hero-glow,
 
 @keyframes glow-float {
   from {
@@ -834,7 +833,7 @@ p {
   }
 }
 
-   LANDING PAGE — RESPONSIVE
+/* LANDING PAGE — RESPONSIVE
    ============================================================ */
 
 @media (max-width: 640px) {
@@ -1569,9 +1568,6 @@ p {
   border-left-color: var(--color-accent-danger);
 }
 
-.csv-success-card,
-
-.csv-success-icon,
 
 @media (max-width: 640px) {
   .csv-step-indicator {
