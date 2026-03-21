@@ -194,8 +194,8 @@ export default function ChatThread({
 
             {/* Risky Payment Warning */}
             {showPaymentWarning && (
-                <div className="chat-payment-warning" role="alert">
-                    <span className="chat-payment-warning-icon">🛡️</span>
+                <div className="flex items-start gap-sm py-sm px-md bg-[rgba(245,158,11,0.12)] border border-[rgba(245,158,11,0.35)] rounded-md mx-md text-xs text-[#f59e0b] leading-relaxed animate-[fadeInUp_0.2s_ease]" role="alert">
+                    <span className="text-[1.2rem] shrink-0 mt-px">🛡️</span>
                     <span>
                         <strong>Protect yourself:</strong> Always use PayPal Goods &amp; Services for
                         off-platform payments. Venmo, Zelle, and PayPal Friends &amp; Family offer{" "}

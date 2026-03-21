@@ -20,7 +20,7 @@ import "@/components/CsvImport.css";
 // Social components
 
 
-import "@/components/ChatGuardrails.css";
+
 import "@/components/SocialFoundation.css";
 // Page-specific styles
 import "./WelcomeOnboarding.css";
