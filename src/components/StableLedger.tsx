@@ -168,7 +168,7 @@ export default function StableLedger({
  </div>
  ) : filteredCards.length > 0 ? (
  <div className="border-edge bg-surface-primary overflow-x-auto rounded-lg border">
- <table className="sticky top-0 z-[2]">
+ <table className="w-full border-collapse text-sm">
  <thead>
  <tr>
  {selectMode && <th className="w-[36]">☑</th>}

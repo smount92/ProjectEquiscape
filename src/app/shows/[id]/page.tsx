@@ -502,7 +502,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <p>Be the first to enter this show!</p>
  </div>
  ) : (
- <div className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] animate-fade-in-up flex flex-col gap-[0] overflow-hidden rounded-lg border">
+ <div className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] animate-fade-in-up flex flex-col gap-0 overflow-hidden rounded-lg border">
  {sortedEntries.map((entry, index) => (
  <div
  key={entry.id}

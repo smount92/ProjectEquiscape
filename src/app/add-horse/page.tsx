@@ -524,7 +524,7 @@ export default function AddHorsePage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  {/* Page Header */}
  <div className="animate-fade-in-up mb-12">
  <h1>
@@ -564,7 +564,7 @@ export default function AddHorsePage() {
 
  {/* Step Indicator */}
  <div
- className="relative mb-12 flex items-center justify-center gap-[0]"
+ className="relative mb-12 flex items-center justify-center gap-0"
  role="navigation"
  aria-label="Form progress"
  >
@@ -576,12 +576,12 @@ export default function AddHorsePage() {
  } ${i < currentStep ?"completed" :""}`}
  >
  <div
- className="relative-dot mb-12 flex items-center justify-center gap-[0]"
+ className="relative-dot mb-12 flex items-center justify-center gap-0"
  aria-current={i === currentStep ?"step" : undefined}
  >
  {i < currentStep ?"✓" : i + 1}
  </div>
- <span className="relative-label mb-12 flex items-center justify-center gap-[0]">
+ <span className="relative-label mb-12 flex items-center justify-center gap-0">
  {step.label}
  </span>
  </div>

@@ -299,7 +299,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  : null;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  {/* Breadcrumb */}
  <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
@@ -321,7 +321,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
 
  {/* Two-column layout: Gallery | Info */}
- <div className="grid-cols-[1fr 420px] animate-fade-in-up grid items-stretch gap-[0] overflow-hidden rounded-lg shadow-lg">
+ <div className="animate-fade-in-up grid grid-cols-1 items-stretch overflow-hidden rounded-lg shadow-lg lg:grid-cols-[1fr_420px]">
  {/* Left: Gallery */}
  <div>
  <PassportGallery images={galleryImages} />
@@ -349,7 +349,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
 
  {/* Model Details Card */}
- <div className="passport-detail-bg-card border-edge rounded-lg border shadow-md transition-all">
+ <div className="bg-[rgba(255,255,255,0.06)] p-4 border-edge rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">📋</span>{""}
  {(horse.asset_category ||"model") ==="model"
@@ -568,7 +568,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Finish Details */}
  {horse.finish_details && (
- <div className="passport-detail-bg-card border-edge rounded-lg border shadow-md transition-all">
+ <div className="bg-[rgba(255,255,255,0.06)] p-4 border-edge rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">✨</span> Finish
  </h3>
@@ -585,7 +585,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Show Bio */}
  {(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
- <div className="passport-detail-bg-card border-edge rounded-lg border shadow-md transition-all">
+ <div className="bg-[rgba(255,255,255,0.06)] p-4 border-edge rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">🏅</span> Show Identity
  </h3>
@@ -634,7 +634,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Public Notes */}
  {horse.public_notes && (
- <div className="passport-detail-bg-card border-edge rounded-lg border shadow-md transition-all">
+ <div className="bg-[rgba(255,255,255,0.06)] p-4 border-edge rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">📝</span> Notes
  </h3>

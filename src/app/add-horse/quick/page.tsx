@@ -113,7 +113,7 @@ export default function QuickAddPage() {
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="animate-fade-in-up mx-auto max-w-[640]">
  <div className="mb-6 justify-between" style={{ display:"flex", alignItems:"center" }}>
  <h1>

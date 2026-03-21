@@ -368,7 +368,7 @@ export default function ManageEventPage() {
 
  if (isLoading) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
  className="bg-card border-edge rounded-lg border p-[var(--space-3xl)] shadow-md transition-all"
  style={{ textAlign:"center" }}
@@ -385,7 +385,7 @@ export default function ManageEventPage() {
 
  if (error && !eventName) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
  className="bg-card border-edge rounded-lg border p-[var(--space-3xl)] shadow-md transition-all"
  style={{ textAlign:"center" }}
@@ -412,7 +412,7 @@ export default function ManageEventPage() {
  ];
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="animate-fade-in-up">
  {/* Header */}
  <div className="mb-6 items-start justify-between gap-4" style={{ display:"flex", flexWrap:"wrap" }}>

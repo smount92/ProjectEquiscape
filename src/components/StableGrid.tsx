@@ -177,11 +177,9 @@ export default function StableGrid({
  // eslint-disable-next-line @next/next/no-img-element
  <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
  ) : (
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
- <span className="flex items-center justify-center rounded-lg border border-edge bg-card text-4xl shadow-md">
- 🐴
- </span>
- <span>No photo</span>
+ <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2 bg-[var(--color-bg-secondary)] text-muted">
+ <span className="text-4xl">🐴</span>
+ <span className="text-xs">No photo</span>
  </div>
  )}
  {horse.finishType && (

@@ -597,7 +597,7 @@ export default function EditHorsePage() {
 
  if (isLoading) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
  className="mx-auto max-w-[680px] p-[var(--space-3xl)] px-[0] py-12"
  style={{ textAlign:"center" }}
@@ -614,7 +614,7 @@ export default function EditHorsePage() {
 
  if (error) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🚫</div>
  <h1>Access Denied</h1>
@@ -631,7 +631,7 @@ export default function EditHorsePage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">

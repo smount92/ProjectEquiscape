@@ -112,7 +112,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
  const isResolved = req.status ==="resolved";
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="animate-fade-in-up">
  <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
  <div>

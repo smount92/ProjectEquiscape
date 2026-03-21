@@ -36,7 +36,7 @@ export default async function ChangelogPage() {
  Community-approved updates to the reference catalog. {count ?? 0} total changes.
  </p>
 
- <div className="flex flex-col gap-[0]">
+ <div className="flex flex-col gap-0">
  {(
  entries as unknown as {
  id: string;

@@ -112,7 +112,7 @@ export default function ClaimPage() {
 
  if (success) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
  className="bg-card border-edge animate-fade-in-up mx-auto max-w-[500px] rounded-lg border shadow-md transition-all"
  style={{ textAlign:"center" }}
@@ -155,7 +155,7 @@ export default function ClaimPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all">
  <div className="mb-6" style={{ textAlign:"center" }}>
  <div className="mb-2 text-[2.5rem]">📦</div>

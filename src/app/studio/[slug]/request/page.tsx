@@ -27,7 +27,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
 
  if (profile.status ==="closed") {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
  className="bg-card border-edge animate-fade-in-up mx-auto max-w-[600] rounded-lg border shadow-md transition-all"
  style={{ textAlign:"center" }}
@@ -48,7 +48,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
 
  if (user.id === profile.userId) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
  className="bg-card border-edge animate-fade-in-up mx-auto max-w-[600] rounded-lg border shadow-md transition-all"
  style={{ textAlign:"center" }}
@@ -70,7 +70,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[600] rounded-lg border shadow-md transition-all">
  {/* Header */}
  <div className="mb-8" style={{ textAlign:"center" }}>

@@ -336,7 +336,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  const isOwnHorse = horse.owner_id === user.id;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  {/* Breadcrumb */}
  <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/community">Show Ring</Link>
@@ -347,7 +347,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </nav>
 
  {/* Two-column layout: Gallery | Info */}
- <div className="grid-cols-[1fr 420px] animate-fade-in-up grid items-stretch gap-[0] overflow-hidden rounded-lg shadow-lg">
+ <div className="grid-cols-[1fr_420px] animate-fade-in-up grid items-stretch gap-0 overflow-hidden rounded-lg shadow-lg">
  {/* Left: Gallery */}
  <div className="bg-[var(--color-bg-primary)] p-6">
  <PassportGallery images={galleryImages} />
@@ -437,7 +437,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
 
  {/* Model Details Card */}
- <div className="passport-detail-bg-card border-edge rounded-lg border shadow-md transition-all">
+ <div className="bg-[rgba(255,255,255,0.06)] p-4 border-edge rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">📋</span>{""}
  {(horse.asset_category ||"model") ==="model"
@@ -638,7 +638,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {/* Finish Details */}
  {horse.finish_details && (
- <div className="passport-detail-bg-card border-edge rounded-lg border shadow-md transition-all">
+ <div className="bg-[rgba(255,255,255,0.06)] p-4 border-edge rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">✨</span> Finish
  </h3>
@@ -655,7 +655,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {/* Show Bio */}
  {(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
- <div className="passport-detail-bg-card border-edge rounded-lg border shadow-md transition-all">
+ <div className="bg-[rgba(255,255,255,0.06)] p-4 border-edge rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">🏅</span> Show Identity
  </h3>
@@ -704,7 +704,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {/* Public Notes */}
  {horse.public_notes && (
- <div className="passport-detail-bg-card border-edge rounded-lg border shadow-md transition-all">
+ <div className="bg-[rgba(255,255,255,0.06)] p-4 border-edge rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">📝</span> Notes
  </h3>

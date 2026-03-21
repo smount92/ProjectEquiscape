@@ -282,7 +282,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {isShowEvent && showEntries.length > 0 && (
  <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">📸 Entries ({showEntries.length})</h3>
- <div className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] flex flex-col gap-[0] overflow-hidden rounded-lg border">
+ <div className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] flex flex-col gap-0 overflow-hidden rounded-lg border">
  {showEntries.map((entry, index) => (
  <div
  key={entry.id}
