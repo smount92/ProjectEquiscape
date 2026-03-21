@@ -292,7 +292,7 @@ export default async function InboxPage() {
                                                     : item.latestMessage}
                                             </>
                                         ) : (
-                                            <span style={{ opacity: 0.5 }}>No messages yet</span>
+                                            <span className="opacity-[0.5]" >No messages yet</span>
                                         )}
                                     </div>
                                 </div>

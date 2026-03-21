@@ -133,7 +133,7 @@ export default function SettingsPage() {
     if (isLoading) {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-                <div style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
+                <div className="p-[var(--space-3xl)]" style={{ textAlign: "center" }}>
                     <div
                         className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner"
                         style={{
@@ -159,8 +159,8 @@ export default function SettingsPage() {
                 <span>Settings</span>
             </nav>
 
-            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up" style={{ maxWidth: 680 }}>
-                <h1 style={{ marginBottom: "var(--space-2xl)", fontSize: "calc(1.6rem * var(--font-scale))" }}>
+            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up max-w-[680]">
+                <h1 className="mb-12 text-[calc(1.6rem*var(--font-scale))]" >
                     ⚙️ <span className="text-forest">Settings</span>
                 </h1>
 
@@ -194,7 +194,7 @@ export default function SettingsPage() {
                                     onChange={handleAvatarChange}
                                     style={{ display: "none" }}
                                 />
-                                <p style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: 4 }}>
+                                <p className="text-[calc(0.75rem*var(--font-scale))] text-muted mt-[4]" >
                                     Max 2MB. JPG, PNG, or WebP.
                                 </p>
                             </div>
@@ -253,7 +253,7 @@ export default function SettingsPage() {
                                 <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
                                     📸 Watermark uploaded photos
                                 </span>
-                                <span className="block mt-1 text-xs text-muted" style={{ display: "block", marginTop: 2 }}>
+                                <span className="block mt-1 text-xs text-muted mt-[2]" style={{ display: "block" }}>
                                     Adds &ldquo;© @{aliasName} — ModelHorseHub&rdquo; to new uploads
                                 </span>
                             </div>
@@ -271,7 +271,7 @@ export default function SettingsPage() {
                                 <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
                                     🏆 Show Trophy Case on profile
                                 </span>
-                                <span className="block mt-1 text-xs text-muted" style={{ display: "block", marginTop: 2 }}>
+                                <span className="block mt-1 text-xs text-muted mt-[2]" style={{ display: "block" }}>
                                     When off, your badges are hidden from other users
                                 </span>
                             </div>
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                         </button>
 
                         {profileMsg && (
-                            <p className={profileMsg.type === "success" ? "text-forest text-sm mt-1 font-medium flex items-center gap-1 before:content-['✓']" : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
+                            <p className={`${profileMsg.type === "success" ? "text-forest text-sm mt-1 font-medium flex items-center gap-1 before:content-['✓']" : "form-error"} mt-2`}>
                                 {profileMsg.text}
                             </p>
                         )}
@@ -382,7 +382,7 @@ export default function SettingsPage() {
                         </button>
 
                         {passwordMsg && (
-                            <p className={passwordMsg.type === "success" ? "text-forest text-sm mt-1 font-medium flex items-center gap-1 before:content-['✓']" : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
+                            <p className={`${passwordMsg.type === "success" ? "text-forest text-sm mt-1 font-medium flex items-center gap-1 before:content-['✓']" : "form-error"} mt-2`}>
                                 {passwordMsg.text}
                             </p>
                         )}
@@ -413,13 +413,13 @@ export default function SettingsPage() {
                 <div className="mb-12 max-sm:mb-8">
                     <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">📊 Data & Reports</h2>
                     <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-lg)" }}>
+                        <div className="gap-6" style={{ display: "flex", flexDirection: "column" }}>
                             {/* CSV Export */}
                             <div>
                                 <a href="/api/export" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" download>
                                     📄 Download Collection (CSV)
                                 </a>
-                                <p className="block mt-1 text-xs text-muted" style={{ marginTop: 4 }}>
+                                <p className="block mt-1 text-xs text-muted mt-[4]">
                                     Spreadsheet format — compatible with Excel, Google Sheets.
                                 </p>
                             </div>
@@ -429,7 +429,7 @@ export default function SettingsPage() {
                                 <a href="/api/insurance-report" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" download>
                                     🛡️ Download Insurance Report (PDF)
                                 </a>
-                                <p className="block mt-1 text-xs text-muted" style={{ marginTop: 4 }}>
+                                <p className="block mt-1 text-xs text-muted mt-[4]">
                                     Professional PDF with photos and values — share with your insurance agent.
                                 </p>
                             </div>
@@ -439,12 +439,12 @@ export default function SettingsPage() {
 
                 {/* ═══ Danger Zone ═══ */}
                 <div className="mb-12 max-sm:mb-8">
-                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight" style={{ color: "#ef4444" }}>⚠️ Danger Zone</h2>
-                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]" style={{ border: "1px solid #ef4444", borderRadius: "var(--radius-lg)" }}>
-                        <p style={{ marginBottom: "var(--space-md)", lineHeight: 1.6 }}>
+                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight text-[#ef4444]">⚠️ Danger Zone</h2>
+                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] rounded-lg" style={{ border: "1px solid #ef4444" }}>
+                        <p className="mb-4 leading-[1.6]" >
                             Permanently delete your account. This action <strong>cannot be undone</strong>.
                         </p>
-                        <ul style={{ marginBottom: "var(--space-md)", paddingLeft: "var(--space-lg)", lineHeight: 1.8, color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <ul className="mb-4 pl-6 leading-[1.8] text-muted text-sm" >
                             <li>Your profile will be anonymized as &ldquo;[Deleted Collector]&rdquo;</li>
                             <li>Your horses will be orphaned (Hoofprint™ history preserved)</li>
                             <li>Pending transfers and commissions will be cancelled</li>
@@ -485,7 +485,7 @@ export default function SettingsPage() {
                         >
                             {isDeleting ? "Deleting…" : "🗑️ Permanently Delete Account"}
                         </button>
-                        {deleteError && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-sm)" }}>{deleteError}</p>}
+                        {deleteError && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mt-2">{deleteError}</p>}
                     </div>
                 </div>
             </div>

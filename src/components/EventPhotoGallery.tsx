@@ -101,8 +101,8 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
     }
 
     return (
-        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-md)" }}>
+        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
+            <div className="justify-between mb-4" style={{ display: "flex", alignItems: "center" }}>
                 <h3>📸 Event Photos ({photos.length})</h3>
                 <label className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" style={{ cursor: "pointer" }}>
                     {uploading ? "Uploading…" : "+ Add Photo"}
@@ -118,10 +118,10 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
                 </label>
             </div>
 
-            {error && <p style={{ color: "var(--color-error)", fontSize: "0.85rem", marginBottom: "var(--space-sm)" }}>{error}</p>}
+            {error && <p className="text-[var(--color-error)] text-[0.85rem] mb-2" >{error}</p>}
 
             {photos.length === 0 ? (
-                <p style={{ color: "var(--color-text-muted)" }}>No photos yet — share yours!</p>
+                <p className="text-muted" >No photos yet — share yours!</p>
             ) : (
                 <div className="grid grid-cols-[repeat(auto-fill, minmax(140px, 1fr))] gap-2 mt-2">
                     {photos.map(p => (

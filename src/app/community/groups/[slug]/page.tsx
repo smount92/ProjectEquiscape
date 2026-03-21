@@ -36,16 +36,16 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
             <div className="page-content">
                 {/* Group Header */}
                 <div className="pb-6 border-b border-edge mb-6">
-                    <Link href="/community/groups" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginBottom: "var(--space-md)" }}>← All Groups</Link>
+                    <Link href="/community/groups" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge mb-4">← All Groups</Link>
                     <h1>{group.name}</h1>
-                    <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap", marginTop: "var(--space-sm)", color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                    <div className="gap-4 mt-2 text-muted text-[calc(0.85rem*var(--font-scale))]" style={{ display: "flex", flexWrap: "wrap" }}>
                         <span>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}</span>
                         {group.region && <span>📍 {group.region}</span>}
                         <span>👥 {group.memberCount} member{group.memberCount !== 1 ? "s" : ""}</span>
                         <span>Created by @{group.creatorAlias}</span>
                     </div>
                     {group.description && (
-                        <p style={{ marginTop: "var(--space-md)", lineHeight: 1.6 }}>{group.description}</p>
+                        <p className="mt-4 leading-[1.6]" >{group.description}</p>
                     )}
                 </div>
 
@@ -58,7 +58,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
                         currentUserId={user.id}
                     />
                 ) : (
-                    <div className="empty-state" style={{ marginTop: "var(--space-xl)" }}>
+                    <div className="empty-state mt-8">
                         <p>Join this group to see posts and participate.</p>
                     </div>
                 )}

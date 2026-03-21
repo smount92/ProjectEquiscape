@@ -90,8 +90,8 @@ export default function StableGrid({
     return (
         <>
             {horseCards.length > 0 && (
-                <div style={{ display: "flex", gap: "var(--space-md)", alignItems: "center", flexWrap: "wrap", marginBottom: "var(--space-md)" }}>
-                    <div style={{ flex: 1, minWidth: "200px" }}>
+                <div className="gap-4 mb-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                    <div className="flex-1 min-w-[200px]" >
                         <SearchBar
                             value={searchQuery}
                             onChange={setSearchQuery}
@@ -171,7 +171,7 @@ export default function StableGrid({
                                         </span>
                                     )}
                                     {horse.assetCategory && horse.assetCategory !== "model" && (
-                                        <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-badge category-badge" style={{ background: "rgba(124, 109, 240, 0.85)", color: "#fff" }}>
+                                        <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-badge category-badge bg-[rgba(124,109,240,0.85)] text-white">
                                             {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
                                         </span>
                                     )}
@@ -186,12 +186,12 @@ export default function StableGrid({
                                     <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-name">{horse.customName}</div>
                                     <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis">{horse.refName}</div>
                                     {horse.releaseLine && (
-                                        <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                        <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis text-[calc(0.7rem*var(--font-scale))] opacity-[0.7] mt-[2px]">
                                             🎨 {horse.releaseLine}
                                         </div>
                                     )}
                                     {horse.sculptor && (
-                                        <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                        <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis text-[calc(0.7rem*var(--font-scale))] opacity-[0.7] mt-[2px]">
                                             ✂️ {horse.sculptor}
                                         </div>
                                     )}

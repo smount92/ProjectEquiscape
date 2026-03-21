@@ -270,7 +270,7 @@ export default function Header() {
 
           {/* "More" dropdown for overflow items */}
           {hasOverflow && (
-            <div className="relative" ref={moreMenuRef} style={{ flexShrink: 0 }}>
+            <div className="relative shrink-0" ref={moreMenuRef}>
               <button
                 className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all"
                 onClick={() => setMoreMenuOpen(!moreMenuOpen)}
@@ -279,7 +279,7 @@ export default function Header() {
                 style={{ cursor: "pointer", background: "none", border: "none", fontFamily: "inherit" }}
               >
                 <MoreHorizontal size={16} strokeWidth={1.5} /> More
-                <ChevronDown size={12} strokeWidth={2} style={{ marginLeft: 2 }} />
+                <ChevronDown size={12} strokeWidth={2}  className="ml-[2]" />
               </button>
               {moreMenuOpen && (
                 <div className="absolute top-[calc(100% + 8px)] right-0 min-w-[200px] bg-[var(--color-bg-secondary)] border border-edge rounded-lg p-1 shadow-lg z-[200] flex flex-col">
@@ -327,7 +327,7 @@ export default function Header() {
               <span className="sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-rounded-full bg-[rgba(0, 0, 0, 0.06)] inline-flex items-center justify-center overflow-hidden shrink-0 font-bold text-muted">
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl} alt={aliasName || "User"} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                  <img src={avatarUrl} alt={aliasName || "User"} className="w-full h-full rounded-full" style={{ objectFit: "cover" }} />
                 ) : (
                   aliasName ? aliasName.charAt(0).toUpperCase() : "U"
                 )}

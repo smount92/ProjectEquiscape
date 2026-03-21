@@ -146,7 +146,7 @@ export default function DashboardShell({
                         Select All ({horseCards.length})
                     </button>
                     {selectedIds.size > 0 && (
-                        <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <span className="text-muted text-sm" >
                             {selectedIds.size} selected
                         </span>
                     )}
@@ -228,12 +228,12 @@ export default function DashboardShell({
             {showDeleteConfirm && createPortal(
                 <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
                     <div className="modal-content max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
-                        <h3 style={{ marginBottom: "var(--space-md)" }}>🗑️ Confirm Delete</h3>
-                        <p style={{ marginBottom: "var(--space-lg)", color: "var(--color-text-secondary)" }}>
+                        <h3 className="mb-4" >🗑️ Confirm Delete</h3>
+                        <p className="mb-6 text-ink-light" >
                             Are you sure you want to delete <strong>{selectedIds.size}</strong> item{selectedIds.size !== 1 ? "s" : ""}?
                             This cannot be undone. All photos and associated data will be permanently removed.
                         </p>
-                        <div style={{ display: "flex", gap: "var(--space-md)", justifyContent: "flex-end" }}>
+                        <div className="gap-4 justify-end" style={{ display: "flex" }}>
                             <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setShowDeleteConfirm(false)}>
                                 Cancel
                             </button>

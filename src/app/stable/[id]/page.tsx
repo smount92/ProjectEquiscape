@@ -313,7 +313,7 @@ export default async function HorsePassportPage({
 
       {/* Wishlist demand banner */}
       {wishlistDemand > 0 && (
-        <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4 animate-fade-in-up" style={{ marginBottom: "var(--space-lg)", background: "rgba(239, 68, 68, 0.1)", borderColor: "rgba(239, 68, 68, 0.3)" }}>
+        <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4 animate-fade-in-up mb-6 bg-[rgba(239,68,68,0.1)] border-[rgba(239,68,68,0.3)]">
           🔥 <strong>{wishlistDemand} collector{wishlistDemand > 1 ? "s" : ""}</strong> {wishlistDemand > 1 ? "are" : "is"} looking for this model! List it for sale to notify them.
         </div>
       )}
@@ -335,7 +335,7 @@ export default async function HorsePassportPage({
                 {refInfo.maker} — {refInfo.name}
               </p>
             ) : (
-              <p className="text-[calc(var(--font-size-md)*var(--font-scale))] text-[#59493A] mb-1" style={{ opacity: 0.6, fontStyle: "italic" }}>
+              <p className="text-[calc(var(--font-size-md)*var(--font-scale))] text-[#59493A] mb-1 opacity-[0.6]" style={{ fontStyle: "italic" }}>
                 Unlisted / Custom Entry
               </p>
             )}
@@ -405,7 +405,7 @@ export default async function HorsePassportPage({
             ) : (
               <div className="flex justify-between items-center py-[5px] px-[0] border-b border-[rgba(255, 255, 255, 0.04)]">
                 <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-medium">Reference</span>
-                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%]" style={{ opacity: 0.6, fontStyle: "italic" }}>
+                <span className="text-[calc(0.8rem*var(--font-scale))] text-ink font-semibold text-right max-w-[60%] opacity-[0.6]" style={{ fontStyle: "italic" }}>
                   Not linked to database — Custom Entry
                 </span>
               </div>
@@ -546,7 +546,7 @@ export default async function HorsePassportPage({
           {horse.public_notes && (
             <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">📝</span> Notes</h3>
-              <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
+              <p className="text-ink-light leading-[1.6] m-0 whitespace-pre-wrap" >
                 {horse.public_notes}
               </p>
             </div>

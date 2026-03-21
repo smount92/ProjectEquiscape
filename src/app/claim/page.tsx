@@ -113,16 +113,16 @@ export default function ClaimPage() {
     if (success) {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: "500px", margin: "0 auto", textAlign: "center", padding: "var(--space-2xl)" }}>
-                    <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>🎉</div>
-                    <h1 style={{ fontSize: "calc(1.5rem * var(--font-scale))" }}>
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up max-w-[500px] mx-auto p-12" style={{ textAlign: "center" }}>
+                    <div className="text-[3rem] mb-4" >🎉</div>
+                    <h1 className="text-[calc(1.5rem*var(--font-scale))]" >
                         Welcome to your stable!
                     </h1>
-                    <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-sm)", marginBottom: "var(--space-lg)" }}>
+                    <p className="text-muted mt-2 mb-6" >
                         <strong>{success.horseName}</strong> has been successfully transferred to your account.
                         The full Hoofprint™ history has been preserved.
                     </p>
-                    <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "center", flexWrap: "wrap" }}>
+                    <div className="gap-2" style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
                         <Link href={`/stable/${success.horseId}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
                             🐴 View Passport
                         </Link>
@@ -147,13 +147,13 @@ export default function ClaimPage() {
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: "520px", margin: "0 auto", padding: "var(--space-2xl)" }}>
-                <div style={{ textAlign: "center", marginBottom: "var(--space-lg)" }}>
-                    <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>📦</div>
-                    <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up max-w-[520px] mx-auto p-12">
+                <div className="mb-6" style={{ textAlign: "center" }}>
+                    <div className="text-[2.5rem] mb-2" >📦</div>
+                    <h1 className="text-[calc(1.3rem*var(--font-scale))]" >
                         <span className="text-forest">Claim a Horse</span>
                     </h1>
-                    <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))", marginTop: "var(--space-xs)" }}>
+                    <p className="text-muted text-[calc(0.85rem*var(--font-scale))] mt-1" >
                         Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
                     </p>
                 </div>
@@ -167,7 +167,7 @@ export default function ClaimPage() {
                         marginBottom: "var(--space-lg)",
                         background: "var(--color-bg-elevated)",
                     }}>
-                        <div style={{ display: "flex", gap: "var(--space-lg)", alignItems: "center" }}>
+                        <div className="gap-6" style={{ display: "flex", alignItems: "center" }}>
                             {preview.photo ? (
                                 <img
                                     src={preview.photo}
@@ -187,11 +187,11 @@ export default function ClaimPage() {
                                     fontSize: "2rem",
                                 }}>🐴</div>
                             )}
-                            <div style={{ flex: 1 }}>
-                                <h3 style={{ fontSize: "calc(1.1rem * var(--font-scale))", fontWeight: 700, marginBottom: 4 }}>
+                            <div className="flex-1" >
+                                <h3 className="text-[calc(1.1rem*var(--font-scale))] font-bold mb-[4]" >
                                     {preview.name}
                                 </h3>
-                                <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                <p className="text-sm text-muted" >
                                     {preview.finish} · {preview.condition}
                                 </p>
                             </div>
@@ -203,21 +203,21 @@ export default function ClaimPage() {
                             paddingTop: "var(--space-md)",
                             borderTop: "1px solid var(--color-border)",
                         }}>
-                            <div style={{ textAlign: "center", flex: 1 }}>
-                                <span style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--color-accent-primary)" }}>
+                            <div className="flex-1" style={{ textAlign: "center" }}>
+                                <span className="text-[1.2rem] font-bold text-forest" >
                                     {preview.timelineCount}
                                 </span>
                                 <br />
-                                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                <span className="text-xs text-muted" >
                                     Hoofprint Events
                                 </span>
                             </div>
-                            <div style={{ textAlign: "center", flex: 1 }}>
-                                <span style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--color-accent-primary)" }}>
+                            <div className="flex-1" style={{ textAlign: "center" }}>
+                                <span className="text-[1.2rem] font-bold text-forest" >
                                     {preview.ownerCount}
                                 </span>
                                 <br />
-                                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                <span className="text-xs text-muted" >
                                     Previous Owner{preview.ownerCount !== 1 ? "s" : ""}
                                 </span>
                             </div>
@@ -264,7 +264,7 @@ export default function ClaimPage() {
                         </div>
 
                         {error && (
-                            <p style={{ color: "#ef4444", fontSize: "calc(0.8rem * var(--font-scale))", textAlign: "center", marginBottom: "var(--space-md)" }}>
+                            <p className="text-[#ef4444] text-[calc(0.8rem*var(--font-scale))] mb-4" style={{ textAlign: "center" }}>
                                 {error}
                             </p>
                         )}
@@ -281,12 +281,12 @@ export default function ClaimPage() {
                 )}
 
                 {error && preview && (
-                    <p style={{ color: "#ef4444", fontSize: "calc(0.8rem * var(--font-scale))", textAlign: "center", marginTop: "var(--space-md)" }}>
+                    <p className="text-[#ef4444] text-[calc(0.8rem*var(--font-scale))] mt-4" style={{ textAlign: "center" }}>
                         {error}
                     </p>
                 )}
 
-                <p style={{ textAlign: "center", fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-md)" }}>
+                <p className="text-[calc(0.75rem*var(--font-scale))] text-muted mt-4" style={{ textAlign: "center" }}>
                     The horse&apos;s full Hoofprint™ history will transfer with it.
                     <br />
                     Photos, show records, and provenance are preserved forever.

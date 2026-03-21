@@ -41,27 +41,27 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
     });
 
     return (
-        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
+        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
             <div
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                 onClick={() => setExpanded(!expanded)}
             >
-                <h3 style={{ margin: 0 }}>📋 Group Registry</h3>
-                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                <h3 className="m-0" >📋 Group Registry</h3>
+                <span className="text-muted text-[calc(0.85rem*var(--font-scale))]" >
                     {expanded ? "▲" : "▼"} {entries.length > 0 ? `${entries.length} models` : ""}
                 </span>
             </div>
 
             {expanded && (
-                <div style={{ marginTop: "var(--space-md)" }}>
-                    <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                <div className="mt-4" >
+                    <p className="text-muted text-[calc(0.8rem*var(--font-scale))] mb-4" >
                         Public models from all group members — a shared catalog of the group&apos;s collection.
                     </p>
 
                     {loading ? (
-                        <p style={{ color: "var(--color-text-muted)" }}>Loading registry…</p>
+                        <p className="text-muted" >Loading registry…</p>
                     ) : entries.length === 0 ? (
-                        <p style={{ color: "var(--color-text-muted)" }}>
+                        <p className="text-muted" >
                             No public models from group members yet.
                         </p>
                     ) : (
@@ -96,13 +96,13 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
                                                     className="flex items-center gap-2 py-1.5 border-b border-edge text-sm last:border-b-0 no-underline text-ink hover:text-forest"
                                                 >
                                                     <span>🐴 {h.horseName}</span>
-                                                    <span style={{ marginLeft: "auto", fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                                    <span className="text-xs text-muted" style={{ marginLeft: "auto" }}>
                                                         {h.finishType}
                                                     </span>
                                                 </Link>
                                             ))}
                                             {horses.length > 8 && (
-                                                <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))", marginTop: 4 }}>
+                                                <p className="text-muted text-xs mt-[4]" >
                                                     +{horses.length - 8} more
                                                 </p>
                                             )}

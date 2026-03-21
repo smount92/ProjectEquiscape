@@ -124,7 +124,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div style={{ textAlign: "center", marginTop: "var(--space-md)" }}>
+        <div className="mt-4" style={{ textAlign: "center" }}>
           <Link
             href="/forgot-password"
             style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)" }}

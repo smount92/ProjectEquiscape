@@ -147,8 +147,8 @@ export default function StudioSetupPage() {
     if (loading) {
         return (
             <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)", textAlign: "center" }}>
-                    <p style={{ color: "var(--color-text-muted)" }}>Loading studio settings…</p>
+                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all max-w-[700] mx-auto p-12" style={{ textAlign: "center" }}>
+                    <p className="text-muted" >Loading studio settings…</p>
                 </div>
             </div>
         );
@@ -156,16 +156,16 @@ export default function StudioSetupPage() {
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ maxWidth: 700, margin: "0 auto", padding: "var(--space-2xl)" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up max-w-[700] mx-auto p-12">
                 {/* Header */}
-                <div style={{ textAlign: "center", marginBottom: "var(--space-xl)" }}>
-                    <div style={{ fontSize: "2.5rem", marginBottom: "var(--space-sm)" }}>🎨</div>
-                    <h1 style={{ fontSize: "calc(1.4rem * var(--font-scale))" }}>
+                <div className="mb-8" style={{ textAlign: "center" }}>
+                    <div className="text-[2.5rem] mb-2" >🎨</div>
+                    <h1 className="text-[calc(1.4rem*var(--font-scale))]" >
                         <span className="text-forest">
                             {existing ? "Edit Your Studio" : "Set Up Your Art Studio"}
                         </span>
                     </h1>
-                    <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))", marginTop: "var(--space-xs)" }}>
+                    <p className="text-muted text-[calc(0.85rem*var(--font-scale))] mt-1" >
                         {existing ? "Update your studio profile and commission settings." : "Create your artist profile to start accepting commissions."}
                     </p>
                 </div>
@@ -190,8 +190,8 @@ export default function StudioSetupPage() {
 
                         <div className="mb-6">
                             <label className="block text-sm font-semibold text-ink mb-1">Studio URL Slug</label>
-                            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
-                                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))", whiteSpace: "nowrap" }}>
+                            <div className="gap-1" style={{ display: "flex", alignItems: "center" }}>
+                                <span className="text-muted text-[calc(0.8rem*var(--font-scale))]" style={{ whiteSpace: "nowrap" }}>
                                     /studio/
                                 </span>
                                 <input
@@ -294,7 +294,7 @@ export default function StudioSetupPage() {
 
                         <div className="mb-6">
                             <label className="block text-sm font-semibold text-ink mb-1">Commission Status</label>
-                            <div style={{ display: "flex", gap: "var(--space-sm)" }}>
+                            <div className="gap-2" style={{ display: "flex" }}>
                                 {(["open", "waitlist", "closed"] as const).map(s => (
                                     <button
                                         key={s}
@@ -413,12 +413,12 @@ export default function StudioSetupPage() {
 
                     {/* Feedback */}
                     {error && (
-                        <p style={{ color: "#ef4444", textAlign: "center", marginBottom: "var(--space-md)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                        <p className="text-[#ef4444] mb-4 text-[calc(0.85rem*var(--font-scale))]" style={{ textAlign: "center" }}>
                             {error}
                         </p>
                     )}
                     {success && (
-                        <p style={{ color: "#22c55e", textAlign: "center", marginBottom: "var(--space-md)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                        <p className="text-[#22c55e] mb-4 text-[calc(0.85rem*var(--font-scale))]" style={{ textAlign: "center" }}>
                             {success}
                         </p>
                     )}
@@ -434,7 +434,7 @@ export default function StudioSetupPage() {
                     </button>
 
                     {existing && (
-                        <div style={{ textAlign: "center", marginTop: "var(--space-md)" }}>
+                        <div className="mt-4" style={{ textAlign: "center" }}>
                             <a href={`/studio/${existing.studioSlug}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                                 👁️ View Public Studio Page
                             </a>

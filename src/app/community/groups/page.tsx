@@ -25,10 +25,10 @@ export default async function GroupsPage() {
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             <div className="page-content">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "var(--space-md)", marginBottom: "var(--space-xl)" }}>
+                <div className="justify-between gap-4 mb-8" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
                     <div>
                         <h1>🏛️ Groups</h1>
-                        <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
+                        <p className="text-muted mt-1" >
                             Clubs, circuits, and communities
                         </p>
                     </div>

@@ -130,12 +130,12 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
             {/* Create New */}
             {!creating ? (
-                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => setCreating(true)} style={{ marginBottom: "var(--space-lg)" }}>
+                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm mb-6" onClick={() => setCreating(true)}>
                     + New Show String
                 </button>
             ) : (
-                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
-                    <h3 style={{ marginBottom: "var(--space-md)" }}>Create Show String</h3>
+                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mb-6">
+                    <h3 className="mb-4" >Create Show String</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="mb-6">
                             <label className="block text-sm font-semibold text-ink mb-1">Show Name *</label>
@@ -146,7 +146,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                             <input className="form-input" type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
                         </div>
                     </div>
-                    <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)" }}>
+                    <div className="gap-2 mt-4" style={{ display: "flex" }}>
                         <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleCreate} disabled={saving}>
                             {saving ? "Creating..." : "Create"}
                         </button>
@@ -168,12 +168,12 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                 <div>
                                     <strong>{ss.name}</strong>
                                     {ss.showDate && (
-                                        <span style={{ marginLeft: "var(--space-sm)", color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                        <span className="ml-2 text-muted text-[calc(0.8rem*var(--font-scale))]" >
                                             📅 {new Date(ss.showDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                                         </span>
                                     )}
                                 </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
+                                <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
                                     <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card max-[480px]:rounded-[var(--radius-md)] text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{ss.entryCount}</span>
                                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={async (e) => { e.stopPropagation(); setSaving(true); await duplicateShowString(ss.id); setSaving(false); router.refresh(); }} title="Duplicate" disabled={saving}>📋</button>
                                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={e => { e.stopPropagation(); handleDeleteString(ss.id); }} title="Delete">🗑️</button>
@@ -184,13 +184,13 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                             {activeStringId === ss.id && (
                                 <div className="p-[0 var(--space-lg) var(--space-lg)] border-t border-edge">
                                     {loadingEntries ? (
-                                        <p style={{ color: "var(--color-text-muted)" }}>Loading entries...</p>
+                                        <p className="text-muted" >Loading entries...</p>
                                     ) : (
                                         <>
                                             {/* Ring Conflict Visual Timeline */}
                                             {conflicts.length > 0 && (
-                                                <div style={{ marginBottom: "var(--space-md)" }}>
-                                                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginBottom: "var(--space-xs)" }}>
+                                                <div className="mb-4" >
+                                                    <div className="gap-2 mb-1" style={{ display: "flex", alignItems: "center" }}>
                                                         <span className="inline-flex items-center gap-1 py-0.5 px-2 rounded-full bg-[rgba(239,68,68,0.15)] text-[#ef4444] text-xs font-semibold">⚠️ {conflicts.length} Conflict{conflicts.length !== 1 ? "s" : ""}</span>
                                                     </div>
                                                     {/* Timeline visualization */}
@@ -210,9 +210,9 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                             );
                                                         })}
                                                     </div>
-                                                    <div style={{ marginTop: "var(--space-xs)" }}>
+                                                    <div className="mt-1" >
                                                         {conflicts.map((c, i) => (
-                                                            <div key={i} className="py-2 px-4 rounded-md bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] text-[#f59e0b] text-[calc(0.8rem*var(--font-scale))] font-semibold" style={{ fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                                            <div key={i} className="py-2 px-4 rounded-md bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] text-[#f59e0b] text-[calc(0.8rem*var(--font-scale))] font-semibold text-[calc(0.75rem*var(--font-scale))]">
                                                                 ⚠️ {c.reason}
                                                             </div>
                                                         ))}
@@ -234,7 +234,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>No entries yet. Add horses below.</p>
+                                                <p className="text-muted text-[calc(0.85rem*var(--font-scale))]" >No entries yet. Add horses below.</p>
                                             )}
 
                                             {/* Add Entry Form */}
@@ -270,7 +270,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
                                             {/* ── Batch Results Section ── */}
                                             {entries.length > 0 && (
-                                                <div style={{ marginTop: "var(--space-lg)", borderTop: "1px solid var(--color-border)", paddingTop: "var(--space-md)" }}>
+                                                <div className="mt-6 pt-4" style={{ borderTop: "1px solid var(--color-border)" }}>
                                                     {!showResults ? (
                                                         <button
                                                             className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
@@ -287,8 +287,8 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                         </button>
                                                     ) : (
                                                         <div>
-                                                            <h4 style={{ marginBottom: "var(--space-sm)" }}>🏆 Batch Results</h4>
-                                                            <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))", marginBottom: "var(--space-sm)" }}>
+                                                            <h4 className="mb-2" >🏆 Batch Results</h4>
+                                                            <p className="text-muted text-[calc(0.8rem*var(--font-scale))] mb-2" >
                                                                 Tab through to enter placing and ribbon for each entry. Results will be saved as show records.
                                                             </p>
                                                             <table className="bg-[var(--color-surface-secondary)] font-semibold sticky top-0">
@@ -296,8 +296,8 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                     <tr>
                                                                         <th>Horse</th>
                                                                         <th>Class</th>
-                                                                        <th style={{ width: 100 }}>Placing</th>
-                                                                        <th style={{ width: 120 }}>Ribbon</th>
+                                                                        <th className="w-[100]" >Placing</th>
+                                                                        <th className="w-[120]" >Ribbon</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -367,7 +367,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                 );
                                                             })()}
 
-                                                            <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)" }}>
+                                                            <div className="gap-2 mt-4" style={{ display: "flex" }}>
                                                                 <button
                                                                     className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                                                                     disabled={savingResults}
@@ -396,7 +396,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                     {savingResults ? "Saving..." : `💾 Save ${Object.values(results).filter(r => r.placing || r.ribbon).length} Results`}
                                                                 </button>
                                                                 <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setShowResults(false)}>Cancel</button>
-                                                                {resultsSaved && <span style={{ color: "var(--color-accent-primary)", fontWeight: 600 }}>✅ Saved!</span>}
+                                                                {resultsSaved && <span className="text-forest font-semibold" >✅ Saved!</span>}
                                                             </div>
                                                         </div>
                                                     )}

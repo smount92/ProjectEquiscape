@@ -159,13 +159,13 @@ export default function RatingForm({
                 </div>
 
                 {status === "error" && errorMsg && (
-                    <div className="comment-error" style={{ marginBottom: "var(--space-md)" }}>
+                    <div className="comment-error mb-4">
                         {errorMsg}
                     </div>
                 )}
 
                 {status === "saved" && (
-                    <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))]" style={{ marginBottom: "var(--space-md)" }}>
+                    <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))] mb-4">
                         ✅ Rating submitted! Thank you.
                     </div>
                 )}

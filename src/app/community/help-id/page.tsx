@@ -97,7 +97,7 @@ export default async function HelpIdPage() {
                         <h1>
                             <span className="text-forest">Help Me ID This Model</span>
                         </h1>
-                        <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
+                        <p className="text-muted mt-1" >
                             Upload a mystery model and let the community help identify it
                         </p>
                     </div>
@@ -111,8 +111,8 @@ export default async function HelpIdPage() {
 
                 {/* Open Requests */}
                 {openRequests.length > 0 && (
-                    <section style={{ marginTop: "var(--space-2xl)" }}>
-                        <h2 style={{ fontSize: "calc(var(--font-size-lg) * var(--font-scale))", fontWeight: 700, marginBottom: "var(--space-lg)" }}>
+                    <section className="mt-12" >
+                        <h2 className="text-lg font-bold mb-6" >
                             🔍 Open Requests ({openRequests.length})
                         </h2>
                         <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6">
@@ -156,8 +156,8 @@ export default async function HelpIdPage() {
 
                 {/* Resolved Requests */}
                 {resolvedRequests.length > 0 && (
-                    <section style={{ marginTop: "var(--space-2xl)" }}>
-                        <h2 style={{ fontSize: "calc(var(--font-size-lg) * var(--font-scale))", fontWeight: 700, marginBottom: "var(--space-lg)", color: "var(--color-text-secondary)" }}>
+                    <section className="mt-12" >
+                        <h2 className="text-lg font-bold mb-6 text-ink-light" >
                             ✅ Resolved ({resolvedRequests.length})
                         </h2>
                         <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6">
@@ -200,9 +200,9 @@ export default async function HelpIdPage() {
                 )}
 
                 {openRequests.length === 0 && resolvedRequests.length === 0 && (
-                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)", marginTop: "var(--space-2xl)" }}>
-                        <p style={{ fontSize: "2rem", marginBottom: "var(--space-md)" }}>🔍</p>
-                        <p style={{ color: "var(--color-text-secondary)" }}>No ID requests yet. Be the first to submit one!</p>
+                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-[var(--space-3xl)] mt-12" style={{ textAlign: "center" }}>
+                        <p className="text-[2rem] mb-4" >🔍</p>
+                        <p className="text-ink-light" >No ID requests yet. Be the first to submit one!</p>
                     </div>
                 )}
             </div>

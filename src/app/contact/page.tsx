@@ -103,7 +103,7 @@ export default function ContactPage() {
 
                             <div className="mb-6">
                                 <label htmlFor="contact-subject" className="block text-sm font-semibold text-ink mb-1">
-                                    Subject <span style={{ color: "var(--color-text-muted)", fontWeight: 400 }}>(optional)</span>
+                                    Subject <span className="text-muted font-normal" >(optional)</span>
                                 </label>
                                 <input
                                     id="contact-subject"

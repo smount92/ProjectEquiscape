@@ -121,7 +121,7 @@ export default async function ShowDetailPage({
                         </p>
                     )}
                     {show.creatorAlias && (
-                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle" style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle text-sm">
                             Hosted by @{show.creatorAlias}
                         </p>
                     )}
@@ -150,7 +150,7 @@ export default async function ShowDetailPage({
 
             {/* Creator Actions */}
             {(isCreator || isAdmin) && (
-                <div className="animate-fade-in-up" style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end", marginBottom: "var(--space-md)" }}>
+                <div className="animate-fade-in-up gap-2 justify-end mb-4" style={{ display: "flex" }}>
                     <Link href={`/community/events/${showId}/manage`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                         ⚙️ Manage Classes
                     </Link>
@@ -166,20 +166,20 @@ export default async function ShowDetailPage({
                     border: "1px solid rgba(139, 92, 246, 0.3)",
                     textAlign: "center",
                 }}>
-                    <div style={{ fontSize: "2rem", marginBottom: "var(--space-sm)" }}>🏅</div>
-                    <h3 style={{ marginBottom: "var(--space-sm)" }}>
+                    <div className="text-[2rem] mb-2" >🏅</div>
+                    <h3 className="mb-2" >
                         You Are an Assigned Judge
                     </h3>
                     {show.status === "open" ? (
-                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <p className="text-muted text-sm" >
                             This show is still accepting entries. Once the host transitions it to <strong>&quot;Judging&quot;</strong> status, the judging panel will appear here for you to assign placings.
                         </p>
                     ) : show.status === "judging" ? (
-                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <p className="text-muted text-sm" >
                             The judging panel is available below. Scroll down to assign placings to each entry.
                         </p>
                     ) : (
-                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <p className="text-muted text-sm" >
                             Judging is complete. Results are final.
                         </p>
                     )}
@@ -189,7 +189,7 @@ export default async function ShowDetailPage({
             {/* Entry Form */}
             {isOpen && (
                 <div className="mb-8 p-6 bg-[rgba(129, 140, 248, 0.04)] border border-[rgba(129, 140, 248, 0.15)] rounded-lg animate-fade-in-up">
-                    <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                    <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
                         Enter Your Horse
                     </h2>
                     <ShowEntryForm showId={showId} userHorses={horseOptions} classes={classOptions.length > 0 ? classOptions : undefined} />
@@ -197,7 +197,7 @@ export default async function ShowDetailPage({
             )}
 
             {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up" style={{ marginBottom: "var(--space-lg)" }}>
+            <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up mb-6">
                 <Link href="/shows">← All Shows</Link>
             </nav>
 
@@ -237,7 +237,7 @@ export default async function ShowDetailPage({
                         padding: "var(--space-xl)",
                         marginBottom: "var(--space-lg)",
                     }}>
-                        <h2 style={{ fontSize: "calc(1.3rem * var(--font-scale))", marginBottom: "var(--space-sm)", textAlign: "center" }}>
+                        <h2 className="text-[calc(1.3rem*var(--font-scale))] mb-2" style={{ textAlign: "center" }}>
                             🏆 <span className="text-forest">Results</span>
                         </h2>
 
@@ -247,18 +247,18 @@ export default async function ShowDetailPage({
                                 <div className="text-[calc(1.2rem*var(--font-scale))] font-extrabold mb-2">
                                     {MEDAL_MAP[entry.placing!] || "🏆"} {entry.placing}
                                 </div>
-                                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--space-md)" }}>
+                                <div className="gap-4" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                                     {entry.thumbnailUrl && (
-                                        <div style={{ width: 60, height: 60, borderRadius: "var(--radius-md)", overflow: "hidden", flexShrink: 0 }}>
+                                        <div className="w-[60] h-[60] rounded-md shrink-0" style={{ overflow: "hidden" }}>
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                            <img src={entry.thumbnailUrl} alt={entry.horseName} className="w-full h-full" style={{ objectFit: "cover" }} />
                                         </div>
                                     )}
                                     <div>
-                                        <Link href={`/community/${entry.horseId}`} style={{ fontWeight: 700, fontSize: "calc(1rem * var(--font-scale))" }}>
+                                        <Link href={`/community/${entry.horseId}`} className="font-bold text-[calc(1rem*var(--font-scale))]" >
                                             🐴 {entry.horseName}
                                         </Link>
-                                        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                        <div className="text-muted text-[calc(0.8rem*var(--font-scale))]" >
                                             by <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>@{entry.ownerAlias}</Link>
                                         </div>
                                     </div>
@@ -300,8 +300,8 @@ export default async function ShowDetailPage({
 
                         {/* Remaining placed entries below podium */}
                         {topPlaced.length > 3 && (
-                            <div style={{ marginTop: "var(--space-md)" }}>
-                                <h3 style={{ fontSize: "calc(0.9rem * var(--font-scale))", marginBottom: "var(--space-sm)", color: "var(--color-text-muted)" }}>Also Placed</h3>
+                            <div className="mt-4" >
+                                <h3 className="text-[calc(0.9rem*var(--font-scale))] mb-2 text-muted" >Also Placed</h3>
                                 {topPlaced.slice(3).map(entry => {
                                     const placing = entry.placing!;
                                     const ribbon = RIBBON_MAP[placing] || "green";
@@ -313,18 +313,18 @@ export default async function ShowDetailPage({
                                             marginBottom: "var(--space-xs)",
                                         }}>
                                             {entry.thumbnailUrl && (
-                                                <div style={{ width: 36, height: 36, borderRadius: "var(--radius-sm)", overflow: "hidden", flexShrink: 0 }}>
+                                                <div className="w-[36] h-[36] rounded-sm shrink-0" style={{ overflow: "hidden" }}>
                                                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                    <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                    <img src={entry.thumbnailUrl} alt={entry.horseName} className="w-full h-full" style={{ objectFit: "cover" }} />
                                                 </div>
                                             )}
-                                            <div style={{ flex: 1 }}>
-                                                <Link href={`/community/${entry.horseId}`} style={{ fontWeight: 600 }}>{entry.horseName}</Link>
-                                                <span style={{ color: "var(--color-text-muted)", marginLeft: "var(--space-xs)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                            <div className="flex-1" >
+                                                <Link href={`/community/${entry.horseId}`} className="font-semibold" >{entry.horseName}</Link>
+                                                <span className="text-muted ml-1 text-[calc(0.75rem*var(--font-scale))]" >
                                                     by @{entry.ownerAlias}
                                                 </span>
                                             </div>
-                                            <span style={{ fontWeight: 700, color: "var(--color-accent, #f59e0b)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                                            <span className="font-bold text-[var(--color-accent, #f59e0b)] text-[calc(0.85rem*var(--font-scale))]" >
                                                 {MEDAL_MAP[placing] || "🏅"} {placing}
                                             </span>
                                         </div>
@@ -345,9 +345,9 @@ export default async function ShowDetailPage({
                     background: "rgba(245, 158, 11, 0.1)",
                     border: "1px solid rgba(245, 158, 11, 0.3)",
                 }}>
-                    <div style={{ fontSize: "2rem" }}>🟡</div>
+                    <div className="text-[2rem]" >🟡</div>
                     <h3>Judging in Progress</h3>
-                    <p style={{ color: "var(--color-text-muted)" }}>
+                    <p className="text-muted" >
                         {isExpertJudged
                             ? ((isCreator || isJudge)
                                 ? "Use the judging panel below to assign placings."
@@ -431,7 +431,7 @@ export default async function ShowDetailPage({
                                     </Link>
                                     {" · "}{entry.finishType}
                                     {entry.className && (
-                                        <span style={{ marginLeft: "var(--space-xs)", color: "var(--color-accent-primary)" }}>
+                                        <span className="ml-1 text-forest" >
                                             · {entry.divisionName && `${entry.divisionName} / `}{entry.className}
                                         </span>
                                     )}
@@ -448,7 +448,7 @@ export default async function ShowDetailPage({
                                     </p>
                                 )}
                             </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                            <div className="gap-1" style={{ display: "flex", alignItems: "center" }}>
                                 {isExpertJudged ? (
                                     entry.placing && show.status === "closed" ? (
                                         <span style={{
@@ -462,7 +462,7 @@ export default async function ShowDetailPage({
                                             {entry.placing}
                                         </span>
                                     ) : isJudging ? (
-                                        <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                        <span className="text-muted text-[calc(0.75rem*var(--font-scale))]" >
                                             🏅 Expert judging
                                         </span>
                                     ) : null

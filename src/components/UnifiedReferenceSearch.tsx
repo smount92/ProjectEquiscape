@@ -274,8 +274,8 @@ export default function UnifiedReferenceSearch({
                   {noResults && (
                     <div className="py-6 px-4 text-center text-[var(--color-text-secondary)] text-sm flex flex-col items-center gap-2">
                       <p>No references found for &ldquo;{query}&rdquo;</p>
-                      <p style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
-                        Check the <a href="/market" style={{ color: "var(--color-accent-primary)" }}>📈 Price Guide</a> for market data, or use the button below.
+                      <p className="text-xs text-muted mt-1" >
+                        Check the <a href="/market" className="text-forest" >📈 Price Guide</a> for market data, or use the button below.
                       </p>
                       <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => { setShowSuggestModal(true); setShowDropdown(false); }}>
                         ✍️ Can&apos;t find it? Suggest adding it
@@ -292,7 +292,7 @@ export default function UnifiedReferenceSearch({
             <div className="mt-4 border border-edge rounded-lg overflow-hidden bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
               <div className="flex items-center justify-between py-2 px-4 bg-[rgba(44, 85, 69, 0.06)] border-b border-edge text-sm text-[var(--color-text-secondary)]">
                 <span>Releases for <strong>{selectedItem.title}</strong></span>
-                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleClear} style={{ fontSize: "0.75rem" }}>✕ Clear</button>
+                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge text-xs" onClick={handleClear}>✕ Clear</button>
               </div>
 
               {/* Option: Select mold directly */}

@@ -79,12 +79,12 @@ export default async function MarketPricePage({
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <div className="page-content" style={{ maxWidth: 900 }}>
+            <div className="page-content max-w-[900]">
                 <div className="animate-fade-in-up">
                     {/* Header */}
-                    <div style={{ textAlign: "center", marginBottom: "var(--space-2xl)" }}>
+                    <div className="mb-12" style={{ textAlign: "center" }}>
                         <h1>📈 Model Horse <span className="text-forest">Price Guide</span></h1>
-                        <p style={{ color: "var(--color-text-secondary)", fontSize: "calc(var(--font-size-md) * var(--font-scale))", marginTop: "var(--space-sm)" }}>
+                        <p className="text-ink-light text-[calc(var(--font-size-md)*var(--font-scale))] mt-2" >
                             The Blue Book — Real sale data from real collectors
                         </p>
                     </div>
@@ -96,14 +96,14 @@ export default async function MarketPricePage({
 
                     {/* Results (Server-rendered) */}
                     {items.length === 0 ? (
-                        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
-                            <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>📊</div>
-                            <h3 style={{ marginBottom: "var(--space-sm)" }}>
+                        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-[var(--space-3xl)]" style={{ textAlign: "center" }}>
+                            <div className="text-[3rem] mb-4" >📊</div>
+                            <h3 className="mb-2" >
                                 {query || itemType !== "all"
                                     ? "No matching price data"
                                     : "The Blue Book Grows With Every Sale"}
                             </h3>
-                            <p style={{ color: "var(--color-text-secondary)", maxWidth: 400, margin: "0 auto" }}>
+                            <p className="text-ink-light max-w-[400] mx-auto" >
                                 {query || itemType !== "all"
                                     ? "Try broadening your search or changing the filter."
                                     : "Complete a transaction to contribute market data. Prices appear here after verified sales."}
@@ -112,7 +112,7 @@ export default async function MarketPricePage({
                     ) : (
                         <>
                             <div className="mb-4">
-                                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                <span className="text-muted text-sm" >
                                     {total} item{total !== 1 ? "s" : ""} with price data
                                 </span>
                             </div>
@@ -167,7 +167,7 @@ export default async function MarketPricePage({
                                     ) : (
                                         <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>← Previous</button>
                                     )}
-                                    <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                    <span className="text-muted text-sm" >
                                         Page {page} of {totalPages} ({total} items)
                                     </span>
                                     {page < totalPages ? (

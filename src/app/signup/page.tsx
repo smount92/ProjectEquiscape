@@ -43,7 +43,7 @@ export default function SignupPage() {
               ✉️
             </div>
             <h1>Check Your Email</h1>
-            <p style={{ marginTop: "var(--space-md)" }}>
+            <p className="mt-4" >
               We&apos;ve sent a confirmation link to your email address. Click
               the link to activate your account and start building your Digital
               Stable!

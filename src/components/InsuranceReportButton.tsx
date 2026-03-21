@@ -117,7 +117,7 @@ export default function InsuranceReportButton() {
                 )}
             </button>
             {status === "error" && error && (
-                <span style={{ color: "var(--color-accent-danger)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))", marginLeft: "var(--space-sm)" }}>
+                <span className="text-danger text-xs ml-2" >
                     {error}
                 </span>
             )}
@@ -125,9 +125,9 @@ export default function InsuranceReportButton() {
             {/* Collection Picker Modal */}
             {status === "picking" && (
                 <div className="modal-backdrop" onClick={handleCancel}>
-                    <div className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 400 }}>
-                        <h3 style={{ marginBottom: "var(--space-md)" }}>📄 Insurance Report Scope</h3>
-                        <p style={{ color: "var(--color-text-secondary)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-lg)" }}>
+                    <div className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all max-w-[400]" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="mb-4" >📄 Insurance Report Scope</h3>
+                        <p className="text-ink-light text-sm mb-6" >
                             Choose which horses to include in your insurance report.
                         </p>
 
@@ -147,12 +147,12 @@ export default function InsuranceReportButton() {
                         </select>
 
                         {!selectedCollection && horseCount !== null && horseCount > 200 && (
-                            <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4" style={{ marginBottom: "var(--space-md)", color: "var(--color-accent-warning, #f59e0b)" }}>
+                            <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4 mb-4 text-[var(--color-accent-warning, #f59e0b)]">
                                 ⚠️ Your stable has {horseCount} models. Generating a full report may be slow. Consider selecting a collection for faster results.
                             </div>
                         )}
 
-                        <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end" }}>
+                        <div className="gap-2 justify-end" style={{ display: "flex" }}>
                             <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={handleCancel}>
                                 Cancel
                             </button>

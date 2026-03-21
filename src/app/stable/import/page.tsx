@@ -28,7 +28,7 @@ export default async function ImportPage() {
                         <h1>
                             <span className="text-forest">Batch Import</span>
                         </h1>
-                        <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
+                        <p className="text-muted mt-1" >
                             Import your collection from a CSV spreadsheet
                         </p>
                     </div>

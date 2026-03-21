@@ -559,8 +559,8 @@ export default function EditHorsePage() {
   if (isLoading) {
     return (
       <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-        <div className="py-12 px-[0] max-w-[680px] mx-auto" style={{ textAlign: "center", padding: "var(--space-3xl)" }}>
-          <div className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ width: 36, height: 36, margin: "0 auto var(--space-lg)", borderWidth: 3, borderColor: "var(--color-border)", borderTopColor: "var(--color-accent-primary)" }} />
+        <div className="py-12 px-[0] max-w-[680px] mx-auto p-[var(--space-3xl)]" style={{ textAlign: "center" }}>
+          <div className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[36] h-[36] m-[0 auto var(--space-lg)] border-[3] border-[var(--color-border)]" style={{ borderTopColor: "var(--color-accent-primary)" }} />
           <p>Loading horse details…</p>
         </div>
       </div>
@@ -591,12 +591,12 @@ export default function EditHorsePage() {
       </nav>
 
       <div className="py-12 px-[0] max-w-[680px] mx-auto animate-fade-in-up">
-        <h1 style={{ marginBottom: "var(--space-xl)" }}>
+        <h1 className="mb-8" >
           Edit <span className="text-forest">{customName}</span>
         </h1>
 
         {saveError && (
-          <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert" style={{ marginBottom: "var(--space-xl)" }}>
+          <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mb-8" role="alert">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
             </svg>
@@ -610,7 +610,7 @@ export default function EditHorsePage() {
             <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 mb-8-icon">📸</div>
             <h2>Photo Studio</h2>
           </div>
-          <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+          <p className="text-muted text-sm mb-4" >
             Upload up to 4 standardized angles. The primary photo is used as the thumbnail everywhere.
           </p>
 
@@ -698,9 +698,9 @@ export default function EditHorsePage() {
 
           {/* Extra Details Multi-Upload Zone */}
           <div className="mt-6 border-t border-edge pt-6">
-            <div className="flex items-center gap-1 mb-1 text-sm font-semibold text-ink" style={{ marginBottom: "var(--space-xs)" }}>
+            <div className="flex items-center gap-1 mb-1 text-sm font-semibold text-ink mb-1">
               Extra Details & Flaws
-              <span style={{ fontWeight: 400, color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>{existingExtras.length + newExtraFiles.length}/10</span>
+              <span className="font-normal text-muted text-xs" >{existingExtras.length + newExtraFiles.length}/10</span>
             </div>
             <div
               className="opacity-[0.4]"
@@ -859,11 +859,11 @@ export default function EditHorsePage() {
 
           <div className="mb-6">
             <label className="block text-sm font-semibold text-ink mb-1">📋 Edition Info</label>
-            <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
+            <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
               <input type="number" className="form-input" placeholder="#"
                 value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)}
                 style={{ width: 80 }} min="1" />
-              <span style={{ color: "var(--color-text-muted)" }}>of</span>
+              <span className="text-muted" >of</span>
               <input type="number" className="form-input" placeholder="Total"
                 value={editionSize} onChange={(e) => setEditionSize(e.target.value)}
                 style={{ width: 80 }} min="1" />
@@ -886,21 +886,21 @@ export default function EditHorsePage() {
               onChange={(e) => setPublicNotes(e.target.value)}
               placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
               maxLength={500} rows={2} id="edit-public-notes" />
-            <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+            <small className="text-muted text-[var(--font-size-xs)]" >
               These notes will be visible to anyone viewing this horse&apos;s passport.
             </small>
           </div>
 
           {/* Show Bio */}
-          <div className="flex items-center gap-4 m-[var(--space-xl) 0] text-muted text-sm" style={{ margin: "var(--space-lg) 0 var(--space-md)" }}>
-            <h4 style={{ fontSize: "var(--font-size-md)", fontWeight: 600, color: "var(--color-text-secondary)" }}>
-              🏅 Show Bio <span style={{ fontWeight: 400, fontSize: "var(--font-size-sm)" }}>(Optional)</span>
+          <div className="flex items-center gap-4 m-[var(--space-xl) 0] text-muted text-sm m-[var(--space-lg) 0 var(--space-md)]">
+            <h4 className="text-[var(--font-size-md)] font-semibold text-ink-light" >
+              🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]" >(Optional)</span>
             </h4>
-            <small style={{ color: "var(--color-text-muted)", display: "block", marginTop: "var(--space-xs)" }}>
+            <small className="text-muted mt-1" style={{ display: "block" }}>
               The show identity you assign for competition — breed, gender, and age for show ring divisions.
             </small>
           </div>
-          <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+          <div className="gap-4" style={{ display: "flex", flexWrap: "wrap" }}>
             <div className="mb-6" style={{ flex: "1 1 200px" }}>
               <label className="block text-sm font-semibold text-ink mb-1">Assigned Breed</label>
               <input className="form-input" type="text" value={assignedBreed}
@@ -921,7 +921,7 @@ export default function EditHorsePage() {
               </select>
             </div>
           </div>
-          <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+          <div className="gap-4" style={{ display: "flex", flexWrap: "wrap" }}>
             <div className="mb-6" style={{ flex: "1 1 150px" }}>
               <label className="block text-sm font-semibold text-ink mb-1">Assigned Age</label>
               <input className="form-input" type="text" value={assignedAge}
@@ -962,7 +962,7 @@ export default function EditHorsePage() {
 
                 {/* Condition Change Note - shows when condition was changed */}
                 {originalCondition && conditionGrade && conditionGrade !== originalCondition && (
-                  <div className="condition-change-note animate-fade-in-up" style={{ marginTop: "var(--space-sm)" }}>
+                  <div className="condition-change-note animate-fade-in-up mt-2">
                     <div style={{
                       fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
                       color: "var(--color-accent-warning, #f59e0b)",
@@ -1054,7 +1054,7 @@ export default function EditHorsePage() {
 
         {/* Community visibility selector */}
         <div className="mt-6 py-4 px-6 rounded-lg bg-[rgba(44, 85, 69, 0.04)] border border-[rgba(44, 85, 69, 0.12)]">
-          <div className="flex items-center justify-between gap-6" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
+          <div className="flex items-center justify-between gap-6 gap-2" style={{ flexDirection: "column" }}>
             <span className="text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold text-ink">👁️ Visibility</span>
             <div className="flex gap-2 flex-wrap">
               {([
@@ -1114,7 +1114,7 @@ export default function EditHorsePage() {
           </div>
 
           <div className="flex items-start gap-2 p-4 bg-[rgba(240, 160, 108, 0.08)] border border-[rgba(240, 160, 108, 0.2)] rounded-md mb-8" role="note">
-            <span style={{ fontSize: "1.3em", flexShrink: 0, marginTop: "2px" }}>🛡️</span>
+            <span className="text-[1.3em] shrink-0 mt-[2px]" >🛡️</span>
             <p>
               <strong>This data is encrypted and only visible to you.</strong> Protected by
               strict Row Level Security.
@@ -1140,7 +1140,7 @@ export default function EditHorsePage() {
             <input className="form-input" type="text" value={purchaseDateText}
               onChange={(e) => setPurchaseDateText(e.target.value)}
               placeholder="e.g. BreyerFest 2017, Summer 2015" id="edit-purchase-date-text" />
-            <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+            <small className="text-muted text-[var(--font-size-xs)]" >
               Use this when you don&apos;t remember the exact date.
             </small>
           </div>

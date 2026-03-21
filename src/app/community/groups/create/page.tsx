@@ -45,8 +45,8 @@ export default function CreateGroupPage() {
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <div className="page-content" style={{ maxWidth: 640 }}>
-                <h1 style={{ marginBottom: "var(--space-xl)" }}>🏛️ Create Group</h1>
+            <div className="page-content max-w-[640]">
+                <h1 className="mb-8" >🏛️ Create Group</h1>
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-6">
@@ -57,7 +57,7 @@ export default function CreateGroupPage() {
                     <div className="mb-6">
                         <label className="block text-sm font-semibold text-ink mb-1">URL Slug</label>
                         <input className="form-input" value={slug} onChange={e => setSlug(e.target.value)} placeholder="pnw-collectors" />
-                        <small style={{ color: "var(--color-text-muted)" }}>modelhorsehub.com/community/groups/{slug || "your-slug"}</small>
+                        <small className="text-muted" >modelhorsehub.com/community/groups/{slug || "your-slug"}</small>
                     </div>
 
                     <div className="mb-6">
@@ -82,7 +82,7 @@ export default function CreateGroupPage() {
 
                     <div className="mb-6">
                         <label className="block text-sm font-semibold text-ink mb-1">Visibility</label>
-                        <div style={{ display: "flex", gap: "var(--space-sm)" }}>
+                        <div className="gap-2" style={{ display: "flex" }}>
                             {["public", "restricted", "private"].map(v => (
                                 <button key={v} type="button" className={`studio-status-btn ${visibility === v ? `active-${v === "public" ? "open" : v === "restricted" ? "waitlist" : "closed"}` : ""}`}
                                     onClick={() => setVisibility(v)}>
@@ -94,7 +94,7 @@ export default function CreateGroupPage() {
 
                     {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
 
-                    <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)" }}>
+                    <div className="gap-2 mt-6" style={{ display: "flex" }}>
                         <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={saving || !name.trim()}>
                             {saving ? "Creating..." : "Create Group"}
                         </button>

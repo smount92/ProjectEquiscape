@@ -32,16 +32,16 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
     };
 
     if (shows.length === 0) {
-        return <p style={{ color: "var(--color-text-muted)" }}>No shows yet. Create one above.</p>;
+        return <p className="text-muted" >No shows yet. Create one above.</p>;
     }
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
+        <div className="gap-2" style={{ display: "flex", flexDirection: "column" }}>
             {shows.map((show) => (
-                <div key={show.id} className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
-                    <div style={{ flex: 1, minWidth: "200px" }}>
-                        <div style={{ fontWeight: 600 }}>{show.title}</div>
-                        <div style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                <div key={show.id} className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-4 gap-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                    <div className="flex-1 min-w-[200px]" >
+                        <div className="font-semibold" >{show.title}</div>
+                        <div className="text-[calc(0.75rem*var(--font-scale))] text-muted" >
                             🐴 {show.entryCount} entries
                             {show.endAt && <> · ⏰ {new Date(show.endAt).toLocaleDateString()}</>}
                         </div>

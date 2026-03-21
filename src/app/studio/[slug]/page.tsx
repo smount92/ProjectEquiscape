@@ -84,35 +84,35 @@ export default async function PublicStudioPage({
             {/* Hero */}
             <div className="py-8 px-6 rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up">
                 <div className="max-w-[800px]">
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
-                        <h1 style={{ fontSize: "calc(1.8rem * var(--font-scale))", margin: 0 }}>
+                    <div className="gap-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                        <h1 className="text-[calc(1.8rem*var(--font-scale))] m-0" >
                             <span className="text-forest">{profile.studioName}</span>
                         </h1>
                         <span className={`studio-status-badge status-${profile.status}`}>
                             {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}
                         </span>
                     </div>
-                    <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)", fontSize: "calc(0.9rem * var(--font-scale))" }}>
-                        by <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} style={{ color: "var(--color-accent-primary)" }}>
+                    <p className="text-muted mt-1 text-[calc(0.9rem*var(--font-scale))]" >
+                        by <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest" >
                             @{profile.ownerAlias}
                         </Link>
                     </p>
 
                     {profile.bioArtist && (
-                        <p style={{ marginTop: "var(--space-md)", lineHeight: 1.6, maxWidth: 600, color: "var(--color-text-secondary)" }}>
+                        <p className="mt-4 leading-[1.6] max-w-[600] text-ink-light" >
                             {profile.bioArtist}
                         </p>
                     )}
 
                     {profile.specialties.length > 0 && (
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)", marginTop: "var(--space-md)" }}>
+                        <div className="gap-1 mt-4" style={{ display: "flex", flexWrap: "wrap" }}>
                             {profile.specialties.map(s => (
                                 <span key={s} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(139,92,246,0.15)] text-[#a78bfa] border border-[rgba(139,92,246,0.25)]">{s}</span>
                             ))}
                         </div>
                     )}
 
-                    <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)", flexWrap: "wrap" }}>
+                    <div className="gap-2 mt-6" style={{ display: "flex", flexWrap: "wrap" }}>
                         {profile.status !== "closed" && !isOwner && (
                             <Link href={`/studio/${slug}/request`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="request-commission-btn">
                                 🎨 Request a Commission
@@ -142,8 +142,8 @@ export default async function PublicStudioPage({
                 {/* Left: Details */}
                 <div>
                     {/* Pricing & Turnaround */}
-                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
-                        <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6 mb-6">
+                        <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
                             💰 Pricing & Timeline
                         </h2>
                         <div className="grid gap-2">
@@ -180,9 +180,9 @@ export default async function PublicStudioPage({
                         </div>
 
                         {profile.mediums.length > 0 && (
-                            <div style={{ marginTop: "var(--space-md)" }}>
-                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Mediums</span>
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)" }}>
+                            <div className="mt-4" >
+                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted mb-1" style={{ display: "block" }}>Mediums</span>
+                                <div className="gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
                                     {profile.mediums.map(m => (
                                         <span key={m} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{m}</span>
                                     ))}
@@ -191,9 +191,9 @@ export default async function PublicStudioPage({
                         )}
 
                         {profile.scalesOffered.length > 0 && (
-                            <div style={{ marginTop: "var(--space-md)" }}>
-                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted" style={{ display: "block", marginBottom: "var(--space-xs)" }}>Scales</span>
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-xs)" }}>
+                            <div className="mt-4" >
+                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted mb-1" style={{ display: "block" }}>Scales</span>
+                                <div className="gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
                                     {profile.scalesOffered.map(s => (
                                         <span key={s} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{s}</span>
                                     ))}
@@ -204,11 +204,11 @@ export default async function PublicStudioPage({
 
                     {/* Terms */}
                     {profile.termsText && (
-                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
-                            <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6">
+                            <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
                                 📄 Terms & Conditions
                             </h2>
-                            <p style={{ whiteSpace: "pre-wrap", lineHeight: 1.6, color: "var(--color-text-secondary)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                            <p className="whitespace-pre-wrap leading-[1.6] text-ink-light text-[calc(0.85rem*var(--font-scale))]" >
                                 {profile.termsText}
                             </p>
                         </div>
@@ -217,16 +217,16 @@ export default async function PublicStudioPage({
 
                 {/* Right: Commission Queue */}
                 <div>
-                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
-                        <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6">
+                        <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
                             📋 Commission Queue
                         </h2>
                         {queue.length === 0 ? (
-                            <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                            <p className="text-muted text-[calc(0.85rem*var(--font-scale))]" >
                                 No active commissions in the queue.
                             </p>
                         ) : (
-                            <div style={{ display: "grid", gap: "var(--space-sm)" }}>
+                            <div className="gap-2" style={{ display: "grid" }}>
                                 {queue.map((item, i) => {
                                     const st = COMMISSION_STATUS_LABELS[item.status] || { label: item.status, emoji: "📋" };
                                     return (
@@ -247,15 +247,15 @@ export default async function PublicStudioPage({
 
                     {/* Accepting */}
                     {profile.acceptingTypes.length > 0 && (
-                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
-                            <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
+                            <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
                                 ✅ Currently Accepting
                             </h2>
-                            <div style={{ display: "grid", gap: "var(--space-xs)" }}>
+                            <div className="gap-1" style={{ display: "grid" }}>
                                 {profile.acceptingTypes.map(t => (
-                                    <div key={t} style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", padding: "var(--space-xs) 0" }}>
-                                        <span style={{ color: "#22c55e" }}>✓</span>
-                                        <span style={{ fontSize: "calc(0.9rem * var(--font-scale))" }}>{t}</span>
+                                    <div key={t} className="gap-2 p-[var(--space-xs) 0]" style={{ display: "flex", alignItems: "center" }}>
+                                        <span className="text-[#22c55e]" >✓</span>
+                                        <span className="text-[calc(0.9rem*var(--font-scale))]" >{t}</span>
                                     </div>
                                 ))}
                             </div>

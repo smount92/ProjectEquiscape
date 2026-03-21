@@ -155,7 +155,7 @@ export default function FaqPage() {
 
     return (
         <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8">
-            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up" style={{ maxWidth: "860px" }}>
+            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up max-w-[860px]">
                 {/* Page Header */}
                 <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                     <h1>
@@ -226,7 +226,7 @@ export default function FaqPage() {
                 </div>
 
                 {/* CTA */}
-                <div className="text-center p-12 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg" style={{ marginTop: "var(--space-3xl)" }}>
+                <div className="text-center p-12 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg mt-[var(--space-3xl)]">
                     <p>Still have questions?</p>
                     <Link href="/contact" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[52px] py-4 px-12 text-[calc(var(--font-size-md)*var(--font-scale))] rounded-lg" id="faq-cta-contact">
                         Contact Us

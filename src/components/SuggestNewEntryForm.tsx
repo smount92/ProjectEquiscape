@@ -61,15 +61,15 @@ export default function SuggestNewEntryForm() {
 
     if (success) {
         return (
-            <div style={{ textAlign: "center", padding: "var(--space-xl)" }}>
-                <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>✅</div>
-                <h2 style={{ fontFamily: "var(--font-display)", marginBottom: "var(--space-sm)" }}>
+            <div className="p-8" style={{ textAlign: "center" }}>
+                <div className="text-[3rem] mb-4" >✅</div>
+                <h2 className="mb-2" style={{ fontFamily: "var(--font-display)" }}>
                     Suggestion Submitted!
                 </h2>
-                <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-lg)" }}>
+                <p className="text-muted mb-6" >
                     Your new entry suggestion is now pending review. The community can vote and discuss it.
                 </p>
-                <div style={{ display: "flex", gap: "var(--space-md)", justifyContent: "center" }}>
+                <div className="gap-4" style={{ display: "flex", justifyContent: "center" }}>
                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => router.push("/catalog/suggestions")}>
                         View All Suggestions
                     </button>
@@ -82,7 +82,7 @@ export default function SuggestNewEntryForm() {
     }
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-md)" }}>
+        <div className="gap-4" style={{ display: "flex", flexDirection: "column" }}>
             {/* Title */}
             <div className="mb-6">
                 <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-title">Title / Name *</label>
@@ -138,7 +138,7 @@ export default function SuggestNewEntryForm() {
             </div>
 
             {/* Two-column row: Scale + Color */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
+            <div className="grid-cols-2 gap-4" style={{ display: "grid" }}>
                 <div className="mb-6">
                     <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-scale">Scale</label>
                     <select id="new-entry-scale" className="form-input" value={scale} onChange={e => setScale(e.target.value)}>
@@ -165,7 +165,7 @@ export default function SuggestNewEntryForm() {
             </div>
 
             {/* Two-column row: Mold + Year */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--space-md)" }}>
+            <div className="grid-cols-2 gap-4" style={{ display: "grid" }}>
                 <div className="mb-6">
                     <label className="block text-sm font-semibold text-ink mb-1" htmlFor="new-entry-mold">Mold Name</label>
                     <input
@@ -205,7 +205,7 @@ export default function SuggestNewEntryForm() {
                     placeholder="Explain why this entry should be added. Include sources if available (e.g. 'Listed in the 2019 Breyer dealer catalog, page 12')."
                     style={{ resize: "vertical" }}
                 />
-                <span style={{ fontSize: "calc(0.7rem * var(--font-scale))", color: "var(--color-text-muted)", textAlign: "right", display: "block", marginTop: 4 }}>
+                <span className="text-[calc(0.7rem*var(--font-scale))] text-muted mt-[4]" style={{ textAlign: "right", display: "block" }}>
                     {reason.length}/2000
                 </span>
             </div>
@@ -213,7 +213,7 @@ export default function SuggestNewEntryForm() {
             {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: "var(--space-md)", justifyContent: "flex-end" }}>
+            <div className="gap-4 justify-end" style={{ display: "flex" }}>
                 <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => router.back()} disabled={isPending}>Cancel</button>
                 <button
                     className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"

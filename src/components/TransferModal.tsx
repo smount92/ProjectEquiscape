@@ -85,13 +85,13 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
 
             {isOpen && createPortal(
                 <div className="modal-overlay" onClick={handleClose}>
-                    <div className="modal-content max-sm:max-w-full" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "420px" }}>
+                    <div className="modal-content max-sm:max-w-full max-w-[420px]" onClick={(e) => e.stopPropagation()}>
                         {step === "form" ? (
                             <>
-                                <h3 style={{ marginBottom: "var(--space-md)" }}>
+                                <h3 className="mb-4" >
                                     📦 Transfer &ldquo;{horseName}&rdquo;
                                 </h3>
-                                <p style={{ fontSize: "calc(0.8rem * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-md)" }}>
+                                <p className="text-[calc(0.8rem*var(--font-scale))] text-muted mb-4" >
                                     Generate a 6-character code to send to the new owner. They&apos;ll enter it on the Claim page to complete the transfer.
                                     <strong> The code expires in 48 hours.</strong>
                                 </p>
@@ -122,7 +122,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                             min="0"
                                             step="0.01"
                                         />
-                                        <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px", fontSize: "calc(0.8rem * var(--font-scale))", cursor: "pointer" }}>
+                                        <label className="gap-[6px] mt-[6px] text-[calc(0.8rem*var(--font-scale))]" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                                             <input
                                                 type="checkbox"
                                                 checked={isPricePublic}
@@ -145,12 +145,12 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                 </div>
 
                                 {error && (
-                                    <p style={{ color: "#ef4444", fontSize: "calc(0.8rem * var(--font-scale))", marginBottom: "var(--space-sm)" }}>
+                                    <p className="text-[#ef4444] text-[calc(0.8rem*var(--font-scale))] mb-2" >
                                         {error}
                                     </p>
                                 )}
 
-                                <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end", marginTop: "var(--space-md)" }}>
+                                <div className="gap-2 justify-end mt-4" style={{ display: "flex" }}>
                                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleClose}>Cancel</button>
                                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleGenerate} disabled={generating}>
                                         {generating ? "Generating…" : "Generate Code"}
@@ -159,7 +159,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                             </>
                         ) : (
                             <>
-                                <h3 style={{ marginBottom: "var(--space-md)", textAlign: "center" }}>
+                                <h3 className="mb-4" style={{ textAlign: "center" }}>
                                     🐾 Transfer Code Ready!
                                 </h3>
                                 <div style={{
@@ -187,14 +187,14 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
                                         {copied ? "✅ Copied!" : "📋 Copy Code"}
                                     </button>
                                 </div>
-                                <p style={{ fontSize: "calc(0.8rem * var(--font-scale))", color: "var(--color-text-muted)", textAlign: "center" }}>
+                                <p className="text-[calc(0.8rem*var(--font-scale))] text-muted" style={{ textAlign: "center" }}>
                                     Send this code to the buyer/receiver. They can enter it on
                                     <strong> /claim</strong> to complete the transfer.
                                     <br />
-                                    <span style={{ color: "var(--color-accent, #f59e0b)" }}>Expires in 48 hours.</span>
+                                    <span className="text-[var(--color-accent, #f59e0b)]" >Expires in 48 hours.</span>
                                 </p>
-                                <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "center", marginTop: "var(--space-md)" }}>
-                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleCancel} style={{ color: "#ef4444" }}>
+                                <div className="gap-2 mt-4" style={{ display: "flex", justifyContent: "center" }}>
+                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge text-[#ef4444]" onClick={handleCancel}>
                                         Cancel Transfer
                                     </button>
                                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleClose}>

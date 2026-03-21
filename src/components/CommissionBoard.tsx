@@ -64,8 +64,8 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
 
             {/* Commission Cards */}
             {filteredCommissions.length === 0 ? (
-                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
-                    <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.9rem * var(--font-scale))" }}>
+                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-12" style={{ textAlign: "center" }}>
+                    <p className="text-muted text-[calc(0.9rem*var(--font-scale))]" >
                         No commissions in this category.
                     </p>
                 </div>
@@ -102,13 +102,13 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                             </p>
 
                             <div className="flex justify-between items-center mt-auto pt-2 border-t border-edge">
-                                <span style={{ fontSize: "calc(0.7rem * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                                <span className="text-[calc(0.7rem*var(--font-scale))] text-muted" >
                                     {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
                                         month: "short", day: "numeric",
                                     })}
                                 </span>
 
-                                <div style={{ display: "flex", gap: "var(--space-xs)", flexWrap: "wrap" }}>
+                                <div className="gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
                                     <Link
                                         href={`/studio/commission/${c.id}`}
                                         className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"

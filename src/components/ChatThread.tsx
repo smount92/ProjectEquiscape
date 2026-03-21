@@ -227,7 +227,7 @@ export default function ChatThread({
                         id="chat-send-button"
                     >
                         {sending ? (
-                            <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ width: 16, height: 16 }} aria-hidden="true" />
+                            <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[16] h-[16]" aria-hidden="true" />
                         ) : (
                             <svg
                                 width="18"

@@ -25,7 +25,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
     return (
         <div className="animate-fade-in-up">
             {/* Search */}
-            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md mb-4">
                 <input
                     type="text"
                     className="form-input"
@@ -37,7 +37,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
             </div>
 
             {/* Filter Chips */}
-            <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap", marginBottom: "var(--space-lg)" }}>
+            <div className="gap-4 mb-6" style={{ display: "flex", flexWrap: "wrap" }}>
                 <div className="flex flex-wrap gap-1">
                     <button className={`studio-chip ${statusFilter === "all" ? "active" : ""}`} onClick={() => setStatusFilter("all")}>All Status</button>
                     {(["open", "waitlist", "closed"] as const).map(s => (
@@ -77,9 +77,9 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
                                     {a.priceRangeMin != null && <span>💰 ${a.priceRangeMin}–${a.priceRangeMax}</span>}
                                 </div>
                                 {a.specialties.length > 0 && (
-                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: "var(--space-xs)" }}>
+                                    <div className="gap-[4] mt-1" style={{ display: "flex", flexWrap: "wrap" }}>
                                         {a.specialties.slice(0, 3).map(s => (
-                                            <span key={s} className="py-[6px] px-[14px] rounded-full border border-edge bg-card max-[480px]:rounded-[var(--radius-md)] text-ink-light text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all" style={{ fontSize: "0.7rem", padding: "2px 6px" }}>{s}</span>
+                                            <span key={s} className="py-[6px] px-[14px] rounded-full border border-edge bg-card max-[480px]:rounded-[var(--radius-md)] text-ink-light text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all text-[0.7rem] p-[2px 6px]">{s}</span>
                                         ))}
                                     </div>
                                 )}

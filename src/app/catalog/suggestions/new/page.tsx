@@ -14,18 +14,18 @@ export default async function SuggestNewEntryPage() {
     if (!user) redirect("/login");
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6" style={{ maxWidth: 720 }}>
+        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 max-w-[720]">
             <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6 animate-fade-in-up">
                 <Link href="/catalog">📚 Catalog</Link>
                 <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
                 <span>Suggest New Entry</span>
             </nav>
 
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-xl)" }}>
-                <h1 style={{ fontFamily: "var(--font-display)", fontSize: "calc(1.5rem * var(--font-scale))", marginBottom: "var(--space-xs)" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up p-8">
+                <h1 className="text-[calc(1.5rem*var(--font-scale))] mb-1" style={{ fontFamily: "var(--font-display)" }}>
                     📗 Suggest a New Catalog Entry
                 </h1>
-                <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-lg)" }}>
+                <p className="text-muted mb-6" >
                     Can&apos;t find a model in the catalog? Submit the details below and the community will review your suggestion.
                 </p>
 

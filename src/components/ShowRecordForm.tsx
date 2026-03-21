@@ -126,7 +126,7 @@ export default function ShowRecordForm({
             <form onSubmit={handleSubmit}>
                 <div className="mb-6">
                     <label className="block text-sm font-semibold text-ink mb-1">
-                        Show Name <span style={{ color: "#e74c6f" }}>*</span>
+                        Show Name <span className="text-[#e74c6f]" >*</span>
                     </label>
                     <input
                         className="form-input"
@@ -175,7 +175,7 @@ export default function ShowRecordForm({
                         placeholder="e.g. OF Stock Horse Mare, CM Decorator"
                         id="show-record-class-name"
                     />
-                    <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+                    <small className="text-muted text-[var(--font-size-xs)]" >
                         Individual class name (not division or section callbacks).
                     </small>
                 </div>
@@ -191,7 +191,7 @@ export default function ShowRecordForm({
                         placeholder="e.g. Spring 2023, BreyerFest 2015"
                         id="show-record-date-text"
                     />
-                    <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+                    <small className="text-muted text-[var(--font-size-xs)]" >
                         Use this when you don&apos;t know the exact date.
                     </small>
                 </div>
@@ -237,7 +237,7 @@ export default function ShowRecordForm({
                     />
                 </div>
 
-                <div className="mb-6" style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
+                <div className="mb-6 gap-2" style={{ display: "flex", alignItems: "center" }}>
                     <input
                         type="checkbox"
                         checked={isNan}
@@ -245,7 +245,7 @@ export default function ShowRecordForm({
                         id="show-record-nan"
                         style={{ width: 18, height: 18, accentColor: "#F59E0B" }}
                     />
-                    <label htmlFor="show-record-nan" className="block text-sm font-semibold text-ink mb-1" style={{ marginBottom: 0 }}>
+                    <label htmlFor="show-record-nan" className="block text-sm font-semibold text-ink mb-1 mb-0">
                         ⭐ NAN Achievement
                     </label>
                 </div>
@@ -341,7 +341,7 @@ export default function ShowRecordForm({
                 )}
 
                 {status === "error" && errorMsg && (
-                    <div className="comment-error" style={{ marginBottom: "var(--space-md)" }}>
+                    <div className="comment-error mb-4">
                         {errorMsg}
                     </div>
                 )}

@@ -77,13 +77,13 @@ export default function HelpIdRequestForm() {
     }
 
     return (
-        <div className="help-id-form-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all card animate-fade-in-up" style={{ marginTop: "var(--space-lg)" }}>
-            <h3 style={{ marginBottom: "var(--space-md)" }}>📸 Submit a Mystery Model</h3>
+        <div className="help-id-form-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all card animate-fade-in-up mt-6">
+            <h3 className="mb-4" >📸 Submit a Mystery Model</h3>
 
             {status === "success" ? (
-                <div style={{ textAlign: "center", padding: "var(--space-xl)" }}>
-                    <p style={{ fontSize: "2rem", marginBottom: "var(--space-sm)" }}>✅</p>
-                    <p style={{ color: "var(--color-accent-success)" }}>Request submitted! The community will help identify your model.</p>
+                <div className="p-8" style={{ textAlign: "center" }}>
+                    <p className="text-[2rem] mb-2" >✅</p>
+                    <p className="text-success" >Request submitted! The community will help identify your model.</p>
                 </div>
             ) : (
                 <form onSubmit={handleSubmit}>
@@ -154,7 +154,7 @@ export default function HelpIdRequestForm() {
 
                     {error && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</div>}
 
-                    <div style={{ display: "flex", gap: "var(--space-md)", marginTop: "var(--space-lg)" }}>
+                    <div className="gap-4 mt-6" style={{ display: "flex" }}>
                         <button
                             type="button"
                             className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"

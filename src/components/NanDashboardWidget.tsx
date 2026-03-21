@@ -52,12 +52,12 @@ export default async function NanDashboardWidget() {
                     );
                 })}
                 {horses.length > 10 && (
-                    <p style={{ fontSize: "calc(0.8rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
+                    <p className="text-[calc(0.8rem*var(--font-scale))] text-muted mt-2" >
                         + {horses.length - 10} more horses
                     </p>
                 )}
             </div>
-            <Link href="/shows/planner" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginTop: "var(--space-md)" }}>
+            <Link href="/shows/planner" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge mt-4">
                 📋 View Full NAN Planner
             </Link>
         </details>

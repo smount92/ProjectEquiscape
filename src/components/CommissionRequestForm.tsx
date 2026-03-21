@@ -131,14 +131,14 @@ export default function CommissionRequestForm({
                     step="0.01"
                 />
                 {(artist.priceRangeMin || artist.priceRangeMax) && (
-                    <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: 4, display: "block" }}>
+                    <span className="text-[calc(0.75rem*var(--font-scale))] text-muted mt-[4]" style={{ display: "block" }}>
                         Artist&apos;s range: ${artist.priceRangeMin || "?"} – ${artist.priceRangeMax || "?"}
                     </span>
                 )}
             </div>
 
             {error && (
-                <p style={{ color: "#ef4444", textAlign: "center", marginBottom: "var(--space-md)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                <p className="text-[#ef4444] mb-4 text-[calc(0.85rem*var(--font-scale))]" style={{ textAlign: "center" }}>
                     {error}
                 </p>
             )}

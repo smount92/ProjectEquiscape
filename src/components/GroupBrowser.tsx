@@ -51,7 +51,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
     return (
         <div>
             {/* Tabs */}
-            <div className="studio-tabs" style={{ marginBottom: "var(--space-lg)" }}>
+            <div className="studio-tabs mb-6">
                 <button className={`studio-tab ${tab === "browse" ? "active" : ""}`} onClick={() => setTab("browse")}>
                     🌐 Browse All
                     <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card max-[480px]:rounded-[var(--radius-md)] text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{allGroups.length}</span>
@@ -63,7 +63,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
             </div>
 
             {/* Search */}
-            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md mb-4">
                 <input
                     type="text"
                     className="form-input"
@@ -75,7 +75,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
             </div>
 
             {/* Type Filter */}
-            <div className="flex flex-wrap gap-1" style={{ marginBottom: "var(--space-lg)" }}>
+            <div className="flex flex-wrap gap-1 mb-6">
                 <button className={`studio-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
                 {Object.entries(typeLabels).map(([key, label]) => (
                     <button key={key} className={`studio-chip ${filter === key ? "active" : ""}`} onClick={() => setFilter(key)}>
@@ -109,8 +109,8 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                             <div className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-footer">
                                 <span className="flex flex-col p-6 rounded-lg bg-elevated border border-edge transition-colors-members">👥 {g.memberCount} member{g.memberCount !== 1 ? "s" : ""}</span>
                                 {g.isMember ? (
-                                    <div style={{ display: "flex", gap: "var(--space-xs)" }}>
-                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
+                                    <div className="gap-1" style={{ display: "flex" }}>
+                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap bg-[rgba(34,197,94,0.12)] text-[#22c55e]" style={{ border: "1px solid rgba(34,197,94,0.3)" }}>
                                             ✓ {g.memberRole || "Member"}
                                         </span>
                                         {g.memberRole !== "owner" && (

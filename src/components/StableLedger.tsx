@@ -117,8 +117,8 @@ export default function StableLedger({
     return (
         <>
             {horseCards.length > 0 && (
-                <div style={{ display: "flex", gap: "var(--space-md)", alignItems: "center", flexWrap: "wrap", marginBottom: "var(--space-md)" }}>
-                    <div style={{ flex: 1, minWidth: "200px" }}>
+                <div className="gap-4 mb-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                    <div className="flex-1 min-w-[200px]" >
                         <SearchBar
                             value={searchQuery}
                             onChange={setSearchQuery}
@@ -148,8 +148,8 @@ export default function StableLedger({
                     <table className="sticky top-0 z-[2]">
                         <thead>
                             <tr>
-                                {selectMode && <th style={{ width: 36 }}>☑</th>}
-                                <th style={{ width: 50 }}>📷</th>
+                                {selectMode && <th className="w-[36]" >☑</th>}
+                                <th className="w-[50]" >📷</th>
                                 <th onClick={() => toggleSort("name")} className="cursor-pointer select-none transition-colors hover:text-forest">
                                     Name{sortIndicator("name")}
                                 </th>
@@ -185,7 +185,7 @@ export default function StableLedger({
                                     style={selectMode ? { cursor: "pointer" } : undefined}
                                 >
                                     {selectMode && (
-                                        <td style={{ width: 36, textAlign: "center" }}>
+                                        <td className="w-[36]" style={{ textAlign: "center" }}>
                                             <input type="checkbox" checked={selectedIds.has(horse.id)} readOnly />
                                         </td>
                                     )}
@@ -222,7 +222,7 @@ export default function StableLedger({
                                     <td className="max-md:hidden">
                                         {horse.tradeStatus === "For Sale" && <span className="inline-block py-[2px] px-1.5 rounded-full text-xs font-medium bg-[rgba(34,197,94,0.15)] text-[rgb(34,197,94)]">💲 For Sale</span>}
                                         {horse.tradeStatus === "Open to Offers" && <span className="inline-block py-[2px] px-1.5 rounded-full text-xs font-medium bg-[rgba(251,191,36,0.15)] text-[rgb(202,138,4)]">🤝 Offers</span>}
-                                        {horse.tradeStatus === "Not for Sale" && <span style={{ color: "var(--color-text-muted)" }}>—</span>}
+                                        {horse.tradeStatus === "Not for Sale" && <span className="text-muted" >—</span>}
                                     </td>
                                     <td className="max-md:hidden">
                                         {horse.vaultValue ? `$${horse.vaultValue.toLocaleString()}` : "—"}

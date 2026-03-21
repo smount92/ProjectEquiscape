@@ -19,7 +19,7 @@ export default function PrivacyPage() {
                     <p className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-lead">
                         Your data is yours. Full stop.
                     </p>
-                    <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
+                    <p className="text-sm text-muted mt-2" >
                         Last updated: March 14, 2026
                     </p>
                 </div>
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
                         <li>Generate Hoofprint&trade; provenance records for your horses</li>
                         <li>Improve the platform based on aggregate usage patterns</li>
                     </ul>
-                    <p style={{ marginTop: "var(--space-md)" }}>
+                    <p className="mt-4" >
                         <strong>We do NOT:</strong>
                     </p>
                     <ul className="list-none p-0 m-[0 0 var(--space-lg) 0]">
@@ -171,7 +171,7 @@ export default function PrivacyPage() {
                         <li><strong>Google Analytics</strong> &mdash; anonymized usage analytics</li>
                         <li><strong>Google Gemini</strong> &mdash; optional AI mold identification (images are processed but not stored by Google)</li>
                     </ul>
-                    <p style={{ marginTop: "var(--space-md)" }}>
+                    <p className="mt-4" >
                         We do not use any advertising networks, social media trackers, or data brokers.
                     </p>
                 </section>

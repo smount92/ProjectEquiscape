@@ -77,13 +77,13 @@ export default function HelpIdDetailClient({
     return (
         <div>
             {/* Suggestion List */}
-            <h2 style={{ fontSize: "calc(var(--font-size-lg) * var(--font-scale))", fontWeight: 700, marginBottom: "var(--space-lg)", marginTop: "var(--space-2xl)" }}>
+            <h2 className="text-lg font-bold mb-6 mt-12" >
                 💬 Suggestions ({suggestions.length})
             </h2>
 
             {suggestions.length === 0 ? (
-                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ textAlign: "center", padding: "var(--space-xl)" }}>
-                    <p style={{ color: "var(--color-text-muted)" }}>No suggestions yet. Be the first to help!</p>
+                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-8" style={{ textAlign: "center" }}>
+                    <p className="text-muted" >No suggestions yet. Be the first to help!</p>
                 </div>
             ) : (
                 <div className="flex flex-col gap-4">
@@ -155,7 +155,7 @@ export default function HelpIdDetailClient({
 
             {/* Add Suggestion */}
             {!isResolved && (
-                <div style={{ marginTop: "var(--space-xl)" }}>
+                <div className="mt-8" >
                     {!showSuggestForm ? (
                         <button
                             className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
@@ -165,8 +165,8 @@ export default function HelpIdDetailClient({
                             💡 I Know This Model
                         </button>
                     ) : (
-                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
-                            <h3 style={{ marginBottom: "var(--space-md)" }}>Your Suggestion</h3>
+                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6">
+                            <h3 className="mb-4" >Your Suggestion</h3>
                             <div className="mb-6">
                                 <textarea
                                     className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
@@ -177,7 +177,7 @@ export default function HelpIdDetailClient({
                                     style={{ resize: "vertical" }}
                                 />
                             </div>
-                            <div style={{ display: "flex", gap: "var(--space-md)" }}>
+                            <div className="gap-4" style={{ display: "flex" }}>
                                 <button
                                     className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                                     onClick={() => {
@@ -207,7 +207,7 @@ export default function HelpIdDetailClient({
             )}
             {/* Owner: Delete Request */}
             {isOwner && (
-                <div style={{ marginTop: "var(--space-xl)", textAlign: "right" }}>
+                <div className="mt-8" style={{ textAlign: "right" }}>
                     <button
                         className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
                         style={{ color: "red" }}

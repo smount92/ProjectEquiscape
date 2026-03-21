@@ -69,24 +69,24 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
     };
 
     return (
-        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6" style={{ marginTop: "var(--space-lg)" }}>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 mt-6">
             <div
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                 onClick={() => setExpanded(!expanded)}
             >
-                <h3 className="text-xs font-bold text-muted uppercase tracking-[0.08em]" style={{ margin: 0 }}>⚙️ Admin Panel</h3>
-                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                <h3 className="text-xs font-bold text-muted uppercase tracking-[0.08em] m-0">⚙️ Admin Panel</h3>
+                <span className="text-muted text-[calc(0.85rem*var(--font-scale))]" >
                     {expanded ? "▲" : "▼"}
                 </span>
             </div>
 
             {expanded && (
-                <div style={{ marginTop: "var(--space-md)" }}>
+                <div className="mt-4" >
                     {loading ? (
-                        <p style={{ color: "var(--color-text-muted)" }}>Loading members…</p>
+                        <p className="text-muted" >Loading members…</p>
                     ) : (
                         <>
-                            <div style={{ marginBottom: "var(--space-sm)", color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>
+                            <div className="mb-2 text-muted text-xs" >
                                 👥 {members.length} member{members.length !== 1 ? "s" : ""}
                             </div>
                             <div className="flex flex-col gap-[2px]">

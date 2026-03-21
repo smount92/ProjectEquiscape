@@ -111,7 +111,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
     return (
         <>
             {/* Search Bar */}
-            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md-container" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md-container mb-4">
                 <input
                     type="text"
                     value={searchQuery}
@@ -140,7 +140,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
 
             {/* Results count */}
             {(searchQuery.trim() || activeTag !== "all") && (
-                <div className="text-sm text-muted mb-6 pl-1" style={{ marginBottom: "var(--space-md)" }}>
+                <div className="text-sm text-muted mb-6 pl-1 mb-4">
                     {filteredUsers.length === 0
                         ? searchQuery.trim()
                             ? `No collectors match "${searchQuery}"`
@@ -207,7 +207,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                                         <span>📅 {memberSince(u.created_at)}</span>
                                     </div>
                                     {u.rating_count > 0 && (
-                                        <div style={{ marginTop: "var(--space-xs)" }}>
+                                        <div className="mt-1" >
                                             <RatingBadge
                                                 average={Number(Number(u.avg_rating).toFixed(1))}
                                                 count={u.rating_count}

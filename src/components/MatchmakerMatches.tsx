@@ -95,7 +95,7 @@ export default function MatchmakerMatches({
                                         {match.marketplace_notes}
                                     </div>
                                 )}
-                                <div style={{ marginTop: "6px" }}>
+                                <div className="mt-[6px]" >
                                     <MessageSellerButton
                                         sellerId={match.ownerId}
                                         horseId={match.id}

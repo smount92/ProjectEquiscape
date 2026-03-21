@@ -95,7 +95,7 @@ export default function GettingStartedPage() {
                         When you sell or trade a horse, you can generate a{" "}
                         <strong>6-character transfer code</strong> from its passport page. The buyer
                         enters the code at{" "}
-                        <Link href="/claim" className="text-forest" style={{ fontWeight: 600 }}>
+                        <Link href="/claim" className="text-forest font-semibold">
                             📦 Claim
                         </Link>{" "}
                         &mdash; and the horse moves to their stable with its entire history intact.
@@ -155,7 +155,7 @@ export default function GettingStartedPage() {
                     </p>
                     <p>
                         Add models to your{" "}
-                        <Link href="/wishlist" className="text-forest" style={{ fontWeight: 600 }}>
+                        <Link href="/wishlist" className="text-forest font-semibold">
                             ❤️ Wishlist
                         </Link>{" "}
                         and you&apos;ll get notified when a matching model is listed for sale.
@@ -167,7 +167,7 @@ export default function GettingStartedPage() {
                     <h2>⚙️ Step 6: Customize Your Experience</h2>
                     <p>
                         Visit{" "}
-                        <Link href="/settings" className="text-forest" style={{ fontWeight: 600 }}>
+                        <Link href="/settings" className="text-forest font-semibold">
                             ⚙️ Settings
                         </Link>{" "}
                         to:
@@ -195,7 +195,7 @@ export default function GettingStartedPage() {
                     </p>
                     <p>
                         Use the{" "}
-                        <Link href="/contact" className="text-forest" style={{ fontWeight: 600 }}>
+                        <Link href="/contact" className="text-forest font-semibold">
                             ✉️ Contact
                         </Link>{" "}
                         page to send us your thoughts, or message the admin directly through the

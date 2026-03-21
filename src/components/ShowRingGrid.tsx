@@ -132,7 +132,7 @@ export default function ShowRingGrid({
     return (
         <>
             {communityCards.length > 0 && (
-                <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md-container" style={{ marginBottom: "var(--space-md)" }}>
+                <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md-container mb-4">
                     <input
                         type="text"
                         value={searchInput}
@@ -221,18 +221,18 @@ export default function ShowRingGrid({
                                             <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-name">
                                                 {horse.customName}
                                                 {(horse.hoofprintCount ?? 0) > 0 && (
-                                                    <span className="text-[0.65rem] py-[2px] px-[8px] rounded-[999px] bg-[rgba(245, 158, 11, 0.15)] text-[#f59e0b] font-semibold" title="Has Hoofprint" style={{ marginLeft: "6px" }}>🐾</span>
+                                                    <span className="text-[0.65rem] py-[2px] px-[8px] rounded-[999px] bg-[rgba(245, 158, 11, 0.15)] text-[#f59e0b] font-semibold ml-[6px]" title="Has Hoofprint">🐾</span>
                                                 )}
                                             </div>
                                             <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref">{horse.refName}</div>
                                             <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-time">{timeAgo(horse.createdAt)}</div>
                                         {horse.releaseLine && (
-                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref text-[calc(0.7rem*var(--font-scale))] opacity-[0.7] mt-[2px]">
                                                 🎨 {horse.releaseLine}
                                             </div>
                                         )}
                                         {horse.sculptor && (
-                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                            <div className="flex flex-col rounded-lg overflow-hidden bg-[var(--color-bg-secondary)] border border-edge no-underline text-ink transition-all-ref text-[calc(0.7rem*var(--font-scale))] opacity-[0.7] mt-[2px]">
                                                 ✂️ {horse.sculptor}
                                             </div>
                                         )}
@@ -259,7 +259,7 @@ export default function ShowRingGrid({
                                         </svg>
                                         @{horse.ownerAlias}
                                     </Link>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                                    <div className="gap-1" style={{ display: "flex", alignItems: "center" }}>
                                         <FavoriteButton
                                             horseId={horse.id}
                                             initialIsFavorited={horse.isFavorited}

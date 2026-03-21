@@ -145,7 +145,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
     if (userHorses.length === 0) {
         return (
             <div className="flex flex-col gap-4-empty">
-                <p style={{ color: "var(--color-text-muted)" }}>
+                <p className="text-muted" >
                     You need at least one public horse to enter shows.
                 </p>
             </div>
@@ -177,12 +177,12 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
             <div className="modal-overlay" onClick={() => setShowPreview(false)}>
                 <div className="modal-content max-sm:max-w-full max-w-[480px] text-center" onClick={e => e.stopPropagation()}>
                     <div className="text-[calc(0.75rem*var(--font-scale))] text-muted text-center mb-4 uppercase tracking-[0.05em]">This is what judges & voters will see</div>
-                    <div style={{ textAlign: "center", marginBottom: "var(--space-sm)" }}>
-                        <span style={{ fontWeight: 700, fontSize: "calc(1rem * var(--font-scale))" }}>
+                    <div className="mb-2" style={{ textAlign: "center" }}>
+                        <span className="font-bold text-[calc(1rem*var(--font-scale))]" >
                             🐴 {selectedHorseName}
                         </span>
                         {selectedClassName && (
-                            <span style={{ color: "var(--color-accent-primary)", marginLeft: "var(--space-sm)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                            <span className="text-forest ml-2 text-[calc(0.85rem*var(--font-scale))]" >
                                 · {selectedClassName}
                             </span>
                         )}
@@ -321,11 +321,11 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                 📸 Choose Entry Photo
                             </label>
                             {loadingPhotos ? (
-                                <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                <p className="text-muted text-[calc(0.8rem*var(--font-scale))]" >
                                     Loading photos…
                                 </p>
                             ) : horsePhotos.length === 0 ? (
-                                <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.8rem * var(--font-scale))" }}>
+                                <p className="text-muted text-[calc(0.8rem*var(--font-scale))]" >
                                     No photos found. Upload photos to your horse&apos;s passport first.
                                 </p>
                             ) : (
@@ -354,7 +354,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                             </button>
                                         ))}
                                     </div>
-                                    <p className="block mt-1 text-xs text-muted" style={{ marginTop: "var(--space-xs)" }}>
+                                    <p className="block mt-1 text-xs text-muted mt-1">
                                         Photos display at 4:3 in the show grid. 800×600 minimum recommended.
                                     </p>
                                 </>
@@ -377,7 +377,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                             {/* Caption */}
                             <div>
                                 <label className="block text-sm font-semibold text-ink mb-1" htmlFor="entry-caption">
-                                    ✏️ Entry Caption <span style={{ color: "var(--color-text-muted)", fontWeight: 400 }}>(optional)</span>
+                                    ✏️ Entry Caption <span className="text-muted font-normal" >(optional)</span>
                                 </label>
                                 <textarea
                                     id="entry-caption"
@@ -398,7 +398,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                             </div>
 
                             {/* Submit + Preview buttons */}
-                            <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-sm)", flexWrap: "wrap" }}>
+                            <div className="gap-2 mt-2" style={{ display: "flex", flexWrap: "wrap" }}>
                                 <button
                                     type="submit"
                                     className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"

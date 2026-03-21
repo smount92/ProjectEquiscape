@@ -49,7 +49,7 @@ export default function TransactionActions({
     return (
         <div className="mt-4 py-4 px-6 rounded-lg bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-edge" id="transaction-status">
             <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
-                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                <span className="text-muted text-[calc(0.85rem*var(--font-scale))]" >
                     Transaction is open
                 </span>
                 <button
@@ -61,7 +61,7 @@ export default function TransactionActions({
                 </button>
             </div>
             {error && (
-                <div className="comment-error" style={{ marginTop: "var(--space-sm)" }}>
+                <div className="comment-error mt-2">
                     {error}
                 </div>
             )}

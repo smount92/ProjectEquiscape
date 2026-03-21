@@ -133,13 +133,13 @@ export default function ExpertJudgingPanel({
             border: `1px solid ${borderColor}`,
             background: bgColor,
         }}>
-            <h3 style={{ marginBottom: "var(--space-md)", display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
+            <h3 className="mb-4 gap-2" style={{ display: "flex", alignItems: "center" }}>
                 {overrideMode ? "⚠️" : "🏅"}{" "}
                 <span className="text-forest">
                     {overrideMode ? "Override Final Placings" : "Expert Judging Panel"}
                 </span>
             </h3>
-            <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-md)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+            <p className="text-muted mb-4 text-sm" >
                 {overrideMode
                     ? "Adjust placings after the show has been judged or closed. Changes update show records with an audit trail."
                     : "Assign placings to each entry below. Only placed entries will appear in results and auto-generate show records."
@@ -148,7 +148,7 @@ export default function ExpertJudgingPanel({
 
             {/* Class Filter */}
             {classes && classes.length > 0 && (
-                <div style={{ marginBottom: "var(--space-md)" }}>
+                <div className="mb-4" >
                     <select
                         className="form-input"
                         value={selectedClassId}
@@ -181,9 +181,9 @@ export default function ExpertJudgingPanel({
                 </div>
             )}
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
+            <div className="gap-2" style={{ display: "flex", flexDirection: "column" }}>
                 {filteredEntries.length === 0 ? (
-                    <div style={{ color: "var(--color-text-muted)", padding: "var(--space-md)", textAlign: "center" }}>
+                    <div className="text-muted p-4" style={{ textAlign: "center" }}>
                         No entries {selectedClassId !== "all" ? "in this class" : "to judge"}.
                     </div>
                 ) : (
@@ -200,16 +200,16 @@ export default function ExpertJudgingPanel({
                                     : "var(--radius-sm)",
                             }}>
                                 {entry.thumbnailUrl && (
-                                    <div style={{ width: 40, height: 40, borderRadius: "var(--radius-sm)", overflow: "hidden", flexShrink: 0 }}>
+                                    <div className="w-[40] h-[40] rounded-sm shrink-0" style={{ overflow: "hidden" }}>
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={entry.thumbnailUrl} alt={entry.horseName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                        <img src={entry.thumbnailUrl} alt={entry.horseName} className="w-full h-full" style={{ objectFit: "cover" }} />
                                     </div>
                                 )}
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontWeight: 600, fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                <div className="flex-1 min-w-0" >
+                                    <div className="font-semibold text-sm" >
                                         🐴 {entry.horseName}
                                     </div>
-                                    <div style={{ color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))" }}>
+                                    <div className="text-muted text-[calc(0.75rem*var(--font-scale))]" >
                                         by @{entry.ownerAlias}
                                     </div>
                                 </div>
@@ -259,7 +259,7 @@ export default function ExpertJudgingPanel({
                 )}
             </div>
 
-            {error && <div className="comment-error" style={{ marginTop: "var(--space-sm)" }}>{error}</div>}
+            {error && <div className="comment-error mt-2">{error}</div>}
             {success && (
                 <div style={{
                     marginTop: "var(--space-sm)",
@@ -273,7 +273,7 @@ export default function ExpertJudgingPanel({
                 </div>
             )}
 
-            <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)" }}>
+            <div className="gap-2 mt-4" style={{ display: "flex" }}>
                 <button
                     className={`btn ${overrideMode ? "btn-ghost" : "btn-primary"}`}
                     onClick={handleSave}

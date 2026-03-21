@@ -44,7 +44,7 @@ export default function ReportButton({
 
     if (done) {
         return (
-            <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+            <span className="text-xs text-muted" >
                 ✅ Reported
             </span>
         );
@@ -71,7 +71,7 @@ export default function ReportButton({
     }
 
     return (
-        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-md)", marginTop: "var(--space-sm)" }}>
+        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-4 mt-2">
             <select
                 className="form-input"
                 value={reason}
@@ -92,8 +92,8 @@ export default function ReportButton({
                 maxLength={500}
                 style={{ marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
             />
-            {error && <p style={{ color: "#ef4444", fontSize: "calc(var(--font-size-xs) * var(--font-scale))", marginBottom: "var(--space-xs)" }}>{error}</p>}
-            <div style={{ display: "flex", gap: "var(--space-xs)" }}>
+            {error && <p className="text-[#ef4444] text-xs mb-1" >{error}</p>}
+            <div className="gap-1" style={{ display: "flex" }}>
                 <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={handleSubmit} disabled={saving || !reason}>
                     {saving ? "…" : "Submit Report"}
                 </button>

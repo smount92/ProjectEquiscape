@@ -275,10 +275,10 @@ export default function ImageCropModal({
                     justifyContent: "space-between",
                     alignItems: "center",
                 }}>
-                    <h3 style={{ margin: 0, fontSize: "calc(var(--font-size-md) * var(--font-scale))" }}>
+                    <h3 className="m-0 text-[calc(var(--font-size-md)*var(--font-scale))]" >
                         ✂️ Crop Photo
                     </h3>
-                    <div style={{ display: "flex", gap: "var(--space-xs)", flexWrap: "wrap" }}>
+                    <div className="gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
                         {ASPECT_PRESETS.map((preset) => (
                             <button
                                 key={preset.label}
@@ -425,7 +425,7 @@ export default function ImageCropModal({
                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={onCancel} disabled={processing}>
                         Cancel
                     </button>
-                    <div style={{ display: "flex", gap: "var(--space-sm)" }}>
+                    <div className="gap-2" style={{ display: "flex" }}>
                         <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleSkip} disabled={processing}>
                             Skip Crop
                         </button>

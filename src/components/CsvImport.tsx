@@ -536,8 +536,8 @@ export default function CsvImport() {
                         <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setStep(2)}>
                             ← Back
                         </button>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)", alignItems: "flex-end" }}>
-                            <label style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", cursor: "pointer", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                        <div className="gap-2 items-end" style={{ display: "flex", flexDirection: "column" }}>
+                            <label className="gap-2 text-sm" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                                 <input
                                     type="checkbox"
                                     checked={publishToFeed}

@@ -270,7 +270,7 @@ export default async function ProfilePage({
         <div className="flex items-center justify-center w-[72px] h-[72px] rounded-full bg-[rgba(44, 85, 69, 0.12)] border-[2px] border-[rgba(44, 85, 69, 0.3)] text-forest shrink-0">
           {profileUser.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={profileUser.avatar_url} alt={profileUser.alias_name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+            <img src={profileUser.avatar_url} alt={profileUser.alias_name} className="w-full h-full rounded-full" style={{ objectFit: "cover" }} />
           ) : (
             <svg
               width="40"
@@ -292,7 +292,7 @@ export default async function ProfilePage({
           <h1>
             @{profileUser.alias_name}
             {isOwnProfile && (
-              <span className="inline-flex py-[2px] px-2 rounded-sm bg-forest text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider" style={{ marginLeft: "var(--space-sm)", verticalAlign: "middle" }}>
+              <span className="inline-flex py-[2px] px-2 rounded-sm bg-forest text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider ml-2" style={{ verticalAlign: "middle" }}>
                 You
               </span>
             )}
@@ -341,12 +341,12 @@ export default async function ProfilePage({
               <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
             )}
             {(completedTxCount ?? 0) > 0 && (
-              <span className="text-sm text-[var(--color-text-secondary)]" style={{ color: "#22C55E" }}>
+              <span className="text-sm text-[var(--color-text-secondary)] text-[#22C55E]">
                 ✅ {completedTxCount} transaction{completedTxCount !== 1 ? "s" : ""} completed
               </span>
             )}
             {forSaleCount > 0 && (
-              <span className="text-sm text-[var(--color-text-secondary)]" style={{ color: "var(--color-accent, #f59e0b)" }}>
+              <span className="text-sm text-[var(--color-text-secondary)] text-[var(--color-accent, #f59e0b)]">
                 💲 {forSaleCount} for sale/trade
               </span>
             )}
@@ -383,7 +383,7 @@ export default async function ProfilePage({
       {/* Public Collections */}
       {publicCollections && publicCollections.length > 0 && (
         <div className="mb-6 animate-fade-in-up">
-          <h3 style={{ fontSize: "calc(0.9rem * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
+          <h3 className="text-[calc(0.9rem*var(--font-scale))] text-muted mb-2" >
             📁 Public Collections
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -402,8 +402,8 @@ export default async function ProfilePage({
 
       {/* Trophy Case — only if user hasn't hidden badges (owner always sees their own) */}
       {userBadges.length > 0 && (isOwnProfile || (profileUser.show_badges ?? true)) && (
-        <div className="animate-fade-in-up" id="trophies" style={{ marginBottom: "var(--space-lg)" }}>
-          <h3 style={{ fontSize: "calc(0.9rem * var(--font-scale))", color: "var(--color-text-muted)", marginBottom: "var(--space-sm)" }}>
+        <div className="animate-fade-in-up mb-6" id="trophies">
+          <h3 className="text-[calc(0.9rem*var(--font-scale))] text-muted mb-2" >
             🏆 Trophy Case
           </h3>
           <TrophyCase badges={userBadges} />
@@ -412,7 +412,7 @@ export default async function ProfilePage({
 
       {/* Unreviewed Transaction Prompt */}
       {unreviewedTxn && (
-        <div className="animate-fade-in-up" style={{ marginBottom: "var(--space-lg)" }}>
+        <div className="animate-fade-in-up mb-6">
           <RatingForm
             transactionId={unreviewedTxn.id}
             targetId={profileUser.id}
@@ -526,7 +526,7 @@ export default async function ProfilePage({
                   </div>
                 )}
                 {!isOwnProfile && (horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") && (
-                  <div style={{ marginTop: "var(--space-sm)" }}>
+                  <div className="mt-2" >
                     <MessageSellerButton
                       sellerId={profileUser.id}
                       horseId={horse.id}

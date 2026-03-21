@@ -97,15 +97,15 @@ export default function CollectionPicker({
   return (
     <div className="mb-6">
       <label className="block text-sm font-semibold text-ink mb-1">
-        📁 Collections <span style={{ opacity: 0.6, fontWeight: 400 }}>(Optional — multi-select)</span>
+        📁 Collections <span className="opacity-[0.6] font-normal" >(Optional — multi-select)</span>
       </label>
 
       {loading ? (
-        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+        <div className="text-muted text-sm" >
           Loading collections…
         </div>
       ) : collections.length === 0 ? (
-        <div style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-sm)" }}>
+        <div className="text-muted text-sm mb-2" >
           No collections yet. Create one to organize your models.
         </div>
       ) : (
@@ -153,7 +153,7 @@ export default function CollectionPicker({
         </div>
       )}
 
-      <div className="flex gap-2 items-center" style={{ marginTop: "var(--space-sm)" }}>
+      <div className="flex gap-2 items-center mt-2">
         {selectedNames.length > 0 && (
           <div style={{
             fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
@@ -222,7 +222,7 @@ export default function CollectionPicker({
 
               <div className="mb-6">
                 <label htmlFor="new-collection-desc" className="block text-sm font-semibold text-ink mb-1">
-                  Description <span style={{ opacity: 0.6 }}>(Optional)</span>
+                  Description <span className="opacity-[0.6]" >(Optional)</span>
                 </label>
                 <input
                   id="new-collection-desc"
@@ -235,7 +235,7 @@ export default function CollectionPicker({
                 />
               </div>
 
-              <div className="mb-6" style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
+              <div className="mb-6 gap-2" style={{ display: "flex", alignItems: "center" }}>
                 <input
                   id="new-collection-public"
                   type="checkbox"
@@ -243,7 +243,7 @@ export default function CollectionPicker({
                   onChange={(e) => setNewIsPublic(e.target.checked)}
                   style={{ width: "16px", height: "16px" }}
                 />
-                <label htmlFor="new-collection-public" className="block text-sm font-semibold text-ink mb-1" style={{ margin: 0 }}>
+                <label htmlFor="new-collection-public" className="block text-sm font-semibold text-ink mb-1 m-0">
                   🌐 Make public on profile
                 </label>
               </div>

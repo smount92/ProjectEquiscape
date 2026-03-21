@@ -45,7 +45,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
     return (
         <div>
             {/* Search */}
-            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md" style={{ marginBottom: "var(--space-md)" }}>
+            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md mb-4">
                 <input
                     type="text"
                     className="form-input"
@@ -57,7 +57,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
             </div>
 
             {/* Type Filter */}
-            <div className="flex flex-wrap gap-1" style={{ marginBottom: "var(--space-lg)" }}>
+            <div className="flex flex-wrap gap-1 mb-6">
                 <button className={`studio-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
                 {Object.entries(typeLabels).map(([key, label]) => (
                     <button key={key} className={`studio-chip ${filter === key ? "active" : ""}`} onClick={() => setFilter(key)}>
@@ -97,15 +97,15 @@ export default function EventBrowser({ events, typeLabels }: Props) {
                                 </div>
                                 <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-actions">
                                     {e.userRsvp === "going" ? (
-                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
+                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap bg-[rgba(34,197,94,0.12)] text-[#22c55e]" style={{ border: "1px solid rgba(34,197,94,0.3)" }}>
                                             ✓ Going
                                         </span>
                                     ) : e.userRsvp === "interested" ? (
-                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap bg-[rgba(245,158,11,0.12)] text-[#f59e0b]" style={{ border: "1px solid rgba(245,158,11,0.3)" }}>
                                             ⭐ Interested
                                         </span>
                                     ) : (
-                                        <div style={{ display: "flex", gap: "var(--space-xs)" }}>
+                                        <div className="gap-1" style={{ display: "flex" }}>
                                             <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={() => handleRsvp(e.id, "going")} disabled={rsvping === e.id}>Going</button>
                                             <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => handleRsvp(e.id, "interested")} disabled={rsvping === e.id}>Interested</button>
                                         </div>

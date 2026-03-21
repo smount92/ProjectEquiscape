@@ -37,7 +37,7 @@ export default function VoteButton({
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+        <div className="gap-[2px]" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <button
                 className={`vote-button ${hasVoted ? "vote-button-voted" : ""}`}
                 onClick={handleVote}

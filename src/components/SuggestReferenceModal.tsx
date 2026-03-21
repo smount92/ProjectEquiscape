@@ -68,16 +68,16 @@ export default function SuggestReferenceModal({
                 style={{ maxWidth: 520 }}
             >
                 {status === "success" ? (
-                    <div style={{ textAlign: "center", padding: "var(--space-xl) var(--space-lg)" }}>
-                        <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }}>✅</div>
-                        <h3 style={{ marginBottom: "var(--space-sm)" }}>Suggestion Submitted!</h3>
-                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                    <div className="p-[var(--space-xl) var(--space-lg)]" style={{ textAlign: "center" }}>
+                        <div className="text-[3rem] mb-4" >✅</div>
+                        <h3 className="mb-2" >Suggestion Submitted!</h3>
+                        <p className="text-muted text-sm" >
                             Our team will review your suggestion. If approved, it will appear in the reference database.
                         </p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit}>
-                        <h3 style={{ marginBottom: "var(--space-xs)" }}>
+                        <h3 className="mb-1" >
                             📝 Suggest a Reference
                         </h3>
                         <p style={{
@@ -89,9 +89,9 @@ export default function SuggestReferenceModal({
                         </p>
 
                         {/* Suggestion Type */}
-                        <div className="mb-6" style={{ marginBottom: "var(--space-md)" }}>
+                        <div className="mb-6 mb-4">
                             <label className="block text-sm font-semibold text-ink mb-1">What are you suggesting?</label>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-xs)" }}>
+                            <div className="gap-1" style={{ display: "flex", flexDirection: "column" }}>
                                 {SUGGESTION_TYPES.map((type) => (
                                     <label
                                         key={type.value}
@@ -116,7 +116,7 @@ export default function SuggestReferenceModal({
                                             style={{ marginTop: 3, accentColor: "var(--color-accent-primary)" }}
                                         />
                                         <div>
-                                            <div style={{ fontWeight: 600, fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                            <div className="font-semibold text-sm" >
                                                 {type.label}
                                             </div>
                                             <div style={{
@@ -132,9 +132,9 @@ export default function SuggestReferenceModal({
                         </div>
 
                         {/* Name */}
-                        <div className="mb-6" style={{ marginBottom: "var(--space-md)" }}>
+                        <div className="mb-6 mb-4">
                             <label className="block text-sm font-semibold text-ink mb-1">
-                                Name <span style={{ color: "#e74c6f" }}>*</span>
+                                Name <span className="text-[#e74c6f]" >*</span>
                             </label>
                             <input
                                 className="form-input"
@@ -150,7 +150,7 @@ export default function SuggestReferenceModal({
                         </div>
 
                         {/* Details */}
-                        <div className="mb-6" style={{ marginBottom: "var(--space-md)" }}>
+                        <div className="mb-6 mb-4">
                             <label className="block text-sm font-semibold text-ink mb-1">Additional Details</label>
                             <textarea
                                 className="form-input"
@@ -176,12 +176,12 @@ export default function SuggestReferenceModal({
                         </div>
 
                         {status === "error" && errorMsg && (
-                            <div className="comment-error" style={{ marginBottom: "var(--space-md)" }}>
+                            <div className="comment-error mb-4">
                                 {errorMsg}
                             </div>
                         )}
 
-                        <div style={{ display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end" }}>
+                        <div className="gap-2 justify-end" style={{ display: "flex" }}>
                             <button
                                 type="button"
                                 className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"

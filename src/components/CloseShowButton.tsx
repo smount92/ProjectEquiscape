@@ -35,9 +35,9 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
             background: "rgba(20, 184, 166, 0.08)",
             border: "1px solid rgba(20, 184, 166, 0.3)",
         }}>
-            <div style={{ fontSize: "2rem", marginBottom: "var(--space-sm)" }}>⏰</div>
-            <h3 style={{ marginBottom: "var(--space-xs)" }}>Entry Period Has Ended</h3>
-            <p style={{ color: "var(--color-text-muted)", marginBottom: "var(--space-md)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+            <div className="text-[2rem] mb-2" >⏰</div>
+            <h3 className="mb-1" >Entry Period Has Ended</h3>
+            <p className="text-muted mb-4 text-[calc(0.85rem*var(--font-scale))]" >
                 Close this show to calculate results and generate show records for the top finishers.
             </p>
             <button
@@ -49,7 +49,7 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
                 {busy ? "Calculating Results…" : "🏆 Close Show & Calculate Results"}
             </button>
             {error && (
-                <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-sm)" }}>{error}</p>
+                <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mt-2">{error}</p>
             )}
         </div>
     );

@@ -54,8 +54,8 @@ export default function CreateEventPage() {
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <div className="page-content" style={{ maxWidth: 640 }}>
-                <h1 style={{ marginBottom: "var(--space-xl)" }}>📅 Create Event</h1>
+            <div className="page-content max-w-[640]">
+                <h1 className="mb-8" >📅 Create Event</h1>
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-6">
@@ -74,8 +74,8 @@ export default function CreateEventPage() {
 
                     <div className="mb-6">
                         <label className="block text-sm font-semibold text-ink mb-1">Judging Method</label>
-                        <div style={{ display: "flex", gap: "var(--space-md)" }}>
-                            <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer" }}>
+                        <div className="gap-4" style={{ display: "flex" }}>
+                            <label className="gap-1" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                                 <input
                                     type="radio"
                                     name="judgingMethod"
@@ -85,7 +85,7 @@ export default function CreateEventPage() {
                                 />
                                 🗳️ Community Vote
                             </label>
-                            <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer" }}>
+                            <label className="gap-1" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                                 <input
                                     type="radio"
                                     name="judgingMethod"
@@ -119,12 +119,12 @@ export default function CreateEventPage() {
                         </div>
                     </div>
 
-                    <div style={{ display: "flex", gap: "var(--space-lg)", margin: "var(--space-md) 0" }}>
-                        <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer" }}>
+                    <div className="gap-6 m-[var(--space-md) 0]" style={{ display: "flex" }}>
+                        <label className="gap-1" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                             <input type="checkbox" checked={isAllDay} onChange={e => setIsAllDay(e.target.checked)} />
                             All Day
                         </label>
-                        <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer" }}>
+                        <label className="gap-1" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                             <input type="checkbox" checked={isVirtual} onChange={e => setIsVirtual(e.target.checked)} />
                             Virtual Event
                         </label>
@@ -155,7 +155,7 @@ export default function CreateEventPage() {
 
                     {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
 
-                    <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)" }}>
+                    <div className="gap-2 mt-6" style={{ display: "flex" }}>
                         <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={saving || !name.trim()}>
                             {saving ? "Creating..." : "Create Event"}
                         </button>

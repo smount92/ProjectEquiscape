@@ -106,13 +106,13 @@ export default async function CommissionDetailPage({
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
             {/* Header */}
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-lg)", marginBottom: "var(--space-lg)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "var(--space-md)" }}>
+            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up p-6 mb-6">
+                <div className="justify-between items-start gap-4" style={{ display: "flex", flexWrap: "wrap" }}>
                     <div>
-                        <h1 style={{ fontSize: "calc(1.3rem * var(--font-scale))", margin: 0 }}>
+                        <h1 className="text-[calc(1.3rem*var(--font-scale))] m-0" >
                             {commission.commissionType}
                         </h1>
-                        <div style={{ display: "flex", gap: "var(--space-md)", marginTop: "var(--space-xs)", fontSize: "calc(0.85rem * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                        <div className="gap-4 mt-1 text-[calc(0.85rem*var(--font-scale))] text-muted" style={{ display: "flex" }}>
                             {isArtist && commission.clientAlias && (
                                 <span>👤 Client: @{commission.clientAlias}</span>
                             )}
@@ -137,25 +137,25 @@ export default async function CommissionDetailPage({
                 </div>
 
                 {/* Description */}
-                <div style={{ marginTop: "var(--space-lg)", padding: "var(--space-md)", borderRadius: "var(--radius-md)", background: "var(--color-bg-card)" }}>
-                    <h3 style={{ fontSize: "calc(0.85rem * var(--font-scale))", marginBottom: "var(--space-xs)", color: "var(--color-text-muted)" }}>Description</h3>
-                    <p style={{ lineHeight: 1.6, whiteSpace: "pre-wrap", fontSize: "calc(0.9rem * var(--font-scale))" }}>
+                <div className="mt-6 p-4 rounded-md bg-card" >
+                    <h3 className="text-[calc(0.85rem*var(--font-scale))] mb-1 text-muted" >Description</h3>
+                    <p className="leading-[1.6] whitespace-pre-wrap text-[calc(0.9rem*var(--font-scale))]" >
                         {commission.description}
                     </p>
                 </div>
 
                 {/* Details Grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "var(--space-md)", marginTop: "var(--space-lg)" }}>
+                <div className="grid-cols-[repeat(auto-fit, minmax(150px, 1fr))] gap-4 mt-6" style={{ display: "grid" }}>
                     {commission.priceQuoted && (
                         <div>
-                            <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", display: "block" }}>Price Quoted</span>
-                            <span style={{ fontWeight: 700, fontSize: "calc(1rem * var(--font-scale))" }}>${commission.priceQuoted}</span>
+                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted" style={{ display: "block" }}>Price Quoted</span>
+                            <span className="font-bold text-[calc(1rem*var(--font-scale))]" >${commission.priceQuoted}</span>
                         </div>
                     )}
                     {commission.depositAmount && (
                         <div>
-                            <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", display: "block" }}>Deposit</span>
-                            <span style={{ fontWeight: 700 }}>
+                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted" style={{ display: "block" }}>Deposit</span>
+                            <span className="font-bold" >
                                 ${commission.depositAmount}
                                 {commission.depositPaid ? " ✅" : " ⏳"}
                             </span>
@@ -163,16 +163,16 @@ export default async function CommissionDetailPage({
                     )}
                     {commission.estimatedCompletion && (
                         <div>
-                            <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", display: "block" }}>Est. Completion</span>
-                            <span style={{ fontWeight: 600 }}>
+                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted" style={{ display: "block" }}>Est. Completion</span>
+                            <span className="font-semibold" >
                                 {new Date(commission.estimatedCompletion).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                             </span>
                         </div>
                     )}
                     {commission.slotNumber && (
                         <div>
-                            <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", display: "block" }}>Slot</span>
-                            <span style={{ fontWeight: 700 }}>#{commission.slotNumber}</span>
+                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted" style={{ display: "block" }}>Slot</span>
+                            <span className="font-bold" >#{commission.slotNumber}</span>
                         </div>
                     )}
                 </div>
@@ -185,7 +185,7 @@ export default async function CommissionDetailPage({
 
             {/* Guest Link (for artist) */}
             {!isGuestMode && isArtist && commission.guestToken && (
-                <div style={{ marginBottom: "var(--space-md)" }}>
+                <div className="mb-4" >
                     <GuestLinkButton commissionId={commission.id} guestToken={commission.guestToken} />
                 </div>
             )}
@@ -201,7 +201,7 @@ export default async function CommissionDetailPage({
 
             {/* Review Prompt (after delivery) */}
             {transactionId && targetId && (
-                <div className="animate-fade-in-up" style={{ marginTop: "var(--space-lg)" }}>
+                <div className="animate-fade-in-up mt-6">
                     <RatingForm
                         transactionId={transactionId}
                         targetId={targetId}
@@ -212,7 +212,7 @@ export default async function CommissionDetailPage({
             )}
 
             {/* Navigation */}
-            <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-lg)", flexWrap: "wrap" }}>
+            <div className="gap-2 mt-6" style={{ display: "flex", flexWrap: "wrap" }}>
                 {isArtist && (
                     <Link href="/studio/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Dashboard</Link>
                 )}

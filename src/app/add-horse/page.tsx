@@ -560,7 +560,7 @@ export default function AddHorsePage() {
 
       {/* Error banner */}
       {submitError && (
-        <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert" style={{ marginBottom: "var(--space-xl)" }}>
+        <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mb-8" role="alert">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
           </svg>
@@ -582,7 +582,7 @@ export default function AddHorsePage() {
               </div>
             </div>
 
-            <p style={{ marginBottom: "var(--space-lg)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+            <p className="mb-6 text-sm" >
               Click any slot below to upload a photo. Images are automatically
               compressed before saving. The <strong>Primary Thumbnail</strong> will
               be shown on your Digital Shelf.
@@ -710,7 +710,7 @@ export default function AddHorsePage() {
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
                 <span><strong>Extra Details & Flaws</strong> — Upload up to 10</span>
-                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>{extraFiles.length}/10 photos · Click or drag files here</span>
+                <span className="text-xs text-muted" >{extraFiles.length}/10 photos · Click or drag files here</span>
               </div>
               {extraFiles.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-4">
@@ -816,7 +816,7 @@ export default function AddHorsePage() {
             externalSearchQuery={aiSearchQuery}
             aiNotice={
               aiResult ? (
-                <div className="shrink-0 text-forest" style={{ marginBottom: "var(--space-lg)" }}>
+                <div className="shrink-0 text-forest mb-6">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
                   </svg>
@@ -853,7 +853,7 @@ export default function AddHorsePage() {
 
             {/* Reference summary badge */}
             {selectedCatalogItem && (
-              <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4" style={{ marginBottom: "var(--space-lg)" }}>
+              <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4 mb-6">
                 🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
               </div>
             )}
@@ -923,7 +923,7 @@ export default function AddHorsePage() {
 
             <div className="mb-6">
               <label className="block text-sm font-semibold text-ink mb-1">📋 Edition Info</label>
-              <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
+              <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
                 <input
                   type="number"
                   className="form-input"
@@ -933,7 +933,7 @@ export default function AddHorsePage() {
                   style={{ width: 80 }}
                   min="1"
                 />
-                <span style={{ color: "var(--color-text-muted)" }}>of</span>
+                <span className="text-muted" >of</span>
                 <input
                   type="number"
                   className="form-input"
@@ -997,22 +997,22 @@ export default function AddHorsePage() {
                 rows={2}
                 id="public-notes"
               />
-              <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+              <small className="text-muted text-[var(--font-size-xs)]" >
                 These notes will be visible to anyone viewing this horse&apos;s passport.
               </small>
             </div>
 
             {/* ── Show Bio (Optional) ── */}
-            <div className="flex items-center gap-4 m-[var(--space-xl) 0] text-muted text-sm" style={{ margin: "var(--space-lg) 0 var(--space-md)" }}>
-              <h4 style={{ fontSize: "var(--font-size-md)", fontWeight: 600, color: "var(--color-text-secondary)" }}>
-                🏅 Show Bio <span style={{ fontWeight: 400, fontSize: "var(--font-size-sm)" }}>(Optional)</span>
+            <div className="flex items-center gap-4 m-[var(--space-xl) 0] text-muted text-sm m-[var(--space-lg) 0 var(--space-md)]">
+              <h4 className="text-[var(--font-size-md)] font-semibold text-ink-light" >
+                🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]" >(Optional)</span>
               </h4>
-              <small style={{ color: "var(--color-text-muted)", display: "block", marginTop: "var(--space-xs)" }}>
+              <small className="text-muted mt-1" style={{ display: "block" }}>
                 The show identity you assign for competition — breed, gender, and age for show ring divisions.
               </small>
             </div>
 
-            <div className="form-row max-md:flex-col max-md:gap-4" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+            <div className="form-row max-md:flex-col max-md:gap-4 gap-4" style={{ display: "flex", flexWrap: "wrap" }}>
               <div className="mb-6" style={{ flex: "1 1 200px" }}>
                 <label className="block text-sm font-semibold text-ink mb-1">Assigned Breed</label>
                 <input
@@ -1044,7 +1044,7 @@ export default function AddHorsePage() {
               </div>
             </div>
 
-            <div className="form-row max-md:flex-col max-md:gap-4" style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" }}>
+            <div className="form-row max-md:flex-col max-md:gap-4 gap-4" style={{ display: "flex", flexWrap: "wrap" }}>
               <div className="mb-6" style={{ flex: "1 1 150px" }}>
                 <label className="block text-sm font-semibold text-ink mb-1">Assigned Age</label>
                 <input
@@ -1195,7 +1195,7 @@ export default function AddHorsePage() {
 
           {/* Community visibility selector */}
           <div className="mt-6 py-4 px-6 rounded-lg bg-[rgba(44, 85, 69, 0.04)] border border-[rgba(44, 85, 69, 0.12)]">
-            <div className="flex items-center justify-between gap-6" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
+            <div className="flex items-center justify-between gap-6 gap-2" style={{ flexDirection: "column" }}>
               <span className="text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold text-ink">👁️ Visibility</span>
               <div className="flex gap-2 flex-wrap">
                 {([
@@ -1231,7 +1231,7 @@ export default function AddHorsePage() {
 
             {/* Reference summary badge */}
             {selectedCatalogItem && (
-              <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4" style={{ marginBottom: "var(--space-lg)" }}>
+              <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4 mb-6">
                 🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
               </div>
             )}
@@ -1248,7 +1248,7 @@ export default function AddHorsePage() {
 
               {/* Privacy reassurance */}
               <div className="flex items-start gap-2 p-4 bg-[rgba(240, 160, 108, 0.08)] border border-[rgba(240, 160, 108, 0.2)] rounded-md mb-8" role="note" aria-label="Financial privacy notice">
-                <span style={{ fontSize: "1.3em", flexShrink: 0, marginTop: "2px" }}>🛡️</span>
+                <span className="text-[1.3em] shrink-0 mt-[2px]" >🛡️</span>
                 <p>
                   <strong>This data is encrypted and only visible to you.</strong> No
                   other user, not even community members who can see your public
@@ -1300,7 +1300,7 @@ export default function AddHorsePage() {
                   placeholder="e.g. BreyerFest 2017, Summer 2015, Christmas 2020"
                   id="purchase-date-text"
                 />
-                <small style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-xs)" }}>
+                <small className="text-muted text-[var(--font-size-xs)]" >
                   Use this when you don&apos;t remember the exact date.
                 </small>
               </div>

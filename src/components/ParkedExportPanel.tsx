@@ -120,15 +120,15 @@ export default function ParkedExportPanel({
 
     return (
         <div className="mt-6 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
+            <div className="justify-between mb-6" style={{ display: "flex", alignItems: "center" }}>
                 <h3>{isParked ? "🔒 Horse is Parked" : "📤 Sell Off-Platform"}</h3>
-                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setIsOpen(false)} style={{ fontSize: "1.2rem" }}>✕</button>
+                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge text-[1.2rem]" onClick={() => setIsOpen(false)}>✕</button>
             </div>
 
             {!isParked ? (
                 /* ── Not Parked: Explain + Park button ── */
                 <div>
-                    <p style={{ color: "var(--color-text-secondary)", marginBottom: "var(--space-lg)", lineHeight: 1.6 }}>
+                    <p className="text-ink-light mb-6 leading-[1.6]" >
                         Selling <strong>{horseName}</strong> at a live show, via Facebook, or another platform?
                         Park it here and get a <strong>Certificate of Authenticity</strong> with a QR code
                         the buyer can scan to claim the horse — and inherit its full Hoofprint™ history.
@@ -157,7 +157,7 @@ export default function ParkedExportPanel({
                 /* ── Parked: Show PIN, QR, download CoA ── */
                 <div>
                     <div className="parked-export-status">
-                        <p style={{ color: "var(--color-text-secondary)", marginBottom: "var(--space-md)" }}>
+                        <p className="text-ink-light mb-4" >
                             <strong>{horseName}</strong> is parked. Its Hoofprint™ history is frozen until
                             claimed by a new owner.
                         </p>
@@ -186,7 +186,7 @@ export default function ParkedExportPanel({
                                 bgColor="transparent"
                                 fgColor="#e0e0e0"
                             />
-                            <p style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
+                            <p className="text-xs text-muted mt-2" >
                                 Scan to claim at modelhorsehub.com
                             </p>
                         </div>
@@ -236,7 +236,7 @@ export default function ParkedExportPanel({
                 </div>
             )}
 
-            {error && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-md)" }}>{error}</div>}
+            {error && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mt-4">{error}</div>}
         </div>
     );
 }

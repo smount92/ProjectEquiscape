@@ -88,7 +88,7 @@ export default function AdminSuggestionsPanel({
                     {s.details && (
                         <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-body">{s.details}</div>
                     )}
-                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-footer" style={{ gap: "var(--space-sm)" }}>
+                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-footer gap-2">
                         <button
                             className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
                             onClick={() => handleReview(s.id, "approved")}

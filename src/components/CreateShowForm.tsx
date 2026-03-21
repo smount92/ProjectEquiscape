@@ -81,16 +81,16 @@ export default function CreateShowForm() {
                     value={endAt}
                     onChange={(e) => setEndAt(e.target.value)}
                 />
-                <p style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "4px" }}>
+                <p className="text-[calc(0.75rem*var(--font-scale))] text-muted mt-[4px]" >
                     Leave blank for no deadline. Show stays open until manually closed.
                 </p>
             </div>
 
             {status === "error" && errorMsg && (
-                <div className="comment-error" style={{ marginBottom: "var(--space-md)" }}>{errorMsg}</div>
+                <div className="comment-error mb-4">{errorMsg}</div>
             )}
             {status === "saved" && (
-                <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))]" style={{ marginBottom: "var(--space-md)" }}>✅ Show created!</div>
+                <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))] mb-4">✅ Show created!</div>
             )}
 
             <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={status === "saving"}>

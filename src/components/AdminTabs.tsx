@@ -111,7 +111,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
 
     if (confirming) {
         return (
-            <span style={{ display: "inline-flex", gap: "var(--space-xs)", alignItems: "center" }}>
+            <span className="inline-flex gap-1" style={{ alignItems: "center" }}>
                 <button
                     className="admin-mark-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
                     style={{ background: "rgba(239, 68, 68, 0.15)", borderColor: "rgba(239, 68, 68, 0.4)", color: "#ef4444" }}
@@ -328,17 +328,17 @@ function ReportsTab({ reports }: { reports: Report[] }) {
         <div className="flex flex-col gap-2">
             {reports.map(report => (
                 <div key={report.id} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all">
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--space-xs)" }}>
+                    <div className="justify-between mb-1" style={{ display: "flex" }}>
                         <strong>{report.reason}</strong>
-                        <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                        <span className="text-xs text-muted" >
                             {report.targetType} · {new Date(report.createdAt).toLocaleDateString()}
                         </span>
                     </div>
-                    <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-xs)" }}>
+                    <p className="text-sm mb-1" >
                         Reported by: {report.reporterAlias} · Target: {report.targetId.slice(0, 8)}…
                     </p>
                     {report.details && (
-                        <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                        <p className="text-sm text-muted" >
                             {report.details}
                         </p>
                     )}
@@ -392,21 +392,21 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
 
                 return (
                     <div key={s.id} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all">
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "var(--space-xs)" }}>
+                        <div className="justify-between mb-1" style={{ display: "flex" }}>
                             <strong>{typeIcon} {s.suggestion_type.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</strong>
-                            <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                            <span className="text-xs text-muted" >
                                 ▲{s.upvotes} ▼{s.downvotes} · {new Date(s.created_at).toLocaleDateString()}
                             </span>
                         </div>
-                        <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-xs)" }}>
+                        <p className="text-sm mb-1" >
                             By: {curatorIcon} @{s.author_alias}
                         </p>
                         {changeText && (
-                            <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", fontFamily: "monospace", background: "var(--color-surface-glass)", padding: "var(--space-xs)", borderRadius: "var(--radius-sm)", marginBottom: "var(--space-xs)" }}>
+                            <p className="text-sm bg-glass p-1 rounded-sm mb-1" style={{ fontFamily: "monospace" }}>
                                 {changeText}
                             </p>
                         )}
-                        <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)", fontStyle: "italic", marginBottom: "var(--space-sm)" }}>
+                        <p className="text-sm text-muted mb-2" style={{ fontStyle: "italic" }}>
                             &ldquo;{s.reason.slice(0, 200)}{s.reason.length > 200 ? "…" : ""}&rdquo;
                         </p>
                         <SuggestionAdminActions suggestionId={s.id} />

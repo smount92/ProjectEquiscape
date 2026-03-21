@@ -149,7 +149,7 @@ export default async function WishlistPage() {
                         <h1>
                             <span className="text-forest">❤️ My Wishlist</span>
                         </h1>
-                        <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
+                        <p className="text-muted mt-1" >
                             Models you&apos;re hunting for — {items.length} item{items.length !== 1 ? "s" : ""}
                             {totalMatches > 0 && (
                                 <span className="matchmaker-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-badge">

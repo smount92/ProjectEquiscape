@@ -364,10 +364,10 @@ export default async function PublicPassportPage({
               alignItems: "center",
               gap: "var(--space-sm)",
             }}>
-              <span style={{ fontSize: "1.3em" }}>🚨</span>
+              <span className="text-[1.3em]" >🚨</span>
               <div>
-                <strong style={{ color: "rgb(220, 38, 38)" }}>Stolen / Missing</strong>
-                <p style={{ fontSize: "calc(0.8rem * var(--font-scale))", margin: "4px 0 0", color: "var(--color-text-muted)" }}>
+                <strong className="text-[rgb(220,38,38)]" >Stolen / Missing</strong>
+                <p className="text-[calc(0.8rem*var(--font-scale))] m-[4px 0 0] text-muted" >
                   This model has been flagged by its owner. Transfers and offers are blocked.
                 </p>
               </div>
@@ -621,7 +621,7 @@ export default async function PublicPassportPage({
           {horse.public_notes && (
             <div className="passport-detail-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all">
               <h3><span aria-hidden="true">📝</span> Notes</h3>
-              <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
+              <p className="text-ink-light leading-[1.6] m-0 whitespace-pre-wrap" >
                 {horse.public_notes}
               </p>
             </div>
@@ -681,7 +681,7 @@ export default async function PublicPassportPage({
 
       {/* Provenance — Read Only */}
       {(showRecords.length > 0 || pedigree) && (
-        <div className="animate-fade-in-up" style={{ marginTop: "var(--space-xl)" }}>
+        <div className="animate-fade-in-up mt-8">
           {showRecords.length > 0 && (
             <ShowRecordTimeline
               horseId={horseId}
@@ -690,7 +690,7 @@ export default async function PublicPassportPage({
             />
           )}
           {pedigree && (
-            <div style={{ marginTop: "var(--space-lg)" }}>
+            <div className="mt-6" >
               <PedigreeCard
                 horseId={horseId}
                 pedigree={pedigree}
@@ -706,7 +706,7 @@ export default async function PublicPassportPage({
         const { timeline: hfTimeline, ownershipChain: hfChain, lifeStage: hfStage } = await getHoofprint(horseId);
         if (hfTimeline.length === 0 && hfChain.length === 0) return null;
         return (
-          <div className="animate-fade-in-up" style={{ marginTop: "var(--space-xl)" }}>
+          <div className="animate-fade-in-up mt-8">
             <HoofprintTimeline
               horseId={horseId}
               timeline={hfTimeline}
@@ -719,7 +719,7 @@ export default async function PublicPassportPage({
       })()}
 
       {/* Comments */}
-      <div className="animate-fade-in-up" style={{ marginTop: "var(--space-xl)" }}>
+      <div className="animate-fade-in-up mt-8">
         <UniversalFeed
           initialPosts={comments}
           context={{ horseId }}

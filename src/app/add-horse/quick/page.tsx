@@ -96,15 +96,15 @@ export default function QuickAddPage() {
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="animate-fade-in-up" style={{ maxWidth: 640, margin: "0 auto" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
+            <div className="animate-fade-in-up max-w-[640] mx-auto">
+                <div className="justify-between mb-6" style={{ display: "flex", alignItems: "center" }}>
                     <h1>⚡ <span className="text-forest">Quick Add</span></h1>
                     <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Back</Link>
                 </div>
 
-                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-xl)" }}>
+                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-8">
                     {/* Catalog Search */}
-                    <div style={{ marginBottom: "var(--space-lg)" }}>
+                    <div className="mb-6" >
                         <label className="block text-sm font-semibold text-ink mb-1">🔍 Search Catalog</label>
                         <UnifiedReferenceSearch
                             selectedCatalogId={selectedCatalog?.id || null}
@@ -120,7 +120,7 @@ export default function QuickAddPage() {
                         {selectedCatalog && (
                             <div className="quick-add-selected">
                                 ✅ {selectedCatalog.maker} — {selectedCatalog.title}
-                                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>
+                                <span className="text-muted text-xs" >
                                     {" "}({selectedCatalog.itemType})
                                 </span>
                             </div>
@@ -134,7 +134,7 @@ export default function QuickAddPage() {
 
                     {/* Custom Name (optional if catalog selected) */}
                     {!selectedCatalog && (
-                        <div style={{ marginBottom: "var(--space-lg)" }}>
+                        <div className="mb-6" >
                             <label className="block text-sm font-semibold text-ink mb-1">Name</label>
                             <input
                                 className="form-input"
@@ -192,7 +192,7 @@ export default function QuickAddPage() {
 
                     {/* Error */}
                     {error && (
-                        <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" style={{ marginTop: "var(--space-md)" }}>
+                        <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mt-4">
                             ⚠️ {error}
                         </div>
                     )}
@@ -220,9 +220,9 @@ export default function QuickAddPage() {
                 </div>
 
                 {/* Link to full form */}
-                <div style={{ textAlign: "center", marginTop: "var(--space-md)", color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                <div className="mt-4 text-muted text-sm" style={{ textAlign: "center" }}>
                     Need photos or more details?{" "}
-                    <Link href="/add-horse" style={{ color: "var(--color-accent-primary)" }}>
+                    <Link href="/add-horse" className="text-forest" >
                         Use the full intake form →
                     </Link>
                 </div>
@@ -230,13 +230,13 @@ export default function QuickAddPage() {
                 {/* Recent Adds */}
                 {recentAdds.length > 0 && (
                     <div className="mt-8 p-6 bg-[var(--color-surface-primary)] border border-edge rounded-lg">
-                        <h3 style={{ marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-md) * var(--font-scale))" }}>
+                        <h3 className="mb-2 text-[calc(var(--font-size-md)*var(--font-scale))]" >
                             Recently Added
                         </h3>
                         {recentAdds.map((item) => (
                             <div key={item.id} className="mt-8 p-6 bg-[var(--color-surface-primary)] border border-edge rounded-lg-item">
                                 <span>✅ {item.name}</span>
-                                <span style={{ color: "var(--color-text-muted)" }}>
+                                <span className="text-muted" >
                                     {item.finish} · {item.condition} — {timeSince(item.timestamp)}
                                 </span>
                                 <Link

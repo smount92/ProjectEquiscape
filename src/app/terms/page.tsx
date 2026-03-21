@@ -19,7 +19,7 @@ export default function TermsPage() {
                     <p className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-lead">
                         Fair rules for a fair platform.
                     </p>
-                    <p style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-sm)" }}>
+                    <p className="text-sm text-muted mt-2" >
                         Last updated: March 14, 2026
                     </p>
                 </div>
@@ -58,7 +58,7 @@ export default function TermsPage() {
                         <li>Notify us immediately if you suspect unauthorized access</li>
                         <li>Not create multiple accounts for the purpose of abuse or manipulation</li>
                     </ul>
-                    <p style={{ marginTop: "var(--space-md)" }}>
+                    <p className="mt-4" >
                         Your display alias must not impersonate another person, use offensive language,
                         or violate the rights of others.
                     </p>
@@ -81,7 +81,7 @@ export default function TermsPage() {
                         <li>Contains malware, spam, or deceptive content</li>
                         <li>Depicts anything other than model horses, tack, props, or hobby-related items</li>
                     </ul>
-                    <p style={{ marginTop: "var(--space-md)" }}>
+                    <p className="mt-4" >
                         We reserve the right to remove content that violates these guidelines.
                     </p>
                 </section>
@@ -127,7 +127,7 @@ export default function TermsPage() {
                         <li>Not misrepresent the condition, provenance, or authenticity of a model</li>
                         <li>Report violations rather than engaging in retaliatory behavior</li>
                     </ul>
-                    <p style={{ marginTop: "var(--space-md)" }}>
+                    <p className="mt-4" >
                         We reserve the right to suspend or terminate accounts that violate these standards.
                     </p>
                 </section>

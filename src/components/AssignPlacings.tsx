@@ -53,17 +53,17 @@ export default function AssignPlacings({
     if (entries.length === 0) return null;
 
     return (
-        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
-            <h3 style={{ marginBottom: "var(--space-md)" }}>🏅 Assign Placings</h3>
-            <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
+            <h3 className="mb-4" >🏅 Assign Placings</h3>
+            <p className="text-muted text-sm mb-4" >
                 As the event host, assign placings to each entry below.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-sm)" }}>
+            <div className="gap-2" style={{ display: "flex", flexDirection: "column" }}>
                 {entries.map(entry => (
-                    <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)" }}>
-                        <span style={{ flex: 1 }}>
+                    <div key={entry.id} className="gap-2" style={{ display: "flex", alignItems: "center" }}>
+                        <span className="flex-1" >
                             <strong>{entry.horseName}</strong>
-                            <span style={{ color: "var(--color-text-muted)", marginLeft: "var(--space-xs)" }}>
+                            <span className="text-muted ml-1" >
                                 by @{entry.ownerAlias}
                             </span>
                         </span>
@@ -87,9 +87,9 @@ export default function AssignPlacings({
                 ))}
             </div>
 
-            {error && <div className="comment-error" style={{ marginTop: "var(--space-sm)" }}>{error}</div>}
+            {error && <div className="comment-error mt-2">{error}</div>}
 
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginTop: "var(--space-lg)" }}>
+            <div className="gap-2 mt-6" style={{ display: "flex", alignItems: "center" }}>
                 <button
                     className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
                     onClick={handleSave}
@@ -98,7 +98,7 @@ export default function AssignPlacings({
                 >
                     {saving ? "Saving…" : `💾 Save ${Object.values(placings).filter(v => v).length} Placings`}
                 </button>
-                {saved && <span style={{ color: "var(--color-accent-primary)", fontWeight: 600, whiteSpace: "nowrap" }}>✅ Saved!</span>}
+                {saved && <span className="text-forest font-semibold" style={{ whiteSpace: "nowrap" }}>✅ Saved!</span>}
             </div>
         </div>
     );

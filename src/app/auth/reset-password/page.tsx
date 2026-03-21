@@ -81,9 +81,9 @@ export default function ResetPasswordPage() {
             <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
                 <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
                     <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                        <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }} aria-hidden="true">✅</div>
+                        <div aria-hidden="true" className="text-[3rem] mb-4" >✅</div>
                         <h1>Password Updated!</h1>
-                        <p style={{ marginTop: "var(--space-md)" }}>Redirecting to your stable...</p>
+                        <p className="mt-4" >Redirecting to your stable...</p>
                     </div>
                 </div>
             </div>
@@ -95,13 +95,13 @@ export default function ResetPasswordPage() {
             <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
                 <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
                     <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                        <div style={{ fontSize: "3rem", marginBottom: "var(--space-md)" }} aria-hidden="true">🔐</div>
+                        <div aria-hidden="true" className="text-[3rem] mb-4" >🔐</div>
                         <h1>Verifying <span className="text-forest">Reset Link</span></h1>
-                        <p style={{ marginTop: "var(--space-md)" }}>
+                        <p className="mt-4" >
                             {error || "Please wait while we verify your reset link..."}
                         </p>
                         {error && (
-                            <a href="/forgot-password" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full" style={{ marginTop: "var(--space-lg)" }}>
+                            <a href="/forgot-password" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full mt-6">
                                 Request New Reset Link
                             </a>
                         )}

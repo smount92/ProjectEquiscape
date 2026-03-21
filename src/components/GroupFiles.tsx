@@ -81,15 +81,15 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
         setFiles(files.filter(f => f.id !== fileId));
     };
 
-    if (loading) return <p style={{ color: "var(--color-text-muted)" }}>Loading files…</p>;
+    if (loading) return <p className="text-muted" >Loading files…</p>;
 
     return (
         <div>
             {/* Upload Form */}
             {canUpload && (
-                <div className="group-file-upload" style={{ marginBottom: "var(--space-lg)" }}>
-                    <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "end", flexWrap: "wrap" }}>
-                        <div style={{ flex: 1, minWidth: 200 }}>
+                <div className="group-file-upload mb-6">
+                    <div className="gap-2" style={{ display: "flex", alignItems: "end", flexWrap: "wrap" }}>
+                        <div className="flex-1 min-w-[200]" >
                             <label className="block text-sm font-semibold text-ink mb-1">Upload File</label>
                             <input
                                 ref={fileRef}
@@ -98,7 +98,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
                                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
                             />
                         </div>
-                        <div style={{ flex: 1, minWidth: 200 }}>
+                        <div className="flex-1 min-w-[200]" >
                             <label className="block text-sm font-semibold text-ink mb-1">Description (optional)</label>
                             <input
                                 className="form-input"
@@ -136,7 +136,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
                                     {" · "}@{f.uploaderAlias} · {timeAgo(f.createdAt)}
                                 </span>
                             </div>
-                            <div style={{ display: "flex", gap: "var(--space-xs)" }}>
+                            <div className="gap-1" style={{ display: "flex" }}>
                                 {canDelete && (
                                     <button
                                         className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"

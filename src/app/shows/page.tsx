@@ -79,7 +79,7 @@ export default async function ShowsPage() {
                             >
                                 <div className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
                                     <h3 className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-title">{show.title}</h3>
-                                    <div style={{ display: "flex", gap: "var(--space-xs)", alignItems: "center" }}>
+                                    <div className="gap-1" style={{ display: "flex", alignItems: "center" }}>
                                         {isUserJudge && (
                                             <span style={{
                                                 fontSize: "calc(0.7rem * var(--font-scale))",
@@ -106,7 +106,7 @@ export default async function ShowsPage() {
                                     <p className="flex flex-col gap-2 p-6 bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg, rgba(0, 0, 0, 0.05))] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg no-underline text-inherit transition-all-desc">{show.description}</p>
                                 )}
                                 {show.creatorAlias && (
-                                    <div style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
+                                    <div className="text-xs text-muted mt-1" >
                                         Hosted by @{show.creatorAlias}
                                     </div>
                                 )}

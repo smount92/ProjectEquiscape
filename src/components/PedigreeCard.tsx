@@ -211,8 +211,8 @@ export default function PedigreeCard({
                                 id="pedigree-sire"
                             />
                             {sireId && (
-                                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", marginTop: "4px" }}>
-                                    <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-accent-primary)" }}>
+                                <div className="gap-1 mt-[4px]" style={{ display: "flex", alignItems: "center" }}>
+                                    <span className="text-[calc(0.75rem*var(--font-scale))] text-forest" >
                                         🔗 Linked to a horse in the system
                                     </span>
                                     <button type="button" onClick={clearSireLink} style={{
@@ -236,7 +236,7 @@ export default function PedigreeCard({
                                             color: "var(--color-text-primary)",
                                             fontSize: "calc(0.85rem * var(--font-scale))",
                                         }}>
-                                            {h.custom_name} <span style={{ color: "var(--color-text-muted)" }}>({h.finish_type})</span>
+                                            {h.custom_name} <span className="text-muted" >({h.finish_type})</span>
                                         </button>
                                     ))}
                                 </div>
@@ -257,8 +257,8 @@ export default function PedigreeCard({
                                 id="pedigree-dam"
                             />
                             {damId && (
-                                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", marginTop: "4px" }}>
-                                    <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-accent-primary)" }}>
+                                <div className="gap-1 mt-[4px]" style={{ display: "flex", alignItems: "center" }}>
+                                    <span className="text-[calc(0.75rem*var(--font-scale))] text-forest" >
                                         🔗 Linked to a horse in the system
                                     </span>
                                     <button type="button" onClick={clearDamLink} style={{
@@ -282,7 +282,7 @@ export default function PedigreeCard({
                                             color: "var(--color-text-primary)",
                                             fontSize: "calc(0.85rem * var(--font-scale))",
                                         }}>
-                                            {h.custom_name} <span style={{ color: "var(--color-text-muted)" }}>({h.finish_type})</span>
+                                            {h.custom_name} <span className="text-muted" >({h.finish_type})</span>
                                         </button>
                                     ))}
                                 </div>
@@ -341,7 +341,7 @@ export default function PedigreeCard({
                     </div>
 
                     {status === "error" && errorMsg && (
-                        <div className="comment-error" style={{ marginBottom: "var(--space-md)" }}>
+                        <div className="comment-error mb-4">
                             {errorMsg}
                         </div>
                     )}
@@ -386,7 +386,7 @@ export default function PedigreeCard({
                     <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Sire</span>
                     <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">
                         {pedigree!.sireId ? (
-                            <Link href={`/community/${pedigree!.sireId}`} style={{ color: "var(--color-accent-primary)", textDecoration: "none" }}>
+                            <Link href={`/community/${pedigree!.sireId}`} className="text-forest" style={{ textDecoration: "none" }}>
                                 {pedigree!.sireName} 🔗
                             </Link>
                         ) : pedigree!.sireName}
@@ -398,7 +398,7 @@ export default function PedigreeCard({
                     <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Dam</span>
                     <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">
                         {pedigree!.damId ? (
-                            <Link href={`/community/${pedigree!.damId}`} style={{ color: "var(--color-accent-primary)", textDecoration: "none" }}>
+                            <Link href={`/community/${pedigree!.damId}`} className="text-forest" style={{ textDecoration: "none" }}>
                                 {pedigree!.damName} 🔗
                             </Link>
                         ) : pedigree!.damName}

@@ -103,7 +103,7 @@ export default function HoofprintTimeline({
         <div className="mt-8">
             {/* Header */}
             <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)" }}>
+                <div className="gap-4" style={{ display: "flex", alignItems: "center" }}>
                     <h2 className="text-[calc(1.2rem*var(--font-scale))] font-bold">
                         🐾 <span className="text-forest">Hoofprint™</span>
                     </h2>
@@ -111,7 +111,7 @@ export default function HoofprintTimeline({
                         {STAGE_ICONS[lifeStage] || "📋"} {STAGE_LABELS[lifeStage] || lifeStage}
                     </span>
                 </div>
-                <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
+                <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
                     {isOwner && (
                         <>
                             <select
@@ -142,11 +142,11 @@ export default function HoofprintTimeline({
             {/* Ownership Chain */}
             {ownershipChain.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap mb-6 p-4 rounded-lg bg-[rgba(0, 0, 0, 0.03)] border border-[rgba(0, 0, 0, 0.06)]">
-                    <span style={{ fontSize: "calc(0.75rem * var(--font-scale))", color: "var(--color-text-muted)", marginRight: "var(--space-xs)" }}>
+                    <span className="text-[calc(0.75rem*var(--font-scale))] text-muted mr-1" >
                         Chain of Custody:
                     </span>
                     {ownershipChain.map((owner, i) => (
-                        <span key={owner.id} style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                        <span key={owner.id} className="inline-flex gap-1" style={{ alignItems: "center" }}>
                             {i > 0 && <span className="text-muted text-[0.8rem]">→</span>}
                             {owner.ownerId ? (
                                 <Link
@@ -154,7 +154,7 @@ export default function HoofprintTimeline({
                                     className={`ownership-link ${!owner.releasedAt ? "current" : ""}`}
                                 >
                                     @{owner.ownerAlias}
-                                    <span style={{ fontSize: "0.6rem", opacity: 0.7 }}>
+                                    <span className="text-[0.6rem] opacity-[0.7]" >
                                         {owner.acquisitionType !== "original" ? ` (${owner.acquisitionType})` : ""}
                                     </span>
                                 </Link>
@@ -192,8 +192,8 @@ export default function HoofprintTimeline({
                             rows={2}
                         />
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", marginTop: "var(--space-sm)" }}>
-                        <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                    <div className="gap-4 mt-2" style={{ display: "flex", alignItems: "center" }}>
+                        <span className="text-xs text-muted" >
                             📝 Notes appear on the Hoofprint™ timeline
                         </span>
                         <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={saving} style={{ marginLeft: "auto" }}>
@@ -205,9 +205,9 @@ export default function HoofprintTimeline({
 
             {/* Timeline */}
             {timeline.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "var(--space-xl)", color: "var(--color-text-muted)" }}>
+                <div className="p-8 text-muted" style={{ textAlign: "center" }}>
                     <p>🐾 No timeline events yet.</p>
-                    {isOwner && <p style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}>Add events to build this horse&apos;s Hoofprint!</p>}
+                    {isOwner && <p className="text-[calc(0.8rem*var(--font-scale))]" >Add events to build this horse&apos;s Hoofprint!</p>}
                 </div>
             ) : (
                 <div className="relative pl-[32px]">
@@ -216,12 +216,12 @@ export default function HoofprintTimeline({
                             <div className="relative pb-6-dot">
                                 {EVENT_ICONS[event.eventType] || "📋"}
                             </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div className="justify-between items-start" style={{ display: "flex" }}>
                                 <div>
                                     <div className="relative pb-6-title">
                                         {event.title}
                                         {!event.isPublic && (
-                                            <span style={{ fontSize: "0.65rem", marginLeft: "6px", opacity: 0.5 }}>🔒 Private</span>
+                                            <span className="text-[0.65rem] ml-[6px] opacity-[0.5]" >🔒 Private</span>
                                         )}
                                     </div>
                                     <div className="relative pb-6-meta">

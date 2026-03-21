@@ -233,7 +233,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         <div className="bg-[rgba(92,224,160,0.1)] border-2 border-success rounded-lg p-6 text-center mt-2">
                             <span className="block text-xs text-muted mb-1">🔑 Your Claim PIN</span>
                             <strong className="block text-2xl font-extrabold tracking-[0.15em] text-[#22c55e] font-mono">{pin}</strong>
-                            <Link href="/claim" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" style={{ marginTop: "var(--space-sm)" }}>
+                            <Link href="/claim" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm mt-2">
                                 Go to Claim Page →
                             </Link>
                         </div>
@@ -245,7 +245,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                 </div>
             )}
 
-            {error && <div className="comment-error" style={{ marginTop: "var(--space-sm)" }}>{error}</div>}
+            {error && <div className="comment-error mt-2">{error}</div>}
         </div>
     );
 }

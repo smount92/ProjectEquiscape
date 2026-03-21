@@ -36,8 +36,8 @@ export default async function MyCommissionsPage() {
     const renderGroup = (title: string, items: typeof commissions, emoji: string) => {
         if (items.length === 0) return null;
         return (
-            <div style={{ marginBottom: "var(--space-xl)" }}>
-                <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+            <div className="mb-8" >
+                <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
                     {emoji} {title} ({items.length})
                 </h2>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] max-md:grid-cols-1 gap-4">
@@ -64,7 +64,7 @@ export default async function MyCommissionsPage() {
                             <p className="text-[calc(0.85rem*var(--font-scale))] text-ink-light leading-normal mb-2">
                                 {c.description.length > 100 ? c.description.substring(0, 100) + "…" : c.description}
                             </p>
-                            <div style={{ marginTop: "auto", paddingTop: "var(--space-sm)", fontSize: "calc(0.7rem * var(--font-scale))", color: "var(--color-text-muted)" }}>
+                            <div className="pt-2 text-[calc(0.7rem*var(--font-scale))] text-muted" style={{ marginTop: "auto" }}>
                                 Last updated {new Date(c.lastUpdateAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </div>
                         </Link>
@@ -89,10 +89,10 @@ export default async function MyCommissionsPage() {
             </div>
 
             {commissions.length === 0 ? (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{ padding: "var(--space-2xl)", textAlign: "center" }}>
-                    <p style={{ fontSize: "2rem", marginBottom: "var(--space-md)" }}>🎨</p>
-                    <p style={{ color: "var(--color-text-muted)" }}>You haven&apos;t requested any commissions yet.</p>
-                    <Link href="/discover" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" style={{ marginTop: "var(--space-lg)" }}>
+                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up p-12" style={{ textAlign: "center" }}>
+                    <p className="text-[2rem] mb-4" >🎨</p>
+                    <p className="text-muted" >You haven&apos;t requested any commissions yet.</p>
+                    <Link href="/discover" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm mt-6">
                         Browse Artists →
                     </Link>
                 </div>

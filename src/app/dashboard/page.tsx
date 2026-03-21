@@ -235,7 +235,7 @@ export default async function DashboardPage({
                             )}
                         </h1>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
+                    <div className="gap-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
                         {totalHorseCount > 0 && (
                             <span className="text-sm text-muted">
                                 {totalHorseCount} model{totalHorseCount === 1 ? "" : "s"}
@@ -273,13 +273,13 @@ export default async function DashboardPage({
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="flex justify-between items-center mt-8 pt-6 border-t border-edge" style={{ marginTop: "var(--space-lg)" }}>
+                            <div className="flex justify-between items-center mt-8 pt-6 border-t border-edge mt-6">
                                 {page > 1 ? (
                                     <Link href={`/dashboard?page=${page - 1}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Previous</Link>
                                 ) : (
                                     <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>← Previous</button>
                                 )}
-                                <span style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                                <span className="text-muted text-sm" >
                                     Page {page} of {totalPages}
                                 </span>
                                 {page < totalPages ? (
@@ -322,7 +322,7 @@ export default async function DashboardPage({
                                     {unreadMsgCount > 0 && (
                                         <Link href="/inbox" className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03] no-underline" style={{ textDecoration: "none" }}>
                                             <span className="text-sm text-ink-light"><Mail size={14} strokeWidth={1.5} /> Unread Messages</span>
-                                            <span className="text-sm font-bold text-ink" style={{ color: "var(--color-accent-primary)" }}>{unreadMsgCount}</span>
+                                            <span className="text-sm font-bold text-ink text-forest">{unreadMsgCount}</span>
                                         </Link>
                                     )}
                                 </div>

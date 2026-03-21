@@ -43,7 +43,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
     }
 
     return (
-        <div className="edit-bio-form" style={{ marginTop: "var(--space-sm)", maxWidth: "480px", width: "100%" }}>
+        <div className="edit-bio-form mt-2 max-w-[480px] w-full">
             <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value.slice(0, 500))}
@@ -71,7 +71,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
                 }}>
                     {bio.length}/500
                 </span>
-                <div style={{ display: "flex", gap: "var(--space-sm)" }}>
+                <div className="gap-2" style={{ display: "flex" }}>
                     <button
                         className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
                         onClick={() => {

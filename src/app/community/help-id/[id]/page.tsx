@@ -141,7 +141,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
                                 </span>
                             )}
                         </h1>
-                        <p style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
+                        <p className="text-muted mt-1" >
                             Submitted by {requesterName} on{" "}
                             {new Date(req.created_at).toLocaleDateString()}
                         </p>
@@ -162,16 +162,16 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
                                 className="w-full h-auto block object-contain max-h-[500px]"
                             />
                         ) : (
-                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-placeholder" style={{ height: 300 }}>🐴</div>
+                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-placeholder h-[300]">🐴</div>
                         )}
                     </div>
 
                     {/* Description */}
                     <div className="p-6 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg">
-                        <h2 style={{ fontSize: "calc(var(--font-size-md) * var(--font-scale))", fontWeight: 600, marginBottom: "var(--space-md)" }}>
+                        <h2 className="text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold mb-4" >
                             Description
                         </h2>
-                        <p style={{ color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+                        <p className="text-ink-light leading-[1.7]" >
                             {req.description || "No description provided."}
                         </p>
                     </div>

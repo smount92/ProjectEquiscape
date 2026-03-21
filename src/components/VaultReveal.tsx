@@ -48,7 +48,7 @@ export default function VaultReveal({ vault, currencySymbol = "$" }: VaultReveal
         <div className="max-h-[500px] p-[0 var(--space-xl) var(--space-xl) var(--space-xl)]-lock w-11 h-11 rounded-md flex items-center justify-center text-[1.4rem] bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] border border-[rgba(240,160,108,0.25)] shrink-0 transition-all" aria-hidden="true">
           {isUnlocked ? "🔓" : "🔒"}
         </div>
-        <div style={{ flex: 1 }}>
+        <div className="flex-1" >
           <h3>Financial Vault</h3>
           <p>
             {isUnlocked

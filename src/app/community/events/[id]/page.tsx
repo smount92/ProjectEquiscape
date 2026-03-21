@@ -90,8 +90,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
     return (
         <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <div className="page-content" style={{ maxWidth: 720 }}>
-                <Link href="/community/events" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" style={{ marginBottom: "var(--space-md)" }}>← All Events</Link>
+            <div className="page-content max-w-[720]">
+                <Link href="/community/events" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge mb-4">← All Events</Link>
 
                 <div className="flex gap-6 items-start mb-6">
                     <div className="flex flex-col items-center justify-center min-w-[56px] h-[56px] rounded-md bg-[linear-gradient(135deg,rgba(44,85,69,0.15),rgba(139,92,246,0.1))] border border-[rgba(44,85,69,0.3)] shrink-0">
@@ -100,22 +100,22 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     </div>
                     <div>
                         <h1>{event.name}</h1>
-                        <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap", marginTop: "var(--space-sm)", color: "var(--color-text-muted)" }}>
+                        <div className="gap-4 mt-2 text-muted" style={{ display: "flex", flexWrap: "wrap" }}>
                             <span>{EVENT_TYPE_LABELS[event.eventType] || event.eventType}</span>
                             <span>👥 {event.rsvpCount} attending</span>
-                            {event.isOfficial && <span style={{ color: "#f59e0b" }}>⭐ Official</span>}
-                            {event.judgingMethod === "expert_judge" && <span style={{ color: "#8b5cf6" }}>🏅 Expert Judged</span>}
+                            {event.isOfficial && <span className="text-[#f59e0b]" >⭐ Official</span>}
+                            {event.judgingMethod === "expert_judge" && <span className="text-[#8b5cf6]" >🏅 Expert Judged</span>}
                         </div>
                     </div>
                 </div>
 
                 {/* RSVP */}
-                <div style={{ margin: "var(--space-lg) 0" }}>
+                <div className="m-[var(--space-lg) 0]" >
                     <EventRsvpButton eventId={event.id} currentStatus={event.userRsvp} />
                 </div>
 
                 {/* Details */}
-                <div className="grid gap-2" style={{ marginBottom: "var(--space-lg)" }}>
+                <div className="grid gap-2 mb-6">
                     <div className="flex justify-between items-center py-1">
                         <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">📅 Date</span>
                         <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
@@ -139,7 +139,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     {event.isVirtual && event.virtualUrl && (
                         <div className="flex justify-between items-center py-1">
                             <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">🌐 Virtual Link</span>
-                            <a href={event.virtualUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-[calc(0.9rem*var(--font-scale))]" style={{ color: "var(--color-accent-primary)" }}>
+                            <a href={event.virtualUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-[calc(0.9rem*var(--font-scale))] text-forest">
                                 Join Online →
                             </a>
                         </div>
@@ -164,15 +164,15 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Description */}
                 {event.description && (
-                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)" }}>
-                        <h3 style={{ marginBottom: "var(--space-sm)" }}>About</h3>
-                        <p style={{ lineHeight: 1.7, whiteSpace: "pre-line" }}>{event.description}</p>
+                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6">
+                        <h3 className="mb-2" >About</h3>
+                        <p className="leading-[1.7]" style={{ whiteSpace: "pre-line" }}>{event.description}</p>
                     </div>
                 )}
 
                 {/* Creator Actions */}
                 {user.id === event.createdBy && (
-                    <div style={{ marginTop: "var(--space-lg)", display: "flex", gap: "var(--space-sm)", justifyContent: "flex-end", flexWrap: "wrap" }}>
+                    <div className="mt-6 gap-2 justify-end" style={{ display: "flex", flexWrap: "wrap" }}>
                         <Link href={`/community/events/${event.id}/manage`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                             ⚙️ Manage Classes
                         </Link>
@@ -182,21 +182,21 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Division / Class Tree */}
                 {divisions.length > 0 && (
-                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
-                        <h3 style={{ marginBottom: "var(--space-md)" }}>📋 Class List ({divisions.reduce((s, d) => s + d.classes.length, 0)} classes)</h3>
+                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
+                        <h3 className="mb-4" >📋 Class List ({divisions.reduce((s, d) => s + d.classes.length, 0)} classes)</h3>
                         {divisions.map((div) => (
-                            <div key={div.id} style={{ marginBottom: "var(--space-md)" }}>
-                                <div style={{ fontWeight: 700, marginBottom: "var(--space-xs)", color: "var(--color-text-primary)" }}>
+                            <div key={div.id} className="mb-4" >
+                                <div className="font-bold mb-1 text-ink" >
                                     {div.name}
                                 </div>
-                                <div style={{ paddingLeft: "var(--space-lg)" }}>
+                                <div className="pl-6" >
                                     {div.classes.map((cls) => (
-                                        <div key={cls.id} style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", padding: "var(--space-xs) 0", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", color: "var(--color-text-secondary)" }}>
-                                            <span style={{ color: "var(--color-text-muted)", minWidth: "40px" }}>{cls.classNumber || "—"}</span>
+                                        <div key={cls.id} className="gap-2 p-[var(--space-xs) 0] text-sm text-ink-light" style={{ display: "flex", alignItems: "center" }}>
+                                            <span className="text-muted min-w-[40px]" >{cls.classNumber || "—"}</span>
                                             <span>{cls.name}</span>
-                                            {cls.isNanQualifying && <span style={{ color: "#f59e0b" }} title="NAN Qualifying">⭐</span>}
+                                            {cls.isNanQualifying && <span title="NAN Qualifying" className="text-[#f59e0b]" >⭐</span>}
                                             {(cls.entryCount || 0) > 0 && (
-                                                <span style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)" }}>({cls.entryCount})</span>
+                                                <span className="text-xs text-muted" >({cls.entryCount})</span>
                                             )}
                                         </div>
                                     ))}
@@ -210,9 +210,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {/* Show Entry Section (live_show / photo_show) */}
                 {/* ══════════════════════════════════════ */}
                 {isShowEvent && isShowOpen && (
-                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
-                        <h3 style={{ marginBottom: "var(--space-sm)" }}>🐴 Enter Your Horse</h3>
-                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
+                        <h3 className="mb-2" >🐴 Enter Your Horse</h3>
+                        <p className="text-muted text-sm mb-4" >
                             Select a public horse to enter. Your horse&apos;s passport photo will be used as the entry thumbnail.
                             {classOptions.length > 0 && " Choose which class to enter."}
                         </p>
@@ -222,8 +222,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Show Entries Grid */}
                 {isShowEvent && showEntries.length > 0 && (
-                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
-                        <h3 style={{ marginBottom: "var(--space-md)" }}>📸 Entries ({showEntries.length})</h3>
+                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
+                        <h3 className="mb-4" >📸 Entries ({showEntries.length})</h3>
                         <div className="flex flex-col gap-[0] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg overflow-hidden">
                             {showEntries.map((entry, index) => (
                                 <div key={entry.id} className="flex items-center gap-4 py-4 px-6 border-b border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-colors">
@@ -250,13 +250,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                                             </Link>
                                             {" · "}{entry.finishType}
                                             {entry.className && (
-                                                <span style={{ marginLeft: "var(--space-xs)", color: "var(--color-accent-primary)" }}>
+                                                <span className="ml-1 text-forest" >
                                                     · {entry.divisionName && `${entry.divisionName} / `}{entry.className}
                                                 </span>
                                             )}
                                         </span>
                                     </div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)" }}>
+                                    <div className="gap-1" style={{ display: "flex", alignItems: "center" }}>
                                         {isExpertJudged ? (
                                             entry.placing && showStatus === "closed" ? (
                                                 <span style={{
@@ -289,8 +289,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 )}
 
                 {isShowEvent && showEntries.length === 0 && !isShowOpen && (
-                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)", textAlign: "center" }}>
-                        <p style={{ color: "var(--color-text-muted)" }}>No entries were submitted for this show.</p>
+                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6" style={{ textAlign: "center" }}>
+                        <p className="text-muted" >No entries were submitted for this show.</p>
                     </div>
                 )}
 
@@ -301,8 +301,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* Attendees */}
                 {attendees.length > 0 && (
-                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ padding: "var(--space-lg)", marginTop: "var(--space-lg)" }}>
-                        <h3 style={{ marginBottom: "var(--space-sm)" }}>👥 Who&apos;s Going ({attendees.filter(a => a.status === "going").length})</h3>
+                    <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
+                        <h3 className="mb-2" >👥 Who&apos;s Going ({attendees.filter(a => a.status === "going").length})</h3>
                         <div className="flex flex-wrap gap-1">
                             {attendees.filter(a => a.status === "going").map(a => (
                                 <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="py-1 px-2.5 rounded-full bg-[var(--color-surface-hover)] text-ink text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white">
@@ -312,7 +312,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         </div>
                         {attendees.filter(a => a.status === "interested").length > 0 && (
                             <>
-                                <h4 style={{ marginTop: "var(--space-md)", color: "var(--color-text-muted)" }}>⭐ Interested ({attendees.filter(a => a.status === "interested").length})</h4>
+                                <h4 className="mt-4 text-muted" >⭐ Interested ({attendees.filter(a => a.status === "interested").length})</h4>
                                 <div className="flex flex-wrap gap-1">
                                     {attendees.filter(a => a.status === "interested").map(a => (
                                         <Link key={a.userId} href={`/profile/${encodeURIComponent(a.alias)}`} className="py-1 px-2.5 rounded-full bg-[var(--color-surface-hover)] text-ink text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white">

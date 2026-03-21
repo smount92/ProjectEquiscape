@@ -86,11 +86,11 @@ export default async function HoofprintReportPage({
                         Full provenance record for <strong>{h.custom_name}</strong>
                     </p>
                     {refName && (
-                        <p style={{ color: "var(--color-text-muted)", fontSize: "calc(0.85rem * var(--font-scale))" }}>
+                        <p className="text-muted text-[calc(0.85rem*var(--font-scale))]" >
                             {refName} · {h.finish_type} · {h.condition_grade}
                         </p>
                     )}
-                    <div style={{ display: "flex", gap: "var(--space-sm)", marginTop: "var(--space-md)", flexWrap: "wrap" }}>
+                    <div className="gap-2 mt-4" style={{ display: "flex", flexWrap: "wrap" }}>
                         <Link href={`/community/${horseId}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
                             ← Back to Passport
                         </Link>
@@ -105,7 +105,7 @@ export default async function HoofprintReportPage({
             </div>
 
             {/* Ownership + Timeline */}
-            <div className="animate-fade-in-up" style={{ marginTop: "var(--space-xl)" }}>
+            <div className="animate-fade-in-up mt-8">
                 <HoofprintTimeline
                     horseId={horseId}
                     timeline={timeline}
@@ -117,11 +117,11 @@ export default async function HoofprintReportPage({
 
             {/* Show Records Summary */}
             {records.length > 0 && (
-                <div className="animate-fade-in-up bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{ marginTop: "var(--space-xl)", padding: "var(--space-lg)" }}>
-                    <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
+                <div className="animate-fade-in-up bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all mt-8 p-6">
+                    <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
                         🏆 Show Record
                     </h2>
-                    <div style={{ display: "grid", gap: "var(--space-xs)" }}>
+                    <div className="gap-1" style={{ display: "grid" }}>
                         {records.map((r, i) => (
                             <div key={i} style={{
                                 display: "flex",
@@ -132,14 +132,14 @@ export default async function HoofprintReportPage({
                                 background: "rgba(255,255,255,0.03)",
                                 fontSize: "calc(0.8rem * var(--font-scale))",
                             }}>
-                                <span style={{ fontSize: "1rem" }}>
+                                <span className="text-base" >
                                     {r.ribbon_color === "Blue" ? "🥇" : r.ribbon_color === "Red" ? "🥈" : r.ribbon_color === "Yellow" ? "🥉" : "🏅"}
                                 </span>
-                                <span style={{ fontWeight: 600 }}>{r.show_name}</span>
-                                {r.division && <span style={{ color: "var(--color-text-muted)" }}>— {r.division}</span>}
-                                {r.placing && <span style={{ color: "var(--color-text-muted)" }}>({r.placing})</span>}
+                                <span className="font-semibold" >{r.show_name}</span>
+                                {r.division && <span className="text-muted" >— {r.division}</span>}
+                                {r.placing && <span className="text-muted" >({r.placing})</span>}
                                 {r.show_date && (
-                                    <span style={{ marginLeft: "auto", color: "var(--color-text-muted)", fontSize: "calc(0.7rem * var(--font-scale))" }}>
+                                    <span className="text-muted text-[calc(0.7rem*var(--font-scale))]" style={{ marginLeft: "auto" }}>
                                         {new Date(r.show_date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
                                     </span>
                                 )}

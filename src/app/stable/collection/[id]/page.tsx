@@ -190,7 +190,7 @@ export default async function CollectionPage({
           <span className="text-sm text-muted">
             {horseCards.length} model{horseCards.length !== 1 ? "s" : ""} in this collection
           </span>
-          <div style={{ marginTop: "var(--space-sm)" }}>
+          <div className="mt-2" >
             <CollectionManager collection={collection} />
           </div>
         </div>
@@ -270,7 +270,7 @@ export default async function CollectionPage({
                 <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-name">{horse.customName}</div>
                 <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis">{horse.refName}</div>
                 {horse.releaseLine && (
-                  <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                  <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis text-[calc(0.7rem*var(--font-scale))] opacity-[0.7] mt-[2px]">
                     🎨 {horse.releaseLine}
                   </div>
                 )}

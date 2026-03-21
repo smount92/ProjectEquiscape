@@ -105,13 +105,13 @@ export default function MakeOfferModal({
                             maxLength={500}
                         />
                         {showPaymentWarning && (
-                            <div className="comment-error" style={{ marginTop: "var(--space-xs)", background: "rgba(234, 179, 8, 0.15)", color: "var(--color-warning, #eab308)", border: "1px solid rgba(234, 179, 8, 0.3)", borderRadius: "var(--radius-sm)", padding: "var(--space-xs) var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                            <div className="comment-error mt-1 bg-[rgba(234,179,8,0.15)] text-[var(--color-warning, #eab308)] rounded-sm p-[var(--space-xs) var(--space-sm)] text-sm" style={{ border: "1px solid rgba(234, 179, 8, 0.3)" }}>
                                 {RISKY_PAYMENT_WARNING}
                             </div>
                         )}
                     </div>
 
-                    <label style={{ display: "flex", alignItems: "center", gap: "var(--space-xs)", cursor: "pointer", marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}>
+                    <label className="gap-1 mb-2 text-sm" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
                         <input type="checkbox" checked={isBundle} onChange={e => setIsBundle(e.target.checked)} />
                         This is a bundle/lot sale (excluded from market price index)
                     </label>

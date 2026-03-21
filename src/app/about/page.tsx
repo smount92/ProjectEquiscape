@@ -99,7 +99,7 @@ export default function AboutPage() {
                     <p>
                         Here&apos;s what&apos;s on the roadmap:
                     </p>
-                    <div className="grid grid-cols-[repeat(3, 1fr)] gap-6" style={{ marginTop: "var(--space-md)" }}>
+                    <div className="grid grid-cols-[repeat(3, 1fr)] gap-6 mt-4">
                         <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-8 text-center transition-all">
                             <span className="block text-[2rem] mb-4" aria-hidden="true">🎨</span>
                             <h3>Art Studio &amp; Commission Tracking</h3>

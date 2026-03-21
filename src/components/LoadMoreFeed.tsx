@@ -56,12 +56,12 @@ export default function LoadMoreFeed({
         <>
             <ActivityFeed items={items} emptyMessage={emptyMessage} currentUserId={currentUserId} />
             {cursor && (
-                <div ref={sentinelRef} style={{ height: "1px" }} />
+                <div ref={sentinelRef}  className="h-[1px]" />
             )}
             {isPending && (
-                <div style={{ textAlign: "center", padding: "var(--space-lg) 0", color: "var(--color-text-muted)" }}>
-                    <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" style={{ width: 20, height: 20, display: "inline-block" }} aria-hidden="true" />
-                    <span style={{ marginLeft: "var(--space-sm)" }}>Loading more…</span>
+                <div className="p-[var(--space-lg) 0] text-muted" style={{ textAlign: "center" }}>
+                    <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[20] h-[20] inline-block" aria-hidden="true" />
+                    <span className="ml-2" >Loading more…</span>
                 </div>
             )}
         </>
