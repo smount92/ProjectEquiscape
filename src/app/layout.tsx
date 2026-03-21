@@ -12,7 +12,7 @@ import "./competition.css";
 // Core UI components
 
 
-import "@/components/Provenance.css";
+
 
 
 
