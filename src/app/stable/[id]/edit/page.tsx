@@ -749,7 +749,7 @@ export default function EditHorsePage() {
                 {existingExtras.map((ex, idx) => (
                   <div
                     key={ex.recordId}
-                    className={`extras-preview-item ${dragExtraIdx === idx ? "dragging" : ""}`}
+                    className={`extras-preview-item group cursor-grab ${dragExtraIdx === idx ? "opacity-40 outline-2 outline-dashed outline-accent-primary" : ""}`}
                     draggable
                     onDragStart={(e) => {
                       setDragExtraIdx(idx);
@@ -775,7 +775,7 @@ export default function EditHorsePage() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={ex.imageUrl} alt="Extra detail" />
-                    <div className="extras-drag-handle" title="Drag to reorder">⠿</div>
+                    <div className="absolute top-1 right-7 bg-black/50 text-white w-5.5 h-5.5 rounded-sm flex items-center justify-center text-xs cursor-grab opacity-0 group-hover:opacity-100 transition-opacity z-[3]" title="Drag to reorder">⠇</div>
                     <button
                       className="gallery-remove"
                       onClick={async (e) => {
@@ -1056,7 +1056,7 @@ export default function EditHorsePage() {
         <div className="community-toggle-section">
           <div className="community-toggle-row" style={{ flexDirection: "column", gap: "var(--space-sm)" }}>
             <span className="community-toggle-label">👁️ Visibility</span>
-            <div className="visibility-options">
+            <div className="flex gap-sm flex-wrap">
               {([
                 { value: "public" as const, icon: "🌐", label: "Public", hint: "Visible in the Show Ring" },
                 { value: "unlisted" as const, icon: "🔗", label: "Unlisted", hint: "Anyone with the link can see it" },
@@ -1065,13 +1065,13 @@ export default function EditHorsePage() {
                 <button
                   key={opt.value}
                   type="button"
-                  className={`visibility-option ${visibility === opt.value ? "active" : ""}`}
+                  className={`flex-1 min-w-[120px] flex flex-col items-center gap-1 py-3 px-2 border-2 rounded-lg bg-surface-primary cursor-pointer transition-all font-inherit text-text-primary hover:border-accent-primary hover:bg-surface-secondary ${visibility === opt.value ? "border-accent-primary bg-[rgba(44,85,69,0.1)]" : "border-border"}`}
                   onClick={() => setVisibility(opt.value)}
                   id={`edit-visibility-${opt.value}`}
                 >
-                  <span className="visibility-icon">{opt.icon}</span>
-                  <span className="visibility-label">{opt.label}</span>
-                  <span className="visibility-hint">{opt.hint}</span>
+                  <span className="text-2xl">{opt.icon}</span>
+                  <span className="font-semibold text-sm">{opt.label}</span>
+                  <span className="text-xs text-text-muted text-center">{opt.hint}</span>
                 </button>
               ))}
             </div>

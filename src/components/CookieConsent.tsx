@@ -43,9 +43,9 @@ export default function CookieConsent() {
     if (!visible) return null;
 
     return (
-        <div className="cookie-banner animate-fade-in-up" role="dialog" aria-label="Cookie consent">
-            <div className="cookie-banner-inner">
-                <div className="cookie-banner-text">
+        <div className="fixed bottom-0 left-0 right-0 z-[9999] py-md px-xl bg-[rgba(10,10,18,0.92)] border-t border-border shadow-[0_-4px_30px_rgba(0,0,0,0.3)] animate-fade-in-up" role="dialog" aria-label="Cookie consent">
+            <div className="max-w-[var(--max-width)] mx-auto flex items-center justify-between gap-xl max-md:flex-col max-md:text-center max-md:gap-md">
+                <div className="flex-1 min-w-0 [&_p]:text-sm [&_p]:text-text-secondary [&_p]:leading-relaxed [&_p]:m-0 [&_p:first-child]:text-text-primary [&_p:first-child]:mb-xs [&_a]:text-accent-primary">
                     <p>
                         <strong>🍪 Cookies &amp; Privacy</strong>
                     </p>
@@ -55,16 +55,16 @@ export default function CookieConsent() {
                         See our <Link href="/privacy">Privacy Policy</Link> for details.
                     </p>
                 </div>
-                <div className="cookie-banner-actions">
+                <div className="flex gap-sm shrink-0 max-md:w-full max-md:justify-center">
                     <button
-                        className="btn btn-primary cookie-btn"
+                        className="btn btn-primary text-sm !py-sm !px-lg whitespace-nowrap"
                         onClick={handleAccept}
                         id="cookie-accept"
                     >
                         Accept
                     </button>
                     <button
-                        className="btn btn-ghost cookie-btn"
+                        className="btn btn-ghost text-sm !py-sm !px-lg whitespace-nowrap"
                         onClick={handleDecline}
                         id="cookie-decline"
                     >

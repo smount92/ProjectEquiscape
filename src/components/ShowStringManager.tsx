@@ -191,10 +191,10 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                             {conflicts.length > 0 && (
                                                 <div style={{ marginBottom: "var(--space-md)" }}>
                                                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-sm)", marginBottom: "var(--space-xs)" }}>
-                                                        <span className="ring-conflict-badge">⚠️ {conflicts.length} Conflict{conflicts.length !== 1 ? "s" : ""}</span>
+                                                        <span className="inline-flex items-center gap-1 py-0.5 px-2 rounded-full bg-[rgba(239,68,68,0.15)] text-[#ef4444] text-xs font-semibold">⚠️ {conflicts.length} Conflict{conflicts.length !== 1 ? "s" : ""}</span>
                                                     </div>
                                                     {/* Timeline visualization */}
-                                                    <div className="ring-timeline">
+                                                    <div className="flex gap-0.5 items-stretch h-8 rounded-md overflow-hidden bg-surface-secondary">
                                                         {entries.map(entry => {
                                                             const isConflict = conflicts.some(
                                                                 c => c.entryA === entry.id || c.entryB === entry.id
@@ -202,7 +202,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                             return (
                                                                 <div
                                                                     key={entry.id}
-                                                                    className={`ring-block ${isConflict ? "conflict" : "scheduled"}`}
+                                                                    className={`flex-1 flex items-center justify-center text-xs font-semibold text-white transition-opacity relative ${isConflict ? "bg-[#ef4444] animate-pulse" : "bg-accent-primary"}`}
                                                                     title={`${entry.horseName} — ${entry.className}${entry.timeSlot ? ` @ ${entry.timeSlot}` : ""}`}
                                                                 >
                                                                     {entry.className.slice(0, 3)}

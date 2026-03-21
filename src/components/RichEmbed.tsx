@@ -32,7 +32,7 @@ export default function RichEmbed({ text, embedData }: RichEmbedProps) {
     return (
         <Link
             href={`/community/${horseId}`}
-            className="embed-card"
+            className="flex gap-md border border-border rounded-lg overflow-hidden bg-surface-secondary no-underline text-inherit mt-sm transition-colors hover:border-accent-primary"
             id={`embed-${horseId}`}
         >
             {data.thumbnailUrl && (
@@ -40,16 +40,16 @@ export default function RichEmbed({ text, embedData }: RichEmbedProps) {
                 <img
                     src={data.thumbnailUrl}
                     alt={data.name}
-                    className="embed-card-image"
+                    className="w-[100px] min-h-[80px] object-cover shrink-0"
                     loading="lazy"
                 />
             )}
-            <div className="embed-card-body">
-                <div className="embed-card-title">🐴 {data.name}</div>
-                <div className="embed-card-desc">
+            <div className="py-2.5 px-3 flex flex-col gap-1 min-w-0">
+                <div className="font-semibold text-sm whitespace-nowrap overflow-hidden text-ellipsis">🐴 {data.name}</div>
+                <div className="text-xs text-text-muted line-clamp-2">
                     {data.finish} · {data.maker}
                 </div>
-                <div className="embed-card-domain">Model Horse Hub</div>
+                <div className="text-xs text-accent-primary">Model Horse Hub</div>
             </div>
         </Link>
     );
