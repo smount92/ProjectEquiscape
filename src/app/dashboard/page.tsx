@@ -237,7 +237,7 @@ export default async function DashboardPage({
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", flexWrap: "wrap" }}>
                         {totalHorseCount > 0 && (
-                            <span className="shelf-stats">
+                            <span className="text-sm text-muted">
                                 {totalHorseCount} model{totalHorseCount === 1 ? "" : "s"}
                             </span>
                         )}

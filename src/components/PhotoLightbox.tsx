@@ -57,7 +57,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
             {/* Prev arrow */}
             {images.length > 1 && (
                 <button
-                    className="lightbox-nav left-[var(--space-lg)]"
+                    className="lightbox-nav hover:0.2)] left-[var(--space-lg)]"
                     onClick={(e) => { e.stopPropagation(); goPrev(); }}
                     aria-label="Previous photo"
                 >
@@ -78,7 +78,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
             {/* Next arrow */}
             {images.length > 1 && (
                 <button
-                    className="lightbox-nav right-[var(--space-lg)]"
+                    className="lightbox-nav hover:0.2)] right-[var(--space-lg)]"
                     onClick={(e) => { e.stopPropagation(); goNext(); }}
                     aria-label="Next photo"
                 >

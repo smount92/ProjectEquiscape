@@ -201,7 +201,7 @@ export default function CatalogBrowser({
                 </span>
                 {(search || activeMaker || activeScale) && (
                     <button
-                        className="ref-clear-btn"
+                        className="shrink-0 text-sm"
                         onClick={() => {
                             setSearch("");
                             setActiveMaker(null);

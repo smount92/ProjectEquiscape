@@ -61,7 +61,7 @@ export default function AdminSuggestionsPanel({
             {items.map((s) => (
                 <div
                     key={s.id}
-                    className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all admin-message-unread"
+                    className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all admin-message hover:opacity-[1]-unread"
                 >
                     <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-header">
                         <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sender">

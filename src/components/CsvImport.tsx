@@ -303,8 +303,8 @@ export default function CsvImport() {
                         key={s.num}
                         className={`csv-step-dot ${step >= s.num ? "active" : ""} ${step === s.num ? "current" : ""}`}
                     >
-                        <span className="csv-step-number">{s.num}</span>
-                        <span className="csv-step-label">{s.label}</span>
+                        <span className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-card border-[2px] border-edge text-muted font-bold text-sm transition-all">{s.num}</span>
+                        <span className="text-xs text-muted font-medium transition-all">{s.label}</span>
                     </div>
                 ))}
             </div>
@@ -313,7 +313,7 @@ export default function CsvImport() {
             {step === 1 && (
                 <div className="max-w-[900px] mx-auto animate-fade-in-up">
                     <h2>📄 Upload Your CSV</h2>
-                    <p className="csv-step-desc">
+                    <p className="text-base text-[var(--color-text-secondary)] mb-8 leading-[1.6]">
                         Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against
                         our 10,500+ reference database.
                     </p>
@@ -332,7 +332,7 @@ export default function CsvImport() {
                         <p className="csv-dropzone-text">
                             Drag &amp; drop your CSV file here
                             <br />
-                            <span className="csv-dropzone-hint">or click to browse</span>
+                            <span className="text-sm text-forest underline">or click to browse</span>
                         </p>
                         <input
                             ref={fileInputRef}
@@ -358,7 +358,7 @@ export default function CsvImport() {
             {step === 2 && (
                 <div className="max-w-[900px] mx-auto animate-fade-in-up">
                     <h2>🔗 Map Your Columns</h2>
-                    <p className="csv-step-desc">
+                    <p className="text-base text-[var(--color-text-secondary)] mb-8 leading-[1.6]">
                         We detected <strong>{csvHeaders.length}</strong> columns and{" "}
                         <strong>{csvData.length}</strong> rows. Map each column to a Model Horse Hub field.
                     </p>
@@ -366,7 +366,7 @@ export default function CsvImport() {
                     <div className="flex flex-col gap-4 mb-8">
                         {csvHeaders.map((header) => (
                             <div key={header} className="flex items-center gap-4 py-4 px-6 bg-card border border-edge rounded-md">
-                                <span className="csv-mapping-csv-col">{header}</span>
+                                <span className="flex-1 font-semibold text-sm text-ink min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{header}</span>
                                 <span className="csv-mapping-arrow">→</span>
                                 <select
                                     className="csv-mapping-select"
@@ -430,7 +430,7 @@ export default function CsvImport() {
                     </div>
 
                     {!Object.values(columnMapping).some((v) => v === "name") && (
-                        <p className="csv-mapping-warning">
+                        <p className="text-sm text-warning text-center mt-4">
                             ⚠️ You must map at least one column to <strong>Name</strong> to proceed.
                         </p>
                     )}
@@ -441,7 +441,7 @@ export default function CsvImport() {
             {step === 3 && (
                 <div className="max-w-[900px] mx-auto animate-fade-in-up">
                     <h2>🔍 Review Matches</h2>
-                    <p className="csv-step-desc">
+                    <p className="text-base text-[var(--color-text-secondary)] mb-8 leading-[1.6]">
                         We matched your {matchResults.length} rows against the reference database. Review and
                         confirm the matches below.
                     </p>
@@ -483,7 +483,7 @@ export default function CsvImport() {
                                         .filter(([, v]) => v)
                                         .slice(0, 4)
                                         .map(([k, v]) => (
-                                            <span key={k} className="csv-match-csv-tag">
+                                            <span key={k} className="py-[2px] px-[8px] bg-elevated rounded-sm text-xs text-muted">
                                                 {k}: {v}
                                             </span>
                                         ))}
@@ -501,7 +501,7 @@ export default function CsvImport() {
                                                     onChange={() => handleSelectMatch(result.rowIndex, match)}
                                                 />
                                                 <span className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors-text">
-                                                    <span className="csv-match-display">{match.display}</span>
+                                                    <span className="text-sm text-ink">{match.display}</span>
                                                     <span className="csv-match-score">
                                                         Score: {match.score > 0 ? `+${match.score}` : match.score}
                                                     </span>
@@ -516,14 +516,14 @@ export default function CsvImport() {
                                                 onChange={() => handleSelectMatch(result.rowIndex, null)}
                                             />
                                             <span className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors-text">
-                                                <span className="csv-match-display">Custom / Unknown — no reference link</span>
+                                                <span className="text-sm text-ink">Custom / Unknown — no reference link</span>
                                             </span>
                                         </label>
                                     </div>
                                 )}
 
                                 {result.matches.length === 0 && (
-                                    <p className="csv-match-no-results">
+                                    <p className="text-sm text-muted italic">
                                         No matches found in the reference database. This model will be imported as
                                         custom/unknown.
                                     </p>

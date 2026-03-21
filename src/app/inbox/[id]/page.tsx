@@ -243,7 +243,7 @@ export default async function ChatPage({
                         <Link href={`/profile/${encodeURIComponent(otherAlias)}`}>
                             @{otherAlias}
                         </Link>
-                        <span className="chat-role-badge">{isBuyer ? "Seller" : "Buyer"}</span>
+                        <span className="text-xs font-medium py-[2px] px-[8px] bg-[rgba(44, 85, 69, 0.1)] text-[#2C5545] rounded-full">{isBuyer ? "Seller" : "Buyer"}</span>
                     </div>
                     {horseContext ? (
                         <span className="text-xs text-muted mt-0.5">

@@ -19,7 +19,7 @@ export default function LandingPage() {
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-glow hidden" aria-hidden="true" />
         <div className="hero-content animate-fade-in-up">
-          <span className="hero-badge"><Fingerprint size={16} strokeWidth={1.5} /> Hoofprint™ — The First Living Provenance System for Model Horses</span>
+          <span className="inline-block py-1 px-6 text-sm font-semibold text-forest bg-[var(--color-accent-primary-glow)] border border-[rgba(44, 85, 69, 0.25)] rounded-full mb-8 tracking-[0.01em]"><Fingerprint size={16} strokeWidth={1.5} /> Hoofprint™ — The First Living Provenance System for Model Horses</span>
           <h1 className="text-[clamp(2rem, 5vw, 3.5rem)] font-extrabold leading-[1.1] mb-6 tracking-[-0.03em]">
             The Only Platform Built{" "}
             <span className="text-gradient">for This Hobby</span>
@@ -38,7 +38,7 @@ export default function LandingPage() {
               Explore the Show Ring
             </Link>
           </div>
-          <p className="hero-trust-line">
+          <p className="text-xs text-muted tracking-[0.03em]">
             ✦ No credit card required &nbsp;·&nbsp; ✦ Privacy-first &nbsp;·&nbsp; ✦ Free forever tier
           </p>
         </div>
@@ -47,7 +47,7 @@ export default function LandingPage() {
       {/* ─── How It Works ─── */}
       <section className="py-[var(--space-3xl)] px-8 text-center" id="how-it-works">
         <div className="max-w-[1100px] mx-auto">
-          <h2 className="features-title">
+          <h2 className="text-2xl font-extrabold mb-2 tracking-[-0.02em]">
             Get Started in <span className="text-gradient">3 Steps</span>
           </h2>
           <p className="features-subtitle">
@@ -93,7 +93,7 @@ export default function LandingPage() {
       {/* ─── Features Grid ─── */}
       <section className="py-[var(--space-3xl)] px-8 relative" id="features">
         <div className="max-w-[var(--max-width)] mx-auto text-center">
-          <h2 className="features-title">
+          <h2 className="text-2xl font-extrabold mb-2 tracking-[-0.02em]">
             Everything You Need.{" "}
             <span className="text-gradient">Nothing You Don&apos;t.</span>
           </h2>
@@ -259,17 +259,17 @@ export default function LandingPage() {
       {/* ─── Hoofprint™ Teaser ─── */}
       <section className="hoofprint-teaser-section" id="hoofprint-teaser">
         <div className="max-w-[720px] mx-auto">
-          <div className="hoofprint-teaser-badge"><PawPrint size={16} strokeWidth={1.5} /> Now Live</div>
+          <div className="inline-block py-1 px-6 text-sm font-semibold text-[#f59e0b] bg-[rgba(245, 158, 11, 0.1)] border border-[rgba(245, 158, 11, 0.25)] rounded-full mb-8 tracking-[0.02em]"><PawPrint size={16} strokeWidth={1.5} /> Now Live</div>
           <h2 className="text-[clamp(1.5rem, 3.5vw, 2.5rem)] font-extrabold leading-[1.2] mb-6">
             Every Horse Has a Story.{" "}
             <span className="text-gradient">Hoofprint™ Tells It.</span>
           </h2>
-          <p className="hoofprint-teaser-desc">
+          <p className="text-base text-muted leading-[1.7] mb-4">
             Imagine a permanent digital identity for every model horse.
             From the moment a blank resin is cast, through the artist&apos;s brushstrokes,
             to the collector who treasures it for years — and the next collector after that.
           </p>
-          <p className="hoofprint-teaser-desc">
+          <p className="text-base text-muted leading-[1.7] mb-4">
             Hoofprint™ is the first-ever living provenance system for model horses.
             Photos, ownership transfers, customization records, and show results
             all follow the horse — not the owner. Like a passport that never expires.
@@ -297,7 +297,7 @@ export default function LandingPage() {
       {/* ─── Who It's For ─── */}
       <section className="py-16 px-8 text-center" id="who-its-for">
         <div className="max-w-[var(--max-width)] mx-auto text-center">
-          <h2 className="features-title">
+          <h2 className="text-2xl font-extrabold mb-2 tracking-[-0.02em]">
             Built for <span className="text-gradient">Every Part of the Hobby</span>
           </h2>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8 mt-12">
@@ -336,22 +336,22 @@ export default function LandingPage() {
       <section className="py-[var(--space-3xl)] px-8 border-t border-edge border-b border-edge bg-[var(--color-bg-secondary)]" id="stats">
         <div className="max-w-[var(--max-width)] mx-auto flex items-center justify-center gap-[var(--space-3xl)]">
           <div className="flex flex-col items-center gap-1">
-            <span className="stat-value">10,500+</span>
+            <span className="text-2xl font-extrabold text-ink">10,500+</span>
             <span className="stat-label">Releases &amp; Resins</span>
           </div>
           <div className="w-[1px] h-[48px] bg-edge" aria-hidden="true" />
           <div className="flex flex-col items-center gap-1">
-            <span className="stat-value"><PawPrint size={28} strokeWidth={1.5} /></span>
+            <span className="text-2xl font-extrabold text-ink"><PawPrint size={28} strokeWidth={1.5} /></span>
             <span className="stat-label">Hoofprint™ Tracking</span>
           </div>
           <div className="w-[1px] h-[48px] bg-edge" aria-hidden="true" />
           <div className="flex flex-col items-center gap-1">
-            <span className="stat-value"><Shield size={28} strokeWidth={1.5} /></span>
+            <span className="text-2xl font-extrabold text-ink"><Shield size={28} strokeWidth={1.5} /></span>
             <span className="stat-label">Privacy-First</span>
           </div>
           <div className="w-[1px] h-[48px] bg-edge" aria-hidden="true" />
           <div className="flex flex-col items-center gap-1">
-            <span className="stat-value">100%</span>
+            <span className="text-2xl font-extrabold text-ink">100%</span>
             <span className="stat-label">Free to Start</span>
           </div>
         </div>
@@ -360,7 +360,7 @@ export default function LandingPage() {
       {/* ─── Coming Soon ─── */}
       <section className="py-16 px-8 text-center" id="coming-soon">
         <div className="max-w-[var(--max-width)] mx-auto text-center">
-          <h2 className="features-title">
+          <h2 className="text-2xl font-extrabold mb-2 tracking-[-0.02em]">
             On the <span className="text-gradient">Horizon</span>
           </h2>
           <p className="features-subtitle">

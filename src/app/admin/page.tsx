@@ -133,20 +133,20 @@ export default async function AdminPage() {
                 <div className="grid grid-cols-[repeat(auto-fit, minmax(200px, 1fr))] gap-4 mb-8">
                     <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all">
                         <div className="text-[2rem] mb-1">👥</div>
-                        <div className="admin-metric-value">{totalUsers}</div>
-                        <div className="admin-metric-label">Registered Users</div>
+                        <div className="text-3xl font-bold text-ink leading-none">{totalUsers}</div>
+                        <div className="text-xs text-muted mt-1 font-medium">Registered Users</div>
                     </div>
                     <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all">
                         <div className="text-[2rem] mb-1">🐴</div>
-                        <div className="admin-metric-value">
+                        <div className="text-3xl font-bold text-ink leading-none">
                             {totalHorses.toLocaleString()}
                         </div>
-                        <div className="admin-metric-label">Horses in Database</div>
+                        <div className="text-xs text-muted mt-1 font-medium">Horses in Database</div>
                     </div>
                     <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all text-[#ef4444]">
                         <div className="text-[2rem] mb-1">📨</div>
-                        <div className="admin-metric-value">{unreadMessages}</div>
-                        <div className="admin-metric-label">Unread Messages</div>
+                        <div className="text-3xl font-bold text-ink leading-none">{unreadMessages}</div>
+                        <div className="text-xs text-muted mt-1 font-medium">Unread Messages</div>
                     </div>
                 </div>
 

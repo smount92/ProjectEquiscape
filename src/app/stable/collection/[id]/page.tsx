@@ -185,9 +185,9 @@ export default async function CollectionPage({
         <div className="collection-hero-content">
           <h1>{collection.name}</h1>
           {collection.description && (
-            <p className="collection-hero-desc">{collection.description}</p>
+            <p className="text-sm text-[var(--color-text-secondary)] mb-1">{collection.description}</p>
           )}
-          <span className="collection-hero-count">
+          <span className="text-sm text-muted">
             {horseCards.length} model{horseCards.length !== 1 ? "s" : ""} in this collection
           </span>
           <div style={{ marginTop: "var(--space-sm)" }}>
@@ -202,7 +202,7 @@ export default async function CollectionPage({
           <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
             <div className="text-2xl leading-none">🐴</div>
             <div className="analytics-value">{horseCards.length}</div>
-            <div className="analytics-label">Models</div>
+            <div className="text-xs font-medium text-muted uppercase tracking-[0.05em]">Models</div>
           </div>
           <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
             <div className="text-2xl leading-none">💰</div>
@@ -211,7 +211,7 @@ export default async function CollectionPage({
                 ? `$${collectionVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
                 : "—"}
             </div>
-            <div className="analytics-label">Collection Value</div>
+            <div className="text-xs font-medium text-muted uppercase tracking-[0.05em]">Collection Value</div>
           </div>
           <div className="flex flex-col items-center gap-1 py-6 px-4 rounded-lg bg-card border border-edge text-center transition-all relative overflow-hidden">
             <div className="text-2xl leading-none">📊</div>
@@ -220,7 +220,7 @@ export default async function CollectionPage({
                 ? `$${avgValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
                 : "—"}
             </div>
-            <div className="analytics-label">Avg. Value</div>
+            <div className="text-xs font-medium text-muted uppercase tracking-[0.05em]">Avg. Value</div>
           </div>
         </div>
       )}
@@ -268,13 +268,13 @@ export default async function CollectionPage({
               </div>
               <div className="py-4 px-6">
                 <div className="horse-card-name">{horse.customName}</div>
-                <div className="horse-card-ref">{horse.refName}</div>
+                <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis">{horse.refName}</div>
                 {horse.releaseLine && (
-                  <div className="horse-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                  <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
                     🎨 {horse.releaseLine}
                   </div>
                 )}
-                <div className="horse-card-meta">
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-edge text-xs text-muted">
                   <span>{horse.conditionGrade}</span>
                   <span>{formatDate(horse.createdAt)}</span>
                 </div>

@@ -163,25 +163,25 @@ export default function WishlistSearch() {
             {showDropdown && (
                 <div className="wishlist-search-dropdown animate-fade-in-up">
                     {loading ? (
-                        <div className="wishlist-search-status">Searching…</div>
+                        <div className="p-4 text-center text-muted text-sm">Searching…</div>
                     ) : (
                         <>
                             {/* Molds */}
                             {molds.length > 0 && (
                                 <>
-                                    <div className="wishlist-search-group-header">🏭 Base Molds</div>
+                                    <div className="py-2 px-4 text-xs font-bold text-muted uppercase tracking-[0.05em] border-b border-edge bg-[rgba(0, 0, 0, 0.02)]">🏭 Base Molds</div>
                                     {molds.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="wishlist-search-result"
+                                            className="wishlist-search-result hover:0.25)] hover:0.08)]"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <span className="wishlist-search-result-name">{item.title}</span>
-                                                <span className="wishlist-search-result-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-name">{item.title}</span>
+                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                                             </div>
-                                            <span className="wishlist-search-add-badge">+ Add</span>
+                                            <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
                                         </button>
                                     ))}
                                 </>
@@ -190,22 +190,22 @@ export default function WishlistSearch() {
                             {/* Releases */}
                             {releases.length > 0 && (
                                 <>
-                                    <div className="wishlist-search-group-header">📦 Releases</div>
+                                    <div className="py-2 px-4 text-xs font-bold text-muted uppercase tracking-[0.05em] border-b border-edge bg-[rgba(0, 0, 0, 0.02)]">📦 Releases</div>
                                     {releases.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="wishlist-search-result"
+                                            className="wishlist-search-result hover:0.25)] hover:0.08)]"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <span className="wishlist-search-result-name">{item.title}</span>
+                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-name">{item.title}</span>
                                                 {!!item.attributes.model_number && (
-                                                    <span className="wishlist-search-result-meta"> (#{String(item.attributes.model_number)})</span>
+                                                    <span className="wishlist-search-result hover:0.25)] hover:0.08)]-meta"> (#{String(item.attributes.model_number)})</span>
                                                 )}
-                                                <span className="wishlist-search-result-meta"> · {item.maker}</span>
+                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-meta"> · {item.maker}</span>
                                             </div>
-                                            <span className="wishlist-search-add-badge">+ Add</span>
+                                            <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
                                         </button>
                                     ))}
                                 </>
@@ -214,19 +214,19 @@ export default function WishlistSearch() {
                             {/* Resins */}
                             {resins.length > 0 && (
                                 <>
-                                    <div className="wishlist-search-group-header">🎨 Artist Resins</div>
+                                    <div className="py-2 px-4 text-xs font-bold text-muted uppercase tracking-[0.05em] border-b border-edge bg-[rgba(0, 0, 0, 0.02)]">🎨 Artist Resins</div>
                                     {resins.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="wishlist-search-result"
+                                            className="wishlist-search-result hover:0.25)] hover:0.08)]"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <span className="wishlist-search-result-name">{item.title}</span>
-                                                <span className="wishlist-search-result-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-name">{item.title}</span>
+                                                <span className="wishlist-search-result hover:0.25)] hover:0.08)]-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                                             </div>
-                                            <span className="wishlist-search-add-badge">+ Add</span>
+                                            <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
                                         </button>
                                     ))}
                                 </>
@@ -234,7 +234,7 @@ export default function WishlistSearch() {
 
                             {/* No results — escape hatch */}
                             {noResults && (
-                                <div className="wishlist-search-empty">
+                                <div className="py-6 px-4 text-center text-muted text-sm">
                                     <p>No references match &ldquo;{query}&rdquo;</p>
                                     <button
                                         className="wishlist-search-custom-btn"

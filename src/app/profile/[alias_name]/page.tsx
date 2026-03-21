@@ -297,7 +297,7 @@ export default async function ProfilePage({
               </span>
             )}
           </h1>
-          <p className="profile-hero-subtitle">
+          <p className="text-sm text-[var(--color-text-secondary)] leading-normal mb-2">
             {isOwnProfile
               ? "Your public stable — this is how other collectors see your models."
               : `@${profileUser.alias_name}'s public collection`}
@@ -326,10 +326,10 @@ export default async function ProfilePage({
             </Link>
           )}
           <div className="flex gap-6 flex-wrap">
-            <span className="profile-stat">
+            <span className="text-sm text-[var(--color-text-secondary)]">
               🐴 {profileCards.length} public model{profileCards.length !== 1 ? "s" : ""}
             </span>
-            <span className="profile-stat">
+            <span className="text-sm text-[var(--color-text-secondary)]">
               📅 Member since {memberSince}
             </span>
             <ShareButton
@@ -341,12 +341,12 @@ export default async function ProfilePage({
               <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
             )}
             {(completedTxCount ?? 0) > 0 && (
-              <span className="profile-stat" style={{ color: "#22C55E" }}>
+              <span className="text-sm text-[var(--color-text-secondary)]" style={{ color: "#22C55E" }}>
                 ✅ {completedTxCount} transaction{completedTxCount !== 1 ? "s" : ""} completed
               </span>
             )}
             {forSaleCount > 0 && (
-              <span className="profile-stat" style={{ color: "var(--color-accent, #f59e0b)" }}>
+              <span className="text-sm text-[var(--color-text-secondary)]" style={{ color: "var(--color-accent, #f59e0b)" }}>
                 💲 {forSaleCount} for sale/trade
               </span>
             )}
@@ -391,7 +391,7 @@ export default async function ProfilePage({
               <Link
                 key={col.id}
                 href={`/stable/collection/${col.id}`}
-                className="profile-collection-pill"
+                className="profile-collection-pill hover:0.12)] hover:0.3)] hover:translate-y-[-1px]"
               >
                 📁 {col.name}
               </Link>

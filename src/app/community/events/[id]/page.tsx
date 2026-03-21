@@ -240,7 +240,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
-                                        <Link href={`/community/${entry.horseId}`} className="show-entry-horse-name">
+                                        <Link href={`/community/${entry.horseId}`} className="show-entry-horse-name hover:text-forest">
                                             🐴 {entry.horseName}
                                         </Link>
                                         <span className="text-forest no-underline">

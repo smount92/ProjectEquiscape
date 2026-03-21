@@ -173,7 +173,7 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
     return (
         <>
             {/* Tab bar */}
-            <div className="admin-tab-bar">
+            <div className="admin-tab hover:text-ink-bar">
                 {TABS.map((tab) => {
                     const badge = getBadge(tab.key);
                     return (
@@ -281,11 +281,11 @@ function ShowsTab({ shows }: { shows: Show[] }) {
     return (
         <div className="admin-grid grid-cols-[repeat(auto-fill, minmax(300px, 1fr))] gap-6">
             <div>
-                <h3 className="admin-sub-title">📸 Create Photo Show</h3>
+                <h3 className="flex items-center gap-2 text-base font-bold mb-4">📸 Create Photo Show</h3>
                 <CreateShowForm />
             </div>
             <div>
-                <h3 className="admin-sub-title">🎛️ Manage Shows <span className="mt-6-count">{shows.length}</span></h3>
+                <h3 className="flex items-center gap-2 text-base font-bold mb-4">🎛️ Manage Shows <span className="mt-6-count">{shows.length}</span></h3>
                 <AdminShowManager shows={shows} />
             </div>
         </div>
@@ -299,11 +299,11 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
     return (
         <div className="admin-content-grid">
             <div>
-                <h3 className="admin-sub-title">💡 Database Suggestions <span className="mt-6-count">{suggestions.length} pending</span></h3>
+                <h3 className="flex items-center gap-2 text-base font-bold mb-4">💡 Database Suggestions <span className="mt-6-count">{suggestions.length} pending</span></h3>
                 <AdminSuggestionsPanel suggestions={suggestions} />
             </div>
             <div>
-                <h3 className="admin-sub-title">🌟 Feature a Horse</h3>
+                <h3 className="flex items-center gap-2 text-base font-bold mb-4">🌟 Feature a Horse</h3>
                 <FeatureHorseForm />
             </div>
         </div>

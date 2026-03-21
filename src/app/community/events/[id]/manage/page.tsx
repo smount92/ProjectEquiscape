@@ -578,8 +578,8 @@ export default function ManageEventPage() {
                                     {/* Division Header */}
                                     <div className="flex items-center gap-2 py-4 px-6 bg-glass border-b border-edge flex-wrap">
                                         <div className="division-reorder">
-                                            <button className="reorder-btn" onClick={() => handleMoveDivision(divIndex, -1)} disabled={divIndex === 0} title="Move up">▲</button>
-                                            <button className="reorder-btn" onClick={() => handleMoveDivision(divIndex, 1)} disabled={divIndex === divisions.length - 1} title="Move down">▼</button>
+                                            <button className="reorder-btn disabled:opacity-[0.3] disabled:cursor-not-allowed hover:border-forest hover:text-forest" onClick={() => handleMoveDivision(divIndex, -1)} disabled={divIndex === 0} title="Move up">▲</button>
+                                            <button className="reorder-btn disabled:opacity-[0.3] disabled:cursor-not-allowed hover:border-forest hover:text-forest" onClick={() => handleMoveDivision(divIndex, 1)} disabled={divIndex === divisions.length - 1} title="Move down">▼</button>
                                         </div>
 
                                         {editingDivision === div.id ? (
@@ -591,10 +591,10 @@ export default function ManageEventPage() {
                                         ) : (
                                             <>
                                                 <span className="division-name">📋 {div.name}</span>
-                                                <span className="division-count">{div.classes.length} class{div.classes.length !== 1 ? "es" : ""}</span>
+                                                <span className="text-xs text-muted ml-1">{div.classes.length} class{div.classes.length !== 1 ? "es" : ""}</span>
                                                 <div className="ml-auto flex gap-1 items-center">
                                                     <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors" onClick={() => { setEditingDivision(div.id); setEditName(div.name); }} title="Edit">✏️</button>
-                                                    <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors action-btn-danger" onClick={() => handleDeleteDivision(div.id, div.name)} title="Delete">🗑️</button>
+                                                    <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors action-btn hover:bg-[var(--color-surface-glass-hover)]-danger" onClick={() => handleDeleteDivision(div.id, div.name)} title="Delete">🗑️</button>
                                                     <button className="btn btn-ghost" onClick={() => { setAddingClassToDivision(div.id); setNewClassName(""); setNewClassNumber(""); }} style={{ padding: "var(--space-xs) var(--space-sm)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>+ Class</button>
                                                 </div>
                                             </>
@@ -606,8 +606,8 @@ export default function ManageEventPage() {
                                         {div.classes.map((cls, clsIndex) => (
                                             <div key={cls.id} className="border-b-0">
                                                 <div className="flex flex-col gap-[2px]">
-                                                    <button className="reorder-btn w-[20px] h-[14px] text-[0.5rem]" onClick={() => handleMoveClass(div.id, clsIndex, -1)} disabled={clsIndex === 0}>▲</button>
-                                                    <button className="reorder-btn w-[20px] h-[14px] text-[0.5rem]" onClick={() => handleMoveClass(div.id, clsIndex, 1)} disabled={clsIndex === div.classes.length - 1}>▼</button>
+                                                    <button className="reorder-btn disabled:opacity-[0.3] disabled:cursor-not-allowed hover:border-forest hover:text-forest w-[20px] h-[14px] text-[0.5rem]" onClick={() => handleMoveClass(div.id, clsIndex, -1)} disabled={clsIndex === 0}>▲</button>
+                                                    <button className="reorder-btn disabled:opacity-[0.3] disabled:cursor-not-allowed hover:border-forest hover:text-forest w-[20px] h-[14px] text-[0.5rem]" onClick={() => handleMoveClass(div.id, clsIndex, 1)} disabled={clsIndex === div.classes.length - 1}>▼</button>
                                                 </div>
 
                                                 {editingClass === cls.id ? (
@@ -621,16 +621,16 @@ export default function ManageEventPage() {
                                                     <>
                                                         <span className="class-number">{cls.classNumber || "—"}</span>
                                                         <span className="flex-1 text-[var(--color-text-secondary)]">{cls.name}</span>
-                                                        {cls.isNanQualifying && <span className="nan-badge" title="NAN Qualifying">⭐ NAN</span>}
+                                                        {cls.isNanQualifying && <span className="inline-flex items-center gap-[2px] py-[1px] px-[6px] rounded-full bg-[rgba(245, 158, 11, 0.15)] text-[#f59e0b] text-xs font-semibold whitespace-nowrap" title="NAN Qualifying">⭐ NAN</span>}
                                                         {(cls.entryCount || 0) > 0 && (
-                                                            <span className="entry-count-badge">{cls.entryCount} entr{cls.entryCount === 1 ? "y" : "ies"}</span>
+                                                            <span className="inline-flex items-center py-[1px] px-[6px] rounded-full bg-[var(--color-accent-primary-glow)] text-forest text-xs font-semibold whitespace-nowrap">{cls.entryCount} entr{cls.entryCount === 1 ? "y" : "ies"}</span>
                                                         )}
                                                         <div className="flex gap-[2px] opacity-0 transition-opacity">
                                                             <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px]" onClick={() => handleToggleNan(cls.id, cls.isNanQualifying)} title={cls.isNanQualifying ? "Remove NAN" : "Mark NAN"}>
                                                                 {cls.isNanQualifying ? "⭐" : "☆"}
                                                             </button>
                                                             <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px]" onClick={() => { setEditingClass(cls.id); setEditName(cls.name); setEditClassNumber(cls.classNumber || ""); }} title="Edit">✏️</button>
-                                                            <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px] action-btn-danger" onClick={() => handleDeleteClass(cls.id, cls.name)} title="Delete">🗑️</button>
+                                                            <button className="bg-transparent border-0 cursor-pointer text-[0.9rem] p-[4px] rounded-sm transition-colors text-xs p-[2px] action-btn hover:bg-[var(--color-surface-glass-hover)]-danger" onClick={() => handleDeleteClass(cls.id, cls.name)} title="Delete">🗑️</button>
                                                         </div>
                                                     </>
                                                 )}

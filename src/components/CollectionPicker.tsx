@@ -165,7 +165,7 @@ export default function CollectionPicker({
         )}
         <button
           type="button"
-          className="btn btn-ghost collection-create-btn"
+          className="btn btn-ghost collection-create-btn hover:border-[var(--color-accent-primary) hover:!important] hover:text-[var(--color-accent-primary) hover:!important]"
           onClick={() => setShowModal(true)}
           aria-label="Create new collection"
           id="create-collection-btn"

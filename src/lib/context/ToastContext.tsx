@@ -80,7 +80,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                             role="status"
                         >
                             <span className="text-[1.1rem] shrink-0">{VARIANT_ICONS[t.variant]}</span>
-                            <span className="toast-message">{t.message}</span>
+                            <span className="flex-1 text-sm text-ink leading-[1.4]">{t.message}</span>
                             <button
                                 className="shrink-0 w-[24px] h-[24px] flex items-center justify-center border-0 bg-transparent text-muted cursor-pointer rounded-sm text-xs transition-all"
                                 onClick={() => dismiss(t.id)}

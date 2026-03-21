@@ -214,7 +214,7 @@ export default function Header() {
     <header className="header" role="banner">
       <Link
         href={user ? "/dashboard" : "/"}
-        className="header-logo"
+        className="flex items-center gap-2 text-lg font-extrabold text-ink no-underline tracking-[-0.02em] shrink-0 mr-6"
         aria-label="Model Horse Hub — Home"
       >
         <span className="text-[1.5em]" aria-hidden="true">
@@ -258,7 +258,7 @@ export default function Header() {
               <Link
                 key={link.id}
                 href={link.href}
-                className="header-nav-link"
+                className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all"
                 id={link.id}
                 data-nav-item="true"
                 style={i >= visibleCount ? { position: "absolute", visibility: "hidden", pointerEvents: "none" } : undefined}
@@ -272,7 +272,7 @@ export default function Header() {
           {hasOverflow && (
             <div className="relative" ref={moreMenuRef} style={{ flexShrink: 0 }}>
               <button
-                className="header-nav-link"
+                className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all"
                 onClick={() => setMoreMenuOpen(!moreMenuOpen)}
                 aria-expanded={moreMenuOpen}
                 aria-label="More navigation links"
@@ -287,7 +287,7 @@ export default function Header() {
                     <Link
                       key={link.id}
                       href={link.href}
-                      className="header-dropdown-link"
+                      className="flex items-center gap-2 py-2 px-4 text-sm text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all border-0 bg-transparent cursor-pointer w-full text-left"
                       onClick={() => setMoreMenuOpen(false)}
                     >
                       <link.Icon size={16} strokeWidth={1.5} /> {link.label}
@@ -342,34 +342,34 @@ export default function Header() {
               <div className="absolute top-[calc(100% + 8px)] right-0 min-w-[200px] bg-[var(--color-bg-secondary)] border border-edge rounded-lg p-1 shadow-lg z-[200] flex flex-col">
                 <Link
                   href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
-                  className="header-dropdown-link"
+                  className="flex items-center gap-2 py-2 px-4 text-sm text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all border-0 bg-transparent cursor-pointer w-full text-left"
                   onClick={() => setUserMenuOpen(false)}
                 >
                   <User size={16} strokeWidth={1.5} /> My Profile
                 </Link>
-                <Link href="/settings" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                <Link href="/settings" className="flex items-center gap-2 py-2 px-4 text-sm text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all border-0 bg-transparent cursor-pointer w-full text-left" onClick={() => setUserMenuOpen(false)}>
                   <Settings size={16} strokeWidth={1.5} /> Settings
                 </Link>
-                <Link href="/claim" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                <Link href="/claim" className="flex items-center gap-2 py-2 px-4 text-sm text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all border-0 bg-transparent cursor-pointer w-full text-left" onClick={() => setUserMenuOpen(false)}>
                   <Package size={16} strokeWidth={1.5} /> Claim
                 </Link>
-                <Link href="/studio/my-commissions" className="header-dropdown-link" onClick={() => setUserMenuOpen(false)}>
+                <Link href="/studio/my-commissions" className="flex items-center gap-2 py-2 px-4 text-sm text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all border-0 bg-transparent cursor-pointer w-full text-left" onClick={() => setUserMenuOpen(false)}>
                   <Palette size={16} strokeWidth={1.5} /> My Commissions
                 </Link>
                 {isAdmin && (
-                  <Link href="/admin" className="header-dropdown-link text-forest" onClick={() => setUserMenuOpen(false)}>
+                  <Link href="/admin" className="flex items-center gap-2 py-2 px-4 text-sm text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all border-0 bg-transparent cursor-pointer w-full text-left text-forest" onClick={() => setUserMenuOpen(false)}>
                     <Zap size={16} strokeWidth={1.5} /> Admin
                   </Link>
                 )}
                 <div className="h-[1px] bg-edge m-[var(--space-xs) 0]" />
                 <button
-                  className="header-dropdown-link"
+                  className="flex items-center gap-2 py-2 px-4 text-sm text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all border-0 bg-transparent cursor-pointer w-full text-left"
                   onClick={() => { setUserMenuOpen(false); toggleSimpleMode(); }}
                 >
                   {isSimpleMode ? <><Eye size={16} strokeWidth={1.5} /> Simple Mode: ON</> : <><EyeOff size={16} strokeWidth={1.5} /> Simple Mode</>}
                 </button>
                 <button
-                  className="header-dropdown-link text-muted"
+                  className="flex items-center gap-2 py-2 px-4 text-sm text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all border-0 bg-transparent cursor-pointer w-full text-left text-muted"
                   onClick={() => { setUserMenuOpen(false); handleSignOut(); }}
                 >
                   <LogOut size={16} strokeWidth={1.5} /> Sign Out
@@ -385,57 +385,57 @@ export default function Header() {
       {/* ═══════════════════════════════════════════════════════════ */}
       {user && (
         <nav ref={navRef} className={`header-nav header-nav-mobile ${mobileMenuOpen ? "header-nav-open" : ""}`} aria-label="Mobile navigation">
-          <Link href="/dashboard" className="header-nav-link" id="nav-stable-m" onClick={closeMobileMenu}>
+          <Link href="/dashboard" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-stable-m" onClick={closeMobileMenu}>
             <Home size={16} strokeWidth={1.5} /> Digital Stable
           </Link>
           <Link
             href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
-            className="header-nav-link"
+            className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all"
             id="nav-profile-m"
             onClick={closeMobileMenu}
           >
             <User size={16} strokeWidth={1.5} /> My Profile
           </Link>
-          <Link href="/community" className="header-nav-link" id="nav-community-m" onClick={closeMobileMenu}>
+          <Link href="/community" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-community-m" onClick={closeMobileMenu}>
             <Trophy size={16} strokeWidth={1.5} /> Show Ring
           </Link>
-          <Link href="/discover" className="header-nav-link" id="nav-discover-m" onClick={closeMobileMenu}>
+          <Link href="/discover" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-discover-m" onClick={closeMobileMenu}>
             <Users size={16} strokeWidth={1.5} /> Discover
           </Link>
-          <Link href="/feed" className="header-nav-link" id="nav-feed-m" onClick={closeMobileMenu}>
+          <Link href="/feed" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-feed-m" onClick={closeMobileMenu}>
             <Newspaper size={16} strokeWidth={1.5} /> Feed
           </Link>
-          <Link href="/shows" className="header-nav-link" id="nav-shows-m" onClick={closeMobileMenu}>
+          <Link href="/shows" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-shows-m" onClick={closeMobileMenu}>
             <Camera size={16} strokeWidth={1.5} /> Shows
           </Link>
-          <Link href={artistSlug ? "/studio/dashboard" : "/studio/setup"} className="header-nav-link" id="nav-studio-m" onClick={closeMobileMenu}>
+          <Link href={artistSlug ? "/studio/dashboard" : "/studio/setup"} className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-studio-m" onClick={closeMobileMenu}>
             <Palette size={16} strokeWidth={1.5} /> Art Studio
           </Link>
-          <Link href="/community/help-id" className="header-nav-link" id="nav-helpid-m" onClick={closeMobileMenu}>
+          <Link href="/community/help-id" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-helpid-m" onClick={closeMobileMenu}>
             <Search size={16} strokeWidth={1.5} /> Help ID
           </Link>
-          <Link href="/community/groups" className="header-nav-link" id="nav-groups-m" onClick={closeMobileMenu}>
+          <Link href="/community/groups" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-groups-m" onClick={closeMobileMenu}>
             <Building2 size={16} strokeWidth={1.5} /> Groups
           </Link>
-          <Link href="/community/events" className="header-nav-link" id="nav-events-m" onClick={closeMobileMenu}>
+          <Link href="/community/events" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-events-m" onClick={closeMobileMenu}>
             <Calendar size={16} strokeWidth={1.5} /> Events
           </Link>
-          <Link href="/catalog" className="header-nav-link" id="nav-catalog-m" onClick={closeMobileMenu}>
+          <Link href="/catalog" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-catalog-m" onClick={closeMobileMenu}>
             <BookOpen size={16} strokeWidth={1.5} /> Catalog
           </Link>
-          <Link href="/market" className="header-nav-link" id="nav-market-m" onClick={closeMobileMenu}>
+          <Link href="/market" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-market-m" onClick={closeMobileMenu}>
             <TrendingUp size={16} strokeWidth={1.5} /> Price Guide
           </Link>
-          <Link href="/wishlist" className="header-nav-link" id="nav-wishlist-m" onClick={closeMobileMenu}>
+          <Link href="/wishlist" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-wishlist-m" onClick={closeMobileMenu}>
             <Heart size={16} strokeWidth={1.5} /> Wishlist
           </Link>
-          <Link href="/claim" className="header-nav-link" id="nav-claim-m" onClick={closeMobileMenu}>
+          <Link href="/claim" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-claim-m" onClick={closeMobileMenu}>
             <Package size={16} strokeWidth={1.5} /> Claim
           </Link>
-          <Link href="/settings" className="header-nav-link" id="nav-settings-m" onClick={closeMobileMenu}>
+          <Link href="/settings" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-settings-m" onClick={closeMobileMenu}>
             <Settings size={16} strokeWidth={1.5} /> Settings
           </Link>
-          <Link href="/inbox" className="header-nav-link relative flex items-center gap-[4px]" id="nav-inbox-m" onClick={closeMobileMenu}>
+          <Link href="/inbox" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all relative flex items-center gap-[4px]" id="nav-inbox-m" onClick={closeMobileMenu}>
             <Mail size={16} strokeWidth={1.5} />
             Inbox
             {unreadCount > 0 && (
@@ -444,7 +444,7 @@ export default function Header() {
           </Link>
           <NotificationBell />
           {isAdmin && (
-            <Link href="/admin" className="header-nav-link admin-nav-link" id="nav-admin-m" onClick={closeMobileMenu}>
+            <Link href="/admin" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all text-[#f59e0b !important] font-bold text-xs" id="nav-admin-m" onClick={closeMobileMenu}>
               Admin <Zap size={16} strokeWidth={1.5} />
             </Link>
           )}
@@ -472,13 +472,13 @@ export default function Header() {
       {/* ── Public Navigation (not signed in) ── */}
       {!user && (
         <nav className="header-nav flex flex-row items-center gap-4" aria-label="Public navigation">
-          <Link href="/about" className="header-nav-link" id="nav-about">
+          <Link href="/about" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-about">
             About
           </Link>
-          <Link href="/catalog" className="header-nav-link" id="nav-catalog-public">
+          <Link href="/catalog" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-catalog-public">
             📚 Catalog
           </Link>
-          <Link href="/contact" className="header-nav-link" id="nav-contact">
+          <Link href="/contact" className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all" id="nav-contact">
             Contact
           </Link>
         </nav>

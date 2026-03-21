@@ -394,7 +394,7 @@ export default async function PublicPassportPage({
           {/* Owner Pill */}
           <Link
             href={`/profile/${encodeURIComponent(ownerAlias)}`}
-            className="passport-owner-pill"
+            className="inline-flex items-center gap-1 p-[6px 14px 6px 6px] rounded-full bg-card border border-edge no-underline text-ink text-sm font-semibold transition-all w-fit"
           >
             <span className="flex items-center justify-center w-[28px] h-[28px] rounded-full bg-elevated border border-edge text-muted shrink-0">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -411,7 +411,7 @@ export default async function PublicPassportPage({
           {!isOwnHorse && (
             <Link
               href={`/profile/${encodeURIComponent(ownerAlias)}`}
-              className="passport-see-more-link"
+              className="text-sm text-muted no-underline transition-all"
               id="see-more-seller"
             >
               See all models from @{ownerAlias} →
@@ -673,7 +673,7 @@ export default async function PublicPassportPage({
           </div>
 
           {/* Back link */}
-          <Link href="/community" className="passport-back-link">
+          <Link href="/community" className="text-center text-sm text-[#59493A] no-underline py-1 px-[0] opacity-[0.6] transition-all">
             ← Back to Show Ring
           </Link>
         </div>

@@ -133,11 +133,11 @@ export default async function MarketPricePage({
                                         </div>
 
                                         <div className="bg-card border border-edge rounded-lg p-6 transition-colors-prices">
-                                            <div className="market-price-range">
+                                            <div className="text-lg font-bold text-forest">
                                                 {formatCurrency(item.lowestPrice)}
                                                 {item.lowestPrice !== item.highestPrice ? ` – ${formatCurrency(item.highestPrice)}` : ""}
                                             </div>
-                                            <div className="market-price-details">
+                                            <div className="text-sm text-[var(--color-text-secondary)] mt-[2px]">
                                                 <span>Avg: {formatCurrency(item.averagePrice)}</span>
                                                 <span> · Median: {formatCurrency(item.medianPrice)}</span>
                                             </div>

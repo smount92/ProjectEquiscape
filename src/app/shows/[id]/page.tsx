@@ -281,7 +281,7 @@ export default async function ShowDetailPage({
                                         )}
                                         <div className="text-center min-w-[160px] max-w-[220px] bg-elevated rounded-lg overflow-hidden shadow-lg transition-transform-body">
                                             <div className="text-[2rem] mb-1">{medal}</div>
-                                            <Link href={`/community/${entry.horseId}`} className="podium-horse-name">
+                                            <Link href={`/community/${entry.horseId}`} className="podium-horse-name hover:underline">
                                                 {entry.horseName}
                                             </Link>
                                             <div className="podium-owner">
@@ -420,7 +420,7 @@ export default async function ShowDetailPage({
                             <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
                                 <Link
                                     href={`/community/${entry.horseId}`}
-                                    className="show-entry-horse-name"
+                                    className="show-entry-horse-name hover:text-forest"
                                 >
                                     🐴 {entry.horseName}
                                 </Link>

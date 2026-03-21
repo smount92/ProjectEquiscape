@@ -35,7 +35,7 @@ export default function NotificationBell() {
     return (
         <Link
             href="/notifications"
-            className="header-nav-link relative"
+            className="flex items-center gap-1 py-1 px-2 text-sm font-medium text-[var(--color-text-secondary)] no-underline rounded-md whitespace-nowrap transition-all relative"
             id="nav-notifications"
             title="Notifications"
         >

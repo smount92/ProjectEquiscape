@@ -162,16 +162,16 @@ export default function UnifiedReferenceSearch({
                 {TYPE_BADGES[selectedItem.itemType]?.label || selectedItem.itemType}
               </span>
               <span className="font-bold text-ink">{selectedItem.title}</span>
-              <span className="ref-selected-maker">{selectedItem.maker}</span>
+              <span className="text-[var(--color-text-secondary)] text-sm">{selectedItem.maker}</span>
               {selectedItem.parentTitle && (
                 <span className="ref-selected-parent"> on {selectedItem.parentTitle}</span>
               )}
               {selectedItem.scale && (
-                <span className="ref-selected-scale"> · {selectedItem.scale}</span>
+                <span className="text-muted text-sm"> · {selectedItem.scale}</span>
               )}
               <MarketValueBadge catalogId={selectedCatalogId} compact />
             </div>
-            <button className="btn btn-ghost ref-clear-btn" onClick={handleClear} aria-label="Clear selection">
+            <button className="btn btn-ghost shrink-0 text-sm" onClick={handleClear} aria-label="Clear selection">
               ✕
             </button>
           </div>
@@ -206,7 +206,7 @@ export default function UnifiedReferenceSearch({
               autoComplete="off"
             />
             {query && (
-              <button className="ref-search-clear" onClick={() => { setQuery(""); setShowDropdown(false); }} aria-label="Clear">
+              <button className="ref-search-clear hover:0.1)] hover:text-ink" onClick={() => { setQuery(""); setShowDropdown(false); }} aria-label="Clear">
                 ✕
               </button>
             )}
@@ -216,7 +216,7 @@ export default function UnifiedReferenceSearch({
           {showDropdown && (
             <div className="w-[6px] animate-fade-in-up">
               {isSearching ? (
-                <div className="ref-search-status">Searching…</div>
+                <div className="py-6 px-4 text-center text-muted text-sm">Searching…</div>
               ) : (
                 <>
                   {/* Molds */}
@@ -227,9 +227,9 @@ export default function UnifiedReferenceSearch({
                         <button key={item.id} className="border-b-0" onClick={() => handleMoldClick(item)}>
                           <div className="flex-1 min-w-0">
                             <span className="font-semibold text-ink">{item.title}</span>
-                            <span className="ref-result-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                            <span className="text-xs text-muted"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                           </div>
-                          <span className="ref-result-action">▸ Releases</span>
+                          <span className="text-xs font-semibold text-forest whitespace-nowrap shrink-0 pl-2">▸ Releases</span>
                         </button>
                       ))}
                     </>
@@ -244,11 +244,11 @@ export default function UnifiedReferenceSearch({
                           <div className="flex-1 min-w-0">
                             <span className="font-semibold text-ink">{item.title}</span>
                             {!!item.attributes.model_number && (
-                              <span className="ref-result-meta"> (#{String(item.attributes.model_number)})</span>
+                              <span className="text-xs text-muted"> (#{String(item.attributes.model_number)})</span>
                             )}
-                            <span className="ref-result-meta"> · {item.maker}</span>
+                            <span className="text-xs text-muted"> · {item.maker}</span>
                           </div>
-                          <span className="ref-result-action">Select</span>
+                          <span className="text-xs font-semibold text-forest whitespace-nowrap shrink-0 pl-2">Select</span>
                         </button>
                       ))}
                     </>
@@ -262,9 +262,9 @@ export default function UnifiedReferenceSearch({
                         <button key={item.id} className="border-b-0" onClick={() => handleSelect(item)}>
                           <div className="flex-1 min-w-0">
                             <span className="font-semibold text-ink">{item.title}</span>
-                            <span className="ref-result-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                            <span className="text-xs text-muted"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
                           </div>
-                          <span className="ref-result-action">Select</span>
+                          <span className="text-xs font-semibold text-forest whitespace-nowrap shrink-0 pl-2">Select</span>
                         </button>
                       ))}
                     </>
@@ -272,7 +272,7 @@ export default function UnifiedReferenceSearch({
 
                   {/* No results */}
                   {noResults && (
-                    <div className="ref-no-results">
+                    <div className="py-6 px-4 text-center text-[var(--color-text-secondary)] text-sm flex flex-col items-center gap-2">
                       <p>No references found for &ldquo;{query}&rdquo;</p>
                       <p style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}>
                         Check the <a href="/market" style={{ color: "var(--color-accent-primary)" }}>📈 Price Guide</a> for market data, or use the button below.
@@ -290,7 +290,7 @@ export default function UnifiedReferenceSearch({
           {/* Expanded Releases (when a mold is clicked) */}
           {releases.length > 0 && selectedItem && selectedItem.itemType === "plastic_mold" && (
             <div className="mt-4 border border-edge rounded-lg overflow-hidden bg-card animate-fade-in-up">
-              <div className="ref-releases-header">
+              <div className="flex items-center justify-between py-2 px-4 bg-[rgba(44, 85, 69, 0.06)] border-b border-edge text-sm text-[var(--color-text-secondary)]">
                 <span>Releases for <strong>{selectedItem.title}</strong></span>
                 <button className="btn btn-ghost" onClick={handleClear} style={{ fontSize: "0.75rem" }}>✕ Clear</button>
               </div>
@@ -300,24 +300,24 @@ export default function UnifiedReferenceSearch({
                 <div className="flex-1 min-w-0">
                   <span className="font-semibold text-ink">🏭 {selectedItem.title} (any release)</span>
                 </div>
-                <span className="ref-result-action">Select Mold</span>
+                <span className="text-xs font-semibold text-forest whitespace-nowrap shrink-0 pl-2">Select Mold</span>
               </button>
 
               {loadingReleases ? (
-                <div className="ref-search-status">Loading releases…</div>
+                <div className="py-6 px-4 text-center text-muted text-sm">Loading releases…</div>
               ) : (
                 releases.map((rel) => (
                   <button key={rel.id} className="border-b-0" onClick={() => handleSelect(rel)}>
                     <div className="flex-1 min-w-0">
                       <span className="font-semibold text-ink">{rel.title}</span>
                       {!!rel.attributes.model_number && (
-                        <span className="ref-result-meta"> (#{String(rel.attributes.model_number)})</span>
+                        <span className="text-xs text-muted"> (#{String(rel.attributes.model_number)})</span>
                       )}
                       {!!rel.attributes.color_description && (
-                        <span className="ref-result-meta"> · {String(rel.attributes.color_description)}</span>
+                        <span className="text-xs text-muted"> · {String(rel.attributes.color_description)}</span>
                       )}
                     </div>
-                    <span className="ref-result-action">Select</span>
+                    <span className="text-xs font-semibold text-forest whitespace-nowrap shrink-0 pl-2">Select</span>
                   </button>
                 ))
               )}

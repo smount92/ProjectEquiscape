@@ -290,7 +290,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                                         </span>
                                                     )}
                                                     {c.isNanQualifying && (
-                                                        <span className="class-nan-badge">NAN</span>
+                                                        <span className="class-inline-flex items-center gap-[2px] py-[1px] px-[6px] rounded-full bg-[rgba(245, 158, 11, 0.15)] text-[#f59e0b] text-xs font-semibold whitespace-nowrap">NAN</span>
                                                     )}
                                                     {scaleMatch === true && <span className="text-[0.85em]" title="Scale matches!">✅</span>}
                                                     {scaleMatch === false && (
@@ -348,7 +348,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                                                 {selectedPhoto === photo.storagePath && (
                                                     <div className="absolute top-[2px] right-[2px] bg-[var(--color-accent-primary, #d4a574)] text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[0.65rem] font-bold">✓</div>
                                                 )}
-                                                <div className="show-entry-photo-label">
+                                                <div className="absolute bottom-0 left-0 right-0 bg-[rgba(0,0,0,0.55)] text-white text-[0.55rem] py-[1px] px-[4px] text-center whitespace-nowrap overflow-hidden text-ellipsis">
                                                     {ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
                                                 </div>
                                             </button>

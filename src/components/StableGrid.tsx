@@ -184,18 +184,18 @@ export default function StableGrid({
                                 </div>
                                 <div className="py-4 px-6">
                                     <div className="horse-card-name">{horse.customName}</div>
-                                    <div className="horse-card-ref">{horse.refName}</div>
+                                    <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis">{horse.refName}</div>
                                     {horse.releaseLine && (
-                                        <div className="horse-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                        <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
                                             🎨 {horse.releaseLine}
                                         </div>
                                     )}
                                     {horse.sculptor && (
-                                        <div className="horse-card-ref" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
+                                        <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: "calc(0.7rem * var(--font-scale))", opacity: 0.7, marginTop: "2px" }}>
                                             ✂️ {horse.sculptor}
                                         </div>
                                     )}
-                                    <div className="horse-card-meta">
+                                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-edge text-xs text-muted">
                                         {horse.conditionGrade && <span>{horse.conditionGrade}</span>}
                                         <span>{formatDate(horse.createdAt)}</span>
                                     </div>

@@ -107,7 +107,7 @@ export default function HelpIdRequestForm() {
                                     <p className="csv-dropzone-text">
                                         Click to upload a photo
                                         <br />
-                                        <span className="csv-dropzone-hint">Clear, well-lit photos get the best results</span>
+                                        <span className="text-sm text-forest underline">Clear, well-lit photos get the best results</span>
                                     </p>
                                 </>
                             )}

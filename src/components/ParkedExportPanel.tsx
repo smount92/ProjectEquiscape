@@ -165,7 +165,7 @@ export default function ParkedExportPanel({
 
                     {/* PIN Display */}
                     <div className="flex items-center gap-4 p-6 bg-elevated border-[2px] border-forest rounded-lg mb-6">
-                        <span className="parked-export-pin-label">Claim PIN</span>
+                        <span className="text-sm text-muted font-semibold">Claim PIN</span>
                         <span className="parked-export-pin">{pin}</span>
                         <button
                             className="btn btn-ghost"

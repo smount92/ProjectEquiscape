@@ -76,7 +76,7 @@ export default function AdminReplyForm({
     return (
         <div className="admin-reply-form">
             <div className="flex justify-between items-center mb-2">
-                <span className="admin-reply-form-to">
+                <span className="text-xs text-muted">
                     To: <strong>{recipientName}</strong> &lt;{recipientEmail}&gt;
                 </span>
                 <button
@@ -108,7 +108,7 @@ export default function AdminReplyForm({
             )}
             <div className="flex items-center gap-2 mt-2">
                 <button
-                    className="admin-reply-send-btn"
+                    className="admin-reply-send-btn disabled:opacity-[0.5] disabled:cursor-not-allowed"
                     onClick={handleSend}
                     disabled={sending || !replyText.trim()}
                 >
@@ -138,7 +138,7 @@ export default function AdminReplyForm({
                     )}
                 </button>
                 <button
-                    className="admin-reply-cancel-btn"
+                    className="admin-reply-cancel-btn hover:0.05)] hover:text-ink"
                     onClick={() => { setIsOpen(false); setStatus(null); }}
                     disabled={sending}
                 >

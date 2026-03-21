@@ -52,7 +52,7 @@ export default function ShowRingFilters({
 
             {/* Trade Status Dropdown */}
             <select
-                className="filter-dropdown"
+                className="filter-dropdown hover:border-forest"
                 value={filters.tradeStatus || ""}
                 onChange={(e) => setFilter("tradeStatus", e.target.value || null)}
                 id="filter-trade-status"
@@ -65,7 +65,7 @@ export default function ShowRingFilters({
             {/* Manufacturer Dropdown */}
             {manufacturers.length > 1 && (
                 <select
-                    className="filter-dropdown"
+                    className="filter-dropdown hover:border-forest"
                     value={filters.manufacturer || ""}
                     onChange={(e) => setFilter("manufacturer", e.target.value || null)}
                     id="filter-manufacturer"
@@ -82,7 +82,7 @@ export default function ShowRingFilters({
             {/* Scale Dropdown */}
             {scales.length > 1 && (
                 <select
-                    className="filter-dropdown"
+                    className="filter-dropdown hover:border-forest"
                     value={filters.scale || ""}
                     onChange={(e) => setFilter("scale", e.target.value || null)}
                     id="filter-scale"
@@ -99,7 +99,7 @@ export default function ShowRingFilters({
 
             {/* Sort Dropdown */}
             <select
-                className="filter-dropdown"
+                className="filter-dropdown hover:border-forest"
                 value={filters.sortBy}
                 onChange={(e) =>
                     setFilter("sortBy", e.target.value as FilterState["sortBy"])

@@ -622,9 +622,9 @@ export default function EditHorsePage() {
 
               return (
                 <div key={slot.angle} className="flex flex-col">
-                  <div className="photo-studio-label">
+                  <div className="flex items-center gap-1 mb-1 text-sm font-semibold text-ink">
                     {slot.label}
-                    {slot.primary && <span className="photo-studio-required">Required</span>}
+                    {slot.primary && <span className="text-xs font-bold text-[#2C5545] bg-[rgba(44, 85, 69, 0.1)] py-[2px] px-[8px] rounded-full">Required</span>}
                   </div>
                   <div
                     className={`image-upload-zone ${isDrag ? "drag-active" : ""} ${preview ? "has-preview" : ""}`}
@@ -675,7 +675,7 @@ export default function EditHorsePage() {
                   {hasNew && (
                     <button
                       type="button"
-                      className="image-revert-btn"
+                      className="image-revert-btn hover:0.2)] hover:0.5)]"
                       onClick={(e) => { e.stopPropagation(); handleSlotRevert(slot.angle); }}
                     >
                       ↩ Revert
@@ -684,7 +684,7 @@ export default function EditHorsePage() {
                   {!hasNew && preview && !slot.primary && (
                     <button
                       type="button"
-                      className="image-revert-btn"
+                      className="image-revert-btn hover:0.2)] hover:0.5)]"
                       style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.3)" }}
                       onClick={(e) => { e.stopPropagation(); handleSlotRemove(slot.angle); }}
                     >
@@ -698,7 +698,7 @@ export default function EditHorsePage() {
 
           {/* Extra Details Multi-Upload Zone */}
           <div className="mt-6 border-t border-edge pt-6">
-            <div className="photo-studio-label" style={{ marginBottom: "var(--space-xs)" }}>
+            <div className="flex items-center gap-1 mb-1 text-sm font-semibold text-ink" style={{ marginBottom: "var(--space-xs)" }}>
               Extra Details & Flaws
               <span style={{ fontWeight: 400, color: "var(--color-text-muted)", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}>{existingExtras.length + newExtraFiles.length}/10</span>
             </div>
@@ -892,7 +892,7 @@ export default function EditHorsePage() {
           </div>
 
           {/* Show Bio */}
-          <div className="form-divider" style={{ margin: "var(--space-lg) 0 var(--space-md)" }}>
+          <div className="flex items-center gap-4 m-[var(--space-xl) 0] text-muted text-sm" style={{ margin: "var(--space-lg) 0 var(--space-md)" }}>
             <h4 style={{ fontSize: "var(--font-size-md)", fontWeight: 600, color: "var(--color-text-secondary)" }}>
               🏅 Show Bio <span style={{ fontWeight: 400, fontSize: "var(--font-size-sm)" }}>(Optional)</span>
             </h4>

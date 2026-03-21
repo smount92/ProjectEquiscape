@@ -94,22 +94,22 @@ export default function HelpIdDetailClient({
                             id={`suggestion-${s.id}`}
                         >
                             <div className="flex items-center gap-4 mb-4 flex-wrap">
-                                <span className="help-id-suggestion-user">{s.userName}</span>
-                                {s.isAccepted && <span className="help-id-accepted-badge">✅ Accepted Answer</span>}
-                                <span className="help-id-suggestion-date">
+                                <span className="font-semibold text-sm text-ink">{s.userName}</span>
+                                {s.isAccepted && <span className="py-[2px] px-[10px] bg-[rgba(92, 224, 160, 0.15)] text-success rounded-full text-xs font-semibold">✅ Accepted Answer</span>}
+                                <span className="text-xs text-muted ml-auto">
                                     {new Date(s.created_at).toLocaleDateString()}
                                 </span>
                             </div>
 
                             <div className="mb-4">
                                 {s.releaseDisplay && (
-                                    <p className="help-id-suggestion-reference">🏷️ {s.releaseDisplay}</p>
+                                    <p className="text-sm text-forest font-semibold mb-1">🏷️ {s.releaseDisplay}</p>
                                 )}
                                 {s.resinDisplay && (
-                                    <p className="help-id-suggestion-reference">🎨 {s.resinDisplay}</p>
+                                    <p className="text-sm text-forest font-semibold mb-1">🎨 {s.resinDisplay}</p>
                                 )}
                                 {s.free_text && (
-                                    <p className="help-id-suggestion-text">{s.free_text}</p>
+                                    <p className="text-sm text-[var(--color-text-secondary)] leading-[1.6]">{s.free_text}</p>
                                 )}
                             </div>
 
