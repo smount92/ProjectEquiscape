@@ -10,11 +10,11 @@ import "./competition.css";
 
 
 // Core UI components
-import "@/components/VaultReveal.css";
+
 import "@/components/CommentSection.css";
 import "@/components/Provenance.css";
 import "@/components/Ratings.css";
-import "@/components/TrophyCase.css";
+
 
 import "@/components/CsvImport.css";
 // Social components

@@ -994,6 +994,29 @@ p {
 }
 .event-photo-grid img:hover { opacity: 0.85; }
 
+/* ── Vault Reveal (requires ::before, .unlocked state) ── */
+.vault-reveal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #f0a06c, #d4943c, #f0d06c);
+}
+.vault-reveal-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+  padding: 0 var(--space-xl);
+}
+.vault-reveal.unlocked .vault-reveal-body {
+  max-height: 500px;
+  padding: 0 var(--space-xl) var(--space-xl) var(--space-xl);
+}
+.vault-reveal.unlocked .vault-reveal-lock {
+  background: rgba(92, 224, 160, 0.1);
+  border-color: rgba(92, 224, 160, 0.25);
+}
+
 /* ── Settings Toggle Switch (requires ::after pseudo-element) ── */
 .settings-toggle,
 .settings-toggle-active {

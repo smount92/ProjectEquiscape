@@ -80,19 +80,20 @@ describe("TrophyCase", () => {
         expect(screen.getByText("Feb 20, 2026")).toBeInTheDocument();
     });
 
-    it("applies correct tier classes", () => {
+    it("applies correct tier border colors", () => {
         const { container } = render(<TrophyCase badges={mockBadges} />);
 
-        expect(container.querySelector(".trophy-tier-1")).toBeInTheDocument();
-        expect(container.querySelector(".trophy-tier-2")).toBeInTheDocument();
-        expect(container.querySelector(".trophy-tier-3")).toBeInTheDocument();
-        expect(container.querySelector(".trophy-tier-5")).toBeInTheDocument();
+        // Tier-specific border colors are now Tailwind classes
+        expect(container.innerHTML).toContain("border-[#cd7f32]"); // tier 1
+        expect(container.innerHTML).toContain("border-[#c0c0c0]"); // tier 2
+        expect(container.innerHTML).toContain("border-[#ffd700]"); // tier 3
+        expect(container.innerHTML).toContain("border-accent-primary"); // tier 5
     });
 
     it("sorts categories in predefined order (exclusive first)", () => {
-        const { container } = render(<TrophyCase badges={mockBadges} />);
+        render(<TrophyCase badges={mockBadges} />);
 
-        const headers = container.querySelectorAll(".trophy-category-header");
+        const headers = screen.getAllByRole("heading", { level: 4 });
         expect(headers[0].textContent).toBe("🏅 Exclusive");
         expect(headers[1].textContent).toBe("🐴 Collection");
         expect(headers[2].textContent).toBe("🦋 Social");
@@ -100,26 +101,27 @@ describe("TrophyCase", () => {
 
     it("shows tooltip on badge hover", async () => {
         const user = userEvent.setup();
-        const { container } = render(<TrophyCase badges={mockBadges} />);
+        render(<TrophyCase badges={mockBadges} />);
 
-        const firstCard = container.querySelector(".trophy-card")!;
-        await user.hover(firstCard);
+        // Hover on the first badge name text
+        const firstBadgeName = screen.getByText("Beta Pioneer"); // exclusive = first category
+        await user.hover(firstBadgeName.closest("div")!);
 
-        // Tooltip should appear with description
-        const tooltip = container.querySelector(".trophy-tooltip");
-        expect(tooltip).toBeInTheDocument();
+        // Tooltip should show the description
+        expect(screen.getByText("Joined during beta testing phase")).toBeInTheDocument();
     });
 
     it("hides tooltip on mouse leave", async () => {
         const user = userEvent.setup();
-        const { container } = render(<TrophyCase badges={mockBadges} />);
+        render(<TrophyCase badges={mockBadges} />);
 
-        const firstCard = container.querySelector(".trophy-card")!;
-        await user.hover(firstCard);
-        await user.unhover(firstCard);
+        const firstBadgeName = screen.getByText("Beta Pioneer");
+        const card = firstBadgeName.closest("div")!;
+        await user.hover(card);
+        await user.unhover(card);
 
-        const tooltip = container.querySelector(".trophy-tooltip");
-        expect(tooltip).not.toBeInTheDocument();
+        // Description tooltip should disappear
+        expect(screen.queryByText("Joined during beta testing phase")).not.toBeInTheDocument();
     });
 
     it("handles unknown category gracefully", () => {
