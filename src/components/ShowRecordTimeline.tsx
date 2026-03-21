@@ -108,15 +108,15 @@ export default function ShowRecordTimeline({
     };
 
     return (
-        <div className="show-record-timeline" id="show-records">
-            <div className="show-record-timeline-header">
-                <h3>
+        <div className="show-record-timeline bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="show-records">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                     <span aria-hidden="true">🏅</span> Show Records
                     {records.length > 0 && ` (${records.length})`}
                 </h3>
                 {isOwner && (
                     <button
-                        className="btn btn-primary show-record-add-btn"
+                        className="btn btn-primary text-[calc(0.8rem*var(--font-scale))] py-1 px-4"
                         onClick={handleAdd}
                         id="add-show-record"
                     >
@@ -136,7 +136,7 @@ export default function ShowRecordTimeline({
 
             {/* Timeline */}
             {records.length === 0 ? (
-                <div className="show-record-empty">
+                <div className="text-center py-6 text-muted text-[calc(0.9rem*var(--font-scale))]">
                     {isOwner
                         ? "No show records yet. Add your first win! 🏆"
                         : "No show records yet."}
@@ -146,7 +146,7 @@ export default function ShowRecordTimeline({
                     {records.map((record) => (
                         <div
                             key={record.id}
-                            className={`show-record-item ${getRibbonClass(record.ribbonColor)}`}
+                            className={`show-record-item group/record relative p-4 mb-4 rounded-md bg-[var(--color-card-bg-hover,rgba(0,0,0,0.03))] transition-colors hover:bg-[rgba(0,0,0,0.06)] ${getRibbonClass(record.ribbonColor)}`}
                             id={`record-${record.id}`}
                         >
                             {/* Edit Form Inline */}
@@ -159,16 +159,16 @@ export default function ShowRecordTimeline({
                                 />
                             ) : (
                                 <>
-                                    <div className="show-record-title">
+                                    <div className="font-semibold text-[calc(0.95rem*var(--font-scale))] mb-1 flex items-center gap-2">
                                         {record.showName}
                                         {record.isNan && (
-                                            <span className="show-record-nan-badge">
+                                            <span className="inline-flex items-center gap-[2px] py-[1px] px-2 rounded-sm bg-[linear-gradient(135deg,rgba(245,158,11,0.2),rgba(234,179,8,0.1))] text-[#F59E0B] text-[calc(0.7rem*var(--font-scale))] font-bold uppercase tracking-wider">
                                                 ⭐ NAN
                                             </span>
                                         )}
                                     </div>
 
-                                    <div className="show-record-meta">
+                                    <div className="flex flex-wrap gap-y-2 gap-x-6 text-[calc(0.8rem*var(--font-scale))] text-muted [&_span]:flex [&_span]:items-center [&_span]:gap-1">
                                         <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
                                         {record.placing && <span>🎖️ {record.placing}</span>}
                                         {record.division && <span>📂 {record.division}</span>}
@@ -179,7 +179,7 @@ export default function ShowRecordTimeline({
 
                                     {/* Advanced details row */}
                                     {(record.sectionName || record.awardCategory || record.competitionLevel) && (
-                                        <div className="show-record-meta" style={{ marginTop: "var(--space-xs)" }}>
+                                        <div className="flex flex-wrap gap-y-2 gap-x-6 text-[calc(0.8rem*var(--font-scale))] text-muted [&_span]:flex [&_span]:items-center [&_span]:gap-1 mt-1">
                                             {record.sectionName && <span>🏷️ {record.sectionName}</span>}
                                             {record.awardCategory && <span>🎯 {record.awardCategory}</span>}
                                             {record.competitionLevel && <span>📊 {record.competitionLevel}</span>}
@@ -187,12 +187,13 @@ export default function ShowRecordTimeline({
                                     )}
 
                                     {record.notes && (
-                                        <div className="show-record-notes">{record.notes}</div>
+                                        <div className="mt-1 text-[calc(0.85rem*var(--font-scale))] text-muted italic">{record.notes}</div>
                                     )}
 
                                     {isOwner && (
-                                        <div className="show-record-actions">
+                                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover/record:opacity-100">
                                             <button
+                                                className="bg-transparent border-none text-muted cursor-pointer py-[2px] px-[6px] rounded-sm text-[calc(0.75rem*var(--font-scale))] transition-colors hover:text-forest"
                                                 onClick={() => handleEdit(record)}
                                                 title="Edit"
                                                 aria-label="Edit record"
@@ -200,7 +201,7 @@ export default function ShowRecordTimeline({
                                                 ✏️
                                             </button>
                                             <button
-                                                className="delete"
+                                                className="bg-transparent border-none text-muted cursor-pointer py-[2px] px-[6px] rounded-sm text-[calc(0.75rem*var(--font-scale))] transition-colors hover:text-[#e74c6f]"
                                                 onClick={() => handleDelete(record.id)}
                                                 disabled={deletingId === record.id}
                                                 title="Delete"

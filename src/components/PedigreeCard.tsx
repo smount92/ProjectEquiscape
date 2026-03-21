@@ -169,8 +169,8 @@ export default function PedigreeCard({
     // CTA for owner when no pedigree exists
     if (!pedigree && isOwner && !isEditing) {
         return (
-            <div className="pedigree-card" id="pedigree-card">
-                <div className="pedigree-empty">
+            <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+                <div className="text-center py-4 text-muted">
                     <p>No pedigree data yet.</p>
                     <button
                         className="btn btn-primary"
@@ -188,14 +188,14 @@ export default function PedigreeCard({
     // Edit form
     if (isEditing) {
         return (
-            <div className="pedigree-card" id="pedigree-card">
-                <div className="pedigree-card-header">
-                    <h3>
+            <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                         <span aria-hidden="true">🧬</span> {pedigree ? "Edit Pedigree" : "Add Pedigree"}
                     </h3>
                 </div>
                 <form onSubmit={handleSave}>
-                    <div className="show-record-form-row">
+                    <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                         {/* Sire with search */}
                         <div className="form-group" ref={sireRef} style={{ position: "relative" }}>
                             <label className="form-label">Sire (Father)</label>
@@ -302,7 +302,7 @@ export default function PedigreeCard({
                         />
                     </div>
 
-                    <div className="show-record-form-row">
+                    <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                         <div className="form-group">
                             <label className="form-label">Cast Number</label>
                             <input
@@ -346,7 +346,7 @@ export default function PedigreeCard({
                         </div>
                     )}
 
-                    <div className="show-record-form-actions">
+                    <div className="flex justify-end gap-2 mt-6">
                         <button type="button" className="btn btn-ghost" onClick={handleCancel}>
                             Cancel
                         </button>
@@ -365,9 +365,9 @@ export default function PedigreeCard({
 
     // Read-only display
     return (
-        <div className="pedigree-card" id="pedigree-card">
-            <div className="pedigree-card-header">
-                <h3>
+        <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
                     <span aria-hidden="true">🧬</span> Pedigree
                 </h3>
                 {isOwner && (
@@ -382,9 +382,9 @@ export default function PedigreeCard({
             </div>
 
             {pedigree!.sireName && (
-                <div className="pedigree-row">
-                    <span className="pedigree-label">Sire</span>
-                    <span className="pedigree-value">
+                <div className="flex justify-between py-2 border-b border-[var(--color-border,rgba(0,0,0,0.06))] last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+                    <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Sire</span>
+                    <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">
                         {pedigree!.sireId ? (
                             <Link href={`/community/${pedigree!.sireId}`} style={{ color: "var(--color-accent-primary)", textDecoration: "none" }}>
                                 {pedigree!.sireName} 🔗
@@ -394,9 +394,9 @@ export default function PedigreeCard({
                 </div>
             )}
             {pedigree!.damName && (
-                <div className="pedigree-row">
-                    <span className="pedigree-label">Dam</span>
-                    <span className="pedigree-value">
+                <div className="flex justify-between py-2 border-b border-[var(--color-border,rgba(0,0,0,0.06))] last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+                    <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Dam</span>
+                    <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">
                         {pedigree!.damId ? (
                             <Link href={`/community/${pedigree!.damId}`} style={{ color: "var(--color-accent-primary)", textDecoration: "none" }}>
                                 {pedigree!.damName} 🔗
@@ -406,15 +406,15 @@ export default function PedigreeCard({
                 </div>
             )}
             {pedigree!.sculptor && (
-                <div className="pedigree-row">
-                    <span className="pedigree-label">Sculptor</span>
-                    <span className="pedigree-value">{pedigree!.sculptor}</span>
+                <div className="flex justify-between py-2 border-b border-[var(--color-border,rgba(0,0,0,0.06))] last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+                    <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Sculptor</span>
+                    <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">{pedigree!.sculptor}</span>
                 </div>
             )}
             {(pedigree!.castNumber || pedigree!.editionSize) && (
-                <div className="pedigree-row">
-                    <span className="pedigree-label">Cast / Edition</span>
-                    <span className="pedigree-value">
+                <div className="flex justify-between py-2 border-b border-[var(--color-border,rgba(0,0,0,0.06))] last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+                    <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Cast / Edition</span>
+                    <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">
                         {pedigree!.castNumber && pedigree!.editionSize
                             ? `#${pedigree!.castNumber} of ${pedigree!.editionSize}`
                             : pedigree!.castNumber
@@ -424,7 +424,7 @@ export default function PedigreeCard({
                 </div>
             )}
             {pedigree!.lineageNotes && (
-                <div className="pedigree-notes">{pedigree!.lineageNotes}</div>
+                <div className="mt-4 py-2 px-4 bg-[rgba(0,0,0,0.03)] rounded-md text-[calc(0.85rem*var(--font-scale))] text-muted italic whitespace-pre-wrap">{pedigree!.lineageNotes}</div>
             )}
         </div>
     );

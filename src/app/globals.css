@@ -58,14 +58,13 @@
 
 /* ============================================================
    THE MODEL HORSE HUB — Global Design System
-   MONOLITH REDUCTION SPRINT — March 2026
-   globals.css reduced from 11,701 → 4,671 lines (60%)
-   Page-specific styles extracted to co-located CSS files
-   PRD Requirements:
-   - Sans-serif fonts (Inter), minimum 16px base
-   - Simple Mode: +30% font, 60px min buttons, high contrast
+   
+   IMPORTANT: Everything below is wrapped in @layer base so that
+   Tailwind v4 utility classes (which live in @layer utilities)
+   can properly override these defaults. Without this wrapper,
+   unlayered CSS always beats @layer CSS per the cascade spec.
    ============================================================ */
-
+@layer base {
 
 
 /* ---- CSS Custom Properties (Design Tokens) ---- */
@@ -12096,4 +12095,6 @@ p {
         min-width: 200px;
         max-width: 280px;
     }
-}  
+}
+
+} /* end @layer base */

@@ -119,8 +119,8 @@ export default function ShowRecordForm({
     };
 
     return (
-        <div className="show-record-form-overlay">
-            <div className="show-record-form-title">
+        <div className="bg-[var(--color-card-bg,rgba(0,0,0,0.05))] border border-[var(--color-primary,rgba(108,99,255,0.3))] rounded-lg p-6 mb-6">
+            <div className="text-[calc(1rem*var(--font-scale))] font-semibold mb-4">
                 {isEdit ? "✏️ Edit Show Record" : "🏅 Add Show Record"}
             </div>
             <form onSubmit={handleSubmit}>
@@ -140,7 +140,7 @@ export default function ShowRecordForm({
                     />
                 </div>
 
-                <div className="show-record-form-row">
+                <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                     <div className="form-group">
                         <label className="form-label">Show Date</label>
                         <input
@@ -196,7 +196,7 @@ export default function ShowRecordForm({
                     </small>
                 </div>
 
-                <div className="show-record-form-row">
+                <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                     <div className="form-group">
                         <label className="form-label">Placing</label>
                         <input
@@ -278,7 +278,7 @@ export default function ShowRecordForm({
 
                 {showAdvanced && (
                     <>
-                        <div className="show-record-form-row">
+                        <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                             <div className="form-group">
                                 <label className="form-label">Location</label>
                                 <input
@@ -303,7 +303,7 @@ export default function ShowRecordForm({
                             </div>
                         </div>
 
-                        <div className="show-record-form-row">
+                        <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                             <div className="form-group">
                                 <label className="form-label">Award Category</label>
                                 <select
@@ -346,7 +346,7 @@ export default function ShowRecordForm({
                     </div>
                 )}
 
-                <div className="show-record-form-actions">
+                <div className="flex justify-end gap-2 mt-6">
                     <button
                         type="button"
                         className="btn btn-ghost"
