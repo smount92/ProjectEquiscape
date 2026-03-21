@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import styles from "./inbox.module.css";
+
 
 export const metadata = {
     title: "Inbox — Model Horse Hub",
@@ -225,15 +225,15 @@ export default async function InboxPage() {
                         </Link>
                     </div>
                 ) : (
-                    <div className={`${styles.list} animate-fade-in-up`}>
+                    <div className="flex flex-col gap-[2px] bg-surface-glass border border-border rounded-lg overflow-hidden animate-fade-in-up">
                         {inboxItems.map((item) => (
                             <Link
                                 key={item.id}
                                 href={`/inbox/${item.id}`}
-                                className={`${styles.item} ${item.unreadCount > 0 ? styles.itemUnread : ""}`}
+                                className={`flex items-center gap-md max-md:gap-sm py-md max-md:py-sm px-lg max-md:px-md no-underline text-text-primary transition-all border-b border-border last:border-b-0 ${item.unreadCount > 0 ? "bg-[rgba(44,85,69,0.05)] hover:bg-[rgba(44,85,69,0.08)]" : "hover:bg-black/[0.03]"}`}
                                 id={`inbox-item-${item.id}`}
                             >
-                                <div className={styles.avatar}>
+                                <div className="w-11 max-md:w-9 h-11 max-md:h-9 rounded-full bg-[rgba(44,85,69,0.15)] flex items-center justify-center shrink-0 text-accent-secondary">
                                     <svg
                                         width="24"
                                         height="24"
@@ -249,25 +249,25 @@ export default async function InboxPage() {
                                         <circle cx="12" cy="7" r="4" />
                                     </svg>
                                 </div>
-                                <div className={styles.info}>
-                                    <div className={styles.top}>
-                                        <span className={styles.alias}>@{item.otherAlias}</span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-center gap-sm">
+                                        <span className={`font-semibold text-sm ${item.unreadCount > 0 ? "text-accent-primary" : "text-text-primary"}`}>@{item.otherAlias}</span>
                                         {item.isRated && (
                                             <span className="inbox-item-rated">⭐ Rated</span>
                                         )}
-                                        <span className={styles.time}>
+                                        <span className="text-xs text-text-muted shrink-0">
                                             {timeAgo(item.latestTime)}
                                         </span>
                                     </div>
                                     {item.horseName ? (
-                                        <div className={styles.horse}>
+                                        <div className="text-xs text-text-muted mt-[2px] flex items-center gap-xs">
                                             🐴 Re: {item.horseName}
                                             {item.horseTradeStatus &&
                                                 item.horseTradeStatus !== "Not for Sale" && (
                                                     <span
                                                         className={item.horseTradeStatus === "For Sale"
-                                                            ? styles.statusSale
-                                                            : styles.statusOffers
+                                                            ? "text-[0.65rem] font-bold py-[1px] px-1.5 rounded-full bg-[rgba(34,197,94,0.15)] text-[#22c55e]"
+                                                            : "text-[0.65rem] font-bold py-[1px] px-1.5 rounded-full bg-[rgba(59,130,246,0.15)] text-[#3b82f6]"
                                                         }
                                                     >
                                                         {item.horseTradeStatus === "For Sale"
@@ -277,15 +277,15 @@ export default async function InboxPage() {
                                                 )}
                                         </div>
                                     ) : (
-                                        <div className={styles.horse}>
+                                        <div className="text-xs text-text-muted mt-[2px] flex items-center gap-xs">
                                             💬 Direct Message
                                         </div>
                                     )}
-                                    <div className={styles.preview}>
+                                    <div className="text-xs text-text-muted mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
                                         {item.latestMessage ? (
                                             <>
                                                 {item.latestSenderIsMe && (
-                                                    <span className={styles.you}>You: </span>
+                                                    <span className="font-semibold text-text-primary">You: </span>
                                                 )}
                                                 {item.latestMessage.length > 80
                                                     ? item.latestMessage.slice(0, 80) + "…"
@@ -297,7 +297,7 @@ export default async function InboxPage() {
                                     </div>
                                 </div>
                                 {item.unreadCount > 0 && (
-                                    <div className={styles.badge}>{item.unreadCount}</div>
+                                    <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-accent-primary text-white rounded-full text-[0.7rem] font-bold shrink-0">{item.unreadCount}</div>
                                 )}
                             </Link>
                         ))}

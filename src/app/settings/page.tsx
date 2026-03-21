@@ -11,7 +11,7 @@ import {
     uploadAvatar,
     deleteAccount,
 } from "@/app/actions/settings";
-import styles from "./settings.module.css";
+
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
     { key: "show_votes", emoji: "📸", label: "Show votes on your entries" },
@@ -165,12 +165,12 @@ export default function SettingsPage() {
                 </h1>
 
                 {/* ═══ Profile ═══ */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>👤 Profile</h2>
-                    <div className={styles.card}>
+                <div className="mb-2xl max-sm:mb-xl">
+                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-md flex items-center gap-sm text-text-primary tracking-tight">👤 Profile</h2>
+                    <div className="p-xl max-sm:p-lg rounded-xl bg-surface border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                         {/* Avatar */}
-                        <div className={styles.avatarRow}>
-                            <div className={styles.avatar}>
+                        <div className="flex items-center gap-lg max-sm:gap-md mb-xl pb-lg border-b border-border">
+                            <div className="w-20 h-20 rounded-full bg-[linear-gradient(135deg,rgba(44,85,69,0.08),rgba(139,90,43,0.08))] flex items-center justify-center text-[2rem] overflow-hidden border-[2.5px] border-border shrink-0 transition-colors hover:border-accent-primary [&_img]:w-full [&_img]:h-full [&_img]:object-cover">
                                 {avatarUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={avatarUrl} alt="Your avatar" />
@@ -235,22 +235,22 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Default horse visibility */}
-                        <div className={styles.toggleRow}>
-                            <span className={styles.toggleLabel}>
+                        <div className="flex items-center justify-between py-md max-sm:gap-sm gap-md border-b border-border last:border-b-0 last:pb-0 first:pt-0">
+                            <span className="flex items-center gap-sm text-[calc(0.88rem*var(--font-scale))] font-medium text-text-primary">
                                 🏆 Default new horses to public
                             </span>
                             <button
                                 type="button"
-                                className={defaultHorsePublic ? styles.toggleActive : styles.toggle}
+                                className={defaultHorsePublic ? "settings-toggle-active" : "settings-toggle"}
                                 onClick={() => setDefaultHorsePublic(!defaultHorsePublic)}
                                 aria-pressed={defaultHorsePublic}
                             />
                         </div>
 
                         {/* Photo watermarking */}
-                        <div className={styles.toggleRow}>
+                        <div className="flex items-center justify-between py-md max-sm:gap-sm gap-md border-b border-border last:border-b-0 last:pb-0 first:pt-0">
                             <div>
-                                <span className={styles.toggleLabel}>
+                                <span className="flex items-center gap-sm text-[calc(0.88rem*var(--font-scale))] font-medium text-text-primary">
                                     📸 Watermark uploaded photos
                                 </span>
                                 <span className="form-hint" style={{ display: "block", marginTop: 2 }}>
@@ -259,16 +259,16 @@ export default function SettingsPage() {
                             </div>
                             <button
                                 type="button"
-                                className={watermarkPhotos ? styles.toggleActive : styles.toggle}
+                                className={watermarkPhotos ? "settings-toggle-active" : "settings-toggle"}
                                 onClick={() => setWatermarkPhotos(!watermarkPhotos)}
                                 aria-pressed={watermarkPhotos}
                             />
                         </div>
 
                         {/* Show trophies on profile */}
-                        <div className={styles.toggleRow}>
+                        <div className="flex items-center justify-between py-md max-sm:gap-sm gap-md border-b border-border last:border-b-0 last:pb-0 first:pt-0">
                             <div>
-                                <span className={styles.toggleLabel}>
+                                <span className="flex items-center gap-sm text-[calc(0.88rem*var(--font-scale))] font-medium text-text-primary">
                                     🏆 Show Trophy Case on profile
                                 </span>
                                 <span className="form-hint" style={{ display: "block", marginTop: 2 }}>
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                             </div>
                             <button
                                 type="button"
-                                className={showBadges ? styles.toggleActive : styles.toggle}
+                                className={showBadges ? "settings-toggle-active" : "settings-toggle"}
                                 onClick={() => setShowBadges(!showBadges)}
                                 aria-pressed={showBadges}
                             />
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                         </button>
 
                         {profileMsg && (
-                            <p className={profileMsg.type === "success" ? styles.success : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
+                            <p className={profileMsg.type === "success" ? "text-accent-primary text-sm mt-xs font-medium flex items-center gap-xs before:content-['✓']" : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
                                 {profileMsg.text}
                             </p>
                         )}
@@ -329,9 +329,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Security ═══ */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>🔒 Security</h2>
-                    <div className={styles.card}>
+                <div className="mb-2xl max-sm:mb-xl">
+                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-md flex items-center gap-sm text-text-primary tracking-tight">🔒 Security</h2>
+                    <div className="p-xl max-sm:p-lg rounded-xl bg-surface border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                         <div className="form-group">
                             <label className="form-label">Email</label>
                             <input
@@ -382,7 +382,7 @@ export default function SettingsPage() {
                         </button>
 
                         {passwordMsg && (
-                            <p className={passwordMsg.type === "success" ? styles.success : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
+                            <p className={passwordMsg.type === "success" ? "text-accent-primary text-sm mt-xs font-medium flex items-center gap-xs before:content-['✓']" : "form-error"} style={{ marginTop: "var(--space-sm)" }}>
                                 {passwordMsg.text}
                             </p>
                         )}
@@ -390,17 +390,17 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Notifications ═══ */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>🔔 Notifications</h2>
-                    <div className={styles.card}>
+                <div className="mb-2xl max-sm:mb-xl">
+                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-md flex items-center gap-sm text-text-primary tracking-tight">🔔 Notifications</h2>
+                    <div className="p-xl max-sm:p-lg rounded-xl bg-surface border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                         {NOTIF_LABELS.map((n) => (
-                            <div key={n.key} className={styles.toggleRow}>
-                                <span className={styles.toggleLabel}>
+                            <div key={n.key} className="flex items-center justify-between py-md max-sm:gap-sm gap-md border-b border-border last:border-b-0 last:pb-0 first:pt-0">
+                                <span className="flex items-center gap-sm text-[calc(0.88rem*var(--font-scale))] font-medium text-text-primary">
                                     {n.emoji} {n.label}
                                 </span>
                                 <button
                                     type="button"
-                                    className={notifPrefs[n.key] ? styles.toggleActive : styles.toggle}
+                                    className={notifPrefs[n.key] ? "settings-toggle-active" : "settings-toggle"}
                                     onClick={() => handleToggleNotif(n.key)}
                                     aria-pressed={notifPrefs[n.key]}
                                 />
@@ -410,9 +410,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Data & Reports ═══ */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>📊 Data & Reports</h2>
-                    <div className={styles.card}>
+                <div className="mb-2xl max-sm:mb-xl">
+                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-md flex items-center gap-sm text-text-primary tracking-tight">📊 Data & Reports</h2>
+                    <div className="p-xl max-sm:p-lg rounded-xl bg-surface border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-lg)" }}>
                             {/* CSV Export */}
                             <div>
@@ -438,9 +438,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Danger Zone ═══ */}
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle} style={{ color: "#ef4444" }}>⚠️ Danger Zone</h2>
-                    <div className={styles.card} style={{ border: "1px solid #ef4444", borderRadius: "var(--radius-lg)" }}>
+                <div className="mb-2xl max-sm:mb-xl">
+                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-md flex items-center gap-sm text-text-primary tracking-tight" style={{ color: "#ef4444" }}>⚠️ Danger Zone</h2>
+                    <div className="p-xl max-sm:p-lg rounded-xl bg-surface border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]" style={{ border: "1px solid #ef4444", borderRadius: "var(--radius-lg)" }}>
                         <p style={{ marginBottom: "var(--space-md)", lineHeight: 1.6 }}>
                             Permanently delete your account. This action <strong>cannot be undone</strong>.
                         </p>

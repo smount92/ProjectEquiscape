@@ -948,6 +948,76 @@ p {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* ── Settings Toggle Switch (requires ::after pseudo-element) ── */
+.settings-toggle,
+.settings-toggle-active {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+}
+.settings-toggle { background: rgba(0, 0, 0, 0.1); }
+.settings-toggle:hover { background: rgba(0, 0, 0, 0.16); }
+.settings-toggle-active {
+  background: var(--color-accent-primary);
+  box-shadow: 0 0 0 2px rgba(44, 85, 69, 0.15);
+}
+.settings-toggle-active:hover { background: var(--color-accent-primary-hover, #1f5a3f); }
+.settings-toggle:focus-visible,
+.settings-toggle-active:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+.settings-toggle::after,
+.settings-toggle-active::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+.settings-toggle-active::after { transform: translateX(20px); }
+
+/* ── Stable Ledger Table (requires nested th/td selectors) ── */
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: calc(var(--font-size-sm) * var(--font-scale));
+}
+.ledger-table thead { position: sticky; top: 0; z-index: 2; }
+.ledger-table th {
+  background: var(--color-surface-secondary);
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--color-border);
+}
+.ledger-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  color: var(--color-text-primary);
+  vertical-align: middle;
+}
+@media (max-width: 768px) {
+  .ledger-table td { padding: 6px 8px; }
+}
+
 /* ============================================================
    FOOTER LINK
    ============================================================ */
