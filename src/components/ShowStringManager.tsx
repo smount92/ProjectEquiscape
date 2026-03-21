@@ -350,18 +350,18 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                 const points = champs * 4 + reserves * 3 + topTens * 2 + (filled.length - champs - reserves - topTens);
                                                                 if (filled.length === 0) return null;
                                                                 return (
-                                                                    <div className="results-summary">
-                                                                        <div className="results-summary-stat">
-                                                                            <span className="stat-value">{filled.length}</span>
-                                                                            <span className="stat-label">Results</span>
+                                                                    <div className="flex gap-lg p-md bg-surface-secondary rounded-lg mt-md flex-wrap">
+                                                                        <div className="flex flex-col gap-0.5">
+                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-accent-primary">{filled.length}</span>
+                                                                            <span className="text-xs text-text-muted">Results</span>
                                                                         </div>
-                                                                        <div className="results-summary-stat">
-                                                                            <span className="stat-value">{champs}🏆 {reserves}🎖️ {topTens}🔟</span>
-                                                                            <span className="stat-label">Major Ribbons</span>
+                                                                        <div className="flex flex-col gap-0.5">
+                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-accent-primary">{champs}🏆 {reserves}🎖️ {topTens}🔟</span>
+                                                                            <span className="text-xs text-text-muted">Major Ribbons</span>
                                                                         </div>
-                                                                        <div className="results-summary-stat">
-                                                                            <span className="stat-value">~{points}</span>
-                                                                            <span className="stat-label">Est. NAN Points</span>
+                                                                        <div className="flex flex-col gap-0.5">
+                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-accent-primary">~{points}</span>
+                                                                            <span className="text-xs text-text-muted">Est. NAN Points</span>
                                                                         </div>
                                                                     </div>
                                                                 );

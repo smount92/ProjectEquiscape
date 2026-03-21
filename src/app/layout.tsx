@@ -7,7 +7,7 @@ import "./competition.css";
 
 /* ── Extracted CSS (globals.css modularization sprint) ── */
 // Layout components
-import "@/components/Footer.css";
+
 
 // Core UI components
 import "@/components/VaultReveal.css";
@@ -24,7 +24,7 @@ import "@/components/ChatGuardrails.css";
 import "@/components/SocialFoundation.css";
 // Page-specific styles
 import "./WelcomeOnboarding.css";
-import "./faq/faq.css";
+
 import "./about/static.css";
 import "./admin/admin.css";
 import "./market/market.css";
@@ -35,7 +35,7 @@ import "./shows/ShowBuilder.css";
 import "./stable/passport.css";
 import "./stable/PhotoUpload.css";
 
-import "./stable/BatchResults.css";
+
 import "./add-horse/gallery.css";
 import "./catalog/reference.css";
 import { SimpleModeProvider } from "@/lib/context/SimpleModeContext";

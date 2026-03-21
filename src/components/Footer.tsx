@@ -4,36 +4,36 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="site-footer">
-            <div className="footer-inner">
+        <footer className="mt-auto border-t border-[rgba(139,90,43,0.2)] bg-[#3B2A1A] pt-3xl px-xl text-sm text-white/70">
+            <div className="flex justify-between gap-3xl max-w-[var(--max-width)] mx-auto pb-2xl max-md:flex-col max-md:gap-2xl">
                 {/* Brand */}
-                <div className="footer-brand">
-                    <Link href="/" className="footer-logo">
+                <div className="max-w-[260px] max-md:max-w-full max-md:text-center">
+                    <Link href="/" className="text-lg font-extrabold text-[#F0EAD6] no-underline inline-block mb-sm tracking-tight hover:text-[#D4A76A]">
                         🐴 Model Horse Hub
                     </Link>
-                    <p className="footer-tagline">
+                    <p className="text-white/50 leading-relaxed text-sm">
                         Built by collectors, for collectors.
                     </p>
                 </div>
 
                 {/* Links */}
-                <div className="footer-links">
-                    <div className="footer-column">
-                        <h4 className="footer-column-title">Platform</h4>
+                <div className="flex gap-3xl max-md:justify-center max-md:gap-2xl max-md:flex-wrap">
+                    <div className="flex flex-col gap-sm max-md:items-center max-md:text-center max-md:min-w-[120px] [&_a]:text-white/70 [&_a]:no-underline [&_a]:text-sm [&_a]:transition-colors [&_a:hover]:text-[#D4A76A]">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-xs">Platform</h4>
                         <Link href="/discover">Show Ring</Link>
                         <Link href="/market">Price Guide</Link>
                         <Link href="/studio">Art Studio</Link>
                         <Link href="/shows">Photo Shows</Link>
                     </div>
-                    <div className="footer-column">
-                        <h4 className="footer-column-title">Community</h4>
+                    <div className="flex flex-col gap-sm max-md:items-center max-md:text-center max-md:min-w-[120px] [&_a]:text-white/70 [&_a]:no-underline [&_a]:text-sm [&_a]:transition-colors [&_a:hover]:text-[#D4A76A]">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-xs">Community</h4>
                         <Link href="/community/groups">Groups</Link>
                         <Link href="/community/events">Events</Link>
                         <Link href="/feed">Activity Feed</Link>
                         <Link href="/community/help-id">Help ID</Link>
                     </div>
-                    <div className="footer-column">
-                        <h4 className="footer-column-title">Company</h4>
+                    <div className="flex flex-col gap-sm max-md:items-center max-md:text-center max-md:min-w-[120px] [&_a]:text-white/70 [&_a]:no-underline [&_a]:text-sm [&_a]:transition-colors [&_a:hover]:text-[#D4A76A]">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-xs">Company</h4>
                         <Link href="/about">About Us</Link>
                         <Link href="/contact">Contact Us</Link>
                         <Link href="/faq">FAQ</Link>
@@ -43,11 +43,11 @@ export default function Footer() {
             </div>
 
             {/* Bottom bar */}
-            <div className="footer-bottom">
+            <div className="flex items-center justify-between max-w-[var(--max-width)] mx-auto py-lg border-t border-white/10 text-xs text-white/40 max-md:flex-col max-md:gap-sm max-md:text-center">
                 <span>© {currentYear} Model Horse Hub. All rights reserved.</span>
-                <span className="footer-bottom-links">
+                <span className="flex items-center gap-xs [&_a]:text-white/40 [&_a]:no-underline [&_a]:transition-colors [&_a:hover]:text-[#D4A76A]">
                     <Link href="/privacy">Privacy</Link>
-                    <span className="footer-dot">·</span>
+                    <span className="opacity-40">·</span>
                     <Link href="/terms">Terms</Link>
                 </span>
             </div>
