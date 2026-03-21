@@ -7,7 +7,6 @@ import GroupFiles from "@/components/GroupFiles";
 import GroupAdminPanel from "@/components/GroupAdminPanel";
 import type { Group, GroupChannel } from "@/app/actions/groups";
 
-
 interface Props {
     group: Group;
     initialPosts: Parameters<typeof UniversalFeed>[0]["initialPosts"];
@@ -25,21 +24,21 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
     return (
         <>
             {/* Tab Bar */}
-            <div className="flex gap-[2px] my-6 bg-black/[0.03] rounded-lg p-1 border border-edge">
+            <div className="border-edge my-6 flex gap-[2px] rounded-lg border bg-black/[0.03] p-1">
                 <button
-                    className={`flex-1 py-2 px-4 bg-transparent border-none rounded-md text-muted text-sm font-semibold cursor-pointer transition-all hover:text-ink hover:bg-black/[0.05] ${activeTab === "feed" ? "text-ink bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
+                    className={`text-muted hover:text-ink flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab === "feed" ? "text-ink border border-[rgba(44,85,69,0.3)] bg-[rgba(44,85,69,0.12)]" : ""}`}
                     onClick={() => setActiveTab("feed")}
                 >
                     💬 Feed
                 </button>
                 <button
-                    className={`flex-1 py-2 px-4 bg-transparent border-none rounded-md text-muted text-sm font-semibold cursor-pointer transition-all hover:text-ink hover:bg-black/[0.05] ${activeTab === "files" ? "text-ink bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
+                    className={`text-muted hover:text-ink flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab === "files" ? "text-ink border border-[rgba(44,85,69,0.3)] bg-[rgba(44,85,69,0.12)]" : ""}`}
                     onClick={() => setActiveTab("files")}
                 >
                     📁 Files
                 </button>
                 <button
-                    className={`flex-1 py-2 px-4 bg-transparent border-none rounded-md text-muted text-sm font-semibold cursor-pointer transition-all hover:text-ink hover:bg-black/[0.05] ${activeTab === "registry" ? "text-ink bg-[rgba(44,85,69,0.12)] border border-[rgba(44,85,69,0.3)]" : ""}`}
+                    className={`text-muted hover:text-ink flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab === "registry" ? "text-ink border border-[rgba(44,85,69,0.3)] bg-[rgba(44,85,69,0.12)]" : ""}`}
                     onClick={() => setActiveTab("registry")}
                 >
                     📋 Registry
@@ -48,17 +47,17 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
 
             {/* Channel Pills (only on Feed tab) */}
             {activeTab === "feed" && channels.length > 1 && (
-                <div className="flex gap-1 mb-6 overflow-x-auto pb-1 scrollbar-none">
+                <div className="scrollbar-none mb-6 flex gap-1 overflow-x-auto pb-1">
                     <button
-                        className={`py-1.5 px-3.5 bg-black/[0.04] border border-edge rounded-full text-muted text-xs font-semibold cursor-pointer whitespace-nowrap transition-all hover:bg-black/[0.06] hover:text-ink ${activeChannel === null ? "bg-[rgba(44,85,69,0.15)] border-[rgba(44,85,69,0.4)] text-forest" : ""}`}
+                        className={`border-edge text-muted hover:text-ink cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === null ? "text-forest border-[rgba(44,85,69,0.4)] bg-[rgba(44,85,69,0.15)]" : ""}`}
                         onClick={() => setActiveChannel(null)}
                     >
                         # all
                     </button>
-                    {channels.map(ch => (
+                    {channels.map((ch) => (
                         <button
                             key={ch.id}
-                            className={`py-1.5 px-3.5 bg-black/[0.04] border border-edge rounded-full text-muted text-xs font-semibold cursor-pointer whitespace-nowrap transition-all hover:bg-black/[0.06] hover:text-ink ${activeChannel === ch.id ? "bg-[rgba(44,85,69,0.15)] border-[rgba(44,85,69,0.4)] text-forest" : ""}`}
+                            className={`border-edge text-muted hover:text-ink cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === ch.id ? "text-forest border-[rgba(44,85,69,0.4)] bg-[rgba(44,85,69,0.15)]" : ""}`}
                             onClick={() => setActiveChannel(ch.id)}
                         >
                             # {ch.name.toLowerCase()}
@@ -74,22 +73,18 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
                     context={{ groupId: group.id }}
                     currentUserId={currentUserId}
                     showComposer={true}
-                    composerPlaceholder={activeChannel ? `Post to #${channels.find(c => c.id === activeChannel)?.name || "channel"}…` : "Share with the group…"}
+                    composerPlaceholder={
+                        activeChannel
+                            ? `Post to #${channels.find((c) => c.id === activeChannel)?.name || "channel"}…`
+                            : "Share with the group…"
+                    }
                     label="Group Posts"
                 />
             )}
 
-            {activeTab === "files" && (
-                <GroupFiles
-                    groupId={group.id}
-                    canUpload={isMod}
-                    canDelete={isAdmin}
-                />
-            )}
+            {activeTab === "files" && <GroupFiles groupId={group.id} canUpload={isMod} canDelete={isAdmin} />}
 
-            {activeTab === "registry" && (
-                <GroupRegistry groupId={group.id} isMember={group.isMember} />
-            )}
+            {activeTab === "registry" && <GroupRegistry groupId={group.id} isMember={group.isMember} />}
 
             {/* Admin Panel (always visible for admins below content) */}
             {isAdmin && (

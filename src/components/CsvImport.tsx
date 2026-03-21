@@ -9,7 +9,10 @@ import { executeBatchImport } from "@/app/actions/csv-import";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DictRelease = { i: string; n: string; m: string | null; c: string | null; mn: string | null; mf: string | null };
 type DictResin = { i: string; n: string; s: string };
-interface RefDict { releases: DictRelease[]; resins: DictResin[] }
+interface RefDict {
+    releases: DictRelease[];
+    resins: DictResin[];
+}
 
 // ============================================================
 // Column mapping presets — auto-detect common CSV headers
@@ -88,7 +91,9 @@ export default function CsvImport() {
     useEffect(() => {
         fetch("/api/reference-dictionary")
             .then((res) => res.json())
-            .then((data: RefDict) => { dictRef.current = data; })
+            .then((data: RefDict) => {
+                dictRef.current = data;
+            })
             .catch((err) => console.error("[CSV] Failed to load dictionary:", err));
     }, []);
 
@@ -141,7 +146,7 @@ export default function CsvImport() {
             const file = e.dataTransfer.files[0];
             if (file) handleFile(file);
         },
-        [handleFile]
+        [handleFile],
     );
 
     const handleFileInput = useCallback(
@@ -149,7 +154,7 @@ export default function CsvImport() {
             const file = e.target.files?.[0];
             if (file) handleFile(file);
         },
-        [handleFile]
+        [handleFile],
     );
 
     // ── Step 2: Column Mapping ───────────────────────────────────
@@ -162,7 +167,17 @@ export default function CsvImport() {
 
         // Build mapped rows from CSV data + column mapping
         const mappedRows = csvData.map((row) => {
-            const mapped: { name: string; mold: string; manufacturer: string; condition: string; finish_type: string; purchase_price: string; estimated_value: string; notes: string;[key: string]: string } = {
+            const mapped: {
+                name: string;
+                mold: string;
+                manufacturer: string;
+                condition: string;
+                finish_type: string;
+                purchase_price: string;
+                estimated_value: string;
+                notes: string;
+                [key: string]: string;
+            } = {
                 name: "",
                 mold: "",
                 manufacturer: "",
@@ -195,7 +210,14 @@ export default function CsvImport() {
         const releaseTargets = dict.releases.map((r) => {
             const display = [r.mf, r.m ? `#${r.m}` : null, "—", r.n, r.mn].filter(Boolean).join(" ");
             const searchText = [r.n, r.mn, r.c, r.m, r.mf].filter(Boolean).join(" ");
-            return { id: r.i, display, searchText, manufacturer: r.mf ?? "Unknown", mold_name: r.mn ?? "Unknown", release_name: r.n };
+            return {
+                id: r.i,
+                display,
+                searchText,
+                manufacturer: r.mf ?? "Unknown",
+                mold_name: r.mn ?? "Unknown",
+                release_name: r.n,
+            };
         });
 
         const resinTargets = dict.resins.map((r) => {
@@ -208,22 +230,53 @@ export default function CsvImport() {
             const searchQuery = [row.name, row.mold, row.manufacturer].filter(Boolean).join(" ").trim();
 
             if (!searchQuery) {
-                return { csvRow: row as unknown as Record<string, string>, rowIndex: index, status: "no_match" as const, matches: [], selectedMatch: null, customName: row.name || `Import Row ${index + 1}` };
+                return {
+                    csvRow: row as unknown as Record<string, string>,
+                    rowIndex: index,
+                    status: "no_match" as const,
+                    matches: [],
+                    selectedMatch: null,
+                    customName: row.name || `Import Row ${index + 1}`,
+                };
             }
 
-            const releaseResults = fuzzysort.go(searchQuery, releaseTargets, { key: "searchText", limit: 3, threshold: -2000 });
-            const resinResults = fuzzysort.go(searchQuery, resinTargets, { key: "searchText", limit: 3, threshold: -2000 });
+            const releaseResults = fuzzysort.go(searchQuery, releaseTargets, {
+                key: "searchText",
+                limit: 3,
+                threshold: -2000,
+            });
+            const resinResults = fuzzysort.go(searchQuery, resinTargets, {
+                key: "searchText",
+                limit: 3,
+                threshold: -2000,
+            });
 
             const allMatches: ReferenceMatch[] = [];
             for (const res of releaseResults) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const obj = res.obj as any;
-                allMatches.push({ id: obj.id, score: res.score, display: obj.display, manufacturer: obj.manufacturer, mold_name: obj.mold_name, release_name: obj.release_name, table: "catalog_items" });
+                allMatches.push({
+                    id: obj.id,
+                    score: res.score,
+                    display: obj.display,
+                    manufacturer: obj.manufacturer,
+                    mold_name: obj.mold_name,
+                    release_name: obj.release_name,
+                    table: "catalog_items",
+                });
             }
             for (const res of resinResults) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const obj = res.obj as any;
-                allMatches.push({ id: obj.id, score: res.score, display: obj.display, manufacturer: obj.sculptor_alias, mold_name: obj.resin_name, release_name: obj.resin_name, table: "catalog_items" });
+                allMatches.push({
+                    id: obj.id,
+                    score: res.score,
+                    display: obj.display,
+                    manufacturer: obj.sculptor_alias,
+                    mold_name: obj.resin_name,
+                    release_name: obj.resin_name,
+                    table: "catalog_items",
+                });
             }
 
             allMatches.sort((a, b) => b.score - a.score);
@@ -231,7 +284,14 @@ export default function CsvImport() {
             const bestScore = topMatches[0]?.score ?? -Infinity;
             const status = bestScore >= -50 ? "perfect" : topMatches.length > 0 ? "review" : "no_match";
 
-            return { csvRow: row as unknown as Record<string, string>, rowIndex: index, status: status as "perfect" | "review" | "no_match", matches: topMatches, selectedMatch: status === "perfect" ? topMatches[0] : null, customName: row.name || `Import Row ${index + 1}` };
+            return {
+                csvRow: row as unknown as Record<string, string>,
+                rowIndex: index,
+                status: status as "perfect" | "review" | "no_match",
+                matches: topMatches,
+                selectedMatch: status === "perfect" ? topMatches[0] : null,
+                customName: row.name || `Import Row ${index + 1}`,
+            };
         });
 
         setIsMatching(false);
@@ -245,19 +305,17 @@ export default function CsvImport() {
             prev.map((r) =>
                 r.rowIndex === rowIndex
                     ? {
-                        ...r,
-                        selectedMatch: match,
-                        status: match ? ("perfect" as const) : ("no_match" as const),
-                    }
-                    : r
-            )
+                          ...r,
+                          selectedMatch: match,
+                          status: match ? ("perfect" as const) : ("no_match" as const),
+                      }
+                    : r,
+            ),
         );
     };
 
     const handleCustomNameChange = (rowIndex: number, name: string) => {
-        setMatchResults((prev) =>
-            prev.map((r) => (r.rowIndex === rowIndex ? { ...r, customName: name } : r))
-        );
+        setMatchResults((prev) => prev.map((r) => (r.rowIndex === rowIndex ? { ...r, customName: name } : r)));
     };
 
     const perfectCount = matchResults.filter((r) => r.status === "perfect").length;
@@ -292,7 +350,7 @@ export default function CsvImport() {
     return (
         <div className="mt-8">
             {/* Step Indicator */}
-            <div className="flex justify-center gap-12 mb-12 relative">
+            <div className="relative mb-12 flex justify-center gap-12">
                 {[
                     { num: 1, label: "Upload" },
                     { num: 2, label: "Map Columns" },
@@ -303,19 +361,21 @@ export default function CsvImport() {
                         key={s.num}
                         className={`csv-step-dot ${step >= s.num ? "active" : ""} ${step === s.num ? "current" : ""}`}
                     >
-                        <span className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border-[2px] border-edge text-muted font-bold text-sm transition-all">{s.num}</span>
-                        <span className="text-xs text-muted font-medium transition-all">{s.label}</span>
+                        <span className="bg-bg-card border-edge border-edge text-muted flex h-[36px] w-[36px] items-center justify-center rounded-full rounded-lg border border-[2px] p-12 text-sm font-bold shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            {s.num}
+                        </span>
+                        <span className="text-muted text-xs font-medium transition-all">{s.label}</span>
                     </div>
                 ))}
             </div>
 
             {/* ═══ Step 1: Upload ═══ */}
             {step === 1 && (
-                <div className="max-w-[900px] mx-auto animate-fade-in-up">
+                <div className="animate-fade-in-up mx-auto max-w-[900px]">
                     <h2>📄 Upload Your CSV</h2>
-                    <p className="text-base text-[var(--color-text-secondary)] mb-8 leading-[1.6]">
-                        Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against
-                        our 10,500+ reference database.
+                    <p className="mb-8 text-base leading-[1.6] text-[var(--color-text-secondary)]">
+                        Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against our
+                        10,500+ reference database.
                     </p>
 
                     <div
@@ -328,11 +388,11 @@ export default function CsvImport() {
                         onDrop={handleDrop}
                         onClick={() => fileInputRef.current?.click()}
                     >
-                        <div className="text-[3rem] mb-4 opacity-[0.7]">📁</div>
-                        <p className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card max-[480px]:rounded-[var(--radius-md)] cursor-pointer text-center transition-all-text">
+                        <div className="mb-4 text-[3rem] opacity-[0.7]">📁</div>
+                        <p className="border-edge bg-card transition-all-text flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-[var(--space-3xl)] text-center max-[480px]:rounded-[var(--radius-md)]">
                             Drag &amp; drop your CSV file here
                             <br />
-                            <span className="text-sm text-forest underline">or click to browse</span>
+                            <span className="text-forest text-sm underline">or click to browse</span>
                         </p>
                         <input
                             ref={fileInputRef}
@@ -344,10 +404,18 @@ export default function CsvImport() {
                         />
                     </div>
 
-                    {parseError && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{parseError}</div>}
+                    {parseError && (
+                        <div className="text-danger mt-4 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-6 py-4 text-sm">
+                            {parseError}
+                        </div>
+                    )}
 
                     <div className="mt-6 text-center">
-                        <a href="/templates/mhh_import_template.csv" download className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                        <a
+                            href="/templates/mhh_import_template.csv"
+                            download
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        >
                             📥 Download CSV Template
                         </a>
                     </div>
@@ -356,20 +424,27 @@ export default function CsvImport() {
 
             {/* ═══ Step 2: Column Mapping ═══ */}
             {step === 2 && (
-                <div className="max-w-[900px] mx-auto animate-fade-in-up">
+                <div className="animate-fade-in-up mx-auto max-w-[900px]">
                     <h2>🔗 Map Your Columns</h2>
-                    <p className="text-base text-[var(--color-text-secondary)] mb-8 leading-[1.6]">
-                        We detected <strong>{csvHeaders.length}</strong> columns and{" "}
-                        <strong>{csvData.length}</strong> rows. Map each column to a Model Horse Hub field.
+                    <p className="mb-8 text-base leading-[1.6] text-[var(--color-text-secondary)]">
+                        We detected <strong>{csvHeaders.length}</strong> columns and <strong>{csvData.length}</strong>{" "}
+                        rows. Map each column to a Model Horse Hub field.
                     </p>
 
-                    <div className="flex flex-col gap-4 mb-8">
+                    <div className="mb-8 flex flex-col gap-4">
                         {csvHeaders.map((header) => (
-                            <div key={header} className="flex items-center gap-4 py-4 px-6 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-md">
-                                <span className="flex-1 font-semibold text-sm text-ink min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{header}</span>
-                                <span className="text-muted text-[calc(var(--font-size-md)*var(--font-scale))] shrink-0">→</span>
+                            <div
+                                key={header}
+                                className="bg-bg-card border-edge border-edge flex items-center gap-4 rounded-lg rounded-md border p-12 px-6 py-4 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                            >
+                                <span className="text-ink min-w-0 flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
+                                    {header}
+                                </span>
+                                <span className="text-muted shrink-0 text-[calc(var(--font-size-md)*var(--font-scale))]">
+                                    →
+                                </span>
                                 <select
-                                    className="flex-1 py-2 px-4 bg-input border border-edge-input rounded-sm text-ink font-sans text-sm cursor-pointer"
+                                    className="bg-input border-edge-input text-ink flex-1 cursor-pointer rounded-sm border px-4 py-2 font-sans text-sm"
                                     value={columnMapping[header] || ""}
                                     onChange={(e) => handleMappingChange(header, e.target.value)}
                                     id={`mapping-${header.replace(/\s+/g, "-")}`}
@@ -387,8 +462,8 @@ export default function CsvImport() {
                     {/* Preview first 5 rows */}
                     <div className="mb-8">
                         <h3>Preview (first {Math.min(5, csvData.length)} rows)</h3>
-                        <div className="overflow-x-auto rounded-md border border-edge">
-                            <table className="bg-elevated py-2 px-4 text-left font-semibold text-ink border-b border-edge whitespace-nowrap">
+                        <div className="border-edge overflow-x-auto rounded-md border">
+                            <table className="bg-elevated text-ink border-edge border-b px-4 py-2 text-left font-semibold whitespace-nowrap">
                                 <thead>
                                     <tr>
                                         {csvHeaders.map((h) => (
@@ -409,12 +484,15 @@ export default function CsvImport() {
                         </div>
                     </div>
 
-                    <div className="flex justify-between items-center gap-4 pt-6 border-t border-edge">
-                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setStep(1)}>
+                    <div className="border-edge flex items-center justify-between gap-4 border-t pt-6">
+                        <button
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            onClick={() => setStep(1)}
+                        >
                             ← Back
                         </button>
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             onClick={proceedToMatch}
                             disabled={isMatching || !Object.values(columnMapping).some((v) => v === "name")}
                             id="proceed-to-match-btn"
@@ -430,7 +508,7 @@ export default function CsvImport() {
                     </div>
 
                     {!Object.values(columnMapping).some((v) => v === "name") && (
-                        <p className="text-sm text-warning text-center mt-4">
+                        <p className="text-warning mt-4 text-center text-sm">
                             ⚠️ You must map at least one column to <strong>Name</strong> to proceed.
                         </p>
                     )}
@@ -439,38 +517,40 @@ export default function CsvImport() {
 
             {/* ═══ Step 3: Reconciliation ═══ */}
             {step === 3 && (
-                <div className="max-w-[900px] mx-auto animate-fade-in-up">
+                <div className="animate-fade-in-up mx-auto max-w-[900px]">
                     <h2>🔍 Review Matches</h2>
-                    <p className="text-base text-[var(--color-text-secondary)] mb-8 leading-[1.6]">
-                        We matched your {matchResults.length} rows against the reference database. Review and
-                        confirm the matches below.
+                    <p className="mb-8 text-base leading-[1.6] text-[var(--color-text-secondary)]">
+                        We matched your {matchResults.length} rows against the reference database. Review and confirm
+                        the matches below.
                     </p>
 
                     {/* Match summary badges */}
-                    <div className="flex gap-4 mb-8 flex-wrap">
-                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border border-[rgba(92, 224, 160, 0.25)] perfect">✅ {perfectCount} perfect</span>
-                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border border-[rgba(92, 224, 160, 0.25)] review">⚠️ {reviewCount} review</span>
-                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border border-[rgba(92, 224, 160, 0.25)] no-match">❌ {noMatchCount} no match</span>
+                    <div className="mb-8 flex flex-wrap gap-4">
+                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border-[rgba(92, 224, 160, 0.25)] perfect border">
+                            ✅ {perfectCount} perfect
+                        </span>
+                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border-[rgba(92, 224, 160, 0.25)] review border">
+                            ⚠️ {reviewCount} review
+                        </span>
+                        <span className="bg-[rgba(92, 224, 160, 0.12)] text-success border-[rgba(92, 224, 160, 0.25)] no-match border">
+                            ❌ {noMatchCount} no match
+                        </span>
                     </div>
 
                     {/* Match cards */}
-                    <div className="flex flex-col gap-4 mb-8 max-h-[600px] overflow-y-auto pr-2">
+                    <div className="mb-8 flex max-h-[600px] flex-col gap-4 overflow-y-auto pr-2">
                         {matchResults.map((result) => (
                             <div
                                 key={result.rowIndex}
                                 className={`csv-match-card ${result.status}`}
                                 id={`match-row-${result.rowIndex}`}
                             >
-                                <div className="p-6 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all rounded-md border-l-[4px] border-edge transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                                    <span className="text-xl shrink-0">
-                                        {result.status === "perfect"
-                                            ? "✅"
-                                            : result.status === "review"
-                                                ? "⚠️"
-                                                : "❌"}
+                                <div className="bg-bg-card border-edge border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg rounded-md border border-b border-l-[4px] p-6 p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                                    <span className="shrink-0 text-xl">
+                                        {result.status === "perfect" ? "✅" : result.status === "review" ? "⚠️" : "❌"}
                                     </span>
                                     <input
-                                        className="flex-1 py-2 px-4 bg-input border border-edge-input rounded-sm text-ink font-sans text-base font-semibold"
+                                        className="bg-input border-edge-input text-ink flex-1 rounded-sm border px-4 py-2 font-sans text-base font-semibold"
                                         value={result.customName}
                                         onChange={(e) => handleCustomNameChange(result.rowIndex, e.target.value)}
                                         placeholder="Horse name..."
@@ -478,12 +558,15 @@ export default function CsvImport() {
                                 </div>
 
                                 {/* CSV row preview */}
-                                <div className="flex flex-wrap gap-1 mb-4">
+                                <div className="mb-4 flex flex-wrap gap-1">
                                     {Object.entries(result.csvRow)
                                         .filter(([, v]) => v)
                                         .slice(0, 4)
                                         .map(([k, v]) => (
-                                            <span key={k} className="py-[2px] px-[8px] bg-elevated rounded-sm text-xs text-muted">
+                                            <span
+                                                key={k}
+                                                className="bg-elevated text-muted rounded-sm px-[8px] py-[2px] text-xs"
+                                            >
                                                 {k}: {v}
                                             </span>
                                         ))}
@@ -493,37 +576,42 @@ export default function CsvImport() {
                                 {result.matches.length > 0 && (
                                     <div className="flex flex-col gap-2">
                                         {result.matches.map((match) => (
-                                            <label key={match.id} className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors">
+                                            <label
+                                                key={match.id}
+                                                className="flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2 transition-colors"
+                                            >
                                                 <input
                                                     type="radio"
                                                     name={`match-${result.rowIndex}`}
                                                     checked={result.selectedMatch?.id === match.id}
                                                     onChange={() => handleSelectMatch(result.rowIndex, match)}
                                                 />
-                                                <span className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors-text">
-                                                    <span className="text-sm text-ink">{match.display}</span>
-                                                    <span className="text-xs text-muted tabular-nums">
+                                                <span className="transition-colors-text flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2">
+                                                    <span className="text-ink text-sm">{match.display}</span>
+                                                    <span className="text-muted text-xs tabular-nums">
                                                         Score: {match.score > 0 ? `+${match.score}` : match.score}
                                                     </span>
                                                 </span>
                                             </label>
                                         ))}
-                                        <label className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors">
+                                        <label className="flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2 transition-colors">
                                             <input
                                                 type="radio"
                                                 name={`match-${result.rowIndex}`}
                                                 checked={result.selectedMatch === null}
                                                 onChange={() => handleSelectMatch(result.rowIndex, null)}
                                             />
-                                            <span className="flex items-start gap-2 py-2 px-4 rounded-sm cursor-pointer transition-colors-text">
-                                                <span className="text-sm text-ink">Custom / Unknown — no reference link</span>
+                                            <span className="transition-colors-text flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2">
+                                                <span className="text-ink text-sm">
+                                                    Custom / Unknown — no reference link
+                                                </span>
                                             </span>
                                         </label>
                                     </div>
                                 )}
 
                                 {result.matches.length === 0 && (
-                                    <p className="text-sm text-muted italic">
+                                    <p className="text-muted text-sm italic">
                                         No matches found in the reference database. This model will be imported as
                                         custom/unknown.
                                     </p>
@@ -532,12 +620,18 @@ export default function CsvImport() {
                         ))}
                     </div>
 
-                    <div className="flex justify-between items-center gap-4 pt-6 border-t border-edge">
-                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setStep(2)}>
+                    <div className="border-edge flex items-center justify-between gap-4 border-t pt-6">
+                        <button
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            onClick={() => setStep(2)}
+                        >
                             ← Back
                         </button>
-                        <div className="gap-2 items-end" style={{ display: "flex", flexDirection: "column" }}>
-                            <label className="gap-2 text-sm" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
+                        <div className="items-end gap-2" style={{ display: "flex", flexDirection: "column" }}>
+                            <label
+                                className="gap-2 text-sm"
+                                style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+                            >
                                 <input
                                     type="checkbox"
                                     checked={publishToFeed}
@@ -545,11 +639,11 @@ export default function CsvImport() {
                                 />
                                 <span>Publish imported models to the community feed</span>
                             </label>
-                            <span className="block mt-1 text-xs text-muted" style={{ textAlign: "right" }}>
+                            <span className="text-muted mt-1 block text-xs" style={{ textAlign: "right" }}>
                                 Models without photos will be excluded regardless.
                             </span>
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                 onClick={handleImport}
                                 disabled={isImporting}
                                 id="import-btn"
@@ -569,21 +663,24 @@ export default function CsvImport() {
 
             {/* ═══ Step 4: Import Result ═══ */}
             {step === 4 && (
-                <div className="max-w-[900px] mx-auto animate-fade-in-up">
+                <div className="animate-fade-in-up mx-auto max-w-[900px]">
                     {importResult?.success ? (
                         <div className="text-success">
                             <div className="csv-success-icon">🎉</div>
                             <h2>Import Complete!</h2>
-                            <p className="text-[calc(var(--font-size-md)*var(--font-scale))] text-ink-light mb-8">
+                            <p className="text-ink-light mb-8 text-[calc(var(--font-size-md)*var(--font-scale))]">
                                 Successfully imported <strong>{importResult.imported}</strong> model
                                 {importResult.imported !== 1 ? "s" : ""} to your stable.
                             </p>
-                            <div className="flex justify-center gap-4 flex-wrap">
-                                <a href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[52px] py-4 px-12 text-[calc(var(--font-size-md)*var(--font-scale))] rounded-lg">
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <a
+                                    href="/dashboard"
+                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[52px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-lg rounded-md border border-0 border-[transparent] px-8 px-12 py-2 py-4 font-sans text-base text-[calc(var(--font-size-md)*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                >
                                     🐴 View Your Stable
                                 </a>
                                 <button
-                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                                     onClick={() => {
                                         setStep(1);
                                         setCsvData([]);
@@ -598,11 +695,14 @@ export default function CsvImport() {
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-[var(--space-3xl)] px-8 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg">
-                            <div className="text-[4rem] mb-6">❌</div>
+                        <div className="bg-bg-card border-edge border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            <div className="mb-6 text-[4rem]">❌</div>
                             <h2>Import Failed</h2>
                             <p>{importResult?.error || "An unexpected error occurred."}</p>
-                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={() => setStep(3)}>
+                            <button
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                onClick={() => setStep(3)}
+                            >
                                 ← Back to Review
                             </button>
                         </div>

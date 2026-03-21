@@ -52,7 +52,9 @@ export default function ExpertJudgingPanel({
     const router = useRouter();
     const [placings, setPlacings] = useState<Record<string, string>>(() => {
         const init: Record<string, string> = {};
-        entries.forEach(e => { init[e.id] = e.placing || ""; });
+        entries.forEach((e) => {
+            init[e.id] = e.placing || "";
+        });
         return init;
     });
     const [notes, setNotes] = useState<Record<string, string>>({});
@@ -63,15 +65,13 @@ export default function ExpertJudgingPanel({
     const [selectedClassId, setSelectedClassId] = useState<string>("all");
 
     // Filter entries by selected class
-    const filteredEntries = selectedClassId === "all"
-        ? entries
-        : entries.filter(e => e.classId === selectedClassId);
+    const filteredEntries = selectedClassId === "all" ? entries : entries.filter((e) => e.classId === selectedClassId);
 
     // Find current class info
-    const currentClass = classes?.find(c => c.id === selectedClassId);
+    const currentClass = classes?.find((c) => c.id === selectedClassId);
 
     const toggleNotes = (entryId: string) => {
-        setExpandedNotes(prev => {
+        setExpandedNotes((prev) => {
             const next = new Set(prev);
             if (next.has(entryId)) next.delete(entryId);
             else next.add(entryId);
@@ -128,38 +128,38 @@ export default function ExpertJudgingPanel({
     const bgColor = overrideMode ? "rgba(239, 68, 68, 0.05)" : "rgba(245, 158, 11, 0.05)";
 
     return (
-        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
-            marginBottom: "var(--space-lg)",
-            border: `1px solid ${borderColor}`,
-            background: bgColor,
-        }}>
+        <div
+            className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+            style={{
+                marginBottom: "var(--space-lg)",
+                border: `1px solid ${borderColor}`,
+                background: bgColor,
+            }}
+        >
             <h3 className="mb-4 gap-2" style={{ display: "flex", alignItems: "center" }}>
                 {overrideMode ? "⚠️" : "🏅"}{" "}
-                <span className="text-forest">
-                    {overrideMode ? "Override Final Placings" : "Expert Judging Panel"}
-                </span>
+                <span className="text-forest">{overrideMode ? "Override Final Placings" : "Expert Judging Panel"}</span>
             </h3>
-            <p className="text-muted mb-4 text-sm" >
+            <p className="text-muted mb-4 text-sm">
                 {overrideMode
                     ? "Adjust placings after the show has been judged or closed. Changes update show records with an audit trail."
-                    : "Assign placings to each entry below. Only placed entries will appear in results and auto-generate show records."
-                }
+                    : "Assign placings to each entry below. Only placed entries will appear in results and auto-generate show records."}
             </p>
 
             {/* Class Filter */}
             {classes && classes.length > 0 && (
-                <div className="mb-4" >
+                <div className="mb-4">
                     <select
                         className="form-input"
                         value={selectedClassId}
-                        onChange={e => setSelectedClassId(e.target.value)}
+                        onChange={(e) => setSelectedClassId(e.target.value)}
                         style={{ maxWidth: 400 }}
                     >
                         <option value="all">All Entries ({entries.length})</option>
                         {Array.from(divisionGroups.entries()).map(([divName, items]) => (
                             <optgroup key={divName} label={divName}>
-                                {items.map(c => {
-                                    const count = entries.filter(e => e.classId === c.id).length;
+                                {items.map((c) => {
+                                    const count = entries.filter((e) => e.classId === c.id).length;
                                     return (
                                         <option key={c.id} value={c.id}>
                                             {c.name} ({count})
@@ -170,12 +170,15 @@ export default function ExpertJudgingPanel({
                         ))}
                     </select>
                     {currentClass && (
-                        <div style={{
-                            marginTop: "var(--space-xs)",
-                            fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
-                            color: "var(--color-text-muted)",
-                        }}>
-                            Currently judging: <strong>{currentClass.divisionName}</strong> › <strong>{currentClass.name}</strong>
+                        <div
+                            style={{
+                                marginTop: "var(--space-xs)",
+                                fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                                color: "var(--color-text-muted)",
+                            }}
+                        >
+                            Currently judging: <strong>{currentClass.divisionName}</strong> ›{" "}
+                            <strong>{currentClass.name}</strong>
                         </div>
                     )}
                 </div>
@@ -187,29 +190,34 @@ export default function ExpertJudgingPanel({
                         No entries {selectedClassId !== "all" ? "in this class" : "to judge"}.
                     </div>
                 ) : (
-                    filteredEntries.map(entry => (
+                    filteredEntries.map((entry) => (
                         <div key={entry.id}>
-                            <div style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "var(--space-md)",
-                                padding: "var(--space-sm) var(--space-md)",
-                                background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.5)",
-                                borderRadius: expandedNotes.has(entry.id)
-                                    ? "var(--radius-sm) var(--radius-sm) 0 0"
-                                    : "var(--radius-sm)",
-                            }}>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "var(--space-md)",
+                                    padding: "var(--space-sm) var(--space-md)",
+                                    background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.5)",
+                                    borderRadius: expandedNotes.has(entry.id)
+                                        ? "var(--radius-sm) var(--radius-sm) 0 0"
+                                        : "var(--radius-sm)",
+                                }}
+                            >
                                 {entry.thumbnailUrl && (
-                                    <div className="w-[40] h-[40] rounded-sm shrink-0" style={{ overflow: "hidden" }}>
+                                    <div className="h-[40] w-[40] shrink-0 rounded-sm" style={{ overflow: "hidden" }}>
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={entry.thumbnailUrl} alt={entry.horseName} className="w-full h-full" style={{ objectFit: "cover" }} />
+                                        <img
+                                            src={entry.thumbnailUrl}
+                                            alt={entry.horseName}
+                                            className="h-full w-full"
+                                            style={{ objectFit: "cover" }}
+                                        />
                                     </div>
                                 )}
-                                <div className="flex-1 min-w-0" >
-                                    <div className="font-semibold text-sm" >
-                                        🐴 {entry.horseName}
-                                    </div>
-                                    <div className="text-muted text-[calc(0.75rem*var(--font-scale))]" >
+                                <div className="min-w-0 flex-1">
+                                    <div className="text-sm font-semibold">🐴 {entry.horseName}</div>
+                                    <div className="text-muted text-[calc(0.75rem*var(--font-scale))]">
                                         by @{entry.ownerAlias}
                                     </div>
                                 </div>
@@ -218,9 +226,15 @@ export default function ExpertJudgingPanel({
                                     onClick={() => toggleNotes(entry.id)}
                                     title="Judge notes"
                                     style={{
-                                        background: "none", border: "none", cursor: "pointer",
-                                        color: notes[entry.id] ? "var(--color-accent-primary)" : "var(--color-text-muted)",
-                                        fontSize: "1rem", padding: "4px", flexShrink: 0,
+                                        background: "none",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        color: notes[entry.id]
+                                            ? "var(--color-accent-primary)"
+                                            : "var(--color-text-muted)",
+                                        fontSize: "1rem",
+                                        padding: "4px",
+                                        flexShrink: 0,
                                     }}
                                 >
                                     📝
@@ -228,26 +242,30 @@ export default function ExpertJudgingPanel({
                                 <select
                                     className="form-input"
                                     value={placings[entry.id] || ""}
-                                    onChange={e => setPlacings(prev => ({ ...prev, [entry.id]: e.target.value }))}
+                                    onChange={(e) => setPlacings((prev) => ({ ...prev, [entry.id]: e.target.value }))}
                                     style={{ width: 140, flexShrink: 0 }}
                                 >
-                                    {PLACING_OPTIONS.map(opt => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    {PLACING_OPTIONS.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
                             {/* Collapsible Judge Notes */}
                             {expandedNotes.has(entry.id) && (
-                                <div style={{
-                                    padding: "var(--space-sm) var(--space-md)",
-                                    background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.3)",
-                                    borderRadius: "0 0 var(--radius-sm) var(--radius-sm)",
-                                    borderTop: "1px solid rgba(255,255,255,0.05)",
-                                }}>
+                                <div
+                                    style={{
+                                        padding: "var(--space-sm) var(--space-md)",
+                                        background: "rgba(var(--color-surface-rgb, 30, 30, 30), 0.3)",
+                                        borderRadius: "0 0 var(--radius-sm) var(--radius-sm)",
+                                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                                    }}
+                                >
                                     <textarea
-                                        className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
+                                        className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
                                         value={notes[entry.id] || ""}
-                                        onChange={e => setNotes(prev => ({ ...prev, [entry.id]: e.target.value }))}
+                                        onChange={(e) => setNotes((prev) => ({ ...prev, [entry.id]: e.target.value }))}
                                         placeholder="Private judge notes (critique, reasoning)…"
                                         rows={2}
                                         style={{ fontSize: "calc(0.8rem * var(--font-scale))", resize: "vertical" }}
@@ -261,19 +279,24 @@ export default function ExpertJudgingPanel({
 
             {error && <div className="comment-error mt-2">{error}</div>}
             {success && (
-                <div style={{
-                    marginTop: "var(--space-sm)",
-                    padding: "var(--space-xs) var(--space-sm)",
-                    background: "rgba(34, 197, 94, 0.15)",
-                    color: "#22c55e",
-                    borderRadius: "var(--radius-sm)",
-                    fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
-                }}>
-                    ✅ Placings saved! {overrideMode ? "Show records updated with audit trail." : "Show records auto-generated for placed entries."}
+                <div
+                    style={{
+                        marginTop: "var(--space-sm)",
+                        padding: "var(--space-xs) var(--space-sm)",
+                        background: "rgba(34, 197, 94, 0.15)",
+                        color: "#22c55e",
+                        borderRadius: "var(--radius-sm)",
+                        fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                    }}
+                >
+                    ✅ Placings saved!{" "}
+                    {overrideMode
+                        ? "Show records updated with audit trail."
+                        : "Show records auto-generated for placed entries."}
                 </div>
             )}
 
-            <div className="gap-2 mt-4" style={{ display: "flex" }}>
+            <div className="mt-4 gap-2" style={{ display: "flex" }}>
                 <button
                     className={`btn ${overrideMode ? "btn-ghost" : "btn-primary"}`}
                     onClick={handleSave}

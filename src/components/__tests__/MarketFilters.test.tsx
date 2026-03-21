@@ -62,9 +62,7 @@ describe("MarketFilters", () => {
 
         await user.click(screen.getByText("Plastic Molds"));
 
-        expect(mockPush).toHaveBeenCalledWith(
-            expect.stringContaining("type=plastic_mold")
-        );
+        expect(mockPush).toHaveBeenCalledWith(expect.stringContaining("type=plastic_mold"));
     });
 
     it("removes type param when 'All Types' is clicked", async () => {
@@ -83,9 +81,7 @@ describe("MarketFilters", () => {
         const finishSelect = screen.getByDisplayValue("All Finishes");
         await user.selectOptions(finishSelect, "Custom");
 
-        expect(mockPush).toHaveBeenCalledWith(
-            expect.stringContaining("finish=Custom")
-        );
+        expect(mockPush).toHaveBeenCalledWith(expect.stringContaining("finish=Custom"));
     });
 
     it("changes sort via dropdown", async () => {
@@ -95,9 +91,7 @@ describe("MarketFilters", () => {
         const sortSelect = screen.getByDisplayValue("Most Traded");
         await user.selectOptions(sortSelect, "average_price:desc");
 
-        expect(mockPush).toHaveBeenCalledWith(
-            expect.stringContaining("sort=average_price")
-        );
+        expect(mockPush).toHaveBeenCalledWith(expect.stringContaining("sort=average_price"));
     });
 
     it("has correct accessibility IDs on controls", () => {

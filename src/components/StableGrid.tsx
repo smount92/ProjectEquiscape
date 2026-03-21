@@ -23,10 +23,14 @@ interface HorseCardData {
 
 function getFinishBadgeClass(finishType: string): string {
     switch (finishType) {
-        case "OF": return "of";
-        case "Custom": return "custom";
-        case "Artist Resin": return "resin";
-        default: return "";
+        case "OF":
+            return "of";
+        case "Custom":
+            return "custom";
+        case "Artist Resin":
+            return "resin";
+        default:
+            return "";
     }
 }
 
@@ -59,12 +63,13 @@ export default function StableGrid({
         let filtered = horseCards;
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase().trim();
-            filtered = horseCards.filter((horse) =>
-                horse.customName.toLowerCase().includes(q) ||
-                (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
-                (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
-                (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
-                horse.refName.toLowerCase().includes(q)
+            filtered = horseCards.filter(
+                (horse) =>
+                    horse.customName.toLowerCase().includes(q) ||
+                    (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
+                    (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
+                    (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
+                    horse.refName.toLowerCase().includes(q),
             );
         }
 
@@ -90,8 +95,8 @@ export default function StableGrid({
     return (
         <>
             {horseCards.length > 0 && (
-                <div className="gap-4 mb-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                    <div className="flex-1 min-w-[200px]" >
+                <div className="mb-4 gap-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                    <div className="min-w-[200px] flex-1">
                         <SearchBar
                             value={searchQuery}
                             onChange={setSearchQuery}
@@ -103,7 +108,11 @@ export default function StableGrid({
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                         className="form-input"
-                        style={{ width: "auto", minWidth: "160px", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
+                        style={{
+                            width: "auto",
+                            minWidth: "160px",
+                            fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                        }}
                         id="stable-sort"
                         aria-label="Sort your stable"
                     >
@@ -117,7 +126,7 @@ export default function StableGrid({
             )}
 
             {searchQuery.trim() && (
-                <div className="text-sm text-muted mb-6 pl-1">
+                <div className="text-muted mb-6 pl-1 text-sm">
                     {filteredCards.length === 0
                         ? "No models match your search"
                         : `Showing ${filteredCards.length} of ${horseCards.length} models`}
@@ -125,43 +134,53 @@ export default function StableGrid({
             )}
 
             {filteredCards.length === 0 && !searchQuery.trim() ? (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
-                    <div className="text-center py-[var(--space-3xl)] px-8-icon">🏠</div>
+                <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🏠</div>
                     <h2>Your Stable is Empty</h2>
                     <p>You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
-                    <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="add-first-horse">
+                    <Link
+                        href="/add-horse"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        id="add-first-horse"
+                    >
                         🐴 Add Your First Horse
                     </Link>
                 </div>
             ) : filteredCards.length === 0 && searchQuery.trim() ? (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
-                    <div className="text-center py-[var(--space-3xl)] px-8-icon">🔍</div>
+                <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🔍</div>
                     <h2>No Results</h2>
                     <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6">
+                <div className="grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] grid gap-6">
                     {filteredCards.map((horse) => {
                         const isSelected = selectedIds.has(horse.id);
                         const CardWrapper = selectMode ? "div" : Link;
                         const wrapperProps = selectMode
-                            ? { onClick: () => onToggleSelect?.(horse.id), className: `horse-card ${isSelected ? "horse-card-selected" : ""}`, id: `horse-card-${horse.id}` }
+                            ? {
+                                  onClick: () => onToggleSelect?.(horse.id),
+                                  className: `horse-card ${isSelected ? "horse-card-selected" : ""}`,
+                                  id: `horse-card-${horse.id}`,
+                              }
                             : { href: `/stable/${horse.id}`, className: "horse-card", id: `horse-card-${horse.id}` };
                         return (
                             // @ts-expect-error — dynamic component type
                             <CardWrapper key={horse.id} {...wrapperProps}>
                                 {selectMode && (
-                                    <div className="absolute top-[8px] left-[8px] z-[5] pointer-events-none">
+                                    <div className="pointer-events-none absolute top-[8px] left-[8px] z-[5]">
                                         <input type="checkbox" checked={isSelected} readOnly />
                                     </div>
                                 )}
-                                <div className="w-full h-full object-contain transition-transform">
+                                <div className="h-full w-full object-contain transition-transform">
                                     {horse.thumbnailUrl ? (
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
                                     ) : (
-                                        <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
-                                            <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
+                                        <div className="horse-bg-card border-edge transition-all-placeholder rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                            <span className="horse-bg-card border-edge transition-all-placeholder-icon rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                                🐴
+                                            </span>
                                             <span>No photo</span>
                                         </div>
                                     )}
@@ -171,36 +190,50 @@ export default function StableGrid({
                                         </span>
                                     )}
                                     {horse.assetCategory && horse.assetCategory !== "model" && (
-                                        <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-badge category-badge bg-[rgba(124,109,240,0.85)] text-white">
-                                            {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
+                                        <span className="horse-bg-card border-edge transition-all-badge category-badge rounded-lg border bg-[rgba(124,109,240,0.85)] p-12 text-white shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                            {horse.assetCategory === "tack"
+                                                ? "🏇 Tack"
+                                                : horse.assetCategory === "prop"
+                                                  ? "🌲 Prop"
+                                                  : "🎭 Diorama"}
                                         </span>
                                     )}
                                     {horse.tradeStatus === "For Sale" && (
-                                        <span className="trade-badge bg-[rgba(34,197,94,0.85)] text-white border border-[rgba(34,197,94,0.5)]">💲 For Sale</span>
+                                        <span className="trade-badge border border-[rgba(34,197,94,0.5)] bg-[rgba(34,197,94,0.85)] text-white">
+                                            💲 For Sale
+                                        </span>
                                     )}
                                     {horse.tradeStatus === "Open to Offers" && (
-                                        <span className="trade-badge bg-[rgba(59,130,246,0.85)] text-white border border-[rgba(59,130,246,0.5)]">🤝 Open to Offers</span>
+                                        <span className="trade-badge border border-[rgba(59,130,246,0.5)] bg-[rgba(59,130,246,0.85)] text-white">
+                                            🤝 Open to Offers
+                                        </span>
                                     )}
                                 </div>
-                                <div className="py-4 px-6">
-                                    <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-name">{horse.customName}</div>
-                                    <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis">{horse.refName}</div>
+                                <div className="px-6 py-4">
+                                    <div className="horse-bg-card border-edge transition-all-name rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                        {horse.customName}
+                                    </div>
+                                    <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
+                                        {horse.refName}
+                                    </div>
                                     {horse.releaseLine && (
-                                        <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis text-[calc(0.7rem*var(--font-scale))] opacity-[0.7] mt-[2px]">
+                                        <div className="mt-[2px] overflow-hidden text-sm text-[calc(0.7rem*var(--font-scale))] text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-[0.7]">
                                             🎨 {horse.releaseLine}
                                         </div>
                                     )}
                                     {horse.sculptor && (
-                                        <div className="text-sm text-[var(--color-text-secondary)] whitespace-nowrap overflow-hidden text-ellipsis text-[calc(0.7rem*var(--font-scale))] opacity-[0.7] mt-[2px]">
+                                        <div className="mt-[2px] overflow-hidden text-sm text-[calc(0.7rem*var(--font-scale))] text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-[0.7]">
                                             ✂️ {horse.sculptor}
                                         </div>
                                     )}
-                                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-edge text-xs text-muted">
+                                    <div className="border-edge text-muted mt-2 flex items-center justify-between border-t pt-2 text-xs">
                                         {horse.conditionGrade && <span>{horse.conditionGrade}</span>}
                                         <span>{formatDate(horse.createdAt)}</span>
                                     </div>
                                     {horse.collectionName && (
-                                        <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-collection">📁 {horse.collectionName}</div>
+                                        <div className="horse-bg-card border-edge transition-all-collection rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                                            📁 {horse.collectionName}
+                                        </div>
                                     )}
                                 </div>
                             </CardWrapper>

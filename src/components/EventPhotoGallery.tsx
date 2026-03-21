@@ -68,14 +68,17 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
                 if (result.success) {
                     // Optimistic — add with object URL for immediate preview
                     const previewUrl = URL.createObjectURL(file);
-                    setPhotos(prev => [{
-                        id: safeUUID(),
-                        imageUrl: previewUrl,
-                        caption: null,
-                        createdAt: new Date().toISOString(),
-                        userId: currentUserId,
-                        userAlias: "You",
-                    }, ...prev]);
+                    setPhotos((prev) => [
+                        {
+                            id: safeUUID(),
+                            imageUrl: previewUrl,
+                            caption: null,
+                            createdAt: new Date().toISOString(),
+                            userId: currentUserId,
+                            userAlias: "You",
+                        },
+                        ...prev,
+                    ]);
                     router.refresh();
                 } else {
                     setError(result.error || "Failed to save photo.");
@@ -94,17 +97,20 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
         startTransition(async () => {
             const result = await deleteEventMedia(photoId);
             if (result.success) {
-                setPhotos(prev => prev.filter(p => p.id !== photoId));
+                setPhotos((prev) => prev.filter((p) => p.id !== photoId));
                 router.refresh();
             }
         });
     }
 
     return (
-        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
-            <div className="justify-between mb-4" style={{ display: "flex", alignItems: "center" }}>
+        <div className="glass-bg-card border-edge mt-6 rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+            <div className="mb-4 justify-between" style={{ display: "flex", alignItems: "center" }}>
                 <h3>📸 Event Photos ({photos.length})</h3>
-                <label className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" style={{ cursor: "pointer" }}>
+                <label
+                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    style={{ cursor: "pointer" }}
+                >
                     {uploading ? "Uploading…" : "+ Add Photo"}
                     <input
                         ref={fileInputRef}
@@ -118,13 +124,13 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
                 </label>
             </div>
 
-            {error && <p className="text-[var(--color-error)] text-[0.85rem] mb-2" >{error}</p>}
+            {error && <p className="mb-2 text-[0.85rem] text-[var(--color-error)]">{error}</p>}
 
             {photos.length === 0 ? (
-                <p className="text-muted" >No photos yet — share yours!</p>
+                <p className="text-muted">No photos yet — share yours!</p>
             ) : (
-                <div className="grid grid-cols-[repeat(auto-fill, minmax(140px, 1fr))] gap-2 mt-2">
-                    {photos.map(p => (
+                <div className="grid-cols-[repeat(auto-fill, minmax(140px, 1fr))] mt-2 grid gap-2">
+                    {photos.map((p) => (
                         <div key={p.id} style={{ position: "relative" }}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={p.imageUrl} alt={p.caption || "Event photo"} loading="lazy" />
@@ -132,11 +138,15 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
                                 <button
                                     onClick={() => handleDelete(p.id)}
                                     disabled={isPending}
-                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
                                     style={{
-                                        position: "absolute", top: 4, right: 4,
-                                        background: "rgba(0,0,0,0.6)", color: "white",
-                                        borderRadius: "var(--radius-pill)", padding: "2px 6px",
+                                        position: "absolute",
+                                        top: 4,
+                                        right: 4,
+                                        background: "rgba(0,0,0,0.6)",
+                                        color: "white",
+                                        borderRadius: "var(--radius-pill)",
+                                        padding: "2px 6px",
                                         fontSize: "0.7rem",
                                     }}
                                 >
@@ -144,12 +154,19 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
                                 </button>
                             )}
                             {p.caption && (
-                                <div style={{
-                                    position: "absolute", bottom: 0, left: 0, right: 0,
-                                    background: "rgba(0,0,0,0.5)", color: "white",
-                                    fontSize: "0.7rem", padding: "2px 6px",
-                                    borderRadius: "0 0 var(--radius-md) var(--radius-md)",
-                                }}>
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        background: "rgba(0,0,0,0.5)",
+                                        color: "white",
+                                        fontSize: "0.7rem",
+                                        padding: "2px 6px",
+                                        borderRadius: "0 0 var(--radius-md) var(--radius-md)",
+                                    }}
+                                >
                                     {p.caption}
                                 </div>
                             )}

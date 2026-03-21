@@ -13,7 +13,9 @@ export const metadata = {
 
 export default async function ShowPlannerPage() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
     const showStrings = await getShowStrings();
@@ -31,16 +33,24 @@ export default async function ShowPlannerPage() {
     }));
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             <div className="page-content">
-                <div className="justify-between gap-4 mb-8" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                <div
+                    className="mb-8 justify-between gap-4"
+                    style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}
+                >
                     <div>
                         <h1>📋 Show String Planner</h1>
-                        <p className="text-muted mt-1" >
+                        <p className="text-muted mt-1">
                             Plan your entries, detect conflicts, and convert results into records.
                         </p>
                     </div>
-                    <Link href="/shows" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Back to Shows</Link>
+                    <Link
+                        href="/shows"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
+                        ← Back to Shows
+                    </Link>
                 </div>
 
                 <ShowStringManager showStrings={showStrings} horses={horseList} />

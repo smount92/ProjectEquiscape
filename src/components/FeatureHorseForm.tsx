@@ -36,9 +36,9 @@ export default function FeatureHorseForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-[500px]">
+        <form onSubmit={handleSubmit} className="flex max-w-[500px] flex-col gap-4">
             <div className="mb-6">
-                <label className="block text-sm font-semibold text-ink mb-1">Horse ID (UUID)</label>
+                <label className="text-ink mb-1 block text-sm font-semibold">Horse ID (UUID)</label>
                 <input
                     type="text"
                     className="form-input"
@@ -49,7 +49,7 @@ export default function FeatureHorseForm() {
                 />
             </div>
             <div className="mb-6">
-                <label className="block text-sm font-semibold text-ink mb-1">Title</label>
+                <label className="text-ink mb-1 block text-sm font-semibold">Title</label>
                 <input
                     type="text"
                     className="form-input"
@@ -59,7 +59,7 @@ export default function FeatureHorseForm() {
                 />
             </div>
             <div className="mb-6">
-                <label className="block text-sm font-semibold text-ink mb-1">Description (optional)</label>
+                <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
                 <textarea
                     className="form-input"
                     value={description}
@@ -69,19 +69,19 @@ export default function FeatureHorseForm() {
                 />
             </div>
 
-            {status === "error" && errorMsg && (
-                <div className="comment-error mb-4">
-                    {errorMsg}
-                </div>
-            )}
+            {status === "error" && errorMsg && <div className="comment-error mb-4">{errorMsg}</div>}
 
             {status === "saved" && (
-                <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))] mb-4">
+                <div className="mb-4 rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] text-[#22C55E]">
                     ✅ Horse featured successfully!
                 </div>
             )}
 
-            <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={status === "saving"}>
+            <button
+                type="submit"
+                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                disabled={status === "saving"}
+            >
                 {status === "saving" ? "Featuring…" : "🌟 Feature This Horse"}
             </button>
         </form>

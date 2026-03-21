@@ -9,7 +9,18 @@ import type { CatalogItem } from "@/app/actions/reference";
 import { createClient } from "@/lib/supabase/client";
 
 const FINISH_TYPES = ["OF", "Custom", "Artist Resin"];
-const CONDITION_GRADES = ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Body Quality", "Fair", "Poor", "Play Grade", "Not Graded"];
+const CONDITION_GRADES = [
+    "Mint",
+    "Near Mint",
+    "Excellent",
+    "Very Good",
+    "Good",
+    "Body Quality",
+    "Fair",
+    "Poor",
+    "Play Grade",
+    "Not Graded",
+];
 
 interface RecentAdd {
     id: string;
@@ -35,7 +46,9 @@ export default function QuickAddPage() {
     useEffect(() => {
         async function loadCollections() {
             const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
             if (!user) return;
             const { data } = await supabase
                 .from("user_collections")
@@ -64,13 +77,18 @@ export default function QuickAddPage() {
                 return;
             }
 
-            setRecentAdds(prev => [{
-                id: result.horseId!,
-                name: result.horseName!,
-                finish: finishType,
-                condition: conditionGrade,
-                timestamp: Date.now(),
-            }, ...prev].slice(0, 10));
+            setRecentAdds((prev) =>
+                [
+                    {
+                        id: result.horseId!,
+                        name: result.horseName!,
+                        finish: finishType,
+                        condition: conditionGrade,
+                        timestamp: Date.now(),
+                    },
+                    ...prev,
+                ].slice(0, 10),
+            );
 
             // Don't clear catalog selection — supports "Duplicate as New"
         } catch {
@@ -95,17 +113,24 @@ export default function QuickAddPage() {
     };
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="animate-fade-in-up max-w-[640] mx-auto">
-                <div className="justify-between mb-6" style={{ display: "flex", alignItems: "center" }}>
-                    <h1>⚡ <span className="text-forest">Quick Add</span></h1>
-                    <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Back</Link>
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+            <div className="animate-fade-in-up mx-auto max-w-[640]">
+                <div className="mb-6 justify-between" style={{ display: "flex", alignItems: "center" }}>
+                    <h1>
+                        ⚡ <span className="text-forest">Quick Add</span>
+                    </h1>
+                    <Link
+                        href="/dashboard"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
+                        ← Back
+                    </Link>
                 </div>
 
-                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-8">
+                <div className="glass-bg-card border-edge rounded-lg border p-8 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                     {/* Catalog Search */}
-                    <div className="mb-6" >
-                        <label className="block text-sm font-semibold text-ink mb-1">🔍 Search Catalog</label>
+                    <div className="mb-6">
+                        <label className="text-ink mb-1 block text-sm font-semibold">🔍 Search Catalog</label>
                         <UnifiedReferenceSearch
                             selectedCatalogId={selectedCatalog?.id || null}
                             onCatalogSelect={(catalogId, item) => {
@@ -120,22 +145,18 @@ export default function QuickAddPage() {
                         {selectedCatalog && (
                             <div className="quick-add-selected">
                                 ✅ {selectedCatalog.maker} — {selectedCatalog.title}
-                                <span className="text-muted text-xs" >
-                                    {" "}({selectedCatalog.itemType})
-                                </span>
+                                <span className="text-muted text-xs"> ({selectedCatalog.itemType})</span>
                             </div>
                         )}
                         {!selectedCatalog && customName && (
-                            <div className="quick-add-selected">
-                                ✍️ Custom entry: {customName}
-                            </div>
+                            <div className="quick-add-selected">✍️ Custom entry: {customName}</div>
                         )}
                     </div>
 
                     {/* Custom Name (optional if catalog selected) */}
                     {!selectedCatalog && (
-                        <div className="mb-6" >
-                            <label className="block text-sm font-semibold text-ink mb-1">Name</label>
+                        <div className="mb-6">
+                            <label className="text-ink mb-1 block text-sm font-semibold">Name</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -149,33 +170,37 @@ export default function QuickAddPage() {
                     {/* Quick Selectors Row */}
                     <div className="quick-add-selectors max-sm:grid-cols-1">
                         <div>
-                            <label className="block text-sm font-semibold text-ink mb-1">Finish</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Finish</label>
                             <select
                                 className="form-input"
                                 value={finishType}
                                 onChange={(e) => setFinishType(e.target.value)}
                                 id="quick-finish"
                             >
-                                {FINISH_TYPES.map(f => (
-                                    <option key={f} value={f}>{f}</option>
+                                {FINISH_TYPES.map((f) => (
+                                    <option key={f} value={f}>
+                                        {f}
+                                    </option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-ink mb-1">Condition</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Condition</label>
                             <select
                                 className="form-input"
                                 value={conditionGrade}
                                 onChange={(e) => setConditionGrade(e.target.value)}
                                 id="quick-condition"
                             >
-                                {CONDITION_GRADES.map(c => (
-                                    <option key={c} value={c}>{c}</option>
+                                {CONDITION_GRADES.map((c) => (
+                                    <option key={c} value={c}>
+                                        {c}
+                                    </option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-ink mb-1">Collection</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Collection</label>
                             <select
                                 className="form-input"
                                 value={collectionId}
@@ -183,8 +208,10 @@ export default function QuickAddPage() {
                                 id="quick-collection"
                             >
                                 <option value="">— None —</option>
-                                {collections.map(c => (
-                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                {collections.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                        {c.name}
+                                    </option>
                                 ))}
                             </select>
                         </div>
@@ -192,15 +219,15 @@ export default function QuickAddPage() {
 
                     {/* Error */}
                     {error && (
-                        <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mt-4">
+                        <div className="text-danger mt-2 mt-4 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
                             ⚠️ {error}
                         </div>
                     )}
 
                     {/* Action Buttons */}
-                    <div className="flex gap-4 items-center flex-wrap">
+                    <div className="flex flex-wrap items-center gap-4">
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             onClick={handleAdd}
                             disabled={isAdding || (!selectedCatalog && !customName.trim())}
                             id="quick-add-submit"
@@ -209,7 +236,7 @@ export default function QuickAddPage() {
                         </button>
                         {selectedCatalog && recentAdds.length > 0 && (
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                                 onClick={handleDuplicate}
                                 id="quick-duplicate"
                             >
@@ -220,36 +247,40 @@ export default function QuickAddPage() {
                 </div>
 
                 {/* Link to full form */}
-                <div className="mt-4 text-muted text-sm" style={{ textAlign: "center" }}>
+                <div className="text-muted mt-4 text-sm" style={{ textAlign: "center" }}>
                     Need photos or more details?{" "}
-                    <Link href="/add-horse" className="text-forest" >
+                    <Link href="/add-horse" className="text-forest">
                         Use the full intake form →
                     </Link>
                 </div>
 
                 {/* Recent Adds */}
                 {recentAdds.length > 0 && (
-                    <div className="mt-8 p-6 bg-[var(--color-surface-primary)] border border-edge rounded-lg">
-                        <h3 className="mb-2 text-[calc(var(--font-size-md)*var(--font-scale))]" >
-                            Recently Added
-                        </h3>
+                    <div className="border-edge mt-8 rounded-lg border bg-[var(--color-surface-primary)] p-6">
+                        <h3 className="mb-2 text-[calc(var(--font-size-md)*var(--font-scale))]">Recently Added</h3>
                         {recentAdds.map((item) => (
-                            <div key={item.id} className="mt-8 p-6 bg-[var(--color-surface-primary)] border border-edge rounded-lg-item">
+                            <div
+                                key={item.id}
+                                className="border-edge rounded-lg-item mt-8 border bg-[var(--color-surface-primary)] p-6"
+                            >
                                 <span>✅ {item.name}</span>
-                                <span className="text-muted" >
+                                <span className="text-muted">
                                     {item.finish} · {item.condition} — {timeSince(item.timestamp)}
                                 </span>
                                 <Link
                                     href={`/stable/${item.id}`}
-                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
-                                    style={{ padding: "2px 8px", fontSize: "calc(var(--font-size-xs) * var(--font-scale))" }}
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    style={{
+                                        padding: "2px 8px",
+                                        fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+                                    }}
                                 >
                                     View →
                                 </Link>
                             </div>
                         ))}
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                             onClick={() => router.push("/dashboard")}
                             style={{ marginTop: "var(--space-sm)", width: "100%" }}
                         >

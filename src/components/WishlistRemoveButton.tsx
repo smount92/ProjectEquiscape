@@ -21,14 +21,17 @@ export default function WishlistRemoveButton({ wishlistId }: { wishlistId: strin
 
     return (
         <button
-            className="absolute top-2 right-2 flex items-center justify-center w-7 h-7 border-none bg-transparent text-muted cursor-pointer rounded-full transition-all p-0 opacity-0 group-hover/bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all:opacity-100 max-[600px]:opacity-100 hover:text-[#ef4444] hover:bg-[rgba(239,68,68,0.1)]"
+            className="text-muted group-hover/bg-card border-edge transition-all:opacity-100 absolute top-2 right-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full rounded-lg border border-none bg-transparent p-0 p-12 opacity-0 shadow-md transition-all hover:bg-[rgba(239,68,68,0.1)] hover:text-[#ef4444] max-[600px]:opacity-100 max-[480px]:rounded-[var(--radius-md)]"
             onClick={handleRemove}
             disabled={removing}
             title="Remove from wishlist"
             aria-label="Remove from wishlist"
         >
             {removing ? (
-                <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[14] h-[14]" aria-hidden="true" />
+                <span
+                    className="hover:no-underline-min-h)] leading-none-spinner inline-flex h-[14] min-h-[var(--opacity-[0.5] w-[14] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                    aria-hidden="true"
+                />
             ) : (
                 <svg
                     width="16"

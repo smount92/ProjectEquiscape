@@ -45,19 +45,22 @@ export default function MarketFilters() {
     const currentStage = params.get("stage") || "all";
     const currentSort = params.get("sort") || "transaction_volume:desc";
 
-    const pushParams = useCallback((updates: Record<string, string | null>) => {
-        const newParams = new URLSearchParams(params.toString());
-        for (const [key, val] of Object.entries(updates)) {
-            if (val && val !== "all" && val !== "transaction_volume:desc") {
-                newParams.set(key, val);
-            } else {
-                newParams.delete(key);
+    const pushParams = useCallback(
+        (updates: Record<string, string | null>) => {
+            const newParams = new URLSearchParams(params.toString());
+            for (const [key, val] of Object.entries(updates)) {
+                if (val && val !== "all" && val !== "transaction_volume:desc") {
+                    newParams.set(key, val);
+                } else {
+                    newParams.delete(key);
+                }
             }
-        }
-        // Reset page when filters change
-        newParams.delete("page");
-        router.push(`/market?${newParams.toString()}`);
-    }, [params, router]);
+            // Reset page when filters change
+            newParams.delete("page");
+            router.push(`/market?${newParams.toString()}`);
+        },
+        [params, router],
+    );
 
     // Debounced search push
     useEffect(() => {
@@ -74,7 +77,7 @@ export default function MarketFilters() {
         <div className="mb-8">
             <div className="mb-4">
                 <input
-                    className="form-input w-full text-[calc(var(--font-size-md)*var(--font-scale))!important] p-[var(--space-md) var(--space-lg) !important] rounded-[var(--radius-lg) !important]"
+                    className="form-input p-[var(--space-md) var(--space-lg) !important] rounded-[var(--radius-lg) !important] w-full text-[calc(var(--font-size-md)*var(--font-scale))!important]"
                     type="search"
                     placeholder="Search by mold, release, or artist resin…"
                     value={searchInput}
@@ -82,8 +85,8 @@ export default function MarketFilters() {
                     id="market-search"
                 />
             </div>
-            <div className="flex justify-between items-center gap-4 flex-wrap">
-                <div className="flex gap-1 flex-wrap">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap gap-1">
                     {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
                         <button
                             key={value}
@@ -102,7 +105,9 @@ export default function MarketFilters() {
                         id="market-finish"
                     >
                         {Object.entries(FINISH_TYPE_LABELS).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
+                            <option key={value} value={value}>
+                                {label}
+                            </option>
                         ))}
                     </select>
                     <select
@@ -112,7 +117,9 @@ export default function MarketFilters() {
                         id="market-stage"
                     >
                         {Object.entries(LIFE_STAGE_LABELS).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
+                            <option key={value} value={value}>
+                                {label}
+                            </option>
                         ))}
                     </select>
                     <select
@@ -122,7 +129,9 @@ export default function MarketFilters() {
                         id="market-sort"
                     >
                         {SORT_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </option>
                         ))}
                     </select>
                 </div>

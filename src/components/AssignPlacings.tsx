@@ -21,7 +21,9 @@ export default function AssignPlacings({
 }) {
     const [placings, setPlacings] = useState<Record<string, string>>(() => {
         const init: Record<string, string> = {};
-        entries.forEach(e => { if (e.placing) init[e.id] = e.placing; });
+        entries.forEach((e) => {
+            if (e.placing) init[e.id] = e.placing;
+        });
         return init;
     });
     const [saving, setSaving] = useState(false);
@@ -53,25 +55,21 @@ export default function AssignPlacings({
     if (entries.length === 0) return null;
 
     return (
-        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
-            <h3 className="mb-4" >🏅 Assign Placings</h3>
-            <p className="text-muted text-sm mb-4" >
-                As the event host, assign placings to each entry below.
-            </p>
+        <div className="glass-bg-card border-edge mt-6 rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+            <h3 className="mb-4">🏅 Assign Placings</h3>
+            <p className="text-muted mb-4 text-sm">As the event host, assign placings to each entry below.</p>
             <div className="gap-2" style={{ display: "flex", flexDirection: "column" }}>
-                {entries.map(entry => (
+                {entries.map((entry) => (
                     <div key={entry.id} className="gap-2" style={{ display: "flex", alignItems: "center" }}>
-                        <span className="flex-1" >
+                        <span className="flex-1">
                             <strong>{entry.horseName}</strong>
-                            <span className="text-muted ml-1" >
-                                by @{entry.ownerAlias}
-                            </span>
+                            <span className="text-muted ml-1">by @{entry.ownerAlias}</span>
                         </span>
                         <select
                             className="form-input"
                             style={{ width: 140 }}
                             value={placings[entry.id] || ""}
-                            onChange={e => setPlacings(prev => ({ ...prev, [entry.id]: e.target.value }))}
+                            onChange={(e) => setPlacings((prev) => ({ ...prev, [entry.id]: e.target.value }))}
                         >
                             <option value="">—</option>
                             <option value="1st">🥇 1st</option>
@@ -89,16 +87,20 @@ export default function AssignPlacings({
 
             {error && <div className="comment-error mt-2">{error}</div>}
 
-            <div className="gap-2 mt-6" style={{ display: "flex", alignItems: "center" }}>
+            <div className="mt-6 gap-2" style={{ display: "flex", alignItems: "center" }}>
                 <button
-                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                     onClick={handleSave}
-                    disabled={saving || Object.values(placings).filter(v => v).length === 0}
+                    disabled={saving || Object.values(placings).filter((v) => v).length === 0}
                     style={{ width: "100%" }}
                 >
-                    {saving ? "Saving…" : `💾 Save ${Object.values(placings).filter(v => v).length} Placings`}
+                    {saving ? "Saving…" : `💾 Save ${Object.values(placings).filter((v) => v).length} Placings`}
                 </button>
-                {saved && <span className="text-forest font-semibold" style={{ whiteSpace: "nowrap" }}>✅ Saved!</span>}
+                {saved && (
+                    <span className="text-forest font-semibold" style={{ whiteSpace: "nowrap" }}>
+                        ✅ Saved!
+                    </span>
+                )}
             </div>
         </div>
     );

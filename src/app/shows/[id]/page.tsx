@@ -12,11 +12,7 @@ import UniversalFeed from "@/components/UniversalFeed";
 import CloseShowButton from "@/components/CloseShowButton";
 import ExpertJudgingPanel from "@/components/ExpertJudgingPanel";
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     return {
         title: `Photo Show — Model Horse Hub`,
@@ -26,14 +22,12 @@ export async function generateMetadata({
 
 export const dynamic = "force-dynamic";
 
-export default async function ShowDetailPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export default async function ShowDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: showId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
     const { show, entries } = await getShowEntries(showId);
@@ -65,12 +59,12 @@ export default async function ShowDetailPage({
 
     // Check if user is assigned judge
     const eventJudges = isExpertJudged ? await getEventJudges(showId) : [];
-    const isJudge = eventJudges.some(j => j.userId === user.id);
+    const isJudge = eventJudges.some((j) => j.userId === user.id);
 
     // Fetch divisions/classes for the entry form
     const divisions = await getEventDivisions(showId);
-    const classOptions = divisions.flatMap(d =>
-        d.classes.map(c => ({
+    const classOptions = divisions.flatMap((d) =>
+        d.classes.map((c) => ({
             id: c.id,
             name: c.classNumber ? `${c.classNumber}: ${c.name}` : c.name,
             divisionName: d.name,
@@ -78,7 +72,7 @@ export default async function ShowDetailPage({
             isNanQualifying: c.isNanQualifying,
             maxEntries: c.maxEntries,
             currentEntryCount: c.entryCount || 0,
-        }))
+        })),
     );
 
     // Sort entries by division → class → entry order
@@ -93,55 +87,61 @@ export default async function ShowDetailPage({
     });
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Hero */}
-            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
-                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
+            <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+                <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                     <h1>
                         📸 <span className="text-forest">{show.title}</span>
                     </h1>
                     {show.theme && (
-                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
+                        <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                             Theme: {show.theme}
                         </p>
                     )}
                     {show.description && (
-                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
+                        <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                             {show.description}
                         </p>
                     )}
                     {show.endAt && (
-                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle" style={{
-                            color: new Date(show.endAt) > new Date() ? "var(--color-accent, #f59e0b)" : "var(--color-text-muted)"
-                        }}>
-                            ⏰ {new Date(show.endAt) > new Date()
+                        <p
+                            className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]"
+                            style={{
+                                color:
+                                    new Date(show.endAt) > new Date()
+                                        ? "var(--color-accent, #f59e0b)"
+                                        : "var(--color-text-muted)",
+                            }}
+                        >
+                            ⏰{" "}
+                            {new Date(show.endAt) > new Date()
                                 ? `Entries close: ${new Date(show.endAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}`
-                                : "Entries are closed"
-                            }
+                                : "Entries are closed"}
                         </p>
                     )}
                     {show.creatorAlias && (
-                        <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle text-sm">
+                        <p className="mb-2-subtitle text-sm text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                             Hosted by @{show.creatorAlias}
                         </p>
                     )}
                 </div>
-                <div className="flex justify-center gap-8 mt-8">
+                <div className="mt-8 flex justify-center gap-8">
                     <div className="flex flex-col items-center">
-                        <span className="flex flex-col items-center-number">{entries.length}</span>
-                        <span className="flex flex-col items-center-label">Entries</span>
+                        <span className="items-center-number flex flex-col">{entries.length}</span>
+                        <span className="items-center-label flex flex-col">Entries</span>
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="flex flex-col items-center-number py-[3px] px-[10px] rounded-sm text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap-lg">
+                        <span className="items-center-number whitespace-nowrap-lg flex flex-col rounded-sm px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold">
                             {show.status === "open" ? "🟢" : show.status === "judging" ? "🟡" : "🔴"}
                         </span>
-                        <span className="flex flex-col items-center-label">{show.status.charAt(0).toUpperCase() + show.status.slice(1)}</span>
+                        <span className="items-center-label flex flex-col">
+                            {show.status.charAt(0).toUpperCase() + show.status.slice(1)}
+                        </span>
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="flex flex-col items-center-number">
-                            {isExpertJudged ? "🏅" : "🗳️"}
-                        </span>
-                        <span className="flex flex-col items-center-label">
+                        <span className="items-center-number flex flex-col">{isExpertJudged ? "🏅" : "🗳️"}</span>
+                        <span className="items-center-label flex flex-col">
                             {isExpertJudged ? "Expert Judge" : "Community Vote"}
                         </span>
                     </div>
@@ -150,8 +150,11 @@ export default async function ShowDetailPage({
 
             {/* Creator Actions */}
             {(isCreator || isAdmin) && (
-                <div className="animate-fade-in-up gap-2 justify-end mb-4" style={{ display: "flex" }}>
-                    <Link href={`/community/events/${showId}/manage`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                <div className="animate-fade-in-up mb-4 justify-end gap-2" style={{ display: "flex" }}>
+                    <Link
+                        href={`/community/events/${showId}/manage`}
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
                         ⚙️ Manage Classes
                     </Link>
                 </div>
@@ -159,201 +162,300 @@ export default async function ShowDetailPage({
 
             {/* Judge Assignment Banner — always visible to assigned judges */}
             {isJudge && !isCreator && (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
-                    marginBottom: "var(--space-lg)",
-                    padding: "var(--space-lg)",
-                    background: "linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.1))",
-                    border: "1px solid rgba(139, 92, 246, 0.3)",
-                    textAlign: "center",
-                }}>
-                    <div className="text-[2rem] mb-2" >🏅</div>
-                    <h3 className="mb-2" >
-                        You Are an Assigned Judge
-                    </h3>
+                <div
+                    className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                    style={{
+                        marginBottom: "var(--space-lg)",
+                        padding: "var(--space-lg)",
+                        background: "linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.1))",
+                        border: "1px solid rgba(139, 92, 246, 0.3)",
+                        textAlign: "center",
+                    }}
+                >
+                    <div className="mb-2 text-[2rem]">🏅</div>
+                    <h3 className="mb-2">You Are an Assigned Judge</h3>
                     {show.status === "open" ? (
-                        <p className="text-muted text-sm" >
-                            This show is still accepting entries. Once the host transitions it to <strong>&quot;Judging&quot;</strong> status, the judging panel will appear here for you to assign placings.
+                        <p className="text-muted text-sm">
+                            This show is still accepting entries. Once the host transitions it to{" "}
+                            <strong>&quot;Judging&quot;</strong> status, the judging panel will appear here for you to
+                            assign placings.
                         </p>
                     ) : show.status === "judging" ? (
-                        <p className="text-muted text-sm" >
+                        <p className="text-muted text-sm">
                             The judging panel is available below. Scroll down to assign placings to each entry.
                         </p>
                     ) : (
-                        <p className="text-muted text-sm" >
-                            Judging is complete. Results are final.
-                        </p>
+                        <p className="text-muted text-sm">Judging is complete. Results are final.</p>
                     )}
                 </div>
             )}
 
             {/* Entry Form */}
             {isOpen && (
-                <div className="mb-8 p-6 bg-[rgba(129, 140, 248, 0.04)] border border-[rgba(129, 140, 248, 0.15)] rounded-lg animate-fade-in-up">
-                    <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
-                        Enter Your Horse
-                    </h2>
-                    <ShowEntryForm showId={showId} userHorses={horseOptions} classes={classOptions.length > 0 ? classOptions : undefined} />
+                <div className="bg-[rgba(129, 140, 248, 0.04)] border-[rgba(129, 140, 248, 0.15)] animate-fade-in-up mb-8 rounded-lg border p-6">
+                    <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">Enter Your Horse</h2>
+                    <ShowEntryForm
+                        showId={showId}
+                        userHorses={horseOptions}
+                        classes={classOptions.length > 0 ? classOptions : undefined}
+                    />
                 </div>
             )}
 
             {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up mb-6">
+            <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm">
                 <Link href="/shows">← All Shows</Link>
             </nav>
 
             {/* Winner Podium for closed shows */}
-            {show.status === "closed" && entries.length > 0 && (() => {
-                const RIBBON_MAP: Record<string, string> = {
-                    "1st": "blue", "2nd": "red", "3rd": "yellow", "4th": "white",
-                    "5th": "pink", "6th": "green", "HM": "green",
-                    "Champion": "blue", "Reserve Champion": "red",
-                    "Grand Champion": "blue", "Reserve Grand Champion": "red",
-                };
-                const MEDAL_MAP: Record<string, string> = {
-                    "1st": "🥇", "2nd": "🥈", "3rd": "🥉", "HM": "🎗️",
-                    "Champion": "🏆", "Reserve Champion": "🥈",
-                    "Grand Champion": "🏆", "Reserve Grand Champion": "🥈",
-                };
-                const PLACE_ORDER: Record<string, number> = {
-                    "Grand Champion": 0, "Reserve Grand Champion": 1,
-                    "Champion": 2, "Reserve Champion": 3,
-                    "1st": 4, "2nd": 5, "3rd": 6, "4th": 7, "5th": 8, "6th": 9, "HM": 10,
-                };
+            {show.status === "closed" &&
+                entries.length > 0 &&
+                (() => {
+                    const RIBBON_MAP: Record<string, string> = {
+                        "1st": "blue",
+                        "2nd": "red",
+                        "3rd": "yellow",
+                        "4th": "white",
+                        "5th": "pink",
+                        "6th": "green",
+                        HM: "green",
+                        Champion: "blue",
+                        "Reserve Champion": "red",
+                        "Grand Champion": "blue",
+                        "Reserve Grand Champion": "red",
+                    };
+                    const MEDAL_MAP: Record<string, string> = {
+                        "1st": "🥇",
+                        "2nd": "🥈",
+                        "3rd": "🥉",
+                        HM: "🎗️",
+                        Champion: "🏆",
+                        "Reserve Champion": "🥈",
+                        "Grand Champion": "🏆",
+                        "Reserve Grand Champion": "🥈",
+                    };
+                    const PLACE_ORDER: Record<string, number> = {
+                        "Grand Champion": 0,
+                        "Reserve Grand Champion": 1,
+                        Champion: 2,
+                        "Reserve Champion": 3,
+                        "1st": 4,
+                        "2nd": 5,
+                        "3rd": 6,
+                        "4th": 7,
+                        "5th": 8,
+                        "6th": 9,
+                        HM: 10,
+                    };
 
-                // Champions first
-                const champions = sortedEntries.filter(e =>
-                    e.placing && ["Champion", "Reserve Champion", "Grand Champion", "Reserve Grand Champion"].includes(e.placing)
-                );
-                // Top placed
-                const topPlaced = isExpertJudged
-                    ? sortedEntries.filter(e => e.placing && !["Champion", "Reserve Champion", "Grand Champion", "Reserve Grand Champion"].includes(e.placing))
-                        .sort((a, b) => (PLACE_ORDER[a.placing!] ?? 99) - (PLACE_ORDER[b.placing!] ?? 99))
-                        .slice(0, 6)
-                    : sortedEntries.slice(0, 3);
-                const podiumEntries = topPlaced.slice(0, 3);
+                    // Champions first
+                    const champions = sortedEntries.filter(
+                        (e) =>
+                            e.placing &&
+                            ["Champion", "Reserve Champion", "Grand Champion", "Reserve Grand Champion"].includes(
+                                e.placing,
+                            ),
+                    );
+                    // Top placed
+                    const topPlaced = isExpertJudged
+                        ? sortedEntries
+                              .filter(
+                                  (e) =>
+                                      e.placing &&
+                                      ![
+                                          "Champion",
+                                          "Reserve Champion",
+                                          "Grand Champion",
+                                          "Reserve Grand Champion",
+                                      ].includes(e.placing),
+                              )
+                              .sort((a, b) => (PLACE_ORDER[a.placing!] ?? 99) - (PLACE_ORDER[b.placing!] ?? 99))
+                              .slice(0, 6)
+                        : sortedEntries.slice(0, 3);
+                    const podiumEntries = topPlaced.slice(0, 3);
 
-                return (
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
-                        padding: "var(--space-xl)",
-                        marginBottom: "var(--space-lg)",
-                    }}>
-                        <h2 className="text-[calc(1.3rem*var(--font-scale))] mb-2" style={{ textAlign: "center" }}>
-                            🏆 <span className="text-forest">Results</span>
-                        </h2>
+                    return (
+                        <div
+                            className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                            style={{
+                                padding: "var(--space-xl)",
+                                marginBottom: "var(--space-lg)",
+                            }}
+                        >
+                            <h2 className="mb-2 text-[calc(1.3rem*var(--font-scale))]" style={{ textAlign: "center" }}>
+                                🏆 <span className="text-forest">Results</span>
+                            </h2>
 
-                        {/* Champion Banners */}
-                        {champions.map(entry => (
-                            <div key={entry.id} className="champion-banner animate-fade-in-up">
-                                <div className="text-[calc(1.2rem*var(--font-scale))] font-extrabold mb-2">
-                                    {MEDAL_MAP[entry.placing!] || "🏆"} {entry.placing}
-                                </div>
-                                <div className="gap-4" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    {entry.thumbnailUrl && (
-                                        <div className="w-[60] h-[60] rounded-md shrink-0" style={{ overflow: "hidden" }}>
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={entry.thumbnailUrl} alt={entry.horseName} className="w-full h-full" style={{ objectFit: "cover" }} />
-                                        </div>
-                                    )}
-                                    <div>
-                                        <Link href={`/community/${entry.horseId}`} className="font-bold text-[calc(1rem*var(--font-scale))]" >
-                                            🐴 {entry.horseName}
-                                        </Link>
-                                        <div className="text-muted text-[calc(0.8rem*var(--font-scale))]" >
-                                            by <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>@{entry.ownerAlias}</Link>
-                                        </div>
+                            {/* Champion Banners */}
+                            {champions.map((entry) => (
+                                <div key={entry.id} className="champion-banner animate-fade-in-up">
+                                    <div className="mb-2 text-[calc(1.2rem*var(--font-scale))] font-extrabold">
+                                        {MEDAL_MAP[entry.placing!] || "🏆"} {entry.placing}
                                     </div>
-                                </div>
-                            </div>
-                        ))}
-
-                        {/* Podium */}
-                        <div className="flex justify-center gap-8 flex-wrap py-8 px-[0] items-end">
-                            {podiumEntries.map((entry, i) => {
-                                const placing = isExpertJudged ? entry.placing! : ["1st", "2nd", "3rd"][i];
-                                const ribbon = RIBBON_MAP[placing] || "blue";
-                                const medal = MEDAL_MAP[placing] || "🏅";
-                                return (
-                                    <div key={entry.id} className={`podium-card ${i === 0 ? "podium-card-first" : ""}`}>
-                                        <div className={`podium-ribbon podium-ribbon-${ribbon}`} />
+                                    <div
+                                        className="gap-4"
+                                        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+                                    >
                                         {entry.thumbnailUrl && (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={entry.thumbnailUrl} alt={entry.horseName} className="w-full aspect-[4/3] object-cover" />
-                                        )}
-                                        <div className="text-center min-w-[160px] max-w-[220px] bg-elevated rounded-lg overflow-hidden shadow-lg transition-transform-body">
-                                            <div className="text-[2rem] mb-1">{medal}</div>
-                                            <Link href={`/community/${entry.horseId}`} className="font-bold text-[calc(0.9rem*var(--font-scale))] text-ink no-underline block hover:underline">
-                                                {entry.horseName}
-                                            </Link>
-                                            <div className="text-muted text-[calc(0.75rem*var(--font-scale))] mt-[2px]">
-                                                by <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>@{entry.ownerAlias}</Link>
-                                                {!isExpertJudged && ` · ${entry.votes} vote${entry.votes !== 1 ? "s" : ""}`}
+                                            <div
+                                                className="h-[60] w-[60] shrink-0 rounded-md"
+                                                style={{ overflow: "hidden" }}
+                                            >
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src={entry.thumbnailUrl}
+                                                    alt={entry.horseName}
+                                                    className="h-full w-full"
+                                                    style={{ objectFit: "cover" }}
+                                                />
                                             </div>
-                                            <div className="font-extrabold text-[var(--color-accent, #f59e0b)] text-[calc(0.85rem*var(--font-scale))] mt-1">{placing}</div>
-                                            {entry.caption && (
-                                                <div className="italic text-ink-light text-[calc(0.7rem*var(--font-scale))] mt-1 leading-snug">&ldquo;{entry.caption}&rdquo;</div>
-                                            )}
+                                        )}
+                                        <div>
+                                            <Link
+                                                href={`/community/${entry.horseId}`}
+                                                className="text-[calc(1rem*var(--font-scale))] font-bold"
+                                            >
+                                                🐴 {entry.horseName}
+                                            </Link>
+                                            <div className="text-muted text-[calc(0.8rem*var(--font-scale))]">
+                                                by{" "}
+                                                <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
+                                                    @{entry.ownerAlias}
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                </div>
+                            ))}
 
-                        {/* Remaining placed entries below podium */}
-                        {topPlaced.length > 3 && (
-                            <div className="mt-4" >
-                                <h3 className="text-[calc(0.9rem*var(--font-scale))] mb-2 text-muted" >Also Placed</h3>
-                                {topPlaced.slice(3).map(entry => {
-                                    const placing = entry.placing!;
-                                    const ribbon = RIBBON_MAP[placing] || "green";
+                            {/* Podium */}
+                            <div className="flex flex-wrap items-end justify-center gap-8 px-[0] py-8">
+                                {podiumEntries.map((entry, i) => {
+                                    const placing = isExpertJudged ? entry.placing! : ["1st", "2nd", "3rd"][i];
+                                    const ribbon = RIBBON_MAP[placing] || "blue";
+                                    const medal = MEDAL_MAP[placing] || "🏅";
                                     return (
-                                        <div key={entry.id} style={{
-                                            display: "flex", alignItems: "center", gap: "var(--space-md)",
-                                            padding: "var(--space-sm) var(--space-md)",
-                                            borderLeft: `3px solid var(--podium-${ribbon}, #22c55e)`,
-                                            marginBottom: "var(--space-xs)",
-                                        }}>
+                                        <div
+                                            key={entry.id}
+                                            className={`podium-card ${i === 0 ? "podium-card-first" : ""}`}
+                                        >
+                                            <div className={`podium-ribbon podium-ribbon-${ribbon}`} />
                                             {entry.thumbnailUrl && (
-                                                <div className="w-[36] h-[36] rounded-sm shrink-0" style={{ overflow: "hidden" }}>
-                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                    <img src={entry.thumbnailUrl} alt={entry.horseName} className="w-full h-full" style={{ objectFit: "cover" }} />
-                                                </div>
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img
+                                                    src={entry.thumbnailUrl}
+                                                    alt={entry.horseName}
+                                                    className="aspect-[4/3] w-full object-cover"
+                                                />
                                             )}
-                                            <div className="flex-1" >
-                                                <Link href={`/community/${entry.horseId}`} className="font-semibold" >{entry.horseName}</Link>
-                                                <span className="text-muted ml-1 text-[calc(0.75rem*var(--font-scale))]" >
-                                                    by @{entry.ownerAlias}
-                                                </span>
+                                            <div className="bg-elevated transition-transform-body max-w-[220px] min-w-[160px] overflow-hidden rounded-lg text-center shadow-lg">
+                                                <div className="mb-1 text-[2rem]">{medal}</div>
+                                                <Link
+                                                    href={`/community/${entry.horseId}`}
+                                                    className="text-ink block text-[calc(0.9rem*var(--font-scale))] font-bold no-underline hover:underline"
+                                                >
+                                                    {entry.horseName}
+                                                </Link>
+                                                <div className="text-muted mt-[2px] text-[calc(0.75rem*var(--font-scale))]">
+                                                    by{" "}
+                                                    <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
+                                                        @{entry.ownerAlias}
+                                                    </Link>
+                                                    {!isExpertJudged &&
+                                                        ` · ${entry.votes} vote${entry.votes !== 1 ? "s" : ""}`}
+                                                </div>
+                                                <div className="text-[var(--color-accent, #f59e0b)] mt-1 text-[calc(0.85rem*var(--font-scale))] font-extrabold">
+                                                    {placing}
+                                                </div>
+                                                {entry.caption && (
+                                                    <div className="text-ink-light mt-1 text-[calc(0.7rem*var(--font-scale))] leading-snug italic">
+                                                        &ldquo;{entry.caption}&rdquo;
+                                                    </div>
+                                                )}
                                             </div>
-                                            <span className="font-bold text-[var(--color-accent, #f59e0b)] text-[calc(0.85rem*var(--font-scale))]" >
-                                                {MEDAL_MAP[placing] || "🏅"} {placing}
-                                            </span>
                                         </div>
                                     );
                                 })}
                             </div>
-                        )}
-                    </div>
-                );
-            })()}
+
+                            {/* Remaining placed entries below podium */}
+                            {topPlaced.length > 3 && (
+                                <div className="mt-4">
+                                    <h3 className="text-muted mb-2 text-[calc(0.9rem*var(--font-scale))]">
+                                        Also Placed
+                                    </h3>
+                                    {topPlaced.slice(3).map((entry) => {
+                                        const placing = entry.placing!;
+                                        const ribbon = RIBBON_MAP[placing] || "green";
+                                        return (
+                                            <div
+                                                key={entry.id}
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "var(--space-md)",
+                                                    padding: "var(--space-sm) var(--space-md)",
+                                                    borderLeft: `3px solid var(--podium-${ribbon}, #22c55e)`,
+                                                    marginBottom: "var(--space-xs)",
+                                                }}
+                                            >
+                                                {entry.thumbnailUrl && (
+                                                    <div
+                                                        className="h-[36] w-[36] shrink-0 rounded-sm"
+                                                        style={{ overflow: "hidden" }}
+                                                    >
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img
+                                                            src={entry.thumbnailUrl}
+                                                            alt={entry.horseName}
+                                                            className="h-full w-full"
+                                                            style={{ objectFit: "cover" }}
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1">
+                                                    <Link
+                                                        href={`/community/${entry.horseId}`}
+                                                        className="font-semibold"
+                                                    >
+                                                        {entry.horseName}
+                                                    </Link>
+                                                    <span className="text-muted ml-1 text-[calc(0.75rem*var(--font-scale))]">
+                                                        by @{entry.ownerAlias}
+                                                    </span>
+                                                </div>
+                                                <span className="text-[var(--color-accent, #f59e0b)] text-[calc(0.85rem*var(--font-scale))] font-bold">
+                                                    {MEDAL_MAP[placing] || "🏅"} {placing}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
 
             {/* Judging Banner */}
             {isJudging && (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up" style={{
-                    textAlign: "center",
-                    padding: "var(--space-lg)",
-                    marginBottom: "var(--space-lg)",
-                    background: "rgba(245, 158, 11, 0.1)",
-                    border: "1px solid rgba(245, 158, 11, 0.3)",
-                }}>
-                    <div className="text-[2rem]" >🟡</div>
+                <div
+                    className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                    style={{
+                        textAlign: "center",
+                        padding: "var(--space-lg)",
+                        marginBottom: "var(--space-lg)",
+                        background: "rgba(245, 158, 11, 0.1)",
+                        border: "1px solid rgba(245, 158, 11, 0.3)",
+                    }}
+                >
+                    <div className="text-[2rem]">🟡</div>
                     <h3>Judging in Progress</h3>
-                    <p className="text-muted" >
+                    <p className="text-muted">
                         {isExpertJudged
-                            ? ((isCreator || isJudge)
+                            ? isCreator || isJudge
                                 ? "Use the judging panel below to assign placings."
-                                : "The judges are reviewing entries. Results will be announced soon!")
-                            : "Voting is closed. Results will be announced soon!"
-                        }
+                                : "The judges are reviewing entries. Results will be announced soon!"
+                            : "Voting is closed. Results will be announced soon!"}
                     </p>
                 </div>
             )}
@@ -362,7 +464,7 @@ export default async function ShowDetailPage({
             {isExpertJudged && isJudging && (isCreator || isJudge) && (
                 <ExpertJudgingPanel
                     showId={showId}
-                    entries={entries.map(e => ({
+                    entries={entries.map((e) => ({
                         id: e.id,
                         horseName: e.horseName,
                         ownerAlias: e.ownerAlias,
@@ -374,16 +476,14 @@ export default async function ShowDetailPage({
             )}
 
             {/* Close Show Button — creator/admin only, when expired */}
-            {canClose && (
-                <CloseShowButton showId={showId} />
-            )}
+            {canClose && <CloseShowButton showId={showId} />}
 
             {/* Host Override Panel — creator can adjust placings on closed shows */}
             {isCreator && show.status === "closed" && (
                 <ExpertJudgingPanel
                     showId={showId}
                     overrideMode
-                    entries={entries.map(e => ({
+                    entries={entries.map((e) => ({
                         id: e.id,
                         horseName: e.horseName,
                         ownerAlias: e.ownerAlias,
@@ -396,31 +496,33 @@ export default async function ShowDetailPage({
 
             {/* Entries Grid */}
             {entries.length === 0 ? (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
-                    <div className="text-center py-[var(--space-3xl)] px-8-icon">📸</div>
+                <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="px-8-icon py-[var(--space-3xl)] text-center">📸</div>
                     <h2>No Entries Yet</h2>
                     <p>Be the first to enter this show!</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-[0] border border-[var(--color-border, rgba(0, 0, 0, 0.06))] rounded-lg overflow-hidden animate-fade-in-up">
+                <div className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] animate-fade-in-up flex flex-col gap-[0] overflow-hidden rounded-lg border">
                     {sortedEntries.map((entry, index) => (
-                        <div key={entry.id} className="flex items-center gap-4 py-4 px-6 border-b border-[var(--color-border, rgba(0, 0, 0, 0.06))] transition-colors">
-                            <div className="text-[calc(1.1rem*var(--font-scale))] font-bold text-muted min-w-[32px] text-center">
+                        <div
+                            key={entry.id}
+                            className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] flex items-center gap-4 border-b px-6 py-4 transition-colors"
+                        >
+                            <div className="text-muted min-w-[32px] text-center text-[calc(1.1rem*var(--font-scale))] font-bold">
                                 {isExpertJudged && show.status === "closed" && entry.placing
                                     ? entry.placing
-                                    : `#${index + 1}`
-                                }
+                                    : `#${index + 1}`}
                             </div>
                             {entry.thumbnailUrl && (
-                                <div className="w-[64px] h-[64px] rounded-md overflow-hidden shrink-0">
+                                <div className="h-[64px] w-[64px] shrink-0 overflow-hidden rounded-md">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
                                 </div>
                             )}
-                            <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
+                            <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
                                 <Link
                                     href={`/community/${entry.horseId}`}
-                                    className="font-semibold text-[calc(0.95rem*var(--font-scale))] no-underline text-inherit hover:text-forest"
+                                    className="hover:text-forest text-[calc(0.95rem*var(--font-scale))] font-semibold text-inherit no-underline"
                                 >
                                     🐴 {entry.horseName}
                                 </Link>
@@ -429,21 +531,25 @@ export default async function ShowDetailPage({
                                     <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
                                         @{entry.ownerAlias}
                                     </Link>
-                                    {" · "}{entry.finishType}
+                                    {" · "}
+                                    {entry.finishType}
                                     {entry.className && (
-                                        <span className="ml-1 text-forest" >
-                                            · {entry.divisionName && `${entry.divisionName} / `}{entry.className}
+                                        <span className="text-forest ml-1">
+                                            · {entry.divisionName && `${entry.divisionName} / `}
+                                            {entry.className}
                                         </span>
                                     )}
                                 </span>
                                 {entry.caption && (
-                                    <p style={{
-                                        fontSize: "calc(0.75rem * var(--font-scale))",
-                                        color: "var(--color-text-secondary)",
-                                        margin: "var(--space-xs) 0 0",
-                                        fontStyle: "italic",
-                                        lineHeight: 1.4,
-                                    }}>
+                                    <p
+                                        style={{
+                                            fontSize: "calc(0.75rem * var(--font-scale))",
+                                            color: "var(--color-text-secondary)",
+                                            margin: "var(--space-xs) 0 0",
+                                            fontStyle: "italic",
+                                            lineHeight: 1.4,
+                                        }}
+                                    >
                                         &ldquo;{entry.caption}&rdquo;
                                     </p>
                                 )}
@@ -451,18 +557,20 @@ export default async function ShowDetailPage({
                             <div className="gap-1" style={{ display: "flex", alignItems: "center" }}>
                                 {isExpertJudged ? (
                                     entry.placing && show.status === "closed" ? (
-                                        <span style={{
-                                            fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
-                                            padding: "var(--space-xs) var(--space-sm)",
-                                            borderRadius: "var(--radius-sm)",
-                                            background: "rgba(245, 158, 11, 0.15)",
-                                            color: "var(--color-accent, #f59e0b)",
-                                            fontWeight: 600,
-                                        }}>
+                                        <span
+                                            style={{
+                                                fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                                                padding: "var(--space-xs) var(--space-sm)",
+                                                borderRadius: "var(--radius-sm)",
+                                                background: "rgba(245, 158, 11, 0.15)",
+                                                color: "var(--color-accent, #f59e0b)",
+                                                fontWeight: 600,
+                                            }}
+                                        >
                                             {entry.placing}
                                         </span>
                                     ) : isJudging ? (
-                                        <span className="text-muted text-[calc(0.75rem*var(--font-scale))]" >
+                                        <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
                                             🏅 Expert judging
                                         </span>
                                     ) : null

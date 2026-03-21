@@ -64,11 +64,7 @@ function getRibbonClass(ribbon: string | null): string {
     return map[lower] || "";
 }
 
-export default function ShowRecordTimeline({
-    horseId,
-    records: initialRecords,
-    isOwner,
-}: ShowRecordTimelineProps) {
+export default function ShowRecordTimeline({ horseId, records: initialRecords, isOwner }: ShowRecordTimelineProps) {
     const [records, setRecords] = useState<ShowRecordDisplay[]>(initialRecords);
     const [formMode, setFormMode] = useState<string | null>(null); // null, "add", "edit-{id}"
     const [editingRecord, setEditingRecord] = useState<ShowRecordDisplay | null>(null);
@@ -108,15 +104,18 @@ export default function ShowRecordTimeline({
     };
 
     return (
-        <div className="show-record-timeline bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="show-records">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
+        <div
+            className="show-record-timeline bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] rounded-lg border border-[var(--color-border,rgba(0,0,0,0.08))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+            id="show-records"
+        >
+            <div className="mb-6 flex items-center justify-between">
+                <h3 className="m-0 flex items-center gap-2 text-[calc(1.1rem*var(--font-scale))]">
                     <span aria-hidden="true">🏅</span> Show Records
                     {records.length > 0 && ` (${records.length})`}
                 </h3>
                 {isOwner && (
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm text-[calc(0.8rem*var(--font-scale))] py-1 px-4"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-4 px-8 py-1 py-2 font-sans text-base text-[calc(0.8rem*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                         onClick={handleAdd}
                         id="add-show-record"
                     >
@@ -126,27 +125,19 @@ export default function ShowRecordTimeline({
             </div>
 
             {/* Add Form */}
-            {formMode === "add" && (
-                <ShowRecordForm
-                    horseId={horseId}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                />
-            )}
+            {formMode === "add" && <ShowRecordForm horseId={horseId} onSave={handleSave} onCancel={handleCancel} />}
 
             {/* Timeline */}
             {records.length === 0 ? (
-                <div className="text-center py-6 text-muted text-[calc(0.9rem*var(--font-scale))]">
-                    {isOwner
-                        ? "No show records yet. Add your first win! 🏆"
-                        : "No show records yet."}
+                <div className="text-muted py-6 text-center text-[calc(0.9rem*var(--font-scale))]">
+                    {isOwner ? "No show records yet. Add your first win! 🏆" : "No show records yet."}
                 </div>
             ) : (
                 <div className="relative pl-8">
                     {records.map((record) => (
                         <div
                             key={record.id}
-                            className={`show-record-item group/record relative p-4 mb-4 rounded-md bg-[var(--color-card-bg-hover,rgba(0,0,0,0.03))] transition-colors hover:bg-[rgba(0,0,0,0.06)] ${getRibbonClass(record.ribbonColor)}`}
+                            className={`show-record-item group/record relative mb-4 rounded-md bg-[var(--color-card-bg-hover,rgba(0,0,0,0.03))] p-4 transition-colors hover:bg-[rgba(0,0,0,0.06)] ${getRibbonClass(record.ribbonColor)}`}
                             id={`record-${record.id}`}
                         >
                             {/* Edit Form Inline */}
@@ -159,16 +150,16 @@ export default function ShowRecordTimeline({
                                 />
                             ) : (
                                 <>
-                                    <div className="font-semibold text-[calc(0.95rem*var(--font-scale))] mb-1 flex items-center gap-2">
+                                    <div className="mb-1 flex items-center gap-2 text-[calc(0.95rem*var(--font-scale))] font-semibold">
                                         {record.showName}
                                         {record.isNan && (
-                                            <span className="inline-flex items-center gap-[2px] py-[1px] px-2 rounded-sm bg-[linear-gradient(135deg,rgba(245,158,11,0.2),rgba(234,179,8,0.1))] text-[#F59E0B] text-[calc(0.7rem*var(--font-scale))] font-bold uppercase tracking-wider">
+                                            <span className="inline-flex items-center gap-[2px] rounded-sm bg-[linear-gradient(135deg,rgba(245,158,11,0.2),rgba(234,179,8,0.1))] px-2 py-[1px] text-[calc(0.7rem*var(--font-scale))] font-bold tracking-wider text-[#F59E0B] uppercase">
                                                 ⭐ NAN
                                             </span>
                                         )}
                                     </div>
 
-                                    <div className="flex flex-wrap gap-y-2 gap-x-6 text-[calc(0.8rem*var(--font-scale))] text-muted [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+                                    <div className="text-muted flex flex-wrap gap-x-6 gap-y-2 text-[calc(0.8rem*var(--font-scale))] [&_span]:flex [&_span]:items-center [&_span]:gap-1">
                                         <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
                                         {record.placing && <span>🎖️ {record.placing}</span>}
                                         {record.division && <span>📂 {record.division}</span>}
@@ -179,7 +170,7 @@ export default function ShowRecordTimeline({
 
                                     {/* Advanced details row */}
                                     {(record.sectionName || record.awardCategory || record.competitionLevel) && (
-                                        <div className="flex flex-wrap gap-y-2 gap-x-6 text-[calc(0.8rem*var(--font-scale))] text-muted [&_span]:flex [&_span]:items-center [&_span]:gap-1 mt-1">
+                                        <div className="text-muted mt-1 flex flex-wrap gap-x-6 gap-y-2 text-[calc(0.8rem*var(--font-scale))] [&_span]:flex [&_span]:items-center [&_span]:gap-1">
                                             {record.sectionName && <span>🏷️ {record.sectionName}</span>}
                                             {record.awardCategory && <span>🎯 {record.awardCategory}</span>}
                                             {record.competitionLevel && <span>📊 {record.competitionLevel}</span>}
@@ -187,13 +178,15 @@ export default function ShowRecordTimeline({
                                     )}
 
                                     {record.notes && (
-                                        <div className="mt-1 text-[calc(0.85rem*var(--font-scale))] text-muted italic">{record.notes}</div>
+                                        <div className="text-muted mt-1 text-[calc(0.85rem*var(--font-scale))] italic">
+                                            {record.notes}
+                                        </div>
                                     )}
 
                                     {isOwner && (
                                         <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover/record:opacity-100">
                                             <button
-                                                className="bg-transparent border-none text-muted cursor-pointer py-[2px] px-[6px] rounded-sm text-[calc(0.75rem*var(--font-scale))] transition-colors hover:text-forest"
+                                                className="text-muted hover:text-forest cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-[calc(0.75rem*var(--font-scale))] transition-colors"
                                                 onClick={() => handleEdit(record)}
                                                 title="Edit"
                                                 aria-label="Edit record"
@@ -201,7 +194,7 @@ export default function ShowRecordTimeline({
                                                 ✏️
                                             </button>
                                             <button
-                                                className="bg-transparent border-none text-muted cursor-pointer py-[2px] px-[6px] rounded-sm text-[calc(0.75rem*var(--font-scale))] transition-colors hover:text-[#e74c6f]"
+                                                className="text-muted cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-[calc(0.75rem*var(--font-scale))] transition-colors hover:text-[#e74c6f]"
                                                 onClick={() => handleDelete(record.id)}
                                                 disabled={deletingId === record.id}
                                                 title="Delete"

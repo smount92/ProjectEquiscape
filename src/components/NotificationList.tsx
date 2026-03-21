@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-    markNotificationRead,
-    markAllNotificationsRead,
-    clearNotifications,
-} from "@/app/actions/notifications";
+import { markNotificationRead, markAllNotificationsRead, clearNotifications } from "@/app/actions/notifications";
 
 interface NotifItem {
     id: string;
@@ -22,18 +18,30 @@ interface NotifItem {
 
 function getNotifIcon(type: string): string {
     switch (type) {
-        case "favorite": return "❤️";
-        case "comment": return "💬";
-        case "rating": return "⭐";
-        case "follow": return "👤";
-        case "message": return "✉️";
-        case "feature": return "🌟";
-        case "wishlist_match": return "❤️‍🔥";
-        case "show_vote": return "📸";
-        case "show_result": return "🏆";
-        case "judge_assigned": return "🏅";
-        case "achievement": return "🏆";
-        default: return "🔔";
+        case "favorite":
+            return "❤️";
+        case "comment":
+            return "💬";
+        case "rating":
+            return "⭐";
+        case "follow":
+            return "👤";
+        case "message":
+            return "✉️";
+        case "feature":
+            return "🌟";
+        case "wishlist_match":
+            return "❤️‍🔥";
+        case "show_vote":
+            return "📸";
+        case "show_result":
+            return "🏆";
+        case "judge_assigned":
+            return "🏅";
+        case "achievement":
+            return "🏆";
+        default:
+            return "🔔";
     }
 }
 
@@ -72,9 +80,7 @@ interface NotificationListProps {
     initialNotifications: NotifItem[];
 }
 
-export default function NotificationList({
-    initialNotifications,
-}: NotificationListProps) {
+export default function NotificationList({ initialNotifications }: NotificationListProps) {
     const [notifs, setNotifs] = useState(initialNotifications);
     const [clearing, setClearing] = useState(false);
 
@@ -92,9 +98,7 @@ export default function NotificationList({
 
     const handleClick = async (id: string) => {
         await markNotificationRead(id);
-        setNotifs((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-        );
+        setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
     };
 
     const unreadCount = notifs.filter((n) => !n.isRead).length;
@@ -103,14 +107,17 @@ export default function NotificationList({
         <div>
             {/* Actions Bar */}
             {notifs.length > 0 && (
-                <div className="flex gap-2 mb-6 pb-2 border-b border-edge">
+                <div className="border-edge mb-6 flex gap-2 border-b pb-2">
                     {unreadCount > 0 && (
-                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={handleMarkAllRead}>
+                        <button
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                            onClick={handleMarkAllRead}
+                        >
                             ✓ Mark All Read
                         </button>
                     )}
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
                         onClick={handleClear}
                         disabled={clearing}
                         style={{ color: "var(--color-text-muted)" }}
@@ -122,8 +129,8 @@ export default function NotificationList({
 
             {/* List */}
             {notifs.length === 0 ? (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
-                    <div className="text-center py-[var(--space-3xl)] px-8-icon">🔔</div>
+                <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🔔</div>
                     <h2>All Caught Up!</h2>
                     <p>No notifications yet. Activity from the community will appear here.</p>
                 </div>
@@ -133,17 +140,21 @@ export default function NotificationList({
                         <Link
                             key={n.id}
                             href={getNotifLink(n)}
-                            className={`flex items-center gap-4 py-4 px-6 border-b border-edge no-underline text-inherit transition-colors hover:bg-black/[0.03] ${n.isRead ? "" : "bg-[rgba(129,140,248,0.04)]"}`}
+                            className={`border-edge flex items-center gap-4 border-b px-6 py-4 text-inherit no-underline transition-colors hover:bg-black/[0.03] ${n.isRead ? "" : "bg-[rgba(129,140,248,0.04)]"}`}
                             onClick={() => handleClick(n.id)}
                         >
-                            <span className="text-[calc(1.2rem*var(--font-scale))] shrink-0">{getNotifIcon(n.type)}</span>
-                            <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                            <span className="shrink-0 text-[calc(1.2rem*var(--font-scale))]">
+                                {getNotifIcon(n.type)}
+                            </span>
+                            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                                 <span className="text-[calc(0.9rem*var(--font-scale))]">
                                     {n.content || "New notification"}
                                 </span>
-                                <span className="text-[calc(0.75rem*var(--font-scale))] text-muted">{timeAgo(n.createdAt)}</span>
+                                <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+                                    {timeAgo(n.createdAt)}
+                                </span>
                             </div>
-                            {!n.isRead && <span className="w-2 h-2 rounded-full bg-forest shrink-0" />}
+                            {!n.isRead && <span className="bg-forest h-2 w-2 shrink-0 rounded-full" />}
                         </Link>
                     ))}
                 </div>

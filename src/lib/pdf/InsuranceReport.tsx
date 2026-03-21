@@ -1,12 +1,5 @@
 import React from "react";
-import {
-    Document,
-    Page,
-    View,
-    Text,
-    Image,
-    StyleSheet,
-} from "@react-pdf/renderer";
+import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 
 /* ═══════════════════════════════════════════════════════════════
    Types
@@ -317,9 +310,7 @@ function CoverPage({
                 <Text style={s.coverSubtitle}>Digital Stable Management</Text>
 
                 <Text style={s.coverTitle}>Collection Insurance Report</Text>
-                <Text style={s.coverOwner}>
-                    {owner.full_name || owner.alias_name}
-                </Text>
+                <Text style={s.coverOwner}>{owner.full_name || owner.alias_name}</Text>
                 <Text style={s.coverDate}>{fmtDate(generatedAt)}</Text>
 
                 <View style={s.coverStat}>
@@ -341,13 +332,7 @@ function CoverPage({
 /* ═══════════════════════════════════════════════════════════════
    Summary Table Page
    ═══════════════════════════════════════════════════════════════ */
-function SummaryPage({
-    horses,
-    generatedAt,
-}: {
-    horses: InsuranceHorse[];
-    generatedAt: string;
-}) {
+function SummaryPage({ horses, generatedAt }: { horses: InsuranceHorse[]; generatedAt: string }) {
     const totalPurchase = horses.reduce((sum, h) => sum + (h.financial_vault?.[0]?.purchase_price || 0), 0);
     const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.[0]?.estimated_current_value || 0), 0);
 
@@ -370,16 +355,10 @@ function SummaryPage({
                 return (
                     <View key={horse.id} style={[s.tableRow, i % 2 === 1 ? s.tableRowAlt : {}]} wrap={false}>
                         <Text style={[s.tableCell, { width: "30%" }]}>{horse.custom_name}</Text>
-                        <Text style={[s.tableCell, { width: "22%" }]}>
-                            {horse.catalog_items?.title || "—"}
-                        </Text>
+                        <Text style={[s.tableCell, { width: "22%" }]}>{horse.catalog_items?.title || "—"}</Text>
                         <Text style={[s.tableCell, { width: "14%" }]}>{horse.condition_grade || "—"}</Text>
-                        <Text style={[s.tableCellMoney, { width: "17%" }]}>
-                            {fmt$(vault?.purchase_price)}
-                        </Text>
-                        <Text style={[s.tableCellMoney, { width: "17%" }]}>
-                            {fmt$(vault?.estimated_current_value)}
-                        </Text>
+                        <Text style={[s.tableCellMoney, { width: "17%" }]}>{fmt$(vault?.purchase_price)}</Text>
+                        <Text style={[s.tableCellMoney, { width: "17%" }]}>{fmt$(vault?.estimated_current_value)}</Text>
                     </View>
                 );
             })}
@@ -387,12 +366,8 @@ function SummaryPage({
             {/* Totals */}
             <View style={s.totalRow}>
                 <Text style={[s.totalText, { width: "66%" }]}>TOTAL ({horses.length} models)</Text>
-                <Text style={[s.totalText, { width: "17%", textAlign: "right" }]}>
-                    {fmt$(totalPurchase)}
-                </Text>
-                <Text style={[s.totalText, { width: "17%", textAlign: "right" }]}>
-                    {fmt$(totalValue)}
-                </Text>
+                <Text style={[s.totalText, { width: "17%", textAlign: "right" }]}>{fmt$(totalPurchase)}</Text>
+                <Text style={[s.totalText, { width: "17%", textAlign: "right" }]}>{fmt$(totalValue)}</Text>
             </View>
 
             <PageFooter generatedAt={generatedAt} />
@@ -429,7 +404,8 @@ function DetailPage({
                     <Text style={s.detailName}>{horse.custom_name}</Text>
                     {ref && (
                         <Text style={s.detailReference}>
-                            {ref.maker} — {ref.title}{ref.scale ? ` (${ref.scale})` : ""}
+                            {ref.maker} — {ref.title}
+                            {ref.scale ? ` (${ref.scale})` : ""}
                         </Text>
                     )}
                 </View>
@@ -483,10 +459,7 @@ function DetailPage({
    ═══════════════════════════════════════════════════════════════ */
 export function InsuranceReportDocument(props: InsuranceReportProps) {
     const { owner, horses, thumbnailMap, generatedAt } = props;
-    const totalValue = horses.reduce(
-        (sum, h) => sum + (h.financial_vault?.[0]?.estimated_current_value || 0),
-        0
-    );
+    const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.[0]?.estimated_current_value || 0), 0);
 
     return (
         <Document
@@ -495,12 +468,7 @@ export function InsuranceReportDocument(props: InsuranceReportProps) {
             subject="Model Horse Collection Insurance Documentation"
             creator="Model Horse Hub"
         >
-            <CoverPage
-                owner={owner}
-                totalModels={horses.length}
-                totalValue={totalValue}
-                generatedAt={generatedAt}
-            />
+            <CoverPage owner={owner} totalModels={horses.length} totalValue={totalValue} generatedAt={generatedAt} />
             <SummaryPage horses={horses} generatedAt={generatedAt} />
             {horses.map((horse) => (
                 <DetailPage

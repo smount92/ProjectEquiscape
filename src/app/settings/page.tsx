@@ -12,7 +12,6 @@ import {
     deleteAccount,
 } from "@/app/actions/settings";
 
-
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
     { key: "show_votes", emoji: "📸", label: "Show votes on your entries" },
     { key: "favorites", emoji: "❤️", label: "Favorites on your horses" },
@@ -84,7 +83,14 @@ export default function SettingsPage() {
     const handleSaveProfile = async () => {
         setIsSavingProfile(true);
         setProfileMsg(null);
-        const result = await updateProfile({ aliasName, bio, defaultHorsePublic, watermarkPhotos, showBadges, currencySymbol });
+        const result = await updateProfile({
+            aliasName,
+            bio,
+            defaultHorsePublic,
+            watermarkPhotos,
+            showBadges,
+            currencySymbol,
+        });
         if (result.success) {
             setProfileMsg({ type: "success", text: "Profile updated!" });
         } else {
@@ -132,10 +138,10 @@ export default function SettingsPage() {
 
     if (isLoading) {
         return (
-            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+            <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
                 <div className="p-[var(--space-3xl)]" style={{ textAlign: "center" }}>
                     <div
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner"
+                        className="hover:no-underline-min-h)] leading-none-spinner inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
                         style={{
                             width: 36,
                             height: 36,
@@ -152,25 +158,29 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <nav className="flex items-center gap-2 mb-6 text-sm text-muted animate-fade-in-up" aria-label="Breadcrumb">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+            <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
                 <Link href="/dashboard">Digital Stable</Link>
-                <span className="separator" aria-hidden="true">/</span>
+                <span className="separator" aria-hidden="true">
+                    /
+                </span>
                 <span>Settings</span>
             </nav>
 
-            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up max-w-[680]">
-                <h1 className="mb-12 text-[calc(1.6rem*var(--font-scale))]" >
+            <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up max-w-[680] py-[var(--space-3xl)] max-sm:py-[0]">
+                <h1 className="mb-12 text-[calc(1.6rem*var(--font-scale))]">
                     ⚙️ <span className="text-forest">Settings</span>
                 </h1>
 
                 {/* ═══ Profile ═══ */}
                 <div className="mb-12 max-sm:mb-8">
-                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">👤 Profile</h2>
-                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                    <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight">
+                        👤 Profile
+                    </h2>
+                    <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
                         {/* Avatar */}
-                        <div className="flex items-center gap-6 max-sm:gap-4 mb-8 pb-6 border-b border-edge">
-                            <div className="w-20 h-20 rounded-full bg-[linear-gradient(135deg,rgba(44,85,69,0.08),rgba(139,90,43,0.08))] flex items-center justify-center text-[2rem] overflow-hidden border-[2.5px] border-edge shrink-0 transition-colors hover:border-forest [&_img]:w-full [&_img]:h-full [&_img]:object-cover">
+                        <div className="border-edge mb-8 flex items-center gap-6 border-b pb-6 max-sm:gap-4">
+                            <div className="border-edge hover:border-forest flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] bg-[linear-gradient(135deg,rgba(44,85,69,0.08),rgba(139,90,43,0.08))] text-[2rem] transition-colors [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
                                 {avatarUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={avatarUrl} alt="Your avatar" />
@@ -180,7 +190,7 @@ export default function SettingsPage() {
                             </div>
                             <div>
                                 <button
-                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                                     style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                                     onClick={() => avatarInputRef.current?.click()}
                                     disabled={isUploadingAvatar}
@@ -194,7 +204,7 @@ export default function SettingsPage() {
                                     onChange={handleAvatarChange}
                                     style={{ display: "none" }}
                                 />
-                                <p className="text-[calc(0.75rem*var(--font-scale))] text-muted mt-[4]" >
+                                <p className="text-muted mt-[4] text-[calc(0.75rem*var(--font-scale))]">
                                     Max 2MB. JPG, PNG, or WebP.
                                 </p>
                             </div>
@@ -202,7 +212,7 @@ export default function SettingsPage() {
 
                         {/* Alias */}
                         <div className="mb-6">
-                            <label htmlFor="settings-alias" className="block text-sm font-semibold text-ink mb-1">
+                            <label htmlFor="settings-alias" className="text-ink mb-1 block text-sm font-semibold">
                                 Display Name
                             </label>
                             <input
@@ -214,29 +224,29 @@ export default function SettingsPage() {
                                 maxLength={30}
                                 minLength={3}
                             />
-                            <span className="block mt-1 text-xs text-muted">3-30 characters. Must be unique.</span>
+                            <span className="text-muted mt-1 block text-xs">3-30 characters. Must be unique.</span>
                         </div>
 
                         {/* Bio */}
                         <div className="mb-6">
-                            <label htmlFor="settings-bio" className="block text-sm font-semibold text-ink mb-1">
+                            <label htmlFor="settings-bio" className="text-ink mb-1 block text-sm font-semibold">
                                 Bio
                             </label>
                             <textarea
                                 id="settings-bio"
-                                className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
+                                className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
                                 rows={3}
                                 maxLength={500}
                                 placeholder="Tell other collectors about yourself…"
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
                             />
-                            <span className="block mt-1 text-xs text-muted">{bio.length}/500</span>
+                            <span className="text-muted mt-1 block text-xs">{bio.length}/500</span>
                         </div>
 
                         {/* Default horse visibility */}
-                        <div className="flex items-center justify-between py-4 max-sm:gap-2 gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
-                            <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
+                        <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
+                            <span className="text-ink flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium">
                                 🏆 Default new horses to public
                             </span>
                             <button
@@ -248,12 +258,12 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Photo watermarking */}
-                        <div className="flex items-center justify-between py-4 max-sm:gap-2 gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
+                        <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
                             <div>
-                                <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
+                                <span className="text-ink flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium">
                                     📸 Watermark uploaded photos
                                 </span>
-                                <span className="block mt-1 text-xs text-muted mt-[2]" style={{ display: "block" }}>
+                                <span className="text-muted mt-1 mt-[2] block text-xs" style={{ display: "block" }}>
                                     Adds &ldquo;© @{aliasName} — ModelHorseHub&rdquo; to new uploads
                                 </span>
                             </div>
@@ -266,12 +276,12 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Show trophies on profile */}
-                        <div className="flex items-center justify-between py-4 max-sm:gap-2 gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
+                        <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
                             <div>
-                                <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
+                                <span className="text-ink flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium">
                                     🏆 Show Trophy Case on profile
                                 </span>
-                                <span className="block mt-1 text-xs text-muted mt-[2]" style={{ display: "block" }}>
+                                <span className="text-muted mt-1 mt-[2] block text-xs" style={{ display: "block" }}>
                                     When off, your badges are hidden from other users
                                 </span>
                             </div>
@@ -285,7 +295,7 @@ export default function SettingsPage() {
 
                         {/* Currency symbol preference */}
                         <div className="mb-6">
-                            <label htmlFor="settings-currency" className="block text-sm font-semibold text-ink mb-1">
+                            <label htmlFor="settings-currency" className="text-ink mb-1 block text-sm font-semibold">
                                 💱 Preferred Currency Symbol
                             </label>
                             <select
@@ -306,13 +316,14 @@ export default function SettingsPage() {
                                 <option value="₩">₩ — Korean Won</option>
                                 <option value="zł">zł — Polish Zloty</option>
                             </select>
-                            <span className="block mt-1 text-xs text-muted">
-                                Shown on your vault, offers, and listing prices. Market Value (Blue Book) always shows USD.
+                            <span className="text-muted mt-1 block text-xs">
+                                Shown on your vault, offers, and listing prices. Market Value (Blue Book) always shows
+                                USD.
                             </span>
                         </div>
 
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             onClick={handleSaveProfile}
                             disabled={isSavingProfile}
                             style={{ marginTop: "var(--space-lg)" }}
@@ -321,7 +332,9 @@ export default function SettingsPage() {
                         </button>
 
                         {profileMsg && (
-                            <p className={`${profileMsg.type === "success" ? "text-forest text-sm mt-1 font-medium flex items-center gap-1 before:content-['✓']" : "form-error"} mt-2`}>
+                            <p
+                                className={`${profileMsg.type === "success" ? "text-forest mt-1 flex items-center gap-1 text-sm font-medium before:content-['✓']" : "form-error"} mt-2`}
+                            >
                                 {profileMsg.text}
                             </p>
                         )}
@@ -330,10 +343,12 @@ export default function SettingsPage() {
 
                 {/* ═══ Security ═══ */}
                 <div className="mb-12 max-sm:mb-8">
-                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">🔒 Security</h2>
-                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                    <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight">
+                        🔒 Security
+                    </h2>
+                    <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Email</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Email</label>
                             <input
                                 type="email"
                                 className="form-input"
@@ -341,11 +356,16 @@ export default function SettingsPage() {
                                 disabled
                                 style={{ opacity: 0.6 }}
                             />
-                            <span className="block mt-1 text-xs text-muted">Email changes require verification (coming soon).</span>
+                            <span className="text-muted mt-1 block text-xs">
+                                Email changes require verification (coming soon).
+                            </span>
                         </div>
 
                         <div className="mb-6">
-                            <label htmlFor="settings-new-password" className="block text-sm font-semibold text-ink mb-1">
+                            <label
+                                htmlFor="settings-new-password"
+                                className="text-ink mb-1 block text-sm font-semibold"
+                            >
                                 New Password
                             </label>
                             <input
@@ -360,7 +380,10 @@ export default function SettingsPage() {
                         </div>
 
                         <div className="mb-6">
-                            <label htmlFor="settings-confirm-password" className="block text-sm font-semibold text-ink mb-1">
+                            <label
+                                htmlFor="settings-confirm-password"
+                                className="text-ink mb-1 block text-sm font-semibold"
+                            >
                                 Confirm Password
                             </label>
                             <input
@@ -374,7 +397,7 @@ export default function SettingsPage() {
                         </div>
 
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             onClick={handleChangePassword}
                             disabled={isSavingPassword || !newPassword || !confirmPassword}
                         >
@@ -382,7 +405,9 @@ export default function SettingsPage() {
                         </button>
 
                         {passwordMsg && (
-                            <p className={`${passwordMsg.type === "success" ? "text-forest text-sm mt-1 font-medium flex items-center gap-1 before:content-['✓']" : "form-error"} mt-2`}>
+                            <p
+                                className={`${passwordMsg.type === "success" ? "text-forest mt-1 flex items-center gap-1 text-sm font-medium before:content-['✓']" : "form-error"} mt-2`}
+                            >
                                 {passwordMsg.text}
                             </p>
                         )}
@@ -391,11 +416,16 @@ export default function SettingsPage() {
 
                 {/* ═══ Notifications ═══ */}
                 <div className="mb-12 max-sm:mb-8">
-                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">🔔 Notifications</h2>
-                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                    <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight">
+                        🔔 Notifications
+                    </h2>
+                    <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
                         {NOTIF_LABELS.map((n) => (
-                            <div key={n.key} className="flex items-center justify-between py-4 max-sm:gap-2 gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
-                                <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
+                            <div
+                                key={n.key}
+                                className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2"
+                            >
+                                <span className="text-ink flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium">
                                     {n.emoji} {n.label}
                                 </span>
                                 <button
@@ -411,25 +441,35 @@ export default function SettingsPage() {
 
                 {/* ═══ Data & Reports ═══ */}
                 <div className="mb-12 max-sm:mb-8">
-                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">📊 Data & Reports</h2>
-                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                    <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight">
+                        📊 Data & Reports
+                    </h2>
+                    <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
                         <div className="gap-6" style={{ display: "flex", flexDirection: "column" }}>
                             {/* CSV Export */}
                             <div>
-                                <a href="/api/export" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" download>
+                                <a
+                                    href="/api/export"
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    download
+                                >
                                     📄 Download Collection (CSV)
                                 </a>
-                                <p className="block mt-1 text-xs text-muted mt-[4]">
+                                <p className="text-muted mt-1 mt-[4] block text-xs">
                                     Spreadsheet format — compatible with Excel, Google Sheets.
                                 </p>
                             </div>
 
                             {/* Insurance PDF */}
                             <div>
-                                <a href="/api/insurance-report" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" download>
+                                <a
+                                    href="/api/insurance-report"
+                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                    download
+                                >
                                     🛡️ Download Insurance Report (PDF)
                                 </a>
-                                <p className="block mt-1 text-xs text-muted mt-[4]">
+                                <p className="text-muted mt-1 mt-[4] block text-xs">
                                     Professional PDF with photos and values — share with your insurance agent.
                                 </p>
                             </div>
@@ -439,19 +479,26 @@ export default function SettingsPage() {
 
                 {/* ═══ Danger Zone ═══ */}
                 <div className="mb-12 max-sm:mb-8">
-                    <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight text-[#ef4444]">⚠️ Danger Zone</h2>
-                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] rounded-lg" style={{ border: "1px solid #ef4444" }}>
-                        <p className="mb-4 leading-[1.6]" >
+                    <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight text-[#ef4444]">
+                        ⚠️ Danger Zone
+                    </h2>
+                    <div
+                        className="bg-surface border-edge rounded-lg rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6"
+                        style={{ border: "1px solid #ef4444" }}
+                    >
+                        <p className="mb-4 leading-[1.6]">
                             Permanently delete your account. This action <strong>cannot be undone</strong>.
                         </p>
-                        <ul className="mb-4 pl-6 leading-[1.8] text-muted text-sm" >
+                        <ul className="text-muted mb-4 pl-6 text-sm leading-[1.8]">
                             <li>Your profile will be anonymized as &ldquo;[Deleted Collector]&rdquo;</li>
                             <li>Your horses will be orphaned (Hoofprint™ history preserved)</li>
                             <li>Pending transfers and commissions will be cancelled</li>
                             <li>You will be signed out and cannot log in again</li>
                         </ul>
                         <div className="mb-6">
-                            <label htmlFor="delete-confirm" className="block text-sm font-semibold text-ink mb-1">Type <strong>DELETE</strong> to confirm</label>
+                            <label htmlFor="delete-confirm" className="text-ink mb-1 block text-sm font-semibold">
+                                Type <strong>DELETE</strong> to confirm
+                            </label>
                             <input
                                 id="delete-confirm"
                                 type="text"
@@ -463,7 +510,7 @@ export default function SettingsPage() {
                             />
                         </div>
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
+                            className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                             style={{
                                 background: deleteConfirm === "DELETE" ? "#ef4444" : "var(--color-surface-elevated)",
                                 color: deleteConfirm === "DELETE" ? "#fff" : "var(--color-text-muted)",
@@ -485,7 +532,11 @@ export default function SettingsPage() {
                         >
                             {isDeleting ? "Deleting…" : "🗑️ Permanently Delete Account"}
                         </button>
-                        {deleteError && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mt-2">{deleteError}</p>}
+                        {deleteError && (
+                            <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+                                {deleteError}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

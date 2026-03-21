@@ -21,18 +21,19 @@ export default async function ImportPage() {
     }
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
                     <div>
                         <h1>
                             <span className="text-forest">Batch Import</span>
                         </h1>
-                        <p className="text-muted mt-1" >
-                            Import your collection from a CSV spreadsheet
-                        </p>
+                        <p className="text-muted mt-1">Import your collection from a CSV spreadsheet</p>
                     </div>
-                    <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                    <Link
+                        href="/dashboard"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
                         ← Back to Stable
                     </Link>
                 </div>

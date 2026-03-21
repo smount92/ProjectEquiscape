@@ -9,11 +9,7 @@ interface FavoriteButtonProps {
     initialCount: number;
 }
 
-export default function FavoriteButton({
-    horseId,
-    initialIsFavorited,
-    initialCount,
-}: FavoriteButtonProps) {
+export default function FavoriteButton({ horseId, initialIsFavorited, initialCount }: FavoriteButtonProps) {
     const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
     const [count, setCount] = useState(initialCount);
     const [status, setStatus] = useState<"idle" | "saving">("idle");
@@ -46,10 +42,8 @@ export default function FavoriteButton({
 
     return (
         <button
-            className={`inline-flex items-center gap-1 bg-transparent border-none cursor-pointer px-1.5 py-1 rounded-sm text-xs transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
-                isFavorited
-                    ? "text-[#e74c6f]"
-                    : "text-muted hover:text-[#e74c6f] hover:scale-110"
+            className={`inline-flex cursor-pointer items-center gap-1 rounded-sm border-none bg-transparent px-1.5 py-1 text-xs transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
+                isFavorited ? "text-[#e74c6f]" : "text-muted hover:scale-110 hover:text-[#e74c6f]"
             }`}
             onClick={handleClick}
             disabled={status === "saving"}
@@ -74,4 +68,3 @@ export default function FavoriteButton({
         </button>
     );
 }
-

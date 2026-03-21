@@ -113,15 +113,19 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
         return (
             <span className="inline-flex gap-1" style={{ alignItems: "center" }}>
                 <button
-                    className="admin-mark-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
-                    style={{ background: "rgba(239, 68, 68, 0.15)", borderColor: "rgba(239, 68, 68, 0.4)", color: "#ef4444" }}
+                    className="admin-mark-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    style={{
+                        background: "rgba(239, 68, 68, 0.15)",
+                        borderColor: "rgba(239, 68, 68, 0.4)",
+                        color: "#ef4444",
+                    }}
                     onClick={handleDelete}
                     disabled={deleting}
                 >
                     {deleting ? "…" : "Confirm"}
                 </button>
                 <button
-                    className="admin-mark-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-[rgba(0, 0, 0, 0.05)] border-edge text-muted"
+                    className="admin-mark-inline-flex hover:no-underline-min-h)] bg-[rgba(0, 0, 0, 0.05)] border-edge text-muted min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                     onClick={() => setConfirming(false)}
                     disabled={deleting}
                 >
@@ -133,7 +137,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
 
     return (
         <button
-            className="admin-mark-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
+            className="admin-mark-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
             style={{ background: "rgba(239, 68, 68, 0.08)", borderColor: "rgba(239, 68, 68, 0.2)", color: "#ef4444" }}
             onClick={() => setConfirming(true)}
             title="Delete this message"
@@ -143,13 +147,20 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
     );
 }
 
-export default function AdminTabs({ messages, unreadCount, shows, suggestions, reports, catalogSuggestions = [] }: AdminTabsProps) {
+export default function AdminTabs({
+    messages,
+    unreadCount,
+    shows,
+    suggestions,
+    reports,
+    catalogSuggestions = [],
+}: AdminTabsProps) {
     const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
 
     // Restore from localStorage
     useEffect(() => {
         const saved = localStorage.getItem("admin-tab");
-        if (saved && TABS.some(t => t.key === saved)) {
+        if (saved && TABS.some((t) => t.key === saved)) {
             setActiveTab(saved as TabKey);
         }
     }, []);
@@ -161,19 +172,25 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
 
     const getBadge = (key: TabKey): number | null => {
         switch (key) {
-            case "mailbox": return unreadCount > 0 ? unreadCount : null;
-            case "shows": return shows.length > 0 ? shows.length : null;
-            case "content": return suggestions.length > 0 ? suggestions.length : null;
-            case "reports": return reports.length > 0 ? reports.length : null;
-            case "catalog": return catalogSuggestions.length > 0 ? catalogSuggestions.length : null;
-            default: return null;
+            case "mailbox":
+                return unreadCount > 0 ? unreadCount : null;
+            case "shows":
+                return shows.length > 0 ? shows.length : null;
+            case "content":
+                return suggestions.length > 0 ? suggestions.length : null;
+            case "reports":
+                return reports.length > 0 ? reports.length : null;
+            case "catalog":
+                return catalogSuggestions.length > 0 ? catalogSuggestions.length : null;
+            default:
+                return null;
         }
     };
 
     return (
         <>
             {/* Tab bar */}
-            <div className="flex items-center gap-1 py-2 px-4 bg-transparent border-0 border-b-[3px] border-[transparent] mb-[-2px] cursor-pointer font-[inherit] text-sm font-semibold text-muted whitespace-nowrap transition-all hover:text-ink-bar">
+            <div className="text-muted hover:text-ink-bar mb-[-2px] flex cursor-pointer items-center gap-1 border-0 border-b-[3px] border-[transparent] bg-transparent px-4 py-2 font-[inherit] text-sm font-semibold whitespace-nowrap transition-all">
                 {TABS.map((tab) => {
                     const badge = getBadge(tab.key);
                     return (
@@ -185,7 +202,9 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
                             <span className="text-[1.1em]">{tab.emoji}</span>
                             <span className="inline">{tab.label}</span>
                             {badge !== null && (
-                                <span className={`admin-tab-badge ${tab.key === "reports" && reports.length > 0 ? "admin-tab-badge-alert" : ""}`}>
+                                <span
+                                    className={`admin-tab-badge ${tab.key === "reports" && reports.length > 0 ? "admin-tab-badge-alert" : ""}`}
+                                >
                                     {badge}
                                 </span>
                             )}
@@ -196,21 +215,11 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
 
             {/* Tab content */}
             <div className="min-h-[300px]">
-                {activeTab === "mailbox" && (
-                    <MailboxTab messages={messages} />
-                )}
-                {activeTab === "shows" && (
-                    <ShowsTab shows={shows} />
-                )}
-                {activeTab === "content" && (
-                    <ContentTab suggestions={suggestions} />
-                )}
-                {activeTab === "reports" && (
-                    <ReportsTab reports={reports} />
-                )}
-                {activeTab === "catalog" && (
-                    <CatalogTab suggestions={catalogSuggestions} />
-                )}
+                {activeTab === "mailbox" && <MailboxTab messages={messages} />}
+                {activeTab === "shows" && <ShowsTab shows={shows} />}
+                {activeTab === "content" && <ContentTab suggestions={suggestions} />}
+                {activeTab === "reports" && <ReportsTab reports={reports} />}
+                {activeTab === "catalog" && <CatalogTab suggestions={catalogSuggestions} />}
             </div>
         </>
     );
@@ -222,8 +231,8 @@ export default function AdminTabs({ messages, unreadCount, shows, suggestions, r
 function MailboxTab({ messages }: { messages: ContactMessage[] }) {
     if (messages.length === 0) {
         return (
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
-                <div className="text-center py-[var(--space-3xl)] px-8-icon">📬</div>
+            <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                <div className="px-8-icon py-[var(--space-3xl)] text-center">📬</div>
                 <h2>No Messages Yet</h2>
                 <p>Contact form submissions will appear here.</p>
             </div>
@@ -237,27 +246,34 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
                     key={msg.id}
                     className={`admin-message ${msg.is_read ? "admin-message-read" : "admin-message-unread"}`}
                 >
-                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-sender">
-                            <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-name">{msg.name}</span>
-                            <a href={`mailto:${msg.email}`} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-email">
+                    <div className="bg-glass border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b px-6 px-8 py-4 py-[0] transition-all max-sm:py-[0]">
+                        <div className="bg-glass border-edge transition-all-sender rounded-lg border px-6 py-4">
+                            <span className="bg-glass border-edge transition-all-name rounded-lg border px-6 py-4">
+                                {msg.name}
+                            </span>
+                            <a
+                                href={`mailto:${msg.email}`}
+                                className="bg-glass border-edge transition-all-email rounded-lg border px-6 py-4"
+                            >
                                 {msg.email}
                             </a>
                         </div>
-                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-actions">
-                            <span className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-date">
+                        <div className="bg-glass border-edge transition-all-actions rounded-lg border px-6 py-4">
+                            <span className="bg-glass border-edge transition-all-date rounded-lg border px-6 py-4">
                                 {formatDate(msg.created_at)}
                             </span>
                         </div>
                     </div>
                     {msg.subject && (
-                        <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-subject">
-                            {!msg.is_read && <span className="w-[8px] h-[8px] rounded-full bg-forest shrink-0" />}
+                        <div className="bg-glass border-edge transition-all-subject rounded-lg border px-6 py-4">
+                            {!msg.is_read && <span className="bg-forest h-[8px] w-[8px] shrink-0 rounded-full" />}
                             {msg.subject}
                         </div>
                     )}
-                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-body">{msg.message}</div>
-                    <div className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all-footer">
+                    <div className="bg-glass border-edge transition-all-body rounded-lg border px-6 py-4">
+                        {msg.message}
+                    </div>
+                    <div className="bg-glass border-edge transition-all-footer rounded-lg border px-6 py-4">
                         <AdminReplyForm
                             messageId={msg.id}
                             recipientEmail={msg.email}
@@ -281,11 +297,13 @@ function ShowsTab({ shows }: { shows: Show[] }) {
     return (
         <div className="admin-grid grid-cols-[repeat(auto-fill, minmax(300px, 1fr))] gap-6">
             <div>
-                <h3 className="flex items-center gap-2 text-base font-bold mb-4">📸 Create Photo Show</h3>
+                <h3 className="mb-4 flex items-center gap-2 text-base font-bold">📸 Create Photo Show</h3>
                 <CreateShowForm />
             </div>
             <div>
-                <h3 className="flex items-center gap-2 text-base font-bold mb-4">🎛️ Manage Shows <span className="mt-6-count">{shows.length}</span></h3>
+                <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
+                    🎛️ Manage Shows <span className="mt-6-count">{shows.length}</span>
+                </h3>
                 <AdminShowManager shows={shows} />
             </div>
         </div>
@@ -299,11 +317,13 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
     return (
         <div className="admin-content-grid">
             <div>
-                <h3 className="flex items-center gap-2 text-base font-bold mb-4">💡 Database Suggestions <span className="mt-6-count">{suggestions.length} pending</span></h3>
+                <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
+                    💡 Database Suggestions <span className="mt-6-count">{suggestions.length} pending</span>
+                </h3>
                 <AdminSuggestionsPanel suggestions={suggestions} />
             </div>
             <div>
-                <h3 className="flex items-center gap-2 text-base font-bold mb-4">🌟 Feature a Horse</h3>
+                <h3 className="mb-4 flex items-center gap-2 text-base font-bold">🌟 Feature a Horse</h3>
                 <FeatureHorseForm />
             </div>
         </div>
@@ -316,8 +336,8 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
 function ReportsTab({ reports }: { reports: Report[] }) {
     if (reports.length === 0) {
         return (
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
-                <div className="text-center py-[var(--space-3xl)] px-8-icon">🎉</div>
+            <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                <div className="px-8-icon py-[var(--space-3xl)] text-center">🎉</div>
                 <h2>All Clear</h2>
                 <p>No open reports to review.</p>
             </div>
@@ -326,22 +346,18 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 
     return (
         <div className="flex flex-col gap-2">
-            {reports.map(report => (
-                <div key={report.id} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all">
-                    <div className="justify-between mb-1" style={{ display: "flex" }}>
+            {reports.map((report) => (
+                <div key={report.id} className="bg-glass border-edge rounded-lg border px-6 py-4 transition-all">
+                    <div className="mb-1 justify-between" style={{ display: "flex" }}>
                         <strong>{report.reason}</strong>
-                        <span className="text-xs text-muted" >
+                        <span className="text-muted text-xs">
                             {report.targetType} · {new Date(report.createdAt).toLocaleDateString()}
                         </span>
                     </div>
-                    <p className="text-sm mb-1" >
+                    <p className="mb-1 text-sm">
                         Reported by: {report.reporterAlias} · Target: {report.targetId.slice(0, 8)}…
                     </p>
-                    {report.details && (
-                        <p className="text-sm text-muted" >
-                            {report.details}
-                        </p>
-                    )}
+                    {report.details && <p className="text-muted text-sm">{report.details}</p>}
                     <ReportActions reportId={report.id} />
                 </div>
             ))}
@@ -355,8 +371,8 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
     if (suggestions.length === 0) {
         return (
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8">
-                <div className="text-center py-[var(--space-3xl)] px-8-icon">📚</div>
+            <div className="bg-card border-edge rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                <div className="px-8-icon py-[var(--space-3xl)] text-center">📚</div>
                 <h2>No Pending Catalog Suggestions</h2>
                 <p>Community suggestions will appear here for review.</p>
             </div>
@@ -367,15 +383,24 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
         <div className="flex flex-col gap-2">
             {suggestions.map((s) => {
                 const curatorIcon =
-                    s.author_approved_count >= 200 ? "🥇" :
-                    s.author_approved_count >= 50 ? "🥈" :
-                    s.author_approved_count >= 10 ? "🥉" :
-                    s.author_approved_count >= 1 ? "📘" : "";
+                    s.author_approved_count >= 200
+                        ? "🥇"
+                        : s.author_approved_count >= 50
+                          ? "🥈"
+                          : s.author_approved_count >= 10
+                            ? "🥉"
+                            : s.author_approved_count >= 1
+                              ? "📘"
+                              : "";
 
                 const typeIcon =
-                    s.suggestion_type === "correction" ? "🔧" :
-                    s.suggestion_type === "addition" ? "📗" :
-                    s.suggestion_type === "photo" ? "📸" : "🗑";
+                    s.suggestion_type === "correction"
+                        ? "🔧"
+                        : s.suggestion_type === "addition"
+                          ? "📗"
+                          : s.suggestion_type === "photo"
+                            ? "📸"
+                            : "🗑";
 
                 // Build changes summary
                 let changeText = "";
@@ -391,23 +416,27 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
                 }
 
                 return (
-                    <div key={s.id} className="py-4 px-6 bg-glass border border-edge rounded-lg transition-all">
-                        <div className="justify-between mb-1" style={{ display: "flex" }}>
-                            <strong>{typeIcon} {s.suggestion_type.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</strong>
-                            <span className="text-xs text-muted" >
+                    <div key={s.id} className="bg-glass border-edge rounded-lg border px-6 py-4 transition-all">
+                        <div className="mb-1 justify-between" style={{ display: "flex" }}>
+                            <strong>
+                                {typeIcon}{" "}
+                                {s.suggestion_type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                            </strong>
+                            <span className="text-muted text-xs">
                                 ▲{s.upvotes} ▼{s.downvotes} · {new Date(s.created_at).toLocaleDateString()}
                             </span>
                         </div>
-                        <p className="text-sm mb-1" >
+                        <p className="mb-1 text-sm">
                             By: {curatorIcon} @{s.author_alias}
                         </p>
                         {changeText && (
-                            <p className="text-sm bg-glass p-1 rounded-sm mb-1" style={{ fontFamily: "monospace" }}>
+                            <p className="bg-glass mb-1 rounded-sm p-1 text-sm" style={{ fontFamily: "monospace" }}>
                                 {changeText}
                             </p>
                         )}
-                        <p className="text-sm text-muted mb-2" style={{ fontStyle: "italic" }}>
-                            &ldquo;{s.reason.slice(0, 200)}{s.reason.length > 200 ? "…" : ""}&rdquo;
+                        <p className="text-muted mb-2 text-sm" style={{ fontStyle: "italic" }}>
+                            &ldquo;{s.reason.slice(0, 200)}
+                            {s.reason.length > 200 ? "…" : ""}&rdquo;
                         </p>
                         <SuggestionAdminActions suggestionId={s.id} />
                     </div>

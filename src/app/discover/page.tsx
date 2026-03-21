@@ -4,8 +4,7 @@ import DiscoverGrid from "@/components/DiscoverGrid";
 
 export const metadata = {
     title: "Discover Collectors — Model Horse Hub",
-    description:
-        "Browse active collectors in the Model Horse Hub community. Find stables to follow and admire.",
+    description: "Browse active collectors in the Model Horse Hub community. Find stables to follow and admire.",
 };
 
 export const dynamic = "force-dynamic";
@@ -39,37 +38,39 @@ export default async function DiscoverPage() {
     // Resolve avatar storage paths to signed URLs
     for (const u of activeUsers) {
         if (u.avatar_url && !u.avatar_url.startsWith("http")) {
-            const { data: signedAvatar } = await supabase.storage
-                .from("avatars")
-                .createSignedUrl(u.avatar_url, 3600);
+            const { data: signedAvatar } = await supabase.storage.from("avatars").createSignedUrl(u.avatar_url, 3600);
             u.avatar_url = signedAvatar?.signedUrl || null;
         }
     }
 
     // Batch-fetch which users the current user follows
-    const userIds = activeUsers.map(u => u.id).filter(id => id !== user.id);
-    const { data: followRows } = userIds.length > 0
-        ? await supabase.from("user_follows").select("following_id").eq("follower_id", user.id).in("following_id", userIds)
-        : { data: [] };
+    const userIds = activeUsers.map((u) => u.id).filter((id) => id !== user.id);
+    const { data: followRows } =
+        userIds.length > 0
+            ? await supabase
+                  .from("user_follows")
+                  .select("following_id")
+                  .eq("follower_id", user.id)
+                  .in("following_id", userIds)
+            : { data: [] };
     const followedIds = new Set((followRows ?? []).map((r: { following_id: string }) => r.following_id));
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 max-w-[var(--max-width)]">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Hero */}
-            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
-                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
+            <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+                <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                     <h1>
                         👥 <span className="text-forest">Discover Collectors</span>
                     </h1>
-                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
-                        Find fellow collectors, browse their stables, and connect with the
-                        community.
+                    <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+                        Find fellow collectors, browse their stables, and connect with the community.
                     </p>
                 </div>
-                <div className="flex justify-center gap-8 mt-8">
+                <div className="mt-8 flex justify-center gap-8">
                     <div className="flex flex-col items-center">
-                        <span className="flex flex-col items-center-number">{activeUsers.length}</span>
-                        <span className="flex flex-col items-center-label">Active Collectors</span>
+                        <span className="items-center-number flex flex-col">{activeUsers.length}</span>
+                        <span className="items-center-label flex flex-col">Active Collectors</span>
                     </div>
                 </div>
             </div>

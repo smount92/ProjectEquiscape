@@ -41,22 +41,19 @@ export default function WishlistSearch() {
         return () => clearTimeout(t);
     }, [toast]);
 
-    const runSearch = useCallback(
-        async (q: string) => {
-            if (!q.trim()) {
-                setResults([]);
-                setShowDropdown(false);
-                return;
-            }
+    const runSearch = useCallback(async (q: string) => {
+        if (!q.trim()) {
+            setResults([]);
+            setShowDropdown(false);
+            return;
+        }
 
-            setLoading(true);
-            const items = await searchCatalogAction(q.trim());
-            setResults(items);
-            setLoading(false);
-            setShowDropdown(true);
-        },
-        []
-    );
+        setLoading(true);
+        const items = await searchCatalogAction(q.trim());
+        setResults(items);
+        setLoading(false);
+        setShowDropdown(true);
+    }, []);
 
     // Debounced search
     useEffect(() => {
@@ -107,9 +104,9 @@ export default function WishlistSearch() {
     const noResults = query.trim() && !loading && !hasResults;
 
     // Group by type
-    const molds = results.filter(r => r.itemType === "plastic_mold");
-    const releases = results.filter(r => r.itemType === "plastic_release");
-    const resins = results.filter(r => r.itemType === "artist_resin");
+    const molds = results.filter((r) => r.itemType === "plastic_mold");
+    const releases = results.filter((r) => r.itemType === "plastic_release");
+    const resins = results.filter((r) => r.itemType === "artist_resin");
 
     return (
         <div className="relative mb-6" ref={containerRef}>
@@ -121,7 +118,7 @@ export default function WishlistSearch() {
             )}
 
             {/* Search input */}
-            <div className="flex items-center gap-2 py-2 px-4 bg-glass border border-edge rounded-lg transition-colors">
+            <div className="bg-glass border-edge flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors">
                 <svg
                     className="text-muted shrink-0"
                     width="18"
@@ -143,15 +140,20 @@ export default function WishlistSearch() {
                     placeholder="Search molds, releases & resins to add to your wishlist…"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    onFocus={() => { if (query.trim() && hasResults) setShowDropdown(true); }}
+                    onFocus={() => {
+                        if (query.trim() && hasResults) setShowDropdown(true);
+                    }}
                     id="wishlist-search-input"
                     autoComplete="off"
                     disabled={adding}
                 />
                 {query && (
                     <button
-                        className="flex items-center justify-center w-[24px] h-[24px] rounded-full bg-[rgba(0, 0, 0, 0.05)] border-0 text-muted cursor-pointer text-[0.7rem] transition-all"
-                        onClick={() => { setQuery(""); setShowDropdown(false); }}
+                        className="bg-[rgba(0, 0, 0, 0.05)] text-muted flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
+                        onClick={() => {
+                            setQuery("");
+                            setShowDropdown(false);
+                        }}
                         aria-label="Clear search"
                     >
                         ✕
@@ -163,25 +165,35 @@ export default function WishlistSearch() {
             {showDropdown && (
                 <div className="wishlist-search-dropdown animate-fade-in-up">
                     {loading ? (
-                        <div className="p-4 text-center text-muted text-sm">Searching…</div>
+                        <div className="text-muted p-4 text-center text-sm">Searching…</div>
                     ) : (
                         <>
                             {/* Molds */}
                             {molds.length > 0 && (
                                 <>
-                                    <div className="py-2 px-4 text-xs font-bold text-muted uppercase tracking-[0.05em] border-b border-edge bg-[rgba(0, 0, 0, 0.02)]">🏭 Base Molds</div>
+                                    <div className="text-muted border-edge bg-[rgba(0, 0, 0, 0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+                                        🏭 Base Molds
+                                    </div>
                                     {molds.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]"
+                                            className="text-ink hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
-                                            <div className="flex-1 min-w-0">
-                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-name">{item.title}</span>
-                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                                            <div className="min-w-0 flex-1">
+                                                <span className="text-ink hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+                                                    {item.title}
+                                                </span>
+                                                <span className="text-ink hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+                                                    {" "}
+                                                    · {item.maker}
+                                                    {item.scale ? ` · ${item.scale}` : ""}
+                                                </span>
                                             </div>
-                                            <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
+                                            <span className="bg-[rgba(34, 197, 94, 0.15)] shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-[#22c55e]">
+                                                + Add
+                                            </span>
                                         </button>
                                     ))}
                                 </>
@@ -190,22 +202,34 @@ export default function WishlistSearch() {
                             {/* Releases */}
                             {releases.length > 0 && (
                                 <>
-                                    <div className="py-2 px-4 text-xs font-bold text-muted uppercase tracking-[0.05em] border-b border-edge bg-[rgba(0, 0, 0, 0.02)]">📦 Releases</div>
+                                    <div className="text-muted border-edge bg-[rgba(0, 0, 0, 0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+                                        📦 Releases
+                                    </div>
                                     {releases.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]"
+                                            className="text-ink hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
-                                            <div className="flex-1 min-w-0">
-                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-name">{item.title}</span>
+                                            <div className="min-w-0 flex-1">
+                                                <span className="text-ink hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+                                                    {item.title}
+                                                </span>
                                                 {!!item.attributes.model_number && (
-                                                    <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-meta"> (#{String(item.attributes.model_number)})</span>
+                                                    <span className="text-ink hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+                                                        {" "}
+                                                        (#{String(item.attributes.model_number)})
+                                                    </span>
                                                 )}
-                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-meta"> · {item.maker}</span>
+                                                <span className="text-ink hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+                                                    {" "}
+                                                    · {item.maker}
+                                                </span>
                                             </div>
-                                            <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
+                                            <span className="bg-[rgba(34, 197, 94, 0.15)] shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-[#22c55e]">
+                                                + Add
+                                            </span>
                                         </button>
                                     ))}
                                 </>
@@ -214,19 +238,29 @@ export default function WishlistSearch() {
                             {/* Resins */}
                             {resins.length > 0 && (
                                 <>
-                                    <div className="py-2 px-4 text-xs font-bold text-muted uppercase tracking-[0.05em] border-b border-edge bg-[rgba(0, 0, 0, 0.02)]">🎨 Artist Resins</div>
+                                    <div className="text-muted border-edge bg-[rgba(0, 0, 0, 0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+                                        🎨 Artist Resins
+                                    </div>
                                     {resins.map((item) => (
                                         <button
                                             key={item.id}
-                                            className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]"
+                                            className="text-ink hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
                                             onClick={() => handleAdd(item)}
                                             disabled={adding}
                                         >
-                                            <div className="flex-1 min-w-0">
-                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-name">{item.title}</span>
-                                                <span className="flex items-center justify-between w-full py-2 px-4 border-0 bg-transparent text-ink cursor-pointer text-left font-[inherit] transition-all border-b border-[rgba(0,0,0,0.03)] hover:0.25)] hover:0.08)]-meta"> · {item.maker}{item.scale ? ` · ${item.scale}` : ""}</span>
+                                            <div className="min-w-0 flex-1">
+                                                <span className="text-ink hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+                                                    {item.title}
+                                                </span>
+                                                <span className="text-ink hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgba(0,0,0,0.03)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+                                                    {" "}
+                                                    · {item.maker}
+                                                    {item.scale ? ` · ${item.scale}` : ""}
+                                                </span>
                                             </div>
-                                            <span className="shrink-0 py-[3px] px-[10px] bg-[rgba(34, 197, 94, 0.15)] text-[#22c55e] rounded-full text-xs font-bold">+ Add</span>
+                                            <span className="bg-[rgba(34, 197, 94, 0.15)] shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-[#22c55e]">
+                                                + Add
+                                            </span>
                                         </button>
                                     ))}
                                 </>
@@ -234,15 +268,24 @@ export default function WishlistSearch() {
 
                             {/* No results — escape hatch */}
                             {noResults && (
-                                <div className="py-6 px-4 text-center text-muted text-sm">
+                                <div className="text-muted px-4 py-6 text-center text-sm">
                                     <p>No references match &ldquo;{query}&rdquo;</p>
                                     <button
-                                        className="wishlist-search-custom-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
+                                        className="wishlist-search-custom-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                                         onClick={handleCustomAdd}
                                         disabled={adding}
                                     >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            aria-hidden="true"
+                                        >
                                             <circle cx="12" cy="12" r="10" />
                                             <line x1="12" y1="8" x2="12" y2="16" />
                                             <line x1="8" y1="12" x2="16" y2="12" />

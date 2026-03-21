@@ -50,10 +50,12 @@ export default async function WishlistPage() {
     // 1. Fetch wishlist items with catalog_items join
     const { data: rawItems } = await supabase
         .from("user_wishlists")
-        .select(`
+        .select(
+            `
             id, notes, created_at, catalog_id,
             catalog_items:catalog_id(title, maker, scale, item_type)
-        `)
+        `,
+        )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -69,12 +71,14 @@ export default async function WishlistPage() {
         if (catalogIds.length > 0) {
             const { data: rawMatches } = await supabase
                 .from("user_horses")
-                .select(`
+                .select(
+                    `
                     id, custom_name, trade_status, listing_price, marketplace_notes,
                     catalog_id, owner_id,
                     users!inner(alias_name),
                     horse_images(image_url, angle_profile)
-                `)
+                `,
+                )
                 .eq("is_public", true)
                 .neq("owner_id", user.id)
                 .in("trade_status", ["For Sale", "Open to Offers"])
@@ -112,9 +116,7 @@ export default async function WishlistPage() {
 
                 for (const match of matches) {
                     if (item.catalog_id && match.catalog_id === item.catalog_id) {
-                        const thumb = match.horse_images?.find(
-                            (img) => img.angle_profile === "Primary_Thumbnail"
-                        );
+                        const thumb = match.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
                         const firstImg = match.horse_images?.[0];
                         const imgUrl = thumb?.image_url || firstImg?.image_url;
 
@@ -141,24 +143,28 @@ export default async function WishlistPage() {
     const totalMatches = [...matchMap.values()].reduce((sum, arr) => sum + arr.length, 0);
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
                 {/* Header */}
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
                     <div>
                         <h1>
                             <span className="text-forest">❤️ My Wishlist</span>
                         </h1>
-                        <p className="text-muted mt-1" >
+                        <p className="text-muted mt-1">
                             Models you&apos;re hunting for — {items.length} item{items.length !== 1 ? "s" : ""}
                             {totalMatches > 0 && (
-                                <span className="matchmaker-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-badge">
+                                <span className="matchmaker-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-badge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] max-sm:py-[0]">
                                     🔥 {totalMatches} marketplace match{totalMatches !== 1 ? "es" : ""} found!
                                 </span>
                             )}
                         </p>
                     </div>
-                    <Link href="/community" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="browse-showring">
+                    <Link
+                        href="/community"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        id="browse-showring"
+                    >
                         🏆 Browse Show Ring
                     </Link>
                 </div>
@@ -168,45 +174,51 @@ export default async function WishlistPage() {
 
                 {/* Wishlist Grid */}
                 {items.length === 0 ? (
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
-                        <div className="text-center py-[var(--space-3xl)] px-8-icon">❤️</div>
+                    <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                        <div className="px-8-icon py-[var(--space-3xl)] text-center">❤️</div>
                         <h2>Your Wishlist is Empty</h2>
-                        <p>
-                            Browse the Show Ring and tap the heart icon on models you love to start your hunt!
-                        </p>
-                        <Link href="/community" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
+                        <p>Browse the Show Ring and tap the heart icon on models you love to start your hunt!</p>
+                        <Link
+                            href="/community"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        >
                             🏆 Browse the Show Ring
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-6 max-[600px]:grid-cols-1 animate-fade-in-up">
+                    <div className="animate-fade-in-up grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-6 max-[600px]:grid-cols-1">
                         {items.map((item) => {
                             const catalogItem = item.catalog_items;
                             const title = catalogItem?.title || "Custom Entry";
                             const maker = catalogItem?.maker || null;
                             const scale = catalogItem?.scale || null;
-                            const typeIcon = catalogItem?.item_type === "artist_resin" ? "🎨" :
-                                catalogItem?.item_type === "plastic_release" ? "📦" : "🏭";
+                            const typeIcon =
+                                catalogItem?.item_type === "artist_resin"
+                                    ? "🎨"
+                                    : catalogItem?.item_type === "plastic_release"
+                                      ? "📦"
+                                      : "🏭";
                             const matches = matchMap.get(item.id) ?? [];
 
                             return (
-                                <div key={item.id} className="group/bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all flex gap-4 p-6 bg-[var(--color-surface-glass)] border border-edge rounded-lg transition-all duration-250 relative hover:border-forest hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)] hover:-translate-y-0.5" id={`wishlist-${item.id}`}>
-                                    <div className="text-[2rem] shrink-0 leading-none mt-[2px]">🐴</div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="font-semibold text-ink text-base mb-1">{typeIcon} {title}</div>
-                                        {maker && (
-                                            <div className="text-sm text-forest mb-1">
-                                                {maker}
-                                            </div>
-                                        )}
-                                        {scale && (
-                                            <div className="text-sm text-muted mb-[2px]">📏 {scale}</div>
-                                        )}
+                                <div
+                                    key={item.id}
+                                    className="group/bg-card border-edge border-edge hover:border-forest relative flex gap-4 rounded-lg border bg-[var(--color-surface-glass)] p-6 p-12 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)] max-[480px]:rounded-[var(--radius-md)]"
+                                    id={`wishlist-${item.id}`}
+                                >
+                                    <div className="mt-[2px] shrink-0 text-[2rem] leading-none">🐴</div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="text-ink mb-1 text-base font-semibold">
+                                            {typeIcon} {title}
+                                        </div>
+                                        {maker && <div className="text-forest mb-1 text-sm">{maker}</div>}
+                                        {scale && <div className="text-muted mb-[2px] text-sm">📏 {scale}</div>}
                                         {item.notes && (
-                                            <div className="text-sm text-muted italic mt-1">📝 {item.notes}</div>
+                                            <div className="text-muted mt-1 text-sm italic">📝 {item.notes}</div>
                                         )}
-                                        <div className="text-xs text-muted opacity-70 mt-2">
-                                            Added {new Date(item.created_at).toLocaleDateString("en-US", {
+                                        <div className="text-muted mt-2 text-xs opacity-70">
+                                            Added{" "}
+                                            {new Date(item.created_at).toLocaleDateString("en-US", {
                                                 month: "short",
                                                 day: "numeric",
                                                 year: "numeric",
@@ -215,10 +227,7 @@ export default async function WishlistPage() {
 
                                         {/* MATCHMAKER RESULTS */}
                                         {matches.length > 0 && (
-                                            <MatchmakerMatches
-                                                matchCount={matches.length}
-                                                matches={matches}
-                                            />
+                                            <MatchmakerMatches matchCount={matches.length} matches={matches} />
                                         )}
                                     </div>
                                     <WishlistRemoveButton wishlistId={item.id} />

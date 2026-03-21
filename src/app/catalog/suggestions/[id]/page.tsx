@@ -24,11 +24,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
     const supabase = await createClient();
 
     // Fetch suggestion
-    const { data: suggestion, error } = await supabase
-        .from("catalog_suggestions")
-        .select("*")
-        .eq("id", id)
-        .single();
+    const { data: suggestion, error } = await supabase.from("catalog_suggestions").select("*").eq("id", id).single();
 
     if (error || !suggestion) notFound();
 
@@ -61,11 +57,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
     // Fetch catalog item (for corrections)
     let catalogItem = null;
     if (s.catalog_item_id) {
-        const { data } = await supabase
-            .from("catalog_items")
-            .select("*")
-            .eq("id", s.catalog_item_id)
-            .single();
+        const { data } = await supabase.from("catalog_items").select("*").eq("id", s.catalog_item_id).single();
         catalogItem = data as {
             id: string;
             title: string;
@@ -99,11 +91,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
         currentVote = vote ? (vote as { vote_type: string }).vote_type : null;
 
         // Check admin
-        const { data: profile } = await supabase
-            .from("users")
-            .select("role")
-            .eq("id", user.id)
-            .single();
+        const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();
         isAdmin = (profile as { role: string } | null)?.role === "admin";
     }
 
@@ -120,7 +108,15 @@ export default async function SuggestionDetailPage({ params }: Props) {
     // Curator badge
     const curatorCount = authorInfo?.approved_suggestions_count ?? 0;
     const curatorIcon =
-        curatorCount >= 200 ? "🥇" : curatorCount >= 50 ? "🥈" : curatorCount >= 10 ? "🥉" : curatorCount >= 1 ? "📘" : "";
+        curatorCount >= 200
+            ? "🥇"
+            : curatorCount >= 50
+              ? "🥈"
+              : curatorCount >= 10
+                ? "🥉"
+                : curatorCount >= 1
+                  ? "📘"
+                  : "";
     const curatorLabel =
         curatorCount >= 200
             ? "Gold Curator"
@@ -133,20 +129,24 @@ export default async function SuggestionDetailPage({ params }: Props) {
                   : "";
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+            <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
                 <Link href="/catalog">📚 Reference Catalog</Link>
-                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
+                <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+                    ›
+                </span>
                 <Link href="/catalog/suggestions">Suggestions</Link>
-                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
+                <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+                    ›
+                </span>
                 <span>Detail</span>
             </nav>
 
             <div className="ref-suggestion-detail">
                 {/* Vote Panel + Main Content */}
-                <div className="grid grid-cols-[60px 1fr] gap-4">
+                <div className="grid-cols-[60px 1fr] grid gap-4">
                     {/* Vote Panel */}
-                    <div className="flex flex-col items-center sticky top-[80px]">
+                    <div className="sticky top-[80px] flex flex-col items-center">
                         {user ? (
                             <SuggestionVoteButtons
                                 suggestionId={s.id}
@@ -155,7 +155,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                                 downvotes={s.downvotes}
                             />
                         ) : (
-                            <div className="flex flex-col items-center gap-1 text-muted">
+                            <div className="text-muted flex flex-col items-center gap-1">
                                 <span className="ref-font-semibold">▲ {s.upvotes}</span>
                                 <span className="ref-font-semibold">▼ {s.downvotes}</span>
                             </div>
@@ -165,8 +165,8 @@ export default async function SuggestionDetailPage({ params }: Props) {
                     {/* Main Content */}
                     <div className="flex flex-col gap-4">
                         {/* Header */}
-                        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6">
-                            <div className="flex justify-between items-center flex-wrap gap-2 mb-4">
+                        <div className="bg-card border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                                 <div>
                                     <span className={`ref-status-badge ${st.className}`}>
                                         {st.icon} {st.label}
@@ -226,7 +226,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
                             {s.suggestion_type === "correction" && s.field_changes && (
                                 <div className="m-[var(--space-md) 0]">
                                     <h3>Changes</h3>
-                                    <table className="py-1 px-2 border-b border-edge">
+                                    <table className="border-edge border-b px-2 py-1">
                                         <thead>
                                             <tr>
                                                 <th>Field</th>
@@ -241,11 +241,13 @@ export default async function SuggestionDetailPage({ params }: Props) {
                                                 return (
                                                     <tr key={key}>
                                                         <td className="font-semibold">
-                                                            {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                                                            {key
+                                                                .replace(/_/g, " ")
+                                                                .replace(/\b\w/g, (c) => c.toUpperCase())}
                                                         </td>
                                                         <td className="ref-diff-from">{v.from}</td>
-                                                        <td className="text-center text-muted">→</td>
-                                                        <td className="text-[#66bb6a] font-bold">{v.to}</td>
+                                                        <td className="text-muted text-center">→</td>
+                                                        <td className="font-bold text-[#66bb6a]">{v.to}</td>
                                                     </tr>
                                                 );
                                             })}
@@ -258,15 +260,15 @@ export default async function SuggestionDetailPage({ params }: Props) {
                             {s.suggestion_type === "addition" && (
                                 <div className="m-[var(--space-md) 0]">
                                     <h3>Proposed Entry</h3>
-                                    <div className="grid grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] gap-4 mb-6">
+                                    <div className="grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] mb-6 grid gap-4">
                                         {Object.entries(s.field_changes)
                                             .filter(([, v]) => v != null && v !== "")
                                             .map(([k, v]) => (
                                                 <div key={k} className="flex flex-col gap-[2px]">
-                                                    <span className="text-[calc(0.75rem*var(--font-scale))] text-muted uppercase tracking-[0.05em] font-semibold">
+                                                    <span className="text-muted text-[calc(0.75rem*var(--font-scale))] font-semibold tracking-[0.05em] uppercase">
                                                         {k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                                                     </span>
-                                                    <span className="text-[calc(0.95rem*var(--font-scale))] font-medium text-[#66bb6a] font-bold">
+                                                    <span className="text-[calc(0.95rem*var(--font-scale))] font-bold font-medium text-[#66bb6a]">
                                                         {String(v)}
                                                     </span>
                                                 </div>
@@ -278,14 +280,14 @@ export default async function SuggestionDetailPage({ params }: Props) {
                             {/* Reason */}
                             <div className="m-[var(--space-md) 0]">
                                 <h3>Reason</h3>
-                                <blockquote className="border-l-[3px] border-forest py-2 px-4 bg-glass rounded-[0 var(--radius-md) var(--radius-md) 0] italic text-[var(--color-text)]">
+                                <blockquote className="border-forest bg-glass rounded-[0 var(--radius-md) var(--radius-md) 0] border-l-[3px] px-4 py-2 text-[var(--color-text)] italic">
                                     {s.reason}
                                 </blockquote>
                             </div>
 
                             {/* Admin Notes */}
                             {s.admin_notes && (
-                                <div className="border-l-[3px] border-[#f9a825] py-2 px-4 bg-[rgba(255, 193, 7, 0.05)] rounded-[0 var(--radius-md) var(--radius-md) 0] m-[var(--space-md) 0]">
+                                <div className="bg-[rgba(255, 193, 7, 0.05)] rounded-[0 var(--radius-md) var(--radius-md) 0] m-[var(--space-md) 0] border-l-[3px] border-[#f9a825] px-4 py-2">
                                     <h3>Admin Notes</h3>
                                     <p>{s.admin_notes}</p>
                                 </div>
@@ -293,10 +295,8 @@ export default async function SuggestionDetailPage({ params }: Props) {
                         </div>
 
                         {/* Discussion Thread */}
-                        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6">
-                            <h3>
-                                💬 Discussion ({(comments ?? []).length})
-                            </h3>
+                        <div className="bg-card border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            <h3>💬 Discussion ({(comments ?? []).length})</h3>
                             <SuggestionCommentThread
                                 suggestionId={s.id}
                                 comments={
@@ -314,7 +314,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
                         {/* Admin Actions */}
                         {isAdmin && s.status === "pending" && (
-                            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 border border-[#ffc107]">
+                            <div className="bg-card border-edge rounded-lg border border-[#ffc107] p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                 <h3>🛡️ Admin Actions</h3>
                                 <SuggestionAdminActions suggestionId={s.id} />
                             </div>

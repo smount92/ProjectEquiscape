@@ -13,10 +13,7 @@ interface MessageUserButtonProps {
  * MessageUserButton — opens a general DM conversation with a user
  * without requiring a specific horse context. Used on profile pages.
  */
-export default function MessageUserButton({
-    targetUserId,
-    targetAlias,
-}: MessageUserButtonProps) {
+export default function MessageUserButton({ targetUserId, targetAlias }: MessageUserButtonProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
@@ -37,16 +34,19 @@ export default function MessageUserButton({
     };
 
     return (
-        <div className="message-user-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-wrapper">
+        <div className="message-user-inline-flex hover:no-underline-min-h)] leading-none-wrapper min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150">
             <button
-                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge inline-flex items-center gap-2 !text-sm !py-2 !px-6 [&_svg]:shrink-0 hover:!text-forest hover:!border-forest"
+                className="hover:no-underline-min-h)] text-ink-light border-edge hover:!text-forest hover:!border-forest inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent !px-6 px-8 !py-2 py-2 font-sans !text-sm text-base leading-none font-semibold no-underline transition-all duration-150 [&_svg]:shrink-0"
                 onClick={handleClick}
                 disabled={loading}
                 id={`message-user-${targetAlias}`}
             >
                 {loading ? (
                     <>
-                        <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[14] h-[14]" aria-hidden="true" />
+                        <span
+                            className="hover:no-underline-min-h)] leading-none-spinner inline-flex h-[14] min-h-[var(--opacity-[0.5] w-[14] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                            aria-hidden="true"
+                        />
                         Opening…
                     </>
                 ) : (
@@ -69,7 +69,7 @@ export default function MessageUserButton({
                 )}
             </button>
             {error && (
-                <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mt-1 text-xs">
+                <p className="text-danger mt-1 mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm text-xs">
                     {error}
                 </p>
             )}

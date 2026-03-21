@@ -20,7 +20,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function GroupDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
     const group = await getGroup(slug);
@@ -32,31 +34,34 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
     ]);
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             <div className="page-content">
                 {/* Group Header */}
-                <div className="pb-6 border-b border-edge mb-6">
-                    <Link href="/community/groups" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge mb-4">← All Groups</Link>
+                <div className="border-edge mb-6 border-b pb-6">
+                    <Link
+                        href="/community/groups"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge mb-4 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
+                        ← All Groups
+                    </Link>
                     <h1>{group.name}</h1>
-                    <div className="gap-4 mt-2 text-muted text-[calc(0.85rem*var(--font-scale))]" style={{ display: "flex", flexWrap: "wrap" }}>
+                    <div
+                        className="text-muted mt-2 gap-4 text-[calc(0.85rem*var(--font-scale))]"
+                        style={{ display: "flex", flexWrap: "wrap" }}
+                    >
                         <span>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}</span>
                         {group.region && <span>📍 {group.region}</span>}
-                        <span>👥 {group.memberCount} member{group.memberCount !== 1 ? "s" : ""}</span>
+                        <span>
+                            👥 {group.memberCount} member{group.memberCount !== 1 ? "s" : ""}
+                        </span>
                         <span>Created by @{group.creatorAlias}</span>
                     </div>
-                    {group.description && (
-                        <p className="mt-4 leading-[1.6]" >{group.description}</p>
-                    )}
+                    {group.description && <p className="mt-4 leading-[1.6]">{group.description}</p>}
                 </div>
 
                 {/* Content */}
                 {group.isMember ? (
-                    <GroupDetailClient
-                        group={group}
-                        initialPosts={posts}
-                        channels={channels}
-                        currentUserId={user.id}
-                    />
+                    <GroupDetailClient group={group} initialPosts={posts} channels={channels} currentUserId={user.id} />
                 ) : (
                     <div className="empty-state mt-8">
                         <p>Join this group to see posts and participate.</p>

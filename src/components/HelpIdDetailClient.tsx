@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { upvoteSuggestion, acceptSuggestion, addIdentifiedHorse, createSuggestion, deleteIdRequest } from "@/app/actions/help-id";
+import {
+    upvoteSuggestion,
+    acceptSuggestion,
+    addIdentifiedHorse,
+    createSuggestion,
+    deleteIdRequest,
+} from "@/app/actions/help-id";
 import { useRouter } from "next/navigation";
 
 interface Suggestion {
@@ -40,9 +46,7 @@ export default function HelpIdDetailClient({
 
     const handleUpvote = async (suggestionId: string) => {
         // Optimistic update
-        setSuggestions((prev) =>
-            prev.map((s) => (s.id === suggestionId ? { ...s, upvotes: s.upvotes + 1 } : s))
-        );
+        setSuggestions((prev) => prev.map((s) => (s.id === suggestionId ? { ...s, upvotes: s.upvotes + 1 } : s)));
         await upvoteSuggestion(suggestionId);
     };
 
@@ -77,13 +81,14 @@ export default function HelpIdDetailClient({
     return (
         <div>
             {/* Suggestion List */}
-            <h2 className="text-lg font-bold mb-6 mt-12" >
-                💬 Suggestions ({suggestions.length})
-            </h2>
+            <h2 className="mt-12 mb-6 text-lg font-bold">💬 Suggestions ({suggestions.length})</h2>
 
             {suggestions.length === 0 ? (
-                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-8" style={{ textAlign: "center" }}>
-                    <p className="text-muted" >No suggestions yet. Be the first to help!</p>
+                <div
+                    className="bg-bg-card border-edge border-edge rounded-lg border p-8 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                    style={{ textAlign: "center" }}
+                >
+                    <p className="text-muted">No suggestions yet. Be the first to help!</p>
                 </div>
             ) : (
                 <div className="flex flex-col gap-4">
@@ -93,29 +98,35 @@ export default function HelpIdDetailClient({
                             className={`help-id-suggestion-card ${s.isAccepted ? "accepted" : ""}`}
                             id={`suggestion-${s.id}`}
                         >
-                            <div className="flex items-center gap-4 mb-4 flex-wrap">
-                                <span className="font-semibold text-sm text-ink">{s.userName}</span>
-                                {s.isAccepted && <span className="py-[2px] px-[10px] bg-[rgba(92, 224, 160, 0.15)] text-success rounded-full text-xs font-semibold">✅ Accepted Answer</span>}
-                                <span className="text-xs text-muted ml-auto">
+                            <div className="mb-4 flex flex-wrap items-center gap-4">
+                                <span className="text-ink text-sm font-semibold">{s.userName}</span>
+                                {s.isAccepted && (
+                                    <span className="bg-[rgba(92, 224, 160, 0.15)] text-success rounded-full px-[10px] py-[2px] text-xs font-semibold">
+                                        ✅ Accepted Answer
+                                    </span>
+                                )}
+                                <span className="text-muted ml-auto text-xs">
                                     {new Date(s.created_at).toLocaleDateString()}
                                 </span>
                             </div>
 
                             <div className="mb-4">
                                 {s.releaseDisplay && (
-                                    <p className="text-sm text-forest font-semibold mb-1">🏷️ {s.releaseDisplay}</p>
+                                    <p className="text-forest mb-1 text-sm font-semibold">🏷️ {s.releaseDisplay}</p>
                                 )}
                                 {s.resinDisplay && (
-                                    <p className="text-sm text-forest font-semibold mb-1">🎨 {s.resinDisplay}</p>
+                                    <p className="text-forest mb-1 text-sm font-semibold">🎨 {s.resinDisplay}</p>
                                 )}
                                 {s.free_text && (
-                                    <p className="text-sm text-[var(--color-text-secondary)] leading-[1.6]">{s.free_text}</p>
+                                    <p className="text-sm leading-[1.6] text-[var(--color-text-secondary)]">
+                                        {s.free_text}
+                                    </p>
                                 )}
                             </div>
 
                             <div className="flex items-center gap-4">
                                 <button
-                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge inline-flex items-center gap-1 tabular-nums"
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-1 gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold tabular-nums no-underline transition-all duration-150"
                                     onClick={() => handleUpvote(s.id)}
                                     title="Upvote this suggestion"
                                 >
@@ -124,7 +135,7 @@ export default function HelpIdDetailClient({
 
                                 {isOwner && !isResolved && (
                                     <button
-                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                         onClick={() => handleAccept(s.id)}
                                         style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                                     >
@@ -134,7 +145,7 @@ export default function HelpIdDetailClient({
 
                                 {s.isAccepted && (
                                     <button
-                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                         onClick={() => handleAddToStable(s.id)}
                                         disabled={addingHorse === s.id}
                                     >
@@ -155,21 +166,21 @@ export default function HelpIdDetailClient({
 
             {/* Add Suggestion */}
             {!isResolved && (
-                <div className="mt-8" >
+                <div className="mt-8">
                     {!showSuggestForm ? (
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             onClick={() => setShowSuggestForm(true)}
                             id="add-suggestion-btn"
                         >
                             💡 I Know This Model
                         </button>
                     ) : (
-                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6">
-                            <h3 className="mb-4" >Your Suggestion</h3>
+                        <div className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            <h3 className="mb-4">Your Suggestion</h3>
                             <div className="mb-6">
                                 <textarea
-                                    className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
+                                    className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
                                     rows={3}
                                     value={suggestText}
                                     onChange={(e) => setSuggestText(e.target.value)}
@@ -179,7 +190,7 @@ export default function HelpIdDetailClient({
                             </div>
                             <div className="gap-4" style={{ display: "flex" }}>
                                 <button
-                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                                     onClick={() => {
                                         setShowSuggestForm(false);
                                         setSuggestText("");
@@ -188,7 +199,7 @@ export default function HelpIdDetailClient({
                                     Cancel
                                 </button>
                                 <button
-                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                     onClick={handleSuggest}
                                     disabled={submitting || !suggestText.trim()}
                                 >
@@ -209,7 +220,7 @@ export default function HelpIdDetailClient({
             {isOwner && (
                 <div className="mt-8" style={{ textAlign: "right" }}>
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                         style={{ color: "red" }}
                         onClick={async () => {
                             if (confirm("Delete this Help ID request? This cannot be undone.")) {

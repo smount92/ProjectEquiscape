@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import MessageSellerButton from "@/components/MessageSellerButton";
 
-
 interface MarketplaceMatch {
     id: string;
     custom_name: string;
@@ -27,15 +26,9 @@ export default function MatchmakerMatches({
 
     return (
         <div className="mt-4">
-            <button
-                className="matchmaker-badge"
-                onClick={() => setExpanded(!expanded)}
-                aria-expanded={expanded}
-            >
+            <button className="matchmaker-badge" onClick={() => setExpanded(!expanded)} aria-expanded={expanded}>
                 <span className="matchmaker-badge-fire">🔥</span>
-                <span className="flex-1">
-                    {matchCount} Available in Marketplace
-                </span>
+                <span className="flex-1">{matchCount} Available in Marketplace</span>
                 <svg
                     className={`matchmaker-chevron ${expanded ? "expanded" : ""}`}
                     width="14"
@@ -53,31 +46,38 @@ export default function MatchmakerMatches({
             </button>
 
             {expanded && (
-                <div className="mt-2 flex flex-col gap-2 animate-fade-in-up">
+                <div className="animate-fade-in-up mt-2 flex flex-col gap-2">
                     {matches.map((match) => (
-                        <div key={match.id} className="flex gap-2 p-2 bg-surface-glass border border-edge rounded-md transition-all duration-200 hover:border-[rgba(251,146,60,0.4)] hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]">
-                            <div className="w-[52px] h-[52px] rounded-sm overflow-hidden shrink-0 bg-black/[0.03]">
+                        <div
+                            key={match.id}
+                            className="bg-surface-glass border-edge flex gap-2 rounded-md border p-2 transition-all duration-200 hover:border-[rgba(251,146,60,0.4)] hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]"
+                        >
+                            <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-sm bg-black/[0.03]">
                                 {match.thumbnailUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
                                         src={match.thumbnailUrl}
                                         alt={match.custom_name}
                                         loading="lazy"
-                                        className="w-full h-full object-cover"
+                                        className="h-full w-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-2xl opacity-40">🐴</div>
+                                    <div className="flex h-full w-full items-center justify-center text-2xl opacity-40">
+                                        🐴
+                                    </div>
                                 )}
                             </div>
-                            <div className="flex-1 min-w-0">
+                            <div className="min-w-0 flex-1">
                                 <Link
                                     href={`/community/${match.id}`}
-                                    className="font-semibold text-sm text-forest no-underline block hover:underline"
+                                    className="text-forest block text-sm font-semibold no-underline hover:underline"
                                 >
                                     {match.custom_name}
                                 </Link>
-                                <div className="flex items-center gap-2 mt-[2px]">
-                                    <span className={`text-xs font-bold py-[2px] px-2 rounded-full ${match.trade_status === "For Sale" ? "bg-[rgba(34,197,94,0.15)] text-[#22c55e]" : "bg-[rgba(59,130,246,0.15)] text-[#3b82f6]"}`}>
+                                <div className="mt-[2px] flex items-center gap-2">
+                                    <span
+                                        className={`rounded-full px-2 py-[2px] text-xs font-bold ${match.trade_status === "For Sale" ? "bg-[rgba(34,197,94,0.15)] text-[#22c55e]" : "bg-[rgba(59,130,246,0.15)] text-[#3b82f6]"}`}
+                                    >
                                         {match.trade_status === "For Sale" ? "💲" : "🤝"}{" "}
                                         {match.listing_price
                                             ? `$${match.listing_price.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
@@ -85,17 +85,17 @@ export default function MatchmakerMatches({
                                     </span>
                                     <Link
                                         href={`/profile/${encodeURIComponent(match.ownerAlias)}`}
-                                        className="text-xs text-muted no-underline hover:text-forest hover:underline"
+                                        className="text-muted hover:text-forest text-xs no-underline hover:underline"
                                     >
                                         @{match.ownerAlias}
                                     </Link>
                                 </div>
                                 {match.marketplace_notes && (
-                                    <div className="text-xs text-muted mt-1 italic leading-snug">
+                                    <div className="text-muted mt-1 text-xs leading-snug italic">
                                         {match.marketplace_notes}
                                     </div>
                                 )}
-                                <div className="mt-[6px]" >
+                                <div className="mt-[6px]">
                                     <MessageSellerButton
                                         sellerId={match.ownerId}
                                         horseId={match.id}

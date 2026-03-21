@@ -43,10 +43,7 @@ export default async function HelpIdPage() {
     const userIds = [...new Set(rawList.map((r) => r.user_id))];
     const userNameMap = new Map<string, string>();
     if (userIds.length > 0) {
-        const { data: usersData } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", userIds);
+        const { data: usersData } = await supabase.from("users").select("id, alias_name").in("id", userIds);
         if (usersData) {
             for (const u of usersData as { id: string; alias_name: string }[]) {
                 userNameMap.set(u.id, u.alias_name);
@@ -90,18 +87,19 @@ export default async function HelpIdPage() {
     const resolvedRequests = requests.filter((r) => r.status === "resolved");
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
                     <div>
                         <h1>
                             <span className="text-forest">Help Me ID This Model</span>
                         </h1>
-                        <p className="text-muted mt-1" >
-                            Upload a mystery model and let the community help identify it
-                        </p>
+                        <p className="text-muted mt-1">Upload a mystery model and let the community help identify it</p>
                     </div>
-                    <Link href="/community" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                    <Link
+                        href="/community"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
                         ← Back to Show Ring
                     </Link>
                 </div>
@@ -111,41 +109,46 @@ export default async function HelpIdPage() {
 
                 {/* Open Requests */}
                 {openRequests.length > 0 && (
-                    <section className="mt-12" >
-                        <h2 className="text-lg font-bold mb-6" >
-                            🔍 Open Requests ({openRequests.length})
-                        </h2>
-                        <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6">
+                    <section className="mt-12">
+                        <h2 className="mb-6 text-lg font-bold">🔍 Open Requests ({openRequests.length})</h2>
+                        <div className="grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] grid gap-6">
                             {openRequests.map((req) => (
                                 <Link
                                     key={req.id}
                                     href={`/community/help-id/${req.id}`}
-                                    className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col"
+                                    className="bg-bg-card border-edge border-edge flex flex-col overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                                     id={`help-id-${req.id}`}
                                 >
-                                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-image">
+                                    <div className="bg-bg-card border-edge border-edge flex-col-image flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                         {signedUrlMap.get(req.id) ? (
                                             <img
                                                 src={signedUrlMap.get(req.id)!}
                                                 alt="Mystery model"
-                                                className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-img"
+                                                className="bg-bg-card border-edge border-edge flex-col-img flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                                             />
                                         ) : (
-                                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-placeholder">🐴</div>
+                                            <div className="bg-bg-card border-edge border-edge flex-col-placeholder flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                                🐴
+                                            </div>
                                         )}
-                                        <span className="bg-[rgba(240, 208, 108, 0.85)] text-white border border-[rgba(240, 208, 108, 0.5)] open">Open</span>
+                                        <span className="bg-[rgba(240, 208, 108, 0.85)] border-[rgba(240, 208, 108, 0.5)] open border text-white">
+                                            Open
+                                        </span>
                                     </div>
-                                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-info">
-                                        <p className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-desc">
+                                    <div className="bg-bg-card border-edge border-edge flex-col-info flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                        <p className="bg-bg-card border-edge border-edge flex-col-desc flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                             {req.description
                                                 ? req.description.length > 100
                                                     ? req.description.substring(0, 100) + "…"
                                                     : req.description
                                                 : "No description provided"}
                                         </p>
-                                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-meta">
+                                        <div className="bg-bg-card border-edge border-edge flex-col-meta flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                             <span>by {req.userName}</span>
-                                            <span>💬 {suggestionCounts.get(req.id) || 0} suggestion{(suggestionCounts.get(req.id) || 0) !== 1 ? "s" : ""}</span>
+                                            <span>
+                                                💬 {suggestionCounts.get(req.id) || 0} suggestion
+                                                {(suggestionCounts.get(req.id) || 0) !== 1 ? "s" : ""}
+                                            </span>
                                         </div>
                                     </div>
                                 </Link>
@@ -156,39 +159,43 @@ export default async function HelpIdPage() {
 
                 {/* Resolved Requests */}
                 {resolvedRequests.length > 0 && (
-                    <section className="mt-12" >
-                        <h2 className="text-lg font-bold mb-6 text-ink-light" >
+                    <section className="mt-12">
+                        <h2 className="text-ink-light mb-6 text-lg font-bold">
                             ✅ Resolved ({resolvedRequests.length})
                         </h2>
-                        <div className="grid grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] gap-6">
+                        <div className="grid-cols-[repeat(auto-fill, minmax(280px, 1fr))] grid gap-6">
                             {resolvedRequests.map((req) => (
                                 <Link
                                     key={req.id}
                                     href={`/community/help-id/${req.id}`}
-                                    className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col resolved"
+                                    className="bg-bg-card border-edge border-edge resolved flex flex-col overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                                     id={`help-id-${req.id}`}
                                 >
-                                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-image">
+                                    <div className="bg-bg-card border-edge border-edge flex-col-image flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                         {signedUrlMap.get(req.id) ? (
                                             <img
                                                 src={signedUrlMap.get(req.id)!}
                                                 alt="Identified model"
-                                                className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-img"
+                                                className="bg-bg-card border-edge border-edge flex-col-img flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                                             />
                                         ) : (
-                                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-placeholder">🐴</div>
+                                            <div className="bg-bg-card border-edge border-edge flex-col-placeholder flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                                🐴
+                                            </div>
                                         )}
-                                        <span className="bg-[rgba(240, 208, 108, 0.85)] text-white border border-[rgba(240, 208, 108, 0.5)] resolved">Resolved</span>
+                                        <span className="bg-[rgba(240, 208, 108, 0.85)] border-[rgba(240, 208, 108, 0.5)] resolved border text-white">
+                                            Resolved
+                                        </span>
                                     </div>
-                                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-info">
-                                        <p className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-desc">
+                                    <div className="bg-bg-card border-edge border-edge flex-col-info flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                        <p className="bg-bg-card border-edge border-edge flex-col-desc flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                             {req.description
                                                 ? req.description.length > 100
                                                     ? req.description.substring(0, 100) + "…"
                                                     : req.description
                                                 : "No description"}
                                         </p>
-                                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-meta">
+                                        <div className="bg-bg-card border-edge border-edge flex-col-meta flex overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                                             <span>by {req.userName}</span>
                                             <span>💬 {suggestionCounts.get(req.id) || 0}</span>
                                         </div>
@@ -200,9 +207,12 @@ export default async function HelpIdPage() {
                 )}
 
                 {openRequests.length === 0 && resolvedRequests.length === 0 && (
-                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-[var(--space-3xl)] mt-12" style={{ textAlign: "center" }}>
-                        <p className="text-[2rem] mb-4" >🔍</p>
-                        <p className="text-ink-light" >No ID requests yet. Be the first to submit one!</p>
+                    <div
+                        className="bg-bg-card border-edge border-edge mt-12 rounded-lg border p-12 p-[var(--space-3xl)] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                        style={{ textAlign: "center" }}
+                    >
+                        <p className="mb-4 text-[2rem]">🔍</p>
+                        <p className="text-ink-light">No ID requests yet. Be the first to submit one!</p>
                     </div>
                 )}
             </div>

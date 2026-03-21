@@ -13,69 +13,68 @@ import CookieConsent from "@/components/CookieConsent";
 const GA_MEASUREMENT_ID = "G-7DWKBT1JV9";
 
 export const metadata: Metadata = {
-  title: {
-    default: "Model Horse Hub — Your Digital Stable",
-    template: "%s — Model Horse Hub",
-  },
-  description:
-    "A secure, privacy-first platform for model horse collectors to catalog their inventory with multi-angle photo galleries.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"),
-  openGraph: {
-    type: "website",
-    siteName: "Model Horse Hub",
-    title: "Model Horse Hub — Your Digital Stable",
+    title: {
+        default: "Model Horse Hub — Your Digital Stable",
+        template: "%s — Model Horse Hub",
+    },
     description:
-      "The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance, LSQ photography, private financial vault, and community marketplace.",
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary",
-    title: "Model Horse Hub — Your Digital Stable",
-    description:
-      "The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance, and community marketplace.",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+        "A secure, privacy-first platform for model horse collectors to catalog their inventory with multi-angle photo galleries.",
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"),
+    openGraph: {
+        type: "website",
+        siteName: "Model Horse Hub",
+        title: "Model Horse Hub — Your Digital Stable",
+        description:
+            "The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance, LSQ photography, private financial vault, and community marketplace.",
+        locale: "en_US",
+    },
+    twitter: {
+        card: "summary",
+        title: "Model Horse Hub — Your Digital Stable",
+        description:
+            "The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance, and community marketplace.",
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
 };
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif-theme" });
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" data-simple-mode="false" className={`${inter.variable} ${playfair.variable}`}>
-      <head>
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
+    return (
+        <html lang="en" data-simple-mode="false" className={`${inter.variable} ${playfair.variable}`}>
+            <head>
+                <Script
+                    src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+                    strategy="afterInteractive"
+                />
+                <Script id="google-analytics" strategy="afterInteractive">
+                    {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${GA_MEASUREMENT_ID}');
           `}
-        </Script>
-      </head>
-      <body>
-        <SimpleModeProvider>
-          <ToastProvider>
-            <Header />
-            <main>{children}</main>
-            <Footer />
-            <BackToTop />
-            <CookieConsent />
-          </ToastProvider>
-        </SimpleModeProvider>
-      </body>
-    </html >
-  );
+                </Script>
+            </head>
+            <body>
+                <SimpleModeProvider>
+                    <ToastProvider>
+                        <Header />
+                        <main>{children}</main>
+                        <Footer />
+                        <BackToTop />
+                        <CookieConsent />
+                    </ToastProvider>
+                </SimpleModeProvider>
+            </body>
+        </html>
+    );
 }
-

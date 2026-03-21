@@ -66,7 +66,7 @@ export default function HelpIdRequestForm() {
     if (!isOpen) {
         return (
             <button
-                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                 onClick={() => setIsOpen(true)}
                 id="new-id-request-btn"
                 style={{ marginTop: "var(--space-lg)" }}
@@ -77,21 +77,21 @@ export default function HelpIdRequestForm() {
     }
 
     return (
-        <div className="help-id-form-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all card animate-fade-in-up mt-6">
-            <h3 className="mb-4" >📸 Submit a Mystery Model</h3>
+        <div className="help-id-form-bg-card border-edge card animate-fade-in-up mt-6 rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+            <h3 className="mb-4">📸 Submit a Mystery Model</h3>
 
             {status === "success" ? (
                 <div className="p-8" style={{ textAlign: "center" }}>
-                    <p className="text-[2rem] mb-2" >✅</p>
-                    <p className="text-success" >Request submitted! The community will help identify your model.</p>
+                    <p className="mb-2 text-[2rem]">✅</p>
+                    <p className="text-success">Request submitted! The community will help identify your model.</p>
                 </div>
             ) : (
                 <form onSubmit={handleSubmit}>
                     {/* Photo Upload */}
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Photo of the model *</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Photo of the model *</label>
                         <div
-                            className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card max-[480px]:rounded-[var(--radius-md)] cursor-pointer text-center transition-all"
+                            className="border-edge bg-card flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-[var(--space-3xl)] text-center transition-all max-[480px]:rounded-[var(--radius-md)]"
                             style={{ padding: "var(--space-xl)", cursor: "pointer" }}
                             onClick={() => fileInputRef.current?.click()}
                         >
@@ -103,11 +103,13 @@ export default function HelpIdRequestForm() {
                                 />
                             ) : (
                                 <>
-                                    <div className="text-[3rem] mb-4 opacity-[0.7]">📷</div>
-                                    <p className="flex flex-col items-center justify-center py-[var(--space-3xl)] px-8 border-[2px] border-dashed border-edge rounded-lg bg-card max-[480px]:rounded-[var(--radius-md)] cursor-pointer text-center transition-all-text">
+                                    <div className="mb-4 text-[3rem] opacity-[0.7]">📷</div>
+                                    <p className="border-edge bg-card transition-all-text flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-[var(--space-3xl)] text-center max-[480px]:rounded-[var(--radius-md)]">
                                         Click to upload a photo
                                         <br />
-                                        <span className="text-sm text-forest underline">Clear, well-lit photos get the best results</span>
+                                        <span className="text-forest text-sm underline">
+                                            Clear, well-lit photos get the best results
+                                        </span>
                                     </p>
                                 </>
                             )}
@@ -125,7 +127,7 @@ export default function HelpIdRequestForm() {
 
                     {/* Description */}
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1" htmlFor="help-id-description">
+                        <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="help-id-description">
                             Description
                         </label>
                         <textarea
@@ -140,7 +142,7 @@ export default function HelpIdRequestForm() {
 
                     {/* Identifying Marks */}
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1" htmlFor="help-id-marks">
+                        <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="help-id-marks">
                             Any identifying marks?
                         </label>
                         <input
@@ -152,12 +154,16 @@ export default function HelpIdRequestForm() {
                         />
                     </div>
 
-                    {error && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</div>}
+                    {error && (
+                        <div className="text-danger mt-4 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-6 py-4 text-sm">
+                            {error}
+                        </div>
+                    )}
 
-                    <div className="gap-4 mt-6" style={{ display: "flex" }}>
+                    <div className="mt-6 gap-4" style={{ display: "flex" }}>
                         <button
                             type="button"
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                             onClick={() => {
                                 setIsOpen(false);
                                 setPreview(null);
@@ -168,7 +174,7 @@ export default function HelpIdRequestForm() {
                         </button>
                         <button
                             type="submit"
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             disabled={status === "submitting"}
                             id="submit-id-request-btn"
                         >

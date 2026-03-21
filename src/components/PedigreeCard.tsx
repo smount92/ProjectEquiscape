@@ -30,11 +30,7 @@ interface HorseSearchResult {
     finish_type: string;
 }
 
-export default function PedigreeCard({
-    horseId,
-    pedigree,
-    isOwner,
-}: PedigreeCardProps) {
+export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCardProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
@@ -169,11 +165,14 @@ export default function PedigreeCard({
     // CTA for owner when no pedigree exists
     if (!pedigree && isOwner && !isEditing) {
         return (
-            <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
-                <div className="text-center py-4 text-muted">
+            <div
+                className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] rounded-lg border border-[var(--color-border,rgba(0,0,0,0.08))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+                id="pedigree-card"
+            >
+                <div className="text-muted py-4 text-center">
                     <p>No pedigree data yet.</p>
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                         onClick={() => setIsEditing(true)}
                         id="add-pedigree"
                         style={{ marginTop: "var(--space-sm)" }}
@@ -188,9 +187,12 @@ export default function PedigreeCard({
     // Edit form
     if (isEditing) {
         return (
-            <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
+            <div
+                className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] rounded-lg border border-[var(--color-border,rgba(0,0,0,0.08))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+                id="pedigree-card"
+            >
+                <div className="mb-4 flex items-center justify-between">
+                    <h3 className="m-0 flex items-center gap-2 text-[calc(1.1rem*var(--font-scale))]">
                         <span aria-hidden="true">🧬</span> {pedigree ? "Edit Pedigree" : "Add Pedigree"}
                     </h3>
                 </div>
@@ -198,7 +200,7 @@ export default function PedigreeCard({
                     <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                         {/* Sire with search */}
                         <div className="mb-6" ref={sireRef} style={{ position: "relative" }}>
-                            <label className="block text-sm font-semibold text-ink mb-1">Sire (Father)</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Sire (Father)</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -211,32 +213,59 @@ export default function PedigreeCard({
                                 id="pedigree-sire"
                             />
                             {sireId && (
-                                <div className="gap-1 mt-[4px]" style={{ display: "flex", alignItems: "center" }}>
-                                    <span className="text-[calc(0.75rem*var(--font-scale))] text-forest" >
+                                <div className="mt-[4px] gap-1" style={{ display: "flex", alignItems: "center" }}>
+                                    <span className="text-forest text-[calc(0.75rem*var(--font-scale))]">
                                         🔗 Linked to a horse in the system
                                     </span>
-                                    <button type="button" onClick={clearSireLink} style={{
-                                        background: "none", border: "none", cursor: "pointer",
-                                        color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))",
-                                    }}>✕</button>
+                                    <button
+                                        type="button"
+                                        onClick={clearSireLink}
+                                        style={{
+                                            background: "none",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            color: "var(--color-text-muted)",
+                                            fontSize: "calc(0.75rem * var(--font-scale))",
+                                        }}
+                                    >
+                                        ✕
+                                    </button>
                                 </div>
                             )}
                             {showSireDropdown && sireResults.length > 0 && (
-                                <div style={{
-                                    position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
-                                    background: "var(--color-bg-card)", border: "1px solid var(--color-border)",
-                                    borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-lg)",
-                                    maxHeight: "200px", overflowY: "auto",
-                                }}>
-                                    {sireResults.map(h => (
-                                        <button key={h.id} type="button" onClick={() => selectSire(h)} style={{
-                                            display: "block", width: "100%", textAlign: "left",
-                                            padding: "var(--space-sm) var(--space-md)",
-                                            background: "none", border: "none", cursor: "pointer",
-                                            color: "var(--color-text-primary)",
-                                            fontSize: "calc(0.85rem * var(--font-scale))",
-                                        }}>
-                                            {h.custom_name} <span className="text-muted" >({h.finish_type})</span>
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: "100%",
+                                        left: 0,
+                                        right: 0,
+                                        zIndex: 50,
+                                        background: "var(--color-bg-card)",
+                                        border: "1px solid var(--color-border)",
+                                        borderRadius: "var(--radius-md)",
+                                        boxShadow: "var(--shadow-lg)",
+                                        maxHeight: "200px",
+                                        overflowY: "auto",
+                                    }}
+                                >
+                                    {sireResults.map((h) => (
+                                        <button
+                                            key={h.id}
+                                            type="button"
+                                            onClick={() => selectSire(h)}
+                                            style={{
+                                                display: "block",
+                                                width: "100%",
+                                                textAlign: "left",
+                                                padding: "var(--space-sm) var(--space-md)",
+                                                background: "none",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                color: "var(--color-text-primary)",
+                                                fontSize: "calc(0.85rem * var(--font-scale))",
+                                            }}
+                                        >
+                                            {h.custom_name} <span className="text-muted">({h.finish_type})</span>
                                         </button>
                                     ))}
                                 </div>
@@ -244,7 +273,7 @@ export default function PedigreeCard({
                         </div>
                         {/* Dam with search */}
                         <div className="mb-6" ref={damRef} style={{ position: "relative" }}>
-                            <label className="block text-sm font-semibold text-ink mb-1">Dam (Mother)</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Dam (Mother)</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -257,32 +286,59 @@ export default function PedigreeCard({
                                 id="pedigree-dam"
                             />
                             {damId && (
-                                <div className="gap-1 mt-[4px]" style={{ display: "flex", alignItems: "center" }}>
-                                    <span className="text-[calc(0.75rem*var(--font-scale))] text-forest" >
+                                <div className="mt-[4px] gap-1" style={{ display: "flex", alignItems: "center" }}>
+                                    <span className="text-forest text-[calc(0.75rem*var(--font-scale))]">
                                         🔗 Linked to a horse in the system
                                     </span>
-                                    <button type="button" onClick={clearDamLink} style={{
-                                        background: "none", border: "none", cursor: "pointer",
-                                        color: "var(--color-text-muted)", fontSize: "calc(0.75rem * var(--font-scale))",
-                                    }}>✕</button>
+                                    <button
+                                        type="button"
+                                        onClick={clearDamLink}
+                                        style={{
+                                            background: "none",
+                                            border: "none",
+                                            cursor: "pointer",
+                                            color: "var(--color-text-muted)",
+                                            fontSize: "calc(0.75rem * var(--font-scale))",
+                                        }}
+                                    >
+                                        ✕
+                                    </button>
                                 </div>
                             )}
                             {showDamDropdown && damResults.length > 0 && (
-                                <div style={{
-                                    position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50,
-                                    background: "var(--color-bg-card)", border: "1px solid var(--color-border)",
-                                    borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-lg)",
-                                    maxHeight: "200px", overflowY: "auto",
-                                }}>
-                                    {damResults.map(h => (
-                                        <button key={h.id} type="button" onClick={() => selectDam(h)} style={{
-                                            display: "block", width: "100%", textAlign: "left",
-                                            padding: "var(--space-sm) var(--space-md)",
-                                            background: "none", border: "none", cursor: "pointer",
-                                            color: "var(--color-text-primary)",
-                                            fontSize: "calc(0.85rem * var(--font-scale))",
-                                        }}>
-                                            {h.custom_name} <span className="text-muted" >({h.finish_type})</span>
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: "100%",
+                                        left: 0,
+                                        right: 0,
+                                        zIndex: 50,
+                                        background: "var(--color-bg-card)",
+                                        border: "1px solid var(--color-border)",
+                                        borderRadius: "var(--radius-md)",
+                                        boxShadow: "var(--shadow-lg)",
+                                        maxHeight: "200px",
+                                        overflowY: "auto",
+                                    }}
+                                >
+                                    {damResults.map((h) => (
+                                        <button
+                                            key={h.id}
+                                            type="button"
+                                            onClick={() => selectDam(h)}
+                                            style={{
+                                                display: "block",
+                                                width: "100%",
+                                                textAlign: "left",
+                                                padding: "var(--space-sm) var(--space-md)",
+                                                background: "none",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                color: "var(--color-text-primary)",
+                                                fontSize: "calc(0.85rem * var(--font-scale))",
+                                            }}
+                                        >
+                                            {h.custom_name} <span className="text-muted">({h.finish_type})</span>
                                         </button>
                                     ))}
                                 </div>
@@ -291,7 +347,7 @@ export default function PedigreeCard({
                     </div>
 
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Sculptor / Artist</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Sculptor / Artist</label>
                         <input
                             className="form-input"
                             type="text"
@@ -304,7 +360,7 @@ export default function PedigreeCard({
 
                     <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Cast Number</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Cast Number</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -315,7 +371,7 @@ export default function PedigreeCard({
                             />
                         </div>
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Edition Size</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Edition Size</label>
                             <input
                                 className="form-input"
                                 type="text"
@@ -328,7 +384,7 @@ export default function PedigreeCard({
                     </div>
 
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Lineage Notes</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Lineage Notes</label>
                         <textarea
                             className="form-input"
                             value={lineageNotes}
@@ -340,19 +396,19 @@ export default function PedigreeCard({
                         />
                     </div>
 
-                    {status === "error" && errorMsg && (
-                        <div className="comment-error mb-4">
-                            {errorMsg}
-                        </div>
-                    )}
+                    {status === "error" && errorMsg && <div className="comment-error mb-4">{errorMsg}</div>}
 
-                    <div className="flex justify-end gap-2 mt-6">
-                        <button type="button" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleCancel}>
+                    <div className="mt-6 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            onClick={handleCancel}
+                        >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             disabled={status === "saving"}
                         >
                             {status === "saving" ? "Saving…" : "Save Pedigree"}
@@ -365,16 +421,22 @@ export default function PedigreeCard({
 
     // Read-only display
     return (
-        <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-border,rgba(0,0,0,0.08))] rounded-lg p-6" id="pedigree-card">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="flex items-center gap-2 m-0 text-[calc(1.1rem*var(--font-scale))]">
+        <div
+            className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] rounded-lg border border-[var(--color-border,rgba(0,0,0,0.08))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]"
+            id="pedigree-card"
+        >
+            <div className="mb-4 flex items-center justify-between">
+                <h3 className="m-0 flex items-center gap-2 text-[calc(1.1rem*var(--font-scale))]">
                     <span aria-hidden="true">🧬</span> Pedigree
                 </h3>
                 {isOwner && (
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                         onClick={() => setIsEditing(true)}
-                        style={{ fontSize: "calc(0.8rem * var(--font-scale))", padding: "var(--space-xs) var(--space-md)" }}
+                        style={{
+                            fontSize: "calc(0.8rem * var(--font-scale))",
+                            padding: "var(--space-xs) var(--space-md)",
+                        }}
                     >
                         ✏️ Edit
                     </button>
@@ -382,49 +444,63 @@ export default function PedigreeCard({
             </div>
 
             {pedigree!.sireName && (
-                <div className="flex justify-between py-2 border-b border-[var(--color-border,rgba(0,0,0,0.06))] last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+                <div className="flex justify-between border-b border-[var(--color-border,rgba(0,0,0,0.06))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
                     <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Sire</span>
-                    <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">
+                    <span className="text-[calc(0.9rem*var(--font-scale))] font-medium">
                         {pedigree!.sireId ? (
-                            <Link href={`/community/${pedigree!.sireId}`} className="text-forest" style={{ textDecoration: "none" }}>
+                            <Link
+                                href={`/community/${pedigree!.sireId}`}
+                                className="text-forest"
+                                style={{ textDecoration: "none" }}
+                            >
                                 {pedigree!.sireName} 🔗
                             </Link>
-                        ) : pedigree!.sireName}
+                        ) : (
+                            pedigree!.sireName
+                        )}
                     </span>
                 </div>
             )}
             {pedigree!.damName && (
-                <div className="flex justify-between py-2 border-b border-[var(--color-border,rgba(0,0,0,0.06))] last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+                <div className="flex justify-between border-b border-[var(--color-border,rgba(0,0,0,0.06))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
                     <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Dam</span>
-                    <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">
+                    <span className="text-[calc(0.9rem*var(--font-scale))] font-medium">
                         {pedigree!.damId ? (
-                            <Link href={`/community/${pedigree!.damId}`} className="text-forest" style={{ textDecoration: "none" }}>
+                            <Link
+                                href={`/community/${pedigree!.damId}`}
+                                className="text-forest"
+                                style={{ textDecoration: "none" }}
+                            >
                                 {pedigree!.damName} 🔗
                             </Link>
-                        ) : pedigree!.damName}
+                        ) : (
+                            pedigree!.damName
+                        )}
                     </span>
                 </div>
             )}
             {pedigree!.sculptor && (
-                <div className="flex justify-between py-2 border-b border-[var(--color-border,rgba(0,0,0,0.06))] last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+                <div className="flex justify-between border-b border-[var(--color-border,rgba(0,0,0,0.06))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
                     <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Sculptor</span>
-                    <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">{pedigree!.sculptor}</span>
+                    <span className="text-[calc(0.9rem*var(--font-scale))] font-medium">{pedigree!.sculptor}</span>
                 </div>
             )}
             {(pedigree!.castNumber || pedigree!.editionSize) && (
-                <div className="flex justify-between py-2 border-b border-[var(--color-border,rgba(0,0,0,0.06))] last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+                <div className="flex justify-between border-b border-[var(--color-border,rgba(0,0,0,0.06))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
                     <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">Cast / Edition</span>
-                    <span className="font-medium text-[calc(0.9rem*var(--font-scale))]">
+                    <span className="text-[calc(0.9rem*var(--font-scale))] font-medium">
                         {pedigree!.castNumber && pedigree!.editionSize
                             ? `#${pedigree!.castNumber} of ${pedigree!.editionSize}`
                             : pedigree!.castNumber
-                                ? `#${pedigree!.castNumber}`
-                                : `Edition of ${pedigree!.editionSize}`}
+                              ? `#${pedigree!.castNumber}`
+                              : `Edition of ${pedigree!.editionSize}`}
                     </span>
                 </div>
             )}
             {pedigree!.lineageNotes && (
-                <div className="mt-4 py-2 px-4 bg-[rgba(0,0,0,0.03)] rounded-md text-[calc(0.85rem*var(--font-scale))] text-muted italic whitespace-pre-wrap">{pedigree!.lineageNotes}</div>
+                <div className="text-muted mt-4 rounded-md bg-[rgba(0,0,0,0.03)] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] whitespace-pre-wrap italic">
+                    {pedigree!.lineageNotes}
+                </div>
             )}
         </div>
     );

@@ -29,11 +29,14 @@ export default function EventBrowser({ events, typeLabels }: Props) {
     const [rsvping, setRsvping] = useState<string | null>(null);
 
     const filtered = events
-        .filter(e => filter === "all" || e.eventType === filter)
-        .filter(e => !search
-            || e.name.toLowerCase().includes(search.toLowerCase())
-            || e.locationName?.toLowerCase().includes(search.toLowerCase())
-            || e.groupName?.toLowerCase().includes(search.toLowerCase()));
+        .filter((e) => filter === "all" || e.eventType === filter)
+        .filter(
+            (e) =>
+                !search ||
+                e.name.toLowerCase().includes(search.toLowerCase()) ||
+                e.locationName?.toLowerCase().includes(search.toLowerCase()) ||
+                e.groupName?.toLowerCase().includes(search.toLowerCase()),
+        );
 
     async function handleRsvp(eventId: string, status: "going" | "interested") {
         setRsvping(eventId);
@@ -45,7 +48,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
     return (
         <div>
             {/* Search */}
-            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md mb-4">
+            <div className="top-[calc(var(--header max-sm:px-4-height) + var(--space-md))] bg-card border-edge sticky z-[10] mb-4 mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
                 <input
                     type="text"
                     className="form-input"
@@ -57,10 +60,16 @@ export default function EventBrowser({ events, typeLabels }: Props) {
             </div>
 
             {/* Type Filter */}
-            <div className="flex flex-wrap gap-1 mb-6">
-                <button className={`studio-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>All</button>
+            <div className="mb-6 flex flex-wrap gap-1">
+                <button className={`studio-chip ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>
+                    All
+                </button>
                 {Object.entries(typeLabels).map(([key, label]) => (
-                    <button key={key} className={`studio-chip ${filter === key ? "active" : ""}`} onClick={() => setFilter(key)}>
+                    <button
+                        key={key}
+                        className={`studio-chip ${filter === key ? "active" : ""}`}
+                        onClick={() => setFilter(key)}
+                    >
                         {TYPE_ICONS[key] || "📌"} {label}
                     </button>
                 ))}
@@ -68,46 +77,78 @@ export default function EventBrowser({ events, typeLabels }: Props) {
 
             {/* Events List */}
             {filtered.length === 0 ? (
-                <div className="empty-state"><p>No upcoming events found.</p></div>
+                <div className="empty-state">
+                    <p>No upcoming events found.</p>
+                </div>
             ) : (
                 <div className="grid gap-4">
-                    {filtered.map(e => {
+                    {filtered.map((e) => {
                         const date = new Date(e.startsAt);
                         const month = date.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
                         const day = date.getDate();
 
                         return (
-                            <div key={e.id} className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors">
-                                <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-date">
-                                    <span className="text-[calc(0.6rem*var(--font-scale))] font-bold text-[#2C5545] uppercase tracking-[0.05em]">{month}</span>
-                                    <span className="text-[calc(1.2rem*var(--font-scale))] font-extrabold text-ink leading-none">{day}</span>
+                            <div
+                                key={e.id}
+                                className="bg-elevated border-edge flex items-center gap-6 rounded-lg border p-6 transition-colors"
+                            >
+                                <div className="bg-elevated border-edge transition-colors-date flex items-center gap-6 rounded-lg border p-6">
+                                    <span className="text-[calc(0.6rem*var(--font-scale))] font-bold tracking-[0.05em] text-[#2C5545] uppercase">
+                                        {month}
+                                    </span>
+                                    <span className="text-ink text-[calc(1.2rem*var(--font-scale))] leading-none font-extrabold">
+                                        {day}
+                                    </span>
                                 </div>
-                                <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-body">
-                                    <Link href={`/community/events/${e.id}`} className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-name">
+                                <div className="bg-elevated border-edge transition-colors-body flex items-center gap-6 rounded-lg border p-6">
+                                    <Link
+                                        href={`/community/events/${e.id}`}
+                                        className="bg-elevated border-edge transition-colors-name flex items-center gap-6 rounded-lg border p-6"
+                                    >
                                         {TYPE_ICONS[e.eventType] || "📌"} {e.name}
                                     </Link>
-                                    <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-meta">
+                                    <div className="bg-elevated border-edge transition-colors-meta flex items-center gap-6 rounded-lg border p-6">
                                         {e.isVirtual ? "🌐 Virtual" : e.locationName || "Location TBD"}
                                         {e.groupName && <> · 🏛️ {e.groupName}</>}
                                     </div>
-                                    <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-meta">
-                                        {e.isAllDay ? "All Day" : date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                                    <div className="bg-elevated border-edge transition-colors-meta flex items-center gap-6 rounded-lg border p-6">
+                                        {e.isAllDay
+                                            ? "All Day"
+                                            : date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
                                         {" · "}👥 {e.rsvpCount} attending
                                     </div>
                                 </div>
-                                <div className="flex gap-6 p-6 rounded-lg bg-elevated border border-edge items-center transition-colors-actions">
+                                <div className="bg-elevated border-edge transition-colors-actions flex items-center gap-6 rounded-lg border p-6">
                                     {e.userRsvp === "going" ? (
-                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap bg-[rgba(34,197,94,0.12)] text-[#22c55e]" style={{ border: "1px solid rgba(34,197,94,0.3)" }}>
+                                        <span
+                                            className="inline-flex items-center rounded-full bg-[rgba(34,197,94,0.12)] px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap text-[#22c55e]"
+                                            style={{ border: "1px solid rgba(34,197,94,0.3)" }}
+                                        >
                                             ✓ Going
                                         </span>
                                     ) : e.userRsvp === "interested" ? (
-                                        <span className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap bg-[rgba(245,158,11,0.12)] text-[#f59e0b]" style={{ border: "1px solid rgba(245,158,11,0.3)" }}>
+                                        <span
+                                            className="inline-flex items-center rounded-full bg-[rgba(245,158,11,0.12)] px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap text-[#f59e0b]"
+                                            style={{ border: "1px solid rgba(245,158,11,0.3)" }}
+                                        >
                                             ⭐ Interested
                                         </span>
                                     ) : (
                                         <div className="gap-1" style={{ display: "flex" }}>
-                                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={() => handleRsvp(e.id, "going")} disabled={rsvping === e.id}>Going</button>
-                                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => handleRsvp(e.id, "interested")} disabled={rsvping === e.id}>Interested</button>
+                                            <button
+                                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                onClick={() => handleRsvp(e.id, "going")}
+                                                disabled={rsvping === e.id}
+                                            >
+                                                Going
+                                            </button>
+                                            <button
+                                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                                onClick={() => handleRsvp(e.id, "interested")}
+                                                disabled={rsvping === e.id}
+                                            >
+                                                Interested
+                                            </button>
                                         </div>
                                     )}
                                 </div>

@@ -71,9 +71,7 @@ export default function ParkedExportPanel({
 
             // Grab the QR canvas from the hidden element and convert to PNG data URI
             const canvasEl = qrCanvasRef.current?.querySelector("canvas");
-            const qrDataUri = canvasEl
-                ? canvasEl.toDataURL("image/png")
-                : ""; // fallback: empty (QR will be blank in PDF, but won't crash)
+            const qrDataUri = canvasEl ? canvasEl.toDataURL("image/png") : ""; // fallback: empty (QR will be blank in PDF, but won't crash)
 
             // Lazy-load react-pdf (1.5MB) only when generating
             const [{ pdf }, { default: CertificateOfAuthenticity }] = await Promise.all([
@@ -82,11 +80,7 @@ export default function ParkedExportPanel({
             ]);
 
             // Generate PDF
-            const blob = await pdf(
-                <CertificateOfAuthenticity
-                    data={{ ...result.data, qrDataUri }}
-                />
-            ).toBlob();
+            const blob = await pdf(<CertificateOfAuthenticity data={{ ...result.data, qrDataUri }} />).toBlob();
 
             // Download
             const url = URL.createObjectURL(blob);
@@ -108,7 +102,7 @@ export default function ParkedExportPanel({
     if (!isOpen) {
         return (
             <button
-                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                 onClick={() => setIsOpen(true)}
                 id="park-export-btn"
                 title="Sell off-platform with a Certificate of Authenticity"
@@ -119,35 +113,42 @@ export default function ParkedExportPanel({
     }
 
     return (
-        <div className="mt-6 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up">
-            <div className="justify-between mb-6" style={{ display: "flex", alignItems: "center" }}>
+        <div className="bg-card border-edge animate-fade-in-up mt-6 rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+            <div className="mb-6 justify-between" style={{ display: "flex", alignItems: "center" }}>
                 <h3>{isParked ? "🔒 Horse is Parked" : "📤 Sell Off-Platform"}</h3>
-                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge text-[1.2rem]" onClick={() => setIsOpen(false)}>✕</button>
+                <button
+                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base text-[1.2rem] leading-none font-semibold no-underline transition-all duration-150"
+                    onClick={() => setIsOpen(false)}
+                >
+                    ✕
+                </button>
             </div>
 
             {!isParked ? (
                 /* ── Not Parked: Explain + Park button ── */
                 <div>
-                    <p className="text-ink-light mb-6 leading-[1.6]" >
-                        Selling <strong>{horseName}</strong> at a live show, via Facebook, or another platform?
-                        Park it here and get a <strong>Certificate of Authenticity</strong> with a QR code
-                        the buyer can scan to claim the horse — and inherit its full Hoofprint™ history.
+                    <p className="text-ink-light mb-6 leading-[1.6]">
+                        Selling <strong>{horseName}</strong> at a live show, via Facebook, or another platform? Park it
+                        here and get a <strong>Certificate of Authenticity</strong> with a QR code the buyer can scan to
+                        claim the horse — and inherit its full Hoofprint™ history.
                     </p>
-                    <ul className="list-none p-0 m-[0 0 var(--space-md)]">
+                    <ul className="m-[0 0 var(--space-md)] list-none p-0">
                         <li>1. Click &quot;Park This Horse&quot; — a unique claim PIN is generated</li>
                         <li>2. Download or print the Certificate of Authenticity</li>
                         <li>3. Give it to the buyer with the model</li>
                         <li>4. They scan the QR or enter the PIN to claim the horse on MHH</li>
                     </ul>
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                         onClick={handlePark}
                         disabled={status === "parking"}
                         id="park-horse-btn"
                         style={{ marginTop: "var(--space-lg)" }}
                     >
                         {status === "parking" ? (
-                            <><span className="spinner-inline" /> Parking…</>
+                            <>
+                                <span className="spinner-inline" /> Parking…
+                            </>
                         ) : (
                             "🔒 Park This Horse"
                         )}
@@ -157,18 +158,18 @@ export default function ParkedExportPanel({
                 /* ── Parked: Show PIN, QR, download CoA ── */
                 <div>
                     <div className="parked-export-status">
-                        <p className="text-ink-light mb-4" >
-                            <strong>{horseName}</strong> is parked. Its Hoofprint™ history is frozen until
-                            claimed by a new owner.
+                        <p className="text-ink-light mb-4">
+                            <strong>{horseName}</strong> is parked. Its Hoofprint™ history is frozen until claimed by a
+                            new owner.
                         </p>
                     </div>
 
                     {/* PIN Display */}
-                    <div className="flex items-center gap-4 p-6 bg-elevated border-[2px] border-forest rounded-lg mb-6">
-                        <span className="text-sm text-muted font-semibold">Claim PIN</span>
+                    <div className="bg-elevated border-forest mb-6 flex items-center gap-4 rounded-lg border-[2px] p-6">
+                        <span className="text-muted text-sm font-semibold">Claim PIN</span>
                         <span className="parked-export-pin">{pin}</span>
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                             onClick={handleCopyPin}
                             style={{ fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
                         >
@@ -178,17 +179,9 @@ export default function ParkedExportPanel({
 
                     {/* QR Code (visible) */}
                     {pin && (
-                        <div className="flex flex-col items-center p-6 bg-elevated border border-edge rounded-lg mb-6">
-                            <QRCodeSVG
-                                value={claimUrl}
-                                size={180}
-                                level="M"
-                                bgColor="transparent"
-                                fgColor="#e0e0e0"
-                            />
-                            <p className="text-xs text-muted mt-2" >
-                                Scan to claim at modelhorsehub.com
-                            </p>
+                        <div className="bg-elevated border-edge mb-6 flex flex-col items-center rounded-lg border p-6">
+                            <QRCodeSVG value={claimUrl} size={180} level="M" bgColor="transparent" fgColor="#e0e0e0" />
+                            <p className="text-muted mt-2 text-xs">Scan to claim at modelhorsehub.com</p>
                         </div>
                     )}
 
@@ -199,32 +192,28 @@ export default function ParkedExportPanel({
                             aria-hidden="true"
                             style={{ position: "absolute", left: "-9999px", top: 0 }}
                         >
-                            <QRCodeCanvas
-                                value={claimUrl}
-                                size={400}
-                                level="M"
-                                bgColor="#ffffff"
-                                fgColor="#1a1a2e"
-                            />
+                            <QRCodeCanvas value={claimUrl} size={400} level="M" bgColor="#ffffff" fgColor="#1a1a2e" />
                         </div>
                     )}
 
                     {/* Actions */}
                     <div className="flex flex-col gap-2">
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             onClick={handleDownloadCoA}
                             disabled={status === "downloading"}
                             id="download-coa-btn"
                         >
                             {status === "downloading" ? (
-                                <><span className="spinner-inline" /> Generating…</>
+                                <>
+                                    <span className="spinner-inline" /> Generating…
+                                </>
                             ) : (
                                 "📄 Download Certificate of Authenticity"
                             )}
                         </button>
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                             onClick={handleUnpark}
                             disabled={status === "unparking"}
                             id="unpark-btn"
@@ -236,7 +225,11 @@ export default function ParkedExportPanel({
                 </div>
             )}
 
-            {error && <div className="mt-4 py-4 px-6 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm mt-4">{error}</div>}
+            {error && (
+                <div className="text-danger mt-4 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-6 py-4 text-sm">
+                    {error}
+                </div>
+            )}
         </div>
     );
 }

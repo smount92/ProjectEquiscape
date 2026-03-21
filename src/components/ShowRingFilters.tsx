@@ -17,20 +17,18 @@ interface ShowRingFiltersProps {
 
 const FINISH_TYPES = ["OF", "Custom", "Artist Resin"];
 
-export default function ShowRingFilters({
-    filters,
-    onFilterChange,
-    manufacturers,
-    scales,
-}: ShowRingFiltersProps) {
+export default function ShowRingFilters({ filters, onFilterChange, manufacturers, scales }: ShowRingFiltersProps) {
     const setFilter = (key: keyof FilterState, value: string | null) => {
         onFilterChange({ ...filters, [key]: value });
     };
 
     return (
-        <div className="showring-filters max-sm:flex-col max-sm:items-stretch flex items-center gap-2 flex-wrap mb-6 py-2" id="showring-filters">
+        <div
+            className="showring-filters mb-6 flex flex-wrap items-center gap-2 py-2 max-sm:flex-col max-sm:items-stretch"
+            id="showring-filters"
+        >
             {/* Finish Type Pills */}
-            <div className="flex gap-[4px] bg-[rgba(0,0,0,0.04)] rounded-lg p-[3px] border border-[rgba(0,0,0,0.06)]">
+            <div className="flex gap-[4px] rounded-lg border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.04)] p-[3px]">
                 <button
                     className={`filter-pill ${filters.finishType === null ? "filter-pill-active" : ""}`}
                     onClick={() => setFilter("finishType", null)}
@@ -41,9 +39,7 @@ export default function ShowRingFilters({
                     <button
                         key={ft}
                         className={`filter-pill ${filters.finishType === ft ? "filter-pill-active" : ""}`}
-                        onClick={() =>
-                            setFilter("finishType", filters.finishType === ft ? null : ft)
-                        }
+                        onClick={() => setFilter("finishType", filters.finishType === ft ? null : ft)}
                     >
                         {ft}
                     </button>
@@ -101,9 +97,7 @@ export default function ShowRingFilters({
             <select
                 className="filter-dropdown hover:border-forest"
                 value={filters.sortBy}
-                onChange={(e) =>
-                    setFilter("sortBy", e.target.value as FilterState["sortBy"])
-                }
+                onChange={(e) => setFilter("sortBy", e.target.value as FilterState["sortBy"])}
                 id="filter-sort"
             >
                 <option value="newest">Sort: Newest</option>

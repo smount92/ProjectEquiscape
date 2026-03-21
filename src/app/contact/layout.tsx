@@ -6,10 +6,6 @@ export const metadata: Metadata = {
         "Get in touch with the Model Horse Hub team. We'd love to hear your questions, suggestions, and feedback.",
 };
 
-export default function ContactLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function ContactLayout({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
 }

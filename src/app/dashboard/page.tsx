@@ -4,8 +4,17 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import {
-    Camera, Trophy, Users, FileText, Zap, Plus,
-    BarChart3, FolderOpen, DollarSign, Award, Mail
+    Camera,
+    Trophy,
+    Users,
+    FileText,
+    Zap,
+    Plus,
+    BarChart3,
+    FolderOpen,
+    DollarSign,
+    Award,
+    Mail,
 } from "lucide-react";
 import DashboardToast from "@/components/DashboardToast";
 import DashboardShell from "@/components/DashboardShell";
@@ -15,7 +24,6 @@ import TransferHistorySection from "@/components/TransferHistorySection";
 import NanDashboardWidget from "@/components/NanDashboardWidget";
 import ShowHistoryWidget from "@/components/ShowHistoryWidget";
 import { getShowHistory } from "@/app/actions/shows";
-
 
 export const dynamic = "force-dynamic";
 
@@ -53,11 +61,7 @@ async function ShowHistoryWidgetWrapper() {
     }
 }
 
-export default async function DashboardPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ page?: string }>;
-}) {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
     const supabase = await createClient();
     const {
         data: { user },
@@ -72,24 +76,43 @@ export default async function DashboardPage({
     const offset = (page - 1) * HORSES_PER_PAGE;
 
     // ── Round 1: Independent queries in parallel ──
-    const [profileResult, summaryResult, horsesResult, collectionsResult, showRecordsResult, convosResult] = await Promise.all([
-        supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>(),
-        supabase.from("user_horses").select(`
+    const [profileResult, summaryResult, horsesResult, collectionsResult, showRecordsResult, convosResult] =
+        await Promise.all([
+            supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>(),
+            supabase
+                .from("user_horses")
+                .select(
+                    `
             id, collection_id, catalog_items:catalog_id(title, maker, item_type)
-        `, { count: "exact" }).eq("owner_id", user.id),
-        supabase.from("user_horses").select(`
+        `,
+                    { count: "exact" },
+                )
+                .eq("owner_id", user.id),
+            supabase
+                .from("user_horses")
+                .select(
+                    `
             id, custom_name, finish_type, condition_grade, created_at, collection_id, sculptor, trade_status, asset_category,
             catalog_items:catalog_id(title, maker, item_type),
             horse_images(image_url, angle_profile)
-        `).eq("owner_id", user.id).order("created_at", { ascending: false }).range(offset, offset + HORSES_PER_PAGE - 1),
-        supabase.from("user_collections").select("id, name, description").eq("user_id", user.id).order("name"),
-        supabase.from("show_records").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("conversations").select("id").or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`),
-    ]);
+        `,
+                )
+                .eq("owner_id", user.id)
+                .order("created_at", { ascending: false })
+                .range(offset, offset + HORSES_PER_PAGE - 1),
+            supabase.from("user_collections").select("id, name, description").eq("user_id", user.id).order("name"),
+            supabase.from("show_records").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+            supabase.from("conversations").select("id").or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`),
+        ]);
 
     const profile = profileResult.data;
     const totalHorseCount = summaryResult.count ?? 0;
-    const allHorsesSummary = (summaryResult.data as unknown as { id: string; collection_id: string | null; catalog_items: { title: string; maker: string; item_type: string } | null }[]) ?? [];
+    const allHorsesSummary =
+        (summaryResult.data as unknown as {
+            id: string;
+            collection_id: string | null;
+            catalog_items: { title: string; maker: string; item_type: string } | null;
+        }[]) ?? [];
     const horses = (horsesResult.data as unknown as HorseWithDetails[]) ?? [];
     const collections = (collectionsResult.data as unknown as UserCollection[]) ?? [];
     const totalShowRecords = showRecordsResult.count;
@@ -97,26 +120,43 @@ export default async function DashboardPage({
     const totalPages = Math.ceil(totalHorseCount / HORSES_PER_PAGE);
 
     // ── Round 2: Dependent queries in parallel ──
-    const allHorseIds = allHorsesSummary.map(h => h.id);
+    const allHorseIds = allHorsesSummary.map((h) => h.id);
     const thumbnailUrls: string[] = [];
     horses.forEach((horse) => {
-        const thumb = horse.horse_images?.find(
-            (img) => img.angle_profile === "Primary_Thumbnail"
-        );
+        const thumb = horse.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
         if (thumb) thumbnailUrls.push(thumb.image_url);
     });
 
     const [vaultsResult, unreadResult, signedUrlMap] = await Promise.all([
         allHorseIds.length > 0
-            ? supabase.from("financial_vault").select("purchase_price, estimated_current_value, horse_id").in("horse_id", allHorseIds)
-            : Promise.resolve({ data: [] as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[] }),
+            ? supabase
+                  .from("financial_vault")
+                  .select("purchase_price, estimated_current_value, horse_id")
+                  .in("horse_id", allHorseIds)
+            : Promise.resolve({
+                  data: [] as {
+                      purchase_price: number | null;
+                      estimated_current_value: number | null;
+                      horse_id: string;
+                  }[],
+              }),
         convoIds.length > 0
-            ? supabase.from("messages").select("id", { count: "exact", head: true }).neq("sender_id", user.id).eq("is_read", false).in("conversation_id", convoIds)
+            ? supabase
+                  .from("messages")
+                  .select("id", { count: "exact", head: true })
+                  .neq("sender_id", user.id)
+                  .eq("is_read", false)
+                  .in("conversation_id", convoIds)
             : Promise.resolve({ count: 0 }),
         getPublicImageUrls(thumbnailUrls),
     ]);
 
-    const vaults = (vaultsResult.data as { purchase_price: number | null; estimated_current_value: number | null; horse_id: string }[]) ?? [];
+    const vaults =
+        (vaultsResult.data as {
+            purchase_price: number | null;
+            estimated_current_value: number | null;
+            horse_id: string;
+        }[]) ?? [];
     const unreadMsgCount = (unreadResult as { count: number | null }).count ?? 0;
 
     // Compute total vault value
@@ -150,9 +190,7 @@ export default async function DashboardPage({
 
     // Build display data
     const horseCards = horses.map((horse) => {
-        const thumb = horse.horse_images?.find(
-            (img) => img.angle_profile === "Primary_Thumbnail"
-        );
+        const thumb = horse.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
         const firstImage = horse.horse_images?.[0];
         const imageUrl = thumb?.image_url || firstImage?.image_url;
         const signedUrl = imageUrl ? signedUrlMap.get(imageUrl) : undefined;
@@ -189,35 +227,50 @@ export default async function DashboardPage({
     });
 
     return (
-        <div className="max-w-[1600px] mx-auto px-6 max-lg:px-4">
+        <div className="mx-auto max-w-[1600px] px-6 max-lg:px-4">
             <div className="animate-fade-in-up">
                 {/* Welcome Card for new users — FULL WIDTH */}
                 {horseCards.length === 0 && (
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-16 px-8 mb-8 bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] border border-[rgba(44,85,69,0.15)] animate-fade-in-up">
+                    <div className="bg-card border-edge animate-fade-in-up mb-8 rounded-lg border border-[rgba(44,85,69,0.15)] bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] p-12 px-8 py-16 text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                         <h2>Welcome to Model Horse Hub!</h2>
                         <p>Let&apos;s get started by adding your first model to your digital stable.</p>
-                        <div className="flex flex-col gap-4 max-w-[360px] mx-auto mb-8 text-left">
+                        <div className="mx-auto mb-8 flex max-w-[360px] flex-col gap-4 text-left">
                             <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-forest font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">1</span>
-                                <span><Camera size={16} strokeWidth={1.5} /> Add your first horse with photos</span>
+                                <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-[calc(0.85rem*var(--font-scale))] font-bold">
+                                    1
+                                </span>
+                                <span>
+                                    <Camera size={16} strokeWidth={1.5} /> Add your first horse with photos
+                                </span>
                             </div>
                             <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-forest font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">2</span>
-                                <span><Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring</span>
+                                <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-[calc(0.85rem*var(--font-scale))] font-bold">
+                                    2
+                                </span>
+                                <span>
+                                    <Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring
+                                </span>
                             </div>
                             <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
-                                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(44,85,69,0.15)] text-forest font-bold text-[calc(0.85rem*var(--font-scale))] shrink-0">3</span>
-                                <span><Users size={16} strokeWidth={1.5} /> Discover and follow other collectors</span>
+                                <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-[calc(0.85rem*var(--font-scale))] font-bold">
+                                    3
+                                </span>
+                                <span>
+                                    <Users size={16} strokeWidth={1.5} /> Discover and follow other collectors
+                                </span>
                             </div>
                         </div>
-                        <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[52px] py-4 px-12 text-[calc(var(--font-size-md)*var(--font-scale))] rounded-lg">
+                        <Link
+                            href="/add-horse"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[52px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-lg rounded-md border border-0 border-[transparent] px-8 px-12 py-2 py-4 font-sans text-base text-[calc(var(--font-size-md)*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        >
                             <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
                         </Link>
                     </div>
                 )}
 
                 {/* Shelf Header — FULL WIDTH */}
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all flex-wrap">
+                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex flex-wrap items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
                     <div>
                         <h1>
                             <span className="text-forest">Digital Stable</span>
@@ -237,19 +290,31 @@ export default async function DashboardPage({
                     </div>
                     <div className="gap-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
                         {totalHorseCount > 0 && (
-                            <span className="text-sm text-muted">
+                            <span className="text-muted text-sm">
                                 {totalHorseCount} model{totalHorseCount === 1 ? "" : "s"}
                             </span>
                         )}
                         {totalHorseCount > 0 && <ExportButton />}
                         {totalHorseCount > 0 && <InsuranceReportButton />}
-                        <Link href="/stable/import" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" id="batch-import-button">
+                        <Link
+                            href="/stable/import"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            id="batch-import-button"
+                        >
                             <FileText size={16} strokeWidth={1.5} /> Batch Import
                         </Link>
-                        <Link href="/add-horse/quick" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" id="quick-add-button">
+                        <Link
+                            href="/add-horse/quick"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            id="quick-add-button"
+                        >
                             <Zap size={16} strokeWidth={1.5} /> Quick Add
                         </Link>
-                        <Link href="/add-horse" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="add-horse-button">
+                        <Link
+                            href="/add-horse"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            id="add-horse-button"
+                        >
                             <Plus size={16} strokeWidth={1.5} /> Add to Stable
                         </Link>
                     </div>
@@ -263,66 +328,104 @@ export default async function DashboardPage({
                 {/* ══════════════════════════════════════════════════════════════
                     TWO-COLUMN GRID: Main (horses) + Sidebar (widgets)
                    ══════════════════════════════════════════════════════════════ */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_360px] gap-8">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_360px]">
                     {/* ── MAIN COLUMN: Horse Grid ── */}
                     <main className="min-w-0">
                         <DashboardShell
                             horseCards={horseCards}
-                            collections={collections.map(c => ({ id: c.id, name: c.name }))}
+                            collections={collections.map((c) => ({ id: c.id, name: c.name }))}
                         />
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="flex justify-between items-center mt-8 pt-6 border-t border-edge mt-6">
+                            <div className="border-edge mt-6 mt-8 flex items-center justify-between border-t pt-6">
                                 {page > 1 ? (
-                                    <Link href={`/dashboard?page=${page - 1}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Previous</Link>
+                                    <Link
+                                        href={`/dashboard?page=${page - 1}`}
+                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    >
+                                        ← Previous
+                                    </Link>
                                 ) : (
-                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>← Previous</button>
+                                    <button
+                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        disabled
+                                    >
+                                        ← Previous
+                                    </button>
                                 )}
-                                <span className="text-muted text-sm" >
+                                <span className="text-muted text-sm">
                                     Page {page} of {totalPages}
                                 </span>
                                 {page < totalPages ? (
-                                    <Link href={`/dashboard?page=${page + 1}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">Next →</Link>
+                                    <Link
+                                        href={`/dashboard?page=${page + 1}`}
+                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    >
+                                        Next →
+                                    </Link>
                                 ) : (
-                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>Next →</button>
+                                    <button
+                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        disabled
+                                    >
+                                        Next →
+                                    </button>
                                 )}
                             </div>
                         )}
                     </main>
 
                     {/* ── SIDEBAR: Widgets ── */}
-                    <aside className="flex flex-col gap-6 max-lg:mt-6 lg:sticky lg:top-[calc(var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height,64px)+var(--space-lg))] lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto lg:scrollbar-thin">
+                    <aside className="lg:top-[calc(var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height,64px)+var(--space-lg))] lg:scrollbar-thin top-0 z-[100] flex flex-col items-center justify-between gap-6 border-b px-8 py-[0] max-lg:mt-6 max-sm:py-[0] lg:sticky lg:max-h-[calc(100vh-var(--header-height,64px)-var(--space-2xl))] lg:overflow-y-auto">
                         {/* Analytics — Compact stat rows */}
                         {totalHorseCount > 0 && (
-                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6">
-                                <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.08em]"><BarChart3 size={16} strokeWidth={1.5} /> Stable Overview</h3>
+                            <div className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                <h3 className="text-muted mb-4 text-xs font-bold tracking-[0.08em] uppercase">
+                                    <BarChart3 size={16} strokeWidth={1.5} /> Stable Overview
+                                </h3>
                                 <div className="flex flex-col gap-[2px]">
-                                    <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <span className="text-sm text-ink-light"><Plus size={14} strokeWidth={1.5} /> Total Models</span>
-                                        <span className="text-sm font-bold text-ink">{totalHorseCount}</span>
+                                    <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-ink-light text-sm">
+                                            <Plus size={14} strokeWidth={1.5} /> Total Models
+                                        </span>
+                                        <span className="text-ink text-sm font-bold">{totalHorseCount}</span>
                                     </div>
-                                    <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <span className="text-sm text-ink-light"><FolderOpen size={14} strokeWidth={1.5} /> Collections</span>
-                                        <span className="text-sm font-bold text-ink">{collections.length}</span>
+                                    <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-ink-light text-sm">
+                                            <FolderOpen size={14} strokeWidth={1.5} /> Collections
+                                        </span>
+                                        <span className="text-ink text-sm font-bold">{collections.length}</span>
                                     </div>
-                                    <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <span className="text-sm text-ink-light"><DollarSign size={14} strokeWidth={1.5} /> Vault Value</span>
-                                        <span className="text-sm font-bold text-ink">
+                                    <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-ink-light text-sm">
+                                            <DollarSign size={14} strokeWidth={1.5} /> Vault Value
+                                        </span>
+                                        <span className="text-ink text-sm font-bold">
                                             {totalVaultValue > 0
                                                 ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
                                                 : "—"}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
-                                        <span className="text-sm text-ink-light"><Award size={14} strokeWidth={1.5} /> Show Placings</span>
-                                        <span className="text-sm font-bold text-ink">{totalShowRecords ?? 0}</span>
+                                    <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
+                                        <span className="text-ink-light text-sm">
+                                            <Award size={14} strokeWidth={1.5} /> Show Placings
+                                        </span>
+                                        <span className="text-ink text-sm font-bold">{totalShowRecords ?? 0}</span>
                                     </div>
 
                                     {unreadMsgCount > 0 && (
-                                        <Link href="/inbox" className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03] no-underline" style={{ textDecoration: "none" }}>
-                                            <span className="text-sm text-ink-light"><Mail size={14} strokeWidth={1.5} /> Unread Messages</span>
-                                            <span className="text-sm font-bold text-ink text-forest">{unreadMsgCount}</span>
+                                        <Link
+                                            href="/inbox"
+                                            className="flex items-center justify-between rounded-sm px-1 py-2 no-underline transition-colors hover:bg-black/[0.03]"
+                                            style={{ textDecoration: "none" }}
+                                        >
+                                            <span className="text-ink-light text-sm">
+                                                <Mail size={14} strokeWidth={1.5} /> Unread Messages
+                                            </span>
+                                            <span className="text-ink text-forest text-sm font-bold">
+                                                {unreadMsgCount}
+                                            </span>
                                         </Link>
                                     )}
                                 </div>
@@ -331,21 +434,30 @@ export default async function DashboardPage({
 
                         {/* Collections — Vertical list */}
                         {collections.length > 0 && (
-                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6">
-                                <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.08em]"><FolderOpen size={16} strokeWidth={1.5} /> Collections</h3>
+                            <div className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                <h3 className="text-muted mb-4 text-xs font-bold tracking-[0.08em] uppercase">
+                                    <FolderOpen size={16} strokeWidth={1.5} /> Collections
+                                </h3>
                                 <div className="flex flex-col gap-1">
                                     {collections.map((col) => (
                                         <Link
                                             key={col.id}
                                             href={`/stable/collection/${col.id}`}
-                                            className="flex justify-between items-center py-2 px-4 rounded-md bg-black/[0.02] border border-transparent text-ink text-sm no-underline transition-all hover:bg-black/[0.06] hover:border-edge hover:no-underline"
+                                            className="text-ink hover:border-edge flex items-center justify-between rounded-md border border-transparent bg-black/[0.02] px-4 py-2 text-sm no-underline transition-all hover:bg-black/[0.06] hover:no-underline"
                                             id={`collection-${col.id}`}
                                         >
                                             <span>{col.name}</span>
-                                            <span className="text-xs text-muted whitespace-nowrap">
+                                            <span className="text-muted text-xs whitespace-nowrap">
                                                 {collectionCounts.get(col.id) || 0}
                                                 {(collectionValues.get(col.id) || 0) > 0 && (
-                                                    <> · ${(collectionValues.get(col.id) || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</>
+                                                    <>
+                                                        {" "}
+                                                        · $
+                                                        {(collectionValues.get(col.id) || 0).toLocaleString("en-US", {
+                                                            minimumFractionDigits: 0,
+                                                            maximumFractionDigits: 0,
+                                                        })}
+                                                    </>
                                                 )}
                                             </span>
                                         </Link>

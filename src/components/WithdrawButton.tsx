@@ -17,10 +17,14 @@ export default function WithdrawButton({ entryId }: { entryId: string }) {
 
     return (
         <button
-            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
             onClick={handleWithdraw}
             disabled={busy}
-            style={{ fontSize: "calc(0.7rem * var(--font-scale))", padding: "2px 8px", color: "var(--color-error, #ef4444)" }}
+            style={{
+                fontSize: "calc(0.7rem * var(--font-scale))",
+                padding: "2px 8px",
+                color: "var(--color-error, #ef4444)",
+            }}
             title="Withdraw your entry"
         >
             {busy ? "…" : "✕ Withdraw"}

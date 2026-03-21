@@ -44,7 +44,7 @@ export default function LoadMoreFeed({
                     loadMore();
                 }
             },
-            { threshold: 0.1 }
+            { threshold: 0.1 },
         );
 
         const sentinel = sentinelRef.current;
@@ -55,13 +55,14 @@ export default function LoadMoreFeed({
     return (
         <>
             <ActivityFeed items={items} emptyMessage={emptyMessage} currentUserId={currentUserId} />
-            {cursor && (
-                <div ref={sentinelRef}  className="h-[1px]" />
-            )}
+            {cursor && <div ref={sentinelRef} className="h-[1px]" />}
             {isPending && (
                 <div className="p-[var(--space-lg) 0] text-muted" style={{ textAlign: "center" }}>
-                    <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[20] h-[20] inline-block" aria-hidden="true" />
-                    <span className="ml-2" >Loading more…</span>
+                    <span
+                        className="hover:no-underline-min-h)] leading-none-spinner inline-block inline-flex h-[20] min-h-[var(--opacity-[0.5] w-[20] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                        aria-hidden="true"
+                    />
+                    <span className="ml-2">Loading more…</span>
                 </div>
             )}
         </>

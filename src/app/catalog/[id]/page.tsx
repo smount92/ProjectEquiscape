@@ -12,11 +12,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { id } = await params;
     const supabase = await createClient();
-    const { data } = await supabase
-        .from("catalog_items")
-        .select("title, maker")
-        .eq("id", id)
-        .single();
+    const { data } = await supabase.from("catalog_items").select("title, maker").eq("id", id).single();
 
     if (!data) return { title: "Entry Not Found — Model Horse Hub" };
     const d = data as { title: string; maker: string };
@@ -33,11 +29,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     const { suggest } = await searchParams;
     const supabase = await createClient();
 
-    const { data: item, error } = await supabase
-        .from("catalog_items")
-        .select("*")
-        .eq("id", id)
-        .single();
+    const { data: item, error } = await supabase.from("catalog_items").select("*").eq("id", id).single();
 
     if (error || !item) notFound();
 
@@ -86,32 +78,40 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     ];
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Breadcrumb */}
-            <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6">
+            <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
                 <Link href="/catalog">📚 Reference Catalog</Link>
-                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
+                <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+                    ›
+                </span>
                 <span>{catalogItem.title}</span>
             </nav>
 
             <div className="flex flex-col gap-6">
                 {/* Main Card */}
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 animate-fade-in-up">
-                    <div className="flex justify-between items-start mb-6">
+                <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="mb-6 flex items-start justify-between">
                         <div>
-                            <h1 className="font-sans text-[calc(1.6rem*var(--font-scale))] m-0">{catalogItem.title}</h1>
-                            <p className="text-muted text-[calc(1rem*var(--font-scale))] mt-[4px]">by {catalogItem.maker}</p>
+                            <h1 className="m-0 font-sans text-[calc(1.6rem*var(--font-scale))]">{catalogItem.title}</h1>
+                            <p className="text-muted mt-[4px] text-[calc(1rem*var(--font-scale))]">
+                                by {catalogItem.maker}
+                            </p>
                         </div>
-                        <span className="bg-glass border border-edge rounded-lg py-[4px] px-[12px] text-[calc(0.8rem*var(--font-scale))] whitespace-nowrap">
+                        <span className="bg-glass border-edge rounded-lg border px-[12px] py-[4px] text-[calc(0.8rem*var(--font-scale))] whitespace-nowrap">
                             {formatItemType(catalogItem.item_type)}
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] gap-4 mb-6">
+                    <div className="grid-cols-[repeat(auto-fill, minmax(200px, 1fr))] mb-6 grid gap-4">
                         {displayFields.map((field) => (
                             <div key={field.label} className="flex flex-col gap-[2px]">
-                                <span className="text-[calc(0.75rem*var(--font-scale))] text-muted uppercase tracking-[0.05em] font-semibold">{field.label}</span>
-                                <span className="text-[calc(0.95rem*var(--font-scale))] font-medium">{field.value}</span>
+                                <span className="text-muted text-[calc(0.75rem*var(--font-scale))] font-semibold tracking-[0.05em] uppercase">
+                                    {field.label}
+                                </span>
+                                <span className="text-[calc(0.95rem*var(--font-scale))] font-medium">
+                                    {field.value}
+                                </span>
                             </div>
                         ))}
                     </div>
@@ -119,12 +119,12 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                     {/* Action Buttons */}
                     <div className="flex gap-2">
                         {user ? (
-                            <SuggestEditModal
-                                catalogItem={catalogItem}
-                                openOnMount={suggest === "true"}
-                            />
+                            <SuggestEditModal catalogItem={catalogItem} openOnMount={suggest === "true"} />
                         ) : (
-                            <Link href="/login" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
+                            <Link
+                                href="/login"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            >
                                 Log in to Suggest Edit
                             </Link>
                         )}
@@ -133,9 +133,9 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
 
                 {/* Pending Suggestions */}
                 {(suggestionCount ?? 0) > 0 && (
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-4">
+                    <div className="bg-card border-edge rounded-lg border p-4 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                         <h3>📝 Pending Suggestions ({suggestionCount})</h3>
-                        <ul className="list-none p-0 m-[var(--space-sm) 0]">
+                        <ul className="m-[var(--space-sm) 0] list-none p-0">
                             {(
                                 suggestions as {
                                     id: string;
@@ -145,7 +145,10 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                                     created_at: string;
                                 }[]
                             )?.map((s) => (
-                                <li key={s.id} className="flex items-center gap-2 py-1 px-[0] text-[var(--color-text)] no-underline">
+                                <li
+                                    key={s.id}
+                                    className="flex items-center gap-2 px-[0] py-1 text-[var(--color-text)] no-underline"
+                                >
                                     <Link href={`/catalog/suggestions/${s.id}`}>
                                         <span className="ref-pending-type">
                                             {s.suggestion_type === "correction"
@@ -156,10 +159,8 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                                                     ? "📸"
                                                     : "🗑"}
                                         </span>
-                                        <span>
-                                            {formatItemType(s.suggestion_type)} suggestion
-                                        </span>
-                                        <span className="ml-auto text-muted text-[calc(0.8rem*var(--font-scale))]">
+                                        <span>{formatItemType(s.suggestion_type)} suggestion</span>
+                                        <span className="text-muted ml-auto text-[calc(0.8rem*var(--font-scale))]">
                                             ▲ {s.upvotes}
                                         </span>
                                     </Link>
@@ -168,7 +169,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
                         </ul>
                         <Link
                             href={`/catalog/suggestions?item=${id}`}
-                            className="text-[calc(0.85rem*var(--font-scale))] text-forest"
+                            className="text-forest text-[calc(0.85rem*var(--font-scale))]"
                         >
                             View all suggestions →
                         </Link>
@@ -180,13 +181,9 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
 }
 
 function formatItemType(type: string): string {
-    return type
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase());
+    return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function formatLabel(key: string): string {
-    return key
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, (c) => c.toUpperCase());
+    return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }

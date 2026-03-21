@@ -21,31 +21,17 @@ export default async function ReferencePage() {
         .range(0, 49);
 
     // Fetch unique makers for filter chips
-    const { data: makerRows } = await supabase
-        .from("catalog_items")
-        .select("maker")
-        .not("maker", "is", null);
+    const { data: makerRows } = await supabase.from("catalog_items").select("maker").not("maker", "is", null);
 
     const makers = [
-        ...new Set(
-            (makerRows ?? [])
-                .map((r: { maker: string }) => r.maker)
-                .filter(Boolean)
-        ),
+        ...new Set((makerRows ?? []).map((r: { maker: string }) => r.maker).filter(Boolean)),
     ].sort() as string[];
 
     // Fetch unique scales
-    const { data: scaleRows } = await supabase
-        .from("catalog_items")
-        .select("scale")
-        .not("scale", "is", null);
+    const { data: scaleRows } = await supabase.from("catalog_items").select("scale").not("scale", "is", null);
 
     const scales = [
-        ...new Set(
-            (scaleRows ?? [])
-                .map((r: { scale: string | null }) => r.scale)
-                .filter(Boolean)
-        ),
+        ...new Set((scaleRows ?? []).map((r: { scale: string | null }) => r.scale).filter(Boolean)),
     ].sort() as string[];
 
     // Fetch top curators
@@ -70,44 +56,34 @@ export default async function ReferencePage() {
         .gte("created_at", weekAgo);
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 max-w-[var(--max-width)]">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Hero Section */}
-            <div className="text-center py-8 px-[0] animate-fade-in-up">
-                <div className="text-center py-8 px-[0]-content">
+            <div className="animate-fade-in-up px-[0] py-8 text-center">
+                <div className="px-[0]-content py-8 text-center">
                     <h1>
-                        📚{" "}
-                        <span className="text-forest">
-                            Reference Catalog
-                        </span>
+                        📚 <span className="text-forest">Reference Catalog</span>
                     </h1>
-                    <p className="text-center py-8 px-[0]-subtitle">
-                        {(count ?? 0).toLocaleString()}+ model horse entries, maintained by the
-                        community
+                    <p className="px-[0]-subtitle py-8 text-center">
+                        {(count ?? 0).toLocaleString()}+ model horse entries, maintained by the community
                     </p>
                 </div>
-                <div className="text-center py-8 px-[0]-stats">
+                <div className="px-[0]-stats py-8 text-center">
                     <div className="flex flex-col items-center">
-                        <span className="flex flex-col items-center-number">
-                            {(count ?? 0).toLocaleString()}
-                        </span>
-                        <span className="flex flex-col items-center-label">Catalog Entries</span>
+                        <span className="items-center-number flex flex-col">{(count ?? 0).toLocaleString()}</span>
+                        <span className="items-center-label flex flex-col">Catalog Entries</span>
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="flex flex-col items-center-number">
-                            {pendingSuggestions ?? 0}
-                        </span>
-                        <span className="flex flex-col items-center-label">
-                            Pending Suggestions
-                        </span>
+                        <span className="items-center-number flex flex-col">{pendingSuggestions ?? 0}</span>
+                        <span className="items-center-label flex flex-col">Pending Suggestions</span>
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="flex flex-col items-center-number">{recentChanges ?? 0}</span>
-                        <span className="flex flex-col items-center-label">Changes This Week</span>
+                        <span className="items-center-number flex flex-col">{recentChanges ?? 0}</span>
+                        <span className="items-center-label flex flex-col">Changes This Week</span>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-[1fr 280px] gap-8 mt-6">
+            <div className="grid-cols-[1fr 280px] mt-6 grid gap-8">
                 {/* Main Content */}
                 <div className="ref-main">
                     <CatalogBrowser
@@ -121,21 +97,30 @@ export default async function ReferencePage() {
                 {/* Sidebar */}
                 <aside className="flex flex-col gap-4">
                     {/* Quick Links */}
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all flex flex-col gap-4-card">
-                        <h3 className="flex flex-col gap-4-title">📋 Community</h3>
-                        <div className="flex flex-col gap-4-links">
-                            <a href="/catalog/suggestions" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary btn-small flex flex-col gap-4-btn">
+                    <div className="bg-card border-edge gap-4-card flex flex-col rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                        <h3 className="gap-4-title flex flex-col">📋 Community</h3>
+                        <div className="gap-4-links flex flex-col">
+                            <a
+                                href="/catalog/suggestions"
+                                className="hover:no-underline-min-h)] btn max-md:min-h-[44px]-secondary btn-small gap-4-btn flex inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            >
                                 View Suggestions
                                 {(pendingSuggestions ?? 0) > 0 && (
-                                    <span className="bg-forest text-white text-[0.7rem] py-[2px] px-[6px] rounded-[10px] font-bold">
+                                    <span className="bg-forest rounded-[10px] px-[6px] py-[2px] text-[0.7rem] font-bold text-white">
                                         {pendingSuggestions}
                                     </span>
                                 )}
                             </a>
-                            <a href="/catalog/suggestions/new" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm btn max-md:min-h-[44px]-small flex flex-col gap-4-btn">
+                            <a
+                                href="/catalog/suggestions/new"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse btn max-md:min-h-[44px]-small gap-4-btn flex inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            >
                                 📗 Suggest New Entry
                             </a>
-                            <a href="/catalog/changelog" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary btn-small flex flex-col gap-4-btn">
+                            <a
+                                href="/catalog/changelog"
+                                className="hover:no-underline-min-h)] btn max-md:min-h-[44px]-secondary btn-small gap-4-btn flex inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            >
                                 📋 View Changelog
                             </a>
                         </div>
@@ -143,9 +128,9 @@ export default async function ReferencePage() {
 
                     {/* Top Curators */}
                     {(curators ?? []).length > 0 && (
-                        <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all flex flex-col gap-4-card">
-                            <h3 className="flex flex-col gap-4-title">🏆 Top Curators</h3>
-                            <ul className="list-none p-0 m-0">
+                        <div className="bg-card border-edge gap-4-card flex flex-col rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            <h3 className="gap-4-title flex flex-col">🏆 Top Curators</h3>
+                            <ul className="m-0 list-none p-0">
                                 {(
                                     curators as {
                                         id: string;
@@ -164,7 +149,7 @@ export default async function ReferencePage() {
                                         >
                                             @{curator.alias_name}
                                         </a>
-                                        <span className="ml-auto text-muted text-[calc(0.75rem*var(--font-scale))]">
+                                        <span className="text-muted ml-auto text-[calc(0.75rem*var(--font-scale))]">
                                             {curator.approved_suggestions_count} contributions
                                         </span>
                                     </li>

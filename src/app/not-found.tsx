@@ -2,12 +2,15 @@ import Link from "next/link";
 
 export default function NotFound() {
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up max-w-[500px] mx-auto">
-                <div className="text-center py-[var(--space-3xl)] px-8-icon">🔍</div>
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+            <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[500px] rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                <div className="px-8-icon py-[var(--space-3xl)] text-center">🔍</div>
                 <h2>Page Not Found</h2>
                 <p>The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
-                <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
+                <Link
+                    href="/dashboard"
+                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                >
                     Back to Stable
                 </Link>
             </div>

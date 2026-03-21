@@ -4,7 +4,6 @@ import { useState } from "react";
 import { leaveReview, deleteReview } from "@/app/actions/transactions";
 import RatingStars from "@/components/RatingStars";
 
-
 interface ExistingRating {
     id: string;
     stars: number;
@@ -82,40 +81,38 @@ export default function RatingForm({
     // Already rated — show the existing rating
     if (rating) {
         return (
-            <div className="bg-[rgba(0,0,0,0.05)] border border-edge rounded-lg p-6 mt-6" id="rating-section">
-                <div className="text-base font-semibold mb-4 flex items-center gap-2">
+            <div className="border-edge mt-6 rounded-lg border bg-[rgba(0,0,0,0.05)] p-6" id="rating-section">
+                <div className="mb-4 flex items-center gap-2 text-base font-semibold">
                     <span>⭐ Your Rating for @{targetAlias}</span>
                 </div>
-                <div className="text-center py-4">
+                <div className="py-4 text-center">
                     <RatingStars rating={rating.stars} size="md" />
                     {rating.reviewText && (
-                        <p className="mt-4 italic text-muted text-sm">&ldquo;{rating.reviewText}&rdquo;</p>
+                        <p className="text-muted mt-4 text-sm italic">&ldquo;{rating.reviewText}&rdquo;</p>
                     )}
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge mt-4 text-xs text-muted hover:text-[#e74c6f]"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge text-muted mt-4 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base text-xs leading-none font-semibold no-underline transition-all duration-150 hover:text-[#e74c6f]"
                         onClick={handleRetract}
                         disabled={status === "retracting"}
                     >
                         {status === "retracting" ? "Retracting…" : "Retract Rating"}
                     </button>
                 </div>
-                {status === "error" && errorMsg && (
-                    <div className="comment-error">{errorMsg}</div>
-                )}
+                {status === "error" && errorMsg && <div className="comment-error">{errorMsg}</div>}
             </div>
         );
     }
 
     // Rating form
     return (
-        <div className="bg-[rgba(0,0,0,0.05)] border border-edge rounded-lg p-6 mt-6" id="rating-section">
-            <div className="text-base font-semibold mb-4 flex items-center gap-2">
+        <div className="border-edge mt-6 rounded-lg border bg-[rgba(0,0,0,0.05)] p-6" id="rating-section">
+            <div className="mb-4 flex items-center gap-2 text-base font-semibold">
                 <span>⭐ Rate your experience with @{targetAlias}</span>
             </div>
 
-            {
-                hasVerifiedTransfer === false && (
-                    <div style={{
+            {hasVerifiedTransfer === false && (
+                <div
+                    style={{
                         display: "flex",
                         alignItems: "center",
                         gap: "var(--space-xs)",
@@ -125,11 +122,11 @@ export default function RatingForm({
                         fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
                         color: "var(--color-text-muted)",
                         marginBottom: "var(--space-md)",
-                    }}>
-                        ℹ️ No verified Hoofprint™ transfer found between you and this user.
-                    </div>
-                )
-            }
+                    }}
+                >
+                    ℹ️ No verified Hoofprint™ transfer found between you and this user.
+                </div>
+            )}
             <form onSubmit={handleSubmit}>
                 <div className="flex justify-center py-4">
                     <RatingStars
@@ -153,19 +150,13 @@ export default function RatingForm({
                         rows={2}
                         id="rating-review-text"
                     />
-                    <div className="text-right text-xs text-muted mt-1">
-                        {reviewText.length}/300
-                    </div>
+                    <div className="text-muted mt-1 text-right text-xs">{reviewText.length}/300</div>
                 </div>
 
-                {status === "error" && errorMsg && (
-                    <div className="comment-error mb-4">
-                        {errorMsg}
-                    </div>
-                )}
+                {status === "error" && errorMsg && <div className="comment-error mb-4">{errorMsg}</div>}
 
                 {status === "saved" && (
-                    <div className="bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22C55E] py-2 px-4 rounded-md text-[calc(0.85rem*var(--font-scale))] mb-4">
+                    <div className="mb-4 rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] text-[#22C55E]">
                         ✅ Rating submitted! Thank you.
                     </div>
                 )}
@@ -173,13 +164,13 @@ export default function RatingForm({
                 <div className="show-record-form-actions">
                     <button
                         type="submit"
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                         disabled={stars === 0 || status === "saving"}
                     >
                         {status === "saving" ? "Submitting…" : "Submit Rating"}
                     </button>
                 </div>
             </form>
-        </div >
+        </div>
     );
 }

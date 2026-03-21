@@ -32,16 +32,20 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
     };
 
     if (shows.length === 0) {
-        return <p className="text-muted" >No shows yet. Create one above.</p>;
+        return <p className="text-muted">No shows yet. Create one above.</p>;
     }
 
     return (
         <div className="gap-2" style={{ display: "flex", flexDirection: "column" }}>
             {shows.map((show) => (
-                <div key={show.id} className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-4 gap-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                    <div className="flex-1 min-w-[200px]" >
-                        <div className="font-semibold" >{show.title}</div>
-                        <div className="text-[calc(0.75rem*var(--font-scale))] text-muted" >
+                <div
+                    key={show.id}
+                    className="bg-bg-card border-edge border-edge gap-4 rounded-lg border p-4 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                    style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}
+                >
+                    <div className="min-w-[200px] flex-1">
+                        <div className="font-semibold">{show.title}</div>
+                        <div className="text-muted text-[calc(0.75rem*var(--font-scale))]">
                             🐴 {show.entryCount} entries
                             {show.endAt && <> · ⏰ {new Date(show.endAt).toLocaleDateString()}</>}
                         </div>
@@ -58,7 +62,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
                         <option value="closed">🔴 Closed</option>
                     </select>
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                         onClick={() => handleDelete(show.id, show.title)}
                         disabled={busy === show.id}
                         style={{ color: "var(--color-error, #ef4444)", fontSize: "calc(0.8rem * var(--font-scale))" }}

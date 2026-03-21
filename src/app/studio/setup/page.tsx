@@ -2,34 +2,44 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-    getArtistProfile,
-    createArtistProfile,
-    updateArtistProfile,
-} from "@/app/actions/art-studio";
+import { getArtistProfile, createArtistProfile, updateArtistProfile } from "@/app/actions/art-studio";
 import type { ArtistProfile } from "@/app/actions/art-studio";
 
 // ── Option Lists ──
 const SPECIALTIES = [
-    "Custom Painting (OF)", "Custom Painting (Resin)", "Prepping",
-    "Hairing", "Tack Making", "Etching/Dremmeling", "Body Mods",
-    "Glazework", "Pastels", "Oils", "Acrylics",
+    "Custom Painting (OF)",
+    "Custom Painting (Resin)",
+    "Prepping",
+    "Hairing",
+    "Tack Making",
+    "Etching/Dremmeling",
+    "Body Mods",
+    "Glazework",
+    "Pastels",
+    "Oils",
+    "Acrylics",
 ];
 
-const MEDIUMS = [
-    "Acrylics", "Oils", "Pastels", "Airbrush",
-    "Prismacolor Pencils", "Chalk", "Epoxy", "Mixed Media",
-];
+const MEDIUMS = ["Acrylics", "Oils", "Pastels", "Airbrush", "Prismacolor Pencils", "Chalk", "Epoxy", "Mixed Media"];
 
 const SCALES = [
-    "Traditional (1:9)", "Classic (1:12)", "Stablemate (1:32)",
-    "Paddock Pal (1:24)", "Micro Mini", "Other",
+    "Traditional (1:9)",
+    "Classic (1:12)",
+    "Stablemate (1:32)",
+    "Paddock Pal (1:24)",
+    "Micro Mini",
+    "Other",
 ];
 
 const COMMISSION_TYPES = [
-    "Custom Paint", "Resin Prep & Paint", "Hair Job",
-    "Tack Order", "Body Mod", "Full Custom",
-    "Repair / Touch-up", "Other",
+    "Custom Paint",
+    "Resin Prep & Paint",
+    "Hair Job",
+    "Tack Order",
+    "Body Mod",
+    "Full Custom",
+    "Repair / Touch-up",
+    "Other",
 ];
 
 export default function StudioSetupPage() {
@@ -63,9 +73,15 @@ export default function StudioSetupPage() {
         try {
             // Get current user ID from cookie-based session
             const res = await fetch("/api/auth/me");
-            if (!res.ok) { setLoading(false); return; }
+            if (!res.ok) {
+                setLoading(false);
+                return;
+            }
             const { userId: uid } = await res.json();
-            if (!uid) { setLoading(false); return; }
+            if (!uid) {
+                setLoading(false);
+                return;
+            }
             setUserId(uid);
 
             const profile = await getArtistProfile(uid);
@@ -87,21 +103,31 @@ export default function StudioSetupPage() {
                 setPaypalMeLink(profile.paypalMeLink || "");
                 setAcceptingTypes(profile.acceptingTypes);
             }
-        } catch { /* ignore */ }
+        } catch {
+            /* ignore */
+        }
         setLoading(false);
     }, []);
 
-    useEffect(() => { loadProfile(); }, [loadProfile]);
+    useEffect(() => {
+        loadProfile();
+    }, [loadProfile]);
 
     // Auto-generate slug from studio name
     useEffect(() => {
         if (!existing && studioName) {
-            setStudioSlug(studioName.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""));
+            setStudioSlug(
+                studioName
+                    .toLowerCase()
+                    .replace(/[^a-z0-9-]/g, "-")
+                    .replace(/-+/g, "-")
+                    .replace(/^-|-$/g, ""),
+            );
         }
     }, [studioName, existing]);
 
     const toggleArray = (arr: string[], setArr: (v: string[]) => void, val: string) => {
-        setArr(arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]);
+        setArr(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -127,9 +153,7 @@ export default function StudioSetupPage() {
         formData.set("paypalMeLink", paypalMeLink);
         formData.set("acceptingTypes", JSON.stringify(acceptingTypes));
 
-        const result = existing
-            ? await updateArtistProfile(formData)
-            : await createArtistProfile(formData);
+        const result = existing ? await updateArtistProfile(formData) : await createArtistProfile(formData);
 
         if (result.success) {
             setSuccess(existing ? "Profile updated!" : "Studio created!");
@@ -146,42 +170,45 @@ export default function StudioSetupPage() {
 
     if (loading) {
         return (
-            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all max-w-[700] mx-auto p-12" style={{ textAlign: "center" }}>
-                    <p className="text-muted" >Loading studio settings…</p>
+            <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+                <div
+                    className="bg-bg-card border-edge border-edge mx-auto max-w-[700] rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                    style={{ textAlign: "center" }}
+                >
+                    <p className="text-muted">Loading studio settings…</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up max-w-[700] mx-auto p-12">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+            <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[700] rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                 {/* Header */}
                 <div className="mb-8" style={{ textAlign: "center" }}>
-                    <div className="text-[2.5rem] mb-2" >🎨</div>
-                    <h1 className="text-[calc(1.4rem*var(--font-scale))]" >
-                        <span className="text-forest">
-                            {existing ? "Edit Your Studio" : "Set Up Your Art Studio"}
-                        </span>
+                    <div className="mb-2 text-[2.5rem]">🎨</div>
+                    <h1 className="text-[calc(1.4rem*var(--font-scale))]">
+                        <span className="text-forest">{existing ? "Edit Your Studio" : "Set Up Your Art Studio"}</span>
                     </h1>
-                    <p className="text-muted text-[calc(0.85rem*var(--font-scale))] mt-1" >
-                        {existing ? "Update your studio profile and commission settings." : "Create your artist profile to start accepting commissions."}
+                    <p className="text-muted mt-1 text-[calc(0.85rem*var(--font-scale))]">
+                        {existing
+                            ? "Update your studio profile and commission settings."
+                            : "Create your artist profile to start accepting commissions."}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                     {/* Studio Identity */}
-                    <fieldset className="border border-edge rounded-lg p-6 mb-6">
+                    <fieldset className="border-edge mb-6 rounded-lg border p-6">
                         <legend>🏷️ Studio Identity</legend>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Studio Name *</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Studio Name *</label>
                             <input
                                 type="text"
                                 className="form-input"
                                 value={studioName}
-                                onChange={e => setStudioName(e.target.value)}
+                                onChange={(e) => setStudioName(e.target.value)}
                                 placeholder="e.g. Painted Ponies Studio"
                                 required
                                 maxLength={80}
@@ -189,16 +216,21 @@ export default function StudioSetupPage() {
                         </div>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Studio URL Slug</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Studio URL Slug</label>
                             <div className="gap-1" style={{ display: "flex", alignItems: "center" }}>
-                                <span className="text-muted text-[calc(0.8rem*var(--font-scale))]" style={{ whiteSpace: "nowrap" }}>
+                                <span
+                                    className="text-muted text-[calc(0.8rem*var(--font-scale))]"
+                                    style={{ whiteSpace: "nowrap" }}
+                                >
                                     /studio/
                                 </span>
                                 <input
                                     type="text"
                                     className="form-input"
                                     value={studioSlug}
-                                    onChange={e => setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                                    onChange={(e) =>
+                                        setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
+                                    }
                                     placeholder="painted-ponies"
                                     maxLength={50}
                                     style={{ fontFamily: "monospace" }}
@@ -207,11 +239,11 @@ export default function StudioSetupPage() {
                         </div>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Artist Bio</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Artist Bio</label>
                             <textarea
                                 className="form-input"
                                 value={bioArtist}
-                                onChange={e => setBioArtist(e.target.value)}
+                                onChange={(e) => setBioArtist(e.target.value)}
                                 placeholder="Tell clients about your style, experience, and what inspires your work…"
                                 rows={4}
                                 maxLength={2000}
@@ -220,13 +252,13 @@ export default function StudioSetupPage() {
                     </fieldset>
 
                     {/* Skills & Services */}
-                    <fieldset className="border border-edge rounded-lg p-6 mb-6">
+                    <fieldset className="border-edge mb-6 rounded-lg border p-6">
                         <legend>🛠️ Skills & Services</legend>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Specialties</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Specialties</label>
                             <div className="flex flex-wrap gap-1">
-                                {SPECIALTIES.map(s => (
+                                {SPECIALTIES.map((s) => (
                                     <button
                                         key={s}
                                         type="button"
@@ -240,9 +272,9 @@ export default function StudioSetupPage() {
                         </div>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Mediums</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Mediums</label>
                             <div className="flex flex-wrap gap-1">
-                                {MEDIUMS.map(m => (
+                                {MEDIUMS.map((m) => (
                                     <button
                                         key={m}
                                         type="button"
@@ -256,9 +288,9 @@ export default function StudioSetupPage() {
                         </div>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Scales Offered</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Scales Offered</label>
                             <div className="flex flex-wrap gap-1">
-                                {SCALES.map(s => (
+                                {SCALES.map((s) => (
                                     <button
                                         key={s}
                                         type="button"
@@ -272,9 +304,11 @@ export default function StudioSetupPage() {
                         </div>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Commission Types Accepted</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">
+                                Commission Types Accepted
+                            </label>
                             <div className="flex flex-wrap gap-1">
-                                {COMMISSION_TYPES.map(t => (
+                                {COMMISSION_TYPES.map((t) => (
                                     <button
                                         key={t}
                                         type="button"
@@ -289,13 +323,13 @@ export default function StudioSetupPage() {
                     </fieldset>
 
                     {/* Commission Settings */}
-                    <fieldset className="border border-edge rounded-lg p-6 mb-6">
+                    <fieldset className="border-edge mb-6 rounded-lg border p-6">
                         <legend>📋 Commission Settings</legend>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Commission Status</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Commission Status</label>
                             <div className="gap-2" style={{ display: "flex" }}>
-                                {(["open", "waitlist", "closed"] as const).map(s => (
+                                {(["open", "waitlist", "closed"] as const).map((s) => (
                                     <button
                                         key={s}
                                         type="button"
@@ -311,12 +345,14 @@ export default function StudioSetupPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Max Commission Slots</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">
+                                    Max Commission Slots
+                                </label>
                                 <input
                                     type="number"
                                     className="form-input"
                                     value={maxSlots}
-                                    onChange={e => setMaxSlots(e.target.value)}
+                                    onChange={(e) => setMaxSlots(e.target.value)}
                                     onBlur={() => {
                                         const val = parseInt(maxSlots);
                                         if (isNaN(val) || val < 1) setMaxSlots("1");
@@ -332,23 +368,27 @@ export default function StudioSetupPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Turnaround (min days)</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">
+                                    Turnaround (min days)
+                                </label>
                                 <input
                                     type="number"
                                     className="form-input"
                                     value={turnaroundMin}
-                                    onChange={e => setTurnaroundMin(e.target.value)}
+                                    onChange={(e) => setTurnaroundMin(e.target.value)}
                                     placeholder="e.g. 14"
                                     min={1}
                                 />
                             </div>
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Turnaround (max days)</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">
+                                    Turnaround (max days)
+                                </label>
                                 <input
                                     type="number"
                                     className="form-input"
                                     value={turnaroundMax}
-                                    onChange={e => setTurnaroundMax(e.target.value)}
+                                    onChange={(e) => setTurnaroundMax(e.target.value)}
                                     placeholder="e.g. 60"
                                     min={1}
                                 />
@@ -357,24 +397,24 @@ export default function StudioSetupPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Price Range (min $)</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">Price Range (min $)</label>
                                 <input
                                     type="number"
                                     className="form-input"
                                     value={priceMin}
-                                    onChange={e => setPriceMin(e.target.value)}
+                                    onChange={(e) => setPriceMin(e.target.value)}
                                     placeholder="e.g. 50"
                                     min={0}
                                     step="0.01"
                                 />
                             </div>
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Price Range (max $)</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">Price Range (max $)</label>
                                 <input
                                     type="number"
                                     className="form-input"
                                     value={priceMax}
-                                    onChange={e => setPriceMax(e.target.value)}
+                                    onChange={(e) => setPriceMax(e.target.value)}
                                     placeholder="e.g. 500"
                                     min={0}
                                     step="0.01"
@@ -384,15 +424,15 @@ export default function StudioSetupPage() {
                     </fieldset>
 
                     {/* Policies & Payment */}
-                    <fieldset className="border border-edge rounded-lg p-6 mb-6">
+                    <fieldset className="border-edge mb-6 rounded-lg border p-6">
                         <legend>💰 Policies & Payment</legend>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Terms & Conditions</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Terms & Conditions</label>
                             <textarea
                                 className="form-input"
                                 value={termsText}
-                                onChange={e => setTermsText(e.target.value)}
+                                onChange={(e) => setTermsText(e.target.value)}
                                 placeholder="Deposit policy, revision limits, turnaround expectations, cancellation rules…"
                                 rows={5}
                                 maxLength={5000}
@@ -400,12 +440,12 @@ export default function StudioSetupPage() {
                         </div>
 
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">PayPal.me Link</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">PayPal.me Link</label>
                             <input
                                 type="url"
                                 className="form-input"
                                 value={paypalMeLink}
-                                onChange={e => setPaypalMeLink(e.target.value)}
+                                onChange={(e) => setPaypalMeLink(e.target.value)}
                                 placeholder="https://paypal.me/yourstudio"
                             />
                         </div>
@@ -413,19 +453,25 @@ export default function StudioSetupPage() {
 
                     {/* Feedback */}
                     {error && (
-                        <p className="text-[#ef4444] mb-4 text-[calc(0.85rem*var(--font-scale))]" style={{ textAlign: "center" }}>
+                        <p
+                            className="mb-4 text-[calc(0.85rem*var(--font-scale))] text-[#ef4444]"
+                            style={{ textAlign: "center" }}
+                        >
                             {error}
                         </p>
                     )}
                     {success && (
-                        <p className="text-[#22c55e] mb-4 text-[calc(0.85rem*var(--font-scale))]" style={{ textAlign: "center" }}>
+                        <p
+                            className="mb-4 text-[calc(0.85rem*var(--font-scale))] text-[#22c55e]"
+                            style={{ textAlign: "center" }}
+                        >
                             {success}
                         </p>
                     )}
 
                     <button
                         type="submit"
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                         disabled={saving || !studioName.trim()}
                         style={{ width: "100%" }}
                         id="save-studio-btn"
@@ -435,7 +481,10 @@ export default function StudioSetupPage() {
 
                     {existing && (
                         <div className="mt-4" style={{ textAlign: "center" }}>
-                            <a href={`/studio/${existing.studioSlug}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                            <a
+                                href={`/studio/${existing.studioSlug}`}
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            >
                                 👁️ View Public Studio Page
                             </a>
                         </div>

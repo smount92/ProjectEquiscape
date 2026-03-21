@@ -11,14 +11,7 @@ vi.mock("@/app/actions/catalog-suggestions", () => ({
 
 describe("SuggestionVoteButtons", () => {
     it("renders upvote, downvote, and net score", () => {
-        render(
-            <SuggestionVoteButtons
-                suggestionId="sug-1"
-                currentVote={null}
-                upvotes={5}
-                downvotes={2}
-            />
-        );
+        render(<SuggestionVoteButtons suggestionId="sug-1" currentVote={null} upvotes={5} downvotes={2} />);
 
         expect(screen.getByText("▲")).toBeDefined();
         expect(screen.getByText("▼")).toBeDefined();
@@ -26,42 +19,21 @@ describe("SuggestionVoteButtons", () => {
     });
 
     it("highlights active upvote", () => {
-        render(
-            <SuggestionVoteButtons
-                suggestionId="sug-1"
-                currentVote="up"
-                upvotes={5}
-                downvotes={2}
-            />
-        );
+        render(<SuggestionVoteButtons suggestionId="sug-1" currentVote="up" upvotes={5} downvotes={2} />);
 
         const upBtn = screen.getByTitle(/^Upvote/);
         expect(upBtn.className).toContain("ref-vote-active");
     });
 
     it("highlights active downvote", () => {
-        render(
-            <SuggestionVoteButtons
-                suggestionId="sug-1"
-                currentVote="down"
-                upvotes={5}
-                downvotes={2}
-            />
-        );
+        render(<SuggestionVoteButtons suggestionId="sug-1" currentVote="down" upvotes={5} downvotes={2} />);
 
         const downBtn = screen.getByTitle(/^Downvote/);
         expect(downBtn.className).toContain("ref-vote-active");
     });
 
     it("optimistically updates score on upvote click", () => {
-        render(
-            <SuggestionVoteButtons
-                suggestionId="sug-1"
-                currentVote={null}
-                upvotes={5}
-                downvotes={2}
-            />
-        );
+        render(<SuggestionVoteButtons suggestionId="sug-1" currentVote={null} upvotes={5} downvotes={2} />);
 
         // Initially net score is 3
         expect(screen.getByText("3")).toBeDefined();
@@ -74,14 +46,7 @@ describe("SuggestionVoteButtons", () => {
     });
 
     it("toggles vote off when clicking same button", () => {
-        render(
-            <SuggestionVoteButtons
-                suggestionId="sug-1"
-                currentVote="up"
-                upvotes={5}
-                downvotes={2}
-            />
-        );
+        render(<SuggestionVoteButtons suggestionId="sug-1" currentVote="up" upvotes={5} downvotes={2} />);
 
         // Net score starts at 3
         expect(screen.getByText("3")).toBeDefined();
@@ -94,14 +59,7 @@ describe("SuggestionVoteButtons", () => {
     });
 
     it("switches vote when clicking opposite button", () => {
-        render(
-            <SuggestionVoteButtons
-                suggestionId="sug-1"
-                currentVote="up"
-                upvotes={5}
-                downvotes={2}
-            />
-        );
+        render(<SuggestionVoteButtons suggestionId="sug-1" currentVote="up" upvotes={5} downvotes={2} />);
 
         // Net starts at 3
         expect(screen.getByText("3")).toBeDefined();

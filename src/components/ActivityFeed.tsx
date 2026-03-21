@@ -24,15 +24,24 @@ export interface FeedItemData {
 
 function getEventIcon(type: string): string {
     switch (type) {
-        case "new_horse": return "🐴";
-        case "favorite": return "❤️";
-        case "comment": return "💬";
-        case "rating": return "⭐";
-        case "follow": return "👤";
-        case "show_record": return "🏆";
-        case "transaction_complete": return "✅";
-        case "text_post": return "📝";
-        default: return "📌";
+        case "new_horse":
+            return "🐴";
+        case "favorite":
+            return "❤️";
+        case "comment":
+            return "💬";
+        case "rating":
+            return "⭐";
+        case "follow":
+            return "👤";
+        case "show_record":
+            return "🏆";
+        case "transaction_complete":
+            return "✅";
+        case "text_post":
+            return "📝";
+        default:
+            return "📌";
     }
 }
 
@@ -87,8 +96,8 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
     const router = useRouter();
     if (items.length === 0) {
         return (
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
-                <div className="text-center py-[var(--space-3xl)] px-8-icon">📰</div>
+            <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                <div className="px-8-icon py-[var(--space-3xl)] text-center">📰</div>
                 <h2>No Activity Yet</h2>
                 <p>{emptyMessage || "Follow some collectors to see their activity here!"}</p>
             </div>
@@ -96,49 +105,52 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
     }
 
     return (
-        <div className="flex flex-col border border-edge rounded-lg overflow-hidden animate-fade-in-up">
+        <div className="border-edge animate-fade-in-up flex flex-col overflow-hidden rounded-lg border">
             {items.map((item) => {
                 const link = item.horseId
                     ? `/community/${item.horseId}`
                     : item.eventType === "text_post"
-                        ? `/feed/${item.id}`
-                        : `/profile/${encodeURIComponent(item.actorAlias)}`;
+                      ? `/feed/${item.id}`
+                      : `/profile/${encodeURIComponent(item.actorAlias)}`;
 
                 return (
                     <div key={item.id} className="activity-feed-item-wrapper">
                         <Link
                             href={link}
-                            className="flex items-center gap-4 py-4 px-6 border-b border-edge no-underline text-inherit transition-colors last:border-b-0 hover:bg-black/[0.03]"
+                            className="border-edge flex items-center gap-4 border-b px-6 py-4 text-inherit no-underline transition-colors last:border-b-0 hover:bg-black/[0.03]"
                         >
                             {item.thumbnailUrl ? (
-                                <div className="w-[48px] h-[48px] rounded-md overflow-hidden shrink-0">
+                                <div className="h-[48px] w-[48px] shrink-0 overflow-hidden rounded-md">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={item.thumbnailUrl} alt="" loading="lazy" />
                                 </div>
                             ) : (
-                                <span className="text-[calc(1.2rem*var(--font-scale))] shrink-0">
+                                <span className="shrink-0 text-[calc(1.2rem*var(--font-scale))]">
                                     {getEventIcon(item.eventType)}
                                 </span>
                             )}
-                            <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                                 {item.eventType === "text_post" ? (
                                     <>
                                         <span className="text-[calc(0.9rem*var(--font-scale))] font-semibold">
                                             @{item.actorAlias}
                                         </span>
-                                        <div className="text-base leading-relaxed text-ink py-1 whitespace-pre-wrap [&_p]:m-0">
+                                        <div className="text-ink py-1 text-base leading-relaxed whitespace-pre-wrap [&_p]:m-0">
                                             <RichText content={(item.metadata as { text?: string })?.text || ""} />
                                         </div>
                                         {/* Image collage for casual image posts */}
                                         {item.imageUrls && item.imageUrls.length > 0 && (
-                                            <div className="grid gap-[4px] mt-2 rounded-md overflow-hidden" data-count={Math.min(item.imageUrls.length, 4)}>
+                                            <div
+                                                className="mt-2 grid gap-[4px] overflow-hidden rounded-md"
+                                                data-count={Math.min(item.imageUrls.length, 4)}
+                                            >
                                                 {item.imageUrls.slice(0, 4).map((url, i) => (
                                                     // eslint-disable-next-line @next/next/no-img-element
                                                     <img key={i} src={url} alt={`Post image ${i + 1}`} loading="lazy" />
                                                 ))}
                                             </div>
                                         )}
-                                        <span className="text-[calc(0.75rem*var(--font-scale))] text-muted">
+                                        <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
                                             {timeAgo(item.createdAt)}
                                         </span>
                                     </>
@@ -147,7 +159,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                                         <span className="text-[calc(0.9rem*var(--font-scale))]">
                                             {getEventText(item)}
                                         </span>
-                                        <span className="text-[calc(0.75rem*var(--font-scale))] text-muted">
+                                        <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
                                             {timeAgo(item.createdAt)}
                                         </span>
                                     </>
@@ -155,7 +167,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                             </div>
                         </Link>
                         {/* Action row: Like + Delete (outside the Link to avoid navigation) */}
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="mt-1 flex items-center gap-2">
                             {currentUserId && (
                                 <LikeToggle
                                     initialLiked={item.isLiked}
@@ -165,8 +177,8 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                             )}
                             {currentUserId && currentUserId === item.actorId && item.eventType === "text_post" && (
                                 <button
-                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
-                                    style={{ padding: '2px 6px', fontSize: '0.8rem' }}
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    style={{ padding: "2px 6px", fontSize: "0.8rem" }}
                                     onClick={() => {
                                         if (confirm("Delete post?")) {
                                             deleteTextPost(item.id).then(() => router.refresh());

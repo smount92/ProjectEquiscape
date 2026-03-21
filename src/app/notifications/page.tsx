@@ -21,23 +21,23 @@ export default async function NotificationsPage() {
     const notifications = await getNotifications(100);
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Hero */}
-            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
-                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
+            <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+                <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                     <h1>
                         🔔 <span className="text-forest">Notifications</span>
                     </h1>
-                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
+                    <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                         Stay updated on favorites, comments, ratings, and more.
                     </p>
                 </div>
-                <div className="flex justify-center gap-8 mt-8">
+                <div className="mt-8 flex justify-center gap-8">
                     <div className="flex flex-col items-center">
-                        <span className="flex flex-col items-center-number">
+                        <span className="items-center-number flex flex-col">
                             {notifications.filter((n) => !n.isRead).length}
                         </span>
-                        <span className="flex flex-col items-center-label">Unread</span>
+                        <span className="items-center-label flex flex-col">Unread</span>
                     </div>
                 </div>
             </div>

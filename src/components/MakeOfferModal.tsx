@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { makeOffer } from "@/app/actions/transactions";
 import { RISKY_PAYMENT_REGEX, RISKY_PAYMENT_WARNING } from "@/lib/safety";
 
-
 interface MakeOfferModalProps {
     horseId: string;
     horseName: string;
@@ -15,13 +14,7 @@ interface MakeOfferModalProps {
     onClose: () => void;
 }
 
-export default function MakeOfferModal({
-    horseId,
-    horseName,
-    sellerId,
-    askingPrice,
-    onClose,
-}: MakeOfferModalProps) {
+export default function MakeOfferModal({ horseId, horseName, sellerId, askingPrice, onClose }: MakeOfferModalProps) {
     const [amount, setAmount] = useState(askingPrice ? String(askingPrice) : "");
     const [message, setMessage] = useState("");
     const [isBundle, setIsBundle] = useState(false);
@@ -60,21 +53,27 @@ export default function MakeOfferModal({
 
     return createPortal(
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content max-sm:max-w-full max-w-[420px]" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+            <div className="modal-content max-w-[420px] max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
                     <h3>💰 Make an Offer</h3>
-                    <button className="bg-transparent border-0 text-muted text-[1.2rem] cursor-pointer p-1 rounded-md transition-all duration-150" onClick={onClose} aria-label="Close">×</button>
+                    <button
+                        className="text-muted cursor-pointer rounded-md border-0 bg-transparent p-1 text-[1.2rem] transition-all duration-150"
+                        onClick={onClose}
+                        aria-label="Close"
+                    >
+                        ×
+                    </button>
                 </div>
 
-                <p className="text-sm text-muted mb-4">
+                <p className="text-muted mb-4 text-sm">
                     🐴 <strong>{horseName}</strong>
                 </p>
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Your Offer</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Your Offer</label>
                         <div className="flex items-center gap-1">
-                            <span className="text-lg font-bold text-muted">$</span>
+                            <span className="text-muted text-lg font-bold">$</span>
                             <input
                                 type="number"
                                 step="0.01"
@@ -88,40 +87,46 @@ export default function MakeOfferModal({
                             />
                         </div>
                         {askingPrice && (
-                            <span className="block mt-1 text-xs text-muted">
+                            <span className="text-muted mt-1 block text-xs">
                                 Asking price: ${askingPrice.toLocaleString("en-US")}
                             </span>
                         )}
                     </div>
 
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Message (optional)</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Message (optional)</label>
                         <textarea
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             placeholder="Tell the seller about your interest…"
-                            className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
+                            className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
                             rows={3}
                             maxLength={500}
                         />
                         {showPaymentWarning && (
-                            <div className="comment-error mt-1 bg-[rgba(234,179,8,0.15)] text-[var(--color-warning, #eab308)] rounded-sm p-[var(--space-xs) var(--space-sm)] text-sm" style={{ border: "1px solid rgba(234, 179, 8, 0.3)" }}>
+                            <div
+                                className="comment-error text-[var(--color-warning, #eab308)] p-[var(--space-xs) var(--space-sm)] mt-1 rounded-sm bg-[rgba(234,179,8,0.15)] text-sm"
+                                style={{ border: "1px solid rgba(234, 179, 8, 0.3)" }}
+                            >
                                 {RISKY_PAYMENT_WARNING}
                             </div>
                         )}
                     </div>
 
-                    <label className="gap-1 mb-2 text-sm" style={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-                        <input type="checkbox" checked={isBundle} onChange={e => setIsBundle(e.target.checked)} />
+                    <label
+                        className="mb-2 gap-1 text-sm"
+                        style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+                    >
+                        <input type="checkbox" checked={isBundle} onChange={(e) => setIsBundle(e.target.checked)} />
                         This is a bundle/lot sale (excluded from market price index)
                     </label>
 
                     {error && <div className="comment-error">{error}</div>}
 
-                    <div className="flex gap-2 justify-end mt-6 max-sm:flex-col max-sm:[&_.inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none]:w-full">
+                    <div className="max-sm:[&_.inline-flex hover:no-underline-min-h)] leading-none]:w-full mt-6 flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center justify-end gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 max-sm:flex-col">
                         <button
                             type="button"
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                             onClick={onClose}
                             disabled={saving}
                         >
@@ -129,7 +134,7 @@ export default function MakeOfferModal({
                         </button>
                         <button
                             type="submit"
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             disabled={saving}
                         >
                             {saving ? "Submitting…" : "Submit Offer"}
@@ -138,6 +143,6 @@ export default function MakeOfferModal({
                 </form>
             </div>
         </div>,
-        document.body
+        document.body,
     );
 }

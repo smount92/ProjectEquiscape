@@ -34,7 +34,7 @@ export default function AdminReplyForm({
             recipientName,
             originalSubject,
             originalMessage,
-            replyText
+            replyText,
         );
 
         if (result.success) {
@@ -53,7 +53,10 @@ export default function AdminReplyForm({
 
     if (!isOpen) {
         return (
-            <button className="admin-reply-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none" onClick={() => setIsOpen(true)}>
+            <button
+                className="admin-reply-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                onClick={() => setIsOpen(true)}
+            >
                 <svg
                     width="14"
                     height="14"
@@ -75,23 +78,28 @@ export default function AdminReplyForm({
 
     return (
         <div className="admin-reply-form">
-            <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-muted">
+            <div className="mb-2 flex items-center justify-between">
+                <span className="text-muted text-xs">
                     To: <strong>{recipientName}</strong> &lt;{recipientEmail}&gt;
                 </span>
                 <button
-                    className="flex items-center justify-center w-[24px] h-[24px] rounded-full bg-[rgba(0, 0, 0, 0.05)] border-0 text-muted cursor-pointer text-[0.7rem] transition-all"
-                    onClick={() => { setIsOpen(false); setStatus(null); }}
+                    className="bg-[rgba(0, 0, 0, 0.05)] text-muted flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
+                    onClick={() => {
+                        setIsOpen(false);
+                        setStatus(null);
+                    }}
                     aria-label="Close reply form"
                 >
                     ✕
                 </button>
             </div>
-            <div className="mb-2 py-[10px] px-[14px] bg-[rgba(0, 0, 0, 0.03)] border-l-[3px] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0]">
-                <div className="mb-2 py-[10px] px-[14px] bg-[rgba(0, 0, 0, 0.03)] border-l-[3px] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0]-label">
+            <div className="bg-[rgba(0, 0, 0, 0.03)] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0] mb-2 border-l-[3px] px-[14px] py-[10px]">
+                <div className="bg-[rgba(0, 0, 0, 0.03)] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0]-label mb-2 border-l-[3px] px-[14px] py-[10px]">
                     {originalSubject ? `Re: ${originalSubject}` : "Original message"}
                 </div>
-                <div className="mb-2 py-[10px] px-[14px] bg-[rgba(0, 0, 0, 0.03)] border-l-[3px] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0]-body">{originalMessage}</div>
+                <div className="bg-[rgba(0, 0, 0, 0.03)] border-[rgba(44, 85, 69, 0.4)] rounded-[0 var(--radius-md) var(--radius-md) 0]-body mb-2 border-l-[3px] px-[14px] py-[10px]">
+                    {originalMessage}
+                </div>
             </div>
             <textarea
                 className="text-muted"
@@ -106,15 +114,18 @@ export default function AdminReplyForm({
                     {status.msg}
                 </div>
             )}
-            <div className="flex items-center gap-2 mt-2">
+            <div className="mt-2 flex items-center gap-2">
                 <button
-                    className="inline-flex items-center gap-[6px] py-[7px] px-[16px] bg-forest border-0 rounded-full text-white text-xs font-semibold cursor-pointer font-[inherit] transition-all disabled:opacity-[0.5] disabled:cursor-not-allowed"
+                    className="bg-forest inline-flex cursor-pointer items-center gap-[6px] rounded-full border-0 px-[16px] py-[7px] font-[inherit] text-xs font-semibold text-white transition-all disabled:cursor-not-allowed disabled:opacity-[0.5]"
                     onClick={handleSend}
                     disabled={sending || !replyText.trim()}
                 >
                     {sending ? (
                         <>
-                            <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[12] h-[12]" aria-hidden="true" />
+                            <span
+                                className="hover:no-underline-min-h)] leading-none-spinner inline-flex h-[12] min-h-[var(--opacity-[0.5] w-[12] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                aria-hidden="true"
+                            />
                             Sending…
                         </>
                     ) : (
@@ -138,8 +149,11 @@ export default function AdminReplyForm({
                     )}
                 </button>
                 <button
-                    className="py-[7px] px-[14px] bg-transparent border border-edge rounded-full text-muted text-xs font-medium cursor-pointer font-[inherit] transition-all hover:0.05)] hover:text-ink"
-                    onClick={() => { setIsOpen(false); setStatus(null); }}
+                    className="border-edge text-muted hover:0.05)] hover:text-ink cursor-pointer rounded-full border bg-transparent px-[14px] py-[7px] font-[inherit] text-xs font-medium transition-all"
+                    onClick={() => {
+                        setIsOpen(false);
+                        setStatus(null);
+                    }}
                     disabled={sending}
                 >
                     Cancel

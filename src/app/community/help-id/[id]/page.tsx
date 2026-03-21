@@ -45,17 +45,11 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     };
 
     // Fetch requester's alias name separately
-    const { data: reqUser } = await supabase
-        .from("users")
-        .select("alias_name")
-        .eq("id", req.user_id)
-        .single();
+    const { data: reqUser } = await supabase.from("users").select("alias_name").eq("id", req.user_id).single();
     const requesterName = (reqUser as { alias_name: string } | null)?.alias_name ?? "Unknown";
 
     // Get signed URL for the image
-    const signedImageUrl = req.image_url
-        ? getPublicImageUrl(req.image_url)
-        : null;
+    const signedImageUrl = req.image_url ? getPublicImageUrl(req.image_url) : null;
 
     // Fetch suggestions — NO PostgREST join for same reason
     const { data: rawSuggestions } = await supabase
@@ -77,10 +71,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     const sugUserIds = [...new Set(sugRows.map((s) => s.user_id))];
     const sugUserMap = new Map<string, string>();
     if (sugUserIds.length > 0) {
-        const { data: sugUsers } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", sugUserIds);
+        const { data: sugUsers } = await supabase.from("users").select("id, alias_name").in("id", sugUserIds);
         if (sugUsers) {
             for (const u of sugUsers as { id: string; alias_name: string }[]) {
                 sugUserMap.set(u.id, u.alias_name);
@@ -121,59 +112,63 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     const isResolved = req.status === "resolved";
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
                     <div>
                         <h1>
                             <span className="text-forest">Mystery Model</span>
                             {isResolved && (
-                                <span style={{
-                                    marginLeft: "var(--space-md)",
-                                    fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
-                                    padding: "4px 12px",
-                                    background: "rgba(92, 224, 160, 0.15)",
-                                    color: "var(--color-accent-success)",
-                                    borderRadius: "var(--radius-full)",
-                                    fontWeight: 600,
-                                }}>
+                                <span
+                                    style={{
+                                        marginLeft: "var(--space-md)",
+                                        fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                                        padding: "4px 12px",
+                                        background: "rgba(92, 224, 160, 0.15)",
+                                        color: "var(--color-accent-success)",
+                                        borderRadius: "var(--radius-full)",
+                                        fontWeight: 600,
+                                    }}
+                                >
                                     ✅ Resolved
                                 </span>
                             )}
                         </h1>
-                        <p className="text-muted mt-1" >
-                            Submitted by {requesterName} on{" "}
-                            {new Date(req.created_at).toLocaleDateString()}
+                        <p className="text-muted mt-1">
+                            Submitted by {requesterName} on {new Date(req.created_at).toLocaleDateString()}
                         </p>
                     </div>
-                    <Link href="/community/help-id" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                    <Link
+                        href="/community/help-id"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
                         ← Back to Help ID
                     </Link>
                 </div>
 
                 {/* Main content grid */}
-                <div className="grid grid-cols-2 gap-8 mt-8">
+                <div className="mt-8 grid grid-cols-2 gap-8">
                     {/* Photo */}
-                    <div className="rounded-lg overflow-hidden bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge">
+                    <div className="bg-bg-card border-edge border-edge overflow-hidden rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                         {signedImageUrl ? (
                             <img
                                 src={signedImageUrl}
                                 alt="Mystery model"
-                                className="w-full h-auto block object-contain max-h-[500px]"
+                                className="block h-auto max-h-[500px] w-full object-contain"
                             />
                         ) : (
-                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg overflow-hidden no-underline transition-all flex flex-col-placeholder h-[300]">🐴</div>
+                            <div className="bg-bg-card border-edge border-edge flex-col-placeholder flex h-[300] overflow-hidden rounded-lg border p-12 no-underline shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                🐴
+                            </div>
                         )}
                     </div>
 
                     {/* Description */}
-                    <div className="p-6 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg">
-                        <h2 className="text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold mb-4" >
+                    <div className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                        <h2 className="mb-4 text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold">
                             Description
                         </h2>
-                        <p className="text-ink-light leading-[1.7]" >
-                            {req.description || "No description provided."}
-                        </p>
+                        <p className="text-ink-light leading-[1.7]">{req.description || "No description provided."}</p>
                     </div>
                 </div>
 

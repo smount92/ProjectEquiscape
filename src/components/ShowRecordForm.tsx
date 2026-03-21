@@ -51,12 +51,7 @@ interface ShowRecordFormProps {
     onCancel: () => void;
 }
 
-export default function ShowRecordForm({
-    horseId,
-    existingRecord,
-    onSave,
-    onCancel,
-}: ShowRecordFormProps) {
+export default function ShowRecordForm({ horseId, existingRecord, onSave, onCancel }: ShowRecordFormProps) {
     const isEdit = !!existingRecord;
 
     const [showName, setShowName] = useState(existingRecord?.showName ?? "");
@@ -78,8 +73,12 @@ export default function ShowRecordForm({
     const [competitionLevel, setCompetitionLevel] = useState(existingRecord?.competitionLevel ?? "");
     const [showDateText, setShowDateText] = useState(existingRecord?.showDateText ?? "");
     const [showAdvanced, setShowAdvanced] = useState(
-        !!(existingRecord?.showLocation || existingRecord?.sectionName ||
-            existingRecord?.awardCategory || existingRecord?.competitionLevel)
+        !!(
+            existingRecord?.showLocation ||
+            existingRecord?.sectionName ||
+            existingRecord?.awardCategory ||
+            existingRecord?.competitionLevel
+        ),
     );
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -119,14 +118,14 @@ export default function ShowRecordForm({
     };
 
     return (
-        <div className="bg-[var(--color-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-bg,rgba(0,0,0,0.05))] border border-[var(--color-primary,rgba(108,99,255,0.3))] rounded-lg p-6 mb-6">
-            <div className="text-[calc(1rem*var(--font-scale))] font-semibold mb-4">
+        <div className="bg-[var(--color-bg-card border-edge transition-all-bg,rgba(0,0,0,0.05))] mb-6 rounded-lg border border-[var(--color-primary,rgba(108,99,255,0.3))] p-6 p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+            <div className="mb-4 text-[calc(1rem*var(--font-scale))] font-semibold">
                 {isEdit ? "✏️ Edit Show Record" : "🏅 Add Show Record"}
             </div>
             <form onSubmit={handleSubmit}>
                 <div className="mb-6">
-                    <label className="block text-sm font-semibold text-ink mb-1">
-                        Show Name <span className="text-[#e74c6f]" >*</span>
+                    <label className="text-ink mb-1 block text-sm font-semibold">
+                        Show Name <span className="text-[#e74c6f]">*</span>
                     </label>
                     <input
                         className="form-input"
@@ -142,7 +141,7 @@ export default function ShowRecordForm({
 
                 <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Show Date</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Show Date</label>
                         <input
                             className="form-input"
                             type="date"
@@ -152,7 +151,7 @@ export default function ShowRecordForm({
                         />
                     </div>
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Division / Section</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Division / Section</label>
                         <input
                             className="form-input"
                             type="text"
@@ -166,7 +165,7 @@ export default function ShowRecordForm({
 
                 {/* Class Name — between Division and Placing */}
                 <div className="mb-6">
-                    <label className="block text-sm font-semibold text-ink mb-1">Class Name</label>
+                    <label className="text-ink mb-1 block text-sm font-semibold">Class Name</label>
                     <input
                         className="form-input"
                         type="text"
@@ -175,14 +174,14 @@ export default function ShowRecordForm({
                         placeholder="e.g. OF Stock Horse Mare, CM Decorator"
                         id="show-record-class-name"
                     />
-                    <small className="text-muted text-[var(--font-size-xs)]" >
+                    <small className="text-muted text-[var(--font-size-xs)]">
                         Individual class name (not division or section callbacks).
                     </small>
                 </div>
 
                 {/* Fuzzy Date fallback */}
                 <div className="mb-6">
-                    <label className="block text-sm font-semibold text-ink mb-1">Approximate Date</label>
+                    <label className="text-ink mb-1 block text-sm font-semibold">Approximate Date</label>
                     <input
                         className="form-input"
                         type="text"
@@ -191,14 +190,14 @@ export default function ShowRecordForm({
                         placeholder="e.g. Spring 2023, BreyerFest 2015"
                         id="show-record-date-text"
                     />
-                    <small className="text-muted text-[var(--font-size-xs)]" >
+                    <small className="text-muted text-[var(--font-size-xs)]">
                         Use this when you don&apos;t know the exact date.
                     </small>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Placing</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Placing</label>
                         <input
                             className="form-input"
                             type="text"
@@ -209,7 +208,7 @@ export default function ShowRecordForm({
                         />
                     </div>
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Ribbon Color</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Ribbon Color</label>
                         <select
                             className="form-select"
                             value={ribbonColor}
@@ -226,7 +225,7 @@ export default function ShowRecordForm({
                 </div>
 
                 <div className="mb-6">
-                    <label className="block text-sm font-semibold text-ink mb-1">Judge</label>
+                    <label className="text-ink mb-1 block text-sm font-semibold">Judge</label>
                     <input
                         className="form-input"
                         type="text"
@@ -245,15 +244,15 @@ export default function ShowRecordForm({
                         id="show-record-nan"
                         style={{ width: 18, height: 18, accentColor: "#F59E0B" }}
                     />
-                    <label htmlFor="show-record-nan" className="block text-sm font-semibold text-ink mb-1 mb-0">
+                    <label htmlFor="show-record-nan" className="text-ink mb-0 mb-1 block text-sm font-semibold">
                         ⭐ NAN Achievement
                     </label>
                 </div>
 
                 <div className="mb-6">
-                    <label className="block text-sm font-semibold text-ink mb-1">Notes</label>
+                    <label className="text-ink mb-1 block text-sm font-semibold">Notes</label>
                     <textarea
-                        className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
+                        className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Additional notes (optional)"
@@ -267,7 +266,7 @@ export default function ShowRecordForm({
                 <div className="mb-6">
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
                         onClick={() => setShowAdvanced(!showAdvanced)}
                         style={{ width: "100%" }}
                         id="show-record-advanced-toggle"
@@ -280,7 +279,7 @@ export default function ShowRecordForm({
                     <>
                         <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Location</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">Location</label>
                                 <input
                                     className="form-input"
                                     type="text"
@@ -291,7 +290,7 @@ export default function ShowRecordForm({
                                 />
                             </div>
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Section</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">Section</label>
                                 <input
                                     className="form-input"
                                     type="text"
@@ -305,7 +304,7 @@ export default function ShowRecordForm({
 
                         <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Award Category</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">Award Category</label>
                                 <select
                                     className="form-select"
                                     value={awardCategory}
@@ -322,7 +321,7 @@ export default function ShowRecordForm({
                                 </select>
                             </div>
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-ink mb-1">Competition Level</label>
+                                <label className="text-ink mb-1 block text-sm font-semibold">Competition Level</label>
                                 <select
                                     className="form-select"
                                     value={competitionLevel}
@@ -340,23 +339,19 @@ export default function ShowRecordForm({
                     </>
                 )}
 
-                {status === "error" && errorMsg && (
-                    <div className="comment-error mb-4">
-                        {errorMsg}
-                    </div>
-                )}
+                {status === "error" && errorMsg && <div className="comment-error mb-4">{errorMsg}</div>}
 
-                <div className="flex justify-end gap-2 mt-6">
+                <div className="mt-6 flex justify-end gap-2">
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                         onClick={onCancel}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                         disabled={!showName.trim() || status === "saving"}
                     >
                         {status === "saving" ? "Saving…" : isEdit ? "Update" : "Add Record"}

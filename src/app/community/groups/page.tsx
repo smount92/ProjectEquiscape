@@ -14,32 +14,33 @@ export const metadata = {
 
 export default async function GroupsPage() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
-    const [allGroups, myGroups] = await Promise.all([
-        getGroups(),
-        getMyGroups(),
-    ]);
+    const [allGroups, myGroups] = await Promise.all([getGroups(), getMyGroups()]);
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             <div className="page-content">
-                <div className="justify-between gap-4 mb-8" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
+                <div
+                    className="mb-8 justify-between gap-4"
+                    style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}
+                >
                     <div>
                         <h1>🏛️ Groups</h1>
-                        <p className="text-muted mt-1" >
-                            Clubs, circuits, and communities
-                        </p>
+                        <p className="text-muted mt-1">Clubs, circuits, and communities</p>
                     </div>
-                    <Link href="/community/groups/create" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">+ Create Group</Link>
+                    <Link
+                        href="/community/groups/create"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    >
+                        + Create Group
+                    </Link>
                 </div>
 
-                <GroupBrowser
-                    allGroups={allGroups}
-                    myGroups={myGroups}
-                    typeLabels={GROUP_TYPE_LABELS}
-                />
+                <GroupBrowser allGroups={allGroups} myGroups={myGroups} typeLabels={GROUP_TYPE_LABELS} />
             </div>
         </div>
     );

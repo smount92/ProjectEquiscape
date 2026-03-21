@@ -13,8 +13,7 @@ vi.mock("@/app/actions/hoofprint", () => ({
 
 // Mock next/link
 vi.mock("next/link", () => ({
-    default: ({ children, href }: { children: React.ReactNode; href: string }) =>
-        <a href={href}>{children}</a>,
+    default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
 
 const mockTimeline = [
@@ -166,9 +165,7 @@ describe("HoofprintTimeline", () => {
     });
 
     it("shows empty state when no timeline events", () => {
-        render(
-            <HoofprintTimeline {...defaultProps} timeline={[]} ownershipChain={[]} />
-        );
+        render(<HoofprintTimeline {...defaultProps} timeline={[]} ownershipChain={[]} />);
 
         expect(screen.getByText("🐾 No timeline events yet.")).toBeInTheDocument();
     });

@@ -38,26 +38,18 @@ export default async function AdminPage() {
     const supabaseAdmin = getAdminClient();
 
     // Fetch metrics in parallel
-    const [usersResult, horsesResult, unreadResult, messagesResult] =
-        await Promise.all([
-            supabaseAdmin.auth.admin.listUsers({ perPage: 1, page: 1 }),
-            supabaseAdmin
-                .from("user_horses")
-                .select("id", { count: "exact", head: true }),
-            supabaseAdmin
-                .from("contact_messages")
-                .select("id", { count: "exact", head: true })
-                .eq("is_read", false),
-            supabaseAdmin
-                .from("contact_messages")
-                .select("id, name, email, subject, message, is_read, created_at")
-                .order("created_at", { ascending: false })
-                .limit(100),
-        ]);
+    const [usersResult, horsesResult, unreadResult, messagesResult] = await Promise.all([
+        supabaseAdmin.auth.admin.listUsers({ perPage: 1, page: 1 }),
+        supabaseAdmin.from("user_horses").select("id", { count: "exact", head: true }),
+        supabaseAdmin.from("contact_messages").select("id", { count: "exact", head: true }).eq("is_read", false),
+        supabaseAdmin
+            .from("contact_messages")
+            .select("id, name, email, subject, message, is_read, created_at")
+            .order("created_at", { ascending: false })
+            .limit(100),
+    ]);
 
-    const totalUsers =
-        (usersResult.data as unknown as { users: unknown[]; total?: number })
-            ?.total ?? 0;
+    const totalUsers = (usersResult.data as unknown as { users: unknown[]; total?: number })?.total ?? 0;
     const totalHorses = horsesResult.count ?? 0;
     const unreadMessages = unreadResult.count ?? 0;
     const messages = (messagesResult.data as ContactMessage[]) ?? [];
@@ -77,9 +69,15 @@ export default async function AdminPage() {
     // Enrich with author info
     const catalogSuggestions = [];
     for (const row of (catalogSuggestionRows ?? []) as {
-        id: string; user_id: string; suggestion_type: string;
-        field_changes: Record<string, unknown>; reason: string;
-        status: string; upvotes: number; downvotes: number; created_at: string;
+        id: string;
+        user_id: string;
+        suggestion_type: string;
+        field_changes: Record<string, unknown>;
+        reason: string;
+        status: string;
+        upvotes: number;
+        downvotes: number;
+        created_at: string;
     }[]) {
         const { data: author } = await supabaseAdmin
             .from("users")
@@ -89,15 +87,16 @@ export default async function AdminPage() {
         catalogSuggestions.push({
             ...row,
             author_alias: (author as { alias_name: string } | null)?.alias_name ?? "Unknown",
-            author_approved_count: (author as { approved_suggestions_count: number } | null)?.approved_suggestions_count ?? 0,
+            author_approved_count:
+                (author as { approved_suggestions_count: number } | null)?.approved_suggestions_count ?? 0,
         });
     }
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
                 {/* Header */}
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
                     <div>
                         <h1>
                             <span className="text-forest">⚡ Admin Console</span>
@@ -130,23 +129,21 @@ export default async function AdminPage() {
                 </div>
 
                 {/* Metrics Row — always visible */}
-                <div className="grid grid-cols-[repeat(auto-fit, minmax(200px, 1fr))] gap-4 mb-8">
-                    <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all">
-                        <div className="text-[2rem] mb-1">👥</div>
-                        <div className="text-3xl font-bold text-ink leading-none">{totalUsers}</div>
-                        <div className="text-xs text-muted mt-1 font-medium">Registered Users</div>
+                <div className="grid-cols-[repeat(auto-fit, minmax(200px, 1fr))] mb-8 grid gap-4">
+                    <div className="bg-glass border-edge rounded-lg border p-6 text-center transition-all">
+                        <div className="mb-1 text-[2rem]">👥</div>
+                        <div className="text-ink text-3xl leading-none font-bold">{totalUsers}</div>
+                        <div className="text-muted mt-1 text-xs font-medium">Registered Users</div>
                     </div>
-                    <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all">
-                        <div className="text-[2rem] mb-1">🐴</div>
-                        <div className="text-3xl font-bold text-ink leading-none">
-                            {totalHorses.toLocaleString()}
-                        </div>
-                        <div className="text-xs text-muted mt-1 font-medium">Horses in Database</div>
+                    <div className="bg-glass border-edge rounded-lg border p-6 text-center transition-all">
+                        <div className="mb-1 text-[2rem]">🐴</div>
+                        <div className="text-ink text-3xl leading-none font-bold">{totalHorses.toLocaleString()}</div>
+                        <div className="text-muted mt-1 text-xs font-medium">Horses in Database</div>
                     </div>
-                    <div className="p-6 bg-glass border border-edge rounded-lg text-center transition-all text-[#ef4444]">
-                        <div className="text-[2rem] mb-1">📨</div>
-                        <div className="text-3xl font-bold text-ink leading-none">{unreadMessages}</div>
-                        <div className="text-xs text-muted mt-1 font-medium">Unread Messages</div>
+                    <div className="bg-glass border-edge rounded-lg border p-6 text-center text-[#ef4444] transition-all">
+                        <div className="mb-1 text-[2rem]">📨</div>
+                        <div className="text-ink text-3xl leading-none font-bold">{unreadMessages}</div>
+                        <div className="text-muted mt-1 text-xs font-medium">Unread Messages</div>
                     </div>
                 </div>
 
@@ -154,7 +151,7 @@ export default async function AdminPage() {
                 <AdminTabs
                     messages={messages}
                     unreadCount={unreadMessages}
-                    shows={allShows.map(s => ({
+                    shows={allShows.map((s) => ({
                         id: s.id,
                         title: s.title,
                         status: s.status,

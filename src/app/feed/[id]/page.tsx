@@ -29,7 +29,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function FeedPostPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
     const { data: post } = await supabase
@@ -68,24 +70,36 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
     }
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             <div className="page-content max-w-[640]">
-                <Link href="/feed" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge mb-4">← Back to Feed</Link>
+                <Link
+                    href="/feed"
+                    className="hover:no-underline-min-h)] text-ink-light border-edge mb-4 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                >
+                    ← Back to Feed
+                </Link>
 
-                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6">
+                <div className="glass-bg-card border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                     <div className="justify-between" style={{ display: "flex", alignItems: "center" }}>
-                        <Link href={`/profile/${encodeURIComponent(actorAlias)}`} className="font-semibold" >
+                        <Link href={`/profile/${encodeURIComponent(actorAlias)}`} className="font-semibold">
                             @{actorAlias}
                         </Link>
-                        <span className="text-muted text-[calc(0.8rem*var(--font-scale))]" >
+                        <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">
                             {new Date(p.created_at as string).toLocaleString()}
                         </span>
                     </div>
 
-                    {content && <div className="mt-4" ><RichText content={content} /></div>}
+                    {content && (
+                        <div className="mt-4">
+                            <RichText content={content} />
+                        </div>
+                    )}
 
                     {signedUrls.length > 0 && (
-                        <div className="grid gap-[4px] mt-2 rounded-md overflow-hidden mt-4" data-count={Math.min(signedUrls.length, 4)}>
+                        <div
+                            className="mt-2 mt-4 grid gap-[4px] overflow-hidden rounded-md"
+                            data-count={Math.min(signedUrls.length, 4)}
+                        >
                             {signedUrls.slice(0, 4).map((item, i) => (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img key={i} src={item.url} alt={item.caption || `Image ${i + 1}`} loading="lazy" />

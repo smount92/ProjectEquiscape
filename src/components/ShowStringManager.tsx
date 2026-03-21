@@ -126,31 +126,57 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
     return (
         <div>
-            {error && <p className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm">{error}</p>}
+            {error && (
+                <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+                    {error}
+                </p>
+            )}
 
             {/* Create New */}
             {!creating ? (
-                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm mb-6" onClick={() => setCreating(true)}>
+                <button
+                    className="hover:no-underline-min-h)] bg-forest text-inverse mb-6 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    onClick={() => setCreating(true)}
+                >
                     + New Show String
                 </button>
             ) : (
-                <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-6 mb-6">
-                    <h3 className="mb-4" >Create Show String</h3>
+                <div className="glass-bg-card border-edge mb-6 rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <h3 className="mb-4">Create Show String</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Show Name *</label>
-                            <input className="form-input" value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Spring Fling 2026" />
+                            <label className="text-ink mb-1 block text-sm font-semibold">Show Name *</label>
+                            <input
+                                className="form-input"
+                                value={newName}
+                                onChange={(e) => setNewName(e.target.value)}
+                                placeholder="e.g. Spring Fling 2026"
+                            />
                         </div>
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Show Date</label>
-                            <input className="form-input" type="date" value={newDate} onChange={e => setNewDate(e.target.value)} />
+                            <label className="text-ink mb-1 block text-sm font-semibold">Show Date</label>
+                            <input
+                                className="form-input"
+                                type="date"
+                                value={newDate}
+                                onChange={(e) => setNewDate(e.target.value)}
+                            />
                         </div>
                     </div>
-                    <div className="gap-2 mt-4" style={{ display: "flex" }}>
-                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleCreate} disabled={saving}>
+                    <div className="mt-4 gap-2" style={{ display: "flex" }}>
+                        <button
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            onClick={handleCreate}
+                            disabled={saving}
+                        >
                             {saving ? "Creating..." : "Create"}
                         </button>
-                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setCreating(false)}>Cancel</button>
+                        <button
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            onClick={() => setCreating(false)}
+                        >
+                            Cancel
+                        </button>
                     </div>
                 </div>
             )}
@@ -162,47 +188,86 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                 </div>
             ) : (
                 <div className="grid gap-2">
-                    {showStrings.map(ss => (
+                    {showStrings.map((ss) => (
                         <div key={ss.id} className={`show-string-item ${activeStringId === ss.id ? "active" : ""}`}>
-                            <div className="flex justify-between items-center py-4 px-6 gap-2" onClick={() => handleSelectString(ss.id)} style={{ cursor: "pointer" }}>
+                            <div
+                                className="flex items-center justify-between gap-2 px-6 py-4"
+                                onClick={() => handleSelectString(ss.id)}
+                                style={{ cursor: "pointer" }}
+                            >
                                 <div>
                                     <strong>{ss.name}</strong>
                                     {ss.showDate && (
-                                        <span className="ml-2 text-muted text-[calc(0.8rem*var(--font-scale))]" >
-                                            📅 {new Date(ss.showDate + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                        <span className="text-muted ml-2 text-[calc(0.8rem*var(--font-scale))]">
+                                            📅{" "}
+                                            {new Date(ss.showDate + "T12:00:00").toLocaleDateString("en-US", {
+                                                month: "short",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            })}
                                         </span>
                                     )}
                                 </div>
                                 <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
-                                    <span className="flex items-center gap-1 py-2 px-4 rounded-md border border-[transparent] bg-card max-[480px]:rounded-[var(--radius-md)] text-muted text-[calc(0.85rem*var(--font-scale))] cursor-pointer whitespace-nowrap transition-all-badge">{ss.entryCount}</span>
-                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={async (e) => { e.stopPropagation(); setSaving(true); await duplicateShowString(ss.id); setSaving(false); router.refresh(); }} title="Duplicate" disabled={saving}>📋</button>
-                                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={e => { e.stopPropagation(); handleDeleteString(ss.id); }} title="Delete">🗑️</button>
+                                    <span className="bg-card text-muted transition-all-badge flex cursor-pointer items-center gap-1 rounded-md border border-[transparent] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] whitespace-nowrap max-[480px]:rounded-[var(--radius-md)]">
+                                        {ss.entryCount}
+                                    </span>
+                                    <button
+                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            setSaving(true);
+                                            await duplicateShowString(ss.id);
+                                            setSaving(false);
+                                            router.refresh();
+                                        }}
+                                        title="Duplicate"
+                                        disabled={saving}
+                                    >
+                                        📋
+                                    </button>
+                                    <button
+                                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteString(ss.id);
+                                        }}
+                                        title="Delete"
+                                    >
+                                        🗑️
+                                    </button>
                                 </div>
                             </div>
 
                             {/* Expanded: entries + add form */}
                             {activeStringId === ss.id && (
-                                <div className="p-[0 var(--space-lg) var(--space-lg)] border-t border-edge">
+                                <div className="p-[0 var(--space-lg) var(--space-lg)] border-edge border-t">
                                     {loadingEntries ? (
-                                        <p className="text-muted" >Loading entries...</p>
+                                        <p className="text-muted">Loading entries...</p>
                                     ) : (
                                         <>
                                             {/* Ring Conflict Visual Timeline */}
                                             {conflicts.length > 0 && (
-                                                <div className="mb-4" >
-                                                    <div className="gap-2 mb-1" style={{ display: "flex", alignItems: "center" }}>
-                                                        <span className="inline-flex items-center gap-1 py-0.5 px-2 rounded-full bg-[rgba(239,68,68,0.15)] text-[#ef4444] text-xs font-semibold">⚠️ {conflicts.length} Conflict{conflicts.length !== 1 ? "s" : ""}</span>
+                                                <div className="mb-4">
+                                                    <div
+                                                        className="mb-1 gap-2"
+                                                        style={{ display: "flex", alignItems: "center" }}
+                                                    >
+                                                        <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(239,68,68,0.15)] px-2 py-0.5 text-xs font-semibold text-[#ef4444]">
+                                                            ⚠️ {conflicts.length} Conflict
+                                                            {conflicts.length !== 1 ? "s" : ""}
+                                                        </span>
                                                     </div>
                                                     {/* Timeline visualization */}
-                                                    <div className="flex gap-0.5 items-stretch h-8 rounded-md overflow-hidden bg-surface-secondary">
-                                                        {entries.map(entry => {
+                                                    <div className="bg-surface-secondary flex h-8 items-stretch gap-0.5 overflow-hidden rounded-md">
+                                                        {entries.map((entry) => {
                                                             const isConflict = conflicts.some(
-                                                                c => c.entryA === entry.id || c.entryB === entry.id
+                                                                (c) => c.entryA === entry.id || c.entryB === entry.id,
                                                             );
                                                             return (
                                                                 <div
                                                                     key={entry.id}
-                                                                    className={`flex-1 flex items-center justify-center text-xs font-semibold text-white transition-opacity relative ${isConflict ? "bg-[#ef4444] animate-pulse" : "bg-forest"}`}
+                                                                    className={`relative flex flex-1 items-center justify-center text-xs font-semibold text-white transition-opacity ${isConflict ? "animate-pulse bg-[#ef4444]" : "bg-forest"}`}
                                                                     title={`${entry.horseName} — ${entry.className}${entry.timeSlot ? ` @ ${entry.timeSlot}` : ""}`}
                                                                 >
                                                                     {entry.className.slice(0, 3)}
@@ -210,9 +275,12 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                             );
                                                         })}
                                                     </div>
-                                                    <div className="mt-1" >
+                                                    <div className="mt-1">
                                                         {conflicts.map((c, i) => (
-                                                            <div key={i} className="py-2 px-4 rounded-md bg-[rgba(245,158,11,0.1)] border border-[rgba(245,158,11,0.3)] text-[#f59e0b] text-[calc(0.8rem*var(--font-scale))] font-semibold text-[calc(0.75rem*var(--font-scale))]">
+                                                            <div
+                                                                key={i}
+                                                                className="rounded-md border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.1)] px-4 py-2 text-[calc(0.8rem*var(--font-scale))] text-[calc(0.75rem*var(--font-scale))] font-semibold text-[#f59e0b]"
+                                                            >
                                                                 ⚠️ {c.reason}
                                                             </div>
                                                         ))}
@@ -222,64 +290,128 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
                                             {/* Entries Table */}
                                             {entries.length > 0 ? (
-                                                <div className="grid gap-1 m-[var(--space-md) 0]">
-                                                    {entries.map(entry => (
-                                                        <div key={entry.id} className="flex items-center gap-2 py-2 px-4 rounded-md bg-[rgba(0,0,0,0.03)] text-[calc(0.85rem*var(--font-scale))]">
-                                                            <span className="font-bold min-w-[140px]">🐴 {entry.horseName}</span>
+                                                <div className="m-[var(--space-md) 0] grid gap-1">
+                                                    {entries.map((entry) => (
+                                                        <div
+                                                            key={entry.id}
+                                                            className="flex items-center gap-2 rounded-md bg-[rgba(0,0,0,0.03)] px-4 py-2 text-[calc(0.85rem*var(--font-scale))]"
+                                                        >
+                                                            <span className="min-w-[140px] font-bold">
+                                                                🐴 {entry.horseName}
+                                                            </span>
                                                             <span className="flex-1">{entry.className}</span>
-                                                            {entry.division && <span className="text-[calc(0.75rem*var(--font-scale))] py-[2px] px-[8px] rounded-full bg-[rgba(139,92,246,0.1)] text-[#a78bfa]">{entry.division}</span>}
-                                                            {entry.timeSlot && <span className="text-[calc(0.75rem*var(--font-scale))] text-muted">🕐 {entry.timeSlot}</span>}
-                                                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => handleRemoveEntry(entry.id)} title="Remove">✕</button>
+                                                            {entry.division && (
+                                                                <span className="rounded-full bg-[rgba(139,92,246,0.1)] px-[8px] py-[2px] text-[calc(0.75rem*var(--font-scale))] text-[#a78bfa]">
+                                                                    {entry.division}
+                                                                </span>
+                                                            )}
+                                                            {entry.timeSlot && (
+                                                                <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+                                                                    🕐 {entry.timeSlot}
+                                                                </span>
+                                                            )}
+                                                            <button
+                                                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                                                onClick={() => handleRemoveEntry(entry.id)}
+                                                                title="Remove"
+                                                            >
+                                                                ✕
+                                                            </button>
                                                         </div>
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <p className="text-muted text-[calc(0.85rem*var(--font-scale))]" >No entries yet. Add horses below.</p>
+                                                <p className="text-muted text-[calc(0.85rem*var(--font-scale))]">
+                                                    No entries yet. Add horses below.
+                                                </p>
                                             )}
 
                                             {/* Add Entry Form */}
-                                            <div className="mt-6 pt-6 border-t border-edge">
+                                            <div className="border-edge mt-6 border-t pt-6">
                                                 <h4>Add Entry</h4>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="mb-6">
-                                                        <label className="block text-sm font-semibold text-ink mb-1">Horse *</label>
-                                                        <select className="form-input" value={entryHorseId} onChange={e => setEntryHorseId(e.target.value)}>
+                                                        <label className="text-ink mb-1 block text-sm font-semibold">
+                                                            Horse *
+                                                        </label>
+                                                        <select
+                                                            className="form-input"
+                                                            value={entryHorseId}
+                                                            onChange={(e) => setEntryHorseId(e.target.value)}
+                                                        >
                                                             <option value="">Select horse...</option>
-                                                            {horses.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+                                                            {horses.map((h) => (
+                                                                <option key={h.id} value={h.id}>
+                                                                    {h.name}
+                                                                </option>
+                                                            ))}
                                                         </select>
                                                     </div>
                                                     <div className="mb-6">
-                                                        <label className="block text-sm font-semibold text-ink mb-1">Class *</label>
-                                                        <input className="form-input" value={entryClassName} onChange={e => setEntryClassName(e.target.value)} placeholder="e.g. Arabian Stallion" />
+                                                        <label className="text-ink mb-1 block text-sm font-semibold">
+                                                            Class *
+                                                        </label>
+                                                        <input
+                                                            className="form-input"
+                                                            value={entryClassName}
+                                                            onChange={(e) => setEntryClassName(e.target.value)}
+                                                            placeholder="e.g. Arabian Stallion"
+                                                        />
                                                     </div>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="mb-6">
-                                                        <label className="block text-sm font-semibold text-ink mb-1">Division</label>
-                                                        <input className="form-input" value={entryDivision} onChange={e => setEntryDivision(e.target.value)} placeholder="e.g. Breed" />
+                                                        <label className="text-ink mb-1 block text-sm font-semibold">
+                                                            Division
+                                                        </label>
+                                                        <input
+                                                            className="form-input"
+                                                            value={entryDivision}
+                                                            onChange={(e) => setEntryDivision(e.target.value)}
+                                                            placeholder="e.g. Breed"
+                                                        />
                                                     </div>
                                                     <div className="mb-6">
-                                                        <label className="block text-sm font-semibold text-ink mb-1">Time Slot</label>
-                                                        <input className="form-input" value={entryTimeSlot} onChange={e => setEntryTimeSlot(e.target.value)} placeholder="e.g. 10:00 AM" />
+                                                        <label className="text-ink mb-1 block text-sm font-semibold">
+                                                            Time Slot
+                                                        </label>
+                                                        <input
+                                                            className="form-input"
+                                                            value={entryTimeSlot}
+                                                            onChange={(e) => setEntryTimeSlot(e.target.value)}
+                                                            placeholder="e.g. 10:00 AM"
+                                                        />
                                                     </div>
                                                 </div>
-                                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={handleAddEntry} disabled={saving || !entryHorseId || !entryClassName.trim()}>
+                                                <button
+                                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                                    onClick={handleAddEntry}
+                                                    disabled={saving || !entryHorseId || !entryClassName.trim()}
+                                                >
                                                     {saving ? "Adding..." : "+ Add Entry"}
                                                 </button>
                                             </div>
 
                                             {/* ── Batch Results Section ── */}
                                             {entries.length > 0 && (
-                                                <div className="mt-6 pt-4" style={{ borderTop: "1px solid var(--color-border)" }}>
+                                                <div
+                                                    className="mt-6 pt-4"
+                                                    style={{ borderTop: "1px solid var(--color-border)" }}
+                                                >
                                                     {!showResults ? (
                                                         <button
-                                                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                                                             onClick={() => {
                                                                 setShowResults(true);
                                                                 setResultsSaved(false);
                                                                 // Initialize results map
-                                                                const init: Record<string, { placing: string; ribbon: string }> = {};
-                                                                entries.forEach(e => { init[e.id] = { placing: "", ribbon: "" }; });
+                                                                const init: Record<
+                                                                    string,
+                                                                    { placing: string; ribbon: string }
+                                                                > = {};
+                                                                entries.forEach((e) => {
+                                                                    init[e.id] = { placing: "", ribbon: "" };
+                                                                });
                                                                 setResults(init);
                                                             }}
                                                         >
@@ -287,53 +419,89 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                         </button>
                                                     ) : (
                                                         <div>
-                                                            <h4 className="mb-2" >🏆 Batch Results</h4>
-                                                            <p className="text-muted text-[calc(0.8rem*var(--font-scale))] mb-2" >
-                                                                Tab through to enter placing and ribbon for each entry. Results will be saved as show records.
+                                                            <h4 className="mb-2">🏆 Batch Results</h4>
+                                                            <p className="text-muted mb-2 text-[calc(0.8rem*var(--font-scale))]">
+                                                                Tab through to enter placing and ribbon for each entry.
+                                                                Results will be saved as show records.
                                                             </p>
-                                                            <table className="bg-[var(--color-surface-secondary)] font-semibold sticky top-0">
+                                                            <table className="sticky top-0 bg-[var(--color-surface-secondary)] font-semibold">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>Horse</th>
                                                                         <th>Class</th>
-                                                                        <th className="w-[100]" >Placing</th>
-                                                                        <th className="w-[120]" >Ribbon</th>
+                                                                        <th className="w-[100]">Placing</th>
+                                                                        <th className="w-[120]">Ribbon</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
-                                                                    {entries.map(entry => (
+                                                                    {entries.map((entry) => (
                                                                         <tr key={entry.id}>
                                                                             <td>{entry.horseName}</td>
-                                                                            <td>{entry.className}{entry.division ? ` (${entry.division})` : ""}</td>
+                                                                            <td>
+                                                                                {entry.className}
+                                                                                {entry.division
+                                                                                    ? ` (${entry.division})`
+                                                                                    : ""}
+                                                                            </td>
                                                                             <td>
                                                                                 <input
                                                                                     type="text"
                                                                                     placeholder="1st"
-                                                                                    value={results[entry.id]?.placing || ""}
-                                                                                    onChange={e => setResults(prev => ({
-                                                                                        ...prev,
-                                                                                        [entry.id]: { ...prev[entry.id], placing: e.target.value }
-                                                                                    }))}
+                                                                                    value={
+                                                                                        results[entry.id]?.placing || ""
+                                                                                    }
+                                                                                    onChange={(e) =>
+                                                                                        setResults((prev) => ({
+                                                                                            ...prev,
+                                                                                            [entry.id]: {
+                                                                                                ...prev[entry.id],
+                                                                                                placing: e.target.value,
+                                                                                            },
+                                                                                        }))
+                                                                                    }
                                                                                 />
                                                                             </td>
                                                                             <td>
                                                                                 <select
-                                                                                    value={results[entry.id]?.ribbon || ""}
-                                                                                    onChange={e => setResults(prev => ({
-                                                                                        ...prev,
-                                                                                        [entry.id]: { ...prev[entry.id], ribbon: e.target.value }
-                                                                                    }))}
+                                                                                    value={
+                                                                                        results[entry.id]?.ribbon || ""
+                                                                                    }
+                                                                                    onChange={(e) =>
+                                                                                        setResults((prev) => ({
+                                                                                            ...prev,
+                                                                                            [entry.id]: {
+                                                                                                ...prev[entry.id],
+                                                                                                ribbon: e.target.value,
+                                                                                            },
+                                                                                        }))
+                                                                                    }
                                                                                 >
                                                                                     <option value="">—</option>
-                                                                                    <option value="Blue">🥇 Blue</option>
+                                                                                    <option value="Blue">
+                                                                                        🥇 Blue
+                                                                                    </option>
                                                                                     <option value="Red">🥈 Red</option>
-                                                                                    <option value="Yellow">🥉 Yellow</option>
-                                                                                    <option value="White">⬜ White</option>
-                                                                                    <option value="Pink">🩷 Pink</option>
-                                                                                    <option value="Green">💚 Green</option>
-                                                                                    <option value="Champion">🏆 Champion</option>
-                                                                                    <option value="Reserve">🎖️ Reserve</option>
-                                                                                    <option value="Top Ten">🔟 Top Ten</option>
+                                                                                    <option value="Yellow">
+                                                                                        🥉 Yellow
+                                                                                    </option>
+                                                                                    <option value="White">
+                                                                                        ⬜ White
+                                                                                    </option>
+                                                                                    <option value="Pink">
+                                                                                        🩷 Pink
+                                                                                    </option>
+                                                                                    <option value="Green">
+                                                                                        💚 Green
+                                                                                    </option>
+                                                                                    <option value="Champion">
+                                                                                        🏆 Champion
+                                                                                    </option>
+                                                                                    <option value="Reserve">
+                                                                                        🎖️ Reserve
+                                                                                    </option>
+                                                                                    <option value="Top Ten">
+                                                                                        🔟 Top Ten
+                                                                                    </option>
                                                                                 </select>
                                                                             </td>
                                                                         </tr>
@@ -343,47 +511,79 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
                                                             {/* NAN Rollup Summary */}
                                                             {(() => {
-                                                                const filled = Object.values(results).filter(r => r.placing || r.ribbon);
-                                                                const champs = Object.values(results).filter(r => r.ribbon === "Champion").length;
-                                                                const reserves = Object.values(results).filter(r => r.ribbon === "Reserve").length;
-                                                                const topTens = Object.values(results).filter(r => r.ribbon === "Top Ten").length;
-                                                                const points = champs * 4 + reserves * 3 + topTens * 2 + (filled.length - champs - reserves - topTens);
+                                                                const filled = Object.values(results).filter(
+                                                                    (r) => r.placing || r.ribbon,
+                                                                );
+                                                                const champs = Object.values(results).filter(
+                                                                    (r) => r.ribbon === "Champion",
+                                                                ).length;
+                                                                const reserves = Object.values(results).filter(
+                                                                    (r) => r.ribbon === "Reserve",
+                                                                ).length;
+                                                                const topTens = Object.values(results).filter(
+                                                                    (r) => r.ribbon === "Top Ten",
+                                                                ).length;
+                                                                const points =
+                                                                    champs * 4 +
+                                                                    reserves * 3 +
+                                                                    topTens * 2 +
+                                                                    (filled.length - champs - reserves - topTens);
                                                                 if (filled.length === 0) return null;
                                                                 return (
-                                                                    <div className="flex gap-6 p-4 bg-surface-secondary rounded-lg mt-4 flex-wrap">
+                                                                    <div className="bg-surface-secondary mt-4 flex flex-wrap gap-6 rounded-lg p-4">
                                                                         <div className="flex flex-col gap-0.5">
-                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-forest">{filled.length}</span>
-                                                                            <span className="text-xs text-muted">Results</span>
+                                                                            <span className="text-forest text-[calc(1.2rem*var(--font-scale))] font-bold">
+                                                                                {filled.length}
+                                                                            </span>
+                                                                            <span className="text-muted text-xs">
+                                                                                Results
+                                                                            </span>
                                                                         </div>
                                                                         <div className="flex flex-col gap-0.5">
-                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-forest">{champs}🏆 {reserves}🎖️ {topTens}🔟</span>
-                                                                            <span className="text-xs text-muted">Major Ribbons</span>
+                                                                            <span className="text-forest text-[calc(1.2rem*var(--font-scale))] font-bold">
+                                                                                {champs}🏆 {reserves}🎖️ {topTens}🔟
+                                                                            </span>
+                                                                            <span className="text-muted text-xs">
+                                                                                Major Ribbons
+                                                                            </span>
                                                                         </div>
                                                                         <div className="flex flex-col gap-0.5">
-                                                                            <span className="text-[calc(1.2rem*var(--font-scale))] font-bold text-forest">~{points}</span>
-                                                                            <span className="text-xs text-muted">Est. NAN Points</span>
+                                                                            <span className="text-forest text-[calc(1.2rem*var(--font-scale))] font-bold">
+                                                                                ~{points}
+                                                                            </span>
+                                                                            <span className="text-muted text-xs">
+                                                                                Est. NAN Points
+                                                                            </span>
                                                                         </div>
                                                                     </div>
                                                                 );
                                                             })()}
 
-                                                            <div className="gap-2 mt-4" style={{ display: "flex" }}>
+                                                            <div className="mt-4 gap-2" style={{ display: "flex" }}>
                                                                 <button
-                                                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                                                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                                                     disabled={savingResults}
                                                                     onClick={async () => {
                                                                         setSavingResults(true);
-                                                                        const activeStr = showStrings.find(s => s.id === activeStringId);
+                                                                        const activeStr = showStrings.find(
+                                                                            (s) => s.id === activeStringId,
+                                                                        );
                                                                         const records = entries
-                                                                            .filter(e => results[e.id]?.placing || results[e.id]?.ribbon)
-                                                                            .map(e => ({
+                                                                            .filter(
+                                                                                (e) =>
+                                                                                    results[e.id]?.placing ||
+                                                                                    results[e.id]?.ribbon,
+                                                                            )
+                                                                            .map((e) => ({
                                                                                 horseId: e.horseId,
-                                                                                showName: activeStr?.name || "Unknown Show",
+                                                                                showName:
+                                                                                    activeStr?.name || "Unknown Show",
                                                                                 showDate: activeStr?.showDate || null,
                                                                                 division: e.division || null,
                                                                                 className: e.className,
                                                                                 placing: results[e.id]?.placing || null,
-                                                                                ribbonColor: results[e.id]?.ribbon || null,
+                                                                                ribbonColor:
+                                                                                    results[e.id]?.ribbon || null,
                                                                             }));
                                                                         if (records.length > 0) {
                                                                             await batchRecordResults(records);
@@ -393,10 +593,21 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
                                                                         router.refresh();
                                                                     }}
                                                                 >
-                                                                    {savingResults ? "Saving..." : `💾 Save ${Object.values(results).filter(r => r.placing || r.ribbon).length} Results`}
+                                                                    {savingResults
+                                                                        ? "Saving..."
+                                                                        : `💾 Save ${Object.values(results).filter((r) => r.placing || r.ribbon).length} Results`}
                                                                 </button>
-                                                                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={() => setShowResults(false)}>Cancel</button>
-                                                                {resultsSaved && <span className="text-forest font-semibold" >✅ Saved!</span>}
+                                                                <button
+                                                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                                                    onClick={() => setShowResults(false)}
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                                {resultsSaved && (
+                                                                    <span className="text-forest font-semibold">
+                                                                        ✅ Saved!
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     )}

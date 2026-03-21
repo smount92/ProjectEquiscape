@@ -5,7 +5,6 @@ import { sendMessage } from "@/app/actions/messaging";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
-
 interface ChatMessage {
     id: string;
     senderId: string;
@@ -23,12 +22,7 @@ interface ChatThreadProps {
 
 import { RISKY_PAYMENT_REGEX } from "@/lib/safety";
 
-export default function ChatThread({
-    conversationId,
-    currentUserId,
-    otherAlias,
-    initialMessages,
-}: ChatThreadProps) {
+export default function ChatThread({ conversationId, currentUserId, otherAlias, initialMessages }: ChatThreadProps) {
     const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
     const [newMessage, setNewMessage] = useState("");
     const [sending, setSending] = useState(false);
@@ -63,7 +57,12 @@ export default function ChatThread({
                     filter: `conversation_id=eq.${conversationId}`,
                 },
                 (payload) => {
-                    const newMsg = payload.new as { id: string; content: string; sender_id: string; created_at: string };
+                    const newMsg = payload.new as {
+                        id: string;
+                        content: string;
+                        sender_id: string;
+                        created_at: string;
+                    };
                     // Only add if not from current user (we already added optimistically)
                     if (newMsg.sender_id !== currentUserId) {
                         setMessages((prev) => [
@@ -77,11 +76,13 @@ export default function ChatThread({
                             },
                         ]);
                     }
-                }
+                },
             )
             .subscribe();
 
-        return () => { supabase.removeChannel(channel); };
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [conversationId, currentUserId]);
 
     const handleSend = async () => {
@@ -150,9 +151,9 @@ export default function ChatThread({
     return (
         <>
             {/* Message area */}
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 bg-surface-glass border border-edge rounded-lg mb-4">
+            <div className="bg-surface-glass border-edge mb-4 flex flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
                 {messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center text-muted">
+                    <div className="text-muted flex flex-1 flex-col items-center justify-center gap-2 text-center">
                         <div className="text-5xl opacity-50">💬</div>
                         <p>
                             Start the conversation! Say hello to <strong>@{otherAlias}</strong>.
@@ -164,12 +165,12 @@ export default function ChatThread({
                         const showDate =
                             i === 0 ||
                             new Date(msg.createdAt).toDateString() !==
-                            new Date(messages[i - 1].createdAt).toDateString();
+                                new Date(messages[i - 1].createdAt).toDateString();
 
                         return (
                             <div key={msg.id}>
                                 {showDate && (
-                                    <div className="text-center py-2 text-xs text-muted font-medium">
+                                    <div className="text-muted py-2 text-center text-xs font-medium">
                                         {new Date(msg.createdAt).toLocaleDateString("en-US", {
                                             weekday: "short",
                                             month: "short",
@@ -177,12 +178,16 @@ export default function ChatThread({
                                         })}
                                     </div>
                                 )}
-                                <div
-                                    className={`flex ${msg.isMe ? "justify-end" : "justify-start"}`}
-                                >
-                                    <div className={`max-w-[75%] max-md:max-w-[85%] py-2.5 px-3.5 rounded-2xl leading-relaxed text-sm animate-[bubbleIn_0.2s_ease] text-ink ${msg.isMe ? "bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))] border border-[rgba(44,85,69,0.3)] rounded-br-[4px]" : "bg-black/[0.05] border border-edge rounded-bl-[4px]"}`}>
+                                <div className={`flex ${msg.isMe ? "justify-end" : "justify-start"}`}>
+                                    <div
+                                        className={`text-ink max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] border border-[rgba(44,85,69,0.3)] bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))]" : "border-edge rounded-bl-[4px] border bg-black/[0.05]"}`}
+                                    >
                                         <div className="break-words whitespace-pre-wrap">{msg.content}</div>
-                                        <div className={`text-[0.6rem] text-muted mt-1 opacity-70 ${msg.isMe ? "text-right" : ""}`}>{formatTime(msg.createdAt)}</div>
+                                        <div
+                                            className={`text-muted mt-1 text-[0.6rem] opacity-70 ${msg.isMe ? "text-right" : ""}`}
+                                        >
+                                            {formatTime(msg.createdAt)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -194,22 +199,25 @@ export default function ChatThread({
 
             {/* Risky Payment Warning */}
             {showPaymentWarning && (
-                <div className="flex items-start gap-2 py-2 px-4 bg-[rgba(245,158,11,0.12)] border border-[rgba(245,158,11,0.35)] rounded-md mx-4 text-xs text-[#f59e0b] leading-relaxed animate-[fadeInUp_0.2s_ease]" role="alert">
-                    <span className="text-[1.2rem] shrink-0 mt-px">🛡️</span>
+                <div
+                    className="mx-4 flex animate-[fadeInUp_0.2s_ease] items-start gap-2 rounded-md border border-[rgba(245,158,11,0.35)] bg-[rgba(245,158,11,0.12)] px-4 py-2 text-xs leading-relaxed text-[#f59e0b]"
+                    role="alert"
+                >
+                    <span className="mt-px shrink-0 text-[1.2rem]">🛡️</span>
                     <span>
-                        <strong>Protect yourself:</strong> Always use PayPal Goods &amp; Services for
-                        off-platform payments. Venmo, Zelle, and PayPal Friends &amp; Family offer{" "}
+                        <strong>Protect yourself:</strong> Always use PayPal Goods &amp; Services for off-platform
+                        payments. Venmo, Zelle, and PayPal Friends &amp; Family offer{" "}
                         <strong>no buyer protection</strong>.
                     </span>
                 </div>
             )}
 
             {/* Input area */}
-            <div className="shrink-0 p-4 bg-surface-glass border border-edge rounded-lg">
-                <div className="flex gap-2 items-end">
+            <div className="bg-surface-glass border-edge shrink-0 rounded-lg border p-4">
+                <div className="flex items-end gap-2">
                     <textarea
                         ref={inputRef}
-                        className="flex-1 py-2.5 px-3.5 bg-black/[0.05] border border-edge rounded-lg text-ink text-sm font-inherit resize-none min-h-[42px] max-h-[120px] transition-colors focus:outline-none focus:border-[rgba(44,85,69,0.5)] focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] placeholder:text-muted"
+                        className="border-edge text-ink font-inherit placeholder:text-muted max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-black/[0.05] px-3.5 py-2.5 text-sm transition-colors focus:border-[rgba(44,85,69,0.5)] focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -220,14 +228,17 @@ export default function ChatThread({
                         id="chat-message-input"
                     />
                     <button
-                        className="flex items-center justify-center w-[42px] h-[42px] rounded-full bg-forest text-white border-none cursor-pointer transition-all shrink-0 hover:enabled:scale-105 hover:enabled:shadow-[0_4px_16px_rgba(44,85,69,0.4)] disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="bg-forest flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none text-white transition-all hover:enabled:scale-105 hover:enabled:shadow-[0_4px_16px_rgba(44,85,69,0.4)] disabled:cursor-not-allowed disabled:opacity-40"
                         onClick={handleSend}
                         disabled={!newMessage.trim() || sending}
                         aria-label="Send message"
                         id="chat-send-button"
                     >
                         {sending ? (
-                            <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[16] h-[16]" aria-hidden="true" />
+                            <span
+                                className="hover:no-underline-min-h)] leading-none-spinner inline-flex h-[16] min-h-[var(--opacity-[0.5] w-[16] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                aria-hidden="true"
+                            />
                         ) : (
                             <svg
                                 width="18"
@@ -246,7 +257,7 @@ export default function ChatThread({
                         )}
                     </button>
                 </div>
-                <div className="text-[0.6rem] text-muted opacity-50 mt-1.5 text-center">
+                <div className="text-muted mt-1.5 text-center text-[0.6rem] opacity-50">
                     Press Enter to send · Shift+Enter for new line
                 </div>
             </div>

@@ -3,8 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { respondToOffer, markPaymentSent, verifyFundsAndRelease, cancelTransaction, retractOffer } from "@/app/actions/transactions";
-
+import {
+    respondToOffer,
+    markPaymentSent,
+    verifyFundsAndRelease,
+    cancelTransaction,
+    retractOffer,
+} from "@/app/actions/transactions";
 
 interface OfferCardProps {
     transaction: {
@@ -25,9 +30,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
     const [status, setStatus] = useState(transaction.status);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
-    const [pin, setPin] = useState<string | null>(
-        (transaction.metadata?.pin as string) || null
-    );
+    const [pin, setPin] = useState<string | null>((transaction.metadata?.pin as string) || null);
     const [hasPaid, setHasPaid] = useState(!!transaction.paidAt);
     const router = useRouter();
 
@@ -92,10 +95,13 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
     // ── Cancelled / Completed ──
     if (status === "cancelled") {
         return (
-            <div className="bg-[rgba(239,68,68,0.06)] border border-[rgba(239,68,68,0.2)] rounded-lg p-6 mb-4 animate-[fadeInUp_0.3s_ease] opacity-70" id="offer-card">
+            <div
+                className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.06)] p-6 opacity-70"
+                id="offer-card"
+            >
                 <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                    <span className="font-semibold text-sm text-[#ef4444]">❌ Offer Declined</span>
-                    {amount && <span className="text-xl font-bold text-saddle">${amount.toFixed(2)}</span>}
+                    <span className="text-sm font-semibold text-[#ef4444]">❌ Offer Declined</span>
+                    {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
                 </div>
             </div>
         );
@@ -103,10 +109,13 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
 
     if (status === "completed") {
         return (
-            <div className="bg-[rgba(34,197,94,0.06)] border border-[rgba(34,197,94,0.2)] rounded-lg p-6 mb-4 animate-[fadeInUp_0.3s_ease]" id="offer-card">
+            <div
+                className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(34,197,94,0.2)] bg-[rgba(34,197,94,0.06)] p-6"
+                id="offer-card"
+            >
                 <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                    <span className="font-semibold text-sm text-[#22c55e]">✅ Transaction Complete</span>
-                    {amount && <span className="text-xl font-bold text-saddle">${amount.toFixed(2)}</span>}
+                    <span className="text-sm font-semibold text-[#22c55e]">✅ Transaction Complete</span>
+                    {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
                 </div>
             </div>
         );
@@ -114,30 +123,35 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
 
     // ── Active states ──
     return (
-        <div className="bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] rounded-lg p-6 mb-4 animate-[fadeInUp_0.3s_ease]" id="offer-card">
+        <div
+            className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] p-6"
+            id="offer-card"
+        >
             <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                <span className="font-semibold text-sm text-saddle">💰 Offer</span>
-                {amount && <span className="text-xl font-bold text-saddle">${amount.toFixed(2)}</span>}
+                <span className="text-saddle text-sm font-semibold">💰 Offer</span>
+                {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
             </div>
 
             {transaction.offerMessage && (
-                <p className="mt-2 text-sm text-muted italic leading-relaxed">&ldquo;{transaction.offerMessage}&rdquo;</p>
+                <p className="text-muted mt-2 text-sm leading-relaxed italic">
+                    &ldquo;{transaction.offerMessage}&rdquo;
+                </p>
             )}
 
             {/* offer_made */}
             {status === "offer_made" && (
                 <div className="mt-4">
                     {isSeller ? (
-                        <div className="flex gap-2 mt-2 flex-wrap items-center">
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                 onClick={() => handleRespond("accept")}
                                 disabled={saving}
                             >
                                 {saving ? "…" : "✅ Accept Offer"}
                             </button>
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
                                 onClick={() => handleRespond("decline")}
                                 disabled={saving}
                             >
@@ -146,9 +160,9 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         </div>
                     ) : (
                         <div>
-                            <p className="text-sm text-muted">⏳ Waiting for seller response…</p>
+                            <p className="text-muted text-sm">⏳ Waiting for seller response…</p>
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
                                 onClick={async () => {
                                     setSaving(true);
                                     const result = await retractOffer(transaction.transactionId);
@@ -173,13 +187,14 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
             {/* pending_payment */}
             {status === "pending_payment" && (
                 <div className="mt-4">
-                    <p className="text-sm text-[#22c55e] font-medium">
-                        ✅ Offer accepted! {isBuyer ? "Please send payment to the seller." : "Waiting for buyer to send payment."}
+                    <p className="text-sm font-medium text-[#22c55e]">
+                        ✅ Offer accepted!{" "}
+                        {isBuyer ? "Please send payment to the seller." : "Waiting for buyer to send payment."}
                     </p>
                     {isBuyer && !hasPaid && (
-                        <div className="flex gap-2 mt-2 flex-wrap items-center">
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                 onClick={handleMarkPaid}
                                 disabled={saving}
                             >
@@ -188,20 +203,20 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         </div>
                     )}
                     {isBuyer && hasPaid && (
-                        <p className="text-sm text-muted">💳 Payment marked as sent. Waiting for seller to verify…</p>
+                        <p className="text-muted text-sm">💳 Payment marked as sent. Waiting for seller to verify…</p>
                     )}
                     {isSeller && hasPaid && (
-                        <div className="flex gap-2 mt-2 flex-wrap items-center">
-                            <p className="text-sm text-muted">💳 Buyer says they&apos;ve paid.</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <p className="text-muted text-sm">💳 Buyer says they&apos;ve paid.</p>
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                 onClick={handleVerify}
                                 disabled={saving}
                             >
                                 {saving ? "Verifying…" : "✅ Confirm Funds & Release"}
                             </button>
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
                                 onClick={handleCancel}
                                 disabled={saving}
                                 style={{ color: "#ef4444" }}
@@ -211,10 +226,10 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
                         </div>
                     )}
                     {isSeller && !hasPaid && (
-                        <div className="flex gap-2 mt-2 flex-wrap items-center">
-                            <p className="text-sm text-muted">⏳ Waiting for buyer to send payment…</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <p className="text-muted text-sm">⏳ Waiting for buyer to send payment…</p>
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
                                 onClick={handleCancel}
                                 disabled={saving}
                                 style={{ color: "#ef4444" }}
@@ -230,17 +245,22 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
             {status === "funds_verified" && (
                 <div className="mt-4">
                     {isBuyer && pin ? (
-                        <div className="bg-[rgba(92,224,160,0.1)] border-2 border-success rounded-lg p-6 text-center mt-2">
-                            <span className="block text-xs text-muted mb-1">🔑 Your Claim PIN</span>
-                            <strong className="block text-2xl font-extrabold tracking-[0.15em] text-[#22c55e] font-mono">{pin}</strong>
-                            <Link href="/claim" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm mt-2">
+                        <div className="border-success mt-2 rounded-lg border-2 bg-[rgba(92,224,160,0.1)] p-6 text-center">
+                            <span className="text-muted mb-1 block text-xs">🔑 Your Claim PIN</span>
+                            <strong className="block font-mono text-2xl font-extrabold tracking-[0.15em] text-[#22c55e]">
+                                {pin}
+                            </strong>
+                            <Link
+                                href="/claim"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse mt-2 inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            >
                                 Go to Claim Page →
                             </Link>
                         </div>
                     ) : isBuyer ? (
-                        <p className="text-sm text-muted">✅ Funds verified. Check notifications for your claim PIN.</p>
+                        <p className="text-muted text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>
                     ) : (
-                        <p className="text-sm text-muted">✅ PIN released to buyer. Transfer in progress…</p>
+                        <p className="text-muted text-sm">✅ PIN released to buyer. Transfer in progress…</p>
                     )}
                 </div>
             )}

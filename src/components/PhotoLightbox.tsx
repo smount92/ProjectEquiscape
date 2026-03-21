@@ -35,7 +35,9 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
     useEffect(() => {
         const originalOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
-        return () => { document.body.style.overflow = originalOverflow; };
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
     }, []);
 
     const current = images[currentIndex];
@@ -50,15 +52,22 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
             aria-label={`Photo viewer — ${current.label || `Image ${currentIndex + 1}`}`}
         >
             {/* Close */}
-            <button className="fixed top-[var(--space-lg)] right-[var(--space-lg)] bg-[rgba(255, 255, 255, 0.12)] border-0 text-white w-[40px] h-[40px] rounded-full cursor-pointer text-[1.2rem] flex items-center justify-center transition-colors z-[1001]" onClick={onClose} aria-label="Close lightbox">
+            <button
+                className="bg-[rgba(255, 255, 255, 0.12)] fixed top-[var(--space-lg)] right-[var(--space-lg)] z-[1001] flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border-0 text-[1.2rem] text-white transition-colors"
+                onClick={onClose}
+                aria-label="Close lightbox"
+            >
                 ✕
             </button>
 
             {/* Prev arrow */}
             {images.length > 1 && (
                 <button
-                    className="fixed top-[50%] translate-y-[-50%] bg-[rgba(255,255,255,0.1)] border-0 text-white w-[48px] h-[48px] rounded-full cursor-pointer text-[1.4rem] flex items-center justify-center transition-all z-[1001] hover:0.2)] left-[var(--space-lg)]"
-                    onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                    className="hover:0.2)] fixed top-[50%] left-[var(--space-lg)] z-[1001] flex h-[48px] w-[48px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgba(255,255,255,0.1)] text-[1.4rem] text-white transition-all"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        goPrev();
+                    }}
                     aria-label="Previous photo"
                 >
                     ‹
@@ -78,8 +87,11 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
             {/* Next arrow */}
             {images.length > 1 && (
                 <button
-                    className="fixed top-[50%] translate-y-[-50%] bg-[rgba(255,255,255,0.1)] border-0 text-white w-[48px] h-[48px] rounded-full cursor-pointer text-[1.4rem] flex items-center justify-center transition-all z-[1001] hover:0.2)] right-[var(--space-lg)]"
-                    onClick={(e) => { e.stopPropagation(); goNext(); }}
+                    className="hover:0.2)] fixed top-[50%] right-[var(--space-lg)] z-[1001] flex h-[48px] w-[48px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgba(255,255,255,0.1)] text-[1.4rem] text-white transition-all"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        goNext();
+                    }}
                     aria-label="Next photo"
                 >
                     ›
@@ -88,16 +100,18 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
 
             {/* Label */}
             {current.label && (
-                <div className="fixed bottom-[calc(var(--space-lg) + 24px)] left-[50%] translate-x-[-50%] text-[rgba(255,255,255,0.85)] text-sm font-semibold z-[1001]">{current.label}</div>
+                <div className="bottom-[calc(var(--space-lg) + 24px)] fixed left-[50%] z-[1001] translate-x-[-50%] text-sm font-semibold text-[rgba(255,255,255,0.85)]">
+                    {current.label}
+                </div>
             )}
 
             {/* Counter */}
             {images.length > 1 && (
-                <div className="fixed bottom-[var(--space-lg)] left-[50%] translate-x-[-50%] text-[rgba(255,255,255,0.6)] text-sm z-[1001]">
+                <div className="fixed bottom-[var(--space-lg)] left-[50%] z-[1001] translate-x-[-50%] text-sm text-[rgba(255,255,255,0.6)]">
                     {currentIndex + 1} of {images.length}
                 </div>
             )}
         </div>,
-        document.body
+        document.body,
     );
 }

@@ -20,20 +20,20 @@ export default async function ChangelogPage() {
         .limit(50);
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+            <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
                 <Link href="/catalog">📚 Reference Catalog</Link>
-                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
+                <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+                    ›
+                </span>
                 <span>Changelog</span>
             </nav>
 
-            <h1 className="font-sans text-[calc(1.8rem*var(--font-scale))] mb-1">
-                📋{" "}
-                <span className="text-forest">Catalog Changelog</span>
+            <h1 className="mb-1 font-sans text-[calc(1.8rem*var(--font-scale))]">
+                📋 <span className="text-forest">Catalog Changelog</span>
             </h1>
             <p className="text-muted mb-6">
-                Community-approved updates to the reference catalog.{" "}
-                {count ?? 0} total changes.
+                Community-approved updates to the reference catalog. {count ?? 0} total changes.
             </p>
 
             <div className="flex flex-col gap-[0]">
@@ -52,8 +52,8 @@ export default async function ChangelogPage() {
                     const timeAgo = getTimeAgo(entry.created_at);
 
                     return (
-                        <div key={entry.id} className="flex gap-4 py-4 px-[0] border-b border-edge">
-                            <span className="text-[1.3rem] min-w-[28px]">
+                        <div key={entry.id} className="border-edge flex gap-4 border-b px-[0] py-4">
+                            <span className="min-w-[28px] text-[1.3rem]">
                                 {entry.change_type === "correction"
                                     ? "🔧"
                                     : entry.change_type === "addition"
@@ -63,7 +63,7 @@ export default async function ChangelogPage() {
                                         : "🗑"}
                             </span>
                             <div className="ref-changelog-content">
-                                <p className="text-[calc(0.9rem*var(--font-scale))] font-medium mb-[4px]">
+                                <p className="mb-[4px] text-[calc(0.9rem*var(--font-scale))] font-medium">
                                     {entry.change_summary}
                                 </p>
                                 <p className="text-forest">
@@ -79,11 +79,7 @@ export default async function ChangelogPage() {
                                     {entry.catalog_item_id && (
                                         <>
                                             {" · "}
-                                            <Link
-                                                href={`/catalog/${entry.catalog_item_id}`}
-                                            >
-                                                View entry →
-                                            </Link>
+                                            <Link href={`/catalog/${entry.catalog_item_id}`}>View entry →</Link>
                                         </>
                                     )}
                                 </p>
@@ -93,9 +89,12 @@ export default async function ChangelogPage() {
                 })}
 
                 {(entries ?? []).length === 0 && (
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center p-8 text-muted">
+                    <div className="bg-card border-edge text-muted rounded-lg border p-8 p-12 text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                         <p>No changes yet. The catalog awaits your contributions!</p>
-                        <Link href="/catalog" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
+                        <Link
+                            href="/catalog"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        >
                             Browse Catalog
                         </Link>
                     </div>

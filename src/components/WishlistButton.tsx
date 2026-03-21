@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { addToWishlist } from "@/app/actions/wishlist";
 
-
 interface WishlistButtonProps {
     catalogId: string | null;
 }
@@ -33,14 +32,17 @@ export default function WishlistButton({ catalogId }: WishlistButtonProps) {
 
     return (
         <button
-            className={`flex items-center justify-center w-8 h-8 border-none bg-transparent cursor-pointer rounded-full p-0 transition-all duration-200 ${status === "saved" ? "text-saddle animate-[wishlistPop_0.3s_ease]" : "text-muted hover:text-saddle hover:bg-[rgba(139,90,43,0.08)] hover:scale-115"}`}
+            className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-transparent p-0 transition-all duration-200 ${status === "saved" ? "text-saddle animate-[wishlistPop_0.3s_ease]" : "text-muted hover:text-saddle hover:scale-115 hover:bg-[rgba(139,90,43,0.08)]"}`}
             onClick={handleClick}
             disabled={status === "saving"}
             title={status === "saved" ? "In your wishlist" : "Add to wishlist"}
             aria-label={status === "saved" ? "In your wishlist" : "Add to wishlist"}
         >
             {status === "saving" ? (
-                <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[14] h-[14]" aria-hidden="true" />
+                <span
+                    className="hover:no-underline-min-h)] leading-none-spinner inline-flex h-[14] min-h-[var(--opacity-[0.5] w-[14] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                    aria-hidden="true"
+                />
             ) : (
                 <svg
                     width="16"

@@ -12,8 +12,16 @@ interface SuggestReferenceModalProps {
 }
 
 const SUGGESTION_TYPES = [
-    { value: "mold", label: "🐴 Mold / Sculpt", description: "A specific sculpt (e.g., Breyer Alborozo, Stone Ideal Stock Horse)" },
-    { value: "release", label: "🎨 Specific Release / Color", description: "A specific release or color run of an existing mold" },
+    {
+        value: "mold",
+        label: "🐴 Mold / Sculpt",
+        description: "A specific sculpt (e.g., Breyer Alborozo, Stone Ideal Stock Horse)",
+    },
+    {
+        value: "release",
+        label: "🎨 Specific Release / Color",
+        description: "A specific release or color run of an existing mold",
+    },
     { value: "resin", label: "✨ Artist Resin", description: "An artist resin sculpt not in our database" },
 ] as const;
 
@@ -63,34 +71,36 @@ export default function SuggestReferenceModal({
     const overlay = (
         <div className="modal-overlay" onClick={handleClose}>
             <div
-                className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all"
+                className="modal-bg-card border-edge rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                 onClick={(e) => e.stopPropagation()}
                 style={{ maxWidth: 520 }}
             >
                 {status === "success" ? (
                     <div className="p-[var(--space-xl) var(--space-lg)]" style={{ textAlign: "center" }}>
-                        <div className="text-[3rem] mb-4" >✅</div>
-                        <h3 className="mb-2" >Suggestion Submitted!</h3>
-                        <p className="text-muted text-sm" >
+                        <div className="mb-4 text-[3rem]">✅</div>
+                        <h3 className="mb-2">Suggestion Submitted!</h3>
+                        <p className="text-muted text-sm">
                             Our team will review your suggestion. If approved, it will appear in the reference database.
                         </p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit}>
-                        <h3 className="mb-1" >
-                            📝 Suggest a Reference
-                        </h3>
-                        <p style={{
-                            color: "var(--color-text-muted)",
-                            fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
-                            marginBottom: "var(--space-lg)",
-                        }}>
+                        <h3 className="mb-1">📝 Suggest a Reference</h3>
+                        <p
+                            style={{
+                                color: "var(--color-text-muted)",
+                                fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                                marginBottom: "var(--space-lg)",
+                            }}
+                        >
                             Help us grow the database! Tell us about the model you couldn&apos;t find.
                         </p>
 
                         {/* Suggestion Type */}
-                        <div className="mb-6 mb-4">
-                            <label className="block text-sm font-semibold text-ink mb-1">What are you suggesting?</label>
+                        <div className="mb-4 mb-6">
+                            <label className="text-ink mb-1 block text-sm font-semibold">
+                                What are you suggesting?
+                            </label>
                             <div className="gap-1" style={{ display: "flex", flexDirection: "column" }}>
                                 {SUGGESTION_TYPES.map((type) => (
                                     <label
@@ -102,7 +112,10 @@ export default function SuggestReferenceModal({
                                             padding: "var(--space-sm) var(--space-md)",
                                             borderRadius: "var(--radius-sm)",
                                             border: `1px solid ${suggestionType === type.value ? "var(--color-accent-primary)" : "var(--color-border)"}`,
-                                            background: suggestionType === type.value ? "rgba(61, 90, 62, 0.08)" : "transparent",
+                                            background:
+                                                suggestionType === type.value
+                                                    ? "rgba(61, 90, 62, 0.08)"
+                                                    : "transparent",
                                             cursor: "pointer",
                                             transition: "all 0.2s ease",
                                         }}
@@ -116,13 +129,13 @@ export default function SuggestReferenceModal({
                                             style={{ marginTop: 3, accentColor: "var(--color-accent-primary)" }}
                                         />
                                         <div>
-                                            <div className="font-semibold text-sm" >
-                                                {type.label}
-                                            </div>
-                                            <div style={{
-                                                color: "var(--color-text-muted)",
-                                                fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
-                                            }}>
+                                            <div className="text-sm font-semibold">{type.label}</div>
+                                            <div
+                                                style={{
+                                                    color: "var(--color-text-muted)",
+                                                    fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+                                                }}
+                                            >
                                                 {type.description}
                                             </div>
                                         </div>
@@ -132,9 +145,9 @@ export default function SuggestReferenceModal({
                         </div>
 
                         {/* Name */}
-                        <div className="mb-6 mb-4">
-                            <label className="block text-sm font-semibold text-ink mb-1">
-                                Name <span className="text-[#e74c6f]" >*</span>
+                        <div className="mb-4 mb-6">
+                            <label className="text-ink mb-1 block text-sm font-semibold">
+                                Name <span className="text-[#e74c6f]">*</span>
                             </label>
                             <input
                                 className="form-input"
@@ -150,8 +163,8 @@ export default function SuggestReferenceModal({
                         </div>
 
                         {/* Details */}
-                        <div className="mb-6 mb-4">
-                            <label className="block text-sm font-semibold text-ink mb-1">Additional Details</label>
+                        <div className="mb-4 mb-6">
+                            <label className="text-ink mb-1 block text-sm font-semibold">Additional Details</label>
                             <textarea
                                 className="form-input"
                                 value={details}
@@ -160,31 +173,29 @@ export default function SuggestReferenceModal({
                                     suggestionType === "mold"
                                         ? "Manufacturer, scale, year introduced, model number…"
                                         : suggestionType === "release"
-                                            ? "Color name, mold it belongs to, year released, regular/special run…"
-                                            : "Sculptor, scale, approximate edition size…"
+                                          ? "Color name, mold it belongs to, year released, regular/special run…"
+                                          : "Sculptor, scale, approximate edition size…"
                                 }
                                 maxLength={1000}
                                 rows={3}
                                 id="suggest-details"
                             />
-                            <small style={{
-                                color: "var(--color-text-muted)",
-                                fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
-                            }}>
+                            <small
+                                style={{
+                                    color: "var(--color-text-muted)",
+                                    fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+                                }}
+                            >
                                 The more detail you provide, the faster we can add it.
                             </small>
                         </div>
 
-                        {status === "error" && errorMsg && (
-                            <div className="comment-error mb-4">
-                                {errorMsg}
-                            </div>
-                        )}
+                        {status === "error" && errorMsg && <div className="comment-error mb-4">{errorMsg}</div>}
 
-                        <div className="gap-2 justify-end" style={{ display: "flex" }}>
+                        <div className="justify-end gap-2" style={{ display: "flex" }}>
                             <button
                                 type="button"
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                                 onClick={handleClose}
                                 disabled={status === "submitting"}
                             >
@@ -192,7 +203,7 @@ export default function SuggestReferenceModal({
                             </button>
                             <button
                                 type="submit"
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                 disabled={!name.trim() || status === "submitting"}
                             >
                                 {status === "submitting" ? "Submitting…" : "📤 Submit Suggestion"}

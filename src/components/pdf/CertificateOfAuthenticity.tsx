@@ -1,8 +1,6 @@
 "use client";
 
-import {
-    Document, Page, Text, View, StyleSheet, Image, Font,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Image, Font } from "@react-pdf/renderer";
 
 // ============================================================
 // CoA PDF Styles
@@ -205,11 +203,7 @@ interface CoaData {
 
 export default function CertificateOfAuthenticity({ data }: { data: CoaData }) {
     return (
-        <Document
-            title={`CoA — ${data.horseName}`}
-            author="Model Horse Hub"
-            subject="Certificate of Authenticity"
-        >
+        <Document title={`CoA — ${data.horseName}`} author="Model Horse Hub" subject="Certificate of Authenticity">
             <Page size="LETTER" style={s.page}>
                 {/* Header */}
                 <View style={s.headerRow}>
@@ -273,8 +267,8 @@ export default function CertificateOfAuthenticity({ data }: { data: CoaData }) {
                     <Text style={s.pinLabel}>Claim PIN</Text>
                     <Text style={s.pinCode}>{data.pin}</Text>
                     <Text style={s.instructions}>
-                        Scan this QR code or visit modelhorsehub.com/claim and enter PIN {data.pin} to claim this
-                        model and inherit its full Hoofprint™ history.
+                        Scan this QR code or visit modelhorsehub.com/claim and enter PIN {data.pin} to claim this model
+                        and inherit its full Hoofprint™ history.
                     </Text>
                 </View>
 

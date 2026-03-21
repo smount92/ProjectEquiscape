@@ -43,17 +43,13 @@ export default function ReportButton({
     };
 
     if (done) {
-        return (
-            <span className="text-xs text-muted" >
-                ✅ Reported
-            </span>
-        );
+        return <span className="text-muted text-xs">✅ Reported</span>;
     }
 
     if (!showForm) {
         return (
             <button
-                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-ghost"
+                className="hover:no-underline-min-h)] leading-none-ghost inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
                 onClick={() => setShowForm(true)}
                 style={{
                     fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
@@ -71,33 +67,44 @@ export default function ReportButton({
     }
 
     return (
-        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-4 mt-2">
+        <div className="bg-bg-card border-edge border-edge mt-2 rounded-lg border p-4 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
             <select
                 className="form-input"
                 value={reason}
-                onChange={e => setReason(e.target.value)}
+                onChange={(e) => setReason(e.target.value)}
                 style={{ marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
             >
                 <option value="">Select a reason…</option>
-                {reasons.map(r => (
-                    <option key={r} value={r}>{r}</option>
+                {reasons.map((r) => (
+                    <option key={r} value={r}>
+                        {r}
+                    </option>
                 ))}
             </select>
             <textarea
-                className="block w-full min-h-[var(--inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-min-h)] py-2 px-4 font-sans text-base text-ink bg-input border border-edge-input rounded-md outline-none transition-all duration-150"
+                className="min-h-[var(--inline-flex hover:no-underline-min-h)] leading-none-min-h)] text-ink bg-input border-edge-input block min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-4 px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150 outline-none"
                 placeholder="Additional details (optional)"
                 value={details}
-                onChange={e => setDetails(e.target.value)}
+                onChange={(e) => setDetails(e.target.value)}
                 rows={2}
                 maxLength={500}
                 style={{ marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
             />
-            {error && <p className="text-[#ef4444] text-xs mb-1" >{error}</p>}
+            {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
             <div className="gap-1" style={{ display: "flex" }}>
-                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={handleSubmit} disabled={saving || !reason}>
+                <button
+                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    onClick={handleSubmit}
+                    disabled={saving || !reason}
+                >
                     {saving ? "…" : "Submit Report"}
                 </button>
-                <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={() => setShowForm(false)}>Cancel</button>
+                <button
+                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                    onClick={() => setShowForm(false)}
+                >
+                    Cancel
+                </button>
             </div>
         </div>
     );

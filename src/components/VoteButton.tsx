@@ -10,12 +10,7 @@ interface VoteButtonProps {
     disabled?: boolean;
 }
 
-export default function VoteButton({
-    entryId,
-    initialVotes,
-    initialHasVoted,
-    disabled = false,
-}: VoteButtonProps) {
+export default function VoteButton({ entryId, initialVotes, initialHasVoted, disabled = false }: VoteButtonProps) {
     const [votes, setVotes] = useState(initialVotes);
     const [hasVoted, setHasVoted] = useState(initialHasVoted);
     const [loading, setLoading] = useState(false);
@@ -49,13 +44,15 @@ export default function VoteButton({
                 <span className="font-semibold">{votes}</span>
             </button>
             {error && (
-                <span style={{
-                    fontSize: "calc(0.65rem * var(--font-scale))",
-                    color: "var(--color-error, #ef4444)",
-                    maxWidth: "100px",
-                    textAlign: "center",
-                    lineHeight: 1.2,
-                }}>
+                <span
+                    style={{
+                        fontSize: "calc(0.65rem * var(--font-scale))",
+                        color: "var(--color-error, #ef4444)",
+                        maxWidth: "100px",
+                        textAlign: "center",
+                        lineHeight: 1.2,
+                    }}
+                >
                     {error}
                 </span>
             )}

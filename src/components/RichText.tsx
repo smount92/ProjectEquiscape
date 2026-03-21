@@ -11,11 +11,13 @@ function linkifyMentions(text: string): React.ReactNode[] {
     return parts.map((part, i) => {
         if (part.startsWith("@") && part.length > 1) {
             // Strip quotes if present: @"My Alias" -> My Alias
-            const alias = part.startsWith('@"') && part.endsWith('"')
-                ? part.slice(2, -1)
-                : part.slice(1);
+            const alias = part.startsWith('@"') && part.endsWith('"') ? part.slice(2, -1) : part.slice(1);
             return (
-                <Link key={i} href={`/profile/${encodeURIComponent(alias)}`} className="text-[var(--color-accent)] font-semibold no-underline hover:underline">
+                <Link
+                    key={i}
+                    href={`/profile/${encodeURIComponent(alias)}`}
+                    className="font-semibold text-[var(--color-accent)] no-underline hover:underline"
+                >
                     @{alias}
                 </Link>
             );

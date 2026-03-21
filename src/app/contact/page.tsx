@@ -21,38 +21,41 @@ export default function ContactPage() {
     }, [state.success]);
 
     return (
-        <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8">
-            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up">
+        <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8 py-[var(--space-3xl)] max-sm:py-[0]">
+            <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up py-[var(--space-3xl)] max-sm:py-[0]">
                 {/* Page Header */}
-                <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-sticky bg-parchment-dark border-edge top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b px-8 py-[0] py-[var(--space-3xl)] transition-all max-sm:py-[0]">
                     <h1>
                         <span className="text-forest">Contact</span> Us
                     </h1>
-                    <p className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-lead">
-                        Have a question, suggestion, or just want to say hello? We&apos;d love to hear from
-                        you.
+                    <p className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-lead py-[var(--space-3xl)] max-sm:py-[0]">
+                        Have a question, suggestion, or just want to say hello? We&apos;d love to hear from you.
                     </p>
                 </div>
 
                 <section className="mb-[var(--space-3xl)]">
                     {state.success ? (
-                        <div className="text-center py-16 px-8" id="contact-success">
-                            <span className="block text-[3rem] mb-6" aria-hidden="true">✅</span>
+                        <div className="px-8 py-16 text-center" id="contact-success">
+                            <span className="mb-6 block text-[3rem]" aria-hidden="true">
+                                ✅
+                            </span>
                             <h2>Message Sent!</h2>
-                            <p>
-                                Thanks for reaching out. We&apos;ll get back to you as soon as possible.
-                            </p>
+                            <p>Thanks for reaching out. We&apos;ll get back to you as soon as possible.</p>
                         </div>
                     ) : (
                         <form
                             ref={formRef}
                             action={formAction}
-                            className="max-w-[560px] mx-auto"
+                            className="mx-auto max-w-[560px]"
                             id="contact-form"
                             noValidate
                         >
                             {state.error && (
-                                <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert" id="contact-error">
+                                <div
+                                    className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+                                    role="alert"
+                                    id="contact-error"
+                                >
                                     <svg
                                         width="16"
                                         height="16"
@@ -71,7 +74,7 @@ export default function ContactPage() {
                             )}
 
                             <div className="mb-6">
-                                <label htmlFor="contact-name" className="block text-sm font-semibold text-ink mb-1">
+                                <label htmlFor="contact-name" className="text-ink mb-1 block text-sm font-semibold">
                                     Your Name
                                 </label>
                                 <input
@@ -87,7 +90,7 @@ export default function ContactPage() {
                             </div>
 
                             <div className="mb-6">
-                                <label htmlFor="contact-email" className="block text-sm font-semibold text-ink mb-1">
+                                <label htmlFor="contact-email" className="text-ink mb-1 block text-sm font-semibold">
                                     Email Address
                                 </label>
                                 <input
@@ -102,8 +105,8 @@ export default function ContactPage() {
                             </div>
 
                             <div className="mb-6">
-                                <label htmlFor="contact-subject" className="block text-sm font-semibold text-ink mb-1">
-                                    Subject <span className="text-muted font-normal" >(optional)</span>
+                                <label htmlFor="contact-subject" className="text-ink mb-1 block text-sm font-semibold">
+                                    Subject <span className="text-muted font-normal">(optional)</span>
                                 </label>
                                 <input
                                     id="contact-subject"
@@ -115,13 +118,13 @@ export default function ContactPage() {
                             </div>
 
                             <div className="mb-6">
-                                <label htmlFor="contact-message" className="block text-sm font-semibold text-ink mb-1">
+                                <label htmlFor="contact-message" className="text-ink mb-1 block text-sm font-semibold">
                                     Message
                                 </label>
                                 <textarea
                                     id="contact-message"
                                     name="message"
-                                    className="form-input resize-y min-h-[140px]"
+                                    className="form-input min-h-[140px] resize-y"
                                     placeholder="Tell us what's on your mind..."
                                     rows={6}
                                     required
@@ -131,13 +134,16 @@ export default function ContactPage() {
 
                             <button
                                 type="submit"
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse flex inline-flex min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                                 id="contact-submit"
                                 disabled={isPending}
                             >
                                 {isPending ? (
                                     <>
-                                        <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
+                                        <span
+                                            className="hover:no-underline-min-h)] leading-none-spinner inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                            aria-hidden="true"
+                                        />
                                         Sending…
                                     </>
                                 ) : (

@@ -6,17 +6,11 @@ import ShareButton from "@/components/ShareButton";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const profile = await getArtistProfileBySlug(slug);
     return {
-        title: profile
-            ? `${profile.studioName} — Art Studio | Model Horse Hub`
-            : "Studio Not Found — Model Horse Hub",
+        title: profile ? `${profile.studioName} — Art Studio | Model Horse Hub` : "Studio Not Found — Model Horse Hub",
         description: profile
             ? `${profile.studioName} — ${profile.specialties.join(", ") || "Model horse artist"}`
             : "This studio could not be found.",
@@ -35,14 +29,12 @@ const STATUS_LABEL: Record<string, string> = {
     closed: "Commissions Closed",
 };
 
-export default async function PublicStudioPage({
-    params,
-}: {
-    params: Promise<{ slug: string }>;
-}) {
+export default async function PublicStudioPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
     const profile = await getArtistProfileBySlug(slug);
@@ -60,8 +52,11 @@ export default async function PublicStudioPage({
         .order("slot_number", { ascending: true });
 
     const queue = (rawQueue ?? []) as {
-        id: string; commission_type: string; status: string;
-        slot_number: number | null; is_public_in_queue: boolean;
+        id: string;
+        commission_type: string;
+        status: string;
+        slot_number: number | null;
+        is_public_in_queue: boolean;
     }[];
 
     // Count active commissions for slots info
@@ -80,50 +75,64 @@ export default async function PublicStudioPage({
     };
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Hero */}
-            <div className="py-8 px-6 rounded-lg bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] border border-[rgba(139,92,246,0.15)] animate-fade-in-up">
+            <div className="animate-fade-in-up rounded-lg border border-[rgba(139,92,246,0.15)] bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] px-6 py-8">
                 <div className="max-w-[800px]">
                     <div className="gap-4" style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-                        <h1 className="text-[calc(1.8rem*var(--font-scale))] m-0" >
+                        <h1 className="m-0 text-[calc(1.8rem*var(--font-scale))]">
                             <span className="text-forest">{profile.studioName}</span>
                         </h1>
                         <span className={`studio-status-badge status-${profile.status}`}>
                             {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}
                         </span>
                     </div>
-                    <p className="text-muted mt-1 text-[calc(0.9rem*var(--font-scale))]" >
-                        by <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest" >
+                    <p className="text-muted mt-1 text-[calc(0.9rem*var(--font-scale))]">
+                        by{" "}
+                        <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest">
                             @{profile.ownerAlias}
                         </Link>
                     </p>
 
                     {profile.bioArtist && (
-                        <p className="mt-4 leading-[1.6] max-w-[600] text-ink-light" >
-                            {profile.bioArtist}
-                        </p>
+                        <p className="text-ink-light mt-4 max-w-[600] leading-[1.6]">{profile.bioArtist}</p>
                     )}
 
                     {profile.specialties.length > 0 && (
-                        <div className="gap-1 mt-4" style={{ display: "flex", flexWrap: "wrap" }}>
-                            {profile.specialties.map(s => (
-                                <span key={s} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(139,92,246,0.15)] text-[#a78bfa] border border-[rgba(139,92,246,0.25)]">{s}</span>
+                        <div className="mt-4 gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
+                            {profile.specialties.map((s) => (
+                                <span
+                                    key={s}
+                                    className="inline-block rounded-full border border-[rgba(139,92,246,0.25)] bg-[rgba(139,92,246,0.15)] px-[10px] py-[3px] text-xs font-semibold text-[#a78bfa]"
+                                >
+                                    {s}
+                                </span>
                             ))}
                         </div>
                     )}
 
-                    <div className="gap-2 mt-6" style={{ display: "flex", flexWrap: "wrap" }}>
+                    <div className="mt-6 gap-2" style={{ display: "flex", flexWrap: "wrap" }}>
                         {profile.status !== "closed" && !isOwner && (
-                            <Link href={`/studio/${slug}/request`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="request-commission-btn">
+                            <Link
+                                href={`/studio/${slug}/request`}
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                id="request-commission-btn"
+                            >
                                 🎨 Request a Commission
                             </Link>
                         )}
                         {isOwner && (
                             <>
-                                <Link href="/studio/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
+                                <Link
+                                    href="/studio/dashboard"
+                                    className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                >
                                     📊 Dashboard
                                 </Link>
-                                <Link href="/studio/setup" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                                <Link
+                                    href="/studio/setup"
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                >
                                     ✏️ Edit Studio
                                 </Link>
                             </>
@@ -138,64 +147,86 @@ export default async function PublicStudioPage({
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 max-md:grid-cols-1 gap-8 mt-8 animate-fade-in-up">
+            <div className="animate-fade-in-up mt-8 grid grid-cols-2 gap-8 max-md:grid-cols-1">
                 {/* Left: Details */}
                 <div>
                     {/* Pricing & Turnaround */}
-                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6 mb-6">
-                        <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
-                            💰 Pricing & Timeline
-                        </h2>
+                    <div className="bg-bg-card border-edge border-edge mb-6 rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                        <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">💰 Pricing & Timeline</h2>
                         <div className="grid gap-2">
                             {(profile.priceRangeMin || profile.priceRangeMax) && (
-                                <div className="flex justify-between items-center py-1">
-                                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">Price Range</span>
-                                    <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
+                                <div className="flex items-center justify-between py-1">
+                                    <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">
+                                        Price Range
+                                    </span>
+                                    <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">
                                         {profile.priceRangeMin && profile.priceRangeMax
                                             ? `$${profile.priceRangeMin} – $${profile.priceRangeMax}`
                                             : profile.priceRangeMin
-                                                ? `From $${profile.priceRangeMin}`
-                                                : `Up to $${profile.priceRangeMax}`}
+                                              ? `From $${profile.priceRangeMin}`
+                                              : `Up to $${profile.priceRangeMax}`}
                                     </span>
                                 </div>
                             )}
                             {(profile.turnaroundMinDays || profile.turnaroundMaxDays) && (
-                                <div className="flex justify-between items-center py-1">
-                                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">Turnaround</span>
-                                    <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
+                                <div className="flex items-center justify-between py-1">
+                                    <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">Turnaround</span>
+                                    <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">
                                         {profile.turnaroundMinDays && profile.turnaroundMaxDays
                                             ? `${profile.turnaroundMinDays}–${profile.turnaroundMaxDays} days`
                                             : profile.turnaroundMinDays
-                                                ? `Min ${profile.turnaroundMinDays} days`
-                                                : `Up to ${profile.turnaroundMaxDays} days`}
+                                              ? `Min ${profile.turnaroundMinDays} days`
+                                              : `Up to ${profile.turnaroundMaxDays} days`}
                                     </span>
                                 </div>
                             )}
-                            <div className="flex justify-between items-center py-1">
-                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted">Commission Slots</span>
-                                <span className="font-bold text-[calc(0.9rem*var(--font-scale))]">
+                            <div className="flex items-center justify-between py-1">
+                                <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">
+                                    Commission Slots
+                                </span>
+                                <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">
                                     {slotsUsed} / {profile.maxSlots} filled
                                 </span>
                             </div>
                         </div>
 
                         {profile.mediums.length > 0 && (
-                            <div className="mt-4" >
-                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted mb-1" style={{ display: "block" }}>Mediums</span>
+                            <div className="mt-4">
+                                <span
+                                    className="text-muted mb-1 text-[calc(0.8rem*var(--font-scale))]"
+                                    style={{ display: "block" }}
+                                >
+                                    Mediums
+                                </span>
                                 <div className="gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
-                                    {profile.mediums.map(m => (
-                                        <span key={m} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{m}</span>
+                                    {profile.mediums.map((m) => (
+                                        <span
+                                            key={m}
+                                            className="inline-block rounded-full border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.1)] px-[10px] py-[3px] text-xs font-semibold text-[#2C5545]"
+                                        >
+                                            {m}
+                                        </span>
                                     ))}
                                 </div>
                             </div>
                         )}
 
                         {profile.scalesOffered.length > 0 && (
-                            <div className="mt-4" >
-                                <span className="text-[calc(0.8rem*var(--font-scale))] text-muted mb-1" style={{ display: "block" }}>Scales</span>
+                            <div className="mt-4">
+                                <span
+                                    className="text-muted mb-1 text-[calc(0.8rem*var(--font-scale))]"
+                                    style={{ display: "block" }}
+                                >
+                                    Scales
+                                </span>
                                 <div className="gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
-                                    {profile.scalesOffered.map(s => (
-                                        <span key={s} className="inline-block py-[3px] px-[10px] rounded-full text-xs font-semibold bg-[rgba(44,85,69,0.1)] text-[#2C5545] border border-[rgba(44,85,69,0.2)]">{s}</span>
+                                    {profile.scalesOffered.map((s) => (
+                                        <span
+                                            key={s}
+                                            className="inline-block rounded-full border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.1)] px-[10px] py-[3px] text-xs font-semibold text-[#2C5545]"
+                                        >
+                                            {s}
+                                        </span>
                                     ))}
                                 </div>
                             </div>
@@ -204,11 +235,9 @@ export default async function PublicStudioPage({
 
                     {/* Terms */}
                     {profile.termsText && (
-                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6">
-                            <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
-                                📄 Terms & Conditions
-                            </h2>
-                            <p className="whitespace-pre-wrap leading-[1.6] text-ink-light text-[calc(0.85rem*var(--font-scale))]" >
+                        <div className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">📄 Terms & Conditions</h2>
+                            <p className="text-ink-light text-[calc(0.85rem*var(--font-scale))] leading-[1.6] whitespace-pre-wrap">
                                 {profile.termsText}
                             </p>
                         </div>
@@ -217,25 +246,33 @@ export default async function PublicStudioPage({
 
                 {/* Right: Commission Queue */}
                 <div>
-                    <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6">
-                        <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
-                            📋 Commission Queue
-                        </h2>
+                    <div className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                        <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">📋 Commission Queue</h2>
                         {queue.length === 0 ? (
-                            <p className="text-muted text-[calc(0.85rem*var(--font-scale))]" >
+                            <p className="text-muted text-[calc(0.85rem*var(--font-scale))]">
                                 No active commissions in the queue.
                             </p>
                         ) : (
                             <div className="gap-2" style={{ display: "grid" }}>
                                 {queue.map((item, i) => {
-                                    const st = COMMISSION_STATUS_LABELS[item.status] || { label: item.status, emoji: "📋" };
+                                    const st = COMMISSION_STATUS_LABELS[item.status] || {
+                                        label: item.status,
+                                        emoji: "📋",
+                                    };
                                     return (
-                                        <div key={item.id} className="flex items-center gap-2 py-2 px-4 rounded-md bg-[rgba(0,0,0,0.03)]">
-                                            <span className="text-xs font-bold text-forest min-w-[50px]">
+                                        <div
+                                            key={item.id}
+                                            className="flex items-center gap-2 rounded-md bg-[rgba(0,0,0,0.03)] px-4 py-2"
+                                        >
+                                            <span className="text-forest min-w-[50px] text-xs font-bold">
                                                 Slot {item.slot_number || i + 1}
                                             </span>
-                                            <span className="flex-1 text-[calc(0.85rem*var(--font-scale))] font-semibold">{item.commission_type}</span>
-                                            <span className={`commission-status-badge status-${item.status.replace("_", "-")}`}>
+                                            <span className="flex-1 text-[calc(0.85rem*var(--font-scale))] font-semibold">
+                                                {item.commission_type}
+                                            </span>
+                                            <span
+                                                className={`commission-status-badge status-${item.status.replace("_", "-")}`}
+                                            >
                                                 {st.emoji} {st.label}
                                             </span>
                                         </div>
@@ -247,15 +284,17 @@ export default async function PublicStudioPage({
 
                     {/* Accepting */}
                     {profile.acceptingTypes.length > 0 && (
-                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-12 shadow-md transition-all p-6 mt-6">
-                            <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
-                                ✅ Currently Accepting
-                            </h2>
+                        <div className="bg-bg-card border-edge border-edge mt-6 rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">✅ Currently Accepting</h2>
                             <div className="gap-1" style={{ display: "grid" }}>
-                                {profile.acceptingTypes.map(t => (
-                                    <div key={t} className="gap-2 p-[var(--space-xs) 0]" style={{ display: "flex", alignItems: "center" }}>
-                                        <span className="text-[#22c55e]" >✓</span>
-                                        <span className="text-[calc(0.9rem*var(--font-scale))]" >{t}</span>
+                                {profile.acceptingTypes.map((t) => (
+                                    <div
+                                        key={t}
+                                        className="p-[var(--space-xs) 0] gap-2"
+                                        style={{ display: "flex", alignItems: "center" }}
+                                    >
+                                        <span className="text-[#22c55e]">✓</span>
+                                        <span className="text-[calc(0.9rem*var(--font-scale))]">{t}</span>
                                     </div>
                                 ))}
                             </div>

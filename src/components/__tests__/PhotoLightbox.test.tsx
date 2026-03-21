@@ -134,7 +134,7 @@ describe("PhotoLightbox", () => {
                 images={[{ url: "https://example.com/single.jpg", label: "Only Photo" }]}
                 initialIndex={0}
                 onClose={mockOnClose}
-            />
+            />,
         );
 
         expect(screen.queryByLabelText("Previous photo")).not.toBeInTheDocument();
@@ -142,9 +142,7 @@ describe("PhotoLightbox", () => {
     });
 
     it("prevents body scroll while open", () => {
-        const { unmount } = render(
-            <PhotoLightbox images={mockImages} initialIndex={0} onClose={mockOnClose} />
-        );
+        const { unmount } = render(<PhotoLightbox images={mockImages} initialIndex={0} onClose={mockOnClose} />);
 
         expect(document.body.style.overflow).toBe("hidden");
 

@@ -21,7 +21,7 @@ export default function RatingStars({
     onHover,
     onHoverEnd,
 }: RatingStarsProps) {
-    const displayValue = (hoverValue && hoverValue > 0) ? hoverValue : rating;
+    const displayValue = hoverValue && hoverValue > 0 ? hoverValue : rating;
 
     return (
         <div
@@ -37,13 +37,21 @@ export default function RatingStars({
                     role={interactive ? "button" : undefined}
                     aria-label={interactive ? `${star} star${star > 1 ? "s" : ""} — ${STAR_LABELS[star]}` : undefined}
                     tabIndex={interactive ? 0 : undefined}
-                    onKeyDown={interactive ? (e) => { if (e.key === "Enter" || e.key === " ") onSelect?.(star); } : undefined}
+                    onKeyDown={
+                        interactive
+                            ? (e) => {
+                                  if (e.key === "Enter" || e.key === " ") onSelect?.(star);
+                              }
+                            : undefined
+                    }
                 >
                     ★
                 </span>
             ))}
             {interactive && displayValue > 0 && (
-                <span className="ml-2 text-[calc(0.85rem*var(--font-scale))] text-[#F59E0B] font-medium">{STAR_LABELS[displayValue]}</span>
+                <span className="ml-2 text-[calc(0.85rem*var(--font-scale))] font-medium text-[#F59E0B]">
+                    {STAR_LABELS[displayValue]}
+                </span>
             )}
         </div>
     );

@@ -21,7 +21,7 @@ export default function InsuranceReportButton() {
     useEffect(() => {
         import("@/app/actions/collections").then(({ getCollectionsAction }) => {
             getCollectionsAction().then((cols: { id: string; name: string; description: string | null }[]) => {
-                setCollections(cols.map(c => ({ id: c.id, name: c.name, emoji: "📁" })));
+                setCollections(cols.map((c) => ({ id: c.id, name: c.name, emoji: "📁" })));
             });
         });
     }, []);
@@ -102,7 +102,7 @@ export default function InsuranceReportButton() {
     return (
         <div className="insurance-report-wrapper">
             <button
-                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                 onClick={handleClick}
                 disabled={status === "loading"}
                 id="insurance-report-btn"
@@ -116,18 +116,17 @@ export default function InsuranceReportButton() {
                     "📄 Insurance Report"
                 )}
             </button>
-            {status === "error" && error && (
-                <span className="text-danger text-xs ml-2" >
-                    {error}
-                </span>
-            )}
+            {status === "error" && error && <span className="text-danger ml-2 text-xs">{error}</span>}
 
             {/* Collection Picker Modal */}
             {status === "picking" && (
                 <div className="modal-backdrop" onClick={handleCancel}>
-                    <div className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all max-w-[400]" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="mb-4" >📄 Insurance Report Scope</h3>
-                        <p className="text-ink-light text-sm mb-6" >
+                    <div
+                        className="modal-bg-card border-edge max-w-[400] rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="mb-4">📄 Insurance Report Scope</h3>
+                        <p className="text-ink-light mb-6 text-sm">
                             Choose which horses to include in your insurance report.
                         </p>
 
@@ -147,16 +146,23 @@ export default function InsuranceReportButton() {
                         </select>
 
                         {!selectedCollection && horseCount !== null && horseCount > 200 && (
-                            <div className="py-4 px-6 rounded-lg bg-[rgba(44,85,69,0.08)] border border-[rgba(44,85,69,0.2)] text-sm leading-relaxed mt-4 mb-4 text-[var(--color-accent-warning, #f59e0b)]">
-                                ⚠️ Your stable has {horseCount} models. Generating a full report may be slow. Consider selecting a collection for faster results.
+                            <div className="text-[var(--color-accent-warning, #f59e0b)] mt-4 mb-4 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-6 py-4 text-sm leading-relaxed">
+                                ⚠️ Your stable has {horseCount} models. Generating a full report may be slow. Consider
+                                selecting a collection for faster results.
                             </div>
                         )}
 
-                        <div className="gap-2 justify-end" style={{ display: "flex" }}>
-                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm" onClick={handleCancel}>
+                        <div className="justify-end gap-2" style={{ display: "flex" }}>
+                            <button
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
+                                onClick={handleCancel}
+                            >
                                 Cancel
                             </button>
-                            <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[36px] py-1 px-6 text-sm" onClick={handleConfirm}>
+                            <button
+                                className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                                onClick={handleConfirm}
+                            >
                                 Generate Report
                             </button>
                         </div>

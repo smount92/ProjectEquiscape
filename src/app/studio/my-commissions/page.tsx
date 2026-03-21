@@ -23,49 +23,66 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default async function MyCommissionsPage() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
     const commissions = await getClientCommissions();
 
     // Group by status
-    const active = commissions.filter(c => ["requested", "accepted", "in_progress", "review", "revision"].includes(c.status));
-    const completed = commissions.filter(c => ["completed", "delivered"].includes(c.status));
-    const closed = commissions.filter(c => ["declined", "cancelled"].includes(c.status));
+    const active = commissions.filter((c) =>
+        ["requested", "accepted", "in_progress", "review", "revision"].includes(c.status),
+    );
+    const completed = commissions.filter((c) => ["completed", "delivered"].includes(c.status));
+    const closed = commissions.filter((c) => ["declined", "cancelled"].includes(c.status));
 
     const renderGroup = (title: string, items: typeof commissions, emoji: string) => {
         if (items.length === 0) return null;
         return (
-            <div className="mb-8" >
-                <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
+            <div className="mb-8">
+                <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">
                     {emoji} {title} ({items.length})
                 </h2>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] max-md:grid-cols-1 gap-4">
-                    {items.map(c => (
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 max-md:grid-cols-1">
+                    {items.map((c) => (
                         <Link
                             key={c.id}
                             href={`/studio/commission/${c.id}`}
-                            className="flex flex-col p-6 rounded-lg bg-[var(--color-bg-elevated)] border border-edge transition-all hover:border-[rgba(139,92,246,0.3)] hover:-translate-y-[1px]"
+                            className="border-edge flex flex-col rounded-lg border bg-[var(--color-bg-elevated)] p-6 transition-all hover:-translate-y-[1px] hover:border-[rgba(139,92,246,0.3)]"
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
-                            <div className="flex justify-between items-center mb-2 gap-2">
-                                <span className="font-bold text-[calc(0.95rem*var(--font-scale))]">{c.commissionType}</span>
+                            <div className="mb-2 flex items-center justify-between gap-2">
+                                <span className="text-[calc(0.95rem*var(--font-scale))] font-bold">
+                                    {c.commissionType}
+                                </span>
                                 <span
-                                    className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
-                                    style={{ backgroundColor: `${STATUS_COLORS[c.status]}20`, color: STATUS_COLORS[c.status], border: `1px solid ${STATUS_COLORS[c.status]}40` }}
+                                    className="inline-flex items-center rounded-full px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
+                                    style={{
+                                        backgroundColor: `${STATUS_COLORS[c.status]}20`,
+                                        color: STATUS_COLORS[c.status],
+                                        border: `1px solid ${STATUS_COLORS[c.status]}40`,
+                                    }}
                                 >
                                     {c.statusLabel}
                                 </span>
                             </div>
-                            <div className="flex gap-4 text-[calc(0.8rem*var(--font-scale))] text-muted mb-2">
+                            <div className="text-muted mb-2 flex gap-4 text-[calc(0.8rem*var(--font-scale))]">
                                 <span>🎨 @{c.artistAlias}</span>
                                 {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
                             </div>
-                            <p className="text-[calc(0.85rem*var(--font-scale))] text-ink-light leading-normal mb-2">
+                            <p className="text-ink-light mb-2 text-[calc(0.85rem*var(--font-scale))] leading-normal">
                                 {c.description.length > 100 ? c.description.substring(0, 100) + "…" : c.description}
                             </p>
-                            <div className="pt-2 text-[calc(0.7rem*var(--font-scale))] text-muted" style={{ marginTop: "auto" }}>
-                                Last updated {new Date(c.lastUpdateAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            <div
+                                className="text-muted pt-2 text-[calc(0.7rem*var(--font-scale))]"
+                                style={{ marginTop: "auto" }}
+                            >
+                                Last updated{" "}
+                                {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                })}
                             </div>
                         </Link>
                     ))}
@@ -75,24 +92,30 @@ export default async function MyCommissionsPage() {
     };
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Header */}
-            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
-                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
+            <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+                <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                     <h1>
                         🎨 <span className="text-forest">My Commissions</span>
                     </h1>
-                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
+                    <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                         Track commissions you&apos;ve requested from artists.
                     </p>
                 </div>
             </div>
 
             {commissions.length === 0 ? (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up p-12" style={{ textAlign: "center" }}>
-                    <p className="text-[2rem] mb-4" >🎨</p>
-                    <p className="text-muted" >You haven&apos;t requested any commissions yet.</p>
-                    <Link href="/discover" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm mt-6">
+                <div
+                    className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                    style={{ textAlign: "center" }}
+                >
+                    <p className="mb-4 text-[2rem]">🎨</p>
+                    <p className="text-muted">You haven&apos;t requested any commissions yet.</p>
+                    <Link
+                        href="/discover"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse mt-6 inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                    >
                         Browse Artists →
                     </Link>
                 </div>

@@ -3,11 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-    addTimelineEvent,
-    deleteTimelineEvent,
-    updateLifeStage,
-} from "@/app/actions/hoofprint";
+import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from "@/app/actions/hoofprint";
 import type { TimelineEvent, OwnershipRecord } from "@/app/actions/hoofprint";
 
 interface HoofprintTimelineProps {
@@ -102,7 +98,7 @@ export default function HoofprintTimeline({
     return (
         <div className="mt-8">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                 <div className="gap-4" style={{ display: "flex", alignItems: "center" }}>
                     <h2 className="text-[calc(1.2rem*var(--font-scale))] font-bold">
                         🐾 <span className="text-forest">Hoofprint™</span>
@@ -116,7 +112,11 @@ export default function HoofprintTimeline({
                         <>
                             <select
                                 className="form-input"
-                                style={{ width: "auto", minWidth: "140px", fontSize: "calc(0.8rem * var(--font-scale))" }}
+                                style={{
+                                    width: "auto",
+                                    minWidth: "140px",
+                                    fontSize: "calc(0.8rem * var(--font-scale))",
+                                }}
                                 value={lifeStage}
                                 onChange={(e) => handleStageChange(e.target.value)}
                                 disabled={stageUpdating}
@@ -128,7 +128,7 @@ export default function HoofprintTimeline({
                                 <option value="for_sale">💲 For Sale</option>
                             </select>
                             <button
-                                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
+                                className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                                 onClick={() => setShowForm(!showForm)}
                                 style={{ fontSize: "calc(0.8rem * var(--font-scale))" }}
                             >
@@ -141,10 +141,8 @@ export default function HoofprintTimeline({
 
             {/* Ownership Chain */}
             {ownershipChain.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap mb-6 p-4 rounded-lg bg-[rgba(0, 0, 0, 0.03)] border border-[rgba(0, 0, 0, 0.06)]">
-                    <span className="text-[calc(0.75rem*var(--font-scale))] text-muted mr-1" >
-                        Chain of Custody:
-                    </span>
+                <div className="bg-[rgba(0, 0, 0, 0.03)] border-[rgba(0, 0, 0, 0.06)] mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
+                    <span className="text-muted mr-1 text-[calc(0.75rem*var(--font-scale))]">Chain of Custody:</span>
                     {ownershipChain.map((owner, i) => (
                         <span key={owner.id} className="inline-flex gap-1" style={{ alignItems: "center" }}>
                             {i > 0 && <span className="text-muted text-[0.8rem]">→</span>}
@@ -154,14 +152,12 @@ export default function HoofprintTimeline({
                                     className={`ownership-link ${!owner.releasedAt ? "current" : ""}`}
                                 >
                                     @{owner.ownerAlias}
-                                    <span className="text-[0.6rem] opacity-[0.7]" >
+                                    <span className="text-[0.6rem] opacity-[0.7]">
                                         {owner.acquisitionType !== "original" ? ` (${owner.acquisitionType})` : ""}
                                     </span>
                                 </Link>
                             ) : (
-                                <span className="border border-[var(--color-accent, #f59e0b)]">
-                                    {owner.ownerAlias}
-                                </span>
+                                <span className="border-[var(--color-accent, #f59e0b)] border">{owner.ownerAlias}</span>
                             )}
                         </span>
                     ))}
@@ -170,9 +166,12 @@ export default function HoofprintTimeline({
 
             {/* Add Event Form */}
             {showForm && (
-                <form onSubmit={handleAddEvent} className="p-4 rounded-lg bg-[rgba(0, 0, 0, 0.03)] border border-[rgba(0, 0, 0, 0.06)] mb-6">
+                <form
+                    onSubmit={handleAddEvent}
+                    className="bg-[rgba(0, 0, 0, 0.03)] border-[rgba(0, 0, 0, 0.06)] mb-6 rounded-lg border p-4"
+                >
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Title</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Title</label>
                         <input
                             type="text"
                             className="form-input"
@@ -183,7 +182,7 @@ export default function HoofprintTimeline({
                         />
                     </div>
                     <div className="mb-6">
-                        <label className="block text-sm font-semibold text-ink mb-1">Description (optional)</label>
+                        <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
                         <textarea
                             className="form-input"
                             value={formState.description}
@@ -192,11 +191,14 @@ export default function HoofprintTimeline({
                             rows={2}
                         />
                     </div>
-                    <div className="gap-4 mt-2" style={{ display: "flex", alignItems: "center" }}>
-                        <span className="text-xs text-muted" >
-                            📝 Notes appear on the Hoofprint™ timeline
-                        </span>
-                        <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" disabled={saving} style={{ marginLeft: "auto" }}>
+                    <div className="mt-2 gap-4" style={{ display: "flex", alignItems: "center" }}>
+                        <span className="text-muted text-xs">📝 Notes appear on the Hoofprint™ timeline</span>
+                        <button
+                            type="submit"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            disabled={saving}
+                            style={{ marginLeft: "auto" }}
+                        >
                             {saving ? "Saving…" : "Add Note"}
                         </button>
                     </div>
@@ -205,48 +207,52 @@ export default function HoofprintTimeline({
 
             {/* Timeline */}
             {timeline.length === 0 ? (
-                <div className="p-8 text-muted" style={{ textAlign: "center" }}>
+                <div className="text-muted p-8" style={{ textAlign: "center" }}>
                     <p>🐾 No timeline events yet.</p>
-                    {isOwner && <p className="text-[calc(0.8rem*var(--font-scale))]" >Add events to build this horse&apos;s Hoofprint!</p>}
+                    {isOwner && (
+                        <p className="text-[calc(0.8rem*var(--font-scale))]">
+                            Add events to build this horse&apos;s Hoofprint!
+                        </p>
+                    )}
                 </div>
             ) : (
                 <div className="relative pl-[32px]">
                     {timeline.map((event) => (
                         <div key={event.id} className="relative pb-6">
-                            <div className="relative pb-6-dot">
-                                {EVENT_ICONS[event.eventType] || "📋"}
-                            </div>
-                            <div className="justify-between items-start" style={{ display: "flex" }}>
+                            <div className="pb-6-dot relative">{EVENT_ICONS[event.eventType] || "📋"}</div>
+                            <div className="items-start justify-between" style={{ display: "flex" }}>
                                 <div>
-                                    <div className="relative pb-6-title">
+                                    <div className="pb-6-title relative">
                                         {event.title}
                                         {!event.isPublic && (
-                                            <span className="text-[0.65rem] ml-[6px] opacity-[0.5]" >🔒 Private</span>
+                                            <span className="ml-[6px] text-[0.65rem] opacity-[0.5]">🔒 Private</span>
                                         )}
                                     </div>
-                                    <div className="relative pb-6-meta">
-                                        {event.eventDate && new Date(event.eventDate).toLocaleDateString("en-US", {
-                                            month: "short",
-                                            day: "numeric",
-                                            year: "numeric",
-                                        })}
+                                    <div className="pb-6-meta relative">
+                                        {event.eventDate &&
+                                            new Date(event.eventDate).toLocaleDateString("en-US", {
+                                                month: "short",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            })}
                                         {" · "}by @{event.userAlias}
                                     </div>
-                                    {event.description && (
-                                        <div className="relative pb-6-desc">{event.description}</div>
-                                    )}
+                                    {event.description && <div className="pb-6-desc relative">{event.description}</div>}
                                 </div>
                                 {/* Only user-authored notes (from posts) can be deleted */}
-                                {isOwner && currentUserId && event.userId === currentUserId && event.sourceTable === "posts" && (
-                                    <button
-                                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
-                                        onClick={() => handleDelete(event.id)}
-                                        style={{ fontSize: "0.7rem", padding: "2px 6px", opacity: 0.5 }}
-                                        title="Delete note"
-                                    >
-                                        🗑
-                                    </button>
-                                )}
+                                {isOwner &&
+                                    currentUserId &&
+                                    event.userId === currentUserId &&
+                                    event.sourceTable === "posts" && (
+                                        <button
+                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            onClick={() => handleDelete(event.id)}
+                                            style={{ fontSize: "0.7rem", padding: "2px 6px", opacity: 0.5 }}
+                                            title="Delete note"
+                                        >
+                                            🗑
+                                        </button>
+                                    )}
                             </div>
                         </div>
                     ))}

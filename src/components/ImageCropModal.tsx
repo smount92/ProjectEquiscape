@@ -107,20 +107,23 @@ export default function ImageCropModal({
     }, []);
 
     // Clamp crop to stay within image bounds
-    const clampCrop = useCallback((c: CropArea): CropArea => {
-        const bounds = getImageBounds();
-        if (!bounds) return c;
+    const clampCrop = useCallback(
+        (c: CropArea): CropArea => {
+            const bounds = getImageBounds();
+            if (!bounds) return c;
 
-        const minSize = 30;
-        let { x, y, width, height } = c;
+            const minSize = 30;
+            let { x, y, width, height } = c;
 
-        width = Math.max(minSize, Math.min(width, bounds.width));
-        height = Math.max(minSize, Math.min(height, bounds.height));
-        x = Math.max(bounds.x, Math.min(x, bounds.x + bounds.width - width));
-        y = Math.max(bounds.y, Math.min(y, bounds.y + bounds.height - height));
+            width = Math.max(minSize, Math.min(width, bounds.width));
+            height = Math.max(minSize, Math.min(height, bounds.height));
+            x = Math.max(bounds.x, Math.min(x, bounds.x + bounds.width - width));
+            y = Math.max(bounds.y, Math.min(y, bounds.y + bounds.height - height));
 
-        return { x, y, width, height };
-    }, [getImageBounds]);
+            return { x, y, width, height };
+        },
+        [getImageBounds],
+    );
 
     // Mouse/touch handlers
     const handlePointerDown = useCallback((e: React.PointerEvent, mode: "move" | "resize", handle?: string) => {
@@ -133,52 +136,57 @@ export default function ImageCropModal({
         (e.target as HTMLElement).setPointerCapture(e.pointerId);
     }, []);
 
-    const handlePointerMove = useCallback((e: React.PointerEvent) => {
-        if (!isDragging || !dragMode) return;
+    const handlePointerMove = useCallback(
+        (e: React.PointerEvent) => {
+            if (!isDragging || !dragMode) return;
 
-        const dx = e.clientX - dragStart.x;
-        const dy = e.clientY - dragStart.y;
-        setDragStart({ x: e.clientX, y: e.clientY });
+            const dx = e.clientX - dragStart.x;
+            const dy = e.clientY - dragStart.y;
+            setDragStart({ x: e.clientX, y: e.clientY });
 
-        if (dragMode === "move") {
-            setCrop(prev => clampCrop({
-                ...prev,
-                x: prev.x + dx,
-                y: prev.y + dy,
-            }));
-        } else if (dragMode === "resize" && resizeHandle) {
-            setCrop(prev => {
-                let newCrop = { ...prev };
+            if (dragMode === "move") {
+                setCrop((prev) =>
+                    clampCrop({
+                        ...prev,
+                        x: prev.x + dx,
+                        y: prev.y + dy,
+                    }),
+                );
+            } else if (dragMode === "resize" && resizeHandle) {
+                setCrop((prev) => {
+                    let newCrop = { ...prev };
 
-                // Handle each corner/edge
-                if (resizeHandle.includes("e")) {
-                    newCrop.width = prev.width + dx;
-                }
-                if (resizeHandle.includes("w")) {
-                    newCrop.x = prev.x + dx;
-                    newCrop.width = prev.width - dx;
-                }
-                if (resizeHandle.includes("s")) {
-                    newCrop.height = prev.height + dy;
-                }
-                if (resizeHandle.includes("n")) {
-                    newCrop.y = prev.y + dy;
-                    newCrop.height = prev.height - dy;
-                }
-
-                // Enforce aspect ratio
-                if (aspectRatio) {
-                    if (resizeHandle.includes("e") || resizeHandle.includes("w")) {
-                        newCrop.height = newCrop.width / aspectRatio;
-                    } else {
-                        newCrop.width = newCrop.height * aspectRatio;
+                    // Handle each corner/edge
+                    if (resizeHandle.includes("e")) {
+                        newCrop.width = prev.width + dx;
                     }
-                }
+                    if (resizeHandle.includes("w")) {
+                        newCrop.x = prev.x + dx;
+                        newCrop.width = prev.width - dx;
+                    }
+                    if (resizeHandle.includes("s")) {
+                        newCrop.height = prev.height + dy;
+                    }
+                    if (resizeHandle.includes("n")) {
+                        newCrop.y = prev.y + dy;
+                        newCrop.height = prev.height - dy;
+                    }
 
-                return clampCrop(newCrop);
-            });
-        }
-    }, [isDragging, dragMode, dragStart, resizeHandle, aspectRatio, clampCrop]);
+                    // Enforce aspect ratio
+                    if (aspectRatio) {
+                        if (resizeHandle.includes("e") || resizeHandle.includes("w")) {
+                            newCrop.height = newCrop.width / aspectRatio;
+                        } else {
+                            newCrop.width = newCrop.height * aspectRatio;
+                        }
+                    }
+
+                    return clampCrop(newCrop);
+                });
+            }
+        },
+        [isDragging, dragMode, dragStart, resizeHandle, aspectRatio, clampCrop],
+    );
 
     const handlePointerUp = useCallback(() => {
         setIsDragging(false);
@@ -215,28 +223,37 @@ export default function ImageCropModal({
         canvas.width = Math.round(srcW);
         canvas.height = Math.round(srcH);
         const ctx = canvas.getContext("2d");
-        if (!ctx) { setProcessing(false); return; }
+        if (!ctx) {
+            setProcessing(false);
+            return;
+        }
 
         ctx.drawImage(
             imgRef.current,
-            Math.round(srcX), Math.round(srcY),
-            Math.round(srcW), Math.round(srcH),
-            0, 0,
-            canvas.width, canvas.height
+            Math.round(srcX),
+            Math.round(srcY),
+            Math.round(srcW),
+            Math.round(srcH),
+            0,
+            0,
+            canvas.width,
+            canvas.height,
         );
 
         canvas.toBlob(
             (blob) => {
-                if (!blob) { setProcessing(false); return; }
-                const croppedFile = new File(
-                    [blob],
-                    file.name.replace(/\.[^.]+$/, "_cropped.webp"),
-                    { type: "image/webp", lastModified: Date.now() }
-                );
+                if (!blob) {
+                    setProcessing(false);
+                    return;
+                }
+                const croppedFile = new File([blob], file.name.replace(/\.[^.]+$/, "_cropped.webp"), {
+                    type: "image/webp",
+                    lastModified: Date.now(),
+                });
                 onCrop(croppedFile);
             },
             "image/webp",
-            0.85
+            0.85,
         );
     }, [crop, file, getImageBounds, onCrop]);
 
@@ -255,40 +272,49 @@ export default function ImageCropModal({
         { key: "sw", cursor: "nesw-resize", style: { bottom: -HANDLE_SIZE / 2, left: -HANDLE_SIZE / 2 } },
         { key: "se", cursor: "nwse-resize", style: { bottom: -HANDLE_SIZE / 2, right: -HANDLE_SIZE / 2 } },
         { key: "n", cursor: "ns-resize", style: { top: -HANDLE_SIZE / 2, left: "50%", transform: "translateX(-50%)" } },
-        { key: "s", cursor: "ns-resize", style: { bottom: -HANDLE_SIZE / 2, left: "50%", transform: "translateX(-50%)" } },
+        {
+            key: "s",
+            cursor: "ns-resize",
+            style: { bottom: -HANDLE_SIZE / 2, left: "50%", transform: "translateX(-50%)" },
+        },
         { key: "w", cursor: "ew-resize", style: { top: "50%", left: -HANDLE_SIZE / 2, transform: "translateY(-50%)" } },
-        { key: "e", cursor: "ew-resize", style: { top: "50%", right: -HANDLE_SIZE / 2, transform: "translateY(-50%)" } },
+        {
+            key: "e",
+            cursor: "ew-resize",
+            style: { top: "50%", right: -HANDLE_SIZE / 2, transform: "translateY(-50%)" },
+        },
     ];
 
     const overlay = (
         <div className="modal-overlay" onClick={onCancel}>
             <div
-                className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all"
+                className="modal-bg-card border-edge rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
                 onClick={(e) => e.stopPropagation()}
                 style={{ maxWidth: 700, width: "95vw", padding: 0, overflow: "hidden" }}
             >
                 {/* Header */}
-                <div style={{
-                    padding: "var(--space-md) var(--space-lg)",
-                    borderBottom: "1px solid var(--color-border)",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                }}>
-                    <h3 className="m-0 text-[calc(var(--font-size-md)*var(--font-scale))]" >
-                        ✂️ Crop Photo
-                    </h3>
+                <div
+                    style={{
+                        padding: "var(--space-md) var(--space-lg)",
+                        borderBottom: "1px solid var(--color-border)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                    }}
+                >
+                    <h3 className="m-0 text-[calc(var(--font-size-md)*var(--font-scale))]">✂️ Crop Photo</h3>
                     <div className="gap-1" style={{ display: "flex", flexWrap: "wrap" }}>
                         {ASPECT_PRESETS.map((preset) => (
                             <button
                                 key={preset.label}
-                                className={`inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge`}
+                                className={`hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150`}
                                 onClick={() => setAspectRatio(preset.value)}
                                 style={{
                                     padding: "4px 10px",
                                     fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
                                     fontWeight: aspectRatio === preset.value ? 700 : 400,
-                                    background: aspectRatio === preset.value ? "var(--color-accent-primary)" : undefined,
+                                    background:
+                                        aspectRatio === preset.value ? "var(--color-accent-primary)" : undefined,
                                     color: aspectRatio === preset.value ? "white" : undefined,
                                     borderRadius: "var(--radius-sm)",
                                 }}
@@ -332,12 +358,13 @@ export default function ImageCropModal({
                     {imageLoaded && (
                         <>
                             {/* Dark overlay outside crop */}
-                            <div style={{
-                                position: "absolute",
-                                inset: 0,
-                                background: "rgba(0, 0, 0, 0.55)",
-                                pointerEvents: "none",
-                                clipPath: `polygon(
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    background: "rgba(0, 0, 0, 0.55)",
+                                    pointerEvents: "none",
+                                    clipPath: `polygon(
                                     0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
                                     ${crop.x}px ${crop.y}px,
                                     ${crop.x}px ${crop.y + crop.height}px,
@@ -345,7 +372,8 @@ export default function ImageCropModal({
                                     ${crop.x + crop.width}px ${crop.y}px,
                                     ${crop.x}px ${crop.y}px
                                 )`,
-                            }} />
+                                }}
+                            />
 
                             {/* Crop selection box */}
                             <div
@@ -362,17 +390,19 @@ export default function ImageCropModal({
                                 onPointerDown={(e) => handlePointerDown(e, "move")}
                             >
                                 {/* Rule of thirds grid lines */}
-                                <div style={{
-                                    position: "absolute",
-                                    inset: 0,
-                                    pointerEvents: "none",
-                                    backgroundImage: `
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        pointerEvents: "none",
+                                        backgroundImage: `
                                         linear-gradient(to right, rgba(255,255,255,0.2) 1px, transparent 1px),
                                         linear-gradient(to bottom, rgba(255,255,255,0.2) 1px, transparent 1px)
                                     `,
-                                    backgroundSize: "33.33% 33.33%",
-                                    backgroundPosition: "33.33% 33.33%",
-                                }} />
+                                        backgroundSize: "33.33% 33.33%",
+                                        backgroundPosition: "33.33% 33.33%",
+                                    }}
+                                />
 
                                 {/* Resize handles */}
                                 {handles.map((handle) => (
@@ -380,7 +410,7 @@ export default function ImageCropModal({
                                         key={handle.key}
                                         style={{
                                             position: "absolute",
-                                            ...handle.style as React.CSSProperties,
+                                            ...(handle.style as React.CSSProperties),
                                             width: HANDLE_SIZE,
                                             height: HANDLE_SIZE,
                                             background: "white",
@@ -395,18 +425,20 @@ export default function ImageCropModal({
                             </div>
 
                             {/* Size indicator */}
-                            <div style={{
-                                position: "absolute",
-                                bottom: 8,
-                                right: 8,
-                                padding: "4px 8px",
-                                background: "rgba(0, 0, 0, 0.7)",
-                                color: "rgba(255, 255, 255, 0.8)",
-                                fontSize: "11px",
-                                borderRadius: "var(--radius-sm)",
-                                fontFamily: "monospace",
-                                pointerEvents: "none",
-                            }}>
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    bottom: 8,
+                                    right: 8,
+                                    padding: "4px 8px",
+                                    background: "rgba(0, 0, 0, 0.7)",
+                                    color: "rgba(255, 255, 255, 0.8)",
+                                    fontSize: "11px",
+                                    borderRadius: "var(--radius-sm)",
+                                    fontFamily: "monospace",
+                                    pointerEvents: "none",
+                                }}
+                            >
                                 {Math.round(crop.width)} × {Math.round(crop.height)}
                             </div>
                         </>
@@ -414,22 +446,36 @@ export default function ImageCropModal({
                 </div>
 
                 {/* Footer actions */}
-                <div style={{
-                    padding: "var(--space-md) var(--space-lg)",
-                    borderTop: "1px solid var(--color-border)",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "var(--space-sm)",
-                }}>
-                    <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={onCancel} disabled={processing}>
+                <div
+                    style={{
+                        padding: "var(--space-md) var(--space-lg)",
+                        borderTop: "1px solid var(--color-border)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: "var(--space-sm)",
+                    }}
+                >
+                    <button
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        onClick={onCancel}
+                        disabled={processing}
+                    >
                         Cancel
                     </button>
                     <div className="gap-2" style={{ display: "flex" }}>
-                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" onClick={handleSkip} disabled={processing}>
+                        <button
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            onClick={handleSkip}
+                            disabled={processing}
+                        >
                             Skip Crop
                         </button>
-                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" onClick={handleCropConfirm} disabled={processing || !imageLoaded}>
+                        <button
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            onClick={handleCropConfirm}
+                            disabled={processing || !imageLoaded}
+                        >
                             {processing ? "Processing…" : "✂️ Apply Crop"}
                         </button>
                     </div>

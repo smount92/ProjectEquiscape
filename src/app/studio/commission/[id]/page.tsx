@@ -51,7 +51,9 @@ export default async function CommissionDetailPage({
         isGuestMode = true;
     } else {
         // Normal auth flow
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) redirect("/login");
         userId = user.id;
     }
@@ -71,7 +73,7 @@ export default async function CommissionDetailPage({
     let transactionId: string | null = null;
     let existingRating: { id: string; stars: number; reviewText: string | null; createdAt: string } | null = null;
     const targetId = isArtist ? commission.clientId : commission.artistId;
-    const targetAlias = isArtist ? (commission.clientAlias || "Client") : commission.artistAlias;
+    const targetAlias = isArtist ? commission.clientAlias || "Client" : commission.artistAlias;
 
     if (!isGuestMode && commission.status === "delivered" && targetId && userId) {
         const { data: txn } = await supabase
@@ -104,26 +106,30 @@ export default async function CommissionDetailPage({
     }
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Header */}
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up p-6 mb-6">
-                <div className="justify-between items-start gap-4" style={{ display: "flex", flexWrap: "wrap" }}>
+            <div className="bg-card border-edge animate-fade-in-up mb-6 rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                <div className="items-start justify-between gap-4" style={{ display: "flex", flexWrap: "wrap" }}>
                     <div>
-                        <h1 className="text-[calc(1.3rem*var(--font-scale))] m-0" >
-                            {commission.commissionType}
-                        </h1>
-                        <div className="gap-4 mt-1 text-[calc(0.85rem*var(--font-scale))] text-muted" style={{ display: "flex" }}>
-                            {isArtist && commission.clientAlias && (
-                                <span>👤 Client: @{commission.clientAlias}</span>
-                            )}
-                            {isClient && (
-                                <span>🎨 Artist: @{commission.artistAlias}</span>
-                            )}
-                            <span>📅 {new Date(commission.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                        <h1 className="m-0 text-[calc(1.3rem*var(--font-scale))]">{commission.commissionType}</h1>
+                        <div
+                            className="text-muted mt-1 gap-4 text-[calc(0.85rem*var(--font-scale))]"
+                            style={{ display: "flex" }}
+                        >
+                            {isArtist && commission.clientAlias && <span>👤 Client: @{commission.clientAlias}</span>}
+                            {isClient && <span>🎨 Artist: @{commission.artistAlias}</span>}
+                            <span>
+                                📅{" "}
+                                {new Date(commission.createdAt).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                })}
+                            </span>
                         </div>
                     </div>
                     <span
-                        className="inline-flex items-center py-[3px] px-[10px] rounded-full text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
+                        className="inline-flex items-center rounded-full px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
                         style={{
                             backgroundColor: `${STATUS_COLORS[commission.status]}20`,
                             color: STATUS_COLORS[commission.status],
@@ -137,25 +143,40 @@ export default async function CommissionDetailPage({
                 </div>
 
                 {/* Description */}
-                <div className="mt-6 p-4 rounded-md bg-card" >
-                    <h3 className="text-[calc(0.85rem*var(--font-scale))] mb-1 text-muted" >Description</h3>
-                    <p className="leading-[1.6] whitespace-pre-wrap text-[calc(0.9rem*var(--font-scale))]" >
+                <div className="bg-card mt-6 rounded-md p-4">
+                    <h3 className="text-muted mb-1 text-[calc(0.85rem*var(--font-scale))]">Description</h3>
+                    <p className="text-[calc(0.9rem*var(--font-scale))] leading-[1.6] whitespace-pre-wrap">
                         {commission.description}
                     </p>
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid-cols-[repeat(auto-fit, minmax(150px, 1fr))] gap-4 mt-6" style={{ display: "grid" }}>
+                <div
+                    className="grid-cols-[repeat(auto-fit, minmax(150px, 1fr))] mt-6 gap-4"
+                    style={{ display: "grid" }}
+                >
                     {commission.priceQuoted && (
                         <div>
-                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted" style={{ display: "block" }}>Price Quoted</span>
-                            <span className="font-bold text-[calc(1rem*var(--font-scale))]" >${commission.priceQuoted}</span>
+                            <span
+                                className="text-muted text-[calc(0.75rem*var(--font-scale))]"
+                                style={{ display: "block" }}
+                            >
+                                Price Quoted
+                            </span>
+                            <span className="text-[calc(1rem*var(--font-scale))] font-bold">
+                                ${commission.priceQuoted}
+                            </span>
                         </div>
                     )}
                     {commission.depositAmount && (
                         <div>
-                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted" style={{ display: "block" }}>Deposit</span>
-                            <span className="font-bold" >
+                            <span
+                                className="text-muted text-[calc(0.75rem*var(--font-scale))]"
+                                style={{ display: "block" }}
+                            >
+                                Deposit
+                            </span>
+                            <span className="font-bold">
                                 ${commission.depositAmount}
                                 {commission.depositPaid ? " ✅" : " ⏳"}
                             </span>
@@ -163,29 +184,41 @@ export default async function CommissionDetailPage({
                     )}
                     {commission.estimatedCompletion && (
                         <div>
-                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted" style={{ display: "block" }}>Est. Completion</span>
-                            <span className="font-semibold" >
-                                {new Date(commission.estimatedCompletion).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            <span
+                                className="text-muted text-[calc(0.75rem*var(--font-scale))]"
+                                style={{ display: "block" }}
+                            >
+                                Est. Completion
+                            </span>
+                            <span className="font-semibold">
+                                {new Date(commission.estimatedCompletion).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                })}
                             </span>
                         </div>
                     )}
                     {commission.slotNumber && (
                         <div>
-                            <span className="text-[calc(0.75rem*var(--font-scale))] text-muted" style={{ display: "block" }}>Slot</span>
-                            <span className="font-bold" >#{commission.slotNumber}</span>
+                            <span
+                                className="text-muted text-[calc(0.75rem*var(--font-scale))]"
+                                style={{ display: "block" }}
+                            >
+                                Slot
+                            </span>
+                            <span className="font-bold">#{commission.slotNumber}</span>
                         </div>
                     )}
                 </div>
             </div>
 
             {/* Link Horse (for artist when no horse is linked) */}
-            {!isGuestMode && !commission.horseId && isArtist && (
-                <LinkHorseToCommission commissionId={commission.id} />
-            )}
+            {!isGuestMode && !commission.horseId && isArtist && <LinkHorseToCommission commissionId={commission.id} />}
 
             {/* Guest Link (for artist) */}
             {!isGuestMode && isArtist && commission.guestToken && (
-                <div className="mb-4" >
+                <div className="mb-4">
                     <GuestLinkButton commissionId={commission.id} guestToken={commission.guestToken} />
                 </div>
             )}
@@ -212,12 +245,22 @@ export default async function CommissionDetailPage({
             )}
 
             {/* Navigation */}
-            <div className="gap-2 mt-6" style={{ display: "flex", flexWrap: "wrap" }}>
+            <div className="mt-6 gap-2" style={{ display: "flex", flexWrap: "wrap" }}>
                 {isArtist && (
-                    <Link href="/studio/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← Dashboard</Link>
+                    <Link
+                        href="/studio/dashboard"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
+                        ← Dashboard
+                    </Link>
                 )}
                 {isClient && (
-                    <Link href="/studio/my-commissions" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">← My Commissions</Link>
+                    <Link
+                        href="/studio/my-commissions"
+                        className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                    >
+                        ← My Commissions
+                    </Link>
                 )}
             </div>
         </div>

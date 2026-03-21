@@ -28,7 +28,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Getting Started",
         q: "Can I import my existing collection from a spreadsheet?",
-        a: "Yes! Go to your Stable and click \"Import CSV.\" Upload your spreadsheet and we'll fuzzy-match each row against our 10,500+ reference database. You can review and confirm matches before importing.",
+        a: 'Yes! Go to your Stable and click "Import CSV." Upload your spreadsheet and we\'ll fuzzy-match each row against our 10,500+ reference database. You can review and confirm matches before importing.',
     },
 
     // Collection Management
@@ -62,7 +62,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Privacy & Security",
         q: "What does 'public' vs 'private' vs 'unlisted' mean?",
-        a: "\"Public\" horses appear in the Show Ring and search results. \"Unlisted\" horses can be viewed via direct link but don't appear in search. \"Private\" horses are visible only to you. You control this per-horse from your stable.",
+        a: '"Public" horses appear in the Show Ring and search results. "Unlisted" horses can be viewed via direct link but don\'t appear in search. "Private" horses are visible only to you. You control this per-horse from your stable.',
     },
     {
         category: "Privacy & Security",
@@ -101,7 +101,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Buying & Selling",
         q: "What is the Price Guide?",
-        a: "The Price Guide (\"The Blue Book\") aggregates real sale data from completed transactions on the platform. It helps collectors understand fair market values for 10,500+ reference models. Prices are based on actual sales, not estimates.",
+        a: 'The Price Guide ("The Blue Book") aggregates real sale data from completed transactions on the platform. It helps collectors understand fair market values for 10,500+ reference models. Prices are based on actual sales, not estimates.',
     },
 
     // Shows & Community
@@ -145,35 +145,32 @@ export default function FaqPage() {
     const categories = ["all", ...Array.from(new Set(FAQ_ITEMS.map((item) => item.category)))];
 
     const filteredItems =
-        activeCategory === "all"
-            ? FAQ_ITEMS
-            : FAQ_ITEMS.filter((item) => item.category === activeCategory);
+        activeCategory === "all" ? FAQ_ITEMS : FAQ_ITEMS.filter((item) => item.category === activeCategory);
 
     const toggle = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
     return (
-        <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8">
-            <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-inner animate-fade-in-up max-w-[860px]">
+        <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8 py-[var(--space-3xl)] max-sm:py-[0]">
+            <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up max-w-[860px] py-[var(--space-3xl)] max-sm:py-[0]">
                 {/* Page Header */}
-                <div className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-sticky top-0 z-[100] h-[var(--header-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-sticky bg-parchment-dark border-edge top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b px-8 py-[0] py-[var(--space-3xl)] transition-all max-sm:py-[0]">
                     <h1>
-                        Frequently Asked{" "}
-                        <span className="text-forest">Questions</span>
+                        Frequently Asked <span className="text-forest">Questions</span>
                     </h1>
-                    <p className="min-h-[calc(100vh - var(--header max-sm:py-[0] max-sm:px-4-height))] py-[var(--space-3xl)] px-8-lead">
-                        Everything you need to know about Model Horse Hub.
-                        Can&apos;t find your answer? <Link href="/contact">Contact us</Link>.
+                    <p className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-lead py-[var(--space-3xl)] max-sm:py-[0]">
+                        Everything you need to know about Model Horse Hub. Can&apos;t find your answer?{" "}
+                        <Link href="/contact">Contact us</Link>.
                     </p>
                 </div>
 
                 {/* Category Filter */}
-                <div className="flex flex-wrap gap-2 justify-center mb-12">
+                <div className="mb-12 flex flex-wrap justify-center gap-2">
                     {categories.map((cat) => (
                         <button
                             key={cat}
-                            className={`py-1 px-4 font-[var(--font-family)] text-sm font-semibold border border-edge rounded-full cursor-pointer transition-all whitespace-nowrap ${activeCategory === cat ? "text-white bg-forest !border-forest" : "text-muted bg-[var(--color-bg-input)] hover:text-ink hover:border-forest"}`}
+                            className={`border-edge cursor-pointer rounded-full border px-4 py-1 text-sm font-[var(--font-family)] font-semibold whitespace-nowrap transition-all ${activeCategory === cat ? "bg-forest !border-forest text-white" : "text-muted hover:text-ink hover:border-forest bg-[var(--color-bg-input)]"}`}
                             onClick={() => {
                                 setActiveCategory(cat);
                                 setOpenIndex(null);
@@ -191,17 +188,17 @@ export default function FaqPage() {
                         return (
                             <div
                                 key={`${item.category}-${idx}`}
-                                className={`border rounded-lg overflow-hidden transition-colors ${isOpen ? "border-[rgba(44,85,69,0.3)]" : "border-edge"}`}
+                                className={`overflow-hidden rounded-lg border transition-colors ${isOpen ? "border-[rgba(44,85,69,0.3)]" : "border-edge"}`}
                             >
                                 <button
-                                    className="flex items-center justify-between w-full py-6 px-8 bg-[var(--color-bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all)] border-none text-ink font-[var(--font-family)] text-base font-semibold text-left cursor-pointer transition-colors gap-4 hover:bg-[var(--color-bg-card-hover)]"
+                                    className="bg-[var(--color-bg-bg-card border-edge transition-all)] text-ink flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border border-none p-12 px-8 py-6 text-left text-base font-[var(--font-family)] font-semibold shadow-md transition-colors hover:bg-[var(--color-bg-card-hover)] max-[480px]:rounded-[var(--radius-md)]"
                                     onClick={() => toggle(idx)}
                                     aria-expanded={isOpen}
                                     id={`faq-q-${idx}`}
                                 >
                                     <span>{item.q}</span>
                                     <svg
-                                        className={`shrink-0 transition-transform ${isOpen ? "rotate-180 text-forest" : "text-muted"}`}
+                                        className={`shrink-0 transition-transform ${isOpen ? "text-forest rotate-180" : "text-muted"}`}
                                         width="20"
                                         height="20"
                                         viewBox="0 0 24 24"
@@ -216,7 +213,10 @@ export default function FaqPage() {
                                     </svg>
                                 </button>
                                 {isOpen && (
-                                    <div className="px-8 pb-6 bg-[var(--color-bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all)] animate-fade-in-up [&_p]:text-base [&_p]:text-ink-light [&_p]:leading-[1.8] [&_p]:m-0" id={`faq-a-${idx}`}>
+                                    <div
+                                        className="bg-[var(--color-bg-bg-card border-edge transition-all)] animate-fade-in-up [&_p]:text-ink-light rounded-lg border p-12 px-8 pb-6 shadow-md max-[480px]:rounded-[var(--radius-md)] [&_p]:m-0 [&_p]:text-base [&_p]:leading-[1.8]"
+                                        id={`faq-a-${idx}`}
+                                    >
                                         <p>{item.a}</p>
                                     </div>
                                 )}
@@ -226,9 +226,13 @@ export default function FaqPage() {
                 </div>
 
                 {/* CTA */}
-                <div className="text-center p-12 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg mt-[var(--space-3xl)]">
+                <div className="bg-card border-edge mt-[var(--space-3xl)] rounded-lg border p-12 text-center max-[480px]:rounded-[var(--radius-md)]">
                     <p>Still have questions?</p>
-                    <Link href="/contact" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm min-h-[52px] py-4 px-12 text-[calc(var(--font-size-md)*var(--font-scale))] rounded-lg" id="faq-cta-contact">
+                    <Link
+                        href="/contact"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[52px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-lg rounded-md border border-0 border-[transparent] px-8 px-12 py-2 py-4 font-sans text-base text-[calc(var(--font-size-md)*var(--font-scale))] leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        id="faq-cta-contact"
+                    >
                         Contact Us
                     </Link>
                 </div>

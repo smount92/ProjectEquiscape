@@ -54,19 +54,31 @@ export default function MessageSellerButton({
         return (
             <>
                 <button
-                    className="flex items-center justify-center w-[28px] h-[28px] p-0 bg-[rgba(44, 85, 69, 0.1)] border border-[rgba(44, 85, 69, 0.25)] rounded-full text-[#2C5545] cursor-pointer transition-all"
+                    className="bg-[rgba(44, 85, 69, 0.1)] border-[rgba(44, 85, 69, 0.25)] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border p-0 text-[#2C5545] transition-all"
                     onClick={handleClick}
                     disabled={loading}
                     title={isOfferable ? "Make Offer" : "Message Seller"}
                     aria-label={isOfferable ? "Make Offer" : "Message Seller"}
                 >
                     {loading ? (
-                        <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[12] h-[12]" aria-hidden="true" />
+                        <span
+                            className="hover:no-underline-min-h)] leading-none-spinner inline-flex h-[12] min-h-[var(--opacity-[0.5] w-[12] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                            aria-hidden="true"
+                        />
                     ) : isOfferable ? (
-                        <span className="text-[12]" >💰</span>
+                        <span className="text-[12]">💰</span>
                     ) : (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                     )}
@@ -87,21 +99,33 @@ export default function MessageSellerButton({
     return (
         <>
             <button
-                className="message-seller-inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none"
+                className="message-seller-inline-flex hover:no-underline-min-h)] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                 onClick={handleClick}
                 disabled={loading}
             >
                 {loading ? (
                     <>
-                        <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner w-[14] h-[14]" aria-hidden="true" />
+                        <span
+                            className="hover:no-underline-min-h)] leading-none-spinner inline-flex h-[14] min-h-[var(--opacity-[0.5] w-[14] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                            aria-hidden="true"
+                        />
                         {isOfferable ? "Opening…" : "Opening…"}
                     </>
                 ) : isOfferable ? (
                     <>💰 Make Offer</>
                 ) : (
                     <>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                        >
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                         Message Seller

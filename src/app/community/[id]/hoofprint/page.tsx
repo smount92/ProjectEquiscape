@@ -7,11 +7,7 @@ import ShareButton from "@/components/ShareButton";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const supabase = await createClient();
     const { data: horse } = await supabase
@@ -27,18 +23,16 @@ export async function generateMetadata({
     };
 }
 
-export default async function HoofprintReportPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export default async function HoofprintReportPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: horseId } = await params;
     const supabase = await createClient();
 
     // Verify horse is public or unlisted
     const { data: horse } = await supabase
         .from("user_horses")
-        .select("id, custom_name, finish_type, condition_grade, is_public, catalog_items:catalog_id(title, maker, item_type)")
+        .select(
+            "id, custom_name, finish_type, condition_grade, is_public, catalog_items:catalog_id(title, maker, item_type)",
+        )
         .eq("id", horseId)
         .in("visibility", ["public", "unlisted"])
         .single();
@@ -58,7 +52,7 @@ export default async function HoofprintReportPage({
     // Fetch show records
     const { data: rawRecords } = await supabase
         .from("show_records")
-        .select("show_name, show_date, division, \"placing\", ribbon_color")
+        .select('show_name, show_date, division, "placing", ribbon_color')
         .eq("horse_id", horseId)
         .order("show_date", { ascending: false, nullsFirst: false });
 
@@ -70,28 +64,29 @@ export default async function HoofprintReportPage({
         ribbon_color: string | null;
     }[];
 
-    const refName = h.catalog_items
-        ? `${h.catalog_items.maker} ${h.catalog_items.title}`
-        : null;
+    const refName = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : null;
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             {/* Header */}
-            <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2 animate-fade-in-up">
-                <div className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-content">
+            <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+                <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                     <h1>
                         🐾 <span className="text-forest">Hoofprint™ Report</span>
                     </h1>
-                    <p className="text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em] mb-2-subtitle">
+                    <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
                         Full provenance record for <strong>{h.custom_name}</strong>
                     </p>
                     {refName && (
-                        <p className="text-muted text-[calc(0.85rem*var(--font-scale))]" >
+                        <p className="text-muted text-[calc(0.85rem*var(--font-scale))]">
                             {refName} · {h.finish_type} · {h.condition_grade}
                         </p>
                     )}
-                    <div className="gap-2 mt-4" style={{ display: "flex", flexWrap: "wrap" }}>
-                        <Link href={`/community/${horseId}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                    <div className="mt-4 gap-2" style={{ display: "flex", flexWrap: "wrap" }}>
+                        <Link
+                            href={`/community/${horseId}`}
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        >
                             ← Back to Passport
                         </Link>
                         <ShareButton
@@ -117,30 +112,43 @@ export default async function HoofprintReportPage({
 
             {/* Show Records Summary */}
             {records.length > 0 && (
-                <div className="animate-fade-in-up bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all mt-8 p-6">
-                    <h2 className="text-[calc(1.1rem*var(--font-scale))] mb-4" >
-                        🏆 Show Record
-                    </h2>
+                <div className="animate-fade-in-up bg-card border-edge mt-8 rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">🏆 Show Record</h2>
                     <div className="gap-1" style={{ display: "grid" }}>
                         {records.map((r, i) => (
-                            <div key={i} style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "var(--space-sm)",
-                                padding: "var(--space-xs) var(--space-sm)",
-                                borderRadius: "var(--radius-md)",
-                                background: "rgba(255,255,255,0.03)",
-                                fontSize: "calc(0.8rem * var(--font-scale))",
-                            }}>
-                                <span className="text-base" >
-                                    {r.ribbon_color === "Blue" ? "🥇" : r.ribbon_color === "Red" ? "🥈" : r.ribbon_color === "Yellow" ? "🥉" : "🏅"}
+                            <div
+                                key={i}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "var(--space-sm)",
+                                    padding: "var(--space-xs) var(--space-sm)",
+                                    borderRadius: "var(--radius-md)",
+                                    background: "rgba(255,255,255,0.03)",
+                                    fontSize: "calc(0.8rem * var(--font-scale))",
+                                }}
+                            >
+                                <span className="text-base">
+                                    {r.ribbon_color === "Blue"
+                                        ? "🥇"
+                                        : r.ribbon_color === "Red"
+                                          ? "🥈"
+                                          : r.ribbon_color === "Yellow"
+                                            ? "🥉"
+                                            : "🏅"}
                                 </span>
-                                <span className="font-semibold" >{r.show_name}</span>
-                                {r.division && <span className="text-muted" >— {r.division}</span>}
-                                {r.placing && <span className="text-muted" >({r.placing})</span>}
+                                <span className="font-semibold">{r.show_name}</span>
+                                {r.division && <span className="text-muted">— {r.division}</span>}
+                                {r.placing && <span className="text-muted">({r.placing})</span>}
                                 {r.show_date && (
-                                    <span className="text-muted text-[calc(0.7rem*var(--font-scale))]" style={{ marginLeft: "auto" }}>
-                                        {new Date(r.show_date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                                    <span
+                                        className="text-muted text-[calc(0.7rem*var(--font-scale))]"
+                                        style={{ marginLeft: "auto" }}
+                                    >
+                                        {new Date(r.show_date).toLocaleDateString("en-US", {
+                                            month: "short",
+                                            year: "numeric",
+                                        })}
                                     </span>
                                 )}
                             </div>

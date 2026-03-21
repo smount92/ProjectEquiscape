@@ -21,12 +21,18 @@ const formatRelativeTime = (dateStr: string | null) => {
 const typeIcon = (type: string) => {
     switch (type) {
         case "plastic_mold":
-        case "plastic_release": return "🐎";
-        case "artist_resin": return "🎨";
-        case "tack": return "🏇";
-        case "prop": return "🌲";
-        case "diorama": return "🎭";
-        default: return "📦";
+        case "plastic_release":
+            return "🐎";
+        case "artist_resin":
+            return "🎨";
+        case "tack":
+            return "🏇";
+        case "prop":
+            return "🌲";
+        case "diorama":
+            return "🎭";
+        default:
+            return "📦";
     }
 };
 
@@ -48,21 +54,18 @@ export default async function MarketPricePage({
 
     const [sortBy, sortDirection] = sortValue.split(":") as [
         "average_price" | "transaction_volume" | "last_sold_at" | "title",
-        "asc" | "desc"
+        "asc" | "desc",
     ];
 
-    const { items, total } = await searchMarketPrices(
-        query || undefined,
-        {
-            itemType: itemType !== "all" ? itemType : undefined,
-            finishType: finishType || undefined,
-            lifeStage: lifeStage || undefined,
-            sortBy,
-            sortDirection,
-            limit: PAGE_SIZE,
-            offset,
-        }
-    );
+    const { items, total } = await searchMarketPrices(query || undefined, {
+        itemType: itemType !== "all" ? itemType : undefined,
+        finishType: finishType || undefined,
+        lifeStage: lifeStage || undefined,
+        sortBy,
+        sortDirection,
+        limit: PAGE_SIZE,
+        offset,
+    });
 
     const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -78,13 +81,15 @@ export default async function MarketPricePage({
     };
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
             <div className="page-content max-w-[900]">
                 <div className="animate-fade-in-up">
                     {/* Header */}
                     <div className="mb-12" style={{ textAlign: "center" }}>
-                        <h1>📈 Model Horse <span className="text-forest">Price Guide</span></h1>
-                        <p className="text-ink-light text-[calc(var(--font-size-md)*var(--font-scale))] mt-2" >
+                        <h1>
+                            📈 Model Horse <span className="text-forest">Price Guide</span>
+                        </h1>
+                        <p className="text-ink-light mt-2 text-[calc(var(--font-size-md)*var(--font-scale))]">
                             The Blue Book — Real sale data from real collectors
                         </p>
                     </div>
@@ -96,14 +101,17 @@ export default async function MarketPricePage({
 
                     {/* Results (Server-rendered) */}
                     {items.length === 0 ? (
-                        <div className="glass-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-[var(--space-3xl)]" style={{ textAlign: "center" }}>
-                            <div className="text-[3rem] mb-4" >📊</div>
-                            <h3 className="mb-2" >
+                        <div
+                            className="glass-bg-card border-edge rounded-lg border p-12 p-[var(--space-3xl)] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                            style={{ textAlign: "center" }}
+                        >
+                            <div className="mb-4 text-[3rem]">📊</div>
+                            <h3 className="mb-2">
                                 {query || itemType !== "all"
                                     ? "No matching price data"
                                     : "The Blue Book Grows With Every Sale"}
                             </h3>
-                            <p className="text-ink-light max-w-[400] mx-auto" >
+                            <p className="text-ink-light mx-auto max-w-[400]">
                                 {query || itemType !== "all"
                                     ? "Try broadening your search or changing the filter."
                                     : "Complete a transaction to contribute market data. Prices appear here after verified sales."}
@@ -112,39 +120,51 @@ export default async function MarketPricePage({
                     ) : (
                         <>
                             <div className="mb-4">
-                                <span className="text-muted text-sm" >
+                                <span className="text-muted text-sm">
                                     {total} item{total !== 1 ? "s" : ""} with price data
                                 </span>
                             </div>
 
-                            <div className="market-bg-[var(--color-surface-secondary)] font-semibold sticky top-0">
+                            <div className="market-bg-[var(--color-surface-secondary)] sticky top-0 font-semibold">
                                 {items.map((item) => (
-                                    <div key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`} className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors">
-                                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                                            <span className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-icon">{typeIcon(item.itemType)}</span>
-                                            <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-info">
-                                                <span className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-title">{item.title}</span>
-                                                <span className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-maker">
-                                                    {item.maker}{item.scale ? ` · ${item.scale}` : ""}
+                                    <div
+                                        key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`}
+                                        className="bg-bg-card border-edge border-edge rounded-lg border p-6 p-12 shadow-md transition-all transition-colors max-[480px]:rounded-[var(--radius-md)]"
+                                    >
+                                        <div className="bg-bg-card border-edge border-edge transition-colors-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-6 p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                                            <span className="bg-bg-card border-edge border-edge transition-colors-icon rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                                {typeIcon(item.itemType)}
+                                            </span>
+                                            <div className="bg-bg-card border-edge border-edge transition-colors-info rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                                <span className="bg-bg-card border-edge border-edge transition-colors-title rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                                    {item.title}
+                                                </span>
+                                                <span className="bg-bg-card border-edge border-edge transition-colors-maker rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                                    {item.maker}
+                                                    {item.scale ? ` · ${item.scale}` : ""}
                                                     {item.finishType ? ` · ${item.finishType}` : ""}
-                                                    {item.lifeStage && item.lifeStage !== "completed" ? ` · ${item.lifeStage === "blank" ? "Blank" : item.lifeStage === "stripped" ? "Stripped" : "In Progress"}` : ""}
+                                                    {item.lifeStage && item.lifeStage !== "completed"
+                                                        ? ` · ${item.lifeStage === "blank" ? "Blank" : item.lifeStage === "stripped" ? "Stripped" : "In Progress"}`
+                                                        : ""}
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-prices">
-                                            <div className="text-lg font-bold text-forest">
+                                        <div className="bg-bg-card border-edge border-edge transition-colors-prices rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                            <div className="text-forest text-lg font-bold">
                                                 {formatCurrency(item.lowestPrice)}
-                                                {item.lowestPrice !== item.highestPrice ? ` – ${formatCurrency(item.highestPrice)}` : ""}
+                                                {item.lowestPrice !== item.highestPrice
+                                                    ? ` – ${formatCurrency(item.highestPrice)}`
+                                                    : ""}
                                             </div>
-                                            <div className="text-sm text-[var(--color-text-secondary)] mt-[2px]">
+                                            <div className="mt-[2px] text-sm text-[var(--color-text-secondary)]">
                                                 <span>Avg: {formatCurrency(item.averagePrice)}</span>
                                                 <span> · Median: {formatCurrency(item.medianPrice)}</span>
                                             </div>
                                         </div>
 
-                                        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 transition-colors-footer">
-                                            <span className="inline-flex items-center py-[2px] px-[8px] rounded-full bg-[var(--color-accent-primary-glow)] text-forest font-semibold">
+                                        <div className="bg-bg-card border-edge border-edge transition-colors-footer rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                                            <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-accent-primary-glow)] px-[8px] py-[2px] font-semibold">
                                                 {item.transactionVolume} sale{item.transactionVolume !== 1 ? "s" : ""}
                                             </span>
                                             {item.lastSoldAt && (
@@ -159,23 +179,39 @@ export default async function MarketPricePage({
 
                             {/* Pagination */}
                             {totalPages > 1 && (
-                                <div className="flex justify-between items-center mt-8 pt-6 border-t border-edge">
+                                <div className="border-edge mt-8 flex items-center justify-between border-t pt-6">
                                     {page > 1 ? (
-                                        <Link href={buildPageUrl(page - 1)} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                                        <Link
+                                            href={buildPageUrl(page - 1)}
+                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        >
                                             ← Previous
                                         </Link>
                                     ) : (
-                                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>← Previous</button>
+                                        <button
+                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            disabled
+                                        >
+                                            ← Previous
+                                        </button>
                                     )}
-                                    <span className="text-muted text-sm" >
+                                    <span className="text-muted text-sm">
                                         Page {page} of {totalPages} ({total} items)
                                     </span>
                                     {page < totalPages ? (
-                                        <Link href={buildPageUrl(page + 1)} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                                        <Link
+                                            href={buildPageUrl(page + 1)}
+                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                        >
                                             Next →
                                         </Link>
                                     ) : (
-                                        <button className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge" disabled>Next →</button>
+                                        <button
+                                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                            disabled
+                                        >
+                                            Next →
+                                        </button>
                                     )}
                                 </div>
                             )}
@@ -183,11 +219,11 @@ export default async function MarketPricePage({
                     )}
 
                     {/* Disclaimer */}
-                    <div className="mt-12 p-6 rounded-lg bg-[var(--color-surface-glass)] border border-edge text-xs">
+                    <div className="border-edge mt-12 rounded-lg border bg-[var(--color-surface-glass)] p-6 text-xs">
                         <p>
-                            📋 Prices based on completed transactions recorded on Model Horse Hub.
-                            This is not a professional appraisal. Market conditions vary.
-                            Always research current listings before buying or selling.
+                            📋 Prices based on completed transactions recorded on Model Horse Hub. This is not a
+                            professional appraisal. Market conditions vary. Always research current listings before
+                            buying or selling.
                         </p>
                     </div>
                 </div>

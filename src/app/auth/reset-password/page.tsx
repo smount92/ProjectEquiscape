@@ -31,7 +31,9 @@ export default function ResetPasswordPage() {
         }
 
         // Method 2: Listen for PASSWORD_RECOVERY event (token-hash flow via URL fragment)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((event) => {
             if (event === "PASSWORD_RECOVERY") {
                 setReady(true);
             } else if (event === "SIGNED_IN") {
@@ -78,12 +80,14 @@ export default function ResetPasswordPage() {
 
     if (success) {
         return (
-            <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                        <div aria-hidden="true" className="text-[3rem] mb-4" >✅</div>
+            <div className="min-h-[calc(100vh - var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height))] top-0 z-[100] flex items-center justify-between justify-center border-b p-8 px-8 py-[0] max-sm:py-[0]">
+                <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="bg-card border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                        <div aria-hidden="true" className="mb-4 text-[3rem]">
+                            ✅
+                        </div>
                         <h1>Password Updated!</h1>
-                        <p className="mt-4" >Redirecting to your stable...</p>
+                        <p className="mt-4">Redirecting to your stable...</p>
                     </div>
                 </div>
             </div>
@@ -92,16 +96,21 @@ export default function ResetPasswordPage() {
 
     if (!ready) {
         return (
-            <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                        <div aria-hidden="true" className="text-[3rem] mb-4" >🔐</div>
-                        <h1>Verifying <span className="text-forest">Reset Link</span></h1>
-                        <p className="mt-4" >
-                            {error || "Please wait while we verify your reset link..."}
-                        </p>
+            <div className="min-h-[calc(100vh - var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height))] top-0 z-[100] flex items-center justify-between justify-center border-b p-8 px-8 py-[0] max-sm:py-[0]">
+                <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="bg-card border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                        <div aria-hidden="true" className="mb-4 text-[3rem]">
+                            🔐
+                        </div>
+                        <h1>
+                            Verifying <span className="text-forest">Reset Link</span>
+                        </h1>
+                        <p className="mt-4">{error || "Please wait while we verify your reset link..."}</p>
                         {error && (
-                            <a href="/forgot-password" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full mt-6">
+                            <a
+                                href="/forgot-password"
+                                className="hover:no-underline-min-h)] bg-forest text-inverse mt-6 flex inline-flex min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                            >
                                 Request New Reset Link
                             </a>
                         )}
@@ -112,17 +121,32 @@ export default function ResetPasswordPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh - var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height))] p-8">
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all w-full max-w-[460px] relative overflow-hidden animate-fade-in-up">
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
-                    <h1>New <span className="text-forest">Password</span></h1>
+        <div className="min-h-[calc(100vh - var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height))] top-0 z-[100] flex items-center justify-between justify-center border-b p-8 px-8 py-[0] max-sm:py-[0]">
+            <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                <div className="bg-card border-edge transition-all-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between rounded-lg border border-b p-12 px-8 py-[0] shadow-md transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                    <h1>
+                        New <span className="text-forest">Password</span>
+                    </h1>
                     <p>Choose a new password for your account</p>
                 </div>
 
                 {error && (
-                    <div className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm" role="alert">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                            <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
+                    <div
+                        className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+                        role="alert"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
                         </svg>
                         {error}
                     </div>
@@ -130,7 +154,9 @@ export default function ResetPasswordPage() {
 
                 <form onSubmit={handleSubmit} noValidate>
                     <div className="mb-6">
-                        <label htmlFor="new-password" className="block text-sm font-semibold text-ink mb-1">New Password</label>
+                        <label htmlFor="new-password" className="text-ink mb-1 block text-sm font-semibold">
+                            New Password
+                        </label>
                         <input
                             id="new-password"
                             type="password"
@@ -145,7 +171,9 @@ export default function ResetPasswordPage() {
                         />
                     </div>
                     <div className="mb-6">
-                        <label htmlFor="confirm-new-password" className="block text-sm font-semibold text-ink mb-1">Confirm New Password</label>
+                        <label htmlFor="confirm-new-password" className="text-ink mb-1 block text-sm font-semibold">
+                            Confirm New Password
+                        </label>
                         <input
                             id="confirm-new-password"
                             type="password"
@@ -158,10 +186,18 @@ export default function ResetPasswordPage() {
                         />
                     </div>
 
-                    <button type="submit" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm flex w-full" disabled={isPending} id="reset-submit">
+                    <button
+                        type="submit"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse flex inline-flex min-h-[var(--opacity-[0.5] w-full cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        disabled={isPending}
+                        id="reset-submit"
+                    >
                         {isPending ? (
                             <>
-                                <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
+                                <span
+                                    className="hover:no-underline-min-h)] leading-none-spinner inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                    aria-hidden="true"
+                                />
                                 Updating...
                             </>
                         ) : (
@@ -173,4 +209,3 @@ export default function ResetPasswordPage() {
         </div>
     );
 }
-

@@ -112,32 +112,41 @@ export default function ClaimPage() {
 
     if (success) {
         return (
-            <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up max-w-[500px] mx-auto p-12" style={{ textAlign: "center" }}>
-                    <div className="text-[3rem] mb-4" >🎉</div>
-                    <h1 className="text-[calc(1.5rem*var(--font-scale))]" >
-                        Welcome to your stable!
-                    </h1>
-                    <p className="text-muted mt-2 mb-6" >
-                        <strong>{success.horseName}</strong> has been successfully transferred to your account.
-                        The full Hoofprint™ history has been preserved.
+            <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+                <div
+                    className="bg-card border-edge animate-fade-in-up mx-auto max-w-[500px] rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                    style={{ textAlign: "center" }}
+                >
+                    <div className="mb-4 text-[3rem]">🎉</div>
+                    <h1 className="text-[calc(1.5rem*var(--font-scale))]">Welcome to your stable!</h1>
+                    <p className="text-muted mt-2 mb-6">
+                        <strong>{success.horseName}</strong> has been successfully transferred to your account. The full
+                        Hoofprint™ history has been preserved.
                     </p>
                     <div className="gap-2" style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}>
-                        <Link href={`/stable/${success.horseId}`} className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
+                        <Link
+                            href={`/stable/${success.horseId}`}
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        >
                             🐴 View Passport
                         </Link>
-                        <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge">
+                        <Link
+                            href="/dashboard"
+                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                        >
                             ← Dashboard
                         </Link>
                     </div>
-                    <p style={{
-                        textAlign: "center",
-                        fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
-                        color: "var(--color-text-muted)",
-                        marginTop: "var(--space-lg)",
-                        borderTop: "1px solid var(--color-border)",
-                        paddingTop: "var(--space-md)",
-                    }}>
+                    <p
+                        style={{
+                            textAlign: "center",
+                            fontSize: "calc(var(--font-size-sm) * var(--font-scale))",
+                            color: "var(--color-text-muted)",
+                            marginTop: "var(--space-lg)",
+                            borderTop: "1px solid var(--color-border)",
+                            paddingTop: "var(--space-md)",
+                        }}
+                    >
                         ⭐ Had a good experience? You can leave a review from the seller&apos;s profile.
                     </p>
                 </div>
@@ -146,85 +155,93 @@ export default function ClaimPage() {
     }
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
-            <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all animate-fade-in-up max-w-[520px] mx-auto p-12">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
+            <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[520px] rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                 <div className="mb-6" style={{ textAlign: "center" }}>
-                    <div className="text-[2.5rem] mb-2" >📦</div>
-                    <h1 className="text-[calc(1.3rem*var(--font-scale))]" >
+                    <div className="mb-2 text-[2.5rem]">📦</div>
+                    <h1 className="text-[calc(1.3rem*var(--font-scale))]">
                         <span className="text-forest">Claim a Horse</span>
                     </h1>
-                    <p className="text-muted text-[calc(0.85rem*var(--font-scale))] mt-1" >
+                    <p className="text-muted mt-1 text-[calc(0.85rem*var(--font-scale))]">
                         Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
                     </p>
                 </div>
 
                 {/* Preview Card (CoA PIN lookup result) */}
                 {preview && (
-                    <div className="claim-preview-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all" style={{
-                        border: "1px solid var(--color-border)",
-                        borderRadius: "var(--radius-lg)",
-                        padding: "var(--space-lg)",
-                        marginBottom: "var(--space-lg)",
-                        background: "var(--color-bg-elevated)",
-                    }}>
+                    <div
+                        className="claim-preview-bg-card border-edge rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]"
+                        style={{
+                            border: "1px solid var(--color-border)",
+                            borderRadius: "var(--radius-lg)",
+                            padding: "var(--space-lg)",
+                            marginBottom: "var(--space-lg)",
+                            background: "var(--color-bg-elevated)",
+                        }}
+                    >
                         <div className="gap-6" style={{ display: "flex", alignItems: "center" }}>
                             {preview.photo ? (
                                 <img
                                     src={preview.photo}
                                     alt={preview.name}
                                     style={{
-                                        width: 80, height: 80,
+                                        width: 80,
+                                        height: 80,
                                         borderRadius: "var(--radius-md)",
                                         objectFit: "cover",
                                     }}
                                 />
                             ) : (
-                                <div style={{
-                                    width: 80, height: 80,
-                                    borderRadius: "var(--radius-md)",
-                                    background: "var(--color-bg-card)",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    fontSize: "2rem",
-                                }}>🐴</div>
+                                <div
+                                    style={{
+                                        width: 80,
+                                        height: 80,
+                                        borderRadius: "var(--radius-md)",
+                                        background: "var(--color-bg-card)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "2rem",
+                                    }}
+                                >
+                                    🐴
+                                </div>
                             )}
-                            <div className="flex-1" >
-                                <h3 className="text-[calc(1.1rem*var(--font-scale))] font-bold mb-[4]" >
+                            <div className="flex-1">
+                                <h3 className="mb-[4] text-[calc(1.1rem*var(--font-scale))] font-bold">
                                     {preview.name}
                                 </h3>
-                                <p className="text-sm text-muted" >
+                                <p className="text-muted text-sm">
                                     {preview.finish} · {preview.condition}
                                 </p>
                             </div>
                         </div>
 
-                        <div style={{
-                            display: "flex", gap: "var(--space-lg)",
-                            marginTop: "var(--space-md)",
-                            paddingTop: "var(--space-md)",
-                            borderTop: "1px solid var(--color-border)",
-                        }}>
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: "var(--space-lg)",
+                                marginTop: "var(--space-md)",
+                                paddingTop: "var(--space-md)",
+                                borderTop: "1px solid var(--color-border)",
+                            }}
+                        >
                             <div className="flex-1" style={{ textAlign: "center" }}>
-                                <span className="text-[1.2rem] font-bold text-forest" >
-                                    {preview.timelineCount}
-                                </span>
+                                <span className="text-forest text-[1.2rem] font-bold">{preview.timelineCount}</span>
                                 <br />
-                                <span className="text-xs text-muted" >
-                                    Hoofprint Events
-                                </span>
+                                <span className="text-muted text-xs">Hoofprint Events</span>
                             </div>
                             <div className="flex-1" style={{ textAlign: "center" }}>
-                                <span className="text-[1.2rem] font-bold text-forest" >
-                                    {preview.ownerCount}
-                                </span>
+                                <span className="text-forest text-[1.2rem] font-bold">{preview.ownerCount}</span>
                                 <br />
-                                <span className="text-xs text-muted" >
+                                <span className="text-muted text-xs">
                                     Previous Owner{preview.ownerCount !== 1 ? "s" : ""}
                                 </span>
                             </div>
                         </div>
 
                         <button
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             onClick={handleClaim}
                             disabled={claiming}
                             style={{ width: "100%", marginTop: "var(--space-lg)" }}
@@ -239,7 +256,7 @@ export default function ClaimPage() {
                 {!preview && (
                     <form onSubmit={handleSubmit}>
                         <div className="mb-6">
-                            <label className="block text-sm font-semibold text-ink mb-1">Transfer Code or PIN</label>
+                            <label className="text-ink mb-1 block text-sm font-semibold">Transfer Code or PIN</label>
                             <input
                                 type="text"
                                 className="form-input"
@@ -264,14 +281,17 @@ export default function ClaimPage() {
                         </div>
 
                         {error && (
-                            <p className="text-[#ef4444] text-[calc(0.8rem*var(--font-scale))] mb-4" style={{ textAlign: "center" }}>
+                            <p
+                                className="mb-4 text-[calc(0.8rem*var(--font-scale))] text-[#ef4444]"
+                                style={{ textAlign: "center" }}
+                            >
                                 {error}
                             </p>
                         )}
 
                         <button
                             type="submit"
-                            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
                             disabled={claiming || lookingUp || code.trim().length < 6}
                             style={{ width: "100%" }}
                         >
@@ -281,12 +301,15 @@ export default function ClaimPage() {
                 )}
 
                 {error && preview && (
-                    <p className="text-[#ef4444] text-[calc(0.8rem*var(--font-scale))] mt-4" style={{ textAlign: "center" }}>
+                    <p
+                        className="mt-4 text-[calc(0.8rem*var(--font-scale))] text-[#ef4444]"
+                        style={{ textAlign: "center" }}
+                    >
                         {error}
                     </p>
                 )}
 
-                <p className="text-[calc(0.75rem*var(--font-scale))] text-muted mt-4" style={{ textAlign: "center" }}>
+                <p className="text-muted mt-4 text-[calc(0.75rem*var(--font-scale))]" style={{ textAlign: "center" }}>
                     The horse&apos;s full Hoofprint™ history will transfer with it.
                     <br />
                     Photos, show records, and provenance are preserved forever.

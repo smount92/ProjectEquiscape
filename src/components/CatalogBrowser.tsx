@@ -25,12 +25,7 @@ interface CatalogBrowserProps {
 type SortField = "title" | "maker" | "scale" | "created_at";
 type SortDir = "asc" | "desc";
 
-export default function CatalogBrowser({
-    initialItems,
-    totalCount,
-    makers,
-    scales,
-}: CatalogBrowserProps) {
+export default function CatalogBrowser({ initialItems, totalCount, makers, scales }: CatalogBrowserProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
 
@@ -55,7 +50,7 @@ export default function CatalogBrowser({
             scaleVal: string | null,
             sortField: SortField,
             sortDirection: SortDir,
-            pageNum: number
+            pageNum: number,
         ) => {
             startTransition(async () => {
                 const result = await getCatalogItems({
@@ -73,7 +68,7 @@ export default function CatalogBrowser({
                 }
             });
         },
-        []
+        [],
     );
 
     // Debounced search
@@ -147,13 +142,13 @@ export default function CatalogBrowser({
                     onChange={(e) => handleSearch(e.target.value)}
                     autoComplete="off"
                 />
-                {isPending && <span className="absolute right-[12px] top-[50%] translate-y-[-50%]">⏳</span>}
+                {isPending && <span className="absolute top-[50%] right-[12px] translate-y-[-50%]">⏳</span>}
             </div>
 
             {/* Filter Chips */}
-            <div className="flex flex-wrap gap-2 mb-4 items-center">
-                <div className="flex items-center gap-[6px] flex-wrap">
-                    <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-semibold">Maker:</span>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-[6px]">
+                    <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-semibold">Maker:</span>
                     <button
                         className={`ref-chip ${activeMaker === null ? "ref-chip-active" : ""}`}
                         onClick={() => handleMakerFilter(null)}
@@ -164,24 +159,20 @@ export default function CatalogBrowser({
                         <button
                             key={maker}
                             className={`ref-chip ${activeMaker === maker ? "ref-chip-active" : ""}`}
-                            onClick={() =>
-                                handleMakerFilter(activeMaker === maker ? null : maker)
-                            }
+                            onClick={() => handleMakerFilter(activeMaker === maker ? null : maker)}
                         >
                             {maker}
                         </button>
                     ))}
                 </div>
                 {scales.length > 0 && (
-                    <div className="flex items-center gap-[6px] flex-wrap">
-                        <span className="text-[calc(0.8rem*var(--font-scale))] text-muted font-semibold">Scale:</span>
+                    <div className="flex flex-wrap items-center gap-[6px]">
+                        <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-semibold">Scale:</span>
                         <select
                             id="catalog-scale-filter"
                             className="input max-w-[160px] text-[calc(0.8rem*var(--font-scale))]"
                             value={activeScale ?? ""}
-                            onChange={(e) =>
-                                handleScaleFilter(e.target.value || null)
-                            }
+                            onChange={(e) => handleScaleFilter(e.target.value || null)}
                         >
                             <option value="">All Scales</option>
                             {scales.map((scale) => (
@@ -195,7 +186,7 @@ export default function CatalogBrowser({
             </div>
 
             {/* Results Count */}
-            <div className="flex justify-between items-center text-[calc(0.85rem*var(--font-scale))] text-muted mb-2">
+            <div className="text-muted mb-2 flex items-center justify-between text-[calc(0.85rem*var(--font-scale))]">
                 <span>
                     {total.toLocaleString()} {total === 1 ? "entry" : "entries"} found
                 </span>
@@ -221,26 +212,32 @@ export default function CatalogBrowser({
                     <thead>
                         <tr>
                             <th
-                                className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap cursor-pointer select-none"
+                                className="border-edge text-muted cursor-pointer border-b-[2px] p-2 text-left font-semibold whitespace-nowrap select-none"
                                 onClick={() => handleSort("title")}
                             >
                                 Name {sortIndicator("title")}
                             </th>
                             <th
-                                className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap cursor-pointer select-none"
+                                className="border-edge text-muted cursor-pointer border-b-[2px] p-2 text-left font-semibold whitespace-nowrap select-none"
                                 onClick={() => handleSort("maker")}
                             >
                                 Maker {sortIndicator("maker")}
                             </th>
-                            <th className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap">Color</th>
-                            <th className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap">Mold</th>
+                            <th className="border-edge text-muted border-b-[2px] p-2 text-left font-semibold whitespace-nowrap">
+                                Color
+                            </th>
+                            <th className="border-edge text-muted border-b-[2px] p-2 text-left font-semibold whitespace-nowrap">
+                                Mold
+                            </th>
                             <th
-                                className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap cursor-pointer select-none"
+                                className="border-edge text-muted cursor-pointer border-b-[2px] p-2 text-left font-semibold whitespace-nowrap select-none"
                                 onClick={() => handleSort("scale")}
                             >
                                 Scale {sortIndicator("scale")}
                             </th>
-                            <th className="text-left p-2 border-b-[2px] border-edge font-semibold text-muted whitespace-nowrap w-[120px]">Actions</th>
+                            <th className="border-edge text-muted w-[120px] border-b-[2px] p-2 text-left font-semibold whitespace-nowrap">
+                                Actions
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -250,14 +247,16 @@ export default function CatalogBrowser({
                                 className="cursor-pointer transition-colors"
                                 onClick={() => router.push(`/catalog/${item.id}`)}
                             >
-                                <td className="p-2 border-b border-edge font-semibold text-[var(--color-text)]">{item.title}</td>
-                                <td className="p-2 border-b border-edge">{item.maker}</td>
-                                <td className="p-2 border-b border-edge">{getAttr(item, "color")}</td>
-                                <td className="p-2 border-b border-edge">{getAttr(item, "mold")}</td>
-                                <td className="p-2 border-b border-edge">{item.scale ?? "—"}</td>
-                                <td className="p-2 border-b border-edge text-right">
+                                <td className="border-edge border-b p-2 font-semibold text-[var(--color-text)]">
+                                    {item.title}
+                                </td>
+                                <td className="border-edge border-b p-2">{item.maker}</td>
+                                <td className="border-edge border-b p-2">{getAttr(item, "color")}</td>
+                                <td className="border-edge border-b p-2">{getAttr(item, "mold")}</td>
+                                <td className="border-edge border-b p-2">{item.scale ?? "—"}</td>
+                                <td className="border-edge border-b p-2 text-right">
                                     <button
-                                        className="bg-transparent border-0 text-forest cursor-pointer text-[calc(0.8rem*var(--font-scale))] opacity-[0] transition-all"
+                                        className="text-forest cursor-pointer border-0 bg-transparent text-[calc(0.8rem*var(--font-scale))] opacity-[0] transition-all"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             router.push(`/catalog/${item.id}?suggest=true`);
@@ -270,7 +269,7 @@ export default function CatalogBrowser({
                         ))}
                         {items.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="text-center p-8 text-muted">
+                                <td colSpan={6} className="text-muted p-8 text-center">
                                     No entries match your search.{" "}
                                     <a href="/catalog/suggestions">Suggest a new entry?</a>
                                 </td>
@@ -282,19 +281,19 @@ export default function CatalogBrowser({
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-6 py-4 px-[0]">
+                <div className="mt-6 flex items-center justify-center gap-4 px-[0] py-4">
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary btn-small"
+                        className="hover:no-underline-min-h)] btn max-md:min-h-[44px]-secondary btn-small inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                         disabled={page <= 1}
                         onClick={() => handlePage(page - 1)}
                     >
                         ← Previous
                     </button>
-                    <span className="text-[calc(0.85rem*var(--font-scale))] text-muted">
+                    <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">
                         Page {page} of {totalPages}
                     </span>
                     <button
-                        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none btn max-md:min-h-[44px]-secondary btn-small"
+                        className="hover:no-underline-min-h)] btn max-md:min-h-[44px]-secondary btn-small inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
                         disabled={page >= totalPages}
                         onClick={() => handlePage(page + 1)}
                     >

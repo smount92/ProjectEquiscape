@@ -1,11 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import {
-    getGroupMembers, updateMemberRole, removeMember, togglePinPost,
-    type GroupMember
-} from "@/app/actions/groups";
-
+import { getGroupMembers, updateMemberRole, removeMember, togglePinPost, type GroupMember } from "@/app/actions/groups";
 
 interface Props {
     groupId: string;
@@ -15,11 +11,16 @@ interface Props {
 
 const roleBadge = (role: string) => {
     switch (role) {
-        case "owner": return "👑 Owner";
-        case "admin": return "⭐ Admin";
-        case "moderator": return "🛡️ Mod";
-        case "judge": return "⚖️ Judge";
-        default: return "👤 Member";
+        case "owner":
+            return "👑 Owner";
+        case "admin":
+            return "⭐ Admin";
+        case "moderator":
+            return "🛡️ Mod";
+        case "judge":
+            return "⚖️ Judge";
+        default:
+            return "👤 Member";
     }
 };
 
@@ -35,7 +36,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
     useEffect(() => {
         if (!expanded) return;
         setLoading(true);
-        getGroupMembers(groupId).then(data => {
+        getGroupMembers(groupId).then((data) => {
             setMembers(data);
             setLoading(false);
         });
@@ -47,9 +48,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
         startTransition(async () => {
             const result = await updateMemberRole(groupId, userId, newRole);
             if (result.success) {
-                setMembers(prev => prev.map(m =>
-                    m.userId === userId ? { ...m, role: newRole } : m
-                ));
+                setMembers((prev) => prev.map((m) => (m.userId === userId ? { ...m, role: newRole } : m)));
             } else {
                 alert(result.error);
             }
@@ -61,7 +60,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
         startTransition(async () => {
             const result = await removeMember(groupId, userId);
             if (result.success) {
-                setMembers(prev => prev.filter(m => m.userId !== userId));
+                setMembers((prev) => prev.filter((m) => m.userId !== userId));
             } else {
                 alert(result.error);
             }
@@ -69,32 +68,33 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
     };
 
     return (
-        <div className="bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg p-6 mt-6">
+        <div className="bg-bg-card border-edge border-edge mt-6 rounded-lg border p-6 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
             <div
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                 onClick={() => setExpanded(!expanded)}
             >
-                <h3 className="text-xs font-bold text-muted uppercase tracking-[0.08em] m-0">⚙️ Admin Panel</h3>
-                <span className="text-muted text-[calc(0.85rem*var(--font-scale))]" >
-                    {expanded ? "▲" : "▼"}
-                </span>
+                <h3 className="text-muted m-0 text-xs font-bold tracking-[0.08em] uppercase">⚙️ Admin Panel</h3>
+                <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">{expanded ? "▲" : "▼"}</span>
             </div>
 
             {expanded && (
-                <div className="mt-4" >
+                <div className="mt-4">
                     {loading ? (
-                        <p className="text-muted" >Loading members…</p>
+                        <p className="text-muted">Loading members…</p>
                     ) : (
                         <>
-                            <div className="mb-2 text-muted text-xs" >
+                            <div className="text-muted mb-2 text-xs">
                                 👥 {members.length} member{members.length !== 1 ? "s" : ""}
                             </div>
                             <div className="flex flex-col gap-[2px]">
-                                {members.map(m => (
-                                    <div key={m.userId} className="flex justify-between items-center py-2 px-1 rounded-sm transition-colors hover:bg-black/[0.03]">
+                                {members.map((m) => (
+                                    <div
+                                        key={m.userId}
+                                        className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]"
+                                    >
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm font-semibold text-ink">@{m.alias}</span>
-                                            <span className="text-xs text-muted">{roleBadge(m.role)}</span>
+                                            <span className="text-ink text-sm font-semibold">@{m.alias}</span>
+                                            <span className="text-muted text-xs">{roleBadge(m.role)}</span>
                                         </div>
                                         {m.userId !== currentUserId && m.role !== "owner" && (
                                             <div className="flex items-center gap-1">
@@ -102,9 +102,18 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
                                                     <select
                                                         className="form-select"
                                                         value={m.role}
-                                                        onChange={e => handleRoleChange(m.userId, e.target.value as "admin" | "moderator" | "member")}
+                                                        onChange={(e) =>
+                                                            handleRoleChange(
+                                                                m.userId,
+                                                                e.target.value as "admin" | "moderator" | "member",
+                                                            )
+                                                        }
                                                         disabled={isPending}
-                                                        style={{ fontSize: "calc(var(--font-size-xs) * var(--font-scale))", padding: "4px 28px 4px 8px", minHeight: "unset" }}
+                                                        style={{
+                                                            fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
+                                                            padding: "4px 28px 4px 8px",
+                                                            minHeight: "unset",
+                                                        }}
                                                     >
                                                         <option value="member">Member</option>
                                                         <option value="moderator">Moderator</option>
@@ -112,7 +121,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
                                                     </select>
                                                 )}
                                                 <button
-                                                    className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+                                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
                                                     onClick={() => handleRemove(m.userId, m.alias)}
                                                     disabled={isPending}
                                                     title="Remove member"
@@ -147,7 +156,7 @@ export function PinPostButton({ postId, isPinned }: { postId: string; isPinned: 
 
     return (
         <button
-            className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge min-h-[36px] py-1 px-6 text-sm"
+            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline transition-all duration-150"
             onClick={handleToggle}
             disabled={isPending}
             title={pinned ? "Unpin post" : "Pin post"}

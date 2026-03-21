@@ -24,7 +24,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
         .from("catalog_suggestions")
         .select(
             "id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at",
-            { count: "exact" }
+            { count: "exact" },
         )
         .order("created_at", { ascending: false })
         .limit(50);
@@ -53,9 +53,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
     }
 
     // Get comment counts per suggestion
-    const suggestionIds = (suggestions ?? []).map(
-        (s: { id: string }) => s.id
-    );
+    const suggestionIds = (suggestions ?? []).map((s: { id: string }) => s.id);
 
     let commentCounts: Record<string, number> = {};
     if (suggestionIds.length > 0) {
@@ -64,8 +62,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
             .select("suggestion_id")
             .in("suggestion_id", suggestionIds);
         for (const c of (comments ?? []) as { suggestion_id: string }[]) {
-            commentCounts[c.suggestion_id] =
-                (commentCounts[c.suggestion_id] || 0) + 1;
+            commentCounts[c.suggestion_id] = (commentCounts[c.suggestion_id] || 0) + 1;
         }
     }
 
@@ -79,19 +76,20 @@ export default async function SuggestionsPage({ searchParams }: Props) {
     ];
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6">
-            <nav className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+            <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
                 <Link href="/catalog">📚 Reference Catalog</Link>
-                <span className="flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))] text-muted mb-6-sep">›</span>
+                <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+                    ›
+                </span>
                 <span>Suggestions</span>
             </nav>
 
-            <h1 className="font-sans text-[calc(1.8rem*var(--font-scale))] mb-1">
+            <h1 className="mb-1 font-sans text-[calc(1.8rem*var(--font-scale))]">
                 📝 <span className="text-forest">Catalog Suggestions</span>
             </h1>
             <p className="text-muted mb-6">
-                Community proposals to improve the reference catalog. Vote and discuss
-                to help admins review.
+                Community proposals to improve the reference catalog. Vote and discuss to help admins review.
             </p>
 
             {/* Filter Tabs */}
@@ -108,7 +106,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
             </div>
 
             {/* Results */}
-            <p className="text-[calc(0.85rem*var(--font-scale))] text-muted mb-2">{count ?? 0} suggestions</p>
+            <p className="text-muted mb-2 text-[calc(0.85rem*var(--font-scale))]">{count ?? 0} suggestions</p>
 
             <div className="flex flex-col gap-2">
                 {(
@@ -148,10 +146,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
 
                     // Build change summary
                     let changeSummary = "";
-                    if (
-                        s.suggestion_type === "correction" &&
-                        s.field_changes
-                    ) {
+                    if (s.suggestion_type === "correction" && s.field_changes) {
                         const changes = Object.entries(s.field_changes)
                             .map(([k, v]) => {
                                 const val = v as { from: string; to: string };
@@ -160,12 +155,10 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                             .join(", ");
                         changeSummary = changes;
                     } else if (s.suggestion_type === "addition") {
-                        changeSummary =
-                            `New: ${(s.field_changes as { title?: string })?.title ?? "Untitled"}`;
+                        changeSummary = `New: ${(s.field_changes as { title?: string })?.title ?? "Untitled"}`;
                     }
 
-                    const curatorCount =
-                        userData?.approved_suggestions_count ?? 0;
+                    const curatorCount = userData?.approved_suggestions_count ?? 0;
                     const curatorIcon =
                         curatorCount >= 200
                             ? "🥇"
@@ -181,38 +174,32 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                         <Link
                             key={s.id}
                             href={`/catalog/suggestions/${s.id}`}
-                            className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all p-4 no-underline text-[var(--color-text)] transition-transform block"
+                            className="bg-card border-edge block rounded-lg border p-4 p-12 text-[var(--color-text)] no-underline shadow-md transition-all transition-transform max-[480px]:rounded-[var(--radius-md)]"
                         >
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-[1.2rem]">
-                                    {typeIcon}
-                                </span>
-                                <span className={`ref-status-badge ${statusBadge}`}>
-                                    {s.status.replace(/_/g, " ")}
-                                </span>
+                            <div className="mb-1 flex items-center justify-between">
+                                <span className="text-[1.2rem]">{typeIcon}</span>
+                                <span className={`ref-status-badge ${statusBadge}`}>{s.status.replace(/_/g, " ")}</span>
                             </div>
 
                             <div className="ref-suggestion-body">
                                 {changeSummary && (
-                                    <p className="text-[calc(0.9rem*var(--font-scale))] font-medium mb-[4px]">
+                                    <p className="mb-[4px] text-[calc(0.9rem*var(--font-scale))] font-medium">
                                         {changeSummary}
                                     </p>
                                 )}
-                                <p className="text-[calc(0.8rem*var(--font-scale))] text-muted italic">
+                                <p className="text-muted text-[calc(0.8rem*var(--font-scale))] italic">
                                     &ldquo;{s.reason.slice(0, 120)}
                                     {s.reason.length > 120 ? "…" : ""}&rdquo;
                                 </p>
                             </div>
 
-                            <div className="flex items-center gap-4 mt-2 text-[calc(0.8rem*var(--font-scale))] text-muted">
+                            <div className="text-muted mt-2 flex items-center gap-4 text-[calc(0.8rem*var(--font-scale))]">
                                 <span className="font-semibold">
                                     {curatorIcon} @{userData?.alias_name ?? "Unknown"}
                                 </span>
                                 <span className="ml-auto">
                                     ▲ {s.upvotes} ▼ {s.downvotes}
-                                    {(commentCounts[s.id] ?? 0) > 0 && (
-                                        <> · 💬 {commentCounts[s.id]}</>
-                                    )}
+                                    {(commentCounts[s.id] ?? 0) > 0 && <> · 💬 {commentCounts[s.id]}</>}
                                 </span>
                                 <span className="ref-suggestion-date">
                                     {new Date(s.created_at).toLocaleDateString()}
@@ -223,9 +210,12 @@ export default async function SuggestionsPage({ searchParams }: Props) {
                 })}
 
                 {(suggestions ?? []).length === 0 && (
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center p-8 text-muted">
+                    <div className="bg-card border-edge text-muted rounded-lg border p-8 p-12 text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
                         <p>No suggestions yet. Be the first to contribute!</p>
-                        <Link href="/catalog" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
+                        <Link
+                            href="/catalog"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        >
                             Browse Catalog
                         </Link>
                     </div>

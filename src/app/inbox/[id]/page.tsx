@@ -10,11 +10,7 @@ import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
 import { getTransactionByConversation } from "@/app/actions/transactions";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     return {
         title: `Conversation — Model Horse Hub`,
@@ -39,11 +35,7 @@ interface MessageRow {
     created_at: string;
 }
 
-export default async function ChatPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: conversationId } = await params;
     const supabase = await createClient();
 
@@ -63,10 +55,7 @@ export default async function ChatPage({
     if (!conversation) notFound();
 
     // Get the other user's alias
-    const otherId =
-        conversation.buyer_id === user.id
-            ? conversation.seller_id
-            : conversation.buyer_id;
+    const otherId = conversation.buyer_id === user.id ? conversation.seller_id : conversation.buyer_id;
 
     const { data: otherUser } = await supabase
         .from("users")
@@ -99,14 +88,12 @@ export default async function ChatPage({
         .or(`sender_id.eq.${otherId},claimed_by.eq.${otherId}`);
 
     // Average rating (from universal reviews table)
-    const { data: reviewsData } = await supabase
-        .from("reviews")
-        .select("stars")
-        .eq("target_id", otherId);
+    const { data: reviewsData } = await supabase.from("reviews").select("stars").eq("target_id", otherId);
     const ratingsArr = (reviewsData ?? []) as { stars: number }[];
-    const avgRating = ratingsArr.length > 0
-        ? Math.round((ratingsArr.reduce((s, r) => s + r.stars, 0) / ratingsArr.length) * 10) / 10
-        : null;
+    const avgRating =
+        ratingsArr.length > 0
+            ? Math.round((ratingsArr.reduce((s, r) => s + r.stars, 0) / ratingsArr.length) * 10) / 10
+            : null;
 
     // Get horse context if present
     let horseContext: {
@@ -121,11 +108,13 @@ export default async function ChatPage({
     if (conversation.horse_id) {
         const { data: horse } = await supabase
             .from("user_horses")
-            .select(`
+            .select(
+                `
                 id, custom_name, trade_status, listing_price,
                 catalog_items:catalog_id(title, maker),
                 horse_images(image_url, angle_profile)
-            `)
+            `,
+            )
             .eq("id", conversation.horse_id)
             .single<{
                 id: string;
@@ -138,9 +127,7 @@ export default async function ChatPage({
 
         if (horse) {
             // Get thumbnail (Primary_Thumbnail or first image)
-            const thumb = horse.horse_images?.find(
-                (img) => img.angle_profile === "Primary_Thumbnail"
-            );
+            const thumb = horse.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
             const firstImg = horse.horse_images?.[0];
             const imgPath = thumb?.image_url || firstImg?.image_url;
 
@@ -157,9 +144,7 @@ export default async function ChatPage({
                 tradeStatus: horse.trade_status,
                 price: horse.listing_price,
                 thumbnailUrl: signedThumb,
-                refLine: horse.catalog_items
-                    ? `${horse.catalog_items.maker} — ${horse.catalog_items.title}`
-                    : null,
+                refLine: horse.catalog_items ? `${horse.catalog_items.maker} — ${horse.catalog_items.title}` : null,
             };
         }
     }
@@ -174,15 +159,10 @@ export default async function ChatPage({
     const messages = (rawMessages as MessageRow[]) ?? [];
 
     // Mark unread messages as read (server-side)
-    const unreadIds = messages
-        .filter((m) => m.sender_id !== user.id && !m.is_read)
-        .map((m) => m.id);
+    const unreadIds = messages.filter((m) => m.sender_id !== user.id && !m.is_read).map((m) => m.id);
 
     if (unreadIds.length > 0) {
-        await supabase
-            .from("messages")
-            .update({ is_read: true })
-            .in("id", unreadIds);
+        await supabase.from("messages").update({ is_read: true }).in("id", unreadIds);
     }
 
     const isBuyer = conversation.buyer_id === user.id;
@@ -217,13 +197,19 @@ export default async function ChatPage({
         .from("horse_transfers")
         .select("id", { count: "exact", head: true })
         .eq("status", "claimed")
-        .or(`and(sender_id.eq.${user.id},claimed_by.eq.${otherId}),and(sender_id.eq.${otherId},claimed_by.eq.${user.id})`);
+        .or(
+            `and(sender_id.eq.${user.id},claimed_by.eq.${otherId}),and(sender_id.eq.${otherId},claimed_by.eq.${user.id})`,
+        );
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 flex flex-col h-[calc(100vh - 70px)] max-h-[calc(100vh - 70px)] overflow-hidden">
+        <div className="h-[calc(100vh - 70px)] max-h-[calc(100vh - 70px)] mx-auto flex max-w-[var(--max-width)] flex-col overflow-hidden px-6 py-[0]">
             {/* Header */}
-            <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0 animate-fade-in-up">
-                <Link href="/inbox" className="flex items-center justify-center w-[36px] h-[36px] rounded-full bg-[rgba(0, 0, 0, 0.05)] text-muted no-underline transition-all shrink-0" aria-label="Back to inbox">
+            <div className="bg-glass border-edge animate-fade-in-up mb-4 flex shrink-0 items-center gap-4 rounded-lg border px-6 py-4">
+                <Link
+                    href="/inbox"
+                    className="bg-[rgba(0, 0, 0, 0.05)] text-muted flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full no-underline transition-all"
+                    aria-label="Back to inbox"
+                >
                     <svg
                         width="20"
                         height="20"
@@ -238,41 +224,46 @@ export default async function ChatPage({
                         <polyline points="15 18 9 12 15 6" />
                     </svg>
                 </Link>
-                <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0-info">
-                    <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0-alias">
-                        <Link href={`/profile/${encodeURIComponent(otherAlias)}`}>
-                            @{otherAlias}
-                        </Link>
-                        <span className="text-xs font-medium py-[2px] px-[8px] bg-[rgba(44, 85, 69, 0.1)] text-[#2C5545] rounded-full">{isBuyer ? "Seller" : "Buyer"}</span>
+                <div className="bg-glass border-edge shrink-0-info mb-4 flex items-center gap-4 rounded-lg border px-6 py-4">
+                    <div className="bg-glass border-edge shrink-0-alias mb-4 flex items-center gap-4 rounded-lg border px-6 py-4">
+                        <Link href={`/profile/${encodeURIComponent(otherAlias)}`}>@{otherAlias}</Link>
+                        <span className="bg-[rgba(44, 85, 69, 0.1)] rounded-full px-[8px] py-[2px] text-xs font-medium text-[#2C5545]">
+                            {isBuyer ? "Seller" : "Buyer"}
+                        </span>
                     </div>
                     {horseContext ? (
-                        <span className="text-xs text-muted mt-0.5">
-                            🐴 Re: {horseContext.name}
-                        </span>
+                        <span className="text-muted mt-0.5 text-xs">🐴 Re: {horseContext.name}</span>
                     ) : (
-                        <span className="text-xs text-muted mt-0.5 opacity-70">
-                            💬 Direct Message
-                        </span>
+                        <span className="text-muted mt-0.5 text-xs opacity-70">💬 Direct Message</span>
                     )}
                 </div>
 
                 {/* Trust Signals */}
-                <div className="flex flex-wrap gap-1 mt-0.5">
+                <div className="mt-0.5 flex flex-wrap gap-1">
                     {memberSince && (
-                        <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-edge rounded-sm text-[calc(0.65rem*var(--font-scale))] text-muted whitespace-nowrap" title="Account age">
+                        <span
+                            className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-[calc(0.65rem*var(--font-scale))] whitespace-nowrap"
+                            title="Account age"
+                        >
                             📅 Member since {memberSince}
                         </span>
                     )}
-                    <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-edge rounded-sm text-[calc(0.65rem*var(--font-scale))] text-muted whitespace-nowrap" title="Completed Hoofprint transfers">
+                    <span
+                        className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-[calc(0.65rem*var(--font-scale))] whitespace-nowrap"
+                        title="Completed Hoofprint transfers"
+                    >
                         📦 {transferCount || 0} transfer{transferCount !== 1 ? "s" : ""}
                     </span>
                     {avgRating !== null && (
-                        <span className="inline-flex items-center gap-[3px] py-0.5 px-2 bg-[var(--color-bg-elevated)] border border-edge rounded-sm text-[calc(0.65rem*var(--font-scale))] text-muted whitespace-nowrap" title="Average user rating">
+                        <span
+                            className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-[calc(0.65rem*var(--font-scale))] whitespace-nowrap"
+                            title="Average user rating"
+                        >
                             ⭐ {avgRating} ({ratingsArr.length})
                         </span>
                     )}
                 </div>
-                <div className="flex items-center gap-4 py-4 px-6 bg-glass border border-edge rounded-lg mb-4 shrink-0-badge">
+                <div className="bg-glass border-edge shrink-0-badge mb-4 flex items-center gap-4 rounded-lg border px-6 py-4">
                     <svg
                         width="12"
                         height="12"
@@ -289,18 +280,14 @@ export default async function ChatPage({
                     </svg>
                     Private &amp; Secure
                 </div>
-                <BlockButton
-                    targetId={otherId}
-                    targetAlias={otherAlias}
-                    initialBlocked={isBlockedUser}
-                />
+                <BlockButton targetId={otherId} targetAlias={otherAlias} initialBlocked={isBlockedUser} />
             </div>
 
             {/* Horse Context Card — visual banner for horse-linked conversations */}
             {horseContext && (
                 <Link
                     href={`/community/${horseContext.id}`}
-                    className="group flex items-center gap-4 p-4 bg-[var(--color-bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all)] border border-edge rounded-lg mb-4 no-underline text-ink transition-all hover:border-forest hover:bg-[var(--color-bg-card-hover)] hover:-translate-y-px hover:shadow-md animate-fade-in-up"
+                    className="group bg-[var(--color-bg-bg-card border-edge transition-all)] border-edge text-ink hover:border-forest animate-fade-in-up mb-4 flex items-center gap-4 rounded-lg border p-4 p-12 no-underline shadow-md transition-all hover:-translate-y-px hover:bg-[var(--color-bg-card-hover)] hover:shadow-md max-[480px]:rounded-[var(--radius-md)]"
                     id="chat-horse-link"
                 >
                     {horseContext.thumbnailUrl ? (
@@ -308,21 +295,30 @@ export default async function ChatPage({
                         <img
                             src={horseContext.thumbnailUrl}
                             alt={horseContext.name}
-                            className="w-14 h-14 rounded-md object-cover shrink-0"
+                            className="h-14 w-14 shrink-0 rounded-md object-cover"
                         />
                     ) : (
-                        <div className="w-14 h-14 rounded-md object-cover shrink-0 flex items-center justify-center bg-[var(--color-bg-input)] text-2xl">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-[var(--color-bg-input)] object-cover text-2xl">
                             🐴
                         </div>
                     )}
-                    <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                        <span className="font-bold text-sm whitespace-nowrap overflow-hidden text-ellipsis">{horseContext.name}</span>
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="overflow-hidden text-sm font-bold text-ellipsis whitespace-nowrap">
+                            {horseContext.name}
+                        </span>
                         {horseContext.refLine && (
-                            <span className="text-xs text-muted whitespace-nowrap overflow-hidden text-ellipsis">{horseContext.refLine}</span>
+                            <span className="text-muted overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+                                {horseContext.refLine}
+                            </span>
                         )}
                         {horseContext.tradeStatus !== "Not for Sale" && (
-                            <span className={`inline-flex items-center gap-[3px] text-[calc(0.7rem*var(--font-scale))] font-bold py-0.5 px-2 rounded-full w-fit ${horseContext.tradeStatus === "For Sale" ? "bg-[rgba(34,197,94,0.12)] text-[#22c55e]" : "bg-[rgba(59,130,246,0.12)] text-[#3b82f6]"
-                                }`}>
+                            <span
+                                className={`inline-flex w-fit items-center gap-[3px] rounded-full px-2 py-0.5 text-[calc(0.7rem*var(--font-scale))] font-bold ${
+                                    horseContext.tradeStatus === "For Sale"
+                                        ? "bg-[rgba(34,197,94,0.12)] text-[#22c55e]"
+                                        : "bg-[rgba(59,130,246,0.12)] text-[#3b82f6]"
+                                }`}
+                            >
                                 {horseContext.tradeStatus === "For Sale" ? "💲" : "🤝"}{" "}
                                 {horseContext.price
                                     ? `$${horseContext.price.toLocaleString("en-US")}`
@@ -330,17 +326,14 @@ export default async function ChatPage({
                             </span>
                         )}
                     </div>
-                    <span className="text-muted text-[1.1rem] shrink-0 transition-transform group-hover:translate-x-[3px] group-hover:text-forest">→</span>
+                    <span className="text-muted group-hover:text-forest shrink-0 text-[1.1rem] transition-transform group-hover:translate-x-[3px]">
+                        →
+                    </span>
                 </Link>
             )}
 
             {/* Offer Card — Commerce State Machine (show for ALL transaction states) */}
-            {txn && (
-                <OfferCard
-                    transaction={txn}
-                    currentUserId={user.id}
-                />
-            )}
+            {txn && <OfferCard transaction={txn} currentUserId={user.id} />}
 
             {/* Chat Thread (Client Component) */}
             <ChatThread

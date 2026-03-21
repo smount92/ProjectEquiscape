@@ -12,12 +12,15 @@ const HORSE_URL_RE = /\/community\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 interface RichEmbedProps {
     text: string;
     /** Pre-fetched embed data (horse name, finish, thumbnail URL) keyed by horse ID */
-    embedData?: Map<string, {
-        name: string;
-        finish: string;
-        maker: string;
-        thumbnailUrl: string | null;
-    }>;
+    embedData?: Map<
+        string,
+        {
+            name: string;
+            finish: string;
+            maker: string;
+            thumbnailUrl: string | null;
+        }
+    >;
 }
 
 export default function RichEmbed({ text, embedData }: RichEmbedProps) {
@@ -32,7 +35,7 @@ export default function RichEmbed({ text, embedData }: RichEmbedProps) {
     return (
         <Link
             href={`/community/${horseId}`}
-            className="flex gap-4 border border-edge rounded-lg overflow-hidden bg-surface-secondary no-underline text-inherit mt-2 transition-colors hover:border-forest"
+            className="border-edge bg-surface-secondary hover:border-forest mt-2 flex gap-4 overflow-hidden rounded-lg border text-inherit no-underline transition-colors"
             id={`embed-${horseId}`}
         >
             {data.thumbnailUrl && (
@@ -40,16 +43,18 @@ export default function RichEmbed({ text, embedData }: RichEmbedProps) {
                 <img
                     src={data.thumbnailUrl}
                     alt={data.name}
-                    className="w-[100px] min-h-[80px] object-cover shrink-0"
+                    className="min-h-[80px] w-[100px] shrink-0 object-cover"
                     loading="lazy"
                 />
             )}
-            <div className="py-2.5 px-3 flex flex-col gap-1 min-w-0">
-                <div className="font-semibold text-sm whitespace-nowrap overflow-hidden text-ellipsis">🐴 {data.name}</div>
-                <div className="text-xs text-muted line-clamp-2">
+            <div className="flex min-w-0 flex-col gap-1 px-3 py-2.5">
+                <div className="overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
+                    🐴 {data.name}
+                </div>
+                <div className="text-muted line-clamp-2 text-xs">
                     {data.finish} · {data.maker}
                 </div>
-                <div className="text-xs text-forest">Model Horse Hub</div>
+                <div className="text-forest text-xs">Model Horse Hub</div>
             </div>
         </Link>
     );

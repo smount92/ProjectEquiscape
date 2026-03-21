@@ -228,7 +228,7 @@ function formatCurrency(value: number | null): string {
 
 export default function InsuranceReport({ data }: { data: InsuranceReportPayload }) {
     // Split horses into groups of 4 for detail pages
-    const detailPages: typeof data.horses[] = [];
+    const detailPages: (typeof data.horses)[] = [];
     for (let i = 0; i < data.horses.length; i += 4) {
         detailPages.push(data.horses.slice(i, i + 4));
     }
@@ -252,9 +252,7 @@ export default function InsuranceReport({ data }: { data: InsuranceReportPayload
                             <Text style={styles.coverStatLabel}>Total Models</Text>
                         </View>
                         <View style={styles.coverStat}>
-                            <Text style={styles.coverStatValue}>
-                                {formatCurrency(data.totalValue)}
-                            </Text>
+                            <Text style={styles.coverStatValue}>{formatCurrency(data.totalValue)}</Text>
                             <Text style={styles.coverStatLabel}>Total Estimated Value</Text>
                         </View>
                     </View>
@@ -338,9 +336,7 @@ export default function InsuranceReport({ data }: { data: InsuranceReportPayload
                                 {horse.purchasePrice && (
                                     <View style={styles.detailRow}>
                                         <Text style={styles.detailLabel}>Paid:</Text>
-                                        <Text style={styles.detailValue}>
-                                            {formatCurrency(horse.purchasePrice)}
-                                        </Text>
+                                        <Text style={styles.detailValue}>{formatCurrency(horse.purchasePrice)}</Text>
                                     </View>
                                 )}
                                 <View style={styles.detailRow}>

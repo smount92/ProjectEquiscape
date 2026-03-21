@@ -21,12 +21,7 @@ export default function SearchBar({
     // Keyboard shortcut: "/" to focus
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (
-                e.key === "/" &&
-                !["INPUT", "TEXTAREA", "SELECT"].includes(
-                    (e.target as HTMLElement)?.tagName
-                )
-            ) {
+            if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName)) {
                 e.preventDefault();
                 inputRef.current?.focus();
             }
@@ -39,7 +34,7 @@ export default function SearchBar({
         <div className={`search-bar ${isFocused ? "search-bar-focused" : ""}`} id={id}>
             {/* Search icon */}
             <svg
-                className="shrink-0 text-muted transition-colors"
+                className="text-muted shrink-0 transition-colors"
                 width="18"
                 height="18"
                 viewBox="0 0 24 24"
@@ -69,7 +64,7 @@ export default function SearchBar({
             {/* Keyboard hint or clear button */}
             {value ? (
                 <button
-                    className="flex items-center justify-center w-[32px] h-[32px] rounded-full bg-[rgba(0, 0, 0, 0.06)] border border-[rgba(0, 0, 0, 0.06)] text-muted cursor-pointer shrink-0 transition-all"
+                    className="bg-[rgba(0, 0, 0, 0.06)] border-[rgba(0, 0, 0, 0.06)] text-muted flex h-[32px] w-[32px] shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all"
                     onClick={() => {
                         onChange("");
                         inputRef.current?.focus();
@@ -92,7 +87,9 @@ export default function SearchBar({
                     </svg>
                 </button>
             ) : (
-                <kbd className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md-kbd">/</kbd>
+                <kbd className="top-[calc(var(--header max-sm:px-4-height) + var(--space-md))] bg-card border-edge shadow-md-kbd sticky z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
+                    /
+                </kbd>
             )}
         </div>
     );

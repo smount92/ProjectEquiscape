@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-
 export const metadata = {
     title: "Inbox — Model Horse Hub",
     description: "Your private conversations with other collectors.",
@@ -66,11 +65,9 @@ export default async function InboxPage() {
             .from("user_horses")
             .select("id, custom_name, trade_status")
             .in("id", [...horseIds]);
-        horses?.forEach(
-            (h: { id: string; custom_name: string; trade_status: string }) => {
-                horseMap.set(h.id, { name: h.custom_name, tradeStatus: h.trade_status });
-            }
-        );
+        horses?.forEach((h: { id: string; custom_name: string; trade_status: string }) => {
+            horseMap.set(h.id, { name: h.custom_name, tradeStatus: h.trade_status });
+        });
     }
 
     // Fetch latest message per conversation + unread counts
@@ -82,10 +79,7 @@ export default async function InboxPage() {
         is_read: boolean;
     }
 
-    const latestMessageMap = new Map<
-        string,
-        { content: string; senderIsMe: boolean; createdAt: string }
-    >();
+    const latestMessageMap = new Map<string, { content: string; senderIsMe: boolean; createdAt: string }>();
     const unreadCountMap = new Map<string, number>();
 
     if (convoIds.length > 0) {
@@ -111,10 +105,7 @@ export default async function InboxPage() {
             }
             // Count unread
             if (msg.sender_id !== user.id && !msg.is_read) {
-                unreadCountMap.set(
-                    msg.conversation_id,
-                    (unreadCountMap.get(msg.conversation_id) ?? 0) + 1
-                );
+                unreadCountMap.set(msg.conversation_id, (unreadCountMap.get(msg.conversation_id) ?? 0) + 1);
             }
         }
     }
@@ -126,12 +117,10 @@ export default async function InboxPage() {
         const { data: txns } = await supabase
             .from("transactions")
             .select("id, metadata")
-            .or(
-                convoIds.map(cid => `metadata->>conversation_id.eq.${cid}`).join(",")
-            );
+            .or(convoIds.map((cid) => `metadata->>conversation_id.eq.${cid}`).join(","));
 
         if (txns && txns.length > 0) {
-            const txnIds = (txns as { id: string; metadata: Record<string, unknown> }[]).map(t => t.id);
+            const txnIds = (txns as { id: string; metadata: Record<string, unknown> }[]).map((t) => t.id);
             const { data: reviews } = await supabase
                 .from("reviews")
                 .select("transaction_id")
@@ -174,9 +163,7 @@ export default async function InboxPage() {
     });
 
     function timeAgo(dateStr: string): string {
-        const seconds = Math.floor(
-            (Date.now() - new Date(dateStr).getTime()) / 1000
-        );
+        const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
         if (seconds < 60) return "Just now";
         const minutes = Math.floor(seconds / 60);
         if (minutes < 60) return `${minutes}m ago`;
@@ -191,9 +178,9 @@ export default async function InboxPage() {
     }
 
     return (
-        <div className="max-w-[var(--max-width)] mx-auto py-[0] px-6 py-12 px-[0]">
+        <div className="mx-auto max-w-[var(--max-width)] px-6 px-[0] py-12 py-[0]">
             <div className="animate-fade-in-up">
-                <div className="shelf-sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all">
+                <div className="shelf-sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]">
                     <div>
                         <h1>
                             <span className="text-forest">✉️ Inbox</span>
@@ -204,36 +191,40 @@ export default async function InboxPage() {
                                 marginTop: "var(--space-xs)",
                             }}
                         >
-                            Your private conversations —{" "}
-                            {inboxItems.length} thread{inboxItems.length !== 1 ? "s" : ""}
+                            Your private conversations — {inboxItems.length} thread{inboxItems.length !== 1 ? "s" : ""}
                         </p>
                     </div>
-                    <Link href="/community" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm" id="browse-showring">
+                    <Link
+                        href="/community"
+                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        id="browse-showring"
+                    >
                         🏆 Browse Show Ring
                     </Link>
                 </div>
 
                 {inboxItems.length === 0 ? (
-                    <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
-                        <div className="text-center py-[var(--space-3xl)] px-8-icon">✉️</div>
+                    <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                        <div className="px-8-icon py-[var(--space-3xl)] text-center">✉️</div>
                         <h2>Your Inbox is Empty</h2>
-                        <p>
-                            Browse the Show Ring and message sellers about models you&apos;re interested in!
-                        </p>
-                        <Link href="/community" className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-forest text-inverse border-0 shadow-sm">
+                        <p>Browse the Show Ring and message sellers about models you&apos;re interested in!</p>
+                        <Link
+                            href="/community"
+                            className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-8 py-2 font-sans text-base leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        >
                             🏆 Browse the Show Ring
                         </Link>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-[2px] bg-surface-glass border border-edge rounded-lg overflow-hidden animate-fade-in-up">
+                    <div className="bg-surface-glass border-edge animate-fade-in-up flex flex-col gap-[2px] overflow-hidden rounded-lg border">
                         {inboxItems.map((item) => (
                             <Link
                                 key={item.id}
                                 href={`/inbox/${item.id}`}
-                                className={`flex items-center gap-4 max-md:gap-2 py-4 max-md:py-2 px-6 max-md:px-4 no-underline text-ink transition-all border-b border-edge last:border-b-0 ${item.unreadCount > 0 ? "bg-[rgba(44,85,69,0.05)] hover:bg-[rgba(44,85,69,0.08)]" : "hover:bg-black/[0.03]"}`}
+                                className={`text-ink border-edge flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ? "bg-[rgba(44,85,69,0.05)] hover:bg-[rgba(44,85,69,0.08)]" : "hover:bg-black/[0.03]"}`}
                                 id={`inbox-item-${item.id}`}
                             >
-                                <div className="w-11 max-md:w-9 h-11 max-md:h-9 rounded-full bg-[rgba(44,85,69,0.15)] flex items-center justify-center shrink-0 text-saddle">
+                                <div className="text-saddle flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] max-md:h-9 max-md:w-9">
                                     <svg
                                         width="24"
                                         height="24"
@@ -249,55 +240,59 @@ export default async function InboxPage() {
                                         <circle cx="12" cy="7" r="4" />
                                     </svg>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-center gap-2">
-                                        <span className={`font-semibold text-sm ${item.unreadCount > 0 ? "text-forest" : "text-ink"}`}>@{item.otherAlias}</span>
-                                        {item.isRated && (
-                                            <span className="text-[calc(0.7rem*var(--font-scale))] text-[#F59E0B] ml-1">⭐ Rated</span>
-                                        )}
-                                        <span className="text-xs text-muted shrink-0">
-                                            {timeAgo(item.latestTime)}
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span
+                                            className={`text-sm font-semibold ${item.unreadCount > 0 ? "text-forest" : "text-ink"}`}
+                                        >
+                                            @{item.otherAlias}
                                         </span>
+                                        {item.isRated && (
+                                            <span className="ml-1 text-[calc(0.7rem*var(--font-scale))] text-[#F59E0B]">
+                                                ⭐ Rated
+                                            </span>
+                                        )}
+                                        <span className="text-muted shrink-0 text-xs">{timeAgo(item.latestTime)}</span>
                                     </div>
                                     {item.horseName ? (
-                                        <div className="text-xs text-muted mt-[2px] flex items-center gap-1">
+                                        <div className="text-muted mt-[2px] flex items-center gap-1 text-xs">
                                             🐴 Re: {item.horseName}
-                                            {item.horseTradeStatus &&
-                                                item.horseTradeStatus !== "Not for Sale" && (
-                                                    <span
-                                                        className={item.horseTradeStatus === "For Sale"
-                                                            ? "text-[0.65rem] font-bold py-[1px] px-1.5 rounded-full bg-[rgba(34,197,94,0.15)] text-[#22c55e]"
-                                                            : "text-[0.65rem] font-bold py-[1px] px-1.5 rounded-full bg-[rgba(59,130,246,0.15)] text-[#3b82f6]"
-                                                        }
-                                                    >
-                                                        {item.horseTradeStatus === "For Sale"
-                                                            ? "💲 For Sale"
-                                                            : "🤝 Offers"}
-                                                    </span>
-                                                )}
+                                            {item.horseTradeStatus && item.horseTradeStatus !== "Not for Sale" && (
+                                                <span
+                                                    className={
+                                                        item.horseTradeStatus === "For Sale"
+                                                            ? "rounded-full bg-[rgba(34,197,94,0.15)] px-1.5 py-[1px] text-[0.65rem] font-bold text-[#22c55e]"
+                                                            : "rounded-full bg-[rgba(59,130,246,0.15)] px-1.5 py-[1px] text-[0.65rem] font-bold text-[#3b82f6]"
+                                                    }
+                                                >
+                                                    {item.horseTradeStatus === "For Sale" ? "💲 For Sale" : "🤝 Offers"}
+                                                </span>
+                                            )}
                                         </div>
                                     ) : (
-                                        <div className="text-xs text-muted mt-[2px] flex items-center gap-1">
+                                        <div className="text-muted mt-[2px] flex items-center gap-1 text-xs">
                                             💬 Direct Message
                                         </div>
                                     )}
-                                    <div className="text-xs text-muted mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <div className="text-muted mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
                                         {item.latestMessage ? (
                                             <>
                                                 {item.latestSenderIsMe && (
-                                                    <span className="font-semibold text-ink">You: </span>
+                                                    <span className="text-ink font-semibold">You: </span>
                                                 )}
                                                 {item.latestMessage.length > 80
                                                     ? item.latestMessage.slice(0, 80) + "…"
                                                     : item.latestMessage}
                                             </>
                                         ) : (
-                                            <span className="opacity-[0.5]" >No messages yet</span>
+                                            <span className="opacity-[0.5]">No messages yet</span>
                                         )}
                                     </div>
                                 </div>
                                 {item.unreadCount > 0 && (
-                                    <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-forest text-white rounded-full text-[0.7rem] font-bold shrink-0">{item.unreadCount}</div>
+                                    <div className="bg-forest flex h-6 min-w-[24px] shrink-0 items-center justify-center rounded-full px-1.5 text-[0.7rem] font-bold text-white">
+                                        {item.unreadCount}
+                                    </div>
                                 )}
                             </Link>
                         ))}

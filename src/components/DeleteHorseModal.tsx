@@ -6,136 +6,134 @@ import { useRouter } from "next/navigation";
 import { deleteHorse } from "@/app/actions/horse";
 
 interface DeleteHorseModalProps {
-  horseId: string;
-  horseName: string;
-  imageUrls: string[]; // stored image_url values from horse_images
+    horseId: string;
+    horseName: string;
+    imageUrls: string[]; // stored image_url values from horse_images
 }
 
-export default function DeleteHorseModal({
-  horseId,
-  horseName,
-}: DeleteHorseModalProps) {
-  const [showModal, setShowModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModalProps) {
+    const [showModal, setShowModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    setError(null);
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        setError(null);
 
-    try {
-      const result = await deleteHorse(horseId);
-      if (!result.success) {
-        throw new Error(result.error || "Failed to delete.");
-      }
-      // Redirect to dashboard with success toast
-      router.push("/dashboard?toast=deleted&name=" + encodeURIComponent(horseName));
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to delete. Please try again."
-      );
-      setIsDeleting(false);
-    }
-  };
+        try {
+            const result = await deleteHorse(horseId);
+            if (!result.success) {
+                throw new Error(result.error || "Failed to delete.");
+            }
+            // Redirect to dashboard with success toast
+            router.push("/dashboard?toast=deleted&name=" + encodeURIComponent(horseName));
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to delete. Please try again.");
+            setIsDeleting(false);
+        }
+    };
 
-  return (
-    <>
-      {/* Trigger button */}
-      <button
-        className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-danger border border-[rgba(240, 108, 126, 0.4)]"
-        onClick={() => setShowModal(true)}
-        id="delete-horse-button"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="3 6 5 6 21 6" />
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          <line x1="10" y1="11" x2="10" y2="17" />
-          <line x1="14" y1="11" x2="14" y2="17" />
-        </svg>
-        Delete from Stable
-      </button>
-
-      {/* Modal overlay — portaled to body to escape CSS containment */}
-      {showModal && createPortal(
-        <div
-          className="modal-overlay"
-          onClick={(e) => {
-            if (e.target === e.currentTarget && !isDeleting) setShowModal(false);
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delete-modal-title"
-        >
-          <div className="modal-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all danger">
-            <div className="text-[3rem] text-center mb-4">⚠️</div>
-            <h2 id="delete-modal-title">Delete &ldquo;{horseName}&rdquo;?</h2>
-            <p>
-              <strong>This cannot be undone.</strong> All photos, financial vault
-              data, and catalog information for this model will be permanently
-              deleted from your stable.
-            </p>
-
-            {error && (
-              <div
-                className="flex items-center gap-2 mt-2 py-2 px-4 bg-[rgba(240,108,126,0.1)] border border-[rgba(240,108,126,0.3)] rounded-md text-danger text-sm"
-                role="alert"
-                style={{ marginBottom: "var(--space-lg)" }}
-              >
+    return (
+        <>
+            {/* Trigger button */}
+            <button
+                className="hover:no-underline-min-h)] text-danger border-[rgba(240, 108, 126, 0.4)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                onClick={() => setShowModal(true)}
+                id="delete-horse-button"
+            >
                 <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                 >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="15" y1="9" x2="9" y2="15" />
-                  <line x1="9" y1="9" x2="15" y2="15" />
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
                 </svg>
-                {error}
-              </div>
-            )}
+                Delete from Stable
+            </button>
 
-            <div className="flex gap-4">
-              <button
-                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-transparent text-ink-light border border-edge"
-                onClick={() => setShowModal(false)}
-                disabled={isDeleting}
-                id="delete-cancel"
-              >
-                Cancel
-              </button>
-              <button
-                className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none bg-[rgb(239,68,68)] text-white border-0 rounded-md py-[6px] px-[14px] text-sm font-[inherit] cursor-pointer transition-all"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                id="delete-confirm"
-              >
-                {isDeleting ? (
-                  <>
-                    <span className="inline-flex items-center justify-center gap-2 min-h-[var(--opacity-[0.5] cursor-not-allowed hover:no-underline-min-h)] py-2 px-8 font-sans text-base font-semibold rounded-md border border-[transparent] cursor-pointer transition-all duration-150 no-underline leading-none-spinner" aria-hidden="true" />
-                    Deleting…
-                  </>
-                ) : (
-                  <>🗑️ Yes, Delete Permanently</>
+            {/* Modal overlay — portaled to body to escape CSS containment */}
+            {showModal &&
+                createPortal(
+                    <div
+                        className="modal-overlay"
+                        onClick={(e) => {
+                            if (e.target === e.currentTarget && !isDeleting) setShowModal(false);
+                        }}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="delete-modal-title"
+                    >
+                        <div className="modal-bg-card border-edge danger rounded-lg border p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                            <div className="mb-4 text-center text-[3rem]">⚠️</div>
+                            <h2 id="delete-modal-title">Delete &ldquo;{horseName}&rdquo;?</h2>
+                            <p>
+                                <strong>This cannot be undone.</strong> All photos, financial vault data, and catalog
+                                information for this model will be permanently deleted from your stable.
+                            </p>
+
+                            {error && (
+                                <div
+                                    className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+                                    role="alert"
+                                    style={{ marginBottom: "var(--space-lg)" }}
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="15" y1="9" x2="9" y2="15" />
+                                        <line x1="9" y1="9" x2="15" y2="15" />
+                                    </svg>
+                                    {error}
+                                </div>
+                            )}
+
+                            <div className="flex gap-4">
+                                <button
+                                    className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                                    onClick={() => setShowModal(false)}
+                                    disabled={isDeleting}
+                                    id="delete-cancel"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="hover:no-underline-min-h)] inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] bg-[rgb(239,68,68)] px-8 px-[14px] py-2 py-[6px] font-[inherit] font-sans text-base text-sm leading-none font-semibold text-white no-underline transition-all duration-150"
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                    id="delete-confirm"
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <span
+                                                className="hover:no-underline-min-h)] leading-none-spinner inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] px-8 py-2 font-sans text-base font-semibold no-underline transition-all duration-150"
+                                                aria-hidden="true"
+                                            />
+                                            Deleting…
+                                        </>
+                                    ) : (
+                                        <>🗑️ Yes, Delete Permanently</>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>,
+                    document.body,
                 )}
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-    </>
-  );
+        </>
+    );
 }

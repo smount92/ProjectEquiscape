@@ -24,30 +24,36 @@ export default function FeaturedHorseCard({
     return (
         <Link
             href={`/community/${horseId}`}
-            className="flex max-sm:flex-col gap-8 p-8 bg-[linear-gradient(135deg,rgba(245,158,11,0.08),rgba(234,179,8,0.03))] border border-[rgba(245,158,11,0.2)] rounded-lg mb-8 no-underline text-inherit transition-all duration-300 overflow-hidden hover:border-[rgba(245,158,11,0.4)] hover:shadow-[0_4px_24px_rgba(245,158,11,0.12)] hover:-translate-y-0.5 animate-fade-in-up"
+            className="animate-fade-in-up mb-8 flex gap-8 overflow-hidden rounded-lg border border-[rgba(245,158,11,0.2)] bg-[linear-gradient(135deg,rgba(245,158,11,0.08),rgba(234,179,8,0.03))] p-8 text-inherit no-underline transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(245,158,11,0.4)] hover:shadow-[0_4px_24px_rgba(245,158,11,0.12)] max-sm:flex-col"
             id="featured-horse"
         >
-            <div className="relative w-[200px] max-sm:w-full h-[200px] max-sm:h-[180px] shrink-0 rounded-md overflow-hidden">
+            <div className="relative h-[200px] w-[200px] shrink-0 overflow-hidden rounded-md max-sm:h-[180px] max-sm:w-full">
                 {thumbnailUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={thumbnailUrl} alt={horseName} loading="eager" className="w-full h-full object-contain bg-black/15" />
+                    <img
+                        src={thumbnailUrl}
+                        alt={horseName}
+                        loading="eager"
+                        className="h-full w-full bg-black/15 object-contain"
+                    />
                 ) : (
-                    <div className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder">
-                        <span className="horse-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all-placeholder-icon">🐴</span>
+                    <div className="horse-bg-card border-edge transition-all-placeholder rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                        <span className="horse-bg-card border-edge transition-all-placeholder-icon rounded-lg border p-12 shadow-md max-[480px]:rounded-[var(--radius-md)]">
+                            🐴
+                        </span>
                     </div>
                 )}
-                <div className="absolute top-2 left-2 py-1 px-2.5 bg-[linear-gradient(135deg,#F59E0B,#D97706)] text-white text-[0.7rem] font-bold rounded-sm whitespace-nowrap">🌟 {title}</div>
+                <div className="absolute top-2 left-2 rounded-sm bg-[linear-gradient(135deg,#F59E0B,#D97706)] px-2.5 py-1 text-[0.7rem] font-bold whitespace-nowrap text-white">
+                    🌟 {title}
+                </div>
             </div>
-            <div className="flex-1 flex flex-col justify-center min-w-0">
-                <div className="text-[1.4rem] font-bold mb-1">{horseName}</div>
-                <div className="text-sm text-muted mb-4">
+            <div className="flex min-w-0 flex-1 flex-col justify-center">
+                <div className="mb-1 text-[1.4rem] font-bold">{horseName}</div>
+                <div className="text-muted mb-4 text-sm">
                     by @{ownerAlias} · {finishType}
                 </div>
-                {description && (
-                    <p className="text-sm text-muted italic leading-relaxed m-0">{description}</p>
-                )}
+                {description && <p className="text-muted m-0 text-sm leading-relaxed italic">{description}</p>}
             </div>
         </Link>
     );
 }
-

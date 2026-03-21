@@ -49,18 +49,15 @@ const VARIANT_ICONS: Record<ToastVariant, string> = {
 export function ToastProvider({ children }: { children: ReactNode }) {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
-    const addToast = useCallback(
-        (message: string, variant: ToastVariant = "success", duration = 5000) => {
-            const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-            setToasts((prev) => [...prev, { id, message, variant, duration }]);
+    const addToast = useCallback((message: string, variant: ToastVariant = "success", duration = 5000) => {
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        setToasts((prev) => [...prev, { id, message, variant, duration }]);
 
-            // Auto-dismiss
-            setTimeout(() => {
-                setToasts((prev) => prev.filter((t) => t.id !== id));
-            }, duration);
-        },
-        [],
-    );
+        // Auto-dismiss
+        setTimeout(() => {
+            setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, duration);
+    }, []);
 
     const dismiss = useCallback((id: string) => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -72,17 +69,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
             {/* Toast Container */}
             {toasts.length > 0 && (
-                <div className="fixed top-[calc(var(--sticky top-0 z-[100] h-[var(--header max-sm:py-[0] max-sm:px-4-height)] flex items-center justify-between py-[0] px-8 bg-parchment-dark border-b border-edge transition-all-height) + var(--space-md))] right-[var(--space-lg)] flex flex-col gap-2 z-[10000] max-w-[420px] w-full pointer-events-none" aria-live="polite">
+                <div
+                    className="top-[calc(var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height) + var(--space-md))] pointer-events-none fixed top-0 right-[var(--space-lg)] z-[100] z-[10000] flex w-full max-w-[420px] flex-col items-center justify-between gap-2 border-b px-8 py-[0] max-sm:py-[0]"
+                    aria-live="polite"
+                >
                     {toasts.map((t) => (
-                        <div
-                            key={t.id}
-                            className={`toast-item toast-${t.variant} animate-fade-in-up`}
-                            role="status"
-                        >
-                            <span className="text-[1.1rem] shrink-0">{VARIANT_ICONS[t.variant]}</span>
-                            <span className="flex-1 text-sm text-ink leading-[1.4]">{t.message}</span>
+                        <div key={t.id} className={`toast-item toast-${t.variant} animate-fade-in-up`} role="status">
+                            <span className="shrink-0 text-[1.1rem]">{VARIANT_ICONS[t.variant]}</span>
+                            <span className="text-ink flex-1 text-sm leading-[1.4]">{t.message}</span>
                             <button
-                                className="shrink-0 w-[24px] h-[24px] flex items-center justify-center border-0 bg-transparent text-muted cursor-pointer rounded-sm text-xs transition-all"
+                                className="text-muted flex h-[24px] w-[24px] shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent text-xs transition-all"
                                 onClick={() => dismiss(t.id)}
                                 aria-label="Dismiss"
                             >

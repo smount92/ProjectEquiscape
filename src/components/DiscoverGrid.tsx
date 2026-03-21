@@ -6,7 +6,6 @@ import RatingBadge from "@/components/RatingBadge";
 import UserAvatar from "@/components/UserAvatar";
 import { toggleFollow } from "@/app/actions/follows";
 
-
 interface DiscoverUser {
     id: string;
     alias_name: string;
@@ -49,19 +48,22 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
     const [activeTag, setActiveTag] = useState<TagKey>("all");
     const [followSet, setFollowSet] = useState<Set<string>>(new Set(followedIds));
 
-    const handleFollow = useCallback(async (userId: string, e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const wasFollowing = followSet.has(userId);
-        // Optimistic toggle
-        setFollowSet(prev => {
-            const next = new Set(prev);
-            if (wasFollowing) next.delete(userId);
-            else next.add(userId);
-            return next;
-        });
-        await toggleFollow(userId);
-    }, [followSet]);
+    const handleFollow = useCallback(
+        async (userId: string, e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const wasFollowing = followSet.has(userId);
+            // Optimistic toggle
+            setFollowSet((prev) => {
+                const next = new Set(prev);
+                if (wasFollowing) next.delete(userId);
+                else next.add(userId);
+                return next;
+            });
+            await toggleFollow(userId);
+        },
+        [followSet],
+    );
 
     const filteredUsers = useMemo(() => {
         let result = users;
@@ -69,19 +71,19 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
         // Tag filter
         switch (activeTag) {
             case "art_studio":
-                result = result.filter(u => u.has_studio);
+                result = result.filter((u) => u.has_studio);
                 break;
             case "top_rated":
-                result = result.filter(u => u.rating_count > 0)
+                result = result
+                    .filter((u) => u.rating_count > 0)
                     .sort((a, b) => b.avg_rating - a.avg_rating || b.rating_count - a.rating_count);
                 break;
             case "new_members":
-                result = result.filter(u =>
-                    Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS
-                );
+                result = result.filter((u) => Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS);
                 break;
             case "big_stables":
-                result = result.filter(u => u.public_horse_count >= 5)
+                result = result
+                    .filter((u) => u.public_horse_count >= 5)
                     .sort((a, b) => b.public_horse_count - a.public_horse_count);
                 break;
         }
@@ -90,9 +92,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             result = result.filter(
-                (u) =>
-                    u.alias_name.toLowerCase().includes(q) ||
-                    (u.bio && u.bio.toLowerCase().includes(q))
+                (u) => u.alias_name.toLowerCase().includes(q) || (u.bio && u.bio.toLowerCase().includes(q)),
             );
         }
 
@@ -100,18 +100,21 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
     }, [users, searchQuery, activeTag]);
 
     // Tag counts for badges
-    const tagCounts = useMemo(() => ({
-        all: users.length,
-        art_studio: users.filter(u => u.has_studio).length,
-        top_rated: users.filter(u => u.rating_count > 0).length,
-        new_members: users.filter(u => Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS).length,
-        big_stables: users.filter(u => u.public_horse_count >= 5).length,
-    }), [users]);
+    const tagCounts = useMemo(
+        () => ({
+            all: users.length,
+            art_studio: users.filter((u) => u.has_studio).length,
+            top_rated: users.filter((u) => u.rating_count > 0).length,
+            new_members: users.filter((u) => Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS).length,
+            big_stables: users.filter((u) => u.public_horse_count >= 5).length,
+        }),
+        [users],
+    );
 
     return (
         <>
             {/* Search Bar */}
-            <div className="sticky top-[calc(var(--header max-sm:py-[0] max-sm:px-4-height) + var(--space-md))] z-[10] flex items-center gap-2 py-2 px-6 mb-8 bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-xl transition-all shadow-md-container mb-4">
+            <div className="top-[calc(var(--header max-sm:px-4-height) + var(--space-md))] bg-card border-edge shadow-md-container sticky z-[10] mb-4 mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-[480px]:rounded-[var(--radius-md)] max-sm:py-[0]">
                 <input
                     type="text"
                     value={searchQuery}
@@ -124,11 +127,11 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
             </div>
 
             {/* Tag Chips */}
-            <div className="flex gap-1 overflow-x-auto pb-1 mb-6" style={{ WebkitOverflowScrolling: "touch" }}>
+            <div className="mb-6 flex gap-1 overflow-x-auto pb-1" style={{ WebkitOverflowScrolling: "touch" }}>
                 {TAGS.map((tag) => (
                     <button
                         key={tag.key}
-                        className={`inline-flex items-center gap-1 py-1.5 px-3 rounded-full border text-[calc(0.8rem*var(--font-scale))] cursor-pointer transition-all whitespace-nowrap font-medium ${activeTag === tag.key ? "bg-forest text-white border-forest shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : "bg-[rgba(0,0,0,0.03)] border-edge text-muted hover:border-forest hover:text-ink"}`}
+                        className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[calc(0.8rem*var(--font-scale))] font-medium whitespace-nowrap transition-all ${activeTag === tag.key ? "bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : "border-edge text-muted hover:border-forest hover:text-ink bg-[rgba(0,0,0,0.03)]"}`}
                         onClick={() => setActiveTag(tag.key)}
                     >
                         <span>{tag.emoji}</span>
@@ -140,7 +143,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
 
             {/* Results count */}
             {(searchQuery.trim() || activeTag !== "all") && (
-                <div className="text-sm text-muted mb-6 pl-1 mb-4">
+                <div className="text-muted mb-4 mb-6 pl-1 text-sm">
                     {filteredUsers.length === 0
                         ? searchQuery.trim()
                             ? `No collectors match "${searchQuery}"`
@@ -151,19 +154,19 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
 
             {/* Grid */}
             {filteredUsers.length === 0 && !searchQuery.trim() && activeTag === "all" ? (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
-                    <div className="text-center py-[var(--space-3xl)] px-8-icon">👥</div>
+                <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="px-8-icon py-[var(--space-3xl)] text-center">👥</div>
                     <h2>No Active Collectors Yet</h2>
                     <p>Be the first to make your models public!</p>
                 </div>
             ) : filteredUsers.length === 0 ? (
-                <div className="bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all text-center py-[var(--space-3xl)] px-8 animate-fade-in-up">
-                    <div className="text-center py-[var(--space-3xl)] px-8-icon">🔍</div>
+                <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-12 px-8 py-[var(--space-3xl)] text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
+                    <div className="px-8-icon py-[var(--space-3xl)] text-center">🔍</div>
                     <h2>No Results</h2>
                     <p>Try a different search or filter.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6 animate-fade-in-up">
+                <div className="animate-fade-in-up grid grid-cols-1 gap-6 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
                     {filteredUsers.map((u) => {
                         const publicCount = u.public_horse_count;
                         const isMe = u.id === currentUserId;
@@ -172,18 +175,18 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                             <Link
                                 key={u.id}
                                 href={`/profile/${encodeURIComponent(u.alias_name)}`}
-                                className="flex items-start gap-4 p-6 bg-bg-card max-[480px]:rounded-[var(--radius-md)] border border-edge rounded-lg p-12 shadow-md transition-all border border-edge rounded-lg no-underline text-inherit transition-all duration-250 hover:border-forest hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)] hover:-translate-y-0.5"
+                                className="bg-bg-card border-edge border-edge hover:border-forest flex items-start gap-4 rounded-lg border p-6 p-12 text-inherit no-underline shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)] max-[480px]:rounded-[var(--radius-md)]"
                                 id={`discover-${u.id}`}
                             >
-                                <div className="w-[52px] h-[52px] rounded-full bg-[linear-gradient(135deg,rgba(129,140,248,0.2),rgba(167,139,250,0.1))] flex items-center justify-center shrink-0 text-forest">
+                                <div className="text-forest flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(129,140,248,0.2),rgba(167,139,250,0.1))]">
                                     <UserAvatar avatarUrl={u.avatar_url} aliasName={u.alias_name} size={40} />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-base mb-1">
+                                <div className="min-w-0 flex-1">
+                                    <div className="mb-1 text-base font-semibold">
                                         @{u.alias_name}
                                         {isMe && (
                                             <span
-                                                className="inline-flex py-[2px] px-2 rounded-sm bg-forest text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider"
+                                                className="bg-forest inline-flex rounded-sm px-2 py-[2px] text-[calc(0.65rem*var(--font-scale))] font-bold tracking-wider text-white uppercase"
                                                 style={{ marginLeft: "6px" }}
                                             >
                                                 You
@@ -196,18 +199,18 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                                         )}
                                     </div>
                                     {u.bio && (
-                                        <div className="flex gap-4 text-xs text-muted italic">
+                                        <div className="text-muted flex gap-4 text-xs italic">
                                             {u.bio.length > 80 ? `${u.bio.slice(0, 80)}…` : u.bio}
                                         </div>
                                     )}
-                                    <div className="flex gap-4 text-xs text-muted">
+                                    <div className="text-muted flex gap-4 text-xs">
                                         <span>
                                             🐴 {publicCount} model{publicCount !== 1 ? "s" : ""}
                                         </span>
                                         <span>📅 {memberSince(u.created_at)}</span>
                                     </div>
                                     {u.rating_count > 0 && (
-                                        <div className="mt-1" >
+                                        <div className="mt-1">
                                             <RatingBadge
                                                 average={Number(Number(u.avg_rating).toFixed(1))}
                                                 count={u.rating_count}
@@ -218,7 +221,11 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                                         <button
                                             className={`btn btn-sm ${followSet.has(u.id) ? "btn-ghost follow-btn-following" : "btn-primary"}`}
                                             onClick={(e) => handleFollow(u.id, e)}
-                                            style={{ marginTop: "var(--space-xs)", fontSize: "calc(0.75rem * var(--font-scale))", padding: "3px 10px" }}
+                                            style={{
+                                                marginTop: "var(--space-xs)",
+                                                fontSize: "calc(0.75rem * var(--font-scale))",
+                                                padding: "3px 10px",
+                                            }}
                                         >
                                             {followSet.has(u.id) ? "✓ Following" : "+ Follow"}
                                         </button>

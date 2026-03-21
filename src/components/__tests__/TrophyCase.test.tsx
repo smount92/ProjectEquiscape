@@ -125,11 +125,13 @@ describe("TrophyCase", () => {
     });
 
     it("handles unknown category gracefully", () => {
-        const unknownBadge = [{
-            ...mockBadges[0],
-            id: "unknown-1",
-            category: "mystery",
-        }];
+        const unknownBadge = [
+            {
+                ...mockBadges[0],
+                id: "unknown-1",
+                category: "mystery",
+            },
+        ];
         render(<TrophyCase badges={unknownBadge} />);
 
         expect(screen.getByText("mystery")).toBeInTheDocument();
