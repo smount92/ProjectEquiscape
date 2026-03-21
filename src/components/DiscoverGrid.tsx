@@ -183,7 +183,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                                         @{u.alias_name}
                                         {isMe && (
                                             <span
-                                                className="community-own-badge"
+                                                className="inline-flex py-[2px] px-2 rounded-sm bg-[var(--gradient-accent)] text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider"
                                                 style={{ marginLeft: "6px" }}
                                             >
                                                 You

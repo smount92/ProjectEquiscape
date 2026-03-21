@@ -292,7 +292,7 @@ export default async function ProfilePage({
           <h1>
             @{profileUser.alias_name}
             {isOwnProfile && (
-              <span className="community-own-badge" style={{ marginLeft: "var(--space-sm)", verticalAlign: "middle" }}>
+              <span className="inline-flex py-[2px] px-2 rounded-sm bg-[var(--gradient-accent)] text-white text-[calc(0.65rem*var(--font-scale))] font-bold uppercase tracking-wider" style={{ marginLeft: "var(--space-sm)", verticalAlign: "middle" }}>
                 You
               </span>
             )}
