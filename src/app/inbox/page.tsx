@@ -230,7 +230,7 @@ export default async function InboxPage() {
                             <Link
                                 key={item.id}
                                 href={`/inbox/${item.id}`}
-                                className={`flex items-center gap-4 max-md:gap-sm py-4 max-md:py-sm px-6 max-md:px-md no-underline text-ink transition-all border-b border-edge last:border-b-0 ${item.unreadCount > 0 ? "bg-[rgba(44,85,69,0.05)] hover:bg-[rgba(44,85,69,0.08)]" : "hover:bg-black/[0.03]"}`}
+                                className={`flex items-center gap-4 max-md:gap-2 py-4 max-md:py-2 px-6 max-md:px-4 no-underline text-ink transition-all border-b border-edge last:border-b-0 ${item.unreadCount > 0 ? "bg-[rgba(44,85,69,0.05)] hover:bg-[rgba(44,85,69,0.08)]" : "hover:bg-black/[0.03]"}`}
                                 id={`inbox-item-${item.id}`}
                             >
                                 <div className="w-11 max-md:w-9 h-11 max-md:h-9 rounded-full bg-[rgba(44,85,69,0.15)] flex items-center justify-center shrink-0 text-saddle">

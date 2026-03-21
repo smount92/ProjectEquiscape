@@ -550,7 +550,7 @@ export default async function ProfilePage({
           </div>
           {ratingSummary.ratings.map((r) => (
             <div key={r.id} className="py-4 border-b border-edge last:border-b-0">
-              <div className="flex items-center justify-between mb-1 max-sm:flex-col max-sm:items-start max-sm:gap-xs">
+              <div className="flex items-center justify-between mb-1 max-sm:flex-col max-sm:items-start max-sm:gap-1">
                 <span className="text-[calc(0.85rem*var(--font-scale))] text-muted">
                   @{r.reviewerAlias} — {"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}
                 </span>

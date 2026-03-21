@@ -165,11 +165,11 @@ export default function SettingsPage() {
                 </h1>
 
                 {/* ═══ Profile ═══ */}
-                <div className="mb-12 max-sm:mb-xl">
+                <div className="mb-12 max-sm:mb-8">
                     <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">👤 Profile</h2>
-                    <div className="p-8 max-sm:p-lg rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                         {/* Avatar */}
-                        <div className="flex items-center gap-6 max-sm:gap-md mb-8 pb-6 border-b border-edge">
+                        <div className="flex items-center gap-6 max-sm:gap-4 mb-8 pb-6 border-b border-edge">
                             <div className="w-20 h-20 rounded-full bg-[linear-gradient(135deg,rgba(44,85,69,0.08),rgba(139,90,43,0.08))] flex items-center justify-center text-[2rem] overflow-hidden border-[2.5px] border-edge shrink-0 transition-colors hover:border-forest [&_img]:w-full [&_img]:h-full [&_img]:object-cover">
                                 {avatarUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
@@ -235,7 +235,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Default horse visibility */}
-                        <div className="flex items-center justify-between py-4 max-sm:gap-sm gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
+                        <div className="flex items-center justify-between py-4 max-sm:gap-2 gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
                             <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
                                 🏆 Default new horses to public
                             </span>
@@ -248,7 +248,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Photo watermarking */}
-                        <div className="flex items-center justify-between py-4 max-sm:gap-sm gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
+                        <div className="flex items-center justify-between py-4 max-sm:gap-2 gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
                             <div>
                                 <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
                                     📸 Watermark uploaded photos
@@ -266,7 +266,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Show trophies on profile */}
-                        <div className="flex items-center justify-between py-4 max-sm:gap-sm gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
+                        <div className="flex items-center justify-between py-4 max-sm:gap-2 gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
                             <div>
                                 <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
                                     🏆 Show Trophy Case on profile
@@ -329,9 +329,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Security ═══ */}
-                <div className="mb-12 max-sm:mb-xl">
+                <div className="mb-12 max-sm:mb-8">
                     <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">🔒 Security</h2>
-                    <div className="p-8 max-sm:p-lg rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                         <div className="form-group">
                             <label className="form-label">Email</label>
                             <input
@@ -390,11 +390,11 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Notifications ═══ */}
-                <div className="mb-12 max-sm:mb-xl">
+                <div className="mb-12 max-sm:mb-8">
                     <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">🔔 Notifications</h2>
-                    <div className="p-8 max-sm:p-lg rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                         {NOTIF_LABELS.map((n) => (
-                            <div key={n.key} className="flex items-center justify-between py-4 max-sm:gap-sm gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
+                            <div key={n.key} className="flex items-center justify-between py-4 max-sm:gap-2 gap-4 border-b border-edge last:border-b-0 last:pb-0 first:pt-0">
                                 <span className="flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium text-ink">
                                     {n.emoji} {n.label}
                                 </span>
@@ -410,9 +410,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Data & Reports ═══ */}
-                <div className="mb-12 max-sm:mb-xl">
+                <div className="mb-12 max-sm:mb-8">
                     <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight">📊 Data & Reports</h2>
-                    <div className="p-8 max-sm:p-lg rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                         <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-lg)" }}>
                             {/* CSV Export */}
                             <div>
@@ -438,9 +438,9 @@ export default function SettingsPage() {
                 </div>
 
                 {/* ═══ Danger Zone ═══ */}
-                <div className="mb-12 max-sm:mb-xl">
+                <div className="mb-12 max-sm:mb-8">
                     <h2 className="text-[calc(1.15rem*var(--font-scale))] font-bold mb-4 flex items-center gap-2 text-ink tracking-tight" style={{ color: "#ef4444" }}>⚠️ Danger Zone</h2>
-                    <div className="p-8 max-sm:p-lg rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]" style={{ border: "1px solid #ef4444", borderRadius: "var(--radius-lg)" }}>
+                    <div className="p-8 max-sm:p-6 rounded-xl bg-surface border border-edge shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]" style={{ border: "1px solid #ef4444", borderRadius: "var(--radius-lg)" }}>
                         <p style={{ marginBottom: "var(--space-md)", lineHeight: 1.6 }}>
                             Permanently delete your account. This action <strong>cannot be undone</strong>.
                         </p>

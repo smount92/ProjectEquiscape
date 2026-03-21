@@ -209,7 +209,7 @@ export default function ChatThread({
                 <div className="flex gap-2 items-end">
                     <textarea
                         ref={inputRef}
-                        className="flex-1 py-2.5 px-3.5 bg-black/[0.05] border border-edge rounded-lg text-ink text-sm font-inherit resize-none min-h-[42px] max-h-[120px] transition-colors focus:outline-none focus:border-[rgba(44,85,69,0.5)] focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] placeholder:text-text-muted"
+                        className="flex-1 py-2.5 px-3.5 bg-black/[0.05] border border-edge rounded-lg text-ink text-sm font-inherit resize-none min-h-[42px] max-h-[120px] transition-colors focus:outline-none focus:border-[rgba(44,85,69,0.5)] focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] placeholder:text-muted"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={handleKeyDown}

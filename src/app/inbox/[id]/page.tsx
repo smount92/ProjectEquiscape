@@ -330,7 +330,7 @@ export default async function ChatPage({
                             </span>
                         )}
                     </div>
-                    <span className="text-muted text-[1.1rem] shrink-0 transition-transform group-hover:translate-x-[3px] group-hover:text-accent-primary">→</span>
+                    <span className="text-muted text-[1.1rem] shrink-0 transition-transform group-hover:translate-x-[3px] group-hover:text-forest">→</span>
                 </Link>
             )}
 

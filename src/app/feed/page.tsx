@@ -57,13 +57,13 @@ export default async function FeedPage({
             <div className="flex gap-1 bg-black/[0.04] rounded-lg p-[3px] border border-black/[0.06] mb-8 w-fit animate-fade-in-up">
                 <Link
                     href="/feed"
-                    className={`py-2 px-5 no-underline text-muted rounded-[calc(var(--radius-lg)-2px)] text-[calc(0.9rem*var(--font-scale))] transition-all whitespace-nowrap hover:text-ink hover:bg-black/[0.06] ${activeTab === "global" ? "!bg-accent-primary !text-white font-semibold shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : ""}`}
+                    className={`py-2 px-5 no-underline text-muted rounded-[calc(var(--radius-lg)-2px)] text-[calc(0.9rem*var(--font-scale))] transition-all whitespace-nowrap hover:text-ink hover:bg-black/[0.06] ${activeTab === "global" ? "!bg-forest !text-white font-semibold shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : ""}`}
                 >
                     🌐 Global
                 </Link>
                 <Link
                     href="/feed?tab=following"
-                    className={`py-2 px-5 no-underline text-muted rounded-[calc(var(--radius-lg)-2px)] text-[calc(0.9rem*var(--font-scale))] transition-all whitespace-nowrap hover:text-ink hover:bg-black/[0.06] ${activeTab === "following" ? "!bg-accent-primary !text-white font-semibold shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : ""}`}
+                    className={`py-2 px-5 no-underline text-muted rounded-[calc(var(--radius-lg)-2px)] text-[calc(0.9rem*var(--font-scale))] transition-all whitespace-nowrap hover:text-ink hover:bg-black/[0.06] ${activeTab === "following" ? "!bg-forest !text-white font-semibold shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : ""}`}
                 >
                     👥 Following
                 </Link>

@@ -301,7 +301,7 @@ export default function LandingPage() {
             Built for <span className="text-gradient">Every Part of the Hobby</span>
           </h2>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8 mt-12">
-            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-2 [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-ink-light">
               <div className="text-[3rem] mb-4"><Home size={32} strokeWidth={1.5} /></div>
               <h3>The Collector</h3>
               <p>
@@ -310,7 +310,7 @@ export default function LandingPage() {
                 spreadsheet in minutes — not months.
               </p>
             </div>
-            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-2 [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-ink-light">
               <div className="text-[3rem] mb-4"><Palette size={32} strokeWidth={1.5} /></div>
               <h3>The Artist &amp; Customizer</h3>
               <p>
@@ -319,7 +319,7 @@ export default function LandingPage() {
                 your creation story becomes part of its Hoofprint&trade; — forever.
               </p>
             </div>
-            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-2 [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-ink-light">
               <div className="text-[3rem] mb-4"><Trophy size={32} strokeWidth={1.5} /></div>
               <h3>The Shower &amp; Competitor</h3>
               <p>
@@ -367,7 +367,7 @@ export default function LandingPage() {
             We&apos;re building the operating system for the hobby. Here&apos;s what&apos;s next.
           </p>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8 mt-12">
-            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-2 [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-ink-light">
               <div className="text-[3rem] mb-4"><Palette size={32} strokeWidth={1.5} /></div>
               <h3>Art Studio</h3>
               <p>
@@ -376,7 +376,7 @@ export default function LandingPage() {
                 Every brushstroke becomes provenance.
               </p>
             </div>
-            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-2 [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-ink-light">
               <div className="text-[3rem] mb-4"><Package size={32} strokeWidth={1.5} /></div>
               <h3>Bulk Import</h3>
               <p>
@@ -384,7 +384,7 @@ export default function LandingPage() {
                 our 10,500+ reference database. Go from CSV to cataloged in minutes.
               </p>
             </div>
-            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-sm [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-text-secondary">
+            <div className="p-8 rounded-xl bg-[rgba(0,0,0,0.03)] border border-[rgba(0,0,0,0.06)] text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_h3]:mb-2 [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))] [&_p]:text-ink-light">
               <div className="text-[3rem] mb-4"><TrendingUp size={32} strokeWidth={1.5} /></div>
               <h3>Price Guide</h3>
               <p>

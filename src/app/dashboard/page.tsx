@@ -338,7 +338,7 @@ export default async function DashboardPage({
                                         <Link
                                             key={col.id}
                                             href={`/stable/collection/${col.id}`}
-                                            className="flex justify-between items-center py-2 px-4 rounded-md bg-black/[0.02] border border-transparent text-ink text-sm no-underline transition-all hover:bg-black/[0.06] hover:border-border hover:no-underline"
+                                            className="flex justify-between items-center py-2 px-4 rounded-md bg-black/[0.02] border border-transparent text-ink text-sm no-underline transition-all hover:bg-black/[0.06] hover:border-edge hover:no-underline"
                                             id={`collection-${col.id}`}
                                         >
                                             <span>{col.name}</span>

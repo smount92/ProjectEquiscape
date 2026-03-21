@@ -173,7 +173,7 @@ export default function FaqPage() {
                     {categories.map((cat) => (
                         <button
                             key={cat}
-                            className={`py-1 px-4 font-[var(--font-family)] text-sm font-semibold border border-edge rounded-full cursor-pointer transition-all whitespace-nowrap ${activeCategory === cat ? "text-white bg-forest !border-accent-primary" : "text-muted bg-[var(--color-bg-input)] hover:text-ink hover:border-forest"}`}
+                            className={`py-1 px-4 font-[var(--font-family)] text-sm font-semibold border border-edge rounded-full cursor-pointer transition-all whitespace-nowrap ${activeCategory === cat ? "text-white bg-forest !border-forest" : "text-muted bg-[var(--color-bg-input)] hover:text-ink hover:border-forest"}`}
                             onClick={() => {
                                 setActiveCategory(cat);
                                 setOpenIndex(null);
@@ -216,7 +216,7 @@ export default function FaqPage() {
                                     </svg>
                                 </button>
                                 {isOpen && (
-                                    <div className="px-8 pb-6 bg-[var(--color-bg-card)] animate-fade-in-up [&_p]:text-base [&_p]:text-text-secondary [&_p]:leading-[1.8] [&_p]:m-0" id={`faq-a-${idx}`}>
+                                    <div className="px-8 pb-6 bg-[var(--color-bg-card)] animate-fade-in-up [&_p]:text-base [&_p]:text-ink-light [&_p]:leading-[1.8] [&_p]:m-0" id={`faq-a-${idx}`}>
                                         <p>{item.a}</p>
                                     </div>
                                 )}

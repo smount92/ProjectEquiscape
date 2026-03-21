@@ -172,7 +172,7 @@ export default function DashboardShell({
 
             {/* Floating Bulk Action Bar */}
             {selectMode && selectedIds.size > 0 && (
-                <div className="fixed bottom-lg left-1/2 -translate-x-1/2 flex items-center gap-4 py-3 px-5 bg-parchment border border-edge rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] z-[100] max-w-[90vw] flex-wrap justify-center">
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 py-3 px-5 bg-parchment border border-edge rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] z-[100] max-w-[90vw] flex-wrap justify-center">
                     <span className="font-semibold text-sm text-forest whitespace-nowrap">✅ {selectedIds.size} selected</span>
 
                     <div className="flex gap-2 items-center flex-wrap">

@@ -36,7 +36,7 @@ export default function FeaturedHorseCard({
                         <span className="horse-card-placeholder-icon">🐴</span>
                     </div>
                 )}
-                <div className="absolute top-sm left-sm py-1 px-2.5 bg-[linear-gradient(135deg,#F59E0B,#D97706)] text-white text-[0.7rem] font-bold rounded-sm whitespace-nowrap">🌟 {title}</div>
+                <div className="absolute top-2 left-2 py-1 px-2.5 bg-[linear-gradient(135deg,#F59E0B,#D97706)] text-white text-[0.7rem] font-bold rounded-sm whitespace-nowrap">🌟 {title}</div>
             </div>
             <div className="flex-1 flex flex-col justify-center min-w-0">
                 <div className="text-[1.4rem] font-bold mb-1">{horseName}</div>

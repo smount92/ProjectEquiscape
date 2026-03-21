@@ -74,11 +74,11 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
                     <h4 className="text-[calc(0.85rem*var(--font-scale))] font-semibold uppercase tracking-[0.05em] text-muted my-6 mb-2 first:mt-0">
                         {CATEGORY_LABELS[category] || category}
                     </h4>
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 max-[480px]:grid-cols-[repeat(auto-fill,minmax(90px,1fr))] max-[480px]:gap-sm">
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 max-[480px]:grid-cols-[repeat(auto-fill,minmax(90px,1fr))] max-[480px]:gap-2">
                         {grouped.get(category)!.map((badge) => (
                             <div
                                 key={badge.id}
-                                className={`relative text-center p-4 rounded-lg bg-surface-glass border transition-transform hover:-translate-y-0.5 cursor-default max-[480px]:p-sm ${getTierClasses(badge.tier)}`}
+                                className={`relative text-center p-4 rounded-lg bg-surface-glass border transition-transform hover:-translate-y-0.5 cursor-default max-[480px]:p-2 ${getTierClasses(badge.tier)}`}
                                 onMouseEnter={() => setHoveredBadge(badge.id)}
                                 onMouseLeave={() => setHoveredBadge(null)}
                             >
@@ -86,7 +86,7 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
                                 <span className="text-[calc(0.75rem*var(--font-scale))] font-semibold block">{badge.name}</span>
                                 <span className="text-[calc(0.6rem*var(--font-scale))] text-muted mt-0.5 block">{formatDate(badge.earnedAt)}</span>
                                 {hoveredBadge === badge.id && (
-                                    <div className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-[var(--color-bg-elevated)] border border-edge rounded-md py-2 px-4 min-w-[200px] max-w-[260px] shadow-lg z-50 text-left pointer-events-none animate-[fadeInUp_0.15s_ease] max-[480px]:hidden [&_strong]:block [&_strong]:text-[calc(0.8rem*var(--font-scale))] [&_strong]:mb-1 [&_p]:text-[calc(0.7rem*var(--font-scale))] [&_p]:text-text-secondary [&_p]:leading-snug [&_p]:m-0 [&_p]:mb-1 [&>span]:text-[calc(0.65rem*var(--font-scale))] [&>span]:text-text-muted">
+                                    <div className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 bg-[var(--color-bg-elevated)] border border-edge rounded-md py-2 px-4 min-w-[200px] max-w-[260px] shadow-lg z-50 text-left pointer-events-none animate-[fadeInUp_0.15s_ease] max-[480px]:hidden [&_strong]:block [&_strong]:text-[calc(0.8rem*var(--font-scale))] [&_strong]:mb-1 [&_p]:text-[calc(0.7rem*var(--font-scale))] [&_p]:text-ink-light [&_p]:leading-snug [&_p]:m-0 [&_p]:mb-1 [&>span]:text-[calc(0.65rem*var(--font-scale))] [&>span]:text-muted">
                                         <strong>{badge.name}</strong>
                                         <p>{badge.description}</p>
                                         <span>Earned {formatDate(badge.earnedAt)}</span>
