@@ -1,271 +1,271 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState } from"react";
+import { useRouter } from"next/navigation";
+import Link from"next/link";
 import {
-    respondToOffer,
-    markPaymentSent,
-    verifyFundsAndRelease,
-    cancelTransaction,
-    retractOffer,
-} from "@/app/actions/transactions";
+ respondToOffer,
+ markPaymentSent,
+ verifyFundsAndRelease,
+ cancelTransaction,
+ retractOffer,
+} from"@/app/actions/transactions";
 
 interface OfferCardProps {
-    transaction: {
-        transactionId: string;
-        status: string;
-        offerAmount: number | null;
-        offerMessage: string | null;
-        partyAId: string; // seller
-        partyBId: string | null; // buyer
-        paidAt: string | null;
-        verifiedAt: string | null;
-        metadata: Record<string, unknown> | null;
-    };
-    currentUserId: string;
+ transaction: {
+ transactionId: string;
+ status: string;
+ offerAmount: number | null;
+ offerMessage: string | null;
+ partyAId: string; // seller
+ partyBId: string | null; // buyer
+ paidAt: string | null;
+ verifiedAt: string | null;
+ metadata: Record<string, unknown> | null;
+ };
+ currentUserId: string;
 }
 
 export default function OfferCard({ transaction, currentUserId }: OfferCardProps) {
-    const [status, setStatus] = useState(transaction.status);
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState("");
-    const [pin, setPin] = useState<string | null>((transaction.metadata?.pin as string) || null);
-    const [hasPaid, setHasPaid] = useState(!!transaction.paidAt);
-    const router = useRouter();
+ const [status, setStatus] = useState(transaction.status);
+ const [saving, setSaving] = useState(false);
+ const [error, setError] = useState("");
+ const [pin, setPin] = useState<string | null>((transaction.metadata?.pin as string) || null);
+ const [hasPaid, setHasPaid] = useState(!!transaction.paidAt);
+ const router = useRouter();
 
-    const isSeller = currentUserId === transaction.partyAId;
-    const isBuyer = currentUserId === transaction.partyBId;
-    const amount = transaction.offerAmount;
+ const isSeller = currentUserId === transaction.partyAId;
+ const isBuyer = currentUserId === transaction.partyBId;
+ const amount = transaction.offerAmount;
 
-    const handleRespond = async (action: "accept" | "decline") => {
-        setSaving(true);
-        setError("");
-        const result = await respondToOffer(transaction.transactionId, action);
-        if (result.success) {
-            setStatus(action === "accept" ? "pending_payment" : "cancelled");
-            router.refresh();
-        } else {
-            setError(result.error || "Failed.");
-        }
-        setSaving(false);
-    };
+ const handleRespond = async (action:"accept" |"decline") => {
+ setSaving(true);
+ setError("");
+ const result = await respondToOffer(transaction.transactionId, action);
+ if (result.success) {
+ setStatus(action ==="accept" ?"pending_payment" :"cancelled");
+ router.refresh();
+ } else {
+ setError(result.error ||"Failed.");
+ }
+ setSaving(false);
+ };
 
-    const handleMarkPaid = async () => {
-        setSaving(true);
-        setError("");
-        const result = await markPaymentSent(transaction.transactionId);
-        if (result.success) {
-            setHasPaid(true);
-            router.refresh();
-        } else {
-            setError(result.error || "Failed.");
-        }
-        setSaving(false);
-    };
+ const handleMarkPaid = async () => {
+ setSaving(true);
+ setError("");
+ const result = await markPaymentSent(transaction.transactionId);
+ if (result.success) {
+ setHasPaid(true);
+ router.refresh();
+ } else {
+ setError(result.error ||"Failed.");
+ }
+ setSaving(false);
+ };
 
-    const handleVerify = async () => {
-        setSaving(true);
-        setError("");
-        const result = await verifyFundsAndRelease(transaction.transactionId);
-        if (result.success) {
-            setStatus("funds_verified");
-            setPin(result.pin || null);
-            router.refresh();
-        } else {
-            setError(result.error || "Failed.");
-        }
-        setSaving(false);
-    };
+ const handleVerify = async () => {
+ setSaving(true);
+ setError("");
+ const result = await verifyFundsAndRelease(transaction.transactionId);
+ if (result.success) {
+ setStatus("funds_verified");
+ setPin(result.pin || null);
+ router.refresh();
+ } else {
+ setError(result.error ||"Failed.");
+ }
+ setSaving(false);
+ };
 
-    const handleCancel = async () => {
-        if (!confirm("Are you sure you want to cancel this transaction? The horse will be relisted.")) return;
-        setSaving(true);
-        setError("");
-        const result = await cancelTransaction(transaction.transactionId);
-        if (result.success) {
-            setStatus("cancelled");
-            router.refresh();
-        } else {
-            setError(result.error || "Failed to cancel.");
-        }
-        setSaving(false);
-    };
+ const handleCancel = async () => {
+ if (!confirm("Are you sure you want to cancel this transaction? The horse will be relisted.")) return;
+ setSaving(true);
+ setError("");
+ const result = await cancelTransaction(transaction.transactionId);
+ if (result.success) {
+ setStatus("cancelled");
+ router.refresh();
+ } else {
+ setError(result.error ||"Failed to cancel.");
+ }
+ setSaving(false);
+ };
 
-    // ── Cancelled / Completed ──
-    if (status === "cancelled") {
-        return (
-            <div
-                className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.06)] p-6 opacity-70"
-                id="offer-card"
-            >
-                <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                    <span className="text-sm font-semibold text-[#ef4444]">❌ Offer Declined</span>
-                    {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
-                </div>
-            </div>
-        );
-    }
+ // ── Cancelled / Completed ──
+ if (status ==="cancelled") {
+ return (
+ <div
+ className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.06)] p-6 opacity-70"
+ id="offer-card"
+ >
+ <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
+ <span className="text-sm font-semibold text-[#ef4444]">❌ Offer Declined</span>
+ {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
+ </div>
+ </div>
+ );
+ }
 
-    if (status === "completed") {
-        return (
-            <div
-                className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(34,197,94,0.2)] bg-[rgba(34,197,94,0.06)] p-6"
-                id="offer-card"
-            >
-                <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                    <span className="text-sm font-semibold text-[#22c55e]">✅ Transaction Complete</span>
-                    {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
-                </div>
-            </div>
-        );
-    }
+ if (status ==="completed") {
+ return (
+ <div
+ className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(34,197,94,0.2)] bg-[rgba(34,197,94,0.06)] p-6"
+ id="offer-card"
+ >
+ <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
+ <span className="text-sm font-semibold text-[#22c55e]">✅ Transaction Complete</span>
+ {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
+ </div>
+ </div>
+ );
+ }
 
-    // ── Active states ──
-    return (
-        <div
-            className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] p-6"
-            id="offer-card"
-        >
-            <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                <span className="text-saddle text-sm font-semibold">💰 Offer</span>
-                {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
-            </div>
+ // ── Active states ──
+ return (
+ <div
+ className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] p-6"
+ id="offer-card"
+ >
+ <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
+ <span className="text-saddle text-sm font-semibold">💰 Offer</span>
+ {amount && <span className="text-saddle text-xl font-bold">${amount.toFixed(2)}</span>}
+ </div>
 
-            {transaction.offerMessage && (
-                <p className="text-muted mt-2 text-sm leading-relaxed italic">
-                    &ldquo;{transaction.offerMessage}&rdquo;
-                </p>
-            )}
+ {transaction.offerMessage && (
+ <p className="text-muted mt-2 text-sm leading-relaxed italic">
+ &ldquo;{transaction.offerMessage}&rdquo;
+ </p>
+ )}
 
-            {/* offer_made */}
-            {status === "offer_made" && (
-                <div className="mt-4">
-                    {isSeller ? (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <button
-                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
-                                onClick={() => handleRespond("accept")}
-                                disabled={saving}
-                            >
-                                {saving ? "…" : "✅ Accept Offer"}
-                            </button>
-                            <button
-                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
-                                onClick={() => handleRespond("decline")}
-                                disabled={saving}
-                            >
-                                Decline
-                            </button>
-                        </div>
-                    ) : (
-                        <div>
-                            <p className="text-muted text-sm">⏳ Waiting for seller response…</p>
-                            <button
-                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
-                                onClick={async () => {
-                                    setSaving(true);
-                                    const result = await retractOffer(transaction.transactionId);
-                                    if (result.success) {
-                                        setStatus("cancelled");
-                                        router.refresh();
-                                    } else {
-                                        setError(result.error || "Failed to retract.");
-                                    }
-                                    setSaving(false);
-                                }}
-                                disabled={saving}
-                                style={{ color: "var(--color-text-muted)", marginTop: "var(--space-xs)" }}
-                            >
-                                ↩️ Retract Offer
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+ {/* offer_made */}
+ {status ==="offer_made" && (
+ <div className="mt-4">
+ {isSeller ? (
+ <div className="mt-2 flex flex-wrap items-center gap-2">
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ onClick={() => handleRespond("accept")}
+ disabled={saving}
+ >
+ {saving ?"…" :"✅ Accept Offer"}
+ </button>
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ onClick={() => handleRespond("decline")}
+ disabled={saving}
+ >
+ Decline
+ </button>
+ </div>
+ ) : (
+ <div>
+ <p className="text-muted text-sm">⏳ Waiting for seller response…</p>
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ onClick={async () => {
+ setSaving(true);
+ const result = await retractOffer(transaction.transactionId);
+ if (result.success) {
+ setStatus("cancelled");
+ router.refresh();
+ } else {
+ setError(result.error ||"Failed to retract.");
+ }
+ setSaving(false);
+ }}
+ disabled={saving}
+ style={{ color:"var(--color-text-muted)", marginTop:"var(--space-xs)" }}
+ >
+ ↩️ Retract Offer
+ </button>
+ </div>
+ )}
+ </div>
+ )}
 
-            {/* pending_payment */}
-            {status === "pending_payment" && (
-                <div className="mt-4">
-                    <p className="text-sm font-medium text-[#22c55e]">
-                        ✅ Offer accepted!{" "}
-                        {isBuyer ? "Please send payment to the seller." : "Waiting for buyer to send payment."}
-                    </p>
-                    {isBuyer && !hasPaid && (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <button
-                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
-                                onClick={handleMarkPaid}
-                                disabled={saving}
-                            >
-                                {saving ? "…" : "💳 I Have Paid"}
-                            </button>
-                        </div>
-                    )}
-                    {isBuyer && hasPaid && (
-                        <p className="text-muted text-sm">💳 Payment marked as sent. Waiting for seller to verify…</p>
-                    )}
-                    {isSeller && hasPaid && (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <p className="text-muted text-sm">💳 Buyer says they&apos;ve paid.</p>
-                            <button
-                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
-                                onClick={handleVerify}
-                                disabled={saving}
-                            >
-                                {saving ? "Verifying…" : "✅ Confirm Funds & Release"}
-                            </button>
-                            <button
-                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
-                                onClick={handleCancel}
-                                disabled={saving}
-                                style={{ color: "#ef4444" }}
-                            >
-                                {saving ? "…" : "🚫 Cancel / Dispute"}
-                            </button>
-                        </div>
-                    )}
-                    {isSeller && !hasPaid && (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <p className="text-muted text-sm">⏳ Waiting for buyer to send payment…</p>
-                            <button
-                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
-                                onClick={handleCancel}
-                                disabled={saving}
-                                style={{ color: "#ef4444" }}
-                            >
-                                {saving ? "…" : "🚫 Cancel / Dispute"}
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+ {/* pending_payment */}
+ {status ==="pending_payment" && (
+ <div className="mt-4">
+ <p className="text-sm font-medium text-[#22c55e]">
+ ✅ Offer accepted!{""}
+ {isBuyer ?"Please send payment to the seller." :"Waiting for buyer to send payment."}
+ </p>
+ {isBuyer && !hasPaid && (
+ <div className="mt-2 flex flex-wrap items-center gap-2">
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ onClick={handleMarkPaid}
+ disabled={saving}
+ >
+ {saving ?"…" :"💳 I Have Paid"}
+ </button>
+ </div>
+ )}
+ {isBuyer && hasPaid && (
+ <p className="text-muted text-sm">💳 Payment marked as sent. Waiting for seller to verify…</p>
+ )}
+ {isSeller && hasPaid && (
+ <div className="mt-2 flex flex-wrap items-center gap-2">
+ <p className="text-muted text-sm">💳 Buyer says they&apos;ve paid.</p>
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ onClick={handleVerify}
+ disabled={saving}
+ >
+ {saving ?"Verifying…" :"✅ Confirm Funds & Release"}
+ </button>
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ onClick={handleCancel}
+ disabled={saving}
+ style={{ color:"#ef4444" }}
+ >
+ {saving ?"…" :"🚫 Cancel / Dispute"}
+ </button>
+ </div>
+ )}
+ {isSeller && !hasPaid && (
+ <div className="mt-2 flex flex-wrap items-center gap-2">
+ <p className="text-muted text-sm">⏳ Waiting for buyer to send payment…</p>
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ onClick={handleCancel}
+ disabled={saving}
+ style={{ color:"#ef4444" }}
+ >
+ {saving ?"…" :"🚫 Cancel / Dispute"}
+ </button>
+ </div>
+ )}
+ </div>
+ )}
 
-            {/* funds_verified */}
-            {status === "funds_verified" && (
-                <div className="mt-4">
-                    {isBuyer && pin ? (
-                        <div className="border-success mt-2 rounded-lg border-2 bg-[rgba(92,224,160,0.1)] p-6 text-center">
-                            <span className="text-muted mb-1 block text-xs">🔑 Your Claim PIN</span>
-                            <strong className="block font-mono text-2xl font-extrabold tracking-[0.15em] text-[#22c55e]">
-                                {pin}
-                            </strong>
-                            <Link
-                                href="/claim"
-                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
-                            >
-                                Go to Claim Page →
-                            </Link>
-                        </div>
-                    ) : isBuyer ? (
-                        <p className="text-muted text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>
-                    ) : (
-                        <p className="text-muted text-sm">✅ PIN released to buyer. Transfer in progress…</p>
-                    )}
-                </div>
-            )}
+ {/* funds_verified */}
+ {status ==="funds_verified" && (
+ <div className="mt-4">
+ {isBuyer && pin ? (
+ <div className="border-success mt-2 rounded-lg border-2 bg-[rgba(92,224,160,0.1)] p-6 text-center">
+ <span className="text-muted mb-1 block text-xs">🔑 Your Claim PIN</span>
+ <strong className="block font-mono text-2xl font-extrabold tracking-[0.15em] text-[#22c55e]">
+ {pin}
+ </strong>
+ <Link
+ href="/claim"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ >
+ Go to Claim Page →
+ </Link>
+ </div>
+ ) : isBuyer ? (
+ <p className="text-muted text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>
+ ) : (
+ <p className="text-muted text-sm">✅ PIN released to buyer. Transfer in progress…</p>
+ )}
+ </div>
+ )}
 
-            {error && <div className="comment-error mt-2">{error}</div>}
-        </div>
-    );
+ {error && <div className="comment-error mt-2">{error}</div>}
+ </div>
+ );
 }

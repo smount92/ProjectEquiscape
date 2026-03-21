@@ -1,226 +1,226 @@
-import { createClient } from "@/lib/supabase/server";
-import { getAdminClient } from "@/lib/supabase/admin";
-import Link from "next/link";
-import type { Metadata } from "next";
+import { createClient } from"@/lib/supabase/server";
+import { getAdminClient } from"@/lib/supabase/admin";
+import Link from"next/link";
+import type { Metadata } from"next";
 
 export const metadata: Metadata = {
-    title: "Catalog Suggestions — Model Horse Hub",
-    description:
-        "View community suggestions for the Model Horse Hub reference catalog. Vote, discuss, and help keep catalog data accurate.",
+ title:"Catalog Suggestions — Model Horse Hub",
+ description:
+"View community suggestions for the Model Horse Hub reference catalog. Vote, discuss, and help keep catalog data accurate.",
 };
 
-export const dynamic = "force-dynamic";
+export const dynamic ="force-dynamic";
 
 interface Props {
-    searchParams: Promise<{ status?: string; item?: string }>;
+ searchParams: Promise<{ status?: string; item?: string }>;
 }
 
 export default async function SuggestionsPage({ searchParams }: Props) {
-    const { status: statusFilter, item: itemFilter } = await searchParams;
-    const supabase = await createClient();
+ const { status: statusFilter, item: itemFilter } = await searchParams;
+ const supabase = await createClient();
 
-    // Two-step fetch: FK goes to auth.users not public.users, so PostgREST can't join
-    let query = supabase
-        .from("catalog_suggestions")
-        .select(
-            "id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at",
-            { count: "exact" },
-        )
-        .order("created_at", { ascending: false })
-        .limit(50);
+ // Two-step fetch: FK goes to auth.users not public.users, so PostgREST can't join
+ let query = supabase
+ .from("catalog_suggestions")
+ .select(
+"id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at",
+ { count:"exact" },
+ )
+ .order("created_at", { ascending: false })
+ .limit(50);
 
-    if (statusFilter && statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
-    }
-    if (itemFilter) {
-        query = query.eq("catalog_item_id", itemFilter);
-    }
+ if (statusFilter && statusFilter !=="all") {
+ query = query.eq("status", statusFilter);
+ }
+ if (itemFilter) {
+ query = query.eq("catalog_item_id", itemFilter);
+ }
 
-    const { data: suggestions, count } = await query;
+ const { data: suggestions, count } = await query;
 
-    // Enrich with user data from public.users via admin client
-    const admin = getAdminClient();
-    const userIds = [...new Set((suggestions ?? []).map((s: { user_id: string }) => s.user_id))];
-    const userMap: Record<string, { alias_name: string; approved_suggestions_count: number }> = {};
-    if (userIds.length > 0) {
-        const { data: users } = await admin
-            .from("users")
-            .select("id, alias_name, approved_suggestions_count")
-            .in("id", userIds);
-        for (const u of (users ?? []) as { id: string; alias_name: string; approved_suggestions_count: number }[]) {
-            userMap[u.id] = { alias_name: u.alias_name, approved_suggestions_count: u.approved_suggestions_count };
-        }
-    }
+ // Enrich with user data from public.users via admin client
+ const admin = getAdminClient();
+ const userIds = [...new Set((suggestions ?? []).map((s: { user_id: string }) => s.user_id))];
+ const userMap: Record<string, { alias_name: string; approved_suggestions_count: number }> = {};
+ if (userIds.length > 0) {
+ const { data: users } = await admin
+ .from("users")
+ .select("id, alias_name, approved_suggestions_count")
+ .in("id", userIds);
+ for (const u of (users ?? []) as { id: string; alias_name: string; approved_suggestions_count: number }[]) {
+ userMap[u.id] = { alias_name: u.alias_name, approved_suggestions_count: u.approved_suggestions_count };
+ }
+ }
 
-    // Get comment counts per suggestion
-    const suggestionIds = (suggestions ?? []).map((s: { id: string }) => s.id);
+ // Get comment counts per suggestion
+ const suggestionIds = (suggestions ?? []).map((s: { id: string }) => s.id);
 
-    let commentCounts: Record<string, number> = {};
-    if (suggestionIds.length > 0) {
-        const { data: comments } = await supabase
-            .from("catalog_suggestion_comments")
-            .select("suggestion_id")
-            .in("suggestion_id", suggestionIds);
-        for (const c of (comments ?? []) as { suggestion_id: string }[]) {
-            commentCounts[c.suggestion_id] = (commentCounts[c.suggestion_id] || 0) + 1;
-        }
-    }
+ let commentCounts: Record<string, number> = {};
+ if (suggestionIds.length > 0) {
+ const { data: comments } = await supabase
+ .from("catalog_suggestion_comments")
+ .select("suggestion_id")
+ .in("suggestion_id", suggestionIds);
+ for (const c of (comments ?? []) as { suggestion_id: string }[]) {
+ commentCounts[c.suggestion_id] = (commentCounts[c.suggestion_id] || 0) + 1;
+ }
+ }
 
-    const currentStatus = statusFilter ?? "all";
-    const tabs = [
-        { key: "all", label: "All" },
-        { key: "pending", label: "🟡 Pending" },
-        { key: "approved", label: "✅ Approved" },
-        { key: "auto_approved", label: "⚡ Auto" },
-        { key: "rejected", label: "❌ Rejected" },
-    ];
+ const currentStatus = statusFilter ??"all";
+ const tabs = [
+ { key:"all", label:"All" },
+ { key:"pending", label:"🟡 Pending" },
+ { key:"approved", label:"✅ Approved" },
+ { key:"auto_approved", label:"⚡ Auto" },
+ { key:"rejected", label:"❌ Rejected" },
+ ];
 
-    return (
-        <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
-            <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
-                <Link href="/catalog">📚 Reference Catalog</Link>
-                <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
-                    ›
-                </span>
-                <span>Suggestions</span>
-            </nav>
+ return (
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <Link href="/catalog">📚 Reference Catalog</Link>
+ <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ ›
+ </span>
+ <span>Suggestions</span>
+ </nav>
 
-            <h1 className="mb-1 font-sans text-[calc(1.8rem*var(--font-scale))]">
-                📝 <span className="text-forest">Catalog Suggestions</span>
-            </h1>
-            <p className="text-muted mb-6">
-                Community proposals to improve the reference catalog. Vote and discuss to help admins review.
-            </p>
+ <h1 className="mb-1 font-sans text-[calc(1.8rem*var(--font-scale))]">
+ 📝 <span className="text-forest">Catalog Suggestions</span>
+ </h1>
+ <p className="text-muted mb-6">
+ Community proposals to improve the reference catalog. Vote and discuss to help admins review.
+ </p>
 
-            {/* Filter Tabs */}
-            <div className="ref-filter-tabs">
-                {tabs.map((tab) => (
-                    <Link
-                        key={tab.key}
-                        href={`/catalog/suggestions?status=${tab.key}${itemFilter ? `&item=${itemFilter}` : ""}`}
-                        className={`ref-filter-tab ${currentStatus === tab.key ? "ref-filter-tab-active" : ""}`}
-                    >
-                        {tab.label}
-                    </Link>
-                ))}
-            </div>
+ {/* Filter Tabs */}
+ <div className="ref-filter-tabs">
+ {tabs.map((tab) => (
+ <Link
+ key={tab.key}
+ href={`/catalog/suggestions?status=${tab.key}${itemFilter ? `&item=${itemFilter}` :""}`}
+ className={`ref-filter-tab ${currentStatus === tab.key ?"ref-filter-tab-active" :""}`}
+ >
+ {tab.label}
+ </Link>
+ ))}
+ </div>
 
-            {/* Results */}
-            <p className="text-muted mb-2 text-[calc(0.85rem*var(--font-scale))]">{count ?? 0} suggestions</p>
+ {/* Results */}
+ <p className="text-muted mb-2 text-[calc(0.85rem*var(--font-scale))]">{count ?? 0} suggestions</p>
 
-            <div className="flex flex-col gap-2">
-                {(
-                    suggestions as unknown as {
-                        id: string;
-                        user_id: string;
-                        catalog_item_id: string | null;
-                        suggestion_type: string;
-                        field_changes: Record<string, unknown>;
-                        reason: string;
-                        status: string;
-                        upvotes: number;
-                        downvotes: number;
-                        created_at: string;
-                    }[]
-                )?.map((s) => {
-                    const userData = userMap[s.user_id];
-                    const typeIcon =
-                        s.suggestion_type === "correction"
-                            ? "🔧"
-                            : s.suggestion_type === "addition"
-                              ? "📗"
-                              : s.suggestion_type === "photo"
-                                ? "📸"
-                                : "🗑";
+ <div className="flex flex-col gap-2">
+ {(
+ suggestions as unknown as {
+ id: string;
+ user_id: string;
+ catalog_item_id: string | null;
+ suggestion_type: string;
+ field_changes: Record<string, unknown>;
+ reason: string;
+ status: string;
+ upvotes: number;
+ downvotes: number;
+ created_at: string;
+ }[]
+ )?.map((s) => {
+ const userData = userMap[s.user_id];
+ const typeIcon =
+ s.suggestion_type ==="correction"
+ ?"🔧"
+ : s.suggestion_type ==="addition"
+ ?"📗"
+ : s.suggestion_type ==="photo"
+ ?"📸"
+ :"🗑";
 
-                    const statusBadge =
-                        s.status === "pending"
-                            ? "ref-status-pending"
-                            : s.status === "approved"
-                              ? "ref-status-approved"
-                              : s.status === "auto_approved"
-                                ? "ref-status-auto"
-                                : s.status === "rejected"
-                                  ? "ref-status-rejected"
-                                  : "";
+ const statusBadge =
+ s.status ==="pending"
+ ?"ref-status-pending"
+ : s.status ==="approved"
+ ?"ref-status-approved"
+ : s.status ==="auto_approved"
+ ?"ref-status-auto"
+ : s.status ==="rejected"
+ ?"ref-status-rejected"
+ :"";
 
-                    // Build change summary
-                    let changeSummary = "";
-                    if (s.suggestion_type === "correction" && s.field_changes) {
-                        const changes = Object.entries(s.field_changes)
-                            .map(([k, v]) => {
-                                const val = v as { from: string; to: string };
-                                return `${k}: ${val.from} → ${val.to}`;
-                            })
-                            .join(", ");
-                        changeSummary = changes;
-                    } else if (s.suggestion_type === "addition") {
-                        changeSummary = `New: ${(s.field_changes as { title?: string })?.title ?? "Untitled"}`;
-                    }
+ // Build change summary
+ let changeSummary ="";
+ if (s.suggestion_type ==="correction" && s.field_changes) {
+ const changes = Object.entries(s.field_changes)
+ .map(([k, v]) => {
+ const val = v as { from: string; to: string };
+ return `${k}: ${val.from} → ${val.to}`;
+ })
+ .join(",");
+ changeSummary = changes;
+ } else if (s.suggestion_type ==="addition") {
+ changeSummary = `New: ${(s.field_changes as { title?: string })?.title ??"Untitled"}`;
+ }
 
-                    const curatorCount = userData?.approved_suggestions_count ?? 0;
-                    const curatorIcon =
-                        curatorCount >= 200
-                            ? "🥇"
-                            : curatorCount >= 50
-                              ? "🥈"
-                              : curatorCount >= 10
-                                ? "🥉"
-                                : curatorCount >= 1
-                                  ? "📘"
-                                  : "";
+ const curatorCount = userData?.approved_suggestions_count ?? 0;
+ const curatorIcon =
+ curatorCount >= 200
+ ?"🥇"
+ : curatorCount >= 50
+ ?"🥈"
+ : curatorCount >= 10
+ ?"🥉"
+ : curatorCount >= 1
+ ?"📘"
+ :"";
 
-                    return (
-                        <Link
-                            key={s.id}
-                            href={`/catalog/suggestions/${s.id}`}
-                            className="bg-card border-edge block rounded-lg border p-4 p-12 text-[var(--color-text)] no-underline shadow-md transition-all transition-transform max-[480px]:rounded-[var(--radius-md)]"
-                        >
-                            <div className="mb-1 flex items-center justify-between">
-                                <span className="text-[1.2rem]">{typeIcon}</span>
-                                <span className={`ref-status-badge ${statusBadge}`}>{s.status.replace(/_/g, " ")}</span>
-                            </div>
+ return (
+ <Link
+ key={s.id}
+ href={`/catalog/suggestions/${s.id}`}
+ className="bg-card border-edge block rounded-lg border p-4 text-[var(--color-text)] no-underline shadow-md transition-all transition-transform"
+ >
+ <div className="mb-1 flex items-center justify-between">
+ <span className="text-[1.2rem]">{typeIcon}</span>
+ <span className={`ref-status-badge ${statusBadge}`}>{s.status.replace(/_/g,"")}</span>
+ </div>
 
-                            <div className="ref-suggestion-body">
-                                {changeSummary && (
-                                    <p className="mb-[4px] text-[calc(0.9rem*var(--font-scale))] font-medium">
-                                        {changeSummary}
-                                    </p>
-                                )}
-                                <p className="text-muted text-[calc(0.8rem*var(--font-scale))] italic">
-                                    &ldquo;{s.reason.slice(0, 120)}
-                                    {s.reason.length > 120 ? "…" : ""}&rdquo;
-                                </p>
-                            </div>
+ <div className="ref-suggestion-body">
+ {changeSummary && (
+ <p className="mb-[4px] text-[calc(0.9rem*var(--font-scale))] font-medium">
+ {changeSummary}
+ </p>
+ )}
+ <p className="text-muted text-[calc(0.8rem*var(--font-scale))] italic">
+ &ldquo;{s.reason.slice(0, 120)}
+ {s.reason.length > 120 ?"…" :""}&rdquo;
+ </p>
+ </div>
 
-                            <div className="text-muted mt-2 flex items-center gap-4 text-[calc(0.8rem*var(--font-scale))]">
-                                <span className="font-semibold">
-                                    {curatorIcon} @{userData?.alias_name ?? "Unknown"}
-                                </span>
-                                <span className="ml-auto">
-                                    ▲ {s.upvotes} ▼ {s.downvotes}
-                                    {(commentCounts[s.id] ?? 0) > 0 && <> · 💬 {commentCounts[s.id]}</>}
-                                </span>
-                                <span className="ref-suggestion-date">
-                                    {new Date(s.created_at).toLocaleDateString()}
-                                </span>
-                            </div>
-                        </Link>
-                    );
-                })}
+ <div className="text-muted mt-2 flex items-center gap-4 text-[calc(0.8rem*var(--font-scale))]">
+ <span className="font-semibold">
+ {curatorIcon} @{userData?.alias_name ??"Unknown"}
+ </span>
+ <span className="ml-auto">
+ ▲ {s.upvotes} ▼ {s.downvotes}
+ {(commentCounts[s.id] ?? 0) > 0 && <> · 💬 {commentCounts[s.id]}</>}
+ </span>
+ <span className="ref-suggestion-date">
+ {new Date(s.created_at).toLocaleDateString()}
+ </span>
+ </div>
+ </Link>
+ );
+ })}
 
-                {(suggestions ?? []).length === 0 && (
-                    <div className="bg-card border-edge text-muted rounded-lg border p-8 p-12 text-center shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-                        <p>No suggestions yet. Be the first to contribute!</p>
-                        <Link
-                            href="/catalog"
-                            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
-                        >
-                            Browse Catalog
-                        </Link>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+ {(suggestions ?? []).length === 0 && (
+ <div className="bg-card border-edge text-muted rounded-lg border p-8 text-center shadow-md transition-all">
+ <p>No suggestions yet. Be the first to contribute!</p>
+ <Link
+ href="/catalog"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ >
+ Browse Catalog
+ </Link>
+ </div>
+ )}
+ </div>
+ </div>
+ );
 }

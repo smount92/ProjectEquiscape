@@ -1,111 +1,111 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { submitReport, getReportReasons } from "@/app/actions/moderation";
+import { useState, useEffect } from"react";
+import { submitReport, getReportReasons } from"@/app/actions/moderation";
 
 export default function ReportButton({
-    targetType,
-    targetId,
+ targetType,
+ targetId,
 }: {
-    targetType: "post" | "horse" | "user" | "comment" | "message";
-    targetId: string;
+ targetType:"post" |"horse" |"user" |"comment" |"message";
+ targetId: string;
 }) {
-    const [showForm, setShowForm] = useState(false);
-    const [reason, setReason] = useState("");
-    const [details, setDetails] = useState("");
-    const [saving, setSaving] = useState(false);
-    const [done, setDone] = useState(false);
-    const [error, setError] = useState("");
-    const [reasons, setReasons] = useState<string[]>([]);
+ const [showForm, setShowForm] = useState(false);
+ const [reason, setReason] = useState("");
+ const [details, setDetails] = useState("");
+ const [saving, setSaving] = useState(false);
+ const [done, setDone] = useState(false);
+ const [error, setError] = useState("");
+ const [reasons, setReasons] = useState<string[]>([]);
 
-    useEffect(() => {
-        if (showForm && reasons.length === 0) {
-            getReportReasons().then(setReasons);
-        }
-    }, [showForm, reasons.length]);
+ useEffect(() => {
+ if (showForm && reasons.length === 0) {
+ getReportReasons().then(setReasons);
+ }
+ }, [showForm, reasons.length]);
 
-    const handleSubmit = async () => {
-        if (!reason) return;
-        setSaving(true);
-        setError("");
-        const result = await submitReport({
-            targetType,
-            targetId,
-            reason,
-            details: details.trim() || undefined,
-        });
-        if (result.success) {
-            setDone(true);
-        } else {
-            setError(result.error || "Failed to submit report.");
-        }
-        setSaving(false);
-    };
+ const handleSubmit = async () => {
+ if (!reason) return;
+ setSaving(true);
+ setError("");
+ const result = await submitReport({
+ targetType,
+ targetId,
+ reason,
+ details: details.trim() || undefined,
+ });
+ if (result.success) {
+ setDone(true);
+ } else {
+ setError(result.error ||"Failed to submit report.");
+ }
+ setSaving(false);
+ };
 
-    if (done) {
-        return <span className="text-muted text-xs">✅ Reported</span>;
-    }
+ if (done) {
+ return <span className="text-muted text-xs">✅ Reported</span>;
+ }
 
-    if (!showForm) {
-        return (
-            <button
-                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
-                onClick={() => setShowForm(true)}
-                style={{
-                    fontSize: "calc(var(--font-size-xs) * var(--font-scale))",
-                    color: "var(--color-text-muted)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "var(--space-xs)",
-                }}
-                title="Report"
-            >
-                🚩 Report
-            </button>
-        );
-    }
+ if (!showForm) {
+ return (
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ onClick={() => setShowForm(true)}
+ style={{
+ fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
+ color:"var(--color-text-muted)",
+ background:"none",
+ border:"none",
+ cursor:"pointer",
+ padding:"var(--space-xs)",
+ }}
+ title="Report"
+ >
+ 🚩 Report
+ </button>
+ );
+ }
 
-    return (
-        <div className="bg-bg-card border-edge border-edge mt-2 rounded-lg border p-4 p-12 shadow-md transition-all max-[480px]:rounded-[var(--radius-md)]">
-            <select
-                className="form-input"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                style={{ marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
-            >
-                <option value="">Select a reason…</option>
-                {reasons.map((r) => (
-                    <option key={r} value={r}>
-                        {r}
-                    </option>
-                ))}
-            </select>
-            <textarea
-                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
-                placeholder="Additional details (optional)"
-                value={details}
-                onChange={(e) => setDetails(e.target.value)}
-                rows={2}
-                maxLength={500}
-                style={{ marginBottom: "var(--space-sm)", fontSize: "calc(var(--font-size-sm) * var(--font-scale))" }}
-            />
-            {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
-            <div className="gap-1" style={{ display: "flex" }}>
-                <button
-                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
-                    onClick={handleSubmit}
-                    disabled={saving || !reason}
-                >
-                    {saving ? "…" : "Submit Report"}
-                </button>
-                <button
-                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
-                    onClick={() => setShowForm(false)}
-                >
-                    Cancel
-                </button>
-            </div>
-        </div>
-    );
+ return (
+ <div className="bg-card border-edge mt-2 rounded-lg border p-4 shadow-md transition-all">
+ <select
+ className="form-input"
+ value={reason}
+ onChange={(e) => setReason(e.target.value)}
+ style={{ marginBottom:"var(--space-sm)", fontSize:"calc(var(--font-size-sm) * var(--font-scale))" }}
+ >
+ <option value="">Select a reason…</option>
+ {reasons.map((r) => (
+ <option key={r} value={r}>
+ {r}
+ </option>
+ ))}
+ </select>
+ <textarea
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ placeholder="Additional details (optional)"
+ value={details}
+ onChange={(e) => setDetails(e.target.value)}
+ rows={2}
+ maxLength={500}
+ style={{ marginBottom:"var(--space-sm)", fontSize:"calc(var(--font-size-sm) * var(--font-scale))" }}
+ />
+ {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
+ <div className="gap-1" style={{ display:"flex" }}>
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ onClick={handleSubmit}
+ disabled={saving || !reason}
+ >
+ {saving ?"…" :"Submit Report"}
+ </button>
+ <button
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ onClick={() => setShowForm(false)}
+ >
+ Cancel
+ </button>
+ </div>
+ </div>
+ );
 }
