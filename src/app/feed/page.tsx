@@ -54,16 +54,16 @@ export default async function FeedPage({
             </div>
 
             {/* Tab Bar */}
-            <div className="feed-tabs animate-fade-in-up">
+            <div className="flex gap-1 bg-black/[0.04] rounded-lg p-[3px] border border-black/[0.06] mb-xl w-fit animate-fade-in-up">
                 <Link
                     href="/feed"
-                    className={`feed-tab ${activeTab === "global" ? "feed-tab-active" : ""}`}
+                    className={`py-2 px-5 no-underline text-text-muted rounded-[calc(var(--radius-lg)-2px)] text-[calc(0.9rem*var(--font-scale))] transition-all whitespace-nowrap hover:text-text-primary hover:bg-black/[0.06] ${activeTab === "global" ? "!bg-accent-primary !text-white font-semibold shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : ""}`}
                 >
                     🌐 Global
                 </Link>
                 <Link
                     href="/feed?tab=following"
-                    className={`feed-tab ${activeTab === "following" ? "feed-tab-active" : ""}`}
+                    className={`py-2 px-5 no-underline text-text-muted rounded-[calc(var(--radius-lg)-2px)] text-[calc(0.9rem*var(--font-scale))] transition-all whitespace-nowrap hover:text-text-primary hover:bg-black/[0.06] ${activeTab === "following" ? "!bg-accent-primary !text-white font-semibold shadow-[0_2px_8px_rgba(129,140,248,0.25)]" : ""}`}
                 >
                     👥 Following
                 </Link>

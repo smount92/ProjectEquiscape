@@ -19,7 +19,7 @@ import "@/components/TrophyCase.css";
 import "@/components/CsvImport.css";
 // Social components
 
-import "@/components/FollowFeed.css";
+
 import "@/components/ChatGuardrails.css";
 import "@/components/SocialFoundation.css";
 // Page-specific styles

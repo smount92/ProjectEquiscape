@@ -39,7 +39,7 @@ export default function MessageUserButton({
     return (
         <div className="message-user-btn-wrapper">
             <button
-                className="btn btn-ghost message-user-btn"
+                className="btn btn-ghost inline-flex items-center gap-sm !text-sm !py-sm !px-lg [&_svg]:shrink-0 hover:!text-accent-primary hover:!border-accent-primary"
                 onClick={handleClick}
                 disabled={loading}
                 id={`message-user-${targetAlias}`}

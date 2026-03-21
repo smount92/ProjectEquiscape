@@ -96,7 +96,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
     }
 
     return (
-        <div className="activity-feed animate-fade-in-up">
+        <div className="flex flex-col border border-border rounded-lg overflow-hidden animate-fade-in-up">
             {items.map((item) => {
                 const link = item.horseId
                     ? `/community/${item.horseId}`
@@ -108,7 +108,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                     <div key={item.id} className="activity-feed-item-wrapper">
                         <Link
                             href={link}
-                            className="activity-feed-item"
+                            className="flex items-center gap-md py-md px-lg border-b border-border no-underline text-inherit transition-colors last:border-b-0 hover:bg-black/[0.03]"
                         >
                             {item.thumbnailUrl ? (
                                 <div className="feed-item-thumb">
@@ -116,14 +116,14 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                                     <img src={item.thumbnailUrl} alt="" loading="lazy" />
                                 </div>
                             ) : (
-                                <span className="activity-feed-icon">
+                                <span className="text-[calc(1.2rem*var(--font-scale))] shrink-0">
                                     {getEventIcon(item.eventType)}
                                 </span>
                             )}
-                            <div className="activity-feed-content">
+                            <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                                 {item.eventType === "text_post" ? (
                                     <>
-                                        <span className="activity-feed-text" style={{ fontWeight: 600 }}>
+                                        <span className="text-[calc(0.9rem*var(--font-scale))] font-semibold">
                                             @{item.actorAlias}
                                         </span>
                                         <div className="feed-item-text-post">
@@ -138,16 +138,16 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                                                 ))}
                                             </div>
                                         )}
-                                        <span className="activity-feed-time">
+                                        <span className="text-[calc(0.75rem*var(--font-scale))] text-text-muted">
                                             {timeAgo(item.createdAt)}
                                         </span>
                                     </>
                                 ) : (
                                     <>
-                                        <span className="activity-feed-text">
+                                        <span className="text-[calc(0.9rem*var(--font-scale))]">
                                             {getEventText(item)}
                                         </span>
-                                        <span className="activity-feed-time">
+                                        <span className="text-[calc(0.75rem*var(--font-scale))] text-text-muted">
                                             {timeAgo(item.createdAt)}
                                         </span>
                                     </>
@@ -155,7 +155,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
                             </div>
                         </Link>
                         {/* Action row: Like + Delete (outside the Link to avoid navigation) */}
-                        <div className="feed-action-row">
+                        <div className="flex items-center gap-sm mt-xs">
                             {currentUserId && (
                                 <LikeToggle
                                     initialLiked={item.isLiked}

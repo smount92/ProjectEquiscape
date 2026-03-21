@@ -358,14 +358,14 @@ export default async function ProfilePage({
             isOwnProfile={isOwnProfile}
           />
           {(followStats.followerCount > 0 || followStats.followingCount > 0) && (
-            <div className="profile-follow-stats">
+            <div className="flex items-center gap-sm text-[calc(0.85rem*var(--font-scale))] text-text-muted mt-xs">
               <span>{followStats.followerCount} follower{followStats.followerCount !== 1 ? "s" : ""}</span>
               <span>·</span>
               <span>{followStats.followingCount} following</span>
             </div>
           )}
           {!isOwnProfile && (
-            <div className="profile-action-row">
+            <div className="flex items-center gap-sm mt-sm flex-wrap">
               <MessageUserButton
                 targetUserId={profileUser.id}
                 targetAlias={profileUser.alias_name}
