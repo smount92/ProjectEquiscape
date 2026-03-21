@@ -70,11 +70,11 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
                     </p>
                 </div>
             ) : (
-                <div className="studio-commission-grid">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] max-md:grid-cols-1 gap-md">
                     {filteredCommissions.map(c => (
-                        <div key={c.id} className="studio-commission-card">
-                            <div className="studio-commission-header">
-                                <span className="studio-commission-type">{c.commissionType}</span>
+                        <div key={c.id} className="flex flex-col p-lg rounded-lg bg-[var(--color-bg-elevated)] border border-border transition-all hover:border-[rgba(139,92,246,0.3)] hover:-translate-y-[1px]">
+                            <div className="flex justify-between items-center mb-sm gap-sm">
+                                <span className="font-bold text-[calc(0.95rem*var(--font-scale))]">{c.commissionType}</span>
                                 <span
                                     className="commission-status-badge"
                                     style={{ backgroundColor: `${STATUS_COLORS[c.status]}20`, color: STATUS_COLORS[c.status], border: `1px solid ${STATUS_COLORS[c.status]}40` }}

@@ -40,16 +40,16 @@ export default async function MyCommissionsPage() {
                 <h2 style={{ fontSize: "calc(1.1rem * var(--font-scale))", marginBottom: "var(--space-md)" }}>
                     {emoji} {title} ({items.length})
                 </h2>
-                <div className="studio-commission-grid">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] max-md:grid-cols-1 gap-md">
                     {items.map(c => (
                         <Link
                             key={c.id}
                             href={`/studio/commission/${c.id}`}
-                            className="studio-commission-card"
+                            className="flex flex-col p-lg rounded-lg bg-[var(--color-bg-elevated)] border border-border transition-all hover:border-[rgba(139,92,246,0.3)] hover:-translate-y-[1px]"
                             style={{ textDecoration: "none", color: "inherit" }}
                         >
-                            <div className="studio-commission-header">
-                                <span className="studio-commission-type">{c.commissionType}</span>
+                            <div className="flex justify-between items-center mb-sm gap-sm">
+                                <span className="font-bold text-[calc(0.95rem*var(--font-scale))]">{c.commissionType}</span>
                                 <span
                                     className="commission-status-badge"
                                     style={{ backgroundColor: `${STATUS_COLORS[c.status]}20`, color: STATUS_COLORS[c.status], border: `1px solid ${STATUS_COLORS[c.status]}40` }}
@@ -57,11 +57,11 @@ export default async function MyCommissionsPage() {
                                     {c.statusLabel}
                                 </span>
                             </div>
-                            <div className="studio-commission-meta">
+                            <div className="flex gap-md text-[calc(0.8rem*var(--font-scale))] text-text-muted mb-sm">
                                 <span>🎨 @{c.artistAlias}</span>
                                 {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
                             </div>
-                            <p className="studio-commission-desc">
+                            <p className="text-[calc(0.85rem*var(--font-scale))] text-text-secondary leading-normal mb-sm">
                                 {c.description.length > 100 ? c.description.substring(0, 100) + "…" : c.description}
                             </p>
                             <div style={{ marginTop: "auto", paddingTop: "var(--space-sm)", fontSize: "calc(0.7rem * var(--font-scale))", color: "var(--color-text-muted)" }}>
