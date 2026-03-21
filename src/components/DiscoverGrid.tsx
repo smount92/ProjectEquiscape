@@ -190,7 +190,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
                                             </span>
                                         )}
                                         {u.has_studio && (
-                                            <span className="discover-studio-badge" title="Has an Art Studio">
+                                            <span className="ml-1 text-[0.85em]" title="Has an Art Studio">
                                                 🎨
                                             </span>
                                         )}
