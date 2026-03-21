@@ -2422,41 +2422,6 @@ p {
 }
 
 
-/* ================================================================
-   PUBLIC PASSPORT — OWNER BADGE
-   ================================================================ */
-
-.community-owner-badge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius-md);
-  background: rgba(44, 85, 69, 0.06);
-  border: 1px solid rgba(44, 85, 69, 0.15);
-  font-size: calc(var(--font-size-sm) * var(--font-scale));
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-md);
-}
-
-.community-owner-badge strong {
-  color: var(--color-accent-primary);
-}
-
-.community-own-badge {
-  display: inline-flex;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  background: var(--gradient-accent);
-  color: white;
-  font-size: calc(0.65rem * var(--font-scale));
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-
-/* ================================================================
    RESPONSIVE — COMMUNITY
    ================================================================ */
 
@@ -2483,53 +2448,6 @@ p {
 }
 
 
-/* ================================================================
-   TOGGLE SWITCH
-   ================================================================ */
-
-.toggle-switch {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  width: 52px;
-  height: 28px;
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  padding: 2px;
-  transition: background-color var(--transition-fast);
-  flex-shrink: 0;
-}
-
-.toggle-on {
-  background: var(--color-accent-primary);
-}
-
-.toggle-off {
-  background: rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--color-border);
-}
-
-.toggle-knob {
-  display: block;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform var(--transition-fast);
-}
-
-.toggle-on .toggle-knob {
-  transform: translateX(24px);
-}
-
-.toggle-off .toggle-knob {
-  transform: translateX(0);
-}
-
-
-/* ================================================================
    COMMUNITY TOGGLE SECTION (Intake & Edit Forms)
    ================================================================ */
 
@@ -2653,90 +2571,6 @@ p {
 }
 
 
-/* ================================================================
-   COLLECTIONS — Dashboard Row
-   ================================================================ */
-
-.collections-row {
-  margin-bottom: var(--space-xl);
-}
-
-.collections-row-title {
-  font-size: calc(var(--font-size-md) * var(--font-scale));
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-md);
-}
-
-.collections-scroll {
-  display: flex;
-  gap: var(--space-md);
-  overflow-x: auto;
-  padding-bottom: var(--space-sm);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
-}
-
-.collections-scroll::-webkit-scrollbar {
-  height: 4px;
-}
-
-.collections-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.collections-scroll::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 2px;
-}
-
-.collection-folder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-xs);
-  min-width: 120px;
-  padding: var(--space-md) var(--space-lg);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  text-decoration: none;
-  color: var(--color-text-primary);
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.collection-folder:hover {
-  transform: translateY(-2px);
-  border-color: rgba(44, 85, 69, 0.3);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  text-decoration: none;
-  color: var(--color-text-primary);
-}
-
-.collection-folder-icon {
-  font-size: 1.8rem;
-}
-
-.collection-folder-name {
-  font-size: calc(var(--font-size-sm) * var(--font-scale));
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.3;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.collection-folder-count {
-  font-size: calc(0.7rem * var(--font-scale));
-  color: var(--color-text-muted);
-}
-
-
-/* ================================================================
    COLLECTIONS — Horse Card Badge
    ================================================================ */
 
@@ -3554,72 +3388,6 @@ p {
 }
 
 
-/* ============================================================
-   LANDING PAGE — FOOTER
-   ============================================================ */
-.landing-footer {
-  border-top: 1px solid rgba(139, 90, 43, 0.2);
-  background: #3B2A1A;
-  padding: var(--space-2xl) var(--space-xl);
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.footer-inner {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-lg);
-}
-
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-weight: 700;
-  font-size: calc(var(--font-size-md) * var(--font-scale));
-}
-
-.footer-logo-icon {
-  font-size: 1.4em;
-}
-
-.footer-logo-text {
-  color: #F0EAD6;
-}
-
-.footer-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xl);
-}
-
-.footer-link {
-  font-size: calc(var(--font-size-sm) * var(--font-scale));
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-.footer-link:hover {
-  color: #D4A76A;
-  text-decoration: none;
-}
-
-.footer-copy {
-  width: 100%;
-  text-align: center;
-  font-size: calc(var(--font-size-xs) * var(--font-scale));
-  color: rgba(255, 255, 255, 0.4);
-  margin-top: var(--space-md);
-  padding-top: var(--space-lg);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ============================================================
    LANDING PAGE — RESPONSIVE
    ============================================================ */
 @media (max-width: 900px) {
@@ -10342,48 +10110,6 @@ p {
   text-align: center;
 }
 
-/* ===== Personas ===== */
-.personas-section {
-  padding: var(--space-3xl) var(--space-xl);
-  text-align: center;
-}
-
-.personas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-xl);
-  margin-top: var(--space-2xl);
-}
-
-.persona-card {
-  padding: var(--space-xl);
-  border-radius: var(--radius-xl);
-  background: rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  text-align: center;
-  transition: transform 0.3s, border-color 0.3s;
-}
-
-.persona-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(44, 85, 69, 0.3);
-}
-
-.persona-emoji {
-  font-size: 3rem;
-  margin-bottom: var(--space-md);
-}
-
-.persona-card h3 {
-  font-size: calc(1.1rem * var(--font-scale));
-  margin-bottom: var(--space-sm);
-}
-
-.persona-card p {
-  font-size: calc(var(--font-size-sm) * var(--font-scale));
-}
-
-/* ===== User Avatar (Reusable) ===== */
 .user-avatar {
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.06);
