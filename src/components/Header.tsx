@@ -234,7 +234,7 @@ export default function Header() {
 
     return (
         <header
-            className="h-[var(--sticky h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-height)] bg-parchment-dark border-edge sticky top-0 z-[100] flex items-center justify-between border-b px-8 py-[0] transition-all max-sm:py-[0]"
+            className="sticky top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b border-edge bg-parchment-dark px-8 py-0 transition-all max-sm:px-4"
             role="banner"
         >
             <Link
@@ -251,7 +251,7 @@ export default function Header() {
             {/* ── Hamburger Button (mobile only) ── */}
             {user && (
                 <button
-                    className="border-edge hidden h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border bg-transparent text-[var(--color-text-secondary)] transition-all"
+                    className="hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent text-[var(--color-text-secondary)] transition-all"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                     aria-expanded={mobileMenuOpen}
@@ -333,7 +333,7 @@ export default function Header() {
                                 <ChevronDown size={12} strokeWidth={2} className="ml-[2]" />
                             </button>
                             {moreMenuOpen && (
-                                <div className="top-[calc(100% + 8px)] border-edge absolute right-0 z-[200] flex min-w-[200px] flex-col rounded-lg border bg-[var(--color-bg-secondary)] p-1 shadow-lg">
+                                <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-edge bg-[var(--color-bg-secondary)] p-1 shadow-lg">
                                     {overflowLinks.map((link) => (
                                         <Link
                                             key={link.id}
@@ -389,12 +389,12 @@ export default function Header() {
                     {/* User menu dropdown */}
                     <div className="relative" ref={userMenuRef}>
                         <button
-                            className="relative-trigger"
+                            className="flex cursor-pointer items-center gap-1 rounded-full border-0 bg-transparent p-1 transition-all"
                             onClick={() => setUserMenuOpen(!userMenuOpen)}
                             aria-expanded={userMenuOpen}
                             aria-label="User menu"
                         >
-                            <span className="h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-rounded-full bg-[rgba(0, 0, 0, 0.06)] text-muted sticky top-0 z-[100] flex inline-flex shrink-0 items-center justify-between justify-center overflow-hidden border-b px-8 py-[0] font-bold max-sm:py-[0]">
+                            <span className="inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgba(0,0,0,0.06)] font-bold text-muted">
                                 {avatarUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
@@ -425,7 +425,7 @@ export default function Header() {
                             </svg>
                         </button>
                         {userMenuOpen && (
-                            <div className="top-[calc(100% + 8px)] border-edge absolute right-0 z-[200] flex min-w-[200px] flex-col rounded-lg border bg-[var(--color-bg-secondary)] p-1 shadow-lg">
+                            <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-edge bg-[var(--color-bg-secondary)] p-1 shadow-lg">
                                 <Link
                                     href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
                                     className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-[var(--color-text-secondary)] no-underline transition-all"
@@ -463,7 +463,7 @@ export default function Header() {
                                         <Zap size={16} strokeWidth={1.5} /> Admin
                                     </Link>
                                 )}
-                                <div className="bg-edge m-[var(--space-xs) 0] h-[1px]" />
+                                <div className="mx-1 my-1 h-px bg-edge" />
                                 <button
                                     className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-[var(--color-text-secondary)] no-underline transition-all"
                                     onClick={() => {
@@ -502,7 +502,7 @@ export default function Header() {
             {user && (
                 <nav
                     ref={navRef}
-                    className={`header-nav header-nav-mobile ${mobileMenuOpen ? "header-nav-open" : ""}`}
+                    className={`absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-edge bg-parchment-dark px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ? "" : "hidden"}`}
                     aria-label="Mobile navigation"
                 >
                     <Link
@@ -641,7 +641,7 @@ export default function Header() {
                     {isAdmin && (
                         <Link
                             href="/admin"
-                            className="text-[#f59e0b !important] flex items-center gap-1 rounded-md px-2 py-1 text-sm text-xs font-bold font-medium whitespace-nowrap text-[var(--color-text-secondary)] no-underline transition-all"
+                            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold whitespace-nowrap text-[#f59e0b] no-underline transition-all"
                             id="nav-admin-m"
                             onClick={closeMobileMenu}
                         >
@@ -649,9 +649,9 @@ export default function Header() {
                         </Link>
                     )}
                     {/* ── Mobile-only: Sign Out + Simple Mode ── */}
-                    <div className="hidden">
+                    <div className="mt-2 flex flex-col gap-1 border-t border-edge pt-2">
                         <button
-                            className="hover:no-underline-min-h)] text-ink-light border-edge inline-flex min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-[transparent] bg-transparent px-8 py-2 font-sans text-base leading-none font-semibold no-underline transition-all duration-150"
+                            className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm text-[var(--color-text-secondary)] transition-all"
                             onClick={() => {
                                 closeMobileMenu();
                                 handleSignOut();
@@ -689,7 +689,7 @@ export default function Header() {
             {/* ── Public Navigation (not signed in) ── */}
             {!user && (
                 <nav
-                    className="h-[var(--header max-sm:px-4-height)] bg-parchment-dark border-edge transition-all-nav sticky top-0 z-[100] flex flex-row items-center justify-between gap-4 border-b px-8 py-[0] max-sm:py-[0]"
+                    className="flex flex-row items-center gap-4"
                     aria-label="Public navigation"
                 >
                     <Link
@@ -721,7 +721,7 @@ export default function Header() {
                 <div className="flex shrink-0 items-center gap-4">
                     <Link
                         href="/login"
-                        className="hover:no-underline-min-h)] bg-forest text-inverse inline-flex min-h-[36px] min-h-[var(--opacity-[0.5] cursor-not-allowed cursor-pointer items-center justify-center gap-2 rounded-md border border-0 border-[transparent] px-6 px-8 py-1 py-2 font-sans text-base text-sm leading-none font-semibold no-underline shadow-sm transition-all duration-150"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
                         id="header-login-button"
                     >
                         Log In
