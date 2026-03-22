@@ -564,24 +564,41 @@ export default function AddHorsePage() {
 
  {/* Step Indicator */}
  <div
- className="relative mb-12 flex items-center justify-center gap-0"
+ className="relative mb-10 flex items-start justify-center"
  role="navigation"
  aria-label="Form progress"
  >
  {STEPS.map((step, i) => (
  <div
  key={step.label}
- className={`stepper-step ${
- i === currentStep ?"active" :""
- } ${i < currentStep ?"completed" :""}`}
+ className="relative flex flex-col items-center"
+ style={{ width: `${100 / STEPS.length}%` }}
  >
+ {/* Connecting line (before the dot) */}
+ {i > 0 && (
  <div
- className="relative-dot mb-12 flex items-center justify-center gap-0"
+ className={`absolute top-4 right-1/2 h-0.5 w-full ${i <= currentStep ? "bg-forest" : "bg-gray-300"}`}
+ />
+ )}
+ {/* Dot */}
+ <div
+ className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-bold transition-all ${
+ i === currentStep
+ ? "border-forest bg-forest text-white"
+ : i < currentStep
+ ? "border-forest bg-forest text-white"
+ : "border-gray-300 bg-white text-gray-400"
+ }`}
  aria-current={i === currentStep ?"step" : undefined}
  >
- {i < currentStep ?"✓" : i + 1}
+ {i < currentStep ? "✓" : i + 1}
  </div>
- <span className="relative-label mb-12 flex items-center justify-center gap-0">
+ {/* Label */}
+ <span
+ className={`mt-2 text-xs font-medium ${
+ i === currentStep ? "text-forest" : i < currentStep ? "text-ink" : "text-muted"
+ }`}
+ >
  {step.label}
  </span>
  </div>

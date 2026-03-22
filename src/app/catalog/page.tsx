@@ -59,26 +59,26 @@ export default async function ReferencePage() {
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Hero Section */}
  <div className="animate-fade-in-up px-0 py-8 text-center">
- <div className="px-0-content py-8 text-center">
+ <div>
  <h1>
  📚 <span className="text-forest">Reference Catalog</span>
  </h1>
- <p className="px-0-subtitle py-8 text-center">
+ <p className="mt-2 text-base text-muted">
  {(count ?? 0).toLocaleString()}+ model horse entries, maintained by the community
  </p>
  </div>
- <div className="px-0-stats py-8 text-center">
+ <div className="mt-6 flex flex-wrap items-center justify-center gap-8">
  <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">{(count ?? 0).toLocaleString()}</span>
- <span className="items-center-label flex flex-col">Catalog Entries</span>
+ <span className="text-3xl font-bold text-ink">{(count ?? 0).toLocaleString()}</span>
+ <span className="text-sm text-muted">Catalog Entries</span>
  </div>
  <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">{pendingSuggestions ?? 0}</span>
- <span className="items-center-label flex flex-col">Pending Suggestions</span>
+ <span className="text-3xl font-bold text-ink">{pendingSuggestions ?? 0}</span>
+ <span className="text-sm text-muted">Pending Suggestions</span>
  </div>
  <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">{recentChanges ?? 0}</span>
- <span className="items-center-label flex flex-col">Changes This Week</span>
+ <span className="text-3xl font-bold text-ink">{recentChanges ?? 0}</span>
+ <span className="text-sm text-muted">Changes This Week</span>
  </div>
  </div>
  </div>
@@ -97,9 +97,9 @@ export default async function ReferencePage() {
  {/* Sidebar */}
  <aside className="flex flex-col gap-4">
  {/* Quick Links */}
- <div className="bg-card border-edge gap-4-card flex flex-col rounded-lg border shadow-md transition-all">
- <h3 className="gap-4-title flex flex-col">📋 Community</h3>
- <div className="gap-4-links flex flex-col">
+ <div className="flex flex-col gap-3 rounded-lg border border-edge bg-card p-5 shadow-sm">
+ <h3 className="text-sm font-bold uppercase tracking-wider text-muted">📋 Community</h3>
+ <div className="flex flex-col gap-2">
  <a
  href="/catalog/suggestions"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
@@ -128,8 +128,8 @@ export default async function ReferencePage() {
 
  {/* Top Curators */}
  {(curators ?? []).length > 0 && (
- <div className="bg-card border-edge gap-4-card flex flex-col rounded-lg border shadow-md transition-all">
- <h3 className="gap-4-title flex flex-col">🏆 Top Curators</h3>
+ <div className="flex flex-col gap-3 rounded-lg border border-edge bg-card p-5 shadow-sm">
+ <h3 className="text-sm font-bold uppercase tracking-wider text-muted">🏆 Top Curators</h3>
  <ul className="m-0 list-none p-0">
  {(
  curators as {

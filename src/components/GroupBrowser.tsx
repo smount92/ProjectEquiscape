@@ -55,23 +55,29 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  return (
  <div>
  {/* Tabs */}
- <div className="studio-tabs mb-6">
- <button className={`studio-tab ${tab ==="browse" ?"active" :""}`} onClick={() => setTab("browse")}>
+ <div className="mb-6 flex gap-1 border-b border-edge">
+ <button
+ className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="browse" ?"border-forest text-forest" :"border-transparent text-muted hover:text-ink"}`}
+ onClick={() => setTab("browse")}
+ >
  🌐 Browse All
- <span className="flex cursor-pointer items-center gap-1 rounded-md border border-edge bg-card px-2 py-1 text-xs text-muted transition-all">
+ <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-bold text-forest">
  {allGroups.length}
  </span>
  </button>
- <button className={`studio-tab ${tab ==="mine" ?"active" :""}`} onClick={() => setTab("mine")}>
+ <button
+ className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="mine" ?"border-forest text-forest" :"border-transparent text-muted hover:text-ink"}`}
+ onClick={() => setTab("mine")}
+ >
  ⭐ My Groups
- <span className="flex cursor-pointer items-center gap-1 rounded-md border border-edge bg-card px-2 py-1 text-xs text-muted transition-all">
+ <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-bold text-forest">
  {myGroups.length}
  </span>
  </button>
  </div>
 
  {/* Search */}
- <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-edge z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
+ <div className="sticky top-[calc(var(--header-height)+0.75rem)] z-[10] mb-8 flex items-center gap-2 rounded-xl border border-edge bg-card px-6 py-2 shadow-md transition-all max-sm:py-0">
  <input
  type="text"
  className="form-input"
@@ -104,50 +110,51 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  <p>{tab ==="mine" ?"You haven't joined any groups yet." :"No groups found."}</p>
  </div>
  ) : (
- <div className="grid-cols-[repeat(auto-fill,minmax(320px,1fr))] grid gap-4">
+ <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">
  {filtered.map((g) => (
  <div
  key={g.id}
- className="bg-elevated border-edge flex flex-col rounded-lg border p-6 transition-colors"
+ className="flex flex-col rounded-lg border border-edge bg-card p-5 transition-shadow hover:shadow-md"
  >
- <div className="bg-elevated border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <span className="bg-elevated border-edge transition-colors-icon flex flex-col rounded-lg border p-6">
+ {/* Card Header */}
+ <div className="mb-3 flex items-start gap-3">
+ <span className="text-2xl">
  {TYPE_ICONS[g.groupType] ||"📂"}
  </span>
- <div>
+ <div className="min-w-0 flex-1">
  <Link
  href={`/community/groups/${g.slug}`}
- className="bg-elevated border-edge transition-colors-name flex flex-col rounded-lg border p-6"
+ className="text-base font-semibold text-forest hover:underline"
  >
  {g.name}
  </Link>
- <div className="bg-elevated border-edge transition-colors-meta flex flex-col rounded-lg border p-6">
+ <div className="text-xs text-muted">
  {typeLabels[g.groupType] || g.groupType}
  {g.region && <> · {g.region}</>}
  </div>
  </div>
  </div>
  {g.description && (
- <p className="bg-elevated border-edge transition-colors-desc flex flex-col rounded-lg border p-6">
+ <p className="mb-3 text-sm leading-relaxed text-ink-light">
  {g.description.slice(0, 120)}
  {g.description.length > 120 ?"..." :""}
  </p>
  )}
- <div className="bg-elevated border-edge transition-colors-footer flex flex-col rounded-lg border p-6">
- <span className="bg-elevated border-edge transition-colors-members flex flex-col rounded-lg border p-6">
+ {/* Card Footer */}
+ <div className="mt-auto flex items-center justify-between pt-3 border-t border-edge">
+ <span className="text-xs text-muted">
  👥 {g.memberCount} member{g.memberCount !== 1 ?"s" :""}
  </span>
  {g.isMember ? (
- <div className="gap-1" style={{ display:"flex" }}>
+ <div className="flex items-center gap-2">
  <span
- className="inline-flex items-center rounded-full bg-[rgba(34,197,94,0.12)] px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap text-[#22c55e]"
- style={{ border:"1px solid rgba(34,197,94,0.3)" }}
+ className="inline-flex items-center rounded-full bg-[rgba(34,197,94,0.12)] px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-[#22c55e] border border-[rgba(34,197,94,0.3)]"
  >
  ✓ {g.memberRole ||"Member"}
  </span>
  {g.memberRole !=="owner" && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="rounded-md border border-edge bg-transparent px-3 py-1 text-xs font-medium text-muted transition-colors hover:text-ink"
  onClick={() => handleLeave(g.id)}
  disabled={joining === g.id}
  >
@@ -157,7 +164,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  </div>
  ) : (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="rounded-md bg-forest px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-forest-dark"
  onClick={() => handleJoin(g.id)}
  disabled={joining === g.id}
  >

@@ -99,7 +99,7 @@ export default function MarketFilters() {
  </div>
  <div className="flex flex-wrap items-center gap-3">
  <select
- className="form-select min-w-[140px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
+ className="min-w-[140px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
  value={currentFinish}
  onChange={(e) => pushParams({ finish: e.target.value ==="all" ? null : e.target.value })}
  id="market-finish"
@@ -111,7 +111,7 @@ export default function MarketFilters() {
  ))}
  </select>
  <select
- className="form-select min-w-[140px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
+ className="min-w-[140px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
  value={currentStage}
  onChange={(e) => pushParams({ stage: e.target.value ==="all" ? null : e.target.value })}
  id="market-stage"
@@ -123,7 +123,7 @@ export default function MarketFilters() {
  ))}
  </select>
  <select
- className="form-select min-w-[160px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
+ className="min-w-[160px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
  value={currentSort}
  onChange={(e) => pushParams({ sort: e.target.value })}
  id="market-sort"
