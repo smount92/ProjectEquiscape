@@ -217,7 +217,7 @@ export default async function WishlistPage() {
  <div className="text-muted mt-1 text-sm italic">📝 {item.notes}</div>
  )}
  <div className="text-muted mt-2 text-xs opacity-70">
- Added{""}
+ Added{" "}
  {new Date(item.created_at).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",

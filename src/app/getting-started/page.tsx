@@ -25,11 +25,11 @@ export default function GettingStartedPage() {
  <section className="mb-12">
  <h2>📸 Step 1: Add Your First Horse</h2>
  <p>
- Click <strong>&ldquo;🏠 Digital Stable&rdquo;</strong> in the navigation, then hit{""}
+ Click <strong>&ldquo;🏠 Digital Stable&rdquo;</strong> in the navigation, then hit{" "}
  <strong>&ldquo;+ Add Horse&rdquo;</strong>.
  </p>
  <p>
- Start by selecting your model type &mdash; <strong>Breyer/Stone</strong> or{""}
+ Start by selecting your model type &mdash; <strong>Breyer/Stone</strong> or{" "}
  <strong>Artist Resin</strong>. Our database has <strong>10,500+ reference entries</strong>, so
  search by name, mold, or manufacturer to auto-fill the details. If your model isn&apos;t in the
  database, you can enter it manually.
@@ -67,7 +67,7 @@ export default function GettingStartedPage() {
  <section className="mb-12">
  <h2>🐾 Step 3: Meet Hoofprint™</h2>
  <p>
- Every horse you add automatically gets a{""}
+ Every horse you add automatically gets a{" "}
  <strong>Hoofprint™ &mdash; a permanent digital identity</strong>. Think of it like a passport
  that follows the horse, not the owner.
  </p>
@@ -88,11 +88,11 @@ export default function GettingStartedPage() {
  </li>
  </ul>
  <p>
- When you sell or trade a horse, you can generate a <strong>6-character transfer code</strong>{""}
- from its passport page. The buyer enters the code at{""}
+ When you sell or trade a horse, you can generate a <strong>6-character transfer code</strong>{" "}
+ from its passport page. The buyer enters the code at{" "}
  <Link href="/claim" className="text-forest font-semibold">
  📦 Claim
- </Link>{""}
+ </Link>{" "}
  &mdash; and the horse moves to their stable with its entire history intact.
  </p>
  </section>
@@ -105,26 +105,26 @@ export default function GettingStartedPage() {
  <li>
  <strong>
  <Link href="/community">🏆 Show Ring</Link>
- </strong>{""}
+ </strong>{" "}
  &mdash; Browse all public models. Filter by finish type, trade status, or manufacturer.
  </li>
  <li>
  <strong>
  <Link href="/discover">👥 Discover</Link>
- </strong>{""}
+ </strong>{" "}
  &mdash; Find and follow other collectors. See their public herds and show records.
  </li>
  <li>
  <strong>
  <Link href="/feed">📰 Feed</Link>
- </strong>{""}
+ </strong>{" "}
  &mdash; See activity from collectors you follow &mdash; new additions, favorites, comments,
  and show results.
  </li>
  <li>
  <strong>
  <Link href="/shows">📸 Photo Shows</Link>
- </strong>{""}
+ </strong>{" "}
  &mdash; Enter your best models in themed virtual photo shows. Vote for your favorites and
  compete for 🥇🥈🥉 placement.
  </li>
@@ -135,7 +135,7 @@ export default function GettingStartedPage() {
  <section className="mb-12">
  <h2>💬 Step 5: Buy, Sell &amp; Connect</h2>
  <p>
- Set any horse&apos;s trade status to <strong>&ldquo;For Sale&rdquo;</strong> or{""}
+ Set any horse&apos;s trade status to <strong>&ldquo;For Sale&rdquo;</strong> or{" "}
  <strong>&ldquo;Open to Offers&rdquo;</strong> and it becomes visible as a listing in the Show
  Ring. Other collectors can message you directly through the built-in inbox.
  </p>
@@ -144,10 +144,10 @@ export default function GettingStartedPage() {
  trust and reputation across the community.
  </p>
  <p>
- Add models to your{""}
+ Add models to your{" "}
  <Link href="/wishlist" className="text-forest font-semibold">
  ❤️ Wishlist
- </Link>{""}
+ </Link>{" "}
  and you&apos;ll get notified when a matching model is listed for sale.
  </p>
  </section>
@@ -156,10 +156,10 @@ export default function GettingStartedPage() {
  <section className="mb-12">
  <h2>⚙️ Step 6: Customize Your Experience</h2>
  <p>
- Visit{""}
+ Visit{" "}
  <Link href="/settings" className="text-forest font-semibold">
  ⚙️ Settings
- </Link>{""}
+ </Link>{" "}
  to:
  </p>
  <ul className="my-3 list-none p-0">
@@ -179,14 +179,14 @@ export default function GettingStartedPage() {
  <h2>🧪 Beta Tester? We Need Your Feedback!</h2>
  <p>
  You&apos;re among the first collectors to use Model Horse Hub. Your feedback directly shapes
- what we build next. If something feels broken, confusing, or missing &mdash;{""}
+ what we build next. If something feels broken, confusing, or missing &mdash;{" "}
  <strong>we want to hear about it.</strong>
  </p>
  <p>
- Use the{""}
+ Use the{" "}
  <Link href="/contact" className="text-forest font-semibold">
  ✉️ Contact
- </Link>{""}
+ </Link>{" "}
  page to send us your thoughts, or message the admin directly through the inbox.
  </p>
  <div className="mt-4 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-6 py-4 text-sm leading-relaxed">

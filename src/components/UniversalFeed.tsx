@@ -196,7 +196,7 @@ export default function UniversalFeed({
  {showComposer && (
  <div className="border-edge mb-6 rounded-lg border bg-[var(--color-surface-1)] p-4">
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="w-full min-h-[100px] resize-y rounded-md border border-edge bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
  placeholder={composerPlaceholder}
  value={composerText}
  onChange={(e) => setComposerText(e.target.value)}

@@ -87,27 +87,25 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  <Link
  key={a.userId}
  href={`/studio/${a.studioSlug}`}
- className="discover-bg-card border-edge rounded-lg border shadow-md transition-all"
+ className="rounded-lg border border-edge bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
  style={{ textDecoration:"none" }}
  >
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+ <div className="p-5">
+ <div className="mb-2 text-base font-semibold text-ink">
  {STATUS_EMOJI[a.status]} {a.studioName}
  </div>
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+ <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted">
  <span>🎨 @{a.ownerAlias}</span>
  {a.priceRangeMin != null && (
- <span>
- 💰 ${a.priceRangeMin}–${a.priceRangeMax}
- </span>
+ <span>💰 ${a.priceRangeMin}–${a.priceRangeMax}</span>
  )}
  </div>
  {a.specialties.length > 0 && (
- <div className="mt-1 gap-[4]" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap gap-1.5">
  {a.specialties.slice(0, 3).map((s) => (
  <span
  key={s}
- className="border-edge bg-card text-ink-light p-[2px 6px] cursor-pointer rounded-full border px-[14px] py-[6px] text-[0.7rem] text-[calc(0.8rem*var(--font-scale))] transition-all"
+ className="rounded-full border border-edge bg-parchment-dark px-2.5 py-0.5 text-xs text-muted"
  >
  {s}
  </span>

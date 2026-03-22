@@ -120,19 +120,20 @@ export default async function ShowsPage() {
  {show.creatorAlias && (
  <div className="text-muted mt-1 text-xs">Hosted by @{show.creatorAlias}</div>
  )}
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+ <div className="flex flex-wrap items-center gap-3 rounded-lg border border-edge bg-card p-4 text-sm text-muted">
  <span>
  🐴 {show.entryCount} entr{show.entryCount !== 1 ?"ies" :"y"}
  </span>
  {show.endAt && (
  <span>
- ⏰{""}
+ ⏰{" "}
  {new Date(show.endAt) > new Date()
  ? `Closes ${new Date(show.endAt).toLocaleDateString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" })}`
  :"Entries closed"}
  </span>
  )}
  <span>
+ 📅{" "}
  {new Date(show.createdAt).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
