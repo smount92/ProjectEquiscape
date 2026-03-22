@@ -49,16 +49,8 @@ export default function ReportButton({
  if (!showForm) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="cursor-pointer border-none bg-transparent p-1 text-xs text-muted"
  onClick={() => setShowForm(true)}
- style={{
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- color:"var(--color-text-muted)",
- background:"none",
- border:"none",
- cursor:"pointer",
- padding:"var(--space-xs)",
- }}
  title="Report"
  >
  🚩 Report
@@ -69,10 +61,10 @@ export default function ReportButton({
  return (
  <div className="bg-card border-edge mt-2 rounded-lg border p-4 shadow-md transition-all">
  <select
- className="form-input"
+ className="form-input mb-2 text-sm"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
- style={{ marginBottom:"var(--space-sm)", fontSize:"calc(var(--font-size-sm) * var(--font-scale))" }}
+ title="Report reason"
  >
  <option value="">Select a reason…</option>
  {reasons.map((r) => (
@@ -82,16 +74,15 @@ export default function ReportButton({
  ))}
  </select>
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full rounded-md border border-edge bg-transparent px-4 py-2 text-sm no-underline transition-all mb-2"
  placeholder="Additional details (optional)"
  value={details}
  onChange={(e) => setDetails(e.target.value)}
  rows={2}
  maxLength={500}
- style={{ marginBottom:"var(--space-sm)", fontSize:"calc(var(--font-size-sm) * var(--font-scale))" }}
  />
  {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
- <div className="gap-1" style={{ display:"flex" }}>
+ <div className="flex gap-1">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handleSubmit}

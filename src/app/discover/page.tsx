@@ -56,22 +56,18 @@ export default async function DiscoverPage() {
  const followedIds = new Set((followRows ?? []).map((r: { following_id: string }) => r.following_id));
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Hero */}
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="animate-fade-in-up mb-8">
+ <h1 className="text-2xl font-bold tracking-tight">
  👥 <span className="text-forest">Discover Collectors</span>
  </h1>
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 max-w-xl text-base text-stone-500">
  Find fellow collectors, browse their stables, and connect with the community.
  </p>
- </div>
- <div className="mt-8 flex justify-center gap-8">
- <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">{activeUsers.length}</span>
- <span className="items-center-label flex flex-col">Active Collectors</span>
- </div>
+ <div className="mt-6 flex items-baseline gap-2">
+ <span className="text-2xl font-bold text-forest">{activeUsers.length}</span>
+ <span className="text-sm font-medium text-stone-500">Active Collectors</span>
  </div>
  </div>
 

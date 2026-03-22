@@ -180,17 +180,12 @@ export default async function InboxPage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="animate-fade-in-up">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark py-8">
  <div>
- <h1>
+ <h1 className="text-2xl font-bold tracking-tight">
  <span className="text-forest">✉️ Inbox</span>
  </h1>
- <p
- style={{
- color:"var(--color-text-muted)",
- marginTop:"var(--space-xs)",
- }}
- >
+ <p className="mt-2 max-w-xl text-base text-stone-500">
  Your private conversations — {inboxItems.length} thread{inboxItems.length !== 1 ?"s" :""}
  </p>
  </div>
@@ -248,7 +243,7 @@ export default async function InboxPage() {
  @{item.otherAlias}
  </span>
  {item.isRated && (
- <span className="ml-1 text-[calc(0.7rem*var(--font-scale))] text-[#F59E0B]">
+ <span className="ml-1 text-xs text-amber-500">
  ⭐ Rated
  </span>
  )}

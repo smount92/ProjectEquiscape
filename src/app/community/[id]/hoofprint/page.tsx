@@ -67,22 +67,22 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
  const refName = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : null;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Header */}
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="animate-fade-in-up mb-6">
+ <div className="mb-4">
+ <h1 className="text-2xl font-bold tracking-tight">
  🐾 <span className="text-forest">Hoofprint™ Report</span>
  </h1>
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 text-base text-stone-500">
  Full provenance record for <strong>{h.custom_name}</strong>
  </p>
  {refName && (
- <p className="text-muted text-[calc(0.85rem*var(--font-scale))]">
+ <p className="text-muted mt-1 text-sm">
  {refName} · {h.finish_type} · {h.condition_grade}
  </p>
  )}
- <div className="mt-4 gap-2" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="mt-4 flex flex-wrap gap-2">
  <Link
  href={`/community/${horseId}`}
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -113,20 +113,12 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
  {/* Show Records Summary */}
  {records.length > 0 && (
  <div className="animate-fade-in-up bg-card border-edge mt-8 rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">🏆 Show Record</h2>
- <div className="gap-1" style={{ display:"grid" }}>
+ <h2 className="mb-4 text-lg">🏆 Show Record</h2>
+ <div className="grid gap-1">
  {records.map((r, i) => (
  <div
  key={i}
- style={{
- display:"flex",
- alignItems:"center",
- gap:"var(--space-sm)",
- padding:"var(--space-xs) var(--space-sm)",
- borderRadius:"var(--radius-md)",
- background:"rgba(255,255,255,0.03)",
- fontSize:"calc(0.8rem * var(--font-scale))",
- }}
+ className="flex items-center gap-2 rounded-md bg-[rgba(255,255,255,0.03)] px-2 py-1 text-[0.8rem]"
  >
  <span className="text-base">
  {r.ribbon_color ==="Blue"
@@ -142,8 +134,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
  {r.placing && <span className="text-muted">({r.placing})</span>}
  {r.show_date && (
  <span
- className="text-muted text-[calc(0.7rem*var(--font-scale))]"
- style={{ marginLeft:"auto" }}
+ className="text-muted ml-auto text-xs"
  >
  {new Date(r.show_date).toLocaleDateString("en-US", {
  month:"short",

@@ -57,7 +57,7 @@ export default function LoadMoreFeed({
  <ActivityFeed items={items} emptyMessage={emptyMessage} currentUserId={currentUserId} />
  {cursor && <div ref={sentinelRef} className="h-[1px]" />}
  {isPending && (
- <div className="py-4 text-muted" style={{ textAlign:"center" }}>
+ <div className="py-4 text-center text-muted">
  <span
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"

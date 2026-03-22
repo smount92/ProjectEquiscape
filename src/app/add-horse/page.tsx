@@ -494,7 +494,7 @@ export default function AddHorsePage() {
  if (showSuccess) {
  return (
  <div className="success-overlay">
- <div className="bg-card border-edge animate-fade-in-up max-w-[480px] rounded-lg border p-12 text-center shadow-md transition-all">
+          <div className="animate-fade-in-up max-w-[480px] rounded-xl border border-stone-200 bg-white p-12 text-center shadow-lg">
  <div className="success-icon">🎉</div>
  <h2>
  <span className="text-forest">{savedHorseName}</span> Added!
@@ -526,11 +526,11 @@ export default function AddHorsePage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  {/* Page Header */}
- <div className="animate-fade-in-up mb-12">
- <h1>
- Add to <span className="text-forest">Stable</span>
- </h1>
- <p>
+ <div className="animate-fade-in-up">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Add to <span className="text-forest">Stable</span>
+          </h1>
+          <p className="mt-2 text-sm text-stone-500">
  {isModel
  ?"Catalog a new model horse in your digital collection"
  : assetCategory ==="tack"
@@ -552,12 +552,12 @@ export default function AddHorsePage() {
  <button
  key={cat.value}
  type="button"
- className={`category-card ${assetCategory === cat.value ?"active" :""}`}
+              className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/5 shadow-sm" : "border-stone-200 bg-white hover:border-stone-300"}`}
  onClick={() => setAssetCategory(cat.value)}
  id={`category-${cat.value}`}
  >
  <span className="text-2xl">{cat.icon}</span>
- <span className="text-sm font-semibold text-[var(--color-text-secondary)]">{cat.label}</span>
+              <span className="text-sm font-semibold text-stone-600">{cat.label}</span>
  </button>
  ))}
  </div>
@@ -1546,12 +1546,12 @@ export default function AddHorsePage() {
 
  {/* ── AI Toast Notifications ── */}
  <div
- className="ai-fixed top-[calc(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
+ className="fixed top-20 right-6 z-50 flex flex-col gap-2"
  aria-live="polite"
  >
  {aiToasts.map((toast) => (
- <div key={toast.id} className={`ai-toast ai-toast-${toast.type}`} role="status">
- <span className="ai-text-[1.1rem] shrink-0">
+ <div key={toast.id} className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg ${toast.type === "success" ? "border-green-200 bg-green-50 text-green-800" : toast.type === "error" ? "border-red-200 bg-red-50 text-red-800" : "border-blue-200 bg-blue-50 text-blue-800"}`} role="status">
+ <span className="shrink-0 text-lg">
  {toast.type ==="success" ?"✨" : toast.type ==="error" ?"⚠️" :"ℹ️"}
  </span>
  <span className="flex-1">{toast.message}</span>

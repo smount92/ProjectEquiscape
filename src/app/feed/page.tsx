@@ -39,30 +39,28 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Hero */}
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="animate-fade-in-up mb-8">
+ <h1 className="text-2xl font-bold tracking-tight">
  📰 <span className="text-forest">Activity Feed</span>
  </h1>
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 max-w-xl text-base text-stone-500">
  Stay up to date with what's happening in the community.
  </p>
  </div>
- </div>
 
  {/* Tab Bar */}
- <div className="animate-fade-in-up mb-8 flex w-fit gap-1 rounded-lg border border-black/[0.06] bg-black/[0.04] p-[3px]">
+ <div className="animate-fade-in-up mb-8 flex w-fit gap-1 rounded-lg border border-stone-200 bg-stone-100/60 p-1">
  <Link
  href="/feed"
- className={`text-muted hover:text-ink rounded-[calc(var(--radius-lg)-2px)] px-5 py-2 text-[calc(0.9rem*var(--font-scale))] whitespace-nowrap no-underline transition-all hover:bg-black/[0.06] ${activeTab ==="global" ?"!bg-forest font-semibold !text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :""}`}
+ className={`rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="global" ?"bg-forest font-semibold text-white shadow-sm" :"text-stone-500 hover:bg-white hover:text-stone-700"}`}
  >
  🌐 Global
  </Link>
  <Link
  href="/feed?tab=following"
- className={`text-muted hover:text-ink rounded-[calc(var(--radius-lg)-2px)] px-5 py-2 text-[calc(0.9rem*var(--font-scale))] whitespace-nowrap no-underline transition-all hover:bg-black/[0.06] ${activeTab ==="following" ?"!bg-forest font-semibold !text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :""}`}
+ className={`rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="following" ?"bg-forest font-semibold text-white shadow-sm" :"text-stone-500 hover:bg-white hover:text-stone-700"}`}
  >
  👥 Following
  </Link>

@@ -111,14 +111,9 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
 
  if (confirming) {
  return (
- <span className="inline-flex gap-1" style={{ alignItems:"center" }}>
+ <span className="inline-flex items-center gap-1">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- style={{
- background:"rgba(239, 68, 68, 0.15)",
- borderColor:"rgba(239, 68, 68, 0.4)",
- color:"#ef4444",
- }}
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-[rgba(239,68,68,0.4)] bg-[rgba(239,68,68,0.15)] px-6 py-2 text-sm font-semibold text-[#ef4444] no-underline transition-all"
  onClick={handleDelete}
  disabled={deleting}
  >
@@ -137,8 +132,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
 
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- style={{ background:"rgba(239, 68, 68, 0.08)", borderColor:"rgba(239, 68, 68, 0.2)", color:"#ef4444" }}
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.08)] px-6 py-2 text-sm font-semibold text-[#ef4444] no-underline transition-all"
  onClick={() => setConfirming(true)}
  title="Delete this message"
  >
@@ -354,7 +348,7 @@ function ReportsTab({ reports }: { reports: Report[] }) {
  <div className="flex flex-col gap-2">
  {reports.map((report) => (
  <div key={report.id} className="bg-glass border-edge rounded-lg border px-6 py-4 transition-all">
- <div className="mb-1 justify-between" style={{ display:"flex" }}>
+ <div className="mb-1 flex justify-between">
  <strong>{report.reason}</strong>
  <span className="text-muted text-xs">
  {report.targetType} · {new Date(report.createdAt).toLocaleDateString()}
@@ -423,7 +417,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
 
  return (
  <div key={s.id} className="bg-glass border-edge rounded-lg border px-6 py-4 transition-all">
- <div className="mb-1 justify-between" style={{ display:"flex" }}>
+ <div className="mb-1 flex justify-between">
  <strong>
  {typeIcon}{""}
  {s.suggestion_type.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
@@ -436,11 +430,11 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  By: {curatorIcon} @{s.author_alias}
  </p>
  {changeText && (
- <p className="bg-glass mb-1 rounded-sm p-1 text-sm" style={{ fontFamily:"monospace" }}>
+ <p className="bg-glass mb-1 rounded-sm p-1 font-mono text-sm">
  {changeText}
  </p>
  )}
- <p className="text-muted mb-2 text-sm" style={{ fontStyle:"italic" }}>
+ <p className="text-muted mb-2 text-sm italic">
  &ldquo;{s.reason.slice(0, 200)}
  {s.reason.length > 200 ?"…" :""}&rdquo;
  </p>

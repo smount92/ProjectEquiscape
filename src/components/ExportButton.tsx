@@ -38,8 +38,7 @@ export default function ExportButton() {
  {loading ? (
  <>
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- style={{ width: 14, height: 14 }}
+ className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
  aria-hidden="true"
  />
  Exporting…

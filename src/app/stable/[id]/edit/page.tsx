@@ -599,12 +599,10 @@ export default function EditHorsePage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
- className="mx-auto max-w-[680px] p-12 px-0 py-12"
- style={{ textAlign:"center" }}
+ className="mx-auto max-w-[680px] px-0 py-12 text-center"
  >
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- style={{ borderTopColor:"var(--color-accent-primary)" }}
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge border-t-[color:var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  />
  <p>Loading horse details…</p>
  </div>
@@ -672,10 +670,8 @@ export default function EditHorsePage() {
 
  {/* ===== Photo Studio ===== */}
  <div className="bg-card border-edge mb-8 rounded-lg border shadow-md transition-all">
- <div className="bg-card border-edge mb-8sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div className="bg-card border-edge mb-8-icon rounded-lg border shadow-md transition-all">
- 📸
- </div>
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark px-6 py-4">
+ <div className="mb-1 text-2xl">📸</div>
  <h2>Photo Studio</h2>
  </div>
  <p className="text-muted mb-4 text-sm">
@@ -721,7 +717,8 @@ export default function EditHorsePage() {
  const f = e.target.files?.[0];
  if (f) handleSlotSelect(slot.angle, f);
  }}
- style={{ display:"none" }}
+ className="hidden"
+ title="Upload photo"
  />
  {preview ? (
  <div className="relative w-full">
@@ -780,12 +777,7 @@ export default function EditHorsePage() {
  {!hasNew && preview && !slot.primary && (
  <button
  type="button"
- className="hover:0.2)] hover:0.5)] mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-[rgba(251,146,60,0.3)] bg-[rgba(251,146,60,0.1)] px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#fb923c] transition-all"
- style={{
- color:"#ef4444",
- background:"rgba(239,68,68,0.1)",
- borderColor:"rgba(239,68,68,0.3)",
- }}
+ className="mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#ef4444] transition-all"
  onClick={(e) => {
  e.stopPropagation();
  handleSlotRemove(slot.angle);
@@ -842,7 +834,8 @@ export default function EditHorsePage() {
  startExtraCropQueue(files);
  e.target.value ="";
  }}
- style={{ display:"none" }}
+ className="hidden"
+ title="Upload extra detail photos"
  />
  <svg
  width="24"
@@ -1015,24 +1008,22 @@ export default function EditHorsePage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">📋 Edition Info</label>
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-2">
  <input
  type="number"
- className="form-input"
+ className="form-input w-[80px]"
  placeholder="#"
  value={editionNumber}
  onChange={(e) => setEditionNumber(e.target.value)}
- style={{ width: 80 }}
  min="1"
  />
  <span className="text-muted">of</span>
  <input
  type="number"
- className="form-input"
+ className="form-input w-[80px]"
  placeholder="Total"
  value={editionSize}
  onChange={(e) => setEditionSize(e.target.value)}
- style={{ width: 80 }}
  min="1"
  />
  </div>
@@ -1077,13 +1068,13 @@ export default function EditHorsePage() {
  <h4 className="text-ink-light font-semibold text-[var(--font-size-md)]">
  🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]">(Optional)</span>
  </h4>
- <small className="text-muted mt-1" style={{ display:"block" }}>
+ <small className="text-muted mt-1 block">
  The show identity you assign for competition — breed, gender, and age for show ring
  divisions.
  </small>
  </div>
- <div className="gap-4" style={{ display:"flex", flexWrap:"wrap" }}>
- <div className="mb-6" style={{ flex:"1 1 200px" }}>
+ <div className="flex flex-wrap gap-4">
+ <div className="mb-6 min-w-[200px] flex-[1_1_200px]">
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Breed</label>
  <input
  className="form-input"
@@ -1095,13 +1086,14 @@ export default function EditHorsePage() {
  id="edit-assigned-breed"
  />
  </div>
- <div className="mb-6" style={{ flex:"1 1 150px" }}>
+ <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
  className="form-select"
  value={assignedGender}
  onChange={(e) => setAssignedGender(e.target.value)}
  id="edit-assigned-gender"
+ title="Assigned gender"
  >
  <option value="">Select…</option>
  <option value="Stallion">Stallion</option>
@@ -1113,8 +1105,8 @@ export default function EditHorsePage() {
  </select>
  </div>
  </div>
- <div className="gap-4" style={{ display:"flex", flexWrap:"wrap" }}>
- <div className="mb-6" style={{ flex:"1 1 150px" }}>
+ <div className="flex flex-wrap gap-4">
+ <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Age</label>
  <input
  className="form-input"
@@ -1126,7 +1118,7 @@ export default function EditHorsePage() {
  id="edit-assigned-age"
  />
  </div>
- <div className="mb-6" style={{ flex:"1 1 200px" }}>
+ <div className="mb-6 min-w-[200px] flex-[1_1_200px]">
  <label className="text-ink mb-1 block text-sm font-semibold">Regional Show ID</label>
  <input
  className="form-input"
@@ -1181,24 +1173,16 @@ export default function EditHorsePage() {
  {/* Condition Change Note - shows when condition was changed */}
  {originalCondition && conditionGrade && conditionGrade !== originalCondition && (
  <div className="condition-change-note animate-fade-in-up mt-2">
- <div
- style={{
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- color:"var(--color-accent-warning, #f59e0b)",
- marginBottom:"var(--space-xs)",
- fontWeight: 600,
- }}
- >
+ <div className="mb-1 text-xs font-semibold text-[var(--color-accent-warning,#f59e0b)]">
  📝 Condition changed: {originalCondition} → {conditionGrade}
  </div>
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="form-input text-sm"
  rows={2}
  maxLength={300}
  placeholder="What happened? (optional — visible on Hoofprint™)"
  value={conditionNote}
  onChange={(e) => setConditionNote(e.target.value)}
- style={{ fontSize:"calc(var(--font-size-sm) * var(--font-scale))" }}
  />
  <span className="text-muted mt-1 block text-xs">
  e.g., &quot;Minor rub discovered on left hip during cleaning&quot;
@@ -1315,7 +1299,7 @@ export default function EditHorsePage() {
 
  {/* Community visibility selector */}
  <div className="bg-[rgba(44,85,69,0.04)] border-[rgba(44,85,69,0.12)] mt-6 rounded-lg border px-6 py-4">
- <div className="flex items-center justify-between gap-2 gap-6" style={{ flexDirection:"column" }}>
+ <div className="flex flex-col items-center justify-between gap-6">
  <span className="text-ink text-base font-semibold">
  👁️ Visibility
  </span>

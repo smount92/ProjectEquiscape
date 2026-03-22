@@ -70,7 +70,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[640]">
  <Link
  href="/feed"
@@ -80,11 +80,11 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  </Link>
 
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
- <div className="justify-between" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center justify-between">
  <Link href={`/profile/${encodeURIComponent(actorAlias)}`} className="font-semibold">
  @{actorAlias}
  </Link>
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">
+ <span className="text-muted text-sm">
  {new Date(p.created_at as string).toLocaleString()}
  </span>
  </div>
@@ -111,7 +111,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  <LikeToggle
  initialLiked={!!liked}
  initialCount={(p.likes_count as number) || 0}
- onToggle={() => togglePostLike(id)}
+ onToggle={togglePostLike.bind(null, id)}
  />
  </div>
  </div>

@@ -21,24 +21,20 @@ export default async function NotificationsPage() {
  const notifications = await getNotifications(100);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Hero */}
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="animate-fade-in-up mb-8">
+ <h1 className="text-2xl font-bold tracking-tight">
  🔔 <span className="text-forest">Notifications</span>
  </h1>
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 max-w-xl text-base text-stone-500">
  Stay updated on favorites, comments, ratings, and more.
  </p>
- </div>
- <div className="mt-8 flex justify-center gap-8">
- <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">
+ <div className="mt-6 flex items-baseline gap-2">
+ <span className="text-2xl font-bold text-forest">
  {notifications.filter((n) => !n.isRead).length}
  </span>
- <span className="items-center-label flex flex-col">Unread</span>
- </div>
+ <span className="text-sm font-medium text-stone-500">Unread</span>
  </div>
  </div>
 

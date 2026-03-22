@@ -58,18 +58,18 @@ export default function AssignPlacings({
  <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">🏅 Assign Placings</h3>
  <p className="text-muted mb-4 text-sm">As the event host, assign placings to each entry below.</p>
- <div className="gap-2" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-2">
  {entries.map((entry) => (
- <div key={entry.id} className="gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div key={entry.id} className="flex items-center gap-2">
  <span className="flex-1">
  <strong>{entry.horseName}</strong>
  <span className="text-muted ml-1">by @{entry.ownerAlias}</span>
  </span>
  <select
- className="form-input"
- style={{ width: 140 }}
+ className="form-input w-[140px]"
  value={placings[entry.id] ||""}
  onChange={(e) => setPlacings((prev) => ({ ...prev, [entry.id]: e.target.value }))}
+ title={`Placing for ${entry.horseName}`}
  >
  <option value="">—</option>
  <option value="1st">🥇 1st</option>
@@ -87,17 +87,16 @@ export default function AssignPlacings({
 
  {error && <div className="mt-2 text-sm text-danger mt-2">{error}</div>}
 
- <div className="mt-6 gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="mt-6 flex items-center gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handleSave}
  disabled={saving || Object.values(placings).filter((v) => v).length === 0}
- style={{ width:"100%" }}
  >
  {saving ?"Saving…" : `💾 Save ${Object.values(placings).filter((v) => v).length} Placings`}
  </button>
  {saved && (
- <span className="text-forest font-semibold" style={{ whiteSpace:"nowrap" }}>
+ <span className="text-forest whitespace-nowrap font-semibold">
  ✅ Saved!
  </span>
  )}

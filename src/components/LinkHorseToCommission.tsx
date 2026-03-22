@@ -58,12 +58,12 @@ export default function LinkHorseToCommission({ commissionId }: { commissionId: 
  <p className="text-muted mb-4 text-sm">
  Link a horse so WIP photos are added to its Hoofprint™ when this commission is delivered.
  </p>
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-2">
  <select
- className="form-input"
+ className="form-input flex-1"
  value={selectedHorseId}
  onChange={(e) => setSelectedHorseId(e.target.value)}
- style={{ flex: 1 }}
+ title="Select a horse to link"
  >
  <option value="">Select a horse…</option>
  {horses.map((h) => (

@@ -190,7 +190,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  <p>No models match your search. Try different filters.</p>
  </div>
  ) : (
- <div className="grid-cols-[repeat(auto-fill,minmax(300px,1fr))] animate-fade-in-up grid gap-6">
+ <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] animate-fade-in-up gap-5">
  {communityCards.map((horse) => {
  const priceLabel = formatPrice(horse.listingPrice);
  const isListed = horse.tradeStatus ==="For Sale" || horse.tradeStatus ==="Open to Offers";
@@ -198,7 +198,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  return (
  <div
  key={horse.id}
- className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink no-underline shadow-sm transition-all hover:shadow-md"
+ className="group flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-card text-ink no-underline shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
  id={`community-card-${horse.id}`}
  >
  <Link
@@ -208,7 +208,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  <div className="relative aspect-[4/3] overflow-hidden bg-[var(--color-bg-secondary)]">
  {horse.thumbnailUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
- <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
+ <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
  ) : (
  <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2 bg-[var(--color-bg-secondary)] text-muted">
  <span className="text-4xl">🐴</span>
@@ -241,7 +241,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  </span>
  )}
  </div>
- <div className="flex flex-col gap-1 p-3">
+ <div className="flex flex-col gap-1.5 p-4">
  <div className="truncate text-sm font-semibold">
  {horse.customName}
  {(horse.hoofprintCount ?? 0) > 0 && (
@@ -253,25 +253,25 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  </span>
  )}
  </div>
- <div className="truncate text-xs text-muted">
+ <div className="truncate text-xs text-stone-500">
  {horse.refName}
  </div>
- <div className="text-xs text-muted">
+ <div className="text-xs text-stone-400">
  {timeAgo(horse.createdAt)}
  </div>
  {horse.releaseLine && (
- <div className="mt-[2px] truncate text-[calc(0.7rem*var(--font-scale))] text-muted opacity-70">
+ <div className="mt-[2px] truncate text-xs text-muted opacity-70">
  🎨 {horse.releaseLine}
  </div>
  )}
  {horse.sculptor && (
- <div className="mt-[2px] truncate text-[calc(0.7rem*var(--font-scale))] text-muted opacity-70">
+ <div className="mt-[2px] truncate text-xs text-muted opacity-70">
  ✂️ {horse.sculptor}
  </div>
  )}
  {isListed && horse.marketplaceNotes && (
  <div className="marketplace-notes-snippet" title={horse.marketplaceNotes}>
- 📝{""}
+ 📝{" "}
  {horse.marketplaceNotes.length > 60
  ? horse.marketplaceNotes.slice(0, 60) +"…"
  : horse.marketplaceNotes}
@@ -279,20 +279,14 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  )}
  {isListed && (
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- style={{
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- padding:"var(--space-xs) var(--space-sm)",
- marginTop:"var(--space-xs)",
- display:"inline-block",
- }}
+ className="mt-1 inline-block rounded-md border-0 bg-forest px-3 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
  >
  View &amp; Contact
  </span>
  )}
  </div>
  </Link>
- <div className="flex items-center justify-between border-t border-edge px-3 py-2 text-xs">
+ <div className="flex items-center justify-between border-t border-stone-100 px-4 py-2.5 text-xs">
  <Link
  href={`/profile/${encodeURIComponent(horse.ownerAlias)}`}
  className="flex items-center gap-1 truncate text-[var(--color-accent-primary)] no-underline hover:underline"
@@ -313,7 +307,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  </svg>
  @{horse.ownerAlias}
  </Link>
- <div className="gap-1" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-1">
  <FavoriteButton
  horseId={horse.id}
  initialIsFavorited={horse.isFavorited}

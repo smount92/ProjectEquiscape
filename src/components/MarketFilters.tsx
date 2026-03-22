@@ -103,6 +103,7 @@ export default function MarketFilters() {
  value={currentFinish}
  onChange={(e) => pushParams({ finish: e.target.value ==="all" ? null : e.target.value })}
  id="market-finish"
+ aria-label="Filter by finish type"
  >
  {Object.entries(FINISH_TYPE_LABELS).map(([value, label]) => (
  <option key={value} value={value}>
@@ -115,6 +116,7 @@ export default function MarketFilters() {
  value={currentStage}
  onChange={(e) => pushParams({ stage: e.target.value ==="all" ? null : e.target.value })}
  id="market-stage"
+ aria-label="Filter by life stage"
  >
  {Object.entries(LIFE_STAGE_LABELS).map(([value, label]) => (
  <option key={value} value={value}>
@@ -127,6 +129,7 @@ export default function MarketFilters() {
  value={currentSort}
  onChange={(e) => pushParams({ sort: e.target.value })}
  id="market-sort"
+ aria-label="Sort market results"
  >
  {SORT_OPTIONS.map((opt) => (
  <option key={opt.value} value={opt.value}>

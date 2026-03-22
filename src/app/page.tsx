@@ -376,7 +376,7 @@ export default function LandingPage() {
  Built for <span className="text-forest">Every Part of the Hobby</span>
  </h2>
  <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Home size={32} strokeWidth={1.5} />
  </div>
@@ -386,7 +386,7 @@ export default function LandingPage() {
  a private vault. Import your entire spreadsheet in minutes — not months.
  </p>
  </div>
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Palette size={32} strokeWidth={1.5} />
  </div>
@@ -397,7 +397,7 @@ export default function LandingPage() {
  Hoofprint&trade; — forever.
  </p>
  </div>
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Trophy size={32} strokeWidth={1.5} />
  </div>
@@ -453,7 +453,7 @@ export default function LandingPage() {
  We&apos;re building the operating system for the hobby. Here&apos;s what&apos;s next.
  </p>
  <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Palette size={32} strokeWidth={1.5} />
  </div>
@@ -463,7 +463,7 @@ export default function LandingPage() {
  queue. Clients watch their custom come to life. Every brushstroke becomes provenance.
  </p>
  </div>
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Package size={32} strokeWidth={1.5} />
  </div>
@@ -473,7 +473,7 @@ export default function LandingPage() {
  reference database. Go from CSV to cataloged in minutes.
  </p>
  </div>
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <TrendingUp size={32} strokeWidth={1.5} />
  </div>

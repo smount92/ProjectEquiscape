@@ -187,10 +187,10 @@ export default function StudioSetupPage() {
  {/* Header */}
  <div className="mb-8" style={{ textAlign:"center" }}>
  <div className="mb-2 text-[2.5rem]">🎨</div>
- <h1 className="text-[calc(1.4rem*var(--font-scale))]">
+ <h1 className="text-xl">
  <span className="text-forest">{existing ?"Edit Your Studio" :"Set Up Your Art Studio"}</span>
  </h1>
- <p className="text-muted mt-1 text-[calc(0.85rem*var(--font-scale))]">
+ <p className="text-muted mt-1 text-sm">
  {existing
  ?"Update your studio profile and commission settings."
  :"Create your artist profile to start accepting commissions."}
@@ -219,7 +219,7 @@ export default function StudioSetupPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">Studio URL Slug</label>
  <div className="gap-1" style={{ display:"flex", alignItems:"center" }}>
  <span
- className="text-muted text-[calc(0.8rem*var(--font-scale))]"
+ className="text-muted text-sm"
  style={{ whiteSpace:"nowrap" }}
  >
  /studio/
@@ -454,7 +454,7 @@ export default function StudioSetupPage() {
  {/* Feedback */}
  {error && (
  <p
- className="mb-4 text-[calc(0.85rem*var(--font-scale))] text-[#ef4444]"
+ className="mb-4 text-sm text-[#ef4444]"
  style={{ textAlign:"center" }}
  >
  {error}
@@ -462,7 +462,7 @@ export default function StudioSetupPage() {
  )}
  {success && (
  <p
- className="mb-4 text-[calc(0.85rem*var(--font-scale))] text-[#22c55e]"
+ className="mb-4 text-sm text-[#22c55e]"
  style={{ textAlign:"center" }}
  >
  {success}

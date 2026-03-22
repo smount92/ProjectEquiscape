@@ -67,15 +67,15 @@ export default function SuggestNewEntryForm() {
 
  if (success) {
  return (
- <div className="p-8" style={{ textAlign:"center" }}>
+ <div className="p-8 text-center">
  <div className="mb-4 text-[3rem]">✅</div>
- <h2 className="mb-2" style={{ fontFamily:"var(--font-display)" }}>
+ <h2 className="mb-2 font-display">
  Suggestion Submitted!
  </h2>
  <p className="text-muted mb-6">
  Your new entry suggestion is now pending review. The community can vote and discuss it.
  </p>
- <div className="gap-4" style={{ display:"flex", justifyContent:"center" }}>
+ <div className="flex justify-center gap-4">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => router.push("/catalog/suggestions")}
@@ -98,7 +98,7 @@ export default function SuggestNewEntryForm() {
  }
 
  return (
- <div className="gap-4" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-4">
  {/* Title */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-title">
@@ -153,8 +153,7 @@ export default function SuggestNewEntryForm() {
  </select>
  {maker ==="Other" && (
  <input
- className="form-input"
- style={{ marginTop:"var(--space-xs)" }}
+ className="form-input mt-2"
  value={customMaker}
  onChange={(e) => setCustomMaker(e.target.value)}
  placeholder="Enter maker name"
@@ -164,7 +163,7 @@ export default function SuggestNewEntryForm() {
  </div>
 
  {/* Two-column row: Scale + Color */}
- <div className="grid-cols-2 gap-4" style={{ display:"grid" }}>
+ <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-scale">
  Scale
@@ -200,7 +199,7 @@ export default function SuggestNewEntryForm() {
  </div>
 
  {/* Two-column row: Mold + Year */}
- <div className="grid-cols-2 gap-4" style={{ display:"grid" }}>
+ <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-mold">
  Mold Name
@@ -238,17 +237,15 @@ export default function SuggestNewEntryForm() {
  </label>
  <textarea
  id="new-entry-reason"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all resize-y"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
  rows={3}
  maxLength={2000}
  placeholder="Explain why this entry should be added. Include sources if available (e.g. 'Listed in the 2019 Breyer dealer catalog, page 12')."
- style={{ resize:"vertical" }}
  />
  <span
- className="text-muted mt-[4] text-[calc(0.7rem*var(--font-scale))]"
- style={{ textAlign:"right", display:"block" }}
+ className="text-muted mt-[4] block text-right text-xs"
  >
  {reason.length}/2000
  </span>
@@ -261,7 +258,7 @@ export default function SuggestNewEntryForm() {
  )}
 
  {/* Actions */}
- <div className="justify-end gap-4" style={{ display:"flex" }}>
+ <div className="flex justify-end gap-4">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => router.back()}

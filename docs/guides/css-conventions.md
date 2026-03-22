@@ -1,200 +1,160 @@
 # CSS Conventions
 
-Model Horse Hub uses **Vanilla CSS** with design tokens and CSS Modules. No Tailwind.
+Model Horse Hub uses **Tailwind CSS v4** as its primary styling approach, with design tokens defined via `@theme` in `globals.css`.
 
-See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the rationale.
+See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the migration rationale.
 
-## File Architecture
+## Current Stack
 
-```
-src/app/
-├── globals.css                       # Design tokens (:root) + shared primitives (~4,670 lines)
-├── studio.css                        # Art Studio feature styles
-├── competition.css                   # Competition feature styles
-├── page.module.css                   # Landing page styles
-├── dashboard/dashboard.module.css    # Dashboard styles
-├── discover/discover.module.css      # Discover page styles
-├── inbox/inbox.module.css            # Inbox styles
-├── settings/settings.module.css      # Settings styles
-├── faq/faq.css                       # FAQ page (extracted from globals)
-├── static/static.css                 # Static pages (extracted from globals)
-├── admin/admin.css                   # Admin pages (extracted from globals)
-├── stable/                           # Stable feature extracted CSS
-│   ├── VisibilitySelector.css
-│   ├── PhotoReorder.css
-│   └── BatchResults.css
-├── shows/RingConflict.css            # Show ring conflicts (extracted)
-├── market/market.css                 # Market page (extracted)
-└── help/HelpId.css                   # Help page (extracted)
-
-src/components/
-├── ChatThread.module.css             # CSS Modules (scoped)
-├── DashboardShell.module.css
-├── DashboardToast.module.css
-├── FavoriteButton.module.css
-├── FeaturedHorseCard.module.css
-├── GroupAdminPanel.module.css
-├── GroupDetailClient.module.css
-├── GroupFiles.module.css
-├── MakeOfferModal.module.css
-├── MatchmakerMatches.module.css
-├── OfferCard.module.css
-├── RatingForm.module.css
-├── StableLedger.module.css
-├── WishlistButton.module.css
-├── Footer.css                        # Extracted from globals
-├── BackToTop.css                     # Extracted from globals
-├── CookieConsent.css
-├── TrophyCase.css
-├── RichEmbed.css
-├── GroupRegistry.css
-└── ... (+ more extracted globals)
-```
-
-**Total:** 49 CSS files (19 CSS Modules + 30 extracted global stylesheets)
-
-> **Note (March 2026):** 30 page-specific CSS blocks were extracted from `globals.css` into co-located `.css` files as part of a CSS modularization sprint. These use global class names (not CSS Modules) and are imported in `layout.tsx` as side-effect imports. The extraction reduced `globals.css` from 11,701 to 4,670 lines (60% reduction).
+- **Tailwind CSS v4** — Utility classes in JSX (`className="flex items-center gap-2"`)
+- **`globals.css`** — `@theme` design tokens + shared primitives (`.btn-*`, `.card`, `.form-*`, `.settings-toggle-*`)
+- **Legacy CSS Modules** — Still present in some components; not the pattern for new work
+- **Extracted `.css` files** — Legacy page-specific styles imported via `layout.tsx`
 
 ## Rules
 
-### 1. New Components Must Use CSS Modules
+### 1. Prefer Tailwind Utility Classes
 
-```css
-/* ✅ MyComponent.module.css */
-.container {
-    padding: var(--space-lg);
-    background: var(--color-bg-card);
-}
+```tsx
+// ✅ Use Tailwind classes
+<div className="flex items-center gap-4 rounded-lg border border-edge bg-card p-6 shadow-md">
+  <h2 className="text-lg font-bold text-ink">Title</h2>
+  <p className="text-sm text-muted">Description</p>
+</div>
 ```
 
 ```tsx
-// ✅ MyComponent.tsx
-import styles from "./MyComponent.module.css";
-
-export default function MyComponent() {
-    return <div className={styles.container}>...</div>;
-}
+// ❌ Don't use inline styles for static values
+<div style={{ display: "flex", alignItems: "center", gap: 16, padding: 24 }}>
 ```
 
-### 2. Use Design Tokens — Never Hard-Code
+### 2. Use Custom Theme Tokens
 
-```css
-/* ❌ WRONG */
-.title {
-    color: #333;
-    padding: 16px;
-    background: white;
-}
+Tailwind is configured with project-specific tokens via `@theme` in `globals.css`:
 
-/* ✅ RIGHT */
-.title {
-    color: var(--color-text-primary);
-    padding: var(--space-md);
-    background: var(--color-bg-card);
-}
+```tsx
+// ✅ Use semantic color tokens
+<span className="text-forest">Hunter green accent</span>
+<span className="text-ink">Primary text</span>
+<span className="text-muted">Secondary text</span>
+<div className="bg-card border-edge">Card with token colors</div>
+
+// ❌ Don't hard-code hex values except for one-off compositional colors
+<span style={{ color: "#2C5545" }}>Don't do this</span>
 ```
 
-### 3. Shared Primitives Stay in globals.css
+### 3. Inline Styles — Only for Dynamic Values
+
+Use `style={{}}` only when the value depends on runtime data:
+
+```tsx
+// ✅ Dynamic runtime value — must be inline
+<div style={{ borderLeft: `3px solid var(--podium-${ribbon})` }}>
+
+// ✅ Dynamic conditional — must be inline
+<button style={{
+  background: isActive ? "#ef4444" : "var(--color-surface-elevated)",
+}}>
+
+// ❌ Static value — use Tailwind instead
+<div style={{ display: "flex", gap: "8px" }}> // → className="flex gap-2"
+```
+
+### 4. Shared Primitives Stay in globals.css
 
 If a class is used across multiple components, it belongs in `globals.css`:
 - `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`
 - `.card`, `.card-auth`
 - `.form-group`, `.form-input`, `.form-select`, `.form-textarea`
 - `.modal-backdrop`, `.modal-content`
-- `.page-container`
+- `.settings-toggle`, `.settings-toggle-active`
 
-### 4. Combining Module + Global Classes
+### 5. Legacy CSS Modules
+
+Some components still use CSS Modules (`.module.css`). These are tolerated but not the preferred pattern:
+- **Don't create new** CSS Module files
+- **If touching a component** with a CSS Module, consider migrating its styles to Tailwind
+- **Combining** is fine: `className={\`btn btn-primary ${styles.myCustomButton}\`}`
+
+### 6. Simple Mode Compatibility
+
+Simple Mode (`[data-simple-mode="true"]`) overrides theme tokens for accessibility:
+- All backgrounds → white
+- All text → black/dark gray
+- Buttons → 60px min height
+- Fonts → +30% larger
+
+This works automatically via CSS custom properties — no Tailwind changes needed.
+
+### 7. Responsive Design
+
+Use Tailwind's responsive prefixes (mobile-first):
 
 ```tsx
-<button className={`btn btn-primary ${styles.myCustomButton}`}>
-    Submit
-</button>
-
-<div className={`card ${styles.featureCard}`}>
-    Content
-</div>
+// ✅ Tailwind responsive
+<div className="flex flex-col md:flex-row lg:grid lg:grid-cols-3">
+<div className="p-4 max-sm:p-2">
 ```
 
-### 5. Simple Mode Compatibility
+Standard breakpoints:
+| Prefix | Min-width |
+|--------|-----------|
+| `sm` | 640px |
+| `md` | 768px |
+| `lg` | 1024px |
+| `xl` | 1280px |
+| `2xl` | 1536px |
 
-All font sizes must use the `--font-scale` multiplier:
+### 8. Shadow & Border Convention
 
-```css
-/* ✅ Scales with Simple Mode */
-.text {
-    font-size: calc(var(--font-size-base) * var(--font-scale));
-}
+Shadows use warm brown tint (defined in theme):
 
-/* ❌ Won't scale in Simple Mode */
-.text {
-    font-size: 16px;
-}
+```tsx
+// ✅ Use Tailwind shadow classes
+<div className="shadow-md">  // warm-tinted shadow via theme
+
+// Or use Tailwind arbitrary values for one-off
+<div className="shadow-[0_4px_8px_rgba(80,60,40,0.08)]">
 ```
 
-All buttons must respect `--btn-min-h`:
+## File Architecture
 
-```css
-.myButton {
-    min-height: var(--btn-min-h); /* 44px normal, 60px Simple Mode */
-}
 ```
+src/app/
+├── globals.css              # @theme tokens + shared primitives (~2,200 lines)
+├── studio.css               # Art Studio feature styles
+├── competition.css          # Competition feature styles
+├── layout.tsx               # Imports legacy CSS files
+└── [page]/page.tsx          # Styling via Tailwind className
 
-### 6. Responsive Breakpoints
-
-Use these consistent breakpoints:
-
-```css
-/* Mobile-first, then scale up */
-@media (min-width: 768px) {
-    /* Tablet */
-}
-
-@media (min-width: 1024px) {
-    /* Desktop */
-}
-
-@media (min-width: 1440px) {
-    /* Widescreen */
-}
+src/components/
+├── *.tsx                    # Styling via Tailwind className
+├── 14 legacy *.module.css   # CSS Modules (not the pattern for new work)
+└── 16 extracted *.css       # Legacy extracted globals
 ```
-
-### 7. Shadow & Border Tinting
-
-Shadows use warm brown tint (not gray):
-
-```css
-/* ✅ Project convention */
-box-shadow: 0 4px 8px rgba(80, 60, 40, 0.08);
-
-/* ❌ Generic gray */
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-```
-
-Or use the token: `box-shadow: var(--shadow-md);`
 
 ## Design Token Quick Reference
 
-| Category | Key Tokens |
-|----------|-----------|
-| **Backgrounds** | `--color-bg-primary` (parchment), `--color-bg-card` (warm white) |
-| **Text** | `--color-text-primary` (espresso), `--color-text-secondary` (warm gray) |
-| **Accents** | `--color-accent-primary` (hunter green), `--color-accent-secondary` (saddle brown) |
-| **Spacing** | `--space-xs` (4px) through `--space-3xl` (64px) |
-| **Radii** | `--radius-sm` (6px) through `--radius-full` (pill) |
-| **Shadows** | `--shadow-sm/md/lg` (warm-tinted), `--shadow-glow` (green) |
-| **Transitions** | `--transition-fast` (150ms), `--transition-base` (250ms) |
+| Category | Tailwind Class | Token |
+|----------|---------------|-------|
+| **Backgrounds** | `bg-card`, `bg-elevated`, `bg-surface` | Warm parchment palette |
+| **Text** | `text-ink`, `text-muted`, `text-ink-light` | Espresso/warm gray hierarchy |
+| **Accents** | `text-forest`, `bg-forest` | Hunter green CTA |
+| **Borders** | `border-edge` | Warm almond |
+| **Success** | `text-success` | Green |
+| **Danger** | `text-danger` | Red |
 
 See [Design System](../components/design-system.md) for the complete reference.
 
-## When to Add to globals.css vs Module
+## When to Use What
 
-| Scenario | Where |
-|----------|-------|
-| Used by 3+ components | `globals.css` |
-| Component-specific styling (new) | `ComponentName.module.css` |
-| Feature-wide styling (Studio, Competition) | `studio.css` / `competition.css` |
-| Design token or utility class | `globals.css` `:root` |
-| Extracted page-specific block (legacy) | Co-located `.css` (imported in `layout.tsx`) |
+| Scenario | Approach |
+|----------|----------|
+| New styling | Tailwind utility classes |
+| Shared primitives (`.btn`, `.card`, `.form-*`) | `globals.css` |
+| Truly dynamic values (runtime colors, coordinates) | Inline `style={{}}` |
+| Legacy CSS Modules | Leave as-is unless actively editing the component |
+| React-PDF components | Inline style objects (required by library) |
 
 ---
 

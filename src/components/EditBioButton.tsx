@@ -31,9 +31,8 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  if (!isEditing) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-xs font-semibold text-ink-light no-underline opacity-70 transition-all"
  onClick={() => setIsEditing(true)}
- style={{ fontSize:"calc(var(--font-size-xs) * var(--font-scale))", opacity: 0.7 }}
  id="edit-bio-btn"
  title="Edit bio"
  >
@@ -48,34 +47,18 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  value={bio}
  onChange={(e) => setBio(e.target.value.slice(0, 500))}
  placeholder="Tell collectors about yourself… (500 chars max)"
- className="form-input"
- style={{
- minHeight:"80px",
- resize:"vertical",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
- }}
+ className="form-input min-h-[80px] resize-y text-sm"
  maxLength={500}
  id="bio-textarea"
  autoFocus
  />
- <div
- style={{
- display:"flex",
- justifyContent:"space-between",
- alignItems:"center",
- marginTop:"var(--space-xs)",
- gap:"var(--space-sm)",
- }}
- >
+ <div className="mt-1 flex items-center justify-between gap-2">
  <span
- style={{
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- color: bio.length > 450 ?"var(--color-error)" :"var(--color-text-muted)",
- }}
+ className={`text-xs ${bio.length > 450 ? "text-danger" : "text-muted"}`}
  >
  {bio.length}/500
  </span>
- <div className="gap-2" style={{ display:"flex" }}>
+ <div className="flex gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => {
@@ -98,13 +81,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  </div>
  </div>
  {error && (
- <div
- style={{
- color:"var(--color-error)",
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- marginTop:"var(--space-xs)",
- }}
- >
+ <div className="mt-1 text-xs text-danger">
  {error}
  </div>
  )}

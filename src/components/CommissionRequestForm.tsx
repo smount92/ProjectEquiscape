@@ -82,6 +82,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  value={commissionType}
  onChange={(e) => setCommissionType(e.target.value)}
  required
+ title="Commission type"
  >
  <option value="">Select a type…</option>
  {typeOptions.map((t) => (
@@ -98,6 +99,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  className="form-input"
  value={selectedHorseId}
  onChange={(e) => setSelectedHorseId(e.target.value)}
+ title="Link a horse"
  >
  <option value="">No horse — artist will create or I&apos;ll send one later</option>
  {horses.map((h) => (
@@ -137,8 +139,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  />
  {(artist.priceRangeMin || artist.priceRangeMax) && (
  <span
- className="text-muted mt-[4] text-[calc(0.75rem*var(--font-scale))]"
- style={{ display:"block" }}
+ className="text-muted mt-[4] block text-xs"
  >
  Artist&apos;s range: ${artist.priceRangeMin ||"?"} – ${artist.priceRangeMax ||"?"}
  </span>
@@ -147,8 +148,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
 
  {error && (
  <p
- className="mb-4 text-[calc(0.85rem*var(--font-scale))] text-[#ef4444]"
- style={{ textAlign:"center" }}
+ className="mb-4 text-center text-sm text-[#ef4444]"
  >
  {error}
  </p>
@@ -156,9 +156,8 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
 
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  disabled={saving}
- style={{ width:"100%" }}
  id="submit-commission-btn"
  >
  {saving ?"Submitting…" :"🎨 Submit Commission Request"}

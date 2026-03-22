@@ -76,16 +76,16 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  ];
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
- <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <nav className="text-muted mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <span>Suggestions</span>
  </nav>
 
- <h1 className="mb-1 font-sans text-[calc(1.8rem*var(--font-scale))]">
+ <h1 className="mb-1 font-sans text-2xl">
  📝 <span className="text-forest">Catalog Suggestions</span>
  </h1>
  <p className="text-muted mb-6">
@@ -106,7 +106,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  </div>
 
  {/* Results */}
- <p className="text-muted mb-2 text-[calc(0.85rem*var(--font-scale))]">{count ?? 0} suggestions</p>
+ <p className="text-muted mb-2 text-sm">{count ?? 0} suggestions</p>
 
  <div className="flex flex-col gap-2">
  {(
@@ -183,17 +183,17 @@ export default async function SuggestionsPage({ searchParams }: Props) {
 
  <div className="text-sm text-ink-light leading-relaxed">
  {changeSummary && (
- <p className="mb-[4px] text-[calc(0.9rem*var(--font-scale))] font-medium">
+ <p className="mb-[4px] text-sm font-medium">
  {changeSummary}
  </p>
  )}
- <p className="text-muted text-[calc(0.8rem*var(--font-scale))] italic">
+ <p className="text-muted text-sm italic">
  &ldquo;{s.reason.slice(0, 120)}
  {s.reason.length > 120 ?"…" :""}&rdquo;
  </p>
  </div>
 
- <div className="text-muted mt-2 flex items-center gap-4 text-[calc(0.8rem*var(--font-scale))]">
+ <div className="text-muted mt-2 flex items-center gap-4 text-sm">
  <span className="font-semibold">
  {curatorIcon} @{userData?.alias_name ??"Unknown"}
  </span>

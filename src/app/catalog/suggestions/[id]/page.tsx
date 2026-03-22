@@ -129,14 +129,14 @@ export default async function SuggestionDetailPage({ params }: Props) {
  :"";
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
- <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <nav className="text-muted mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <Link href="/catalog/suggestions">Suggestions</Link>
- <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <span>Detail</span>
@@ -181,7 +181,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  :"🗑 Removal"}
  </span>
  </div>
- <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-muted text-sm">
  {new Date(s.created_at).toLocaleDateString("en-US", {
  year:"numeric",
  month:"long",
@@ -265,10 +265,10 @@ export default async function SuggestionDetailPage({ params }: Props) {
  .filter(([, v]) => v != null && v !=="")
  .map(([k, v]) => (
  <div key={k} className="flex flex-col gap-[2px]">
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))] font-semibold tracking-[0.05em] uppercase">
+ <span className="text-muted text-xs font-semibold tracking-[0.05em] uppercase">
  {k.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
  </span>
- <span className="text-[calc(0.95rem*var(--font-scale))] font-bold text-[#66bb6a]">
+ <span className="text-base font-bold text-[#66bb6a]">
  {String(v)}
  </span>
  </div>

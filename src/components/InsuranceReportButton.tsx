@@ -131,11 +131,11 @@ export default function InsuranceReportButton() {
  </p>
 
  <select
- className="form-select"
+ className="form-select mb-4 w-full"
  value={selectedCollection}
  onChange={(e) => setSelectedCollection(e.target.value)}
- style={{ width:"100%", marginBottom:"var(--space-md)" }}
  id="insurance-collection-select"
+ title="Report scope"
  >
  <option value="">🐎 Entire Stable</option>
  {collections.map((c) => (
@@ -152,7 +152,7 @@ export default function InsuranceReportButton() {
  </div>
  )}
 
- <div className="justify-end gap-2" style={{ display:"flex" }}>
+ <div className="flex justify-end gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={handleCancel}

@@ -45,23 +45,19 @@ export default async function ShowsPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <div className="animate-fade-in-up mb-8">
+ <h1 className="text-2xl font-bold tracking-tight">
  📸 <span className="text-forest">Virtual Photo Shows</span>
  </h1>
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 max-w-xl text-base text-stone-500">
  Enter your models, vote for your favorites, and compete for community glory!
  </p>
- </div>
- <div className="mt-8 flex justify-center gap-8">
- <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">
+ <div className="mt-6 flex items-baseline gap-2">
+ <span className="text-2xl font-bold text-forest">
  {shows.filter((s) => s.status ==="open").length}
  </span>
- <span className="items-center-label flex flex-col">Open Shows</span>
- </div>
+ <span className="text-sm font-medium text-stone-500">Open Shows</span>
  </div>
  </div>
 
@@ -87,20 +83,9 @@ export default async function ShowsPage() {
  <h3 className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
  {show.title}
  </h3>
- <div className="gap-1" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-1">
  {isUserJudge && (
- <span
- style={{
- fontSize:"calc(0.7rem * var(--font-scale))",
- padding:"2px 8px",
- borderRadius:"var(--radius-sm)",
- background:"rgba(139, 92, 246, 0.2)",
- color:"#a78bfa",
- border:"1px solid rgba(139, 92, 246, 0.3)",
- fontWeight: 600,
- whiteSpace:"nowrap",
- }}
- >
+ <span className="whitespace-nowrap rounded-sm border border-[rgba(139,92,246,0.3)] bg-[rgba(139,92,246,0.2)] px-2 py-0.5 text-[0.7rem] font-semibold text-[#a78bfa]">
  🏅 Judge
  </span>
  )}

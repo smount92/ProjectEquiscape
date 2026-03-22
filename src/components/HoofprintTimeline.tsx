@@ -99,27 +99,23 @@ export default function HoofprintTimeline({
  <div className="mt-8">
  {/* Header */}
  <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
- <div className="gap-4" style={{ display:"flex", alignItems:"center" }}>
- <h2 className="text-[calc(1.2rem*var(--font-scale))] font-bold">
+ <div className="flex items-center gap-4">
+ <h2 className="text-xl font-bold">
  🐾 <span className="text-forest">Hoofprint™</span>
  </h2>
  <span className={`hoofprint-stage-badge stage-${lifeStage}`}>
  {STAGE_ICONS[lifeStage] ||"📋"} {STAGE_LABELS[lifeStage] || lifeStage}
  </span>
  </div>
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-2">
  {isOwner && (
  <>
  <select
- className="form-input"
- style={{
- width:"auto",
- minWidth:"140px",
- fontSize:"calc(0.8rem * var(--font-scale))",
- }}
+ className="form-input w-auto min-w-[140px] text-sm"
  value={lifeStage}
  onChange={(e) => handleStageChange(e.target.value)}
  disabled={stageUpdating}
+ title="Life stage"
  >
  <option value="blank">🎨 Blank</option>
  <option value="stripped">🛁 Stripped / Body</option>
@@ -130,7 +126,6 @@ export default function HoofprintTimeline({
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setShowForm(!showForm)}
- style={{ fontSize:"calc(0.8rem * var(--font-scale))" }}
  >
  {showForm ?"Cancel" :"📝 Add Note"}
  </button>
@@ -142,9 +137,9 @@ export default function HoofprintTimeline({
  {/* Ownership Chain */}
  {ownershipChain.length > 0 && (
  <div className="bg-[rgba(0,0,0,0.03)] border-[rgba(0,0,0,0.06)] mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
- <span className="text-muted mr-1 text-[calc(0.75rem*var(--font-scale))]">Chain of Custody:</span>
+ <span className="text-muted mr-1 text-xs">Chain of Custody:</span>
  {ownershipChain.map((owner, i) => (
- <span key={owner.id} className="inline-flex gap-1" style={{ alignItems:"center" }}>
+ <span key={owner.id} className="inline-flex items-center gap-1">
  {i > 0 && <span className="text-muted text-[0.8rem]">→</span>}
  {owner.ownerId ? (
  <Link
@@ -191,13 +186,12 @@ export default function HoofprintTimeline({
  rows={2}
  />
  </div>
- <div className="mt-2 gap-4" style={{ display:"flex", alignItems:"center" }}>
+ <div className="mt-2 flex items-center gap-4">
  <span className="text-muted text-xs">📝 Notes appear on the Hoofprint™ timeline</span>
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all ml-auto"
  disabled={saving}
- style={{ marginLeft:"auto" }}
  >
  {saving ?"Saving…" :"Add Note"}
  </button>
@@ -207,10 +201,10 @@ export default function HoofprintTimeline({
 
  {/* Timeline */}
  {timeline.length === 0 ? (
- <div className="text-muted p-8" style={{ textAlign:"center" }}>
+ <div className="text-muted p-8 text-center">
  <p>🐾 No timeline events yet.</p>
  {isOwner && (
- <p className="text-[calc(0.8rem*var(--font-scale))]">
+ <p className="text-sm">
  Add events to build this horse&apos;s Hoofprint!
  </p>
  )}
@@ -220,7 +214,7 @@ export default function HoofprintTimeline({
  {timeline.map((event) => (
  <div key={event.id} className="relative pb-6">
  <div className="pb-6-dot relative">{EVENT_ICONS[event.eventType] ||"📋"}</div>
- <div className="items-start justify-between" style={{ display:"flex" }}>
+ <div className="flex items-start justify-between">
  <div>
  <div className="pb-6-title relative">
  {event.title}
@@ -245,9 +239,8 @@ export default function HoofprintTimeline({
  event.userId === currentUserId &&
  event.sourceTable ==="posts" && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="text-[0.7rem] p-[2px_6px] opacity-50"
  onClick={() => handleDelete(event.id)}
- style={{ fontSize:"0.7rem", padding:"2px 6px", opacity: 0.5 }}
  title="Delete note"
  >
  🗑

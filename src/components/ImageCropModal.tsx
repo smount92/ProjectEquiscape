@@ -288,32 +288,18 @@ export default function ImageCropModal({
  const overlay = (
  <div className="modal-overlay" onClick={onCancel}>
  <div
- className="rounded-lg border border-edge bg-card shadow-md transition-all"
+ className="w-[95vw] max-w-[700px] overflow-hidden rounded-lg border border-edge bg-card p-0 shadow-md transition-all"
  onClick={(e) => e.stopPropagation()}
- style={{ maxWidth: 700, width:"95vw", padding: 0, overflow:"hidden" }}
  >
  {/* Header */}
- <div
- style={{
- padding:"var(--space-md) var(--space-lg)",
- borderBottom:"1px solid var(--color-border)",
- display:"flex",
- justifyContent:"space-between",
- alignItems:"center",
- }}
- >
+ <div className="flex items-center justify-between border-b border-edge px-6 py-4">
  <h3 className="m-0 text-base">✂️ Crop Photo</h3>
- <div className="gap-1" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap gap-1">
  {ASPECT_PRESETS.map((preset) => (
  <button
  key={preset.label}
- className={`inline-flex cursor-pointer items-center justify-center rounded-md border text-sm font-semibold transition-all ${aspectRatio === preset.value ? 'border-0 bg-forest text-inverse' : 'border-edge bg-transparent text-ink-light'}`}
- style={{
- padding:"4px 10px",
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- fontWeight: aspectRatio === preset.value ? 700 : 400,
- borderRadius:"var(--radius-sm)",
- }}
+ className={`inline-flex cursor-pointer items-center justify-center rounded-sm border px-2.5 py-1 text-xs transition-all ${aspectRatio === preset.value ? 'border-0 bg-forest font-bold text-inverse' : 'border-edge bg-transparent font-normal text-ink-light'}`}
+ onClick={() => setAspectRatio(preset.value)}
  >
  {preset.label}
  </button>
@@ -324,15 +310,8 @@ export default function ImageCropModal({
  {/* Crop area */}
  <div
  ref={containerRef}
- style={{
- position:"relative",
- width:"100%",
- height:"min(60vh, 500px)",
- background:"#111",
- overflow:"hidden",
- userSelect:"none",
- touchAction:"none",
- }}
+ className="relative h-[min(60vh,500px)] w-full select-none overflow-hidden touch-none"
+ style={{ background: "#111" }}
  onPointerMove={handlePointerMove}
  onPointerUp={handlePointerUp}
  >
@@ -343,12 +322,7 @@ export default function ImageCropModal({
  src={imageUrl}
  alt="Crop preview"
  onLoad={handleImageLoad}
- style={{
- width:"100%",
- height:"100%",
- objectFit:"contain",
- pointerEvents:"none",
- }}
+ className="pointer-events-none h-full w-full object-contain"
  />
 
  {imageLoaded && (
@@ -442,16 +416,7 @@ export default function ImageCropModal({
  </div>
 
  {/* Footer actions */}
- <div
- style={{
- padding:"var(--space-md) var(--space-lg)",
- borderTop:"1px solid var(--color-border)",
- display:"flex",
- justifyContent:"space-between",
- alignItems:"center",
- gap:"var(--space-sm)",
- }}
- >
+ <div className="flex items-center justify-between gap-2 border-t border-edge px-6 py-4">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={onCancel}
@@ -459,7 +424,7 @@ export default function ImageCropModal({
  >
  Cancel
  </button>
- <div className="gap-2" style={{ display:"flex" }}>
+ <div className="flex gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={handleSkip}

@@ -399,8 +399,9 @@ export default function CsvImport() {
  type="file"
  accept=".csv"
  onChange={handleFileInput}
- style={{ display:"none" }}
+ className="hidden"
  id="csv-file-input"
+ title="Upload CSV file"
  />
  </div>
 
@@ -447,7 +448,7 @@ export default function CsvImport() {
  className="bg-input border-edge-input text-ink flex-1 cursor-pointer rounded-sm border px-4 py-2 font-sans text-sm"
  value={columnMapping[header] ||""}
  onChange={(e) => handleMappingChange(header, e.target.value)}
- id={`mapping-${header.replace(/\s+/g,"-")}`}
+ aria-label={`Map ${header} to field`}
  >
  {MHH_FIELDS.map((f) => (
  <option key={f.value} value={f.value}>
@@ -627,10 +628,9 @@ export default function CsvImport() {
  >
  ← Back
  </button>
- <div className="items-end gap-2" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col items-end gap-2">
  <label
- className="gap-2 text-sm"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center gap-2 text-sm"
  >
  <input
  type="checkbox"
@@ -639,7 +639,7 @@ export default function CsvImport() {
  />
  <span>Publish imported models to the community feed</span>
  </label>
- <span className="text-muted mt-1 block text-xs" style={{ textAlign:"right" }}>
+ <span className="text-muted mt-1 block text-right text-xs">
  Models without photos will be excluded regardless.
  </span>
  <button

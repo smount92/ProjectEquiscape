@@ -136,7 +136,7 @@ export default function ExpertJudgingPanel({
  background: bgColor,
  }}
  >
- <h3 className="mb-4 gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <h3 className="mb-4 flex items-center gap-2">
  {overrideMode ?"⚠️" :"🏅"}{""}
  <span className="text-forest">{overrideMode ?"Override Final Placings" :"Expert Judging Panel"}</span>
  </h3>
@@ -150,10 +150,10 @@ export default function ExpertJudgingPanel({
  {classes && classes.length > 0 && (
  <div className="mb-4">
  <select
- className="form-input"
+ className="form-input max-w-[400px]"
  value={selectedClassId}
  onChange={(e) => setSelectedClassId(e.target.value)}
- style={{ maxWidth: 400 }}
+ title="Filter by class"
  >
  <option value="all">All Entries ({entries.length})</option>
  {Array.from(divisionGroups.entries()).map(([divName, items]) => (
@@ -173,7 +173,7 @@ export default function ExpertJudgingPanel({
  <div
  style={{
  marginTop:"var(--space-xs)",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
+ fontSize: "0.875rem",
  color:"var(--color-text-muted)",
  }}
  >
@@ -184,9 +184,9 @@ export default function ExpertJudgingPanel({
  </div>
  )}
 
- <div className="gap-2" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-2">
  {filteredEntries.length === 0 ? (
- <div className="text-muted p-4" style={{ textAlign:"center" }}>
+ <div className="text-muted p-4 text-center">
  No entries {selectedClassId !=="all" ?"in this class" :"to judge"}.
  </div>
  ) : (
@@ -205,19 +205,18 @@ export default function ExpertJudgingPanel({
  }}
  >
  {entry.thumbnailUrl && (
- <div className="h-[40] w-[40] shrink-0 rounded-sm" style={{ overflow:"hidden" }}>
+ <div className="h-[40] w-[40] shrink-0 overflow-hidden rounded-sm">
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img
  src={entry.thumbnailUrl}
  alt={entry.horseName}
- className="h-full w-full"
- style={{ objectFit:"cover" }}
+ className="h-full w-full object-cover"
  />
  </div>
  )}
  <div className="min-w-0 flex-1">
  <div className="text-sm font-semibold">🐴 {entry.horseName}</div>
- <div className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+ <div className="text-muted text-xs">
  by @{entry.ownerAlias}
  </div>
  </div>
@@ -240,10 +239,10 @@ export default function ExpertJudgingPanel({
  📝
  </button>
  <select
- className="form-input"
+ className="form-input w-[140px] shrink-0"
  value={placings[entry.id] ||""}
  onChange={(e) => setPlacings((prev) => ({ ...prev, [entry.id]: e.target.value }))}
- style={{ width: 140, flexShrink: 0 }}
+ title={`Placing for ${entry.horseName}`}
  >
  {PLACING_OPTIONS.map((opt) => (
  <option key={opt.value} value={opt.value}>
@@ -263,12 +262,11 @@ export default function ExpertJudgingPanel({
  }}
  >
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="form-input text-sm resize-y"
  value={notes[entry.id] ||""}
  onChange={(e) => setNotes((prev) => ({ ...prev, [entry.id]: e.target.value }))}
  placeholder="Private judge notes (critique, reasoning)…"
  rows={2}
- style={{ fontSize:"calc(0.8rem * var(--font-scale))", resize:"vertical" }}
  />
  </div>
  )}
@@ -286,7 +284,7 @@ export default function ExpertJudgingPanel({
  background:"rgba(34, 197, 94, 0.15)",
  color:"#22c55e",
  borderRadius:"var(--radius-sm)",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
+ fontSize: "0.875rem",
  }}
  >
  ✅ Placings saved!{""}
@@ -296,7 +294,7 @@ export default function ExpertJudgingPanel({
  </div>
  )}
 
- <div className="mt-4 gap-2" style={{ display:"flex" }}>
+ <div className="mt-4 flex gap-2">
  <button
  className={`btn ${overrideMode ?"btn-ghost" :"btn-primary"}`}
  onClick={handleSave}

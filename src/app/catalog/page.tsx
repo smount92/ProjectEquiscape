@@ -56,7 +56,7 @@ export default async function ReferencePage() {
  .gte("created_at", weekAgo);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Hero Section */}
  <div className="animate-fade-in-up px-0 py-8 text-center">
  <div>
@@ -149,7 +149,7 @@ export default async function ReferencePage() {
  >
  @{curator.alias_name}
  </a>
- <span className="text-muted ml-auto text-[calc(0.75rem*var(--font-scale))]">
+ <span className="text-muted ml-auto text-xs">
  {curator.approved_suggestions_count} contributions
  </span>
  </li>

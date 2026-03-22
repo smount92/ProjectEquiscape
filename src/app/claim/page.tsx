@@ -118,7 +118,7 @@ export default function ClaimPage() {
  style={{ textAlign:"center" }}
  >
  <div className="mb-4 text-[3rem]">🎉</div>
- <h1 className="text-[calc(1.5rem*var(--font-scale))]">Welcome to your stable!</h1>
+ <h1 className="text-2xl">Welcome to your stable!</h1>
  <p className="text-muted mt-2 mb-6">
  <strong>{success.horseName}</strong> has been successfully transferred to your account. The full
  Hoofprint™ history has been preserved.
@@ -140,7 +140,7 @@ export default function ClaimPage() {
  <p
  style={{
  textAlign:"center",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
+ fontSize:"0.875rem",
  color:"var(--color-text-muted)",
  marginTop:"var(--space-lg)",
  borderTop:"1px solid var(--color-border)",
@@ -159,10 +159,10 @@ export default function ClaimPage() {
  <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all">
  <div className="mb-6" style={{ textAlign:"center" }}>
  <div className="mb-2 text-[2.5rem]">📦</div>
- <h1 className="text-[calc(1.3rem*var(--font-scale))]">
+ <h1 className="text-xl">
  <span className="text-forest">Claim a Horse</span>
  </h1>
- <p className="text-muted mt-1 text-[calc(0.85rem*var(--font-scale))]">
+ <p className="text-muted mt-1 text-sm">
  Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
  </p>
  </div>
@@ -208,7 +208,7 @@ export default function ClaimPage() {
  </div>
  )}
  <div className="flex-1">
- <h3 className="mb-[4] text-[calc(1.1rem*var(--font-scale))] font-bold">
+ <h3 className="mb-[4] text-lg font-bold">
  {preview.name}
  </h3>
  <p className="text-muted text-sm">
@@ -282,7 +282,7 @@ export default function ClaimPage() {
 
  {error && (
  <p
- className="mb-4 text-[calc(0.8rem*var(--font-scale))] text-[#ef4444]"
+ className="mb-4 text-sm text-[#ef4444]"
  style={{ textAlign:"center" }}
  >
  {error}
@@ -302,14 +302,14 @@ export default function ClaimPage() {
 
  {error && preview && (
  <p
- className="mt-4 text-[calc(0.8rem*var(--font-scale))] text-[#ef4444]"
+ className="mt-4 text-sm text-[#ef4444]"
  style={{ textAlign:"center" }}
  >
  {error}
  </p>
  )}
 
- <p className="text-muted mt-4 text-[calc(0.75rem*var(--font-scale))]" style={{ textAlign:"center" }}>
+ <p className="text-muted mt-4 text-xs" style={{ textAlign:"center" }}>
  The horse&apos;s full Hoofprint™ history will transfer with it.
  <br />
  Photos, show records, and provenance are preserved forever.

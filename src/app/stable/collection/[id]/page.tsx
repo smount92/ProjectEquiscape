@@ -178,7 +178,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  {/* Collection Header */}
  <div className="collection-hero animate-fade-in-up max-sm:flex-col max-sm:p-6 max-sm:text-center">
  <div className="shrink-0 text-[2.5rem]">📁</div>
- <div className="text-ink mb-1 text-[calc(1.5rem*var(--font-scale))] font-bold">
+ <div className="text-ink mb-1 text-2xl font-bold">
  <h1>{collection.name}</h1>
  {collection.description && (
  <p className="mb-1 text-sm text-[var(--color-text-secondary)]">{collection.description}</p>
@@ -197,14 +197,14 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  <div className="grid-cols-[repeat(3,1fr)] animate-fade-in-up mb-8 grid gap-4">
  <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
  <div className="text-2xl leading-none">🐴</div>
- <div className="analytics-value max-[400px]:text-[calc(1.2rem*var(--font-scale))]">
+ <div className="analytics-value max-[400px]:text-xl">
  {horseCards.length}
  </div>
  <div className="text-muted text-xs font-medium tracking-[0.05em] uppercase">Models</div>
  </div>
  <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
  <div className="text-2xl leading-none">💰</div>
- <div className="analytics-value max-[400px]:text-[calc(1.2rem*var(--font-scale))]">
+ <div className="analytics-value max-[400px]:text-xl">
  {collectionVaultValue > 0
  ? `$${collectionVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
  :"—"}
@@ -215,7 +215,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  </div>
  <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
  <div className="text-2xl leading-none">📊</div>
- <div className="analytics-value max-[400px]:text-[calc(1.2rem*var(--font-scale))]">
+ <div className="analytics-value max-[400px]:text-xl">
  {avgValue > 0
  ? `$${avgValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
  :"—"}
@@ -247,19 +247,17 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  <Link
  key={horse.id}
  href={`/stable/${horse.id}`}
- className="horse-bg-card border-edge rounded-lg border shadow-md transition-all"
+ className="group overflow-hidden rounded-lg border border-edge bg-card shadow-md transition-all hover:shadow-lg"
  id={`collection-horse-${horse.id}`}
  >
- <div className="h-full w-full object-contain transition-transform">
+ <div className="relative aspect-square overflow-hidden bg-[rgba(0,0,0,0.03)]">
  {horse.thumbnailUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
- <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
+ <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
  ) : (
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
- <span className="flex items-center justify-center rounded-lg border border-edge bg-card text-4xl shadow-md">
- 🐴
- </span>
- <span>No photo</span>
+ <div className="flex h-full flex-col items-center justify-center gap-2 text-muted">
+ <span className="text-4xl">🐴</span>
+ <span className="text-sm">No photo</span>
  </div>
  )}
  <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
@@ -276,15 +274,15 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  </span>
  )}
  </div>
- <div className="px-6 py-4">
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+ <div className="px-4 py-3">
+ <div className="font-semibold text-ink">
  {horse.customName}
  </div>
  <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
  {horse.refName}
  </div>
  {horse.releaseLine && (
- <div className="mt-[2px] overflow-hidden text-sm text-[calc(0.7rem*var(--font-scale))] text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-[0.7]">
+ <div className="mt-[2px] overflow-hidden text-xs text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-70">
  🎨 {horse.releaseLine}
  </div>
  )}

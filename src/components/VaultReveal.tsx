@@ -48,7 +48,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  >
  <div className="flex items-center gap-4 p-8">
  <div
- className="px-5 pb-5-lock flex h-11 max-h-[500px] w-11 shrink-0 items-center justify-center rounded-md border border-[rgba(240,160,108,0.25)] bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] text-[1.4rem] transition-all"
+ className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[rgba(240,160,108,0.25)] bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] text-[1.4rem] transition-all"
  aria-hidden="true"
  >
  {isUnlocked ?"🔓" :"🔒"}
@@ -62,7 +62,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  </p>
  </div>
  <button
- className="min-h-[var(--inline-flex inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setIsUnlocked(!isUnlocked)}
  aria-expanded={isUnlocked}
  aria-controls="vault-data"
@@ -106,7 +106,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  </button>
  </div>
 
- <div className="max-h-[0] overflow-hidden px-8 py-0 transition-all" id="vault-data">
+ <div className={`overflow-hidden px-8 transition-all duration-300 ${isUnlocked ? "max-h-[500px] py-4" : "max-h-0 py-0"}`} id="vault-data">
  {!hasData ? (
  <div className="text-muted py-6 text-center text-sm">
  <p>📭 No financial data recorded yet. You can add purchase details by editing this horse.</p>

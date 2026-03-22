@@ -114,7 +114,7 @@ export default function ParkedExportPanel({
 
  return (
  <div className="bg-card border-edge animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
- <div className="mb-6 justify-between" style={{ display:"flex", alignItems:"center" }}>
+ <div className="mb-6 flex items-center justify-between">
  <h3>{isParked ?"🔒 Horse is Parked" :"📤 Sell Off-Platform"}</h3>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -139,11 +139,10 @@ export default function ParkedExportPanel({
  <li>4. They scan the QR or enter the PIN to claim the horse on MHH</li>
  </ul>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="mt-6 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handlePark}
  disabled={status ==="parking"}
  id="park-horse-btn"
- style={{ marginTop:"var(--space-lg)" }}
  >
  {status ==="parking" ? (
  <>
@@ -171,7 +170,6 @@ export default function ParkedExportPanel({
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={handleCopyPin}
- style={{ fontSize:"calc(var(--font-size-sm) * var(--font-scale))" }}
  >
  {copied ?"✅ Copied!" :"📋 Copy"}
  </button>
@@ -190,7 +188,7 @@ export default function ParkedExportPanel({
  <div
  ref={qrCanvasRef}
  aria-hidden="true"
- style={{ position:"absolute", left:"-9999px", top: 0 }}
+ className="sr-only"
  >
  <QRCodeCanvas value={claimUrl} size={400} level="M" bgColor="#ffffff" fgColor="#1a1a2e" />
  </div>
@@ -213,11 +211,10 @@ export default function ParkedExportPanel({
  )}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
  onClick={handleUnpark}
  disabled={status ==="unparking"}
  id="unpark-btn"
- style={{ color:"var(--color-accent-danger)" }}
  >
  {status ==="unparking" ?"Unparking…" :"Cancel & Unpark"}
  </button>

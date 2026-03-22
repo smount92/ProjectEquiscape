@@ -34,7 +34,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  ]);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  <div className="mx-auto max-w-[var(--max-width)] px-6">
  {/* Group Header */}
  <div className="border-edge mb-6 border-b pb-6">
@@ -46,8 +46,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  </Link>
  <h1>{group.name}</h1>
  <div
- className="text-muted mt-2 gap-4 text-[calc(0.85rem*var(--font-scale))]"
- style={{ display:"flex", flexWrap:"wrap" }}
+ className="text-muted mt-2 flex flex-wrap gap-4 text-sm"
  >
  <span>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}</span>
  {group.region && <span>📍 {group.region}</span>}

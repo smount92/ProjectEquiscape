@@ -85,8 +85,7 @@ export default function HelpIdDetailClient({
 
  {suggestions.length === 0 ? (
  <div
- className="bg-card border-edge rounded-lg border p-8 shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all"
  >
  <p className="text-muted">No suggestions yet. Be the first to help!</p>
  </div>
@@ -137,7 +136,6 @@ export default function HelpIdDetailClient({
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleAccept(s.id)}
- style={{ fontSize:"calc(var(--font-size-sm) * var(--font-scale))" }}
  >
  ✅ Accept
  </button>
@@ -180,15 +178,14 @@ export default function HelpIdDetailClient({
  <h3 className="mb-4">Your Suggestion</h3>
  <div className="mb-6">
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  rows={3}
  value={suggestText}
  onChange={(e) => setSuggestText(e.target.value)}
  placeholder="What model do you think this is? Include manufacturer, mold name, release name, model number if known..."
- style={{ resize:"vertical" }}
+ className="form-input resize-y"
  />
  </div>
- <div className="gap-4" style={{ display:"flex" }}>
+ <div className="flex gap-4">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => {
@@ -218,10 +215,9 @@ export default function HelpIdDetailClient({
  )}
  {/* Owner: Delete Request */}
  {isOwner && (
- <div className="mt-8" style={{ textAlign:"right" }}>
+ <div className="mt-8 text-right">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{ color:"red" }}
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
  onClick={async () => {
  if (confirm("Delete this Help ID request? This cannot be undone.")) {
  const result = await deleteIdRequest(requestId);

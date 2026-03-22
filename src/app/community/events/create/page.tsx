@@ -56,7 +56,7 @@ export default function CreateEventPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[640]">
  <h1 className="mb-8">📅 Create Event</h1>
 
@@ -74,7 +74,7 @@ export default function CreateEventPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Event Type *</label>
- <select className="form-input" value={eventType} onChange={(e) => setEventType(e.target.value)}>
+ <select className="form-input" value={eventType} onChange={(e) => setEventType(e.target.value)} title="Event type">
  {Object.entries(EVENT_TYPE_LABELS).map(([key, label]) => (
  <option key={key} value={key}>
  {label}
@@ -85,10 +85,9 @@ export default function CreateEventPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Judging Method</label>
- <div className="gap-4" style={{ display:"flex" }}>
+ <div className="flex gap-4">
  <label
- className="gap-1"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center gap-1"
  >
  <input
  type="radio"
@@ -100,8 +99,7 @@ export default function CreateEventPage() {
  🗳️ Community Vote
  </label>
  <label
- className="gap-1"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center gap-1"
  >
  <input
  type="radio"
@@ -123,12 +121,11 @@ export default function CreateEventPage() {
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="form-input w-full resize-y"
  rows={4}
  value={description}
  onChange={(e) => setDescription(e.target.value)}
  placeholder="What's this event about?"
- style={{ resize:"vertical" }}
  />
  </div>
 
@@ -154,12 +151,12 @@ export default function CreateEventPage() {
  </div>
  </div>
 
- <div className="my-3 gap-6" style={{ display:"flex" }}>
- <label className="gap-1" style={{ display:"flex", alignItems:"center", cursor:"pointer" }}>
+ <div className="my-3 flex gap-6">
+ <label className="flex cursor-pointer items-center gap-1">
  <input type="checkbox" checked={isAllDay} onChange={(e) => setIsAllDay(e.target.checked)} />
  All Day
  </label>
- <label className="gap-1" style={{ display:"flex", alignItems:"center", cursor:"pointer" }}>
+ <label className="flex cursor-pointer items-center gap-1">
  <input
  type="checkbox"
  checked={isVirtual}
@@ -219,7 +216,7 @@ export default function CreateEventPage() {
  </p>
  )}
 
- <div className="mt-6 gap-2" style={{ display:"flex" }}>
+ <div className="mt-6 flex gap-2">
  <button
  type="submit"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"

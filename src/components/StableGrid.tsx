@@ -95,7 +95,7 @@ export default function StableGrid({
  return (
  <>
  {horseCards.length > 0 && (
- <div className="mb-4 gap-4" style={{ display:"flex", alignItems:"center", flexWrap:"wrap" }}>
+ <div className="mb-6 flex flex-wrap items-center gap-4">
  <div className="min-w-[200px] flex-1">
  <SearchBar
  value={searchQuery}
@@ -107,12 +107,7 @@ export default function StableGrid({
  <select
  value={sortBy}
  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
- className="form-input"
- style={{
- width:"auto",
- minWidth:"160px",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
- }}
+ className="form-input w-auto min-w-[160px] text-sm"
  id="stable-sort"
  aria-label="Sort your stable"
  >
@@ -153,35 +148,35 @@ export default function StableGrid({
  <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
  </div>
  ) : (
- <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
+ <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
  {filteredCards.map((horse) => {
  const isSelected = selectedIds.has(horse.id);
  const CardWrapper = selectMode ?"div" : Link;
  const wrapperProps = selectMode
  ? {
  onClick: () => onToggleSelect?.(horse.id),
- className: `group relative flex flex-col overflow-hidden rounded-lg border border-edge bg-card shadow-sm transition-all hover:shadow-md ${isSelected ? "ring-2 ring-forest" : ""}`,
- id: `horse-card-${horse.id}`,
- }
- : { href: `/stable/${horse.id}`, className: "group relative flex flex-col overflow-hidden rounded-lg border border-edge bg-card no-underline shadow-sm transition-all hover:shadow-md", id: `horse-card-${horse.id}` };
+                  className: `group relative flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isSelected ? "ring-2 ring-forest" : ""}`,
+                  id: `horse-card-${horse.id}`,
+                }
+              : { href: `/stable/${horse.id}`, className: "group relative flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-card no-underline shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md", id: `horse-card-${horse.id}` };
  return (
  // @ts-expect-error — dynamic component type
  <CardWrapper key={horse.id} {...wrapperProps}>
  {selectMode && (
  <div className="pointer-events-none absolute top-[8px] left-[8px] z-[5]">
- <input type="checkbox" checked={isSelected} readOnly />
+ <input type="checkbox" checked={isSelected} readOnly aria-label={`Select ${horse.customName}`} />
  </div>
  )}
- <div className="h-full w-full object-contain transition-transform">
- {horse.thumbnailUrl ? (
- // eslint-disable-next-line @next/next/no-img-element
- <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
- ) : (
- <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2 bg-[var(--color-bg-secondary)] text-muted">
- <span className="text-4xl">🐴</span>
- <span className="text-xs">No photo</span>
- </div>
- )}
+              <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
+                {horse.thumbnailUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
+                ) : (
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-400">
+                    <span className="text-4xl opacity-50">🐴</span>
+                    <span className="text-xs font-medium">No photo</span>
+                  </div>
+                )}
  {horse.finishType && (
  <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
  {horse.finishType}
@@ -206,34 +201,34 @@ export default function StableGrid({
  🤝 Open to Offers
  </span>
  )}
- </div>
- <div className="px-6 py-4">
- <div className="truncate text-sm font-semibold">
- {horse.customName}
- </div>
- <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
- {horse.refName}
- </div>
- {horse.releaseLine && (
- <div className="mt-[2px] overflow-hidden text-sm text-[calc(0.7rem*var(--font-scale))] text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-[0.7]">
- 🎨 {horse.releaseLine}
- </div>
- )}
- {horse.sculptor && (
- <div className="mt-[2px] overflow-hidden text-sm text-[calc(0.7rem*var(--font-scale))] text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-[0.7]">
- ✂️ {horse.sculptor}
- </div>
- )}
- <div className="border-edge text-muted mt-2 flex items-center justify-between border-t pt-2 text-xs">
- {horse.conditionGrade && <span>{horse.conditionGrade}</span>}
- <span>{formatDate(horse.createdAt)}</span>
- </div>
- {horse.collectionName && (
- <div className="mt-1 truncate text-xs text-muted">
- 📁 {horse.collectionName}
- </div>
- )}
- </div>
+              </div>
+              <div className="flex flex-1 flex-col px-4 py-3">
+                <div className="truncate text-[0.9rem] font-semibold leading-snug text-stone-800">
+                  {horse.customName}
+                </div>
+                <div className="mt-0.5 truncate text-xs text-stone-500">
+                  {horse.refName}
+                </div>
+                {horse.releaseLine && (
+                  <div className="mt-0.5 truncate text-[0.7rem] text-stone-400">
+                    🎨 {horse.releaseLine}
+                  </div>
+                )}
+                {horse.sculptor && (
+                  <div className="mt-0.5 truncate text-[0.7rem] text-stone-400">
+                    ✂️ {horse.sculptor}
+                  </div>
+                )}
+                <div className="mt-auto flex items-center justify-between border-t border-stone-100 pt-2.5 text-[0.7rem] text-stone-400">
+                  {horse.conditionGrade && <span>{horse.conditionGrade}</span>}
+                  <span>{formatDate(horse.createdAt)}</span>
+                </div>
+                {horse.collectionName && (
+                  <div className="mt-1 truncate text-[0.7rem] text-stone-400">
+                    📁 {horse.collectionName}
+                  </div>
+                )}
+              </div>
  </CardWrapper>
  );
  })}

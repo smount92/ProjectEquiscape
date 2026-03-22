@@ -66,10 +66,9 @@ export default function HelpIdRequestForm() {
  if (!isOpen) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all mt-8"
  onClick={() => setIsOpen(true)}
  id="new-id-request-btn"
- style={{ marginTop:"var(--space-lg)" }}
  >
  🔍 Submit a Mystery Model
  </button>
@@ -81,7 +80,7 @@ export default function HelpIdRequestForm() {
  <h3 className="mb-4">📸 Submit a Mystery Model</h3>
 
  {status ==="success" ? (
- <div className="p-8" style={{ textAlign:"center" }}>
+ <div className="p-8 text-center">
  <p className="mb-2 text-[2rem]">✅</p>
  <p className="text-success">Request submitted! The community will help identify your model.</p>
  </div>
@@ -92,14 +91,13 @@ export default function HelpIdRequestForm() {
  <label className="text-ink mb-1 block text-sm font-semibold">Photo of the model *</label>
  <div
  className="border-edge bg-card flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-12 text-center transition-all"
- style={{ padding:"var(--space-xl)", cursor:"pointer" }}
  onClick={() => fileInputRef.current?.click()}
  >
  {preview ? (
  <img
  src={preview}
  alt="Preview"
- style={{ maxHeight: 200, borderRadius:"var(--radius-md)", objectFit:"contain" }}
+ className="max-h-[200px] rounded-md object-contain"
  />
  ) : (
  <>
@@ -119,8 +117,9 @@ export default function HelpIdRequestForm() {
  name="image"
  accept="image/*"
  onChange={handleFileChange}
- style={{ display:"none" }}
+ className="hidden"
  required={false}
+ title="Upload model photo"
  />
  </div>
  </div>
@@ -133,10 +132,9 @@ export default function HelpIdRequestForm() {
  <textarea
  id="help-id-description"
  name="description"
- className="form-input"
+ className="form-input resize-y"
  rows={3}
  placeholder="What do you know about this model? Size, material, markings, where you got it..."
- style={{ resize:"vertical" }}
  />
  </div>
 
@@ -160,7 +158,7 @@ export default function HelpIdRequestForm() {
  </div>
  )}
 
- <div className="mt-6 gap-4" style={{ display:"flex" }}>
+ <div className="mt-6 flex gap-4">
  <button
  type="button"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"

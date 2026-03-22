@@ -36,16 +36,15 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  }
 
  return (
- <div className="gap-2" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-2">
  {shows.map((show) => (
  <div
  key={show.id}
- className="bg-card border-edge gap-4 rounded-lg border p-4 shadow-md transition-all"
- style={{ display:"flex", alignItems:"center", flexWrap:"wrap" }}
+ className="flex flex-wrap items-center gap-2 border-b border-edge py-4 last:border-b-0"
  >
  <div className="min-w-[200px] flex-1">
  <div className="font-semibold">{show.title}</div>
- <div className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+ <div className="text-muted text-xs">
  🐴 {show.entryCount} entries
  {show.endAt && <> · ⏰ {new Date(show.endAt).toLocaleDateString()}</>}
  </div>
@@ -53,19 +52,18 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  <select
  value={show.status}
  onChange={(e) => handleStatusChange(show.id, e.target.value)}
- className="form-input"
- style={{ width:"auto", minWidth:"120px" }}
+ className="form-input w-auto min-w-[120px]"
  disabled={busy === show.id}
+ title={`Status for ${show.title}`}
  >
  <option value="open">🟢 Open</option>
  <option value="judging">🟡 Judging</option>
  <option value="closed">🔴 Closed</option>
  </select>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
  onClick={() => handleDelete(show.id, show.title)}
  disabled={busy === show.id}
- style={{ color:"var(--color-error, #ef4444)", fontSize:"calc(0.8rem * var(--font-scale))" }}
  >
  🗑 Delete
  </button>

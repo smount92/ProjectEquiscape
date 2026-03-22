@@ -46,7 +46,6 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  return (
  <div
  className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all"
- style={{ textAlign:"center" }}
  >
  <div className="mb-4 text-5xl">✅</div>
  <h2>No Pending Suggestions</h2>
@@ -69,8 +68,7 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  {typeLabel[s.suggestion_type] || s.suggestion_type}
  </span>
  <span
- className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all"
- style={{ cursor:"default" }}
+ className="cursor-default rounded-lg border border-edge bg-glass px-6 py-4 transition-all"
  >
  {s.name}
  </span>
@@ -101,10 +99,9 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  {isPending && processingId === s.id ?"…" :"✅ Approve"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
  onClick={() => handleReview(s.id,"rejected")}
  disabled={isPending && processingId === s.id}
- style={{ color:"var(--color-text-muted)" }}
  >
  ❌ Reject
  </button>

@@ -20,16 +20,16 @@ export default async function ChangelogPage() {
  .limit(50);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
- <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <nav className="text-muted mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <span>Changelog</span>
  </nav>
 
- <h1 className="mb-1 font-sans text-[calc(1.8rem*var(--font-scale))]">
+ <h1 className="mb-1 font-sans text-2xl">
  📋 <span className="text-forest">Catalog Changelog</span>
  </h1>
  <p className="text-muted mb-6">
@@ -63,7 +63,7 @@ export default async function ChangelogPage() {
  :"🗑"}
  </span>
  <div className="space-y-4">
- <p className="mb-[4px] text-[calc(0.9rem*var(--font-scale))] font-medium">
+ <p className="mb-[4px] text-sm font-medium">
  {entry.change_summary}
  </p>
  <p className="text-forest">

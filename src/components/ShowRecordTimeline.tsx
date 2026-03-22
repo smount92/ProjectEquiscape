@@ -109,7 +109,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  id="show-records"
  >
  <div className="mb-6 flex items-center justify-between">
- <h3 className="m-0 flex items-center gap-2 text-[calc(1.1rem*var(--font-scale))]">
+ <h3 className="m-0 flex items-center gap-2 text-lg">
  <span aria-hidden="true">🏅</span> Show Records
  {records.length > 0 && ` (${records.length})`}
  </h3>
@@ -129,7 +129,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Timeline */}
  {records.length === 0 ? (
- <div className="text-muted py-6 text-center text-[calc(0.9rem*var(--font-scale))]">
+ <div className="text-muted py-6 text-center text-sm">
  {isOwner ?"No show records yet. Add your first win! 🏆" :"No show records yet."}
  </div>
  ) : (
@@ -150,16 +150,16 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  />
  ) : (
  <>
- <div className="mb-1 flex items-center gap-2 text-[calc(0.95rem*var(--font-scale))] font-semibold">
+ <div className="mb-1 flex items-center gap-2 text-sm font-semibold">
  {record.showName}
  {record.isNan && (
- <span className="inline-flex items-center gap-[2px] rounded-sm bg-[linear-gradient(135deg,rgba(245,158,11,0.2),rgba(234,179,8,0.1))] px-2 py-[1px] text-[calc(0.7rem*var(--font-scale))] font-bold tracking-wider text-[#F59E0B] uppercase">
+ <span className="inline-flex items-center gap-[2px] rounded-sm bg-[linear-gradient(135deg,rgba(245,158,11,0.2),rgba(234,179,8,0.1))] px-2 py-[1px] text-xs font-bold tracking-wider text-[#F59E0B] uppercase">
  ⭐ NAN
  </span>
  )}
  </div>
 
- <div className="text-muted flex flex-wrap gap-x-6 gap-y-2 text-[calc(0.8rem*var(--font-scale))] [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+ <div className="text-muted flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
  {record.placing && <span>🎖️ {record.placing}</span>}
  {record.division && <span>📂 {record.division}</span>}
@@ -170,7 +170,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Advanced details row */}
  {(record.sectionName || record.awardCategory || record.competitionLevel) && (
- <div className="text-muted mt-1 flex flex-wrap gap-x-6 gap-y-2 text-[calc(0.8rem*var(--font-scale))] [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+ <div className="text-muted mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  {record.sectionName && <span>🏷️ {record.sectionName}</span>}
  {record.awardCategory && <span>🎯 {record.awardCategory}</span>}
  {record.competitionLevel && <span>📊 {record.competitionLevel}</span>}
@@ -178,7 +178,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  )}
 
  {record.notes && (
- <div className="text-muted mt-1 text-[calc(0.85rem*var(--font-scale))] italic">
+ <div className="text-muted mt-1 text-sm italic">
  {record.notes}
  </div>
  )}
@@ -186,7 +186,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  {isOwner && (
  <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover/record:opacity-100">
  <button
- className="text-muted hover:text-forest cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-[calc(0.75rem*var(--font-scale))] transition-colors"
+ className="text-muted hover:text-forest cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors"
  onClick={() => handleEdit(record)}
  title="Edit"
  aria-label="Edit record"
@@ -194,7 +194,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  ✏️
  </button>
  <button
- className="text-muted cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-[calc(0.75rem*var(--font-scale))] transition-colors hover:text-[#e74c6f]"
+ className="text-muted cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors hover:text-[#e74c6f]"
  onClick={() => handleDelete(record.id)}
  disabled={deletingId === record.id}
  title="Delete"

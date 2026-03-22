@@ -44,18 +44,18 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  return (
  <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div
- style={{ display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center justify-between"
  onClick={() => setExpanded(!expanded)}
  >
  <h3 className="m-0">📋 Group Registry</h3>
- <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-muted text-sm">
  {expanded ?"▲" :"▼"} {entries.length > 0 ? `${entries.length} models` :""}
  </span>
  </div>
 
  {expanded && (
  <div className="mt-4">
- <p className="text-muted mb-4 text-[calc(0.8rem*var(--font-scale))]">
+ <p className="text-muted mb-4 text-sm">
  Public models from all group members — a shared catalog of the group&apos;s collection.
  </p>
 
@@ -66,11 +66,10 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  ) : (
  <>
  <input
- className="form-input"
+ className="form-input mb-4 max-w-[300px]"
  placeholder="Search by name or owner…"
  value={search}
  onChange={(e) => setSearch(e.target.value)}
- style={{ marginBottom:"var(--space-md)", maxWidth: 300 }}
  />
 
  <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
@@ -82,7 +81,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  <div className="mb-2 flex items-center gap-2">
  <Link
  href={`/profile/${encodeURIComponent(ownerAlias)}`}
- style={{ fontWeight: 600 }}
+ className="font-semibold"
  >
  @{ownerAlias}
  </Link>
@@ -98,7 +97,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  className="border-edge text-ink hover:text-forest flex items-center gap-2 border-b py-1.5 text-sm no-underline last:border-b-0"
  >
  <span>🐴 {h.horseName}</span>
- <span className="text-muted text-xs" style={{ marginLeft:"auto" }}>
+ <span className="text-muted ml-auto text-xs">
  {h.finishType}
  </span>
  </Link>

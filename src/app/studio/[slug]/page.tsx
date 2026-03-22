@@ -75,19 +75,19 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Hero */}
  <div className="animate-fade-in-up rounded-lg border border-[rgba(139,92,246,0.15)] bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] px-6 py-8">
  <div className="max-w-[800px]">
  <div className="gap-4" style={{ display:"flex", alignItems:"center", flexWrap:"wrap" }}>
- <h1 className="m-0 text-[calc(1.8rem*var(--font-scale))]">
+ <h1 className="m-0 text-2xl">
  <span className="text-forest">{profile.studioName}</span>
  </h1>
  <span className={`studio-status-badge status-${profile.status}`}>
  {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}
  </span>
  </div>
- <p className="text-muted mt-1 text-[calc(0.9rem*var(--font-scale))]">
+ <p className="text-muted mt-1 text-sm">
  by{""}
  <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest">
  @{profile.ownerAlias}
@@ -152,14 +152,14 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  <div>
  {/* Pricing & Turnaround */}
  <div className="bg-card border-edge mb-6 rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">💰 Pricing & Timeline</h2>
+ <h2 className="mb-4 text-lg">💰 Pricing & Timeline</h2>
  <div className="grid gap-2">
  {(profile.priceRangeMin || profile.priceRangeMax) && (
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">
+ <span className="text-muted text-sm">
  Price Range
  </span>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">
+ <span className="text-sm font-bold">
  {profile.priceRangeMin && profile.priceRangeMax
  ? `$${profile.priceRangeMin} – $${profile.priceRangeMax}`
  : profile.priceRangeMin
@@ -170,8 +170,8 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  )}
  {(profile.turnaroundMinDays || profile.turnaroundMaxDays) && (
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">Turnaround</span>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">
+ <span className="text-muted text-sm">Turnaround</span>
+ <span className="text-sm font-bold">
  {profile.turnaroundMinDays && profile.turnaroundMaxDays
  ? `${profile.turnaroundMinDays}–${profile.turnaroundMaxDays} days`
  : profile.turnaroundMinDays
@@ -181,10 +181,10 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  </div>
  )}
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">
+ <span className="text-muted text-sm">
  Commission Slots
  </span>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">
+ <span className="text-sm font-bold">
  {slotsUsed} / {profile.maxSlots} filled
  </span>
  </div>
@@ -193,7 +193,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.mediums.length > 0 && (
  <div className="mt-4">
  <span
- className="text-muted mb-1 text-[calc(0.8rem*var(--font-scale))]"
+ className="text-muted mb-1 text-sm"
  style={{ display:"block" }}
  >
  Mediums
@@ -214,7 +214,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.scalesOffered.length > 0 && (
  <div className="mt-4">
  <span
- className="text-muted mb-1 text-[calc(0.8rem*var(--font-scale))]"
+ className="text-muted mb-1 text-sm"
  style={{ display:"block" }}
  >
  Scales
@@ -236,8 +236,8 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {/* Terms */}
  {profile.termsText && (
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">📄 Terms & Conditions</h2>
- <p className="text-ink-light text-[calc(0.85rem*var(--font-scale))] leading-[1.6] whitespace-pre-wrap">
+ <h2 className="mb-4 text-lg">📄 Terms & Conditions</h2>
+ <p className="text-ink-light text-sm leading-[1.6] whitespace-pre-wrap">
  {profile.termsText}
  </p>
  </div>
@@ -247,9 +247,9 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {/* Right: Commission Queue */}
  <div>
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">📋 Commission Queue</h2>
+ <h2 className="mb-4 text-lg">📋 Commission Queue</h2>
  {queue.length === 0 ? (
- <p className="text-muted text-[calc(0.85rem*var(--font-scale))]">
+ <p className="text-muted text-sm">
  No active commissions in the queue.
  </p>
  ) : (
@@ -267,7 +267,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  <span className="text-forest min-w-[50px] text-xs font-bold">
  Slot {item.slot_number || i + 1}
  </span>
- <span className="flex-1 text-[calc(0.85rem*var(--font-scale))] font-semibold">
+ <span className="flex-1 text-sm font-semibold">
  {item.commission_type}
  </span>
  <span
@@ -285,7 +285,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {/* Accepting */}
  {profile.acceptingTypes.length > 0 && (
  <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">✅ Currently Accepting</h2>
+ <h2 className="mb-4 text-lg">✅ Currently Accepting</h2>
  <div className="gap-1" style={{ display:"grid" }}>
  {profile.acceptingTypes.map((t) => (
  <div
@@ -294,7 +294,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  style={{ display:"flex", alignItems:"center" }}
  >
  <span className="text-[#22c55e]">✓</span>
- <span className="text-[calc(0.9rem*var(--font-scale))]">{t}</span>
+ <span className="text-sm">{t}</span>
  </div>
  ))}
  </div>

@@ -23,11 +23,10 @@ export default async function EventsPage() {
  const events = await getEvents({ upcoming: true });
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  <div className="mx-auto max-w-[var(--max-width)] px-6">
  <div
- className="mb-8 justify-between gap-4"
- style={{ display:"flex", alignItems:"center", flexWrap:"wrap" }}
+ className="mb-8 flex flex-wrap items-center justify-between gap-4"
  >
  <div>
  <h1>📅 Events</h1>

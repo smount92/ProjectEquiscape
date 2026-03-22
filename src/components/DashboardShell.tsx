@@ -129,13 +129,12 @@ export default function DashboardShell({
  </button>
  </div>
  <button
- className={`text-muted font-inherit hover:text-ink cursor-pointer rounded-full border-none bg-transparent px-4 py-1.5 text-sm transition-all duration-200 ${selectMode ?"bg-forest font-semibold text-white" :""}`}
+ className={`text-muted font-inherit hover:text-ink ml-2 cursor-pointer rounded-full border-none bg-transparent px-4 py-1.5 text-sm transition-all duration-200 ${selectMode ?"bg-forest font-semibold text-white" :""}`}
  onClick={() => {
  if (selectMode) clearSelection();
  else setSelectMode(true);
  }}
  id="select-mode-toggle"
- style={{ marginLeft:"var(--space-sm)" }}
  >
  {selectMode ?"✕ Cancel" :"☑ Select"}
  </button>
@@ -190,6 +189,7 @@ export default function DashboardShell({
  else if (val) handleBulkCollection(val);
  }}
  disabled={isProcessing}
+ title="Move to collection"
  >
  <option value="">📁 Move to…</option>
  <option value="__none__">— No Collection —</option>
@@ -208,6 +208,7 @@ export default function DashboardShell({
  if (e.target.value) handleBulkTradeStatus(e.target.value);
  }}
  disabled={isProcessing}
+ title="Change trade status"
  >
  <option value="">🏷️ Trade Status…</option>
  <option value="Not for Sale">Not for Sale</option>
@@ -246,7 +247,7 @@ export default function DashboardShell({
  {selectedIds.size !== 1 ?"s" :""}? This cannot be undone. All photos and associated
  data will be permanently removed.
  </p>
- <div className="justify-end gap-4" style={{ display:"flex" }}>
+ <div className="flex justify-end gap-4">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setShowDeleteConfirm(false)}

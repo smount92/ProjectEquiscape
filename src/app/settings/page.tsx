@@ -138,18 +138,10 @@ export default function SettingsPage() {
 
  if (isLoading) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
- <div className="p-12" style={{ textAlign:"center" }}>
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <div className="p-12 text-center">
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- style={{
- width: 36,
- height: 36,
- margin:"0 auto var(--space-lg)",
- borderWidth: 3,
- borderColor:"var(--color-border)",
- borderTopColor:"var(--color-accent-primary)",
- }}
+ className="mx-auto mb-6 h-9 w-9 animate-spin rounded-full border-3 border-edge border-t-forest"
  />
  <p>Loading settings…</p>
  </div>
@@ -158,7 +150,7 @@ export default function SettingsPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
@@ -167,20 +159,20 @@ export default function SettingsPage() {
  <span>Settings</span>
  </nav>
 
- <div className="animate-fade-in-up max-w-[680]">
- <h1 className="mb-12 text-[calc(1.6rem*var(--font-scale))]">
- ⚙️ <span className="text-forest">Settings</span>
- </h1>
+        <div className="animate-fade-in-up max-w-[680px]">
+          <h1 className="mb-12 text-2xl font-bold tracking-tight">
+            ⚙️ <span className="text-forest">Settings</span>
+          </h1>
 
  {/* ═══ Profile ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight">
+ <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  👤 Profile
  </h2>
  <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
  {/* Avatar */}
- <div className="border-edge mb-8 flex items-center gap-6 border-b pb-6 max-sm:gap-4">
- <div className="border-edge hover:border-forest flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] bg-[linear-gradient(135deg,rgba(44,85,69,0.08),rgba(139,90,43,0.08))] text-[2rem] transition-colors [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
+            <div className="mb-8 flex items-center gap-6 border-b border-stone-200 pb-6 max-sm:gap-4">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-stone-300 bg-gradient-to-br from-forest/5 to-amber-800/5 text-[2rem] transition-colors hover:border-forest [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img src={avatarUrl} alt="Your avatar" />
@@ -190,8 +182,7 @@ export default function SettingsPage() {
  </div>
  <div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{ fontSize:"calc(var(--font-size-sm) * var(--font-scale))" }}
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-300 bg-transparent px-6 py-2 text-sm font-medium text-stone-600 no-underline transition-all hover:border-forest hover:text-forest"
  onClick={() => avatarInputRef.current?.click()}
  disabled={isUploadingAvatar}
  >
@@ -202,9 +193,10 @@ export default function SettingsPage() {
  type="file"
  accept="image/*"
  onChange={handleAvatarChange}
- style={{ display:"none" }}
+ className="hidden"
+ aria-label="Upload avatar"
  />
- <p className="text-muted mt-[4] text-[calc(0.75rem*var(--font-scale))]">
+              <p className="mt-1 text-xs text-stone-400">
  Max 2MB. JPG, PNG, or WebP.
  </p>
  </div>
@@ -234,7 +226,7 @@ export default function SettingsPage() {
  </label>
  <textarea
  id="settings-bio"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="w-full resize-y rounded-lg border border-stone-300 bg-white px-4 py-3 text-sm text-stone-800 transition-colors focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
  rows={3}
  maxLength={500}
  placeholder="Tell other collectors about yourself…"
@@ -246,7 +238,7 @@ export default function SettingsPage() {
 
  {/* Default horse visibility */}
  <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
- <span className="text-ink flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium">
+ <span className="text-ink flex items-center gap-2 text-sm font-medium">
  🏆 Default new horses to public
  </span>
  <button
@@ -254,16 +246,18 @@ export default function SettingsPage() {
  className={defaultHorsePublic ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => setDefaultHorsePublic(!defaultHorsePublic)}
  aria-pressed={defaultHorsePublic}
+ aria-label="Toggle default new horses to public"
+ title="Toggle default horse visibility"
  />
  </div>
 
  {/* Photo watermarking */}
  <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
  <div>
- <span className="text-ink flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium">
+ <span className="text-ink flex items-center gap-2 text-sm font-medium">
  📸 Watermark uploaded photos
  </span>
- <span className="text-muted mt-1 mt-[2] block text-xs" style={{ display:"block" }}>
+ <span className="text-muted mt-1 mt-[2] block text-xs">
  Adds &ldquo;© @{aliasName} — ModelHorseHub&rdquo; to new uploads
  </span>
  </div>
@@ -272,16 +266,18 @@ export default function SettingsPage() {
  className={watermarkPhotos ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => setWatermarkPhotos(!watermarkPhotos)}
  aria-pressed={watermarkPhotos}
+ aria-label="Toggle photo watermarking"
+ title="Toggle photo watermarking"
  />
  </div>
 
  {/* Show trophies on profile */}
  <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
  <div>
- <span className="text-ink flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium">
+ <span className="text-ink flex items-center gap-2 text-sm font-medium">
  🏆 Show Trophy Case on profile
  </span>
- <span className="text-muted mt-1 mt-[2] block text-xs" style={{ display:"block" }}>
+ <span className="text-muted mt-1 mt-[2] block text-xs">
  When off, your badges are hidden from other users
  </span>
  </div>
@@ -290,6 +286,8 @@ export default function SettingsPage() {
  className={showBadges ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => setShowBadges(!showBadges)}
  aria-pressed={showBadges}
+ aria-label="Toggle Trophy Case on profile"
+ title="Toggle Trophy Case visibility"
  />
  </div>
 
@@ -300,10 +298,9 @@ export default function SettingsPage() {
  </label>
  <select
  id="settings-currency"
- className="form-select"
+ className="form-select max-w-[200px]"
  value={currencySymbol}
  onChange={(e) => setCurrencySymbol(e.target.value)}
- style={{ maxWidth: 200 }}
  >
  <option value="$">$ — USD / CAD / AUD</option>
  <option value="£">£ — British Pound</option>
@@ -323,10 +320,9 @@ export default function SettingsPage() {
  </div>
 
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-forest px-6 py-2.5 text-sm font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90"
  onClick={handleSaveProfile}
  disabled={isSavingProfile}
- style={{ marginTop:"var(--space-lg)" }}
  >
  {isSavingProfile ?"Saving…" :"Save Profile"}
  </button>
@@ -343,7 +339,7 @@ export default function SettingsPage() {
 
  {/* ═══ Security ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight">
+ <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  🔒 Security
  </h2>
  <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
@@ -351,10 +347,10 @@ export default function SettingsPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">Email</label>
  <input
  type="email"
- className="form-input"
+ className="form-input opacity-60"
  value={email}
  disabled
- style={{ opacity: 0.6 }}
+ title="Email address"
  />
  <span className="text-muted mt-1 block text-xs">
  Email changes require verification (coming soon).
@@ -416,7 +412,7 @@ export default function SettingsPage() {
 
  {/* ═══ Notifications ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight">
+ <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  🔔 Notifications
  </h2>
  <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
@@ -425,7 +421,7 @@ export default function SettingsPage() {
  key={n.key}
  className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2"
  >
- <span className="text-ink flex items-center gap-2 text-[calc(0.88rem*var(--font-scale))] font-medium">
+ <span className="text-ink flex items-center gap-2 text-sm font-medium">
  {n.emoji} {n.label}
  </span>
  <button
@@ -433,6 +429,8 @@ export default function SettingsPage() {
  className={notifPrefs[n.key] ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => handleToggleNotif(n.key)}
  aria-pressed={notifPrefs[n.key]}
+ aria-label={`Toggle ${n.label}`}
+ title={`Toggle ${n.label}`}
  />
  </div>
  ))}
@@ -441,11 +439,11 @@ export default function SettingsPage() {
 
  {/* ═══ Data & Reports ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight">
+ <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  📊 Data & Reports
  </h2>
  <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
- <div className="gap-6" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-6">
  {/* CSV Export */}
  <div>
  <a
@@ -479,12 +477,11 @@ export default function SettingsPage() {
 
  {/* ═══ Danger Zone ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-[calc(1.15rem*var(--font-scale))] font-bold tracking-tight text-[#ef4444]">
+ <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight text-[#ef4444]">
  ⚠️ Danger Zone
  </h2>
  <div
- className="bg-surface border-edge rounded-lg rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6"
- style={{ border:"1px solid #ef4444" }}
+ className="bg-surface rounded-xl border border-[#ef4444] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6"
  >
  <p className="mb-4 leading-[1.6]">
  Permanently delete your account. This action <strong>cannot be undone</strong>.
@@ -510,7 +507,7 @@ export default function SettingsPage() {
  />
  </div>
  <button
- className="min-h-[var(--inline-flex inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  style={{
  background: deleteConfirm ==="DELETE" ?"#ef4444" :"var(--color-surface-elevated)",
  color: deleteConfirm ==="DELETE" ?"#fff" :"var(--color-text-muted)",

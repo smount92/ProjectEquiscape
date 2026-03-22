@@ -78,11 +78,11 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  ];
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Breadcrumb */}
- <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <nav className="text-muted mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <span>{catalogItem.title}</span>
@@ -93,12 +93,12 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-6 shadow-md transition-all">
  <div className="mb-6 flex items-start justify-between">
  <div>
- <h1 className="m-0 font-sans text-[calc(1.6rem*var(--font-scale))]">{catalogItem.title}</h1>
- <p className="text-muted mt-[4px] text-[calc(1rem*var(--font-scale))]">
+ <h1 className="m-0 font-sans text-2xl">{catalogItem.title}</h1>
+ <p className="text-muted mt-[4px] text-base">
  by {catalogItem.maker}
  </p>
  </div>
- <span className="bg-glass border-edge rounded-lg border px-[12px] py-[4px] text-[calc(0.8rem*var(--font-scale))] whitespace-nowrap">
+ <span className="bg-glass border-edge rounded-lg border px-[12px] py-[4px] text-sm whitespace-nowrap">
  {formatItemType(catalogItem.item_type)}
  </span>
  </div>
@@ -106,10 +106,10 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  <div className="grid-cols-[repeat(auto-fill,minmax(200px,1fr))] mb-6 grid gap-4">
  {displayFields.map((field) => (
  <div key={field.label} className="flex flex-col gap-[2px]">
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))] font-semibold tracking-[0.05em] uppercase">
+ <span className="text-muted text-xs font-semibold tracking-[0.05em] uppercase">
  {field.label}
  </span>
- <span className="text-[calc(0.95rem*var(--font-scale))] font-medium">
+ <span className="text-base font-medium">
  {field.value}
  </span>
  </div>
@@ -160,7 +160,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  :"🗑"}
  </span>
  <span>{formatItemType(s.suggestion_type)} suggestion</span>
- <span className="text-muted ml-auto text-[calc(0.8rem*var(--font-scale))]">
+ <span className="text-muted ml-auto text-sm">
  ▲ {s.upvotes}
  </span>
  </Link>
@@ -169,7 +169,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  </ul>
  <Link
  href={`/catalog/suggestions?item=${id}`}
- className="text-forest text-[calc(0.85rem*var(--font-scale))]"
+ className="text-forest text-sm"
  >
  View all suggestions →
  </Link>

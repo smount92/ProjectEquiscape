@@ -210,25 +210,12 @@ export default function UniversalFeed({
  data-count={imagePreviews.length}
  >
  {imagePreviews.map((preview, i) => (
- <div key={i} style={{ position:"relative" }}>
+ <div key={i} className="relative">
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={preview} alt={`Preview ${i + 1}`} className="max-h-[150]" />
  <button
  onClick={() => removeImage(i)}
- style={{
- position:"absolute",
- top: 4,
- right: 4,
- background:"rgba(0,0,0,0.6)",
- color:"white",
- border:"none",
- borderRadius:"50%",
- width: 20,
- height: 20,
- cursor:"pointer",
- fontSize: 12,
- lineHeight:"20px",
- }}
+ className="absolute top-1 right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border-0 bg-black/60 text-xs leading-5 text-white"
  aria-label="Remove image"
  >
  ✕
@@ -238,14 +225,13 @@ export default function UniversalFeed({
  </div>
  )}
  <div className="flex items-center justify-between">
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-2">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-1 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => fileInputRef.current?.click()}
  disabled={imageFiles.length >= 4}
  title="Attach images (up to 4)"
- style={{ padding:"4px 8px" }}
  >
  📷 {imageFiles.length > 0 ? `(${imageFiles.length}/4)` :""}
  </button>
@@ -255,7 +241,8 @@ export default function UniversalFeed({
  accept="image/*"
  multiple
  onChange={handleImageSelect}
- style={{ display:"none" }}
+ className="hidden"
+ aria-label="Upload images"
  />
  <span className="text-muted text-xs">{composerText.length}/2000</span>
  </div>
@@ -279,7 +266,7 @@ export default function UniversalFeed({
  {posts.length === 0 ? (
  <p className="text-muted">No {label.toLowerCase()} yet — be the first!</p>
  ) : (
- <div className="gap-4" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-4">
  {posts.map((post) => (
  <PostCard key={post.id} post={post} currentUserId={currentUserId} />
  ))}
@@ -289,7 +276,7 @@ export default function UniversalFeed({
  {/* ── Load More Sentinel ── */}
  {hasMore && <div ref={sentinelRef} className="h-[1]" />}
  {isLoadingMore && (
- <p className="text-muted mt-4" style={{ textAlign:"center" }}>
+ <p className="text-muted mt-4 text-center">
  Loading more…
  </p>
  )}
@@ -367,43 +354,40 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  };
 
  return (
- <div className="pb-2" style={{ borderBottom:"1px solid var(--color-border)" }}>
+ <div className="border-b border-edge pb-2">
  {/* Header */}
- <div className="justify-between" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center justify-between">
  <Link
  href={`/profile/${encodeURIComponent(post.authorAlias)}`}
- className="text-[calc(0.85rem*var(--font-scale))] font-semibold"
+ className="text-sm font-semibold"
  >
  @{post.authorAlias}
  </Link>
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+ <div className="flex items-center gap-2">
+ <Link href={`/feed/${post.id}`} className="text-muted text-xs no-underline hover:underline">
  {timeAgo(post.createdAt)}
  {wasEdited && (
- <span title="This post was edited" className="opacity-[0.6]">
- {""}
- (edited)
+ <span title="This post was edited" className="opacity-60">
+ {" "}(edited)
  </span>
  )}
- </span>
+ </Link>
  {post.authorId === currentUserId && (
  <>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-ink-light no-underline transition-all"
  onClick={() => {
  setIsEditing(!isEditing);
  setEditText(displayContent);
  }}
  disabled={isPending}
- style={{ fontSize:"0.75rem", padding:"2px 6px" }}
  >
  ✏️
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-ink-light no-underline transition-all"
  onClick={handleDelete}
  disabled={isPending}
- style={{ fontSize:"0.75rem", padding:"2px 6px" }}
  >
  🗑️
  </button>
@@ -415,16 +399,16 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  {/* Content */}
  <div className="mt-[4]">
  {isEditing ? (
- <div className="gap-1" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-1">
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="min-h-[36px] w-full resize-y rounded-md border border-edge bg-transparent px-4 py-2 text-sm no-underline transition-all"
  value={editText}
  onChange={(e) => setEditText(e.target.value)}
  rows={3}
  maxLength={2000}
- style={{ fontSize:"calc(0.85rem * var(--font-scale))" }}
+ aria-label="Edit post content"
  />
- <div className="gap-1" style={{ display:"flex" }}>
+ <div className="flex gap-1">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handleEdit}
@@ -454,20 +438,15 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  return (
  <Link
  href={`/community/${horseId}`}
- className="embed-bg-card border-edge rounded-lg border shadow-md transition-all"
- style={{ marginTop:"var(--space-sm)" }}
+ className="mt-2 block rounded-lg border border-edge bg-card p-4 no-underline shadow-sm transition-all hover:shadow-md"
  >
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+ <div className="flex items-center gap-2 font-semibold text-ink">
  🐴 View Horse Passport
  </div>
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
- Click to view this model on Model Horse Hub
- </div>
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+ <p className="mt-1 text-sm text-muted">Click to view this model on Model Horse Hub</p>
+ <span className="mt-1 block text-xs text-muted opacity-60">
  modelhorsehub.com/community/{horseId.slice(0, 8)}…
- </div>
- </div>
+ </span>
  </Link>
  );
  })()}
@@ -496,7 +475,6 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setShowReplies(!showReplies)}
- style={{ fontSize:"calc(0.8rem * var(--font-scale))" }}
  >
  💬 {post.repliesCount > 0 ? post.repliesCount :""} {showReplies ?"▲" :"▼"}
  </button>
@@ -504,17 +482,17 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
 
  {/* Replies */}
  {showReplies && (
- <div className="mt-2 ml-6 pl-4" style={{ borderLeft:"2px solid var(--color-border)" }}>
+ <div className="mt-2 ml-6 border-l-2 border-edge pl-4">
  {replies.map((r) => (
- <div key={r.id} className="mb-2 items-start justify-between" style={{ display:"flex" }}>
+ <div key={r.id} className="mb-2 flex items-start justify-between">
  <div className="flex-1">
  <Link
  href={`/profile/${encodeURIComponent(r.authorAlias)}`}
- className="text-[calc(0.8rem*var(--font-scale))] font-semibold"
+ className="text-sm font-semibold"
  >
  @{r.authorAlias}
  </Link>
- <span className="text-muted ml-1 text-[calc(0.7rem*var(--font-scale))]">
+ <span className="text-muted ml-1 text-xs">
  {timeAgo(r.createdAt)}
  </span>
  <div className="mt-[2]">
@@ -523,8 +501,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  </div>
  {r.authorId === currentUserId && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{ fontSize:"0.7rem", padding:"2px 6px", flexShrink: 0 }}
+ className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-ink-light no-underline transition-all"
  onClick={() => {
  if (!confirm("Delete this reply?")) return;
  startTransition(async () => {
@@ -541,20 +518,18 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  </div>
  ))}
  {/* Reply composer */}
- <div className="mt-2 gap-2" style={{ display:"flex" }}>
+ <div className="mt-2 flex gap-2">
  <input
- className="form-input"
+ className="form-input flex-1 text-sm"
  placeholder="Reply…"
  value={replyText}
  onChange={(e) => setReplyText(e.target.value)}
  maxLength={500}
- style={{ flex: 1, fontSize:"calc(0.8rem * var(--font-scale))" }}
  />
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handleReply}
  disabled={isPending || !replyText.trim()}
- style={{ fontSize:"calc(0.8rem * var(--font-scale))" }}
  >
  {isPending ?"…" :"Reply"}
  </button>

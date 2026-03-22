@@ -71,12 +71,11 @@ export default function SuggestReferenceModal({
  const overlay = (
  <div className="modal-overlay" onClick={handleClose}>
  <div
- className="bg-card border-edge rounded-lg border shadow-md transition-all"
+ className="bg-card border-edge max-w-[520px] rounded-lg border shadow-md transition-all"
  onClick={(e) => e.stopPropagation()}
- style={{ maxWidth: 520 }}
  >
  {status ==="success" ? (
- <div className="py-5 px-4" style={{ textAlign:"center" }}>
+ <div className="px-4 py-5 text-center">
  <div className="mb-4 text-[3rem]">✅</div>
  <h3 className="mb-2">Suggestion Submitted!</h3>
  <p className="text-muted text-sm">
@@ -87,11 +86,7 @@ export default function SuggestReferenceModal({
  <form onSubmit={handleSubmit}>
  <h3 className="mb-1">📝 Suggest a Reference</h3>
  <p
- style={{
- color:"var(--color-text-muted)",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
- marginBottom:"var(--space-lg)",
- }}
+ className="text-muted mb-6 text-sm"
  >
  Help us grow the database! Tell us about the model you couldn&apos;t find.
  </p>
@@ -101,24 +96,15 @@ export default function SuggestReferenceModal({
  <label className="text-ink mb-1 block text-sm font-semibold">
  What are you suggesting?
  </label>
- <div className="gap-1" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-1">
  {SUGGESTION_TYPES.map((type) => (
  <label
  key={type.value}
- style={{
- display:"flex",
- alignItems:"flex-start",
- gap:"var(--space-sm)",
- padding:"var(--space-sm) var(--space-md)",
- borderRadius:"var(--radius-sm)",
- border: `1px solid ${suggestionType === type.value ?"var(--color-accent-primary)" :"var(--color-border)"}`,
- background:
+ className={`flex cursor-pointer items-start gap-2 rounded-sm border px-4 py-2 transition-all duration-200 ${
  suggestionType === type.value
- ?"rgba(61, 90, 62, 0.08)"
- :"transparent",
- cursor:"pointer",
- transition:"all 0.2s ease",
- }}
+ ? "border-[var(--color-accent-primary)] bg-[rgba(61,90,62,0.08)]"
+ : "border-[var(--color-border)] bg-transparent"
+ }`}
  >
  <input
  type="radio"
@@ -126,15 +112,12 @@ export default function SuggestReferenceModal({
  value={type.value}
  checked={suggestionType === type.value}
  onChange={() => setSuggestionType(type.value)}
- style={{ marginTop: 3, accentColor:"var(--color-accent-primary)" }}
+ className="mt-[3px] accent-[var(--color-accent-primary)]"
  />
  <div>
  <div className="text-sm font-semibold">{type.label}</div>
  <div
- style={{
- color:"var(--color-text-muted)",
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- }}
+ className="text-muted text-xs"
  >
  {type.description}
  </div>
@@ -181,10 +164,7 @@ export default function SuggestReferenceModal({
  id="suggest-details"
  />
  <small
- style={{
- color:"var(--color-text-muted)",
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- }}
+ className="text-muted text-xs"
  >
  The more detail you provide, the faster we can add it.
  </small>
@@ -192,7 +172,7 @@ export default function SuggestReferenceModal({
 
  {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger mb-4">{errorMsg}</div>}
 
- <div className="justify-end gap-2" style={{ display:"flex" }}>
+ <div className="flex justify-end gap-2">
  <button
  type="button"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"

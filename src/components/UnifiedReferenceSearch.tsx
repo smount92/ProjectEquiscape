@@ -183,7 +183,7 @@ export default function UnifiedReferenceSearch({
  border:"1px solid rgba(61, 90, 62, 0.25)",
  borderRadius:"var(--radius-md)",
  padding:"var(--space-sm) var(--space-md)",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
+ fontSize: "0.875rem",
  color:"var(--color-text-secondary)",
  marginTop:"var(--space-sm)",
  }}

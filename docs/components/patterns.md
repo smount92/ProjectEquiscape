@@ -181,23 +181,21 @@ export default function Feed({ initialItems, hasMore }: Props) {
 
 ---
 
-## Pattern 7: CSS Module Styling
+## Pattern 7: Tailwind Utility Styling
 
-Components use CSS Modules for scoped styling. Import the module and reference classes:
+Components use Tailwind CSS v4 utility classes for styling directly in JSX:
 
 ```tsx
-import styles from "./MyComponent.module.css";
-
 export default function MyComponent() {
-    return <div className={styles.container}>
-        <h2 className={styles.title}>Hello</h2>
+    return <div className="rounded-lg border border-edge bg-card p-6 shadow-md">
+        <h2 className="text-lg font-bold text-ink">Hello</h2>
     </div>;
 }
 ```
 
 For shared primitives (`.btn`, `.card`, `.form-*`), use the global class names from `globals.css`.
 
-**Convention:** Component-specific styles → CSS Module. Shared styles → global classes.
+> **Legacy:** Some components still use CSS Modules (`.module.css`). These are tolerated but Tailwind classes are preferred for new work. See [CSS Conventions](../guides/css-conventions.md).
 
 ---
 
@@ -207,9 +205,10 @@ For shared primitives (`.btn`, `.card`, `.form-*`), use the global class names f
 |----------|------|
 | Fetch data in client components | Pass data from Server Component via props |
 | Use `useEffect` for initial data | Use Server Component async fetching |
-| Create inline styles | Use CSS Modules or global design tokens |
+| Create inline styles for static values | Use Tailwind utility classes or global design tokens |
 | Call `getAdminClient()` from client | Always use server actions for mutations |
-| Hard-code colors | Use CSS custom properties (`var(--color-*)`) |
+| Hard-code colors | Use Tailwind theme tokens (`text-forest`, `bg-card`) or CSS properties (`var(--color-*)`) |
+| Create new CSS Module files | Use Tailwind classes (legacy modules are tolerated) |
 
 ---
 

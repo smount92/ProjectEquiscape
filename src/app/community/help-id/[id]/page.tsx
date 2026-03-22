@@ -120,15 +120,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
  <span className="text-forest">Mystery Model</span>
  {isResolved && (
  <span
- style={{
- marginLeft:"var(--space-md)",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
- padding:"4px 12px",
- background:"rgba(92, 224, 160, 0.15)",
- color:"var(--color-accent-success)",
- borderRadius:"var(--radius-full)",
- fontWeight: 600,
- }}
+ className="ml-4 rounded-full bg-[rgba(92,224,160,0.15)] px-3 py-1 text-sm font-semibold text-emerald-600"
  >
  ✅ Resolved
  </span>
@@ -157,7 +149,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
  className="block h-auto max-h-[500px] w-full object-contain"
  />
  ) : (
- <div className="bg-card border-edge flex-col-placeholder flex h-[300] overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="flex h-[300px] items-center justify-center bg-[var(--color-surface-hover)] text-6xl">
  🐴
  </div>
  )}

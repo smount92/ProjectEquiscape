@@ -106,14 +106,14 @@ export default async function CommissionDetailPage({
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Header */}
  <div className="bg-card border-edge animate-fade-in-up mb-6 rounded-lg border p-6 shadow-md transition-all">
  <div className="items-start justify-between gap-4" style={{ display:"flex", flexWrap:"wrap" }}>
  <div>
- <h1 className="m-0 text-[calc(1.3rem*var(--font-scale))]">{commission.commissionType}</h1>
+ <h1 className="m-0 text-xl">{commission.commissionType}</h1>
  <div
- className="text-muted mt-1 gap-4 text-[calc(0.85rem*var(--font-scale))]"
+ className="text-muted mt-1 gap-4 text-sm"
  style={{ display:"flex" }}
  >
  {isArtist && commission.clientAlias && <span>👤 Client: @{commission.clientAlias}</span>}
@@ -129,12 +129,12 @@ export default async function CommissionDetailPage({
  </div>
  </div>
  <span
- className="inline-flex items-center rounded-full px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
+ className="inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap"
  style={{
  backgroundColor: `${STATUS_COLORS[commission.status]}20`,
  color: STATUS_COLORS[commission.status],
  border: `1px solid ${STATUS_COLORS[commission.status]}40`,
- fontSize:"calc(0.85rem * var(--font-scale))",
+ fontSize:"0.85rem",
  padding:"var(--space-xs) var(--space-md)",
  }}
  >
@@ -144,8 +144,8 @@ export default async function CommissionDetailPage({
 
  {/* Description */}
  <div className="bg-card mt-6 rounded-md p-4">
- <h3 className="text-muted mb-1 text-[calc(0.85rem*var(--font-scale))]">Description</h3>
- <p className="text-[calc(0.9rem*var(--font-scale))] leading-[1.6] whitespace-pre-wrap">
+ <h3 className="text-muted mb-1 text-sm">Description</h3>
+ <p className="text-sm leading-[1.6] whitespace-pre-wrap">
  {commission.description}
  </p>
  </div>
@@ -158,12 +158,12 @@ export default async function CommissionDetailPage({
  {commission.priceQuoted && (
  <div>
  <span
- className="text-muted text-[calc(0.75rem*var(--font-scale))]"
+ className="text-muted text-xs"
  style={{ display:"block" }}
  >
  Price Quoted
  </span>
- <span className="text-[calc(1rem*var(--font-scale))] font-bold">
+ <span className="text-base font-bold">
  ${commission.priceQuoted}
  </span>
  </div>
@@ -171,7 +171,7 @@ export default async function CommissionDetailPage({
  {commission.depositAmount && (
  <div>
  <span
- className="text-muted text-[calc(0.75rem*var(--font-scale))]"
+ className="text-muted text-xs"
  style={{ display:"block" }}
  >
  Deposit
@@ -185,7 +185,7 @@ export default async function CommissionDetailPage({
  {commission.estimatedCompletion && (
  <div>
  <span
- className="text-muted text-[calc(0.75rem*var(--font-scale))]"
+ className="text-muted text-xs"
  style={{ display:"block" }}
  >
  Est. Completion
@@ -202,7 +202,7 @@ export default async function CommissionDetailPage({
  {commission.slotNumber && (
  <div>
  <span
- className="text-muted text-[calc(0.75rem*var(--font-scale))]"
+ className="text-muted text-xs"
  style={{ display:"block" }}
  >
  Slot

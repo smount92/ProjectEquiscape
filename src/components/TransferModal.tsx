@@ -78,7 +78,6 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setIsOpen(true)}
- style={{ fontSize:"calc(0.85rem * var(--font-scale))" }}
  >
  📦 Transfer Ownership
  </button>
@@ -93,7 +92,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  {step ==="form" ? (
  <>
  <h3 className="mb-4">📦 Transfer &ldquo;{horseName}&rdquo;</h3>
- <p className="text-muted mb-4 text-[calc(0.8rem*var(--font-scale))]">
+ <p className="text-muted mb-4 text-sm">
  Generate a 6-character code to send to the new owner. They&apos;ll enter it on
  the Claim page to complete the transfer.
  <strong> The code expires in 48 hours.</strong>
@@ -109,6 +108,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  onChange={(e) =>
  setAcquisitionType(e.target.value as typeof acquisitionType)
  }
+ title="Transfer type"
  >
  <option value="purchase">💲 Sale</option>
  <option value="trade">🔄 Trade</option>
@@ -132,8 +132,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  step="0.01"
  />
  <label
- className="mt-[6px] gap-[6px] text-[calc(0.8rem*var(--font-scale))]"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="mt-[6px] flex cursor-pointer items-center gap-[6px] text-sm"
  >
  <input
  type="checkbox"
@@ -159,12 +158,12 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  </div>
 
  {error && (
- <p className="mb-2 text-[calc(0.8rem*var(--font-scale))] text-[#ef4444]">
+ <p className="mb-2 text-sm text-[#ef4444]">
  {error}
  </p>
  )}
 
- <div className="mt-4 justify-end gap-2" style={{ display:"flex" }}>
+ <div className="mt-4 flex justify-end gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={handleClose}
@@ -182,44 +181,26 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  </>
  ) : (
  <>
- <h3 className="mb-4" style={{ textAlign:"center" }}>
+ <h3 className="mb-4 text-center">
  🐾 Transfer Code Ready!
  </h3>
  <div
- style={{
- textAlign:"center",
- padding:"var(--space-lg)",
- background:"rgba(245, 158, 11, 0.1)",
- borderRadius:"var(--radius-lg)",
- border:"2px dashed rgba(245, 158, 11, 0.3)",
- marginBottom:"var(--space-md)",
- }}
+ className="mb-4 rounded-lg border-2 border-dashed border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.1)] p-6 text-center"
  >
  <div
- style={{
- fontFamily:"monospace",
- fontSize:"2.5rem",
- fontWeight: 800,
- letterSpacing:"0.3em",
- color:"#f59e0b",
- }}
+ className="font-mono text-[2.5rem] font-extrabold tracking-[0.3em] text-[#f59e0b]"
  >
  {generatedCode}
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="mt-2 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={handleCopy}
- style={{
- marginTop:"var(--space-sm)",
- fontSize:"calc(0.8rem * var(--font-scale))",
- }}
  >
  {copied ?"✅ Copied!" :"📋 Copy Code"}
  </button>
  </div>
  <p
- className="text-muted text-[calc(0.8rem*var(--font-scale))]"
- style={{ textAlign:"center" }}
+ className="text-muted text-center text-sm"
  >
  Send this code to the buyer/receiver. They can enter it on
  <strong> /claim</strong> to complete the transfer.
@@ -228,7 +209,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  Expires in 48 hours.
  </span>
  </p>
- <div className="mt-4 gap-2" style={{ display:"flex", justifyContent:"center" }}>
+ <div className="mt-4 flex justify-center gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={handleCancel}

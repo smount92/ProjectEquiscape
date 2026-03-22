@@ -32,27 +32,18 @@ export default function VoteButton({ entryId, initialVotes, initialHasVoted, dis
  };
 
  return (
- <div className="gap-[2px]" style={{ display:"flex", flexDirection:"column", alignItems:"center" }}>
+ <div className="flex flex-col items-center gap-[2px]">
  <button
- className={`vote-button ${hasVoted ?"vote-button-voted" :""}`}
+ className={`vote-button ${hasVoted ?"vote-button-voted" :""} ${disabled ?"cursor-not-allowed opacity-50" :""}`}
  onClick={handleVote}
  disabled={loading || disabled}
- style={disabled ? { opacity: 0.5, cursor:"not-allowed" } : undefined}
  title={disabled ?"Voting is closed" : undefined}
  >
  <span className="vote-icon">{hasVoted ?"❤️" :"🤍"}</span>
  <span className="font-semibold">{votes}</span>
  </button>
  {error && (
- <span
- style={{
- fontSize:"calc(0.65rem * var(--font-scale))",
- color:"var(--color-error, #ef4444)",
- maxWidth:"100px",
- textAlign:"center",
- lineHeight: 1.2,
- }}
- >
+ <span className="max-w-[100px] text-center text-[0.625rem] leading-tight text-[var(--color-error,#ef4444)]">
  {error}
  </span>
  )}

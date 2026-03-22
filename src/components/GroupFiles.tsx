@@ -91,7 +91,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  {/* Upload Form */}
  {canUpload && (
  <div className="group-file-upload mb-6">
- <div className="gap-2" style={{ display:"flex", alignItems:"end", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap items-end gap-2">
  <div className="min-w-[200] flex-1">
  <label className="text-ink mb-1 block text-sm font-semibold">Upload File</label>
  <input
@@ -99,6 +99,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  type="file"
  className="form-input"
  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
+ title="Choose file to upload"
  />
  </div>
  <div className="min-w-[200] flex-1">
@@ -144,7 +145,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  {" ·"}@{f.uploaderAlias} · {timeAgo(f.createdAt)}
  </span>
  </div>
- <div className="gap-1" style={{ display:"flex" }}>
+ <div className="flex gap-1">
  {canDelete && (
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"

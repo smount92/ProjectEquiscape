@@ -120,18 +120,17 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  value={searchQuery}
  onChange={(e) => setSearchQuery(e.target.value)}
  placeholder="🔍 Search by name or bio…"
- className="form-input"
+ className="form-input max-w-[500px]"
  id="discover-search-bar"
- style={{ maxWidth: 500 }}
  />
  </div>
 
  {/* Tag Chips */}
- <div className="mb-6 flex gap-1 overflow-x-auto pb-1" style={{ WebkitOverflowScrolling:"touch" }}>
+ <div className="mb-6 flex gap-1 overflow-x-auto pb-1">
  {TAGS.map((tag) => (
  <button
  key={tag.key}
- className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-[calc(0.8rem*var(--font-scale))] font-medium whitespace-nowrap transition-all ${activeTag === tag.key ?"bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :"border-edge text-muted hover:border-forest hover:text-ink bg-[rgba(0,0,0,0.03)]"}`}
+ className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${activeTag === tag.key ?"bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :"border-edge text-muted hover:border-forest hover:text-ink bg-[rgba(0,0,0,0.03)]"}`}
  onClick={() => setActiveTag(tag.key)}
  >
  <span>{tag.emoji}</span>
@@ -186,8 +185,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  @{u.alias_name}
  {isMe && (
  <span
- className="bg-forest inline-flex rounded-sm px-2 py-[2px] text-[calc(0.65rem*var(--font-scale))] font-bold tracking-wider text-white uppercase"
- style={{ marginLeft:"6px" }}
+ className="bg-forest ml-1.5 inline-flex rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase"
  >
  You
  </span>
@@ -219,13 +217,8 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  )}
  {!isMe && (
  <button
- className={`btn btn-sm ${followSet.has(u.id) ?"btn-ghost follow-btn-following" :"btn-primary"}`}
+ className={`btn btn-sm mt-1 text-xs p-[3px_10px] ${followSet.has(u.id) ?"btn-ghost follow-btn-following" :"btn-primary"}`}
  onClick={(e) => handleFollow(u.id, e)}
- style={{
- marginTop:"var(--space-xs)",
- fontSize:"calc(0.75rem * var(--font-scale))",
- padding:"3px 10px",
- }}
  >
  {followSet.has(u.id) ?"✓ Following" :"+ Follow"}
  </button>

@@ -18,7 +18,7 @@ export default async function NanDashboardWidget() {
  <summary className="hidden">
  🏆 NAN {currentYear} Qualification Status
  {totalQualified > 0 && (
- <span className="text-muted ml-auto text-[calc(0.8rem*var(--font-scale))] font-normal">
+ <span className="text-muted ml-auto text-sm font-normal">
  {totalQualified} horse{totalQualified !== 1 ?"s" :""} across {totalDivisions} division
  {totalDivisions !== 1 ?"s" :""}
  </span>
@@ -37,7 +37,7 @@ export default async function NanDashboardWidget() {
  <Link href={`/community/${h.horseId}`} className="text-ink font-semibold no-underline">
  {h.horseName}
  </Link>
- <span className="ml-auto flex gap-1 text-[calc(0.75rem*var(--font-scale))]">
+ <span className="ml-auto flex gap-1 text-xs">
  {currentYearCards.length > 0 ? (
  currentYearCards.map((q, i) => (
  <span key={i} className={`nan-card nan-card-${q.cardType}`}>
@@ -53,7 +53,7 @@ export default async function NanDashboardWidget() {
  );
  })}
  {horses.length > 10 && (
- <p className="text-muted mt-2 text-[calc(0.8rem*var(--font-scale))]">
+ <p className="text-muted mt-2 text-sm">
  + {horses.length - 10} more horses
  </p>
  )}

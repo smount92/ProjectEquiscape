@@ -81,14 +81,14 @@ export default function CreateShowForm() {
  value={endAt}
  onChange={(e) => setEndAt(e.target.value)}
  />
- <p className="text-muted mt-[4px] text-[calc(0.75rem*var(--font-scale))]">
+ <p className="text-muted mt-[4px] text-xs">
  Leave blank for no deadline. Show stays open until manually closed.
  </p>
  </div>
 
  {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger mb-4">{errorMsg}</div>}
  {status ==="saved" && (
- <div className="mb-4 rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] text-[#22C55E]">
+ <div className="mb-4 rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-sm text-[#22C55E]">
  ✅ Show created!
  </div>
  )}

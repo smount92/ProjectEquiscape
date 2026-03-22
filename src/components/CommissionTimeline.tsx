@@ -195,13 +195,12 @@ export default function CommissionTimeline({
  return (
  <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-6 shadow-md transition-all">
  {/* ── Header ── */}
- <div className="mb-6 justify-between" style={{ display:"flex", alignItems:"center" }}>
- <h2 className="m-0 text-[calc(1.1rem*var(--font-scale))]">📋 Timeline</h2>
+ <div className="mb-6 flex items-center justify-between">
+ <h2 className="m-0 text-lg">📋 Timeline</h2>
  {(isArtist || isClient) && !isTerminal && !showForm && (
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => setShowForm(true)}
- style={{ fontSize:"calc(0.8rem * var(--font-scale))" }}
  >
  + Add Update
  </button>
@@ -211,39 +210,27 @@ export default function CommissionTimeline({
  {/* ── Artist Status Actions ── */}
  {isArtist && artistActions.length > 0 && (
  <div
- className="flex flex-wrap items-center gap-2 border-t border-edge pt-4 mt-4"
- style={{
- padding:"var(--space-md)",
- marginBottom:"var(--space-lg)",
- borderRadius:"var(--radius-lg)",
- background:"var(--color-bg-card)",
- border:"1px solid var(--color-border)",
- }}
+ className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4"
  >
- <div className="text-muted mb-2 text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <div className="text-muted mb-2 text-sm font-semibold">
  🎨 Actions — {STATUS_LABELS[commissionStatus] || commissionStatus}
  </div>
- <div className="gap-2" style={{ display:"flex", flexWrap:"wrap", alignItems:"center" }}>
+ <div className="flex flex-wrap items-center gap-2">
  <input
  type="text"
- className="form-input"
+ className="form-input min-w-[150px] flex-1 text-sm"
  placeholder="Optional note…"
  value={statusNote}
  onChange={(e) => setStatusNote(e.target.value)}
- style={{ flex: 1, minWidth: 150, fontSize:"calc(0.8rem * var(--font-scale))" }}
  />
  {artistActions.map((action) => (
  <button
  key={action.label}
- className={`btn ${action.style ==="primary" ?"btn-primary" : action.style ==="danger" ?"btn-ghost" :"btn-ghost"}`}
+ className={`btn ${action.style === "primary" ? "btn-primary" : "btn-ghost"} text-sm ${
+ action.style === "danger" ? "text-danger border-[rgba(239,68,68,0.3)]" : ""
+ }`}
  onClick={() => handleStatusAction(action.label)}
  disabled={acting}
- style={{
- fontSize:"calc(0.8rem * var(--font-scale))",
- ...(action.style ==="danger"
- ? { color:"#ef4444", borderColor:"rgba(239,68,68,0.3)" }
- : {}),
- }}
  >
  {action.emoji} {action.label}
  </button>
@@ -255,32 +242,23 @@ export default function CommissionTimeline({
  {/* ── Client Review Actions ── */}
  {isClient && commissionStatus ==="review" && (
  <div
- className="flex flex-wrap items-center gap-2 border-t border-edge pt-4 mt-4"
- style={{
- padding:"var(--space-md)",
- marginBottom:"var(--space-lg)",
- borderRadius:"var(--radius-lg)",
- background:"rgba(139, 92, 246, 0.06)",
- border:"1px solid rgba(139, 92, 246, 0.2)",
- }}
+ className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-[rgba(139,92,246,0.2)] bg-[rgba(139,92,246,0.06)] p-4"
  >
- <div className="mb-2 text-[calc(0.85rem*var(--font-scale))] font-semibold">
+ <div className="mb-2 text-sm font-semibold">
  🔎 The artist has submitted this for your review
  </div>
  <input
  type="text"
- className="form-input"
+ className="form-input mb-2 text-sm"
  placeholder="Add revision notes (optional)…"
  value={statusNote}
  onChange={(e) => setStatusNote(e.target.value)}
- style={{ marginBottom:"var(--space-sm)", fontSize:"calc(0.8rem * var(--font-scale))" }}
  />
- <div className="gap-2" style={{ display:"flex" }}>
+ <div className="flex gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleClientAction("approval")}
  disabled={acting}
- style={{ fontSize:"calc(0.8rem * var(--font-scale))" }}
  >
  ✅ Approve
  </button>
@@ -288,7 +266,6 @@ export default function CommissionTimeline({
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => handleClientAction("revision_request")}
  disabled={acting}
- style={{ fontSize:"calc(0.8rem * var(--font-scale))" }}
  >
  ✏️ Request Revision
  </button>
@@ -308,6 +285,7 @@ export default function CommissionTimeline({
  className="form-input"
  value={updateType}
  onChange={(e) => setUpdateType(e.target.value)}
+ title="Update type"
  >
  <option value="message">💬 Message</option>
  <option value="wip_photo">📸 WIP Photo</option>
@@ -349,9 +327,10 @@ export default function CommissionTimeline({
  accept="image/*"
  className="form-input"
  onChange={(e) => setAttachFile(e.target.files?.[0] || null)}
+ title="Attach photo"
  />
  {attachFile && (
- <p className="text-muted mt-[4] text-[calc(0.75rem*var(--font-scale))]">
+ <p className="text-muted mt-[4] text-xs">
  📎 {attachFile.name} ({(attachFile.size / 1024).toFixed(0)} KB)
  </p>
  )}
@@ -364,8 +343,7 @@ export default function CommissionTimeline({
 
  {isArtist && (
  <label
- className="mb-2 gap-1 text-[calc(0.8rem*var(--font-scale))]"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="mb-2 flex cursor-pointer items-center gap-1 text-sm"
  >
  <input
  type="checkbox"
@@ -376,7 +354,7 @@ export default function CommissionTimeline({
  </label>
  )}
 
- <div className="gap-2" style={{ display:"flex" }}>
+ <div className="flex gap-2">
  <button
  type="submit"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
@@ -400,7 +378,7 @@ export default function CommissionTimeline({
 
  {/* ── Timeline Events ── */}
  {updates.length === 0 ? (
- <p className="text-muted p-6" style={{ textAlign:"center" }}>
+ <p className="text-muted p-6 text-center">
  No updates yet.
  </p>
  ) : (
@@ -409,14 +387,14 @@ export default function CommissionTimeline({
  <div key={update.id} className="commission-relative pb-6">
  <div className="gap-4-dot grid">{UPDATE_ICONS[update.updateType] ||"📋"}</div>
  <div className="gap-4-content grid">
- <div className="items-start justify-between" style={{ display:"flex" }}>
+ <div className="flex items-start justify-between">
  <div>
  {update.title && (
- <div className="text-[calc(0.9rem*var(--font-scale))] font-bold">
+ <div className="text-sm font-bold">
  {update.title}
  </div>
  )}
- <div className="text-muted mt-[2] text-[calc(0.75rem*var(--font-scale))]">
+ <div className="text-muted mt-[2] text-xs">
  @{update.authorAlias} ·{""}
  {new Date(update.createdAt).toLocaleDateString("en-US", {
  month:"short",
@@ -430,25 +408,20 @@ export default function CommissionTimeline({
  </div>
  </div>
  {update.requiresPayment && (
- <span className="text-[calc(0.7rem*var(--font-scale))] font-semibold text-[var(--color-accent-warm)]">
+ <span className="text-xs font-semibold text-[var(--color-accent-warm)]">
  💰 Payment Due
  </span>
  )}
  </div>
  {update.body && (
- <p className="mt-1 text-[calc(0.85rem*var(--font-scale))] leading-normal whitespace-pre-wrap">
+ <p className="mt-1 text-sm leading-normal whitespace-pre-wrap">
  {update.body}
  </p>
  )}
  {/* ── Render attached images ── */}
  {update.imageUrls && update.imageUrls.length > 0 && (
  <div
- style={{
- display:"flex",
- flexWrap:"wrap",
- gap:"var(--space-sm)",
- marginTop:"var(--space-sm)",
- }}
+ className="mt-2 flex flex-wrap gap-2"
  >
  {update.imageUrls.map((url, idx) => (
  <a
@@ -456,32 +429,20 @@ export default function CommissionTimeline({
  href={url}
  target="_blank"
  rel="noopener noreferrer"
- style={{
- display:"block",
- borderRadius:"var(--radius-md)",
- overflow:"hidden",
- border:"1px solid var(--color-border)",
- maxWidth: 280,
- }}
+ className="block max-w-[280px] overflow-hidden rounded-md border border-[var(--color-border)]"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img
  src={url}
  alt={`${update.updateType ==="wip_photo" ?"WIP" :"Attached"} photo ${idx + 1}`}
- style={{
- width:"100%",
- height:"auto",
- display:"block",
- maxHeight: 220,
- objectFit:"cover",
- }}
+ className="block h-auto max-h-[220px] w-full object-cover"
  />
  </a>
  ))}
  </div>
  )}
  {update.oldStatus && update.newStatus && (
- <div className="text-muted mt-1 text-[calc(0.8rem*var(--font-scale))]">
+ <div className="text-muted mt-1 text-sm">
  {STATUS_LABELS[update.oldStatus] || update.oldStatus} →{""}
  <strong>{STATUS_LABELS[update.newStatus] || update.newStatus}</strong>
  </div>

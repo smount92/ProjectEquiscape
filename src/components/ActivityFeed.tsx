@@ -125,14 +125,14 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  <img src={item.thumbnailUrl} alt="" loading="lazy" />
  </div>
  ) : (
- <span className="shrink-0 text-[calc(1.2rem*var(--font-scale))]">
+ <span className="shrink-0 text-xl">
  {getEventIcon(item.eventType)}
  </span>
  )}
  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
  {item.eventType ==="text_post" ? (
  <>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-semibold">
+ <span className="text-sm font-semibold">
  @{item.actorAlias}
  </span>
  <div className="text-ink py-1 text-base leading-relaxed whitespace-pre-wrap [&_p]:m-0">
@@ -150,16 +150,16 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  ))}
  </div>
  )}
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+ <span className="text-muted text-xs">
  {timeAgo(item.createdAt)}
  </span>
  </>
  ) : (
  <>
- <span className="text-[calc(0.9rem*var(--font-scale))]">
+ <span className="text-sm">
  {getEventText(item)}
  </span>
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+ <span className="text-muted text-xs">
  {timeAgo(item.createdAt)}
  </span>
  </>
@@ -177,8 +177,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  )}
  {currentUserId && currentUserId === item.actorId && item.eventType ==="text_post" && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{ padding:"2px 6px", fontSize:"0.8rem" }}
+ className="cursor-pointer rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs text-ink-light no-underline transition-all"
  onClick={() => {
  if (confirm("Delete post?")) {
  deleteTextPost(item.id).then(() => router.refresh());

@@ -41,7 +41,7 @@ export default async function MyCommissionsPage() {
  if (items.length === 0) return null;
  return (
  <div className="mb-8">
- <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">
+ <h2 className="mb-4 text-lg">
  {emoji} {title} ({items.length})
  </h2>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 max-md:grid-cols-1">
@@ -49,15 +49,14 @@ export default async function MyCommissionsPage() {
  <Link
  key={c.id}
  href={`/studio/commission/${c.id}`}
- className="border-edge flex flex-col rounded-lg border bg-[var(--color-bg-elevated)] p-6 transition-all hover:-translate-y-[1px] hover:border-[rgba(139,92,246,0.3)]"
- style={{ textDecoration:"none", color:"inherit" }}
+ className="border-edge flex flex-col rounded-lg border bg-[var(--color-bg-elevated)] p-6 text-inherit no-underline transition-all hover:-translate-y-[1px] hover:border-[rgba(139,92,246,0.3)]"
  >
  <div className="mb-2 flex items-center justify-between gap-2">
- <span className="text-[calc(0.95rem*var(--font-scale))] font-bold">
+ <span className="text-base font-bold">
  {c.commissionType}
  </span>
  <span
- className="inline-flex items-center rounded-full px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
+ className="inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap"
  style={{
  backgroundColor: `${STATUS_COLORS[c.status]}20`,
  color: STATUS_COLORS[c.status],
@@ -67,18 +66,17 @@ export default async function MyCommissionsPage() {
  {c.statusLabel}
  </span>
  </div>
- <div className="text-muted mb-2 flex gap-4 text-[calc(0.8rem*var(--font-scale))]">
+ <div className="text-muted mb-2 flex gap-4 text-sm">
  <span>🎨 @{c.artistAlias}</span>
  {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
  </div>
- <p className="text-ink-light mb-2 text-[calc(0.85rem*var(--font-scale))] leading-normal">
+ <p className="text-ink-light mb-2 text-sm leading-normal">
  {c.description.length > 100 ? c.description.substring(0, 100) +"…" : c.description}
  </p>
  <div
- className="text-muted pt-2 text-[calc(0.7rem*var(--font-scale))]"
- style={{ marginTop:"auto" }}
+ className="text-muted mt-auto pt-2 text-xs"
  >
- Last updated{""}
+ Last updated{" "}
  {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
@@ -92,23 +90,20 @@ export default async function MyCommissionsPage() {
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Header */}
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="animate-fade-in-up mb-6">
+ <h1 className="text-2xl font-bold tracking-tight">
  🎨 <span className="text-forest">My Commissions</span>
  </h1>
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 text-sm text-stone-500">
  Track commissions you&apos;ve requested from artists.
  </p>
- </div>
  </div>
 
  {commissions.length === 0 ? (
  <div
- className="bg-card border-edge animate-fade-in-up rounded-lg border shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
  >
  <p className="mb-4 text-[2rem]">🎨</p>
  <p className="text-muted">You haven&apos;t requested any commissions yet.</p>

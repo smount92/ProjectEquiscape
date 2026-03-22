@@ -272,7 +272,7 @@ export default function QuickAddPage() {
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  style={{
  padding:"2px 8px",
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
+ fontSize:"0.75rem",
  }}
  >
  View →

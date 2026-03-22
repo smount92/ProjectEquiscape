@@ -95,50 +95,25 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div className="text-muted mb-2 text-sm">No collections yet. Create one to organize your models.</div>
  ) : (
  <div
- style={{
- display:"flex",
- flexDirection:"column",
- gap:"var(--space-xs)",
- maxHeight: 180,
- overflowY:"auto",
- padding:"var(--space-sm)",
- border:"1px solid var(--color-border)",
- borderRadius:"var(--radius-md)",
- background:"var(--color-bg-input, rgba(0,0,0,0.03))",
- }}
+ className="flex max-h-[180px] flex-col gap-1 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-bg-input,rgba(0,0,0,0.03))] p-2"
  >
  {collections.map((c) => (
  <label
  key={c.id}
- style={{
- display:"flex",
- alignItems:"center",
- gap:"var(--space-sm)",
- padding:"var(--space-xs) var(--space-sm)",
- borderRadius:"var(--radius-sm)",
- cursor:"pointer",
- background: selectedCollectionIds.includes(c.id)
- ?"rgba(44, 85, 69, 0.12)"
- :"transparent",
- transition:"background 0.15s ease",
- }}
+ className={`flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-[background] duration-150 ${
+ selectedCollectionIds.includes(c.id)
+ ? "bg-[rgba(44,85,69,0.12)]"
+ : "bg-transparent"
+ }`}
  >
  <input
  type="checkbox"
  checked={selectedCollectionIds.includes(c.id)}
  onChange={() => handleToggle(c.id)}
- style={{
- width: 16,
- height: 16,
- flexShrink: 0,
- accentColor:"var(--color-accent-primary)",
- }}
+ className="h-4 w-4 shrink-0 accent-[var(--color-accent-primary)]"
  />
  <span
- style={{
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
- fontWeight: selectedCollectionIds.includes(c.id) ? 600 : 400,
- }}
+ className={`text-sm ${selectedCollectionIds.includes(c.id) ? "font-semibold" : "font-normal"}`}
  >
  📁 {c.name}
  </span>
@@ -150,11 +125,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div className="mt-2 flex items-center gap-2">
  {selectedNames.length > 0 && (
  <div
- style={{
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- color:"var(--color-accent-primary)",
- fontWeight: 500,
- }}
+ className="text-xs font-medium text-[var(--color-accent-primary)]"
  >
  ✓ In: {selectedNames.join(",")}
  </div>
@@ -239,13 +210,13 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  />
  </div>
 
- <div className="mb-6 gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="mb-6 flex items-center gap-2">
  <input
  id="new-collection-public"
  type="checkbox"
  checked={newIsPublic}
  onChange={(e) => setNewIsPublic(e.target.checked)}
- style={{ width:"16px", height:"16px" }}
+ className="h-4 w-4"
  />
  <label
  htmlFor="new-collection-public"

@@ -323,11 +323,10 @@ export default function Header() {
  {hasOverflow && (
  <div className="relative shrink-0" ref={moreMenuRef}>
  <button
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-[var(--color-text-secondary)] no-underline transition-all"
+ className="flex cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 py-1 font-[inherit] text-sm font-medium whitespace-nowrap text-[var(--color-text-secondary)] no-underline transition-all"
  onClick={() => setMoreMenuOpen(!moreMenuOpen)}
  aria-expanded={moreMenuOpen}
  aria-label="More navigation links"
- style={{ cursor:"pointer", background:"none", border:"none", fontFamily:"inherit" }}
  >
  <MoreHorizontal size={16} strokeWidth={1.5} /> More
  <ChevronDown size={12} strokeWidth={2} className="ml-[2]" />
@@ -400,8 +399,7 @@ export default function Header() {
  <img
  src={avatarUrl}
  alt={aliasName ||"User"}
- className="h-full w-full rounded-full"
- style={{ objectFit:"cover" }}
+ className="h-full w-full rounded-full object-cover"
  />
  ) : aliasName ? (
  aliasName.charAt(0).toUpperCase()
@@ -651,26 +649,18 @@ export default function Header() {
  {/* ── Mobile-only: Sign Out + Simple Mode ── */}
  <div className="mt-2 flex flex-col gap-1 border-t border-edge pt-2">
  <button
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm text-[var(--color-text-secondary)] transition-all"
+ className="flex w-full cursor-pointer items-center justify-start gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm text-[var(--color-text-secondary)] transition-all"
  onClick={() => {
  closeMobileMenu();
  handleSignOut();
- }}
- style={{
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
- width:"100%",
- justifyContent:"flex-start",
  }}
  >
  <LogOut size={16} strokeWidth={1.5} /> Sign Out
  </button>
  <button
- className="border-edge bg-glass relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-[var(--color-text-secondary)] transition-all"
- onClick={() => {
- toggleSimpleMode();
- }}
+ className="border-edge bg-glass relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-[var(--color-text-secondary)] transition-all"
+ onClick={() => toggleSimpleMode()}
  aria-pressed={isSimpleMode}
- style={{ justifyContent:"flex-start", gap:"var(--space-sm)", width:"100%" }}
  >
  {isSimpleMode ? (
  <>

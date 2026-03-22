@@ -1,6 +1,6 @@
 # Design System
 
-The Model Horse Hub design system is built on **Vanilla CSS** with design tokens (CSS custom properties) in `:root`. The visual identity is **"Warm Equestrian Parchment"** — earthy, warm, and premium-feeling.
+The Model Horse Hub design system is built on **Tailwind CSS v4** with design tokens defined via the `@theme` directive in `globals.css`. The visual identity is **"Warm Equestrian Parchment"** — earthy, warm, and premium-feeling. See [CSS Conventions](../guides/css-conventions.md) for usage guidelines.
 
 ## Color Palette
 
@@ -142,20 +142,19 @@ All shadows are **warm brown-tinted** (`rgba(80, 60, 40, ...)`) — not standard
 
 ```
 src/app/
-├── globals.css          ← Design tokens + shared primitives (~4,670 lines, down from 11.7K)
+├── globals.css          ← @theme design tokens + shared primitives (~2,200 lines)
 ├── studio.css           ← Art Studio feature styles
 ├── competition.css      ← Competition feature styles
-├── *.module.css         ← 8 page-scoped CSS Modules
-└── 12 extracted *.css   ← Page-specific blocks extracted from globals (March 2026)
+├── [page]/page.tsx      ← Styling via Tailwind utility classes in className
+└── layout.tsx           ← Imports legacy CSS files
 
 src/components/
-├── 14 *.module.css      ← Component-scoped CSS Modules
-└── 16 extracted *.css   ← Component-specific blocks extracted from globals
+├── *.tsx                ← Styling via Tailwind utility classes in className
+├── 14 *.module.css      ← Legacy component-scoped CSS Modules
+└── 16 extracted *.css   ← Legacy component-specific blocks extracted from globals
 ```
 
-**Total: 49 CSS files** (19 CSS Modules + 30 extracted global stylesheets)
-
-> As of March 2026, 30 large CSS blocks were extracted from `globals.css` into co-located `.css` files. These still use global class names (not CSS Modules) and are imported via `layout.tsx`. See [CSS Conventions](../guides/css-conventions.md) for the full file listing.
+> **Migration status (March 2026):** The project migrated from Vanilla CSS to Tailwind CSS v4. Legacy CSS Modules and extracted `.css` files still exist but are not the pattern for new work. An ongoing inline style audit is converting remaining `style={{}}` usage to Tailwind utility classes. See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for rationale.
 
 ---
 

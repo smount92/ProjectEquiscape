@@ -41,7 +41,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  </div>
 
  {/* Filter Chips */}
- <div className="mb-6 gap-4" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="mb-6 flex flex-wrap gap-4">
  <div className="flex flex-wrap gap-1">
  <button
  className={`studio-chip ${statusFilter ==="all" ?"active" :""}`}
@@ -61,10 +61,10 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  </div>
  {allSpecialties.length > 0 && (
  <select
- className="form-select"
+ className="form-select max-w-[200px]"
  value={specialtyFilter}
  onChange={(e) => setSpecialtyFilter(e.target.value)}
- style={{ maxWidth: 200 }}
+ aria-label="Filter by specialty"
  >
  <option value="all">All Specialties</option>
  {allSpecialties.map((s) => (
@@ -87,8 +87,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  <Link
  key={a.userId}
  href={`/studio/${a.studioSlug}`}
- className="rounded-lg border border-edge bg-card shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
- style={{ textDecoration:"none" }}
+ className="rounded-lg border border-edge bg-card no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
  >
  <div className="p-5">
  <div className="mb-2 text-base font-semibold text-ink">

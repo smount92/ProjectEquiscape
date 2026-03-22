@@ -20,16 +20,14 @@ export default async function StudiosPage() {
  const artists = await browseArtists();
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <div className="animate-fade-in-up mb-8">
+ <h1 className="text-2xl font-bold tracking-tight">
  🎨 <span className="text-forest">Art Studios</span>
  </h1>
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 max-w-xl text-base text-stone-500">
  Find custom painters, sculptors, and tack makers.
  </p>
- </div>
  </div>
  <ArtistBrowser artists={artists} />
  </div>

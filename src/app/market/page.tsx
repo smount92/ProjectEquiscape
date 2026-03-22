@@ -81,15 +81,15 @@ export default async function MarketPricePage({
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[900]">
  <div className="animate-fade-in-up">
  {/* Header */}
- <div className="mb-12" style={{ textAlign:"center" }}>
- <h1>
+ <div className="mb-12 text-center">
+ <h1 className="text-2xl font-bold tracking-tight">
  📈 Model Horse <span className="text-forest">Price Guide</span>
  </h1>
- <p className="text-ink-light mt-2 text-base">
+ <p className="mt-2 text-base text-stone-500">
  The Blue Book — Real sale data from real collectors
  </p>
  </div>
@@ -102,8 +102,7 @@ export default async function MarketPricePage({
  {/* Results (Server-rendered) */}
  {items.length === 0 ? (
  <div
- className="bg-card border-edge rounded-lg border p-12 shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <div className="mb-4 text-[3rem]">📊</div>
  <h3 className="mb-2">

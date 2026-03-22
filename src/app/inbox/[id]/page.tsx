@@ -242,21 +242,21 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <div className="mt-0.5 flex flex-wrap gap-1">
  {memberSince && (
  <span
- className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-[calc(0.65rem*var(--font-scale))] whitespace-nowrap"
+ className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-xs whitespace-nowrap"
  title="Account age"
  >
  📅 Member since {memberSince}
  </span>
  )}
  <span
- className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-[calc(0.65rem*var(--font-scale))] whitespace-nowrap"
+ className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-xs whitespace-nowrap"
  title="Completed Hoofprint transfers"
  >
  📦 {transferCount || 0} transfer{transferCount !== 1 ?"s" :""}
  </span>
  {avgRating !== null && (
  <span
- className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-[calc(0.65rem*var(--font-scale))] whitespace-nowrap"
+ className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-xs whitespace-nowrap"
  title="Average user rating"
  >
  ⭐ {avgRating} ({ratingsArr.length})
@@ -313,7 +313,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  )}
  {horseContext.tradeStatus !=="Not for Sale" && (
  <span
- className={`inline-flex w-fit items-center gap-[3px] rounded-full px-2 py-0.5 text-[calc(0.7rem*var(--font-scale))] font-bold ${
+ className={`inline-flex w-fit items-center gap-[3px] rounded-full px-2 py-0.5 text-xs font-bold ${
  horseContext.tradeStatus ==="For Sale"
  ?"bg-[rgba(34,197,94,0.12)] text-[#22c55e]"
  :"bg-[rgba(59,130,246,0.12)] text-[#3b82f6]"

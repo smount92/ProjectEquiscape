@@ -263,7 +263,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  ).length;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Profile Header */}
  <div className="profile-hero animate-fade-in-up max-md:flex-col max-md:items-center max-md:text-center max-sm:flex-col max-sm:px-4 max-sm:py-8 max-sm:text-center">
  <div className="bg-[rgba(44,85,69,0.12)] border-[rgba(44,85,69,0.3)] text-forest flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full border-[2px]">
@@ -272,8 +272,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <img
  src={profileUser.avatar_url}
  alt={profileUser.alias_name}
- className="h-full w-full rounded-full"
- style={{ objectFit:"cover" }}
+ className="h-full w-full rounded-full object-cover"
  />
  ) : (
  <svg
@@ -292,13 +291,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </svg>
  )}
  </div>
- <div className="text-forest mb-1 text-[calc(1.6rem*var(--font-scale))] font-extrabold tracking-[-0.02em]">
+ <div className="text-forest mb-1 text-2xl font-bold tracking-tight">
  <h1>
  @{profileUser.alias_name}
  {isOwnProfile && (
  <span
- className="bg-forest ml-2 inline-flex rounded-sm px-2 py-[2px] text-[calc(0.65rem*var(--font-scale))] font-bold tracking-wider text-white uppercase"
- style={{ verticalAlign:"middle" }}
+ className="bg-forest ml-2 inline-flex align-middle rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase"
  >
  You
  </span>
@@ -310,15 +308,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  : `@${profileUser.alias_name}'s public collection`}
  </p>
  {profileUser.bio && (
- <p
- style={{
- color:"var(--color-text-muted)",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
- maxWidth:"480px",
- lineHeight: 1.5,
- marginTop:"var(--space-xs)",
- }}
- >
+ <p className="mt-2 max-w-[480px] text-sm leading-relaxed text-stone-500">
  {profileUser.bio}
  </p>
  )}
@@ -326,13 +316,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {studioSlug && (
  <Link
  href={`/studio/${studioSlug}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{
- marginTop:"var(--space-xs)",
- display:"inline-flex",
- alignItems:"center",
- gap:"6px",
- }}
+ className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  >
  🎨 {isOwnProfile ?"My Studio" : `Visit ${studioName ||"Studio"}`}
  </Link>
@@ -370,7 +354,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  isOwnProfile={isOwnProfile}
  />
  {(followStats.followerCount > 0 || followStats.followingCount > 0) && (
- <div className="text-muted mt-1 flex items-center gap-2 text-[calc(0.85rem*var(--font-scale))]">
+ <div className="mt-1 flex items-center gap-2 text-sm text-stone-500">
  <span>
  {followStats.followerCount} follower{followStats.followerCount !== 1 ?"s" :""}
  </span>
@@ -394,13 +378,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Public Collections */}
  {publicCollections && publicCollections.length > 0 && (
  <div className="animate-fade-in-up mb-6">
- <h3 className="text-muted mb-2 text-[calc(0.9rem*var(--font-scale))]">📁 Public Collections</h3>
+ <h3 className="mb-2 text-sm text-stone-500">📁 Public Collections</h3>
  <div className="flex flex-wrap gap-2">
  {(publicCollections as { id: string; name: string }[]).map((col) => (
  <Link
  key={col.id}
  href={`/stable/collection/${col.id}`}
- className="text-forest hover:0.12)] hover:0.3)] inline-flex items-center gap-1 rounded-md border border-[rgba(129,140,248,0.15)] bg-[rgba(129,140,248,0.06)] px-[14px] py-[6px] text-[calc(0.85rem*var(--font-scale))] no-underline transition-all hover:translate-y-[-1px]"
+ className="text-forest inline-flex items-center gap-1 rounded-md border border-indigo-200/20 bg-indigo-100/10 px-3.5 py-1.5 text-sm no-underline transition-all hover:translate-y-[-1px]"
  >
  📁 {col.name}
  </Link>
@@ -412,7 +396,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Trophy Case — only if user hasn't hidden badges (owner always sees their own) */}
  {userBadges.length > 0 && (isOwnProfile || (profileUser.show_badges ?? true)) && (
  <div className="animate-fade-in-up mb-6" id="trophies">
- <h3 className="text-muted mb-2 text-[calc(0.9rem*var(--font-scale))]">🏆 Trophy Case</h3>
+ <h3 className="mb-2 text-sm text-stone-500">🏆 Trophy Case</h3>
  <TrophyCase badges={userBadges} />
  </div>
  )}
@@ -431,9 +415,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
  {/* Breadcrumb */}
  <nav
- className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm"
+ className="text-muted animate-fade-in-up mb-8 flex items-center gap-2 text-sm"
  aria-label="Breadcrumb"
- style={{ marginBottom:"var(--space-lg)" }}
  >
  <Link href="/community">Show Ring</Link>
  <span className="separator" aria-hidden="true">
@@ -474,23 +457,21 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  className="border-edge text-ink flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline transition-all"
  id={`profile-card-${horse.id}`}
  >
- <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
+ <div className="relative">
  {horse.thumbnailUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
- <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
+ <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="w-full object-cover" />
  ) : (
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
- <span className="flex items-center justify-center rounded-lg border border-edge bg-card text-4xl shadow-md">
- 🐴
- </span>
- <span>No photo</span>
+ <div className="flex flex-col items-center justify-center bg-stone-100 px-4 py-8">
+ <span className="text-4xl">🐴</span>
+ <span className="mt-1 text-sm text-stone-400">No photo</span>
  </div>
  )}
  <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
  {horse.finishType}
  </span>
  {horse.tradeStatus ==="For Sale" && (
- <span className="trade-badge border border-[rgba(34,197,94,0.5)] bg-[rgba(34,197,94,0.85)] text-white">
+ <span className="trade-badge border border-green-500/50 bg-green-500/85 text-white">
  💲{""}
  {horse.listingPrice
  ? `$${horse.listingPrice.toLocaleString("en-US")}`
@@ -498,7 +479,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </span>
  )}
  {horse.tradeStatus ==="Open to Offers" && (
- <span className="trade-badge border border-[rgba(59,130,246,0.5)] bg-[rgba(59,130,246,0.85)] text-white">
+ <span className="trade-badge border border-blue-500/50 bg-blue-500/85 text-white">
  🤝{""}
  {horse.listingPrice
  ? `~$${horse.listingPrice.toLocaleString("en-US")}`
@@ -506,41 +487,30 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </span>
  )}
  </div>
- <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
- <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
+ <div className="p-4">
+ <div className="text-sm font-semibold text-ink">
  {horse.customName}
  </div>
- <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
+ <div className="mt-0.5 text-xs text-stone-500">
  {horse.refName}
  </div>
  {horse.releaseLine && (
- <div
- className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline"
- style={{
- fontSize:"calc(0.7rem * var(--font-scale))",
- opacity: 0.7,
- marginTop:"2px",
- }}
- >
+ <div className="mt-0.5 text-xs text-stone-400">
  🎨 {horse.releaseLine}
  </div>
  )}
- <div className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
- <span className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
- {horse.conditionGrade}
- </span>
- <span className="flex flex-col overflow-hidden rounded-lg border border-edge bg-card text-ink transition-all no-underline">
- {formatDate(horse.createdAt)}
- </span>
+ <div className="mt-2 flex items-center justify-between text-xs text-stone-400">
+ <span>{horse.conditionGrade}</span>
+ <span>{formatDate(horse.createdAt)}</span>
  </div>
  {horse.collectionName && (
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
+ <div className="mt-2 text-xs text-stone-500">
  📁 {horse.collectionName}
  </div>
  )}
  {(horse.tradeStatus ==="For Sale" || horse.tradeStatus ==="Open to Offers") &&
  horse.marketplaceNotes && (
- <div className="marketplace-notes-snippet" title={horse.marketplaceNotes}>
+ <div className="mt-1 truncate text-xs text-stone-400" title={horse.marketplaceNotes}>
  📝{""}
  {horse.marketplaceNotes.length > 50
  ? horse.marketplaceNotes.slice(0, 50) +"…"
@@ -571,17 +541,17 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  className="bg-card border border-edge animate-fade-in-up mt-8 rounded-lg border p-6 shadow-md"
  id="reviews"
  >
- <div className="mb-6 flex items-center gap-2 [&_h2]:m-0 [&_h2]:text-[calc(1.1rem*var(--font-scale))]">
- <h2>⭐ Reviews ({ratingSummary.count})</h2>
+ <div className="mb-6 flex items-center gap-2">
+ <h2 className="m-0 text-lg">⭐ Reviews ({ratingSummary.count})</h2>
  </div>
  {ratingSummary.ratings.map((r) => (
  <div key={r.id} className="border-edge border-b py-4 last:border-b-0">
  <div className="mb-1 flex items-center justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
- <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-sm text-stone-500">
  @{r.reviewerAlias} — {"★".repeat(r.stars)}
  {"☆".repeat(5 - r.stars)}
  </span>
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))] opacity-70">
+ <span className="text-xs text-stone-400">
  {new Date(r.createdAt).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
@@ -590,7 +560,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </span>
  </div>
  {r.reviewText && (
- <p className="text-muted mt-1 text-[calc(0.9rem*var(--font-scale))] italic">
+ <p className="mt-1 text-sm italic text-stone-500">
  &ldquo;{r.reviewText}&rdquo;
  </p>
  )}

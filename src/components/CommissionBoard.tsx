@@ -67,10 +67,9 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  {/* Commission Cards */}
  {filteredCommissions.length === 0 ? (
  <div
- className="bg-card border-edge rounded-lg border shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge rounded-lg border text-center shadow-md transition-all"
  >
- <p className="text-muted text-[calc(0.9rem*var(--font-scale))]">No commissions in this category.</p>
+ <p className="text-muted text-sm">No commissions in this category.</p>
  </div>
  ) : (
  <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 max-md:grid-cols-1">
@@ -80,11 +79,11 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  className="border-edge flex flex-col rounded-lg border bg-[var(--color-bg-elevated)] p-6 transition-all hover:-translate-y-[1px] hover:border-[rgba(139,92,246,0.3)]"
  >
  <div className="mb-2 flex items-center justify-between gap-2">
- <span className="text-[calc(0.95rem*var(--font-scale))] font-bold">
+ <span className="text-sm font-bold">
  {c.commissionType}
  </span>
  <span
- className="inline-flex items-center rounded-full px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap"
+ className="inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap"
  style={{
  backgroundColor: `${STATUS_COLORS[c.status]}20`,
  color: STATUS_COLORS[c.status],
@@ -95,29 +94,28 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  </span>
  </div>
 
- <div className="text-muted mb-2 flex gap-4 text-[calc(0.8rem*var(--font-scale))]">
+ <div className="text-muted mb-2 flex gap-4 text-sm">
  {c.clientAlias && <span>👤 @{c.clientAlias}</span>}
  {c.slotNumber && <span>📌 Slot {c.slotNumber}</span>}
  {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
  </div>
 
- <p className="text-ink-light mb-2 text-[calc(0.85rem*var(--font-scale))] leading-normal">
+ <p className="text-ink-light mb-2 text-sm leading-normal">
  {c.description.length > 120 ? c.description.substring(0, 120) +"…" : c.description}
  </p>
 
  <div className="border-edge mt-auto flex items-center justify-between border-t pt-2">
- <span className="text-muted text-[calc(0.7rem*var(--font-scale))]">
+ <span className="text-muted text-xs">
  {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
  })}
  </span>
 
- <div className="gap-1" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap gap-1">
  <Link
  href={`/studio/commission/${c.id}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{ fontSize:"calc(0.7rem * var(--font-scale))", padding:"4px 8px" }}
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-1 text-xs font-semibold text-ink-light no-underline transition-all"
  >
  View
  </Link>
@@ -126,23 +124,14 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  {c.status ==="requested" && (
  <>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- style={{
- fontSize:"calc(0.7rem * var(--font-scale))",
- padding:"4px 8px",
- }}
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-2 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleStatusChange(c.id,"accepted")}
  disabled={acting === c.id}
  >
  ✅ Accept
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{
- fontSize:"calc(0.7rem * var(--font-scale))",
- padding:"4px 8px",
- color:"#ef4444",
- }}
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-1 text-xs font-semibold text-danger no-underline transition-all"
  onClick={() => handleStatusChange(c.id,"declined")}
  disabled={acting === c.id}
  >
@@ -152,8 +141,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  )}
  {c.status ==="accepted" && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- style={{ fontSize:"calc(0.7rem * var(--font-scale))", padding:"4px 8px" }}
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-2 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleStatusChange(c.id,"in_progress")}
  disabled={acting === c.id}
  >
@@ -162,8 +150,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  )}
  {c.status ==="in_progress" && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- style={{ fontSize:"calc(0.7rem * var(--font-scale))", padding:"4px 8px" }}
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-2 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleStatusChange(c.id,"review")}
  disabled={acting === c.id}
  >
@@ -172,8 +159,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  )}
  {c.status ==="review" && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- style={{ fontSize:"calc(0.7rem * var(--font-scale))", padding:"4px 8px" }}
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-2 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleStatusChange(c.id,"completed")}
  disabled={acting === c.id}
  >
@@ -182,8 +168,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  )}
  {c.status ==="completed" && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- style={{ fontSize:"calc(0.7rem * var(--font-scale))", padding:"4px 8px" }}
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-2 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleStatusChange(c.id,"delivered")}
  disabled={acting === c.id}
  >
@@ -192,8 +177,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  )}
  {c.status ==="revision" && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- style={{ fontSize:"calc(0.7rem * var(--font-scale))", padding:"4px 8px" }}
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-2 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleStatusChange(c.id,"in_progress")}
  disabled={acting === c.id}
  >

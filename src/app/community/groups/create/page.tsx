@@ -50,7 +50,7 @@ export default function CreateGroupPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[640]">
  <h1 className="mb-8">🏛️ Create Group</h1>
 
@@ -80,12 +80,11 @@ export default function CreateGroupPage() {
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="form-input w-full resize-y"
  rows={3}
  value={description}
  onChange={(e) => setDescription(e.target.value)}
  placeholder="What is this group about?"
- style={{ resize:"vertical" }}
  />
  </div>
 
@@ -96,6 +95,7 @@ export default function CreateGroupPage() {
  className="form-input"
  value={groupType}
  onChange={(e) => setGroupType(e.target.value)}
+ title="Group type"
  >
  {Object.entries(GROUP_TYPE_LABELS).map(([key, label]) => (
  <option key={key} value={key}>
@@ -117,7 +117,7 @@ export default function CreateGroupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Visibility</label>
- <div className="gap-2" style={{ display:"flex" }}>
+ <div className="flex gap-2">
  {["public","restricted","private"].map((v) => (
  <button
  key={v}
@@ -137,7 +137,7 @@ export default function CreateGroupPage() {
  </p>
  )}
 
- <div className="mt-6 gap-2" style={{ display:"flex" }}>
+ <div className="mt-6 flex gap-2">
  <button
  type="submit"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"

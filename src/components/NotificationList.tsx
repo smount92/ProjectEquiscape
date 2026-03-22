@@ -117,10 +117,9 @@ export default function NotificationList({ initialNotifications }: NotificationL
  </button>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
  onClick={handleClear}
  disabled={clearing}
- style={{ color:"var(--color-text-muted)" }}
  >
  {clearing ?"Clearing…" :"🗑️ Clear All"}
  </button>
@@ -143,14 +142,14 @@ export default function NotificationList({ initialNotifications }: NotificationL
  className={`border-edge flex items-center gap-4 border-b px-6 py-4 text-inherit no-underline transition-colors hover:bg-black/[0.03] ${n.isRead ?"" :"bg-[rgba(129,140,248,0.04)]"}`}
  onClick={() => handleClick(n.id)}
  >
- <span className="shrink-0 text-[calc(1.2rem*var(--font-scale))]">
+ <span className="shrink-0 text-xl">
  {getNotifIcon(n.type)}
  </span>
  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
- <span className="text-[calc(0.9rem*var(--font-scale))]">
+ <span className="text-sm">
  {n.content ||"New notification"}
  </span>
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+ <span className="text-muted text-xs">
  {timeAgo(n.createdAt)}
  </span>
  </div>

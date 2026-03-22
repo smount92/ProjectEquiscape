@@ -67,16 +67,16 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  <h3 className="mb-6">Manage Collection</h3>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Name</label>
- <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} />
+ <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Collection name" />
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-edge bg-transparent px-4 py-2 text-sm no-underline transition-all"
  rows={3}
  value={description}
  onChange={(e) => setDescription(e.target.value)}
- style={{ resize:"vertical" }}
+ placeholder="Describe this collection…"
  />
  </div>
  {error && (
@@ -84,16 +84,15 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  {error}
  </p>
  )}
- <div className="mt-6 justify-between" style={{ display:"flex" }}>
+ <div className="mt-6 flex justify-between">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{ color:"red" }}
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
  onClick={handleDelete}
  disabled={saving}
  >
  🗑️ Delete
  </button>
- <div className="gap-2" style={{ display:"flex" }}>
+ <div className="flex gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setShowModal(false)}

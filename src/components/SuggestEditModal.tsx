@@ -199,7 +199,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  onChange={(e) => handleFieldChange(i, e.target.value)}
  />
  {field.current !== field.original && (
- <span className="text-muted mt-[4px] text-[calc(0.75rem*var(--font-scale))] italic">
+ <span className="text-muted mt-[4px] text-xs italic">
  Was: {field.original}
  </span>
  )}
@@ -213,14 +213,14 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  Reason for change *
  </label>
  <textarea
- className="input min-h-[72px] w-full resize-y text-[calc(0.9rem*var(--font-scale))]"
+ className="input min-h-[72px] w-full resize-y text-sm"
  placeholder="Explain why this change is needed (e.g., 'The 2019 Breyer catalog lists this as Dark Bay, not Bay')"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
  rows={3}
  maxLength={2000}
  />
- <span className="text-muted mt-[4px] block text-right text-[calc(0.7rem*var(--font-scale))]">
+ <span className="text-muted mt-[4px] block text-right text-xs">
  {reason.length}/2000
  </span>
  </div>

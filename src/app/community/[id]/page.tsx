@@ -358,20 +358,12 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  {/* Stolen/Missing Banner */}
  {horse.trade_status ==="Stolen/Missing" && (
  <div
- style={{
- background:"linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.08))",
- border:"1px solid rgba(220, 38, 38, 0.4)",
- borderRadius:"var(--radius-md)",
- padding:"var(--space-md)",
- display:"flex",
- alignItems:"center",
- gap:"var(--space-sm)",
- }}
+ className="flex items-center gap-2 rounded-md border border-[rgba(220,38,38,0.4)] bg-gradient-to-br from-[rgba(220,38,38,0.15)] to-[rgba(220,38,38,0.08)] p-4"
  >
  <span className="text-[1.3em]">🚨</span>
  <div>
  <strong className="text-[rgb(220,38,38)]">Stolen / Missing</strong>
- <p className="m-[4px 0 0] text-muted text-[calc(0.8rem*var(--font-scale))]">
+ <p className="m-[4px 0 0] text-muted text-sm">
  This model has been flagged by its owner. Transfers and offers are blocked.
  </p>
  </div>
@@ -380,7 +372,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {/* Free-floating Title — no card wrapper */}
  <div className="p-0">
- <h1 className="mb-1 text-[calc(1.75rem*var(--font-scale))] leading-[1.15] font-extrabold tracking-[-0.02em] text-[#2D2318]">
+ <h1 className="mb-1 text-2xl leading-[1.15] font-bold tracking-tight text-[#2D2318]">
  {horse.custom_name}
  </h1>
  {refInfo ? (
@@ -389,8 +381,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </p>
  ) : (
  <p
- className="mb-1 text-base text-[#59493A]"
- style={{ opacity: 0.6, fontStyle:"italic" }}
+ className="mb-1 text-base italic text-[#59493A] opacity-60"
  >
  Unlisted / Custom Entry
  </p>
@@ -420,7 +411,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </span>
  <span>@{ownerAlias}</span>
  {isOwnHorse && (
- <span className="bg-forest inline-flex rounded-sm px-2 py-[2px] text-[calc(0.65rem*var(--font-scale))] font-bold tracking-wider text-white uppercase">
+ <span className="bg-forest inline-flex rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase">
  You
  </span>
  )}
@@ -447,10 +438,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {horse.asset_category && horse.asset_category !=="model" && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Category
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.asset_category ==="tack"
  ?"🏇 Tack & Gear"
  : horse.asset_category ==="prop"
@@ -462,10 +453,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {horse.finish_type && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Finish Type
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.finish_type}
  </span>
  </div>
@@ -473,10 +464,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {horse.condition_grade && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Condition
  </span>
- <span className="text-success inline-flex items-center gap-[4px] rounded-full border border-[rgba(92,224,160,0.25)] bg-[rgba(92,224,160,0.1)] px-[10px] py-[2px] text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-success inline-flex items-center gap-[4px] rounded-full border border-[rgba(92,224,160,0.25)] bg-[rgba(92,224,160,0.1)] px-[10px] py-[2px] text-sm font-semibold">
  {horse.condition_grade}
  </span>
  </div>
@@ -485,38 +476,38 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  {refInfo ? (
  <>
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  {refInfo.type}
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {refInfo.name}
  </span>
  </div>
 
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  {refInfo.type ==="Mold" ?"Manufacturer" :"Sculptor"}
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {refInfo.maker}
  </span>
  </div>
 
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Scale
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {refInfo.scale}
  </span>
  </div>
 
  {refInfo.extra && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  {refInfo.type ==="Mold" ?"Released" :"Medium"}
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {refInfo.extra}
  </span>
  </div>
@@ -524,12 +515,11 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </>
  ) : (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Reference
  </span>
  <span
- className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold"
- style={{ opacity: 0.6, fontStyle:"italic" }}
+ className="text-ink max-w-[60%] text-right text-sm font-semibold italic opacity-60"
  >
  Not linked to database — Custom Entry
  </span>
@@ -539,20 +529,20 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  {releaseInfo && (
  <>
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Release
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {releaseInfo.name}
  </span>
  </div>
 
  {releaseInfo.modelNumber && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Model #
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  #{releaseInfo.modelNumber}
  </span>
  </div>
@@ -560,10 +550,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {releaseInfo.color && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Color
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {releaseInfo.color}
  </span>
  </div>
@@ -571,10 +561,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {releaseInfo.yearStart && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Release Years
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {releaseInfo.yearStart}
  {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
  ? `–${releaseInfo.yearEnd}`
@@ -587,20 +577,15 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {horse.finishing_artist && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  🎨 Finished by
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.finishing_artist}
  {horse.finishing_artist_verified && (
  <span
- className="inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-forest"
+ className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-[var(--color-accent-success,#22c55e)]"
  title="Verified via commission delivery"
- style={{
- marginLeft: 6,
- color:"var(--color-accent-success, #22c55e)",
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- }}
  >
  ✅ Verified
  </span>
@@ -611,10 +596,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {(horse.edition_number || horse.edition_size) && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  📋 Edition
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.edition_number && horse.edition_size
  ? `${horse.edition_number} of ${horse.edition_size}`
  : horse.edition_size
@@ -625,8 +610,8 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
 
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">Added</span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-muted text-sm font-medium">Added</span>
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {new Date(horse.created_at).toLocaleDateString("en-US", {
  year:"numeric",
  month:"long",
@@ -643,10 +628,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  <span aria-hidden="true">✨</span> Finish
  </h3>
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Finish Details
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.finish_details}
  </span>
  </div>
@@ -661,40 +646,40 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </h3>
  {horse.assigned_breed && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Breed
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.assigned_breed}
  </span>
  </div>
  )}
  {horse.assigned_gender && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Gender
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.assigned_gender}
  </span>
  </div>
  )}
  {horse.assigned_age && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Age
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.assigned_age}
  </span>
  </div>
  )}
  {horse.regional_id && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
+ <span className="text-muted text-sm font-medium">
  Regional ID
  </span>
- <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
+ <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {horse.regional_id}
  </span>
  </div>

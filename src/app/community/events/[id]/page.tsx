@@ -93,7 +93,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  const endDate = event.endsAt ? new Date(event.endsAt) : null;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[720]">
  <Link
  href="/community/events"
@@ -104,16 +104,16 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  <div className="mb-6 flex items-start gap-6">
  <div className="flex h-[56px] min-w-[56px] shrink-0 flex-col items-center justify-center rounded-md border border-[rgba(44,85,69,0.3)] bg-[linear-gradient(135deg,rgba(44,85,69,0.15),rgba(139,92,246,0.1))]">
- <span className="text-[calc(0.6rem*var(--font-scale))] font-bold tracking-wider text-[#2C5545] uppercase">
+ <span className="text-xs font-bold tracking-wider text-[#2C5545] uppercase">
  {date.toLocaleDateString("en-US", { month:"short" }).toUpperCase()}
  </span>
- <span className="text-ink text-[calc(1.2rem*var(--font-scale))] leading-none font-extrabold">
+ <span className="text-ink text-xl leading-none font-extrabold">
  {date.getDate()}
  </span>
  </div>
  <div>
  <h1>{event.name}</h1>
- <div className="text-muted mt-2 gap-4" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="text-muted mt-2 flex flex-wrap gap-4">
  <span>{EVENT_TYPE_LABELS[event.eventType] || event.eventType}</span>
  <span>👥 {event.rsvpCount} attending</span>
  {event.isOfficial && <span className="text-[#f59e0b]">⭐ Official</span>}
@@ -132,8 +132,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {/* Details */}
  <div className="mb-6 grid gap-2">
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">📅 Date</span>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">
+ <span className="text-muted text-sm">📅 Date</span>
+ <span className="text-sm font-bold">
  {event.isAllDay
  ?"All Day"
  : date.toLocaleString("en-US", {
@@ -159,8 +159,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  </div>
  {!event.isVirtual && event.locationName && (
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">📍 Location</span>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">
+ <span className="text-muted text-sm">📍 Location</span>
+ <span className="text-sm font-bold">
  {event.locationName}
  {event.locationAddress && (
  <>
@@ -173,12 +173,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  )}
  {event.isVirtual && event.virtualUrl && (
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">🌐 Virtual Link</span>
+ <span className="text-muted text-sm">🌐 Virtual Link</span>
  <a
  href={event.virtualUrl}
  target="_blank"
  rel="noopener noreferrer"
- className="text-forest text-[calc(0.9rem*var(--font-scale))] font-bold"
+ className="text-forest text-sm font-bold"
  >
  Join Online →
  </a>
@@ -186,19 +186,19 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  )}
  {event.region && (
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">🗺️ Region</span>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">{event.region}</span>
+ <span className="text-muted text-sm">🗺️ Region</span>
+ <span className="text-sm font-bold">{event.region}</span>
  </div>
  )}
  {event.groupName && (
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">🏛️ Hosted by</span>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">{event.groupName}</span>
+ <span className="text-muted text-sm">🏛️ Hosted by</span>
+ <span className="text-sm font-bold">{event.groupName}</span>
  </div>
  )}
  <div className="flex items-center justify-between py-1">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))]">Created by</span>
- <span className="text-[calc(0.9rem*var(--font-scale))] font-bold">@{event.creatorAlias}</span>
+ <span className="text-muted text-sm">Created by</span>
+ <span className="text-sm font-bold">@{event.creatorAlias}</span>
  </div>
  </div>
 
@@ -206,7 +206,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {event.description && (
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-2">About</h3>
- <p className="leading-[1.7]" style={{ whiteSpace:"pre-line" }}>
+ <p className="leading-[1.7] whitespace-pre-line">
  {event.description}
  </p>
  </div>
@@ -214,7 +214,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  {/* Creator Actions */}
  {user.id === event.createdBy && (
- <div className="mt-6 justify-end gap-2" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="mt-6 flex flex-wrap justify-end gap-2">
  <Link
  href={`/community/events/${event.id}/manage`}
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -238,8 +238,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {div.classes.map((cls) => (
  <div
  key={cls.id}
- className="py-1 text-ink-light gap-2 text-sm"
- style={{ display:"flex", alignItems:"center" }}
+ className="py-1 text-ink-light flex items-center gap-2 text-sm"
  >
  <span className="text-muted min-w-[40px]">{cls.classNumber ||"—"}</span>
  <span>{cls.name}</span>
@@ -288,7 +287,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  key={entry.id}
  className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] flex items-center gap-4 border-b px-6 py-4 transition-colors"
  >
- <div className="text-muted min-w-[32px] text-center text-[calc(1.1rem*var(--font-scale))] font-bold">
+ <div className="text-muted min-w-[32px] text-center text-lg font-bold">
  {isExpertJudged && showStatus ==="closed" && entry.placing
  ? entry.placing
  : `#${index + 1}`}
@@ -302,7 +301,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
  <Link
  href={`/community/${entry.horseId}`}
- className="hover:text-forest text-[calc(0.95rem*var(--font-scale))] font-semibold text-inherit no-underline"
+ className="hover:text-forest text-base font-semibold text-inherit no-underline"
  >
  🐴 {entry.horseName}
  </Link>
@@ -321,18 +320,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  )}
  </span>
  </div>
- <div className="gap-1" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-1">
  {isExpertJudged ? (
  entry.placing && showStatus ==="closed" ? (
  <span
- style={{
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
- padding:"var(--space-xs) var(--space-sm)",
- borderRadius:"var(--radius-sm)",
- background:"rgba(245, 158, 11, 0.15)",
- color:"var(--color-accent, #f59e0b)",
- fontWeight: 600,
- }}
+ className="rounded-sm bg-[rgba(245,158,11,0.15)] px-2 py-1 text-sm font-semibold text-amber-500"
  >
  {entry.placing}
  </span>
@@ -357,8 +349,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  {isShowEvent && showEntries.length === 0 && !isShowOpen && (
  <div
- className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge mt-6 rounded-lg border p-6 text-center shadow-md transition-all"
  >
  <p className="text-muted">No entries were submitted for this show.</p>
  </div>
@@ -382,7 +373,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <Link
  key={a.userId}
  href={`/profile/${encodeURIComponent(a.alias)}`}
- className="text-ink rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+ className="text-ink rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
  >
  @{a.alias}
  </Link>
@@ -400,7 +391,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <Link
  key={a.userId}
  href={`/profile/${encodeURIComponent(a.alias)}`}
- className="text-ink rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-[calc(0.8rem*var(--font-scale))] no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+ className="text-ink rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
  >
  @{a.alias}
  </Link>

@@ -119,7 +119,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
 
  return (
  <div className="rounded-lg border border-edge bg-card p-6 shadow-md transition-all">
- <div className="mb-4 text-[calc(1rem*var(--font-scale))] font-semibold">
+ <div className="mb-4 text-base font-semibold">
  {isEdit ?"✏️ Edit Show Record" :"🏅 Add Show Record"}
  </div>
  <form onSubmit={handleSubmit}>
@@ -141,13 +141,14 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
 
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Show Date</label>
+ <label htmlFor="show-record-date" className="text-ink mb-1 block text-sm font-semibold">Show Date</label>
  <input
  className="form-input"
  type="date"
  value={showDate}
  onChange={(e) => setShowDate(e.target.value)}
  id="show-record-date"
+ title="Show date"
  />
  </div>
  <div className="mb-6">
@@ -208,7 +209,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Ribbon Color</label>
+ <label htmlFor="show-record-ribbon" className="text-ink mb-1 block text-sm font-semibold">Ribbon Color</label>
  <select
  className="form-select"
  value={ribbonColor}
@@ -236,13 +237,13 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  />
  </div>
 
- <div className="mb-6 gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="mb-6 flex items-center gap-2">
  <input
  type="checkbox"
  checked={isNan}
  onChange={(e) => setIsNan(e.target.checked)}
  id="show-record-nan"
- style={{ width: 18, height: 18, accentColor:"#F59E0B" }}
+ className="h-[18px] w-[18px] accent-amber-500"
  />
  <label htmlFor="show-record-nan" className="text-ink mb-0 mb-1 block text-sm font-semibold">
  ⭐ NAN Achievement
@@ -266,9 +267,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setShowAdvanced(!showAdvanced)}
- style={{ width:"100%" }}
  id="show-record-advanced-toggle"
  >
  {showAdvanced ?"▾ Hide" :"▸ Show"} Advanced Details
@@ -304,7 +304,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
 
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Award Category</label>
+ <label htmlFor="show-record-award-category" className="text-ink mb-1 block text-sm font-semibold">Award Category</label>
  <select
  className="form-select"
  value={awardCategory}
@@ -321,7 +321,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  </select>
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Competition Level</label>
+ <label htmlFor="show-record-competition-level" className="text-ink mb-1 block text-sm font-semibold">Competition Level</label>
  <select
  className="form-select"
  value={competitionLevel}

@@ -105,7 +105,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
 
  return (
  <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
- <div className="mb-4 justify-between" style={{ display:"flex", alignItems:"center" }}>
+ <div className="mb-4 flex items-center justify-between">
  <h3>📸 Event Photos ({photos.length})</h3>
  <label
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
@@ -118,7 +118,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  accept="image/*"
  onChange={handleUpload}
  disabled={uploading || isPending}
- style={{ display:"none" }}
+ className="hidden"
  id="event-photo-upload"
  />
  </label>
@@ -131,7 +131,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  ) : (
  <div className="grid-cols-[repeat(auto-fill,minmax(140px,1fr))] mt-2 grid gap-2">
  {photos.map((p) => (
- <div key={p.id} style={{ position:"relative" }}>
+ <div key={p.id} className="relative">
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={p.imageUrl} alt={p.caption ||"Event photo"} loading="lazy" />
  {p.userId === currentUserId && (

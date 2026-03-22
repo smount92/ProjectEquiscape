@@ -101,12 +101,7 @@ export default async function AdminPage() {
  <h1>
  <span className="text-forest">⚡ Admin Console</span>
  </h1>
- <p
- style={{
- color:"var(--color-text-muted)",
- marginTop:"var(--space-xs)",
- }}
- >
+ <p className="mt-1 text-muted">
  Founder&apos;s Command Center — Full system overview
  </p>
  </div>

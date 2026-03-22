@@ -93,10 +93,10 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  className="bg-elevated border-edge flex items-center gap-6 rounded-lg border p-6 transition-colors"
  >
  <div className="bg-elevated border-edge transition-colors-date flex items-center gap-6 rounded-lg border p-6">
- <span className="text-[calc(0.6rem*var(--font-scale))] font-bold tracking-[0.05em] text-[#2C5545] uppercase">
+ <span className="text-xs font-bold tracking-[0.05em] text-[#2C5545] uppercase">
  {month}
  </span>
- <span className="text-ink text-[calc(1.2rem*var(--font-scale))] leading-none font-extrabold">
+ <span className="text-ink text-xl leading-none font-extrabold">
  {day}
  </span>
  </div>
@@ -121,20 +121,18 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  <div className="bg-elevated border-edge transition-colors-actions flex items-center gap-6 rounded-lg border p-6">
  {e.userRsvp ==="going" ? (
  <span
- className="inline-flex items-center rounded-full bg-[rgba(34,197,94,0.12)] px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap text-[#22c55e]"
- style={{ border:"1px solid rgba(34,197,94,0.3)" }}
+ className="inline-flex items-center rounded-full border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.12)] px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-[#22c55e]"
  >
  ✓ Going
  </span>
  ) : e.userRsvp ==="interested" ? (
  <span
- className="inline-flex items-center rounded-full bg-[rgba(245,158,11,0.12)] px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold whitespace-nowrap text-[#f59e0b]"
- style={{ border:"1px solid rgba(245,158,11,0.3)" }}
+ className="inline-flex items-center rounded-full border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.12)] px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]"
  >
  ⭐ Interested
  </span>
  ) : (
- <div className="gap-1" style={{ display:"flex" }}>
+ <div className="flex gap-1">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={() => handleRsvp(e.id,"going")}

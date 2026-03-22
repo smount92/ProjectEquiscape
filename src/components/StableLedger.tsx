@@ -140,7 +140,7 @@ export default function StableLedger({
  return (
  <>
  {horseCards.length > 0 && (
- <div className="mb-4 gap-4" style={{ display:"flex", alignItems:"center", flexWrap:"wrap" }}>
+ <div className="mb-4 flex flex-wrap items-center gap-4">
  <div className="min-w-[200px] flex-1">
  <SearchBar
  value={searchQuery}
@@ -227,13 +227,12 @@ export default function StableLedger({
  {filteredCards.map((horse) => (
  <tr
  key={horse.id}
- className={`hover:bg-surface-secondary transition-colors ${selectMode && selectedIds.has(horse.id) ?"!bg-[rgba(44,85,69,0.1)]" :""}`}
+ className={`hover:bg-surface-secondary transition-colors ${selectMode && selectedIds.has(horse.id) ?"!bg-[rgba(44,85,69,0.1)]" :""} ${selectMode ? "cursor-pointer" : ""}`}
  onClick={selectMode ? () => onToggleSelect?.(horse.id) : undefined}
- style={selectMode ? { cursor:"pointer" } : undefined}
  >
  {selectMode && (
- <td className="w-[36]" style={{ textAlign:"center" }}>
- <input type="checkbox" checked={selectedIds.has(horse.id)} readOnly />
+ <td className="w-[36] text-center">
+ <input type="checkbox" checked={selectedIds.has(horse.id)} readOnly aria-label={`Select ${horse.customName}`} />
  </td>
  )}
  <td className="w-[50px] !px-2 !py-1">

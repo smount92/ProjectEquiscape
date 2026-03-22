@@ -82,9 +82,8 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
 
  {error && (
  <div
- className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+ className="text-danger mb-6 mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
  role="alert"
- style={{ marginBottom:"var(--space-lg)" }}
  >
  <svg
  width="16"

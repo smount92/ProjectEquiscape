@@ -39,7 +39,7 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
  <span>📷</span>
  <p
  style={{
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
+ fontSize: "0.875rem",
  }}
  >
  No photos uploaded

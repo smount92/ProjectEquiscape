@@ -182,15 +182,15 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  className="modal-content max-w-[480px] text-center max-sm:max-w-full"
  onClick={(e) => e.stopPropagation()}
  >
- <div className="text-muted mb-4 text-center text-[calc(0.75rem*var(--font-scale))] tracking-[0.05em] uppercase">
+ <div className="text-muted mb-4 text-center text-xs tracking-[0.05em] uppercase">
  This is what judges & voters will see
  </div>
- <div className="mb-2" style={{ textAlign:"center" }}>
- <span className="text-[calc(1rem*var(--font-scale))] font-bold">
+ <div className="mb-2 text-center">
+ <span className="text-base font-bold">
  🐴 {selectedHorseName}
  </span>
  {selectedClassName && (
- <span className="text-forest ml-2 text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-forest ml-2 text-sm">
  · {selectedClassName}
  </span>
  )}
@@ -202,7 +202,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  className="mx-auto block aspect-[4/3] w-full max-w-[400px] rounded-md object-cover shadow-lg"
  />
  {caption.trim() && (
- <p className="text-ink-light mt-2 text-[calc(0.9rem*var(--font-scale))] leading-normal italic">
+ <p className="text-ink-light mt-2 text-sm leading-normal italic">
  &ldquo;{caption.trim()}&rdquo;
  </p>
  )}
@@ -231,7 +231,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  <>
  <form onSubmit={handleSubmit} className="flex flex-col gap-4">
  {/* Guidance tip */}
- <div className="mt-4 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-4 px-6 py-2 py-4 text-sm text-[calc(0.8rem*var(--font-scale))] leading-relaxed">
+ <div className="mt-4 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-4 px-6 py-2 py-4 text-sm text-sm leading-relaxed">
  💡 <strong>How it works:</strong> Select a horse, pick your best photo, add an optional caption,
  then submit. For best results, upload clear, well-lit photos (at least 800×600) to your horse&apos;s
  passport first.
@@ -248,6 +248,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  setClassSearch("");
  }}
  required
+ title="Select horse to enter"
  >
  <option value="">Select a horse to enter…</option>
  {userHorses.map((h) => (
@@ -264,11 +265,10 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  <label className="text-ink mb-1 block text-sm font-semibold">📋 Select Class</label>
  <input
  type="text"
- className="form-input"
+ className="form-input mb-2"
  placeholder="Search classes…"
  value={classSearch}
  onChange={(e) => setClassSearch(e.target.value)}
- style={{ marginBottom:"var(--space-xs)" }}
  />
  <div className="border-edge bg-elevated max-h-[240px] overflow-y-auto rounded-md border">
  {/* No class option */}
@@ -301,7 +301,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  </span>
  <span className="border-edge bg-elevated-meta max-h-[240px] overflow-y-auto rounded-md border">
  {c.currentEntryCount !== undefined && (
- <span className="text-muted text-[calc(0.7rem*var(--font-scale))]">
+ <span className="text-muted text-xs">
  {c.currentEntryCount}{""}
  {c.currentEntryCount === 1 ?"entry" :"entries"}
  </span>
@@ -346,9 +346,9 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  <div className="flex flex-col gap-1">
  <label className="text-ink mb-1 block text-sm font-semibold">📸 Choose Entry Photo</label>
  {loadingPhotos ? (
- <p className="text-muted text-[calc(0.8rem*var(--font-scale))]">Loading photos…</p>
+ <p className="text-muted text-sm">Loading photos…</p>
  ) : horsePhotos.length === 0 ? (
- <p className="text-muted text-[calc(0.8rem*var(--font-scale))]">
+ <p className="text-muted text-sm">
  No photos found. Upload photos to your horse&apos;s passport first.
  </p>
  ) : (
@@ -411,18 +411,14 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  placeholder="Describe your entry, photography setup, or what makes this model special…"
  />
  <span
- style={{
- fontSize:"calc(0.7rem * var(--font-scale))",
- color: caption.length > 250 ?"var(--color-error)" :"var(--color-text-muted)",
- float:"right",
- }}
+ className={`text-xs float-right ${caption.length > 250 ? "text-danger" : "text-muted"}`}
  >
  {caption.length}/280
  </span>
  </div>
 
  {/* Submit + Preview buttons */}
- <div className="mt-2 gap-2" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="mt-2 flex flex-wrap gap-2">
  <button
  type="submit"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
@@ -441,7 +437,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  )}
  </div>
  {status ==="success" && (
- <span className="rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-[calc(0.85rem*var(--font-scale))] text-[#22C55E]">
+ <span className="rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-sm text-[#22C55E]">
  ✅ Entered!
  </span>
  )}

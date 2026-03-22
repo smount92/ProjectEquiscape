@@ -235,24 +235,24 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  <h2>Welcome to Model Horse Hub!</h2>
  <p>Let&apos;s get started by adding your first model to your digital stable.</p>
  <div className="mx-auto mb-8 flex max-w-[360px] flex-col gap-4 text-left">
- <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
- <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-[calc(0.85rem*var(--font-scale))] font-bold">
+ <div className="flex items-center gap-4 text-base">
+ <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
  1
  </span>
  <span>
  <Camera size={16} strokeWidth={1.5} /> Add your first horse with photos
  </span>
  </div>
- <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
- <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-[calc(0.85rem*var(--font-scale))] font-bold">
+ <div className="flex items-center gap-4 text-base">
+ <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
  2
  </span>
  <span>
  <Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring
  </span>
  </div>
- <div className="flex items-center gap-4 text-[calc(0.95rem*var(--font-scale))]">
- <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-[calc(0.85rem*var(--font-scale))] font-bold">
+ <div className="flex items-center gap-4 text-base">
+ <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
  3
  </span>
  <span>
@@ -275,20 +275,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  <h1>
  <span className="text-forest">Digital Stable</span>
  {profile?.alias_name && (
- <span
- style={{
- fontSize:"calc(var(--font-size-lg) * var(--font-scale))",
- color:"var(--color-text-muted)",
- fontWeight: 400,
- marginLeft:"var(--space-md)",
- }}
- >
+ <span className="ml-4 text-lg font-normal text-muted">
  {profile.alias_name}&apos;s Herd
  </span>
  )}
  </h1>
  </div>
- <div className="gap-4" style={{ display:"flex", alignItems:"center", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap items-center gap-4">
  {totalHorseCount > 0 && (
  <span className="text-muted text-sm">
  {totalHorseCount} model{totalHorseCount === 1 ?"" :"s"}
@@ -377,12 +370,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  </main>
 
  {/* ── SIDEBAR: Widgets ── */}
- <aside className="lg:top-[calc(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
+ <aside className="space-y-6">
  {/* Analytics — Compact stat rows */}
  {totalHorseCount > 0 && (
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
- <h3 className="text-muted mb-4 text-xs font-bold tracking-[0.08em] uppercase">
- <BarChart3 size={16} strokeWidth={1.5} /> Stable Overview
+              <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-500 uppercase">
+                <BarChart3 size={14} strokeWidth={1.5} /> Stable Overview
  </h3>
  <div className="flex flex-col gap-[2px]">
  <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
@@ -420,7 +413,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  className="flex items-center justify-between rounded-sm px-1 py-2 no-underline transition-colors hover:bg-black/[0.03]"
  style={{ textDecoration:"none" }}
  >
- <span className="text-ink-light text-sm">
+ <span className="flex items-center gap-1.5 text-sm text-stone-500">
  <Mail size={14} strokeWidth={1.5} /> Unread Messages
  </span>
  <span className="text-ink text-forest text-sm font-bold">
@@ -435,8 +428,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  {/* Collections — Vertical list */}
  {collections.length > 0 && (
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
- <h3 className="text-muted mb-4 text-xs font-bold tracking-[0.08em] uppercase">
- <FolderOpen size={16} strokeWidth={1.5} /> Collections
+              <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-500 uppercase">
+                <FolderOpen size={14} strokeWidth={1.5} /> Collections
  </h3>
  <div className="flex flex-col gap-1">
  {collections.map((col) => (
@@ -451,7 +444,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  {collectionCounts.get(col.id) || 0}
  {(collectionValues.get(col.id) || 0) > 0 && (
  <>
- {""}
  · $
  {(collectionValues.get(col.id) || 0).toLocaleString("en-US", {
  minimumFractionDigits: 0,

@@ -9,7 +9,7 @@ export default async function TransferHistorySection() {
  <details className="mt-8" id="transfer-history">
  <summary className="hidden">
  📤 Transfer History
- <span className="inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[rgba(0,0,0,0.06)] px-[6px] py-0 text-[calc(0.7rem*var(--font-scale))] font-semibold">
+ <span className="inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[rgba(0,0,0,0.06)] px-[6px] py-0 text-xs font-semibold">
  {history.length}
  </span>
  </summary>
@@ -30,10 +30,10 @@ export default async function TransferHistorySection() {
  <div className="transfer-ghost-thumb transfer-ghost-placeholder">🐴</div>
  )}
  <div className="flex min-w-0 flex-col gap-[2px]">
- <span className="overflow-hidden text-[calc(0.85rem*var(--font-scale))] font-bold text-ellipsis whitespace-nowrap">
+ <span className="overflow-hidden text-sm font-bold text-ellipsis whitespace-nowrap">
  {item.horseName ||"Unknown Horse"}
  </span>
- <span className="text-muted text-[calc(0.7rem*var(--font-scale))]">
+ <span className="text-muted text-xs">
  Transferred{""}
  {new Date(item.releasedAt).toLocaleDateString("en-US", {
  month:"short",
@@ -42,7 +42,7 @@ export default async function TransferHistorySection() {
  })}
  </span>
  {item.isPricePublic && item.salePrice && (
- <span className="text-[calc(0.7rem*var(--font-scale))] font-semibold text-[var(--color-accent-warm)]">
+ <span className="text-xs font-semibold text-[var(--color-accent-warm)]">
  Sale: ${item.salePrice.toLocaleString("en-US", { minimumFractionDigits: 2 })}
  </span>
  )}

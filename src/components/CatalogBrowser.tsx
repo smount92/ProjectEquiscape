@@ -148,7 +148,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
  {/* Filter Chips */}
  <div className="mb-4 flex flex-wrap items-center gap-2">
  <div className="flex flex-wrap items-center gap-[6px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-semibold">Maker:</span>
+ <span className="text-muted text-sm font-semibold">Maker:</span>
  <button
  className={`ref-chip ${activeMaker === null ?"ref-chip-active" :""}`}
  onClick={() => handleMakerFilter(null)}
@@ -167,10 +167,10 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
  </div>
  {scales.length > 0 && (
  <div className="flex flex-wrap items-center gap-[6px]">
- <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-semibold">Scale:</span>
+ <span className="text-muted text-sm font-semibold">Scale:</span>
  <select
  id="catalog-scale-filter"
- className="input max-w-[160px] text-[calc(0.8rem*var(--font-scale))]"
+ className="input max-w-[160px] text-sm"
  value={activeScale ??""}
  onChange={(e) => handleScaleFilter(e.target.value || null)}
  >
@@ -186,7 +186,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
  </div>
 
  {/* Results Count */}
- <div className="text-muted mb-2 flex items-center justify-between text-[calc(0.85rem*var(--font-scale))]">
+ <div className="text-muted mb-2 flex items-center justify-between text-sm">
  <span>
  {total.toLocaleString()} {total === 1 ?"entry" :"entries"} found
  </span>
@@ -256,7 +256,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
  <td className="border-edge border-b p-2">{item.scale ??"—"}</td>
  <td className="border-edge border-b p-2 text-right">
  <button
- className="text-forest cursor-pointer border-0 bg-transparent text-[calc(0.8rem*var(--font-scale))] opacity-[0] transition-all"
+ className="text-forest cursor-pointer border-0 bg-transparent text-sm opacity-[0] transition-all"
  onClick={(e) => {
  e.stopPropagation();
  router.push(`/catalog/${item.id}?suggest=true`);
@@ -289,7 +289,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
  >
  ← Previous
  </button>
- <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">
+ <span className="text-muted text-sm">
  Page {page} of {totalPages}
  </span>
  <button

@@ -54,7 +54,7 @@ export default function SuggestionVoteButtons({
  >
  ▲
  </button>
- <span className="px-0 py-[4px] text-[calc(1.1rem*var(--font-scale))] font-bold text-[var(--color-text)]">
+ <span className="px-0 py-[4px] text-lg font-bold text-[var(--color-text)]">
  {upvotes - downvotes}
  </span>
  <button

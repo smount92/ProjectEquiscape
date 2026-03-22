@@ -249,25 +249,23 @@ export default async function CommunityPage({
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Hero */}
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="animate-fade-in-up mb-8">
+ <h1 className="text-2xl font-bold tracking-tight">
  🏆 The <span className="text-forest">Show Ring</span>
  </h1>
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 max-w-xl text-base text-stone-500">
  Browse the latest models shared by collectors from around the world. Every horse has a story.
  </p>
- </div>
- <div className="mt-8 flex justify-center gap-8">
- <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">{communityCards.length}</span>
- <span className="items-center-label flex flex-col">Models Showcased</span>
+ <div className="mt-6 flex items-center gap-6">
+ <div className="flex items-baseline gap-2">
+ <span className="text-2xl font-bold text-forest">{communityCards.length}</span>
+ <span className="text-sm font-medium text-stone-500">Models Showcased</span>
  </div>
  <Link
  href="/community/help-id"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-5 py-2 text-sm font-semibold text-stone-700 no-underline shadow-sm transition-all hover:border-stone-400 hover:bg-stone-50"
  id="help-id-link"
  >
  🔍 Help Me ID

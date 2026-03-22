@@ -70,11 +70,11 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  return (
  <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div
- style={{ display:"flex", justifyContent:"space-between", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center justify-between"
  onClick={() => setExpanded(!expanded)}
  >
  <h3 className="text-muted m-0 text-xs font-bold tracking-[0.08em] uppercase">⚙️ Admin Panel</h3>
- <span className="text-muted text-[calc(0.85rem*var(--font-scale))]">{expanded ?"▲" :"▼"}</span>
+ <span className="text-muted text-sm">{expanded ?"▲" :"▼"}</span>
  </div>
 
  {expanded && (
@@ -100,7 +100,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  <div className="flex items-center gap-1">
  {isOwner && (
  <select
- className="form-select"
+ className="form-select text-xs min-h-0 py-1 pl-2 pr-7"
  value={m.role}
  onChange={(e) =>
  handleRoleChange(
@@ -109,11 +109,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  )
  }
  disabled={isPending}
- style={{
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
- padding:"4px 28px 4px 8px",
- minHeight:"unset",
- }}
+ title={`Role for ${m.alias}`}
  >
  <option value="member">Member</option>
  <option value="moderator">Moderator</option>
@@ -121,11 +117,10 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  </select>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
  onClick={() => handleRemove(m.userId, m.alias)}
  disabled={isPending}
  title="Remove member"
- style={{ color:"var(--color-accent-danger)" }}
  >
  ✕
  </button>
@@ -156,11 +151,10 @@ export function PinPostButton({ postId, isPinned }: { postId: string; isPinned: 
 
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-xs font-semibold text-ink-light no-underline transition-all"
  onClick={handleToggle}
  disabled={isPending}
  title={pinned ?"Unpin post" :"Pin post"}
- style={{ fontSize:"calc(var(--font-size-xs) * var(--font-scale))" }}
  >
  📌 {pinned ?"Unpin" :"Pin"}
  </button>

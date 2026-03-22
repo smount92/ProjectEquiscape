@@ -87,70 +87,69 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  });
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
  {/* Hero */}
- <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
- <h1>
+ <div className="animate-fade-in-up mb-6 text-center">
+ <div className="mb-4">
+ <h1 className="text-2xl font-bold tracking-tight">
  📸 <span className="text-forest">{show.title}</span>
  </h1>
  {show.theme && (
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 text-base italic text-stone-600">
  Theme: {show.theme}
  </p>
  )}
  {show.description && (
- <p className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-2 text-sm text-stone-500">
  {show.description}
  </p>
  )}
  {show.endAt && (
  <p
- className="mb-2-subtitle text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]"
- style={{
- color:
+ className={`mt-2 text-sm font-medium ${
  new Date(show.endAt) > new Date()
- ?"var(--color-accent, #f59e0b)"
- :"var(--color-text-muted)",
- }}
+ ? "text-amber-600"
+ : "text-stone-400"
+ }`}
  >
- ⏰{""}
+ ⏰{" "}
  {new Date(show.endAt) > new Date()
  ? `Entries close: ${new Date(show.endAt).toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric", hour:"numeric", minute:"2-digit" })}`
  :"Entries are closed"}
  </p>
  )}
  {show.creatorAlias && (
- <p className="mb-2-subtitle text-sm text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
+ <p className="mt-1 text-sm text-stone-400">
  Hosted by @{show.creatorAlias}
  </p>
  )}
  </div>
- <div className="mt-8 flex justify-center gap-8">
+ <div className="mt-6 flex justify-center gap-8">
  <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">{entries.length}</span>
- <span className="items-center-label flex flex-col">Entries</span>
+ <span className="text-xl font-bold">{entries.length}</span>
+ <span className="text-xs text-stone-500">Entries</span>
  </div>
  <div className="flex flex-col items-center">
- <span className="items-center-number whitespace-nowrap-lg flex flex-col rounded-sm px-[10px] py-[3px] text-[calc(0.7rem*var(--font-scale))] font-semibold">
+ <span className="text-xl">
  {show.status ==="open" ?"🟢" : show.status ==="judging" ?"🟡" :"🔴"}
  </span>
- <span className="items-center-label flex flex-col">
+ <span className="text-xs text-stone-500">
  {show.status.charAt(0).toUpperCase() + show.status.slice(1)}
  </span>
  </div>
  <div className="flex flex-col items-center">
- <span className="items-center-number flex flex-col">{isExpertJudged ?"🏅" :"🗳️"}</span>
- <span className="items-center-label flex flex-col">
+ <span className="text-xl">{isExpertJudged ?"🏅" :"🗳️"}</span>
+ <span className="text-xs text-stone-500">
  {isExpertJudged ?"Expert Judge" :"Community Vote"}
  </span>
  </div>
  </div>
  </div>
 
+
  {/* Creator Actions */}
  {(isCreator || isAdmin) && (
- <div className="animate-fade-in-up mb-4 justify-end gap-2" style={{ display:"flex" }}>
+ <div className="animate-fade-in-up mb-4 flex justify-end gap-2">
  <Link
  href={`/community/events/${showId}/manage`}
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -163,14 +162,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Judge Assignment Banner — always visible to assigned judges */}
  {isJudge && !isCreator && (
  <div
- className="bg-card border-edge animate-fade-in-up rounded-lg border shadow-md transition-all"
- style={{
- marginBottom:"var(--space-lg)",
- padding:"var(--space-lg)",
- background:"linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(245, 158, 11, 0.1))",
- border:"1px solid rgba(139, 92, 246, 0.3)",
- textAlign:"center",
- }}
+ className="animate-fade-in-up mb-6 rounded-lg border border-[rgba(139,92,246,0.3)] bg-gradient-to-br from-[rgba(139,92,246,0.15)] to-[rgba(245,158,11,0.1)] p-6 text-center shadow-md transition-all"
  >
  <div className="mb-2 text-[2rem]">🏅</div>
  <h3 className="mb-2">You Are an Assigned Judge</h3>
@@ -193,7 +185,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Entry Form */}
  {isOpen && (
  <div className="bg-[rgba(129,140,248,0.04)] border-[rgba(129,140,248,0.15)] animate-fade-in-up mb-8 rounded-lg border p-6">
- <h2 className="mb-4 text-[calc(1.1rem*var(--font-scale))]">Enter Your Horse</h2>
+ <h2 className="mb-4 text-lg">Enter Your Horse</h2>
  <ShowEntryForm
  showId={showId}
  userHorses={horseOptions}
@@ -276,48 +268,37 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
 
  return (
  <div
- className="bg-card border-edge animate-fade-in-up rounded-lg border shadow-md transition-all"
- style={{
- padding:"var(--space-xl)",
- marginBottom:"var(--space-lg)",
- }}
+ className="bg-card border-edge animate-fade-in-up rounded-lg border p-8 mb-6 shadow-md transition-all"
  >
- <h2 className="mb-2 text-[calc(1.3rem*var(--font-scale))]" style={{ textAlign:"center" }}>
+ <h2 className="mb-2 text-xl text-center">
  🏆 <span className="text-forest">Results</span>
  </h2>
 
  {/* Champion Banners */}
  {champions.map((entry) => (
- <div key={entry.id} className="champion-banner animate-fade-in-up">
- <div className="mb-2 text-[calc(1.2rem*var(--font-scale))] font-extrabold">
+ <div key={entry.id} className="animate-fade-in-up mb-4 rounded-lg border border-amber-200/30 bg-amber-50/30 p-4 text-center">
+ <div className="mb-2 text-xl font-extrabold">
  {MEDAL_MAP[entry.placing!] ||"🏆"} {entry.placing}
  </div>
- <div
- className="gap-4"
- style={{ display:"flex", alignItems:"center", justifyContent:"center" }}
- >
+ <div className="flex items-center justify-center gap-4">
  {entry.thumbnailUrl && (
- <div
- className="h-[60] w-[60] shrink-0 rounded-md"
- style={{ overflow:"hidden" }}
- >
+ <div className="h-[60px] w-[60px] shrink-0 overflow-hidden rounded-md">
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img
  src={entry.thumbnailUrl}
  alt={entry.horseName}
- className="h-full w-full"
- style={{ objectFit:"cover" }}
+ className="h-full w-full object-cover"
  />
  </div>
  )}
  <div>
  <Link
  href={`/community/${entry.horseId}`}
- className="text-[calc(1rem*var(--font-scale))] font-bold"
+ className="text-base font-bold"
  >
  🐴 {entry.horseName}
  </Link>
- <div className="text-muted text-[calc(0.8rem*var(--font-scale))]">
+ <div className="text-muted text-sm">
  by{""}
  <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
  @{entry.ownerAlias}
@@ -337,9 +318,9 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  return (
  <div
  key={entry.id}
- className={`podium-card ${i === 0 ?"podium-card-first" :""}`}
+ className={`max-w-[220px] min-w-[160px] overflow-hidden rounded-lg text-center shadow-lg transition-transform ${i === 0 ? "scale-105" : ""}`}
  >
- <div className={`podium-ribbon podium-ribbon-${ribbon}`} />
+ <div className="h-1 w-full bg-amber-400" />
  {entry.thumbnailUrl && (
  // eslint-disable-next-line @next/next/no-img-element
  <img
@@ -348,15 +329,15 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  className="aspect-[4/3] w-full object-cover"
  />
  )}
- <div className="bg-elevated transition-transform-body max-w-[220px] min-w-[160px] overflow-hidden rounded-lg text-center shadow-lg">
+ <div className="bg-elevated max-w-[220px] min-w-[160px] overflow-hidden rounded-lg p-4 text-center shadow-lg">
  <div className="mb-1 text-[2rem]">{medal}</div>
  <Link
  href={`/community/${entry.horseId}`}
- className="text-ink block text-[calc(0.9rem*var(--font-scale))] font-bold no-underline hover:underline"
+ className="text-ink block text-sm font-bold no-underline hover:underline"
  >
  {entry.horseName}
  </Link>
- <div className="text-muted mt-[2px] text-[calc(0.75rem*var(--font-scale))]">
+ <div className="text-muted mt-[2px] text-xs">
  by{""}
  <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
  @{entry.ownerAlias}
@@ -364,11 +345,11 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {!isExpertJudged &&
  ` · ${entry.votes} vote${entry.votes !== 1 ?"s" :""}`}
  </div>
- <div className="text-[var(--color-accent, #f59e0b)] mt-1 text-[calc(0.85rem*var(--font-scale))] font-extrabold">
+ <div className="text-[var(--color-accent, #f59e0b)] mt-1 text-sm font-extrabold">
  {placing}
  </div>
  {entry.caption && (
- <div className="text-ink-light mt-1 text-[calc(0.7rem*var(--font-scale))] leading-snug italic">
+ <div className="text-ink-light mt-1 text-xs leading-snug italic">
  &ldquo;{entry.caption}&rdquo;
  </div>
  )}
@@ -381,7 +362,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Remaining placed entries below podium */}
  {topPlaced.length > 3 && (
  <div className="mt-4">
- <h3 className="text-muted mb-2 text-[calc(0.9rem*var(--font-scale))]">
+ <h3 className="text-muted mb-2 text-sm">
  Also Placed
  </h3>
  {topPlaced.slice(3).map((entry) => {
@@ -390,26 +371,20 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  return (
  <div
  key={entry.id}
+ className="mb-1 flex items-center gap-4 px-4 py-2"
  style={{
- display:"flex",
- alignItems:"center",
- gap:"var(--space-md)",
- padding:"var(--space-sm) var(--space-md)",
  borderLeft: `3px solid var(--podium-${ribbon}, #22c55e)`,
- marginBottom:"var(--space-xs)",
  }}
  >
  {entry.thumbnailUrl && (
  <div
- className="h-[36] w-[36] shrink-0 rounded-sm"
- style={{ overflow:"hidden" }}
+ className="h-[36] w-[36] shrink-0 overflow-hidden rounded-sm"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img
  src={entry.thumbnailUrl}
  alt={entry.horseName}
- className="h-full w-full"
- style={{ objectFit:"cover" }}
+ className="h-full w-full object-cover"
  />
  </div>
  )}
@@ -420,11 +395,11 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  >
  {entry.horseName}
  </Link>
- <span className="text-muted ml-1 text-[calc(0.75rem*var(--font-scale))]">
+ <span className="text-muted ml-1 text-xs">
  by @{entry.ownerAlias}
  </span>
  </div>
- <span className="text-[var(--color-accent, #f59e0b)] text-[calc(0.85rem*var(--font-scale))] font-bold">
+ <span className="text-[var(--color-accent, #f59e0b)] text-sm font-bold">
  {MEDAL_MAP[placing] ||"🏅"} {placing}
  </span>
  </div>
@@ -508,7 +483,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  key={entry.id}
  className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] flex items-center gap-4 border-b px-6 py-4 transition-colors"
  >
- <div className="text-muted min-w-[32px] text-center text-[calc(1.1rem*var(--font-scale))] font-bold">
+ <div className="text-muted min-w-[32px] text-center text-lg font-bold">
  {isExpertJudged && show.status ==="closed" && entry.placing
  ? entry.placing
  : `#${index + 1}`}
@@ -522,7 +497,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
  <Link
  href={`/community/${entry.horseId}`}
- className="hover:text-forest text-[calc(0.95rem*var(--font-scale))] font-semibold text-inherit no-underline"
+ className="hover:text-forest text-base font-semibold text-inherit no-underline"
  >
  🐴 {entry.horseName}
  </Link>
@@ -543,7 +518,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {entry.caption && (
  <p
  style={{
- fontSize:"calc(0.75rem * var(--font-scale))",
+ fontSize:"0.75rem",
  color:"var(--color-text-secondary)",
  margin:"var(--space-xs) 0 0",
  fontStyle:"italic",
@@ -559,7 +534,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  entry.placing && show.status ==="closed" ? (
  <span
  style={{
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
+ fontSize:"0.875rem",
  padding:"var(--space-xs) var(--space-sm)",
  borderRadius:"var(--radius-sm)",
  background:"rgba(245, 158, 11, 0.15)",
@@ -570,7 +545,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {entry.placing}
  </span>
  ) : isJudging ? (
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+ <span className="text-muted text-xs">
  🏅 Expert judging
  </span>
  ) : null

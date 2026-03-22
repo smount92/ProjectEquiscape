@@ -160,10 +160,11 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  type="date"
  value={newDate}
  onChange={(e) => setNewDate(e.target.value)}
+ title="Show date"
  />
  </div>
  </div>
- <div className="mt-4 gap-2" style={{ display:"flex" }}>
+ <div className="mt-4 flex gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handleCreate}
@@ -191,14 +192,13 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {showStrings.map((ss) => (
  <div key={ss.id} className={`show-string-item ${activeStringId === ss.id ?"active" :""}`}>
  <div
- className="flex items-center justify-between gap-2 px-6 py-4"
+ className="flex cursor-pointer items-center justify-between gap-2 px-6 py-4"
  onClick={() => handleSelectString(ss.id)}
- style={{ cursor:"pointer" }}
  >
  <div>
  <strong>{ss.name}</strong>
  {ss.showDate && (
- <span className="text-muted ml-2 text-[calc(0.8rem*var(--font-scale))]">
+ <span className="text-muted ml-2 text-sm">
  📅{""}
  {new Date(ss.showDate +"T12:00:00").toLocaleDateString("en-US", {
  month:"short",
@@ -208,7 +208,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </span>
  )}
  </div>
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-2">
  <span className="flex cursor-pointer items-center gap-1 rounded-md border border-edge bg-card px-2 py-1 text-xs text-muted transition-all">
  {ss.entryCount}
  </span>
@@ -250,8 +250,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {conflicts.length > 0 && (
  <div className="mb-4">
  <div
- className="mb-1 gap-2"
- style={{ display:"flex", alignItems:"center" }}
+ className="mb-1 flex items-center gap-2"
  >
  <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(239,68,68,0.15)] px-2 py-0.5 text-xs font-semibold text-[#ef4444]">
  ⚠️ {conflicts.length} Conflict
@@ -279,7 +278,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {conflicts.map((c, i) => (
  <div
  key={i}
- className="rounded-md border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.1)] px-4 py-2 text-[calc(0.8rem*var(--font-scale))] text-[calc(0.75rem*var(--font-scale))] font-semibold text-[#f59e0b]"
+ className="rounded-md border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.1)] px-4 py-2 text-sm text-xs font-semibold text-[#f59e0b]"
  >
  ⚠️ {c.reason}
  </div>
@@ -294,19 +293,19 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {entries.map((entry) => (
  <div
  key={entry.id}
- className="flex items-center gap-2 rounded-md bg-[rgba(0,0,0,0.03)] px-4 py-2 text-[calc(0.85rem*var(--font-scale))]"
+ className="flex items-center gap-2 rounded-md bg-[rgba(0,0,0,0.03)] px-4 py-2 text-sm"
  >
  <span className="min-w-[140px] font-bold">
  🐴 {entry.horseName}
  </span>
  <span className="flex-1">{entry.className}</span>
  {entry.division && (
- <span className="rounded-full bg-[rgba(139,92,246,0.1)] px-[8px] py-[2px] text-[calc(0.75rem*var(--font-scale))] text-[#a78bfa]">
+ <span className="rounded-full bg-[rgba(139,92,246,0.1)] px-[8px] py-[2px] text-xs text-[#a78bfa]">
  {entry.division}
  </span>
  )}
  {entry.timeSlot && (
- <span className="text-muted text-[calc(0.75rem*var(--font-scale))]">
+ <span className="text-muted text-xs">
  🕐 {entry.timeSlot}
  </span>
  )}
@@ -321,7 +320,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  ))}
  </div>
  ) : (
- <p className="text-muted text-[calc(0.85rem*var(--font-scale))]">
+ <p className="text-muted text-sm">
  No entries yet. Add horses below.
  </p>
  )}
@@ -338,6 +337,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  className="form-input"
  value={entryHorseId}
  onChange={(e) => setEntryHorseId(e.target.value)}
+ title="Select horse"
  >
  <option value="">Select horse...</option>
  {horses.map((h) => (
@@ -395,8 +395,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {/* ── Batch Results Section ── */}
  {entries.length > 0 && (
  <div
- className="mt-6 pt-4"
- style={{ borderTop:"1px solid var(--color-border)" }}
+ className="mt-6 border-t border-edge pt-4"
  >
  {!showResults ? (
  <button
@@ -420,7 +419,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  ) : (
  <div>
  <h4 className="mb-2">🏆 Batch Results</h4>
- <p className="text-muted mb-2 text-[calc(0.8rem*var(--font-scale))]">
+ <p className="text-muted mb-2 text-sm">
  Tab through to enter placing and ribbon for each entry.
  Results will be saved as show records.
  </p>
@@ -475,6 +474,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  },
  }))
  }
+ title="Ribbon"
  >
  <option value="">—</option>
  <option value="Blue">
@@ -532,7 +532,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  return (
  <div className="bg-surface-secondary mt-4 flex flex-wrap gap-6 rounded-lg p-4">
  <div className="flex flex-col gap-0.5">
- <span className="text-forest text-[calc(1.2rem*var(--font-scale))] font-bold">
+ <span className="text-forest text-xl font-bold">
  {filled.length}
  </span>
  <span className="text-muted text-xs">
@@ -540,7 +540,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </span>
  </div>
  <div className="flex flex-col gap-0.5">
- <span className="text-forest text-[calc(1.2rem*var(--font-scale))] font-bold">
+ <span className="text-forest text-xl font-bold">
  {champs}🏆 {reserves}🎖️ {topTens}🔟
  </span>
  <span className="text-muted text-xs">
@@ -548,7 +548,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </span>
  </div>
  <div className="flex flex-col gap-0.5">
- <span className="text-forest text-[calc(1.2rem*var(--font-scale))] font-bold">
+ <span className="text-forest text-xl font-bold">
  ~{points}
  </span>
  <span className="text-muted text-xs">
@@ -559,7 +559,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  );
  })()}
 
- <div className="mt-4 gap-2" style={{ display:"flex" }}>
+ <div className="mt-4 flex gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  disabled={savingResults}

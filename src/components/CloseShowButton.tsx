@@ -34,25 +34,17 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
 
  return (
  <div
- className="bg-card border-edge animate-fade-in-up rounded-lg border shadow-md transition-all"
- style={{
- textAlign:"center",
- padding:"var(--space-lg)",
- marginBottom:"var(--space-lg)",
- background:"rgba(20, 184, 166, 0.08)",
- border:"1px solid rgba(20, 184, 166, 0.3)",
- }}
+ className="animate-fade-in-up mb-6 rounded-lg border border-[rgba(20,184,166,0.3)] bg-[rgba(20,184,166,0.08)] p-6 text-center shadow-md transition-all"
  >
  <div className="mb-2 text-[2rem]">⏰</div>
  <h3 className="mb-1">Entry Period Has Ended</h3>
- <p className="text-muted mb-4 text-[calc(0.85rem*var(--font-scale))]">
+ <p className="text-muted mb-4 text-sm">
  Close this show to calculate results and generate show records for the top finishers.
  </p>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] min-w-[220px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handleClose}
  disabled={busy}
- style={{ minWidth:"220px" }}
  >
  {busy ?"Calculating Results…" :"🏆 Close Show & Calculate Results"}
  </button>

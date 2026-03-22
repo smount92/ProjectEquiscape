@@ -116,34 +116,34 @@ export default async function HelpIdPage() {
  <Link
  key={req.id}
  href={`/community/help-id/${req.id}`}
- className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all"
+ className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
  id={`help-id-${req.id}`}
  >
- <div className="bg-card border-edge flex-col-image flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
  {signedUrlMap.get(req.id) ? (
  <img
  src={signedUrlMap.get(req.id)!}
  alt="Mystery model"
- className="bg-card border-edge flex-col-img flex overflow-hidden rounded-lg border no-underline shadow-md transition-all"
+ className="h-full w-full object-cover"
  />
  ) : (
- <div className="bg-card border-edge flex-col-placeholder flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="flex h-full w-full items-center justify-center text-4xl">
  🐴
  </div>
  )}
- <span className="bg-[rgba(240,208,108,0.85)] border-[rgba(240,208,108,0.5)] open border text-white">
+ <span className="absolute top-2 right-2 rounded-full bg-[rgba(240,208,108,0.9)] px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
  Open
  </span>
  </div>
- <div className="bg-card border-edge flex-col-info flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
- <p className="bg-card border-edge flex-col-desc flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="flex flex-1 flex-col gap-2 p-4">
+ <p className="text-ink-light line-clamp-2 text-sm leading-relaxed">
  {req.description
  ? req.description.length > 100
  ? req.description.substring(0, 100) +"…"
  : req.description
  :"No description provided"}
  </p>
- <div className="bg-card border-edge flex-col-meta flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="text-muted mt-auto flex items-center justify-between text-xs">
  <span>by {req.userName}</span>
  <span>
  💬 {suggestionCounts.get(req.id) || 0} suggestion
@@ -168,34 +168,34 @@ export default async function HelpIdPage() {
  <Link
  key={req.id}
  href={`/community/help-id/${req.id}`}
- className="bg-card border-edge resolved flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all"
+ className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
  id={`help-id-${req.id}`}
  >
- <div className="bg-card border-edge flex-col-image flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
  {signedUrlMap.get(req.id) ? (
  <img
  src={signedUrlMap.get(req.id)!}
  alt="Identified model"
- className="bg-card border-edge flex-col-img flex overflow-hidden rounded-lg border no-underline shadow-md transition-all"
+ className="h-full w-full object-cover"
  />
  ) : (
- <div className="bg-card border-edge flex-col-placeholder flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="flex h-full w-full items-center justify-center text-4xl">
  🐴
  </div>
  )}
- <span className="bg-[rgba(240,208,108,0.85)] border-[rgba(240,208,108,0.5)] resolved border text-white">
+ <span className="absolute top-2 right-2 rounded-full bg-emerald-500/80 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
  Resolved
  </span>
  </div>
- <div className="bg-card border-edge flex-col-info flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
- <p className="bg-card border-edge flex-col-desc flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="flex flex-1 flex-col gap-2 p-4">
+ <p className="text-ink-light line-clamp-2 text-sm leading-relaxed">
  {req.description
  ? req.description.length > 100
  ? req.description.substring(0, 100) +"…"
  : req.description
  :"No description"}
  </p>
- <div className="bg-card border-edge flex-col-meta flex overflow-hidden rounded-lg border no-underline shadow-md transition-all">
+ <div className="text-muted mt-auto flex items-center justify-between text-xs">
  <span>by {req.userName}</span>
  <span>💬 {suggestionCounts.get(req.id) || 0}</span>
  </div>
@@ -208,8 +208,7 @@ export default async function HelpIdPage() {
 
  {openRequests.length === 0 && resolvedRequests.length === 0 && (
  <div
- className="bg-card border-edge mt-12 rounded-lg border p-12 shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <p className="mb-4 text-[2rem]">🔍</p>
  <p className="text-ink-light">No ID requests yet. Be the first to submit one!</p>

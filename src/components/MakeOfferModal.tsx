@@ -105,8 +105,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  />
  {showPaymentWarning && (
  <div
- className="mt-2 text-sm text-danger text-[var(--color-warning, #eab308)] py-1 px-2 mt-1 rounded-sm bg-[rgba(234,179,8,0.15)] text-sm"
- style={{ border:"1px solid rgba(234, 179, 8, 0.3)" }}
+ className="mt-2 text-sm text-[var(--color-warning,#eab308)] py-1 px-2 mt-1 rounded-sm border border-[rgba(234,179,8,0.3)] bg-[rgba(234,179,8,0.15)]"
  >
  {RISKY_PAYMENT_WARNING}
  </div>
@@ -114,8 +113,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  </div>
 
  <label
- className="mb-2 gap-1 text-sm"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="mb-2 flex cursor-pointer items-center gap-1 text-sm"
  >
  <input type="checkbox" checked={isBundle} onChange={(e) => setIsBundle(e.target.checked)} />
  This is a bundle/lot sale (excluded from market price index)

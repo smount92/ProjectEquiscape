@@ -33,7 +33,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  style={{ textAlign:"center" }}
  >
  <div className="mb-4 text-[2.5rem]">🔴</div>
- <h1 className="text-[calc(1.3rem*var(--font-scale))]">Commissions Closed</h1>
+ <h1 className="text-xl">Commissions Closed</h1>
  <p className="text-muted mt-2">{profile.studioName} is not accepting commissions right now.</p>
  <Link
  href={`/studio/${slug}`}
@@ -54,7 +54,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  style={{ textAlign:"center" }}
  >
  <div className="mb-4 text-[2.5rem]">🎨</div>
- <h1 className="text-[calc(1.3rem*var(--font-scale))]">This is your studio!</h1>
+ <h1 className="text-xl">This is your studio!</h1>
  <p className="text-muted mt-2">
  You can&apos;t commission yourself. Manage your commissions from the dashboard.
  </p>
@@ -75,14 +75,14 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  {/* Header */}
  <div className="mb-8" style={{ textAlign:"center" }}>
  <div className="mb-2 text-[2.5rem]">🎨</div>
- <h1 className="text-[calc(1.3rem*var(--font-scale))]">
+ <h1 className="text-xl">
  <span className="text-forest">Request a Commission</span>
  </h1>
- <p className="text-muted mt-1 text-[calc(0.85rem*var(--font-scale))]">
+ <p className="text-muted mt-1 text-sm">
  from <strong>{profile.studioName}</strong> by @{profile.ownerAlias}
  </p>
  {profile.status ==="waitlist" && (
- <p className="mt-1 text-[calc(0.8rem*var(--font-scale))] text-[var(--color-accent-warm)]">
+ <p className="mt-1 text-sm text-[var(--color-accent-warm)]">
  🟡 This artist is currently on waitlist — your request will be queued.
  </p>
  )}

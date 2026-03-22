@@ -370,8 +370,7 @@ export default function ManageEventPage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
- className="bg-card border-edge rounded-lg border p-12 shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <div
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
@@ -387,8 +386,7 @@ export default function ManageEventPage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
- className="bg-card border-edge rounded-lg border p-12 shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <p className="text-danger">{error}</p>
  <Link
@@ -415,7 +413,7 @@ export default function ManageEventPage() {
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="animate-fade-in-up">
  {/* Header */}
- <div className="mb-6 items-start justify-between gap-4" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
  <div>
  <Link href={`/community/events/${eventId}`} className="text-muted mb-1 inline-block text-sm">
  ← Back to Event
@@ -423,8 +421,8 @@ export default function ManageEventPage() {
  <h1>⚙️ Manage Event</h1>
  <p className="text-ink-light">{eventName}</p>
  </div>
- <div className="gap-2" style={{ display:"flex" }}>
- <span className="rounded-md bg-[var(--color-accent-primary)] px-2 py-0.5 text-xs font-bold text-forest">
+ <div className="flex gap-2">
+ <span className="rounded-md bg-[var(--color-accent-primary)] px-2 py-0.5 text-xs font-bold text-white">
  {divisions.length} Division{divisions.length !== 1 ?"s" :""} · {totalClasses} Class
  {totalClasses !== 1 ?"es" :""} · {totalEntries} Entr{totalEntries !== 1 ?"ies" :"y"}
  </span>
@@ -459,7 +457,7 @@ export default function ManageEventPage() {
  activeTab === tab.id ?"var(--color-text-primary)" :"var(--color-text-muted)",
  fontWeight: activeTab === tab.id ? 600 : 400,
  cursor:"pointer",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
+ fontSize:"0.875rem",
  transition:"all 0.2s ease",
  }}
  >
@@ -491,7 +489,7 @@ export default function ManageEventPage() {
  {/* ═══════════════════════════════════════ */}
  {activeTab ==="details" && (
  <div className="bg-card border-edge rounded-lg border p-8 shadow-md transition-all">
- <div className="gap-6" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-6">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Event Name</label>
  <input
@@ -513,7 +511,7 @@ export default function ManageEventPage() {
  />
  </div>
 
- <div className="grid-cols-2 gap-4" style={{ display:"grid" }}>
+ <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Starts At</label>
  <input
@@ -538,7 +536,7 @@ export default function ManageEventPage() {
  </div>
  </div>
 
- <div className="grid-cols-2 gap-4" style={{ display:"grid" }}>
+ <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Region</label>
  <input
@@ -566,10 +564,9 @@ export default function ManageEventPage() {
  </div>
  </div>
 
- <div className="gap-6" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap gap-6">
  <label
- className="gap-1"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center gap-1"
  >
  <input
  type="checkbox"
@@ -581,8 +578,7 @@ export default function ManageEventPage() {
  All-day event
  </label>
  <label
- className="gap-1"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center gap-1"
  >
  <input
  type="checkbox"
@@ -596,7 +592,7 @@ export default function ManageEventPage() {
  </div>
 
  {!eventData.isVirtual && (
- <div className="grid-cols-2 gap-4" style={{ display:"grid" }}>
+ <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">
  Location Name
@@ -643,10 +639,9 @@ export default function ManageEventPage() {
  {/* Judging Method */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Judging Method</label>
- <div className="gap-4" style={{ display:"flex" }}>
+ <div className="flex gap-4">
  <label
- className="py-2 px-3 gap-1 rounded-md"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center gap-1 rounded-md px-3 py-2"
  >
  <input
  type="radio"
@@ -660,8 +655,7 @@ export default function ManageEventPage() {
  🗳️ Community Vote
  </label>
  <label
- className="py-2 px-3 gap-1 rounded-md"
- style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
+ className="flex cursor-pointer items-center gap-1 rounded-md px-3 py-2"
  >
  <input
  type="radio"
@@ -677,7 +671,7 @@ export default function ManageEventPage() {
  </div>
  </div>
 
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handleSaveDetails}
@@ -932,7 +926,7 @@ export default function ManageEventPage() {
  )}
 
  {div.classes.length === 0 && addingClassToDivision !== div.id && (
- <div className="text-muted border-b-0" style={{ fontStyle:"italic" }}>
+ <div className="text-muted italic border-b-0">
  No classes yet — click &quot;+ Class&quot; to add one
  </div>
  )}
@@ -943,14 +937,13 @@ export default function ManageEventPage() {
 
  {/* Add Division */}
  <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-2">
  <input
- className="form-input"
+ className="form-input flex-1"
  value={newDivisionName}
  onChange={(e) => setNewDivisionName(e.target.value)}
  onKeyDown={(e) => e.key ==="Enter" && handleAddDivision()}
  placeholder="New division name (e.g. OF Plastic Halter)"
- style={{ flex: 1 }}
  />
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
@@ -963,7 +956,7 @@ export default function ManageEventPage() {
  </div>
 
  {/* Quick Actions */}
- <div className="mt-6 gap-2" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="mt-6 flex flex-wrap gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={loadUserEvents}
@@ -989,9 +982,9 @@ export default function ManageEventPage() {
  </p>
 
  {/* Add Judge Form */}
- <div className="mb-6" style={{ position:"relative" }}>
+ <div className="relative mb-6">
  <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
- <div className="max-w-[300] flex-1" style={{ position:"relative" }}>
+ <div className="relative max-w-[300] flex-1">
  <input
  className="form-input"
  value={newJudgeAlias}
@@ -1039,7 +1032,7 @@ export default function ManageEventPage() {
  border:"none",
  cursor:"pointer",
  color:"var(--color-text-primary)",
- fontSize:"calc(var(--font-size-sm) * var(--font-scale))",
+ fontSize:"0.875rem",
  textAlign:"left",
  borderBottom:"1px solid var(--color-border)",
  }}
@@ -1097,7 +1090,7 @@ export default function ManageEventPage() {
  + Add Judge
  </button>
  </div>
- <p className="text-muted mt-[4] text-[calc(0.75rem*var(--font-scale))]">
+ <p className="text-muted mt-[4] text-xs">
  Type 2+ characters to search. Click a result to select, then"Add Judge".
  </p>
  </div>
@@ -1157,7 +1150,7 @@ export default function ManageEventPage() {
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => handleRemoveJudge(judge.id)}
  style={{
- fontSize:"calc(var(--font-size-xs) * var(--font-scale))",
+ fontSize:"0.75rem",
  color:"var(--color-accent-danger)",
  }}
  >

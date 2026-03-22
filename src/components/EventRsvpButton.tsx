@@ -21,7 +21,7 @@ export default function EventRsvpButton({ eventId, currentStatus }: Props) {
  }
 
  return (
- <div className="gap-2" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap gap-2">
  <button
  className={`btn ${currentStatus ==="going" ?"btn-primary" :"btn-ghost"}`}
  onClick={() => handleRsvp("going")}
