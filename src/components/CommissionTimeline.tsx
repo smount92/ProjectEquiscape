@@ -211,7 +211,7 @@ export default function CommissionTimeline({
  {/* ── Artist Status Actions ── */}
  {isArtist && artistActions.length > 0 && (
  <div
- className="commission-actions-bar"
+ className="flex flex-wrap items-center gap-2 border-t border-edge pt-4 mt-4"
  style={{
  padding:"var(--space-md)",
  marginBottom:"var(--space-lg)",
@@ -255,7 +255,7 @@ export default function CommissionTimeline({
  {/* ── Client Review Actions ── */}
  {isClient && commissionStatus ==="review" && (
  <div
- className="commission-actions-bar"
+ className="flex flex-wrap items-center gap-2 border-t border-edge pt-4 mt-4"
  style={{
  padding:"var(--space-md)",
  marginBottom:"var(--space-lg)",

@@ -45,7 +45,7 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  if (items.length === 0) {
  return (
  <div
- className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all"
+ className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all"
  style={{ textAlign:"center" }}
  >
  <div className="mb-4 text-5xl">✅</div>

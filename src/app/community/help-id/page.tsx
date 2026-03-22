@@ -208,7 +208,7 @@ export default async function HelpIdPage() {
 
  {openRequests.length === 0 && resolvedRequests.length === 0 && (
  <div
- className="bg-card border-edge mt-12 rounded-lg border p-[var(--space-3xl)] shadow-md transition-all"
+ className="bg-card border-edge mt-12 rounded-lg border p-12 shadow-md transition-all"
  style={{ textAlign:"center" }}
  >
  <p className="mb-4 text-[2rem]">🔍</p>

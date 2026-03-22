@@ -96,7 +96,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  const router = useRouter();
  if (items.length === 0) {
  return (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📰</div>
  <h2>No Activity Yet</h2>
  <p>{emptyMessage ||"Follow some collectors to see their activity here!"}</p>

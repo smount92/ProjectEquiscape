@@ -76,7 +76,7 @@ export default function SuggestReferenceModal({
  style={{ maxWidth: 520 }}
  >
  {status ==="success" ? (
- <div className="p-[var(--space-xl) var(--space-lg)]" style={{ textAlign:"center" }}>
+ <div className="py-5 px-4" style={{ textAlign:"center" }}>
  <div className="mb-4 text-[3rem]">✅</div>
  <h3 className="mb-2">Suggestion Submitted!</h3>
  <p className="text-muted text-sm">
@@ -190,7 +190,7 @@ export default function SuggestReferenceModal({
  </small>
  </div>
 
- {status ==="error" && errorMsg && <div className="comment-error mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger mb-4">{errorMsg}</div>}
 
  <div className="justify-end gap-2" style={{ display:"flex" }}>
  <button

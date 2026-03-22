@@ -64,13 +64,13 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
  <p className="mt-4-empty">No comments yet. Be the first to discuss this suggestion.</p>
  )}
  {initialComments.map((comment) => (
- <div key={comment.id} className="border-edge border-b px-[0] py-2">
+ <div key={comment.id} className="border-edge border-b px-0 py-2">
  <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <span className="border-edge-author border-b px-[0] py-2">@{comment.user_alias}</span>
- <span className="border-edge-time border-b px-[0] py-2">{timeAgo(comment.created_at)}</span>
+ <span className="border-edge-author border-b px-0 py-2">@{comment.user_alias}</span>
+ <span className="border-edge-time border-b px-0 py-2">{timeAgo(comment.created_at)}</span>
  {currentUserId === comment.user_id && (
  <button
- className="border-edge-delete border-b px-[0] py-2"
+ className="border-edge-delete border-b px-0 py-2"
  onClick={() => handleDelete(comment.id)}
  disabled={isPending}
  title="Delete comment"
@@ -79,15 +79,15 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
  </button>
  )}
  </div>
- <p className="border-edge-body border-b px-[0] py-2">{comment.body}</p>
+ <p className="border-edge-body border-b px-0 py-2">{comment.body}</p>
  </div>
  ))}
 
  {/* Add Comment */}
  {currentUserId ? (
- <div className="border-edge-form border-b px-[0] py-2">
+ <div className="border-edge-form border-b px-0 py-2">
  <textarea
- className="input border-edge-textarea border-b px-[0] py-2"
+ className="input border-edge-textarea border-b px-0 py-2"
  placeholder="Share evidence, discuss this change…"
  value={newComment}
  onChange={(e) => setNewComment(e.target.value)}
@@ -99,8 +99,8 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
  {error}
  </p>
  )}
- <div className="border-edge-form-actions border-b px-[0] py-2">
- <span className="border-edge-charcount border-b px-[0] py-2">{newComment.length}/2000</span>
+ <div className="border-edge-form-actions border-b px-0 py-2">
+ <span className="border-edge-charcount border-b px-0 py-2">{newComment.length}/2000</span>
  <button
  className="inline-flex min-h-[32px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-4 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
  onClick={handleSubmit}

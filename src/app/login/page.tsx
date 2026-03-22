@@ -14,9 +14,9 @@ export default function LoginPage() {
  const [showPassword, setShowPassword] = useState(false);
 
  return (
- <div className="min-h-[calc(100vh - var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
+ <div className="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center px-6 py-12">
  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
- <div className="bg-card border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
+ <div className="px-6 py-6">
  <h1>
  Welcome <span className="text-forest">Back</span>
  </h1>

@@ -67,7 +67,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
  const refName = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : null;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Header */}
  <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
  <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">

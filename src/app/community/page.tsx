@@ -249,7 +249,7 @@ export default async function CommunityPage({
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Hero */}
  <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
  <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">

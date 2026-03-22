@@ -105,7 +105,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  />
  {showPaymentWarning && (
  <div
- className="comment-error text-[var(--color-warning, #eab308)] p-[var(--space-xs) var(--space-sm)] mt-1 rounded-sm bg-[rgba(234,179,8,0.15)] text-sm"
+ className="mt-2 text-sm text-danger text-[var(--color-warning, #eab308)] py-1 px-2 mt-1 rounded-sm bg-[rgba(234,179,8,0.15)] text-sm"
  style={{ border:"1px solid rgba(234, 179, 8, 0.3)" }}
  >
  {RISKY_PAYMENT_WARNING}
@@ -121,7 +121,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  This is a bundle/lot sale (excluded from market price index)
  </label>
 
- {error && <div className="comment-error">{error}</div>}
+ {error && <div className="mt-2 text-sm text-danger">{error}</div>}
 
  <div className="mt-6 flex gap-3 max-sm:flex-col">
  <button

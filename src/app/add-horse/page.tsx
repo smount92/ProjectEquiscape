@@ -494,7 +494,7 @@ export default function AddHorsePage() {
  if (showSuccess) {
  return (
  <div className="success-overlay">
- <div className="bg-card border-edge animate-fade-in-up max-w-[480px] rounded-lg border p-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up max-w-[480px] rounded-lg border p-12 text-center shadow-md transition-all">
  <div className="success-icon">🎉</div>
  <h2>
  <span className="text-forest">{savedHorseName}</span> Added!
@@ -1116,7 +1116,7 @@ export default function AddHorsePage() {
  </div>
 
  {/* ── Show Bio (Optional) ── */}
- <div className="m-[var(--space-xl) 0] text-muted m-[var(--space-lg) 0 var(--space-md)] flex items-center gap-4 text-sm">
+ <div className="my-5 text-muted mt-4 mb-3 flex items-center gap-4 text-sm">
  <h4 className="text-ink-light font-semibold text-[var(--font-size-md)]">
  🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]">(Optional)</span>
  </h4>
@@ -1329,7 +1329,7 @@ export default function AddHorsePage() {
  className="flex items-center justify-between gap-2 gap-6"
  style={{ flexDirection:"column" }}
  >
- <span className="text-ink text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold">
+ <span className="text-ink text-base font-semibold">
  👁️ Visibility
  </span>
  <div className="flex flex-wrap gap-2">
@@ -1529,7 +1529,7 @@ export default function AddHorsePage() {
 
  {/* ── AI Toast Notifications ── */}
  <div
- className="ai-fixed top-[calc(var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
+ className="ai-fixed top-[calc(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
  aria-live="polite"
  >
  {aiToasts.map((toast) => (

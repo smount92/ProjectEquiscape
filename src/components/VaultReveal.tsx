@@ -48,7 +48,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  >
  <div className="flex items-center gap-4 p-8">
  <div
- className="p-[0 var(--space-xl) var(--space-xl) var(--space-xl)]-lock flex h-11 max-h-[500px] w-11 shrink-0 items-center justify-center rounded-md border border-[rgba(240,160,108,0.25)] bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] text-[1.4rem] transition-all"
+ className="px-5 pb-5-lock flex h-11 max-h-[500px] w-11 shrink-0 items-center justify-center rounded-md border border-[rgba(240,160,108,0.25)] bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] text-[1.4rem] transition-all"
  aria-hidden="true"
  >
  {isUnlocked ?"🔓" :"🔒"}
@@ -106,7 +106,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  </button>
  </div>
 
- <div className="max-h-[0] overflow-hidden px-8 py-[0] transition-all" id="vault-data">
+ <div className="max-h-[0] overflow-hidden px-8 py-0 transition-all" id="vault-data">
  {!hasData ? (
  <div className="text-muted py-6 text-center text-sm">
  <p>📭 No financial data recorded yet. You can add purchase details by editing this horse.</p>

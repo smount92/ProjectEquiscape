@@ -129,7 +129,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  :"";
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
  <Link href="/catalog">📚 Reference Catalog</Link>
  <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
@@ -142,7 +142,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  <span>Detail</span>
  </nav>
 
- <div className="ref-suggestion-detail">
+ <div className="space-y-4">
  {/* Vote Panel + Main Content */}
  <div className="grid-cols-[60px 1fr] grid gap-4">
  {/* Vote Panel */}
@@ -156,8 +156,8 @@ export default async function SuggestionDetailPage({ params }: Props) {
  />
  ) : (
  <div className="text-muted flex flex-col items-center gap-1">
- <span className="ref-font-semibold">▲ {s.upvotes}</span>
- <span className="ref-font-semibold">▼ {s.downvotes}</span>
+ <span className="font-semibold">▲ {s.upvotes}</span>
+ <span className="font-semibold">▼ {s.downvotes}</span>
  </div>
  )}
  </div>
@@ -224,7 +224,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Diff View */}
  {s.suggestion_type ==="correction" && s.field_changes && (
- <div className="m-[var(--space-md) 0]">
+ <div className="my-3">
  <h3>Changes</h3>
  <table className="border-edge border-b px-2 py-1">
  <thead>
@@ -258,7 +258,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Addition Details */}
  {s.suggestion_type ==="addition" && (
- <div className="m-[var(--space-md) 0]">
+ <div className="my-3">
  <h3>Proposed Entry</h3>
  <div className="grid-cols-[repeat(auto-fill,minmax(200px,1fr))] mb-6 grid gap-4">
  {Object.entries(s.field_changes)
@@ -278,7 +278,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  )}
 
  {/* Reason */}
- <div className="m-[var(--space-md) 0]">
+ <div className="my-3">
  <h3>Reason</h3>
  <blockquote className="border-forest bg-glass rounded-r-md border-l-[3px] px-4 py-2 text-[var(--color-text)] italic">
  {s.reason}
@@ -287,7 +287,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Admin Notes */}
  {s.admin_notes && (
- <div className="bg-[rgba(255,193,7,0.05)] rounded-r-md m-[var(--space-md) 0] border-l-[3px] border-[#f9a825] px-4 py-2">
+ <div className="bg-[rgba(255,193,7,0.05)] rounded-r-md my-3 border-l-[3px] border-[#f9a825] px-4 py-2">
  <h3>Admin Notes</h3>
  <p>{s.admin_notes}</p>
  </div>

@@ -138,7 +138,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  return (
  <>
  {communityCards.length > 0 && (
- <div className="sticky top-[calc(var(--header-height)+var(--space-md))] bg-card border-edge shadow-md z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-[0]">
+ <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-edge shadow-md z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-0">
  <input
  type="text"
  value={searchInput}
@@ -172,7 +172,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  )}
 
  {communityCards.length === 0 && !isFiltering ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🏟️</div>
  <h2>The Show Ring is Empty</h2>
  <p>No models have been shared yet. Be the first to showcase your collection!</p>
@@ -184,7 +184,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  </Link>
  </div>
  ) : communityCards.length === 0 && isFiltering ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🔍</div>
  <h2>No Results</h2>
  <p>No models match your search. Try different filters.</p>

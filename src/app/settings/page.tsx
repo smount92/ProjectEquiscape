@@ -138,8 +138,8 @@ export default function SettingsPage() {
 
  if (isLoading) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
- <div className="p-[var(--space-3xl)]" style={{ textAlign:"center" }}>
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="p-12" style={{ textAlign:"center" }}>
  <div
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  style={{
@@ -158,7 +158,7 @@ export default function SettingsPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
@@ -167,7 +167,7 @@ export default function SettingsPage() {
  <span>Settings</span>
  </nav>
 
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up max-w-[680] py-[var(--space-3xl)] max-sm:py-[0]">
+ <div className="animate-fade-in-up max-w-[680]">
  <h1 className="mb-12 text-[calc(1.6rem*var(--font-scale))]">
  ⚙️ <span className="text-forest">Settings</span>
  </h1>

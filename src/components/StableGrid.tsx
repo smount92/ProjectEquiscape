@@ -134,7 +134,7 @@ export default function StableGrid({
  )}
 
  {filteredCards.length === 0 && !searchQuery.trim() ? (
- <div className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🏠</div>
  <h2>Your Stable is Empty</h2>
  <p>You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
@@ -147,7 +147,7 @@ export default function StableGrid({
  </Link>
  </div>
  ) : filteredCards.length === 0 && searchQuery.trim() ? (
- <div className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🔍</div>
  <h2>No Results</h2>
  <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>

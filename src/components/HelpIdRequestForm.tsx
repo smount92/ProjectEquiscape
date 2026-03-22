@@ -91,7 +91,7 @@ export default function HelpIdRequestForm() {
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Photo of the model *</label>
  <div
- className="border-edge bg-card flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-[var(--space-3xl)] text-center transition-all"
+ className="border-edge bg-card flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-12 text-center transition-all"
  style={{ padding:"var(--space-xl)", cursor:"pointer" }}
  onClick={() => fileInputRef.current?.click()}
  >

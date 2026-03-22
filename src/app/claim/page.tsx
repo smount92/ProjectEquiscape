@@ -170,7 +170,7 @@ export default function ClaimPage() {
  {/* Preview Card (CoA PIN lookup result) */}
  {preview && (
  <div
- className="claim-preview-bg-card border-edge rounded-lg border shadow-md transition-all"
+ className="rounded-lg border border-edge bg-card p-6 shadow-sm border-edge rounded-lg border shadow-md transition-all"
  style={{
  border:"1px solid var(--color-border)",
  borderRadius:"var(--radius-lg)",

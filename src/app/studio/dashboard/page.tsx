@@ -29,7 +29,7 @@ export default async function StudioDashboardPage() {
  const completedTotal = commissions.filter((c) => c.status ==="completed" || c.status ==="delivered");
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Header */}
  <div className="animate-fade-in-up mb-8 rounded-lg border border-[rgba(139,92,246,0.15)] bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] px-6 py-8">
  <div className="max-w-[800px]">

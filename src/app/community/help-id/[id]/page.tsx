@@ -165,7 +165,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
 
  {/* Description */}
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold">
+ <h2 className="mb-4 text-base font-semibold">
  Description
  </h2>
  <p className="text-ink-light leading-[1.7]">{req.description ||"No description provided."}</p>

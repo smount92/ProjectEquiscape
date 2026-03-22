@@ -22,8 +22,8 @@ export default async function GroupsPage() {
  const [allGroups, myGroups] = await Promise.all([getGroups(), getMyGroups()]);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
- <div className="page-content">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6">
  <div
  className="mb-8 justify-between gap-4"
  style={{ display:"flex", alignItems:"center", flexWrap:"wrap" }}

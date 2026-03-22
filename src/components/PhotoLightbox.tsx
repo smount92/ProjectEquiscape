@@ -53,7 +53,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
  >
  {/* Close */}
  <button
- className="bg-[rgba(255,255,255,0.12)] fixed top-[var(--space-lg)] right-[var(--space-lg)] z-[1001] flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border-0 text-[1.2rem] text-white transition-colors"
+ className="bg-[rgba(255,255,255,0.12)] fixed top-4 right-4 z-[1001] flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border-0 text-[1.2rem] text-white transition-colors"
  onClick={onClose}
  aria-label="Close lightbox"
  >
@@ -63,7 +63,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
  {/* Prev arrow */}
  {images.length > 1 && (
  <button
- className="hover:0.2)] fixed top-[50%] left-[var(--space-lg)] z-[1001] flex h-[48px] w-[48px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgba(255,255,255,0.1)] text-[1.4rem] text-white transition-all"
+ className="hover:0.2)] fixed top-[50%] left-4 z-[1001] flex h-[48px] w-[48px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgba(255,255,255,0.1)] text-[1.4rem] text-white transition-all"
  onClick={(e) => {
  e.stopPropagation();
  goPrev();
@@ -87,7 +87,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
  {/* Next arrow */}
  {images.length > 1 && (
  <button
- className="hover:0.2)] fixed top-[50%] right-[var(--space-lg)] z-[1001] flex h-[48px] w-[48px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgba(255,255,255,0.1)] text-[1.4rem] text-white transition-all"
+ className="hover:0.2)] fixed top-[50%] right-4 z-[1001] flex h-[48px] w-[48px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgba(255,255,255,0.1)] text-[1.4rem] text-white transition-all"
  onClick={(e) => {
  e.stopPropagation();
  goNext();
@@ -100,14 +100,14 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
 
  {/* Label */}
  {current.label && (
- <div className="bottom-[calc(var(--space-lg) + 24px)] fixed left-[50%] z-[1001] translate-x-[-50%] text-sm font-semibold text-[rgba(255,255,255,0.85)]">
+ <div className="bottom-10 fixed left-[50%] z-[1001] translate-x-[-50%] text-sm font-semibold text-[rgba(255,255,255,0.85)]">
  {current.label}
  </div>
  )}
 
  {/* Counter */}
  {images.length > 1 && (
- <div className="fixed bottom-[var(--space-lg)] left-[50%] z-[1001] translate-x-[-50%] text-sm text-[rgba(255,255,255,0.6)]">
+ <div className="fixed bottom-4 left-[50%] z-[1001] translate-x-[-50%] text-sm text-[rgba(255,255,255,0.6)]">
  {currentIndex + 1} of {images.length}
  </div>
  )}

@@ -70,7 +70,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
  {/* Toast Container */}
  {toasts.length > 0 && (
  <div
- className="top-[calc(var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
+ className="top-[calc(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
  aria-live="polite"
  >
  {toasts.map((t) => (

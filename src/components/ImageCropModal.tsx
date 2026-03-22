@@ -302,7 +302,7 @@ export default function ImageCropModal({
  alignItems:"center",
  }}
  >
- <h3 className="m-0 text-[calc(var(--font-size-md)*var(--font-scale))]">✂️ Crop Photo</h3>
+ <h3 className="m-0 text-base">✂️ Crop Photo</h3>
  <div className="gap-1" style={{ display:"flex", flexWrap:"wrap" }}>
  {ASPECT_PRESETS.map((preset) => (
  <button

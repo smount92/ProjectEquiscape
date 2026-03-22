@@ -9,7 +9,7 @@ export default async function TransferHistorySection() {
  <details className="mt-8" id="transfer-history">
  <summary className="hidden">
  📤 Transfer History
- <span className="inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[rgba(0,0,0,0.06)] px-[6px] py-[0] text-[calc(0.7rem*var(--font-scale))] font-semibold">
+ <span className="inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[rgba(0,0,0,0.06)] px-[6px] py-0 text-[calc(0.7rem*var(--font-scale))] font-semibold">
  {history.length}
  </span>
  </summary>

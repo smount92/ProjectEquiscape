@@ -56,18 +56,18 @@ export default async function ReferencePage() {
  .gte("created_at", weekAgo);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Hero Section */}
- <div className="animate-fade-in-up px-[0] py-8 text-center">
- <div className="px-[0]-content py-8 text-center">
+ <div className="animate-fade-in-up px-0 py-8 text-center">
+ <div className="px-0-content py-8 text-center">
  <h1>
  📚 <span className="text-forest">Reference Catalog</span>
  </h1>
- <p className="px-[0]-subtitle py-8 text-center">
+ <p className="px-0-subtitle py-8 text-center">
  {(count ?? 0).toLocaleString()}+ model horse entries, maintained by the community
  </p>
  </div>
- <div className="px-[0]-stats py-8 text-center">
+ <div className="px-0-stats py-8 text-center">
  <div className="flex flex-col items-center">
  <span className="items-center-number flex flex-col">{(count ?? 0).toLocaleString()}</span>
  <span className="items-center-label flex flex-col">Catalog Entries</span>
@@ -85,7 +85,7 @@ export default async function ReferencePage() {
 
  <div className="grid-cols-[1fr_280px] mt-6 grid gap-8">
  {/* Main Content */}
- <div className="ref-main">
+ <div className="space-y-6">
  <CatalogBrowser
  initialItems={(items ?? []) as CatalogItemRow[]}
  totalCount={count ?? 0}

@@ -106,7 +106,7 @@ export default async function CommissionDetailPage({
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Header */}
  <div className="bg-card border-edge animate-fade-in-up mb-6 rounded-lg border p-6 shadow-md transition-all">
  <div className="items-start justify-between gap-4" style={{ display:"flex", flexWrap:"wrap" }}>

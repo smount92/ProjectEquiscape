@@ -24,11 +24,11 @@ export default function LandingPage() {
  <div className="overflow-x-hidden">
  {/* ─── Hero Section ─── */}
  <section
- className="min-h-[calc(100vh - var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
+ className="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center px-6 py-12"
  id="hero"
  >
- <div className="hero-glow" aria-hidden="true" />
- <div className="hero-glow hidden" aria-hidden="true" />
+ <div className="absolute inset-0 rounded-full bg-forest/10 blur-3xl" aria-hidden="true" />
+ <div className="absolute inset-0 rounded-full bg-forest/10 blur-3xl hidden" aria-hidden="true" />
  <div className="animate-fade-in-up relative z-[1] max-w-[780px]">
  <span className="text-forest border-[rgba(44,85,69,0.25)] mb-8 inline-block rounded-full border bg-[var(--color-accent-primary-glow)] px-6 py-1 text-sm font-semibold tracking-[0.01em]">
  <Fingerprint size={16} strokeWidth={1.5} /> Hoofprint™ — The First Living Provenance System for
@@ -37,7 +37,7 @@ export default function LandingPage() {
  <h1 className="text-[clamp(2rem, 5vw, 3.5rem)] mb-6 leading-[1.1] font-extrabold tracking-[-0.03em]">
  The Only Platform Built <span className="text-forest">for This Hobby</span>
  </h1>
- <p className="text-ink-light m-[0 auto var(--space-2xl)] max-w-[620px] text-[calc(var(--font-size-md)*var(--font-scale))] leading-[1.7]">
+ <p className="text-ink-light mx-auto mb-10 max-w-[620px] text-base leading-[1.7]">
  Catalog your herd with a 10,500+ reference database. Track provenance from blank resin to
  finished custom. Sell with verified trust signals. And soon — manage commissions, plan show
  strings, and join collector groups. All in one place. Built by collectors, for collectors.
@@ -65,12 +65,12 @@ export default function LandingPage() {
  </section>
 
  {/* ─── How It Works ─── */}
- <section className="px-8 py-[var(--space-3xl)] text-center" id="how-it-works">
+ <section className="px-8 py-12 text-center" id="how-it-works">
  <div className="mx-auto max-w-[1100px]">
  <h2 className="mb-2 text-2xl font-extrabold tracking-[-0.02em]">
  Get Started in <span className="text-forest">3 Steps</span>
  </h2>
- <p className="text-ink-light m-[0 auto var(--space-3xl)] max-w-[540px] text-[calc(var(--font-size-md)*var(--font-scale))]">
+ <p className="text-ink-light mx-auto mb-12 max-w-[540px] text-base">
  From your shelf to the Show Ring in under 5 minutes.
  </p>
  <div className="mt-12 flex items-start justify-center gap-6">
@@ -132,12 +132,12 @@ export default function LandingPage() {
  </section>
 
  {/* ─── Features Grid ─── */}
- <section className="relative px-8 py-[var(--space-3xl)]" id="features">
+ <section className="relative px-8 py-12" id="features">
  <div className="mx-auto max-w-[var(--max-width)] text-center">
  <h2 className="mb-2 text-2xl font-extrabold tracking-[-0.02em]">
  Everything You Need. <span className="text-forest">Nothing You Don&apos;t.</span>
  </h2>
- <p className="text-ink-light m-[0 auto var(--space-3xl)] max-w-[540px] text-[calc(var(--font-size-md)*var(--font-scale))]">
+ <p className="text-ink-light mx-auto mb-12 max-w-[540px] text-base">
  Every feature exists because a real collector said &ldquo;I wish this existed.&rdquo;
  </p>
 
@@ -376,7 +376,7 @@ export default function LandingPage() {
  Built for <span className="text-forest">Every Part of the Hobby</span>
  </h2>
  <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))]">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Home size={32} strokeWidth={1.5} />
  </div>
@@ -386,7 +386,7 @@ export default function LandingPage() {
  a private vault. Import your entire spreadsheet in minutes — not months.
  </p>
  </div>
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))]">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Palette size={32} strokeWidth={1.5} />
  </div>
@@ -397,7 +397,7 @@ export default function LandingPage() {
  Hoofprint&trade; — forever.
  </p>
  </div>
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))]">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Trophy size={32} strokeWidth={1.5} />
  </div>
@@ -413,10 +413,10 @@ export default function LandingPage() {
 
  {/* ─── Social Proof / Stats ─── */}
  <section
- className="border-edge border-t border-b bg-[var(--color-bg-secondary)] px-8 py-[var(--space-3xl)]"
+ className="border-edge border-t border-b bg-[var(--color-bg-secondary)] px-8 py-12"
  id="stats"
  >
- <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-center gap-[var(--space-3xl)]">
+ <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-center gap-12">
  <div className="flex flex-col items-center gap-1">
  <span className="text-ink text-2xl font-extrabold">10,500+</span>
  <span className="text-muted text-sm font-medium">Releases &amp; Resins</span>
@@ -449,11 +449,11 @@ export default function LandingPage() {
  <h2 className="mb-2 text-2xl font-extrabold tracking-[-0.02em]">
  On the <span className="text-forest">Horizon</span>
  </h2>
- <p className="text-ink-light m-[0 auto var(--space-3xl)] max-w-[540px] text-[calc(var(--font-size-md)*var(--font-scale))]">
+ <p className="text-ink-light mx-auto mb-12 max-w-[540px] text-base">
  We&apos;re building the operating system for the hobby. Here&apos;s what&apos;s next.
  </p>
  <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))]">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Palette size={32} strokeWidth={1.5} />
  </div>
@@ -463,7 +463,7 @@ export default function LandingPage() {
  queue. Clients watch their custom come to life. Every brushstroke becomes provenance.
  </p>
  </div>
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))]">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <Package size={32} strokeWidth={1.5} />
  </div>
@@ -473,7 +473,7 @@ export default function LandingPage() {
  reference database. Go from CSV to cataloged in minutes.
  </p>
  </div>
- <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-[calc(var(--font-size-sm)*var(--font-scale))]">
+ <div className="[&_p]:text-ink-light rounded-xl border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.03)] p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(44,85,69,0.3)] [&_h3]:mb-2 [&_h3]:text-[calc(1.1rem*var(--font-scale))] [&_p]:text-sm">
  <div className="mb-4 text-[3rem]">
  <TrendingUp size={32} strokeWidth={1.5} />
  </div>
@@ -488,7 +488,7 @@ export default function LandingPage() {
  </section>
 
  {/* ─── Final CTA ─── */}
- <section className="px-8 py-[var(--space-3xl)] text-center" id="final-cta">
+ <section className="px-8 py-12 text-center" id="final-cta">
  <div className="animate-fade-in-up mx-auto max-w-[600px]">
  <h2>
  Ready to Give Your Herd <span className="text-forest">a Real Home</span>?

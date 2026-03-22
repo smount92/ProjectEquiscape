@@ -384,12 +384,12 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  {horse.custom_name}
  </h1>
  {refInfo ? (
- <p className="mb-1 text-[calc(var(--font-size-md)*var(--font-scale))] text-[#59493A]">
+ <p className="mb-1 text-base text-[#59493A]">
  {refInfo.maker} — {refInfo.name}
  </p>
  ) : (
  <p
- className="mb-1 text-[calc(var(--font-size-md)*var(--font-scale))] text-[#59493A]"
+ className="mb-1 text-base text-[#59493A]"
  style={{ opacity: 0.6, fontStyle:"italic" }}
  >
  Unlisted / Custom Entry
@@ -446,7 +446,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </h3>
 
  {horse.asset_category && horse.asset_category !=="model" && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Category
  </span>
@@ -461,7 +461,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
 
  {horse.finish_type && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Finish Type
  </span>
@@ -472,7 +472,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
 
  {horse.condition_grade && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Condition
  </span>
@@ -484,7 +484,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {refInfo ? (
  <>
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  {refInfo.type}
  </span>
@@ -493,7 +493,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </span>
  </div>
 
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  {refInfo.type ==="Mold" ?"Manufacturer" :"Sculptor"}
  </span>
@@ -502,7 +502,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </span>
  </div>
 
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Scale
  </span>
@@ -512,7 +512,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </div>
 
  {refInfo.extra && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  {refInfo.type ==="Mold" ?"Released" :"Medium"}
  </span>
@@ -523,7 +523,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
  </>
  ) : (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Reference
  </span>
@@ -538,7 +538,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  {releaseInfo && (
  <>
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Release
  </span>
@@ -548,7 +548,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </div>
 
  {releaseInfo.modelNumber && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Model #
  </span>
@@ -559,7 +559,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
 
  {releaseInfo.color && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Color
  </span>
@@ -570,7 +570,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
 
  {releaseInfo.yearStart && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Release Years
  </span>
@@ -586,7 +586,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
 
  {horse.finishing_artist && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  🎨 Finished by
  </span>
@@ -594,7 +594,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  {horse.finishing_artist}
  {horse.finishing_artist_verified && (
  <span
- className="verified-badge"
+ className="inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-forest"
  title="Verified via commission delivery"
  style={{
  marginLeft: 6,
@@ -610,7 +610,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  )}
 
  {(horse.edition_number || horse.edition_size) && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  📋 Edition
  </span>
@@ -624,7 +624,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </div>
  )}
 
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">Added</span>
  <span className="text-ink max-w-[60%] text-right text-[calc(0.8rem*var(--font-scale))] font-semibold">
  {new Date(horse.created_at).toLocaleDateString("en-US", {
@@ -642,7 +642,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  <h3>
  <span aria-hidden="true">✨</span> Finish
  </h3>
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Finish Details
  </span>
@@ -660,7 +660,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  <span aria-hidden="true">🏅</span> Show Identity
  </h3>
  {horse.assigned_breed && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Breed
  </span>
@@ -670,7 +670,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </div>
  )}
  {horse.assigned_gender && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Gender
  </span>
@@ -680,7 +680,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </div>
  )}
  {horse.assigned_age && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Age
  </span>
@@ -690,7 +690,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  </div>
  )}
  {horse.regional_id && (
- <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-[0] py-[5px]">
+ <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted text-[calc(0.8rem*var(--font-scale))] font-medium">
  Regional ID
  </span>
@@ -763,7 +763,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  {/* Back link */}
  <Link
  href="/community"
- className="px-[0] py-1 text-center text-sm text-[#59493A] no-underline opacity-[0.6] transition-all"
+ className="px-0 py-1 text-center text-sm text-[#59493A] no-underline opacity-[0.6] transition-all"
  >
  ← Back to Show Ring
  </Link>

@@ -62,7 +62,7 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
  {saving ?"Completing…" :"✅ Mark as Complete"}
  </button>
  </div>
- {error && <div className="comment-error mt-2">{error}</div>}
+ {error && <div className="mt-2 text-sm text-danger mt-2">{error}</div>}
  </div>
  );
 }

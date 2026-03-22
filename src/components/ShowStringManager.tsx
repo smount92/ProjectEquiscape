@@ -183,7 +183,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  {/* Show Strings List */}
  {showStrings.length === 0 ? (
- <div className="empty-state">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-edge bg-card p-8 text-center shadow-sm">
  <p>No show strings yet. Create one to start planning!</p>
  </div>
  ) : (
@@ -241,7 +241,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  {/* Expanded: entries + add form */}
  {activeStringId === ss.id && (
- <div className="p-[0 var(--space-lg) var(--space-lg)] border-edge border-t">
+ <div className="px-4 pb-4 border-edge border-t">
  {loadingEntries ? (
  <p className="text-muted">Loading entries...</p>
  ) : (
@@ -290,7 +290,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  {/* Entries Table */}
  {entries.length > 0 ? (
- <div className="m-[var(--space-md) 0] grid gap-1">
+ <div className="my-3 grid gap-1">
  {entries.map((entry) => (
  <div
  key={entry.id}

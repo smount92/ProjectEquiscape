@@ -377,7 +377,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  </main>
 
  {/* ── SIDEBAR: Widgets ── */}
- <aside className="lg:top-[calc(var(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
+ <aside className="lg:top-[calc(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
  {/* Analytics — Compact stat rows */}
  {totalHorseCount > 0 && (
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">

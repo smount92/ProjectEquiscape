@@ -174,7 +174,7 @@ export default async function WishlistPage() {
 
  {/* Wishlist Grid */}
  {items.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">❤️</div>
  <h2>Your Wishlist is Empty</h2>
  <p>Browse the Show Ring and tap the heart icon on models you love to start your hunt!</p>

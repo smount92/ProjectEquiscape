@@ -487,7 +487,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  )}
 
  {/* Actions: Like + Reply toggle */}
- <div className="feed-action-row mt-1">
+ <div className="flex items-center gap-3 mt-1">
  <LikeToggle
  initialLiked={post.isLikedByMe}
  initialCount={post.likesCount}

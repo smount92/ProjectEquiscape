@@ -21,19 +21,19 @@ export default function ContactPage() {
  }, [state.success]);
 
  return (
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8 py-[var(--space-3xl)] max-sm:py-[0]">
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up py-[var(--space-3xl)] max-sm:py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <div className="animate-fade-in-up">
  {/* Page Header */}
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-sticky bg-parchment-dark border-edge top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b px-8 py-[0] py-[var(--space-3xl)] transition-all max-sm:py-[0]">
+ <div className="mb-8">
  <h1>
  <span className="text-forest">Contact</span> Us
  </h1>
- <p className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-lead py-[var(--space-3xl)] max-sm:py-[0]">
+ <p className="mt-2 text-lg text-muted">
  Have a question, suggestion, or just want to say hello? We&apos;d love to hear from you.
  </p>
  </div>
 
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  {state.success ? (
  <div className="px-8 py-16 text-center" id="contact-success">
  <span className="mb-6 block text-[3rem]" aria-hidden="true">

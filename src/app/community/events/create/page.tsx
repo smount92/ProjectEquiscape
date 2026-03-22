@@ -56,8 +56,8 @@ export default function CreateEventPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
- <div className="page-content max-w-[640]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[640]">
  <h1 className="mb-8">📅 Create Event</h1>
 
  <form onSubmit={handleSubmit}>
@@ -154,7 +154,7 @@ export default function CreateEventPage() {
  </div>
  </div>
 
- <div className="m-[var(--space-md) 0] gap-6" style={{ display:"flex" }}>
+ <div className="my-3 gap-6" style={{ display:"flex" }}>
  <label className="gap-1" style={{ display:"flex", alignItems:"center", cursor:"pointer" }}>
  <input type="checkbox" checked={isAllDay} onChange={(e) => setIsAllDay(e.target.checked)} />
  All Day

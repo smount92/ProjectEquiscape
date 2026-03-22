@@ -132,7 +132,7 @@ export default function ParkedExportPanel({
  here and get a <strong>Certificate of Authenticity</strong> with a QR code the buyer can scan to
  claim the horse — and inherit its full Hoofprint™ history.
  </p>
- <ul className="m-[0 0 var(--space-md)] list-none p-0">
+ <ul className="mb-3 list-none p-0">
  <li>1. Click &quot;Park This Horse&quot; — a unique claim PIN is generated</li>
  <li>2. Download or print the Certificate of Authenticity</li>
  <li>3. Give it to the buyer with the model</li>

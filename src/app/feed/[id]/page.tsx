@@ -70,8 +70,8 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
- <div className="page-content max-w-[640]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[640]">
  <Link
  href="/feed"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -107,7 +107,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  </div>
  )}
 
- <div className="feed-action-row mt-4">
+ <div className="flex items-center gap-3 mt-4">
  <LikeToggle
  initialLiked={!!liked}
  initialCount={(p.likes_count as number) || 0}

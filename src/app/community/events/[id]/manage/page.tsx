@@ -370,7 +370,7 @@ export default function ManageEventPage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
- className="bg-card border-edge rounded-lg border p-[var(--space-3xl)] shadow-md transition-all"
+ className="bg-card border-edge rounded-lg border p-12 shadow-md transition-all"
  style={{ textAlign:"center" }}
  >
  <div
@@ -387,7 +387,7 @@ export default function ManageEventPage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
- className="bg-card border-edge rounded-lg border p-[var(--space-3xl)] shadow-md transition-all"
+ className="bg-card border-edge rounded-lg border p-12 shadow-md transition-all"
  style={{ textAlign:"center" }}
  >
  <p className="text-danger">{error}</p>
@@ -645,7 +645,7 @@ export default function ManageEventPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">Judging Method</label>
  <div className="gap-4" style={{ display:"flex" }}>
  <label
- className="p-[var(--space-sm) var(--space-md)] gap-1 rounded-md"
+ className="py-2 px-3 gap-1 rounded-md"
  style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
  >
  <input
@@ -660,7 +660,7 @@ export default function ManageEventPage() {
  🗳️ Community Vote
  </label>
  <label
- className="p-[var(--space-sm) var(--space-md)] gap-1 rounded-md"
+ className="py-2 px-3 gap-1 rounded-md"
  style={{ display:"flex", alignItems:"center", cursor:"pointer" }}
  >
  <input
@@ -750,7 +750,7 @@ export default function ManageEventPage() {
  </div>
  ) : (
  <>
- <span className="text-ink text-[calc(var(--font-size-md)*var(--font-scale))] font-bold">
+ <span className="text-ink text-base font-bold">
  📋 {div.name}
  </span>
  <span className="text-muted ml-1 text-xs">
@@ -790,7 +790,7 @@ export default function ManageEventPage() {
  </div>
 
  {/* Classes */}
- <div className="px-[0] py-1">
+ <div className="px-0 py-1">
  {div.classes.map((cls, clsIndex) => (
  <div key={cls.id} className="border-b-0">
  <div className="flex flex-col gap-[2px]">
@@ -1102,7 +1102,7 @@ export default function ManageEventPage() {
  </p>
  </div>
 
- {judgeError && <div className="comment-error mb-4">{judgeError}</div>}
+ {judgeError && <div className="mt-2 text-sm text-danger mb-4">{judgeError}</div>}
  {judgeSuccess && <div className="mb-4 text-sm text-[#22c55e]">✅ {judgeSuccess}</div>}
 
  {/* Judge List */}

@@ -277,7 +277,7 @@ export default function ExpertJudgingPanel({
  )}
  </div>
 
- {error && <div className="comment-error mt-2">{error}</div>}
+ {error && <div className="mt-2 text-sm text-danger mt-2">{error}</div>}
  {success && (
  <div
  style={{

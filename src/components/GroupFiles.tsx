@@ -123,7 +123,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
 
  {/* File List */}
  {files.length === 0 ? (
- <div className="empty-state">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-edge bg-card p-8 text-center shadow-sm">
  <p>No files uploaded yet.</p>
  </div>
  ) : (

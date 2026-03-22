@@ -374,7 +374,7 @@ export default function UnifiedReferenceSearch({
 
  {/* Option: Select mold directly */}
  <button
- className="bg-[rgba(92,224,160,0.04)] border-[var(--color-border) !important] border-b border-b-0"
+ className="bg-[rgba(92,224,160,0.04)] border-4 border-b border-b-0"
  onClick={() => handleSelect(selectedItem)}
  >
  <div className="min-w-0 flex-1">

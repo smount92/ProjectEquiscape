@@ -78,7 +78,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  ];
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Breadcrumb */}
  <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
  <Link href="/catalog">📚 Reference Catalog</Link>
@@ -135,7 +135,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  {(suggestionCount ?? 0) > 0 && (
  <div className="bg-card border-edge rounded-lg border p-4 shadow-md transition-all">
  <h3>📝 Pending Suggestions ({suggestionCount})</h3>
- <ul className="m-[var(--space-sm) 0] list-none p-0">
+ <ul className="my-2 list-none p-0">
  {(
  suggestions as {
  id: string;
@@ -147,10 +147,10 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  )?.map((s) => (
  <li
  key={s.id}
- className="flex items-center gap-2 px-[0] py-1 text-[var(--color-text)] no-underline"
+ className="flex items-center gap-2 px-0 py-1 text-[var(--color-text)] no-underline"
  >
  <Link href={`/catalog/suggestions/${s.id}`}>
- <span className="ref-pending-type">
+ <span className="text-xs font-semibold uppercase text-forest">
  {s.suggestion_type ==="correction"
  ?"🔧"
  : s.suggestion_type ==="addition"

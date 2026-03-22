@@ -76,7 +76,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  ];
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
  <Link href="/catalog">📚 Reference Catalog</Link>
  <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
@@ -181,7 +181,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  <span className={`ref-status-badge ${statusBadge}`}>{s.status.replace(/_/g,"")}</span>
  </div>
 
- <div className="ref-suggestion-body">
+ <div className="text-sm text-ink-light leading-relaxed">
  {changeSummary && (
  <p className="mb-[4px] text-[calc(0.9rem*var(--font-scale))] font-medium">
  {changeSummary}
@@ -201,7 +201,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  ▲ {s.upvotes} ▼ {s.downvotes}
  {(commentCounts[s.id] ?? 0) > 0 && <> · 💬 {commentCounts[s.id]}</>}
  </span>
- <span className="ref-suggestion-date">
+ <span className="text-xs text-muted">
  {new Date(s.created_at).toLocaleDateString()}
  </span>
  </div>

@@ -81,15 +81,15 @@ export default async function MarketPricePage({
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
- <div className="page-content max-w-[900]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[900]">
  <div className="animate-fade-in-up">
  {/* Header */}
  <div className="mb-12" style={{ textAlign:"center" }}>
  <h1>
  📈 Model Horse <span className="text-forest">Price Guide</span>
  </h1>
- <p className="text-ink-light mt-2 text-[calc(var(--font-size-md)*var(--font-scale))]">
+ <p className="text-ink-light mt-2 text-base">
  The Blue Book — Real sale data from real collectors
  </p>
  </div>
@@ -102,7 +102,7 @@ export default async function MarketPricePage({
  {/* Results (Server-rendered) */}
  {items.length === 0 ? (
  <div
- className="bg-card border-edge rounded-lg border p-[var(--space-3xl)] shadow-md transition-all"
+ className="bg-card border-edge rounded-lg border p-12 shadow-md transition-all"
  style={{ textAlign:"center" }}
  >
  <div className="mb-4 text-[3rem]">📊</div>
@@ -131,7 +131,7 @@ export default async function MarketPricePage({
  key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`}
  className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all transition-colors"
  >
- <div className="bg-card border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
+ <div className="px-6 py-6">
  <span className="bg-card border-edge transition-colors-icon rounded-lg border p-6 shadow-md transition-all">
  {typeIcon(item.itemType)}
  </span>

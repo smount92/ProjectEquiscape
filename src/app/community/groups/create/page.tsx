@@ -50,8 +50,8 @@ export default function CreateGroupPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
- <div className="page-content max-w-[640]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[640]">
  <h1 className="mb-8">🏛️ Create Group</h1>
 
  <form onSubmit={handleSubmit}>

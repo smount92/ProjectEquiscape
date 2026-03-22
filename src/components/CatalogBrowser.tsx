@@ -281,7 +281,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
 
  {/* Pagination */}
  {totalPages > 1 && (
- <div className="mt-6 flex items-center justify-center gap-4 px-[0] py-4">
+ <div className="mt-6 flex items-center justify-center gap-4 px-0 py-4">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  disabled={page <= 1}

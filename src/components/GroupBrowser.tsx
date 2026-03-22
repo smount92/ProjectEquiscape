@@ -71,7 +71,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  </div>
 
  {/* Search */}
- <div className="sticky top-[calc(var(--header-height)+var(--space-md))] bg-card border-edge z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-[0]">
+ <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-edge z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
  <input
  type="text"
  className="form-input"
@@ -100,7 +100,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
 
  {/* Group Cards */}
  {filtered.length === 0 ? (
- <div className="empty-state">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-edge bg-card p-8 text-center shadow-sm">
  <p>{tab ==="mine" ?"You haven't joined any groups yet." :"No groups found."}</p>
  </div>
  ) : (

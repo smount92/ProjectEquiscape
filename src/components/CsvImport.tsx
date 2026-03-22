@@ -440,7 +440,7 @@ export default function CsvImport() {
  <span className="text-ink min-w-0 flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
  {header}
  </span>
- <span className="text-muted shrink-0 text-[calc(var(--font-size-md)*var(--font-scale))]">
+ <span className="text-muted shrink-0 text-base">
  →
  </span>
  <select
@@ -545,7 +545,7 @@ export default function CsvImport() {
  className={`csv-match-card ${result.status}`}
  id={`match-row-${result.rowIndex}`}
  >
- <div className="bg-card border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
+ <div className="px-6 py-6">
  <span className="shrink-0 text-xl">
  {result.status ==="perfect" ?"✅" : result.status ==="review" ?"⚠️" :"❌"}
  </span>
@@ -668,7 +668,7 @@ export default function CsvImport() {
  <div className="text-success">
  <div className="csv-success-icon">🎉</div>
  <h2>Import Complete!</h2>
- <p className="text-ink-light mb-8 text-[calc(var(--font-size-md)*var(--font-scale))]">
+ <p className="text-ink-light mb-8 text-base">
  Successfully imported <strong>{importResult.imported}</strong> model
  {importResult.imported !== 1 ?"s" :""} to your stable.
  </p>
@@ -695,7 +695,7 @@ export default function CsvImport() {
  </div>
  </div>
  ) : (
- <div className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-6 text-[4rem]">❌</div>
  <h2>Import Failed</h2>
  <p>{importResult?.error ||"An unexpected error occurred."}</p>

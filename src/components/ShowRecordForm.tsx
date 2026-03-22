@@ -339,7 +339,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  </>
  )}
 
- {status ==="error" && errorMsg && <div className="comment-error mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger mb-4">{errorMsg}</div>}
 
  <div className="mt-6 flex justify-end gap-2">
  <button

@@ -45,7 +45,7 @@ export default async function ShowsPage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
  <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
  <h1>
@@ -66,7 +66,7 @@ export default async function ShowsPage() {
  </div>
 
  {shows.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📸</div>
  <h2>No Shows Yet</h2>
  <p>Check back soon for virtual photo shows!</p>

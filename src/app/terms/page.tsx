@@ -8,21 +8,21 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
  return (
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8 py-[var(--space-3xl)] max-sm:py-[0]">
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up py-[var(--space-3xl)] max-sm:py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <div className="animate-fade-in-up">
  {/* Page Header */}
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-sticky bg-parchment-dark border-edge top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b px-8 py-[0] py-[var(--space-3xl)] transition-all max-sm:py-[0]">
+ <div className="mb-8">
  <h1>
  <span className="text-forest">Terms</span> of Service
  </h1>
- <p className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-lead py-[var(--space-3xl)] max-sm:py-[0]">
+ <p className="mt-2 text-lg text-muted">
  Fair rules for a fair platform.
  </p>
  <p className="text-muted mt-2 text-sm">Last updated: March 14, 2026</p>
  </div>
 
  {/* Agreement */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>1. Agreement to Terms</h2>
  <p>
  By accessing or using Model Horse Hub (&ldquo;the Platform&rdquo;), you agree to be bound by
@@ -32,7 +32,7 @@ export default function TermsPage() {
  </section>
 
  {/* Eligibility */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>2. Eligibility</h2>
  <p>
  You must be at least 13 years of age to create an account. If you are under 18, you represent
@@ -42,10 +42,10 @@ export default function TermsPage() {
  </section>
 
  {/* Your Account */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>3. Your Account</h2>
  <p>You are responsible for maintaining the security of your account credentials. You agree to:</p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>Provide a valid email address</li>
  <li>Keep your password secure and not share it with others</li>
  <li>Notify us immediately if you suspect unauthorized access</li>
@@ -58,7 +58,7 @@ export default function TermsPage() {
  </section>
 
  {/* Your Content */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>4. Your Content</h2>
  <p>
  You retain full ownership of all content you upload to Model Horse Hub, including photos,
@@ -66,7 +66,7 @@ export default function TermsPage() {
  Ring), you grant us a limited, non-exclusive license to display that content on the Platform.
  </p>
  <p>You agree not to upload content that:</p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>You do not own or have the right to share</li>
  <li>Contains illegal, abusive, or harmful material</li>
  <li>Infringes on any third party&apos;s intellectual property rights</li>
@@ -77,13 +77,13 @@ export default function TermsPage() {
  </section>
 
  {/* Commerce & Safe-Trade */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>5. Commerce &amp; Safe-Trade</h2>
  <p>
  Model Horse Hub provides communication and coordination tools (messaging, offers, PIN-based
  transfers) to facilitate transactions between users. However:
  </p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>
  <strong>We are not a payment processor.</strong> All payments are arranged directly between
  buyer and seller through external services (PayPal, Venmo, etc.). Model Horse Hub does not
@@ -107,10 +107,10 @@ export default function TermsPage() {
  </section>
 
  {/* Community Conduct */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>6. Community Conduct</h2>
  <p>Model Horse Hub is a hobby community. You agree to:</p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>Treat other users with respect in messages, comments, and group posts</li>
  <li>Not harass, bully, or threaten other users</li>
  <li>Not engage in price manipulation, shill bidding, or deceptive trade practices</li>
@@ -123,13 +123,13 @@ export default function TermsPage() {
  </section>
 
  {/* Hoofprint */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>7. Hoofprint&trade; Provenance</h2>
  <p>
  Hoofprint&trade; records are designed to be a permanent, trustworthy provenance trail for model
  horses. By using Hoofprint&trade;, you understand that:
  </p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>
  Provenance events (ownership transfers, show results, customization records) are permanent
  and cannot be deleted
@@ -147,7 +147,7 @@ export default function TermsPage() {
  </section>
 
  {/* IP */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>8. Intellectual Property</h2>
  <p>
  The Model Horse Hub platform, including its design, code, features, and branding, is the
@@ -162,9 +162,9 @@ export default function TermsPage() {
  </section>
 
  {/* Disclaimers */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>9. Disclaimers &amp; Limitations</h2>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>
  The Platform is provided &ldquo;as is&rdquo; without warranties of any kind, express or
  implied.
@@ -189,7 +189,7 @@ export default function TermsPage() {
  </section>
 
  {/* Termination */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>10. Account Termination</h2>
  <p>
  You may delete your account at any time from your Settings page. Upon deletion, your collection
@@ -204,7 +204,7 @@ export default function TermsPage() {
  </section>
 
  {/* Governing Law */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>11. Governing Law</h2>
  <p>
  These Terms are governed by the laws of the United States. Any disputes will be resolved through
@@ -213,7 +213,7 @@ export default function TermsPage() {
  </section>
 
  {/* Contact */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>12. Questions?</h2>
  <p>
  If you have questions about these Terms, please reach out via our{""}

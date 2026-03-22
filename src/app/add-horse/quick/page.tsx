@@ -143,13 +143,13 @@ export default function QuickAddPage() {
  }}
  />
  {selectedCatalog && (
- <div className="quick-add-selected">
+ <div className="ring-2 ring-forest bg-forest/5">
  ✅ {selectedCatalog.maker} — {selectedCatalog.title}
  <span className="text-muted text-xs"> ({selectedCatalog.itemType})</span>
  </div>
  )}
  {!selectedCatalog && customName && (
- <div className="quick-add-selected">✍️ Custom entry: {customName}</div>
+ <div className="ring-2 ring-forest bg-forest/5">✍️ Custom entry: {customName}</div>
  )}
  </div>
 
@@ -257,7 +257,7 @@ export default function QuickAddPage() {
  {/* Recent Adds */}
  {recentAdds.length > 0 && (
  <div className="border-edge mt-8 rounded-lg border bg-[var(--color-surface-primary)] p-6">
- <h3 className="mb-2 text-[calc(var(--font-size-md)*var(--font-scale))]">Recently Added</h3>
+ <h3 className="mb-2 text-base">Recently Added</h3>
  {recentAdds.map((item) => (
  <div
  key={item.id}

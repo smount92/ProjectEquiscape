@@ -34,8 +34,8 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  ]);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
- <div className="page-content">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6">
  {/* Group Header */}
  <div className="border-edge mb-6 border-b pb-6">
  <Link
@@ -63,7 +63,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  {group.isMember ? (
  <GroupDetailClient group={group} initialPosts={posts} channels={channels} currentUserId={user.id} />
  ) : (
- <div className="empty-state mt-8">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-edge bg-card p-8 text-center shadow-sm mt-8">
  <p>Join this group to see posts and participate.</p>
  </div>
  )}

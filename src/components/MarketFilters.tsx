@@ -77,7 +77,7 @@ export default function MarketFilters() {
  <div className="mb-8">
  <div className="mb-4">
  <input
- className="form-input p-[var(--space-md) var(--space-lg) !important] rounded-[var(--radius-lg) !important] w-full text-[calc(var(--font-size-md)*var(--font-scale))!important]"
+ className="form-input w-full rounded-lg p-3 text-base"
  type="search"
  placeholder="Search by mold, release, or artist resin…"
  value={searchInput}
@@ -86,20 +86,20 @@ export default function MarketFilters() {
  />
  </div>
  <div className="flex flex-wrap items-center justify-between gap-4">
- <div className="flex flex-wrap gap-1">
+ <div className="flex flex-wrap gap-2">
  {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
  <button
  key={value}
- className={`market-filter-chip ${currentType === value ?"active" :""}`}
+ className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-all ${currentType === value ?"bg-forest border-forest text-white" :"border-edge text-muted hover:text-ink hover:border-forest bg-card"}`}
  onClick={() => pushParams({ type: value ==="all" ? null : value })}
  >
  {label}
  </button>
  ))}
  </div>
- <div className="market-filter-controls">
+ <div className="flex flex-wrap items-center gap-3">
  <select
- className="form-select market-finish-select"
+ className="form-select min-w-[140px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
  value={currentFinish}
  onChange={(e) => pushParams({ finish: e.target.value ==="all" ? null : e.target.value })}
  id="market-finish"
@@ -111,7 +111,7 @@ export default function MarketFilters() {
  ))}
  </select>
  <select
- className="form-select market-stage-select"
+ className="form-select min-w-[140px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
  value={currentStage}
  onChange={(e) => pushParams({ stage: e.target.value ==="all" ? null : e.target.value })}
  id="market-stage"
@@ -123,7 +123,7 @@ export default function MarketFilters() {
  ))}
  </select>
  <select
- className="form-select min-w-[160px]"
+ className="form-select min-w-[160px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
  value={currentSort}
  onChange={(e) => pushParams({ sort: e.target.value })}
  id="market-sort"

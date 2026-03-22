@@ -263,7 +263,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  ).length;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Profile Header */}
  <div className="profile-hero animate-fade-in-up max-md:flex-col max-md:items-center max-md:text-center max-sm:flex-col max-sm:px-4 max-sm:py-8 max-sm:text-center">
  <div className="bg-[rgba(44,85,69,0.12)] border-[rgba(44,85,69,0.3)] text-forest flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full border-[2px]">
@@ -444,7 +444,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
  {/* Grid */}
  {profileCards.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🔒</div>
  <h2>
  {isOwnProfile

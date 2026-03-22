@@ -87,7 +87,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  });
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Hero */}
  <div className="animate-fade-in-up mb-2 text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
  <div className="mb-2-content text-[calc(2.2rem*var(--font-scale))] font-extrabold tracking-[-0.03em]">
@@ -329,7 +329,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  ))}
 
  {/* Podium */}
- <div className="flex flex-wrap items-end justify-center gap-8 px-[0] py-8">
+ <div className="flex flex-wrap items-end justify-center gap-8 px-0 py-8">
  {podiumEntries.map((entry, i) => {
  const placing = isExpertJudged ? entry.placing! : ["1st","2nd","3rd"][i];
  const ribbon = RIBBON_MAP[placing] ||"blue";
@@ -496,7 +496,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
 
  {/* Entries Grid */}
  {entries.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📸</div>
  <h2>No Entries Yet</h2>
  <p>Be the first to enter this show!</p>

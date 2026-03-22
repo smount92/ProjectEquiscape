@@ -227,7 +227,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
 
  {/* Grid */}
  {horseCards.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📂</div>
  <h2>This collection is empty</h2>
  <p>

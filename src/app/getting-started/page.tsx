@@ -9,20 +9,20 @@ export const metadata: Metadata = {
 
 export default function GettingStartedPage() {
  return (
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8 py-[var(--space-3xl)] max-sm:py-[0]">
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up py-[var(--space-3xl)] max-sm:py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <div className="animate-fade-in-up">
  {/* Page Header */}
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-sticky bg-parchment-dark border-edge top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b px-8 py-[0] py-[var(--space-3xl)] transition-all max-sm:py-[0]">
+ <div className="mb-8">
  <h1>
  Getting Started with <span className="text-forest">Model Horse Hub</span>
  </h1>
- <p className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-lead py-[var(--space-3xl)] max-sm:py-[0]">
+ <p className="mt-2 text-lg text-muted">
  Your digital stable is ready. Here&apos;s how to make the most of it.
  </p>
  </div>
 
  {/* Step 1 */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>📸 Step 1: Add Your First Horse</h2>
  <p>
  Click <strong>&ldquo;🏠 Digital Stable&rdquo;</strong> in the navigation, then hit{""}
@@ -46,13 +46,13 @@ export default function GettingStartedPage() {
  </section>
 
  {/* Step 2 */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>🔒 Step 2: Track Your Financials (Private)</h2>
  <p>
  During the add-horse process, you&apos;ll see the <strong>Financial Vault</strong> section. This
  is where you can record:
  </p>
- <ul className="m-[var(--space-md) 0] list-none p-0">
+ <ul className="my-3 list-none p-0">
  <li>Purchase price and date</li>
  <li>Estimated current value</li>
  <li>Insurance notes</li>
@@ -64,7 +64,7 @@ export default function GettingStartedPage() {
  </section>
 
  {/* Step 3 */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>🐾 Step 3: Meet Hoofprint™</h2>
  <p>
  Every horse you add automatically gets a{""}
@@ -72,7 +72,7 @@ export default function GettingStartedPage() {
  that follows the horse, not the owner.
  </p>
  <p>Your Hoofprint timeline tracks:</p>
- <ul className="m-[var(--space-md) 0] list-none p-0">
+ <ul className="my-3 list-none p-0">
  <li>
  <strong>Life stages</strong> &mdash; from blank resin to work-in-progress to completed
  custom
@@ -98,10 +98,10 @@ export default function GettingStartedPage() {
  </section>
 
  {/* Step 4 */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>🏆 Step 4: Explore the Community</h2>
  <p>Once you&apos;ve added a few horses, explore what other collectors are sharing:</p>
- <ul className="m-[var(--space-md) 0] list-none p-0">
+ <ul className="my-3 list-none p-0">
  <li>
  <strong>
  <Link href="/community">🏆 Show Ring</Link>
@@ -132,7 +132,7 @@ export default function GettingStartedPage() {
  </section>
 
  {/* Step 5 */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>💬 Step 5: Buy, Sell &amp; Connect</h2>
  <p>
  Set any horse&apos;s trade status to <strong>&ldquo;For Sale&rdquo;</strong> or{""}
@@ -153,7 +153,7 @@ export default function GettingStartedPage() {
  </section>
 
  {/* Step 6 */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>⚙️ Step 6: Customize Your Experience</h2>
  <p>
  Visit{""}
@@ -162,7 +162,7 @@ export default function GettingStartedPage() {
  </Link>{""}
  to:
  </p>
- <ul className="m-[var(--space-md) 0] list-none p-0">
+ <ul className="my-3 list-none p-0">
  <li>Upload a profile avatar</li>
  <li>Update your bio and alias</li>
  <li>Manage notification preferences</li>
@@ -175,7 +175,7 @@ export default function GettingStartedPage() {
  </section>
 
  {/* Beta Feedback */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>🧪 Beta Tester? We Need Your Feedback!</h2>
  <p>
  You&apos;re among the first collectors to use Model Horse Hub. Your feedback directly shapes

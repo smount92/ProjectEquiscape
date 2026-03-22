@@ -20,7 +20,7 @@ export default async function ChangelogPage() {
  .limit(50);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  <nav className="text-muted mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
  <Link href="/catalog">📚 Reference Catalog</Link>
  <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
@@ -52,7 +52,7 @@ export default async function ChangelogPage() {
  const timeAgo = getTimeAgo(entry.created_at);
 
  return (
- <div key={entry.id} className="border-edge flex gap-4 border-b px-[0] py-4">
+ <div key={entry.id} className="border-edge flex gap-4 border-b px-0 py-4">
  <span className="min-w-[28px] text-[1.3rem]">
  {entry.change_type ==="correction"
  ?"🔧"
@@ -62,7 +62,7 @@ export default async function ChangelogPage() {
  ?"📸"
  :"🗑"}
  </span>
- <div className="ref-changelog-content">
+ <div className="space-y-4">
  <p className="mb-[4px] text-[calc(0.9rem*var(--font-scale))] font-medium">
  {entry.change_summary}
  </p>

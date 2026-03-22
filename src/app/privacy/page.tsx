@@ -8,21 +8,21 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
  return (
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8 py-[var(--space-3xl)] max-sm:py-[0]">
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-inner animate-fade-in-up py-[var(--space-3xl)] max-sm:py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <div className="animate-fade-in-up">
  {/* Page Header */}
- <div className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-sticky bg-parchment-dark border-edge top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b px-8 py-[0] py-[var(--space-3xl)] transition-all max-sm:py-[0]">
+ <div className="mb-8">
  <h1>
  <span className="text-forest">Privacy</span> Policy
  </h1>
- <p className="min-h-[calc(100vh - var(--header max-sm:px-4-height))] px-8-lead py-[var(--space-3xl)] max-sm:py-[0]">
+ <p className="mt-2 text-lg text-muted">
  Your data is yours. Full stop.
  </p>
  <p className="text-muted mt-2 text-sm">Last updated: March 14, 2026</p>
  </div>
 
  {/* Overview */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>Our Privacy Philosophy</h2>
  <p>
  Model Horse Hub was built by collectors, for collectors. We believe your collection data,
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
  </section>
 
  {/* What We Collect */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>1. Information We Collect</h2>
 
  <h3>Account Information</h3>
@@ -73,10 +73,10 @@ export default function PrivacyPage() {
  </section>
 
  {/* How We Use It */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>2. How We Use Your Information</h2>
  <p>We use your information exclusively to:</p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>Provide and operate the Model Horse Hub platform</li>
  <li>Display your public collection in the Show Ring (only when you opt in)</li>
  <li>Facilitate messaging and commerce features between users</li>
@@ -87,7 +87,7 @@ export default function PrivacyPage() {
  <p className="mt-4">
  <strong>We do NOT:</strong>
  </p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>Sell your data to third parties &mdash; ever</li>
  <li>Display ads or share data with advertisers</li>
  <li>Use your collection data for machine learning training</li>
@@ -97,10 +97,10 @@ export default function PrivacyPage() {
  </section>
 
  {/* Data Security */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>3. Data Security</h2>
  <p>Your data is protected by multiple layers of security:</p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>
  <strong>Row-Level Security (RLS)</strong> &mdash; enforced at the PostgreSQL database level,
  meaning even if our application code had a bug, the database itself would refuse to return
@@ -126,10 +126,10 @@ export default function PrivacyPage() {
  </section>
 
  {/* Data Sharing */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>4. When We Share Data</h2>
  <p>We share data only in the following limited circumstances:</p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>
  <strong>Public profiles</strong> &mdash; if you choose to make horses public, their name,
  photos, reference link, condition, and finish type are visible in the Show Ring. Financial
@@ -152,10 +152,10 @@ export default function PrivacyPage() {
  </section>
 
  {/* Third-Party Services */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>5. Third-Party Services</h2>
  <p>We use the following third-party services:</p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>
  <strong>Supabase</strong> &mdash; database hosting, authentication, and file storage (hosted
  in the US)
@@ -180,10 +180,10 @@ export default function PrivacyPage() {
  </section>
 
  {/* Your Rights */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>6. Your Rights</h2>
  <p>You have the right to:</p>
- <ul className="m-[0 0 var(--space-lg) 0] list-none p-0">
+ <ul className="mb-4 list-none p-0">
  <li>
  <strong>Export your data</strong> &mdash; download your entire collection as CSV at any time
  from your dashboard
@@ -204,7 +204,7 @@ export default function PrivacyPage() {
  </section>
 
  {/* Cookies */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>7. Cookies</h2>
  <p>
  We use only <strong>essential cookies</strong> required for authentication and session
@@ -215,7 +215,7 @@ export default function PrivacyPage() {
  </section>
 
  {/* Children */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>8. Children&apos;s Privacy</h2>
  <p>
  Model Horse Hub is not directed at children under 13. We do not knowingly collect information
@@ -225,7 +225,7 @@ export default function PrivacyPage() {
  </section>
 
  {/* Changes */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>9. Changes to This Policy</h2>
  <p>
  We may update this Privacy Policy from time to time. We will notify registered users of any
@@ -235,7 +235,7 @@ export default function PrivacyPage() {
  </section>
 
  {/* Contact */}
- <section className="mb-[var(--space-3xl)]">
+ <section className="mb-12">
  <h2>10. Questions?</h2>
  <p>
  If you have questions about this Privacy Policy or how your data is handled, please reach out

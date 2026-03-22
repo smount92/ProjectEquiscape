@@ -202,7 +202,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  );
 
  return (
- <div className="h-[calc(100vh - 70px)] max-h-[calc(100vh - 70px)] mx-auto flex max-w-[var(--max-width)] flex-col overflow-hidden px-6 py-[0]">
+ <div className="h-[calc(100vh - 70px)] max-h-[calc(100vh - 70px)] mx-auto flex max-w-[var(--max-width)] flex-col overflow-hidden px-6 py-0">
  {/* Header */}
  <div className="bg-glass border-edge animate-fade-in-up mb-4 flex shrink-0 items-center gap-4 rounded-lg border px-6 py-4">
  <Link
@@ -287,7 +287,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  {horseContext && (
  <Link
  href={`/community/${horseContext.id}`}
- className="group bg-[var(--color-bg-card border-edge transition-all)] border-edge text-ink hover:border-forest animate-fade-in-up mb-4 flex items-center gap-4 rounded-lg border p-4 no-underline shadow-md transition-all hover:-translate-y-px hover:bg-[var(--color-bg-card-hover)] hover:shadow-md"
+ className="group bg-card border-edge text-ink hover:border-forest animate-fade-in-up mb-4 flex items-center gap-4 rounded-lg border p-4 no-underline shadow-md transition-all hover:-translate-y-px hover:bg-[var(--color-bg-card-hover)] hover:shadow-md"
  id="chat-horse-link"
  >
  {horseContext.thumbnailUrl ? (

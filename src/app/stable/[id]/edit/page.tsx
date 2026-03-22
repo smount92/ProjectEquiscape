@@ -599,7 +599,7 @@ export default function EditHorsePage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
- className="mx-auto max-w-[680px] p-[var(--space-3xl)] px-[0] py-12"
+ className="mx-auto max-w-[680px] p-12 px-0 py-12"
  style={{ textAlign:"center" }}
  >
  <div
@@ -615,7 +615,7 @@ export default function EditHorsePage() {
  if (error) {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
- <div className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🚫</div>
  <h1>Access Denied</h1>
  <p>{error}</p>
@@ -644,7 +644,7 @@ export default function EditHorsePage() {
  <span>Edit</span>
  </nav>
 
- <div className="animate-fade-in-up mx-auto max-w-[680px] px-[0] py-12">
+ <div className="animate-fade-in-up mx-auto max-w-[680px] px-0 py-12">
  <h1 className="mb-8">
  Edit <span className="text-forest">{customName}</span>
  </h1>
@@ -1073,7 +1073,7 @@ export default function EditHorsePage() {
  </div>
 
  {/* Show Bio */}
- <div className="m-[var(--space-xl) 0] text-muted m-[var(--space-lg) 0 var(--space-md)] flex items-center gap-4 text-sm">
+ <div className="my-5 text-muted mt-4 mb-3 flex items-center gap-4 text-sm">
  <h4 className="text-ink-light font-semibold text-[var(--font-size-md)]">
  🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]">(Optional)</span>
  </h4>
@@ -1316,7 +1316,7 @@ export default function EditHorsePage() {
  {/* Community visibility selector */}
  <div className="bg-[rgba(44,85,69,0.04)] border-[rgba(44,85,69,0.12)] mt-6 rounded-lg border px-6 py-4">
  <div className="flex items-center justify-between gap-2 gap-6" style={{ flexDirection:"column" }}>
- <span className="text-ink text-[calc(var(--font-size-md)*var(--font-scale))] font-semibold">
+ <span className="text-ink text-base font-semibold">
  👁️ Visibility
  </span>
  <div className="flex flex-wrap gap-2">

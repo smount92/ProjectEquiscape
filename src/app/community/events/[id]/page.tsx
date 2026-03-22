@@ -93,8 +93,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  const endDate = event.endsAt ? new Date(event.endsAt) : null;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
- <div className="page-content max-w-[720]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[720]">
  <Link
  href="/community/events"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -125,7 +125,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  </div>
 
  {/* RSVP */}
- <div className="m-[var(--space-lg) 0]">
+ <div className="my-4">
  <EventRsvpButton eventId={event.id} currentStatus={event.userRsvp} />
  </div>
 
@@ -238,7 +238,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {div.classes.map((cls) => (
  <div
  key={cls.id}
- className="p-[var(--space-xs) 0] text-ink-light gap-2 text-sm"
+ className="py-1 text-ink-light gap-2 text-sm"
  style={{ display:"flex", alignItems:"center" }}
  >
  <span className="text-muted min-w-[40px]">{cls.classNumber ||"—"}</span>

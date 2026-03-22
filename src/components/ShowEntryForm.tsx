@@ -445,7 +445,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  ✅ Entered!
  </span>
  )}
- {status ==="error" && errorMsg && <span className="comment-error">{errorMsg}</span>}
+ {status ==="error" && errorMsg && <span className="mt-2 text-sm text-danger">{errorMsg}</span>}
  </div>
  </div>
  )}

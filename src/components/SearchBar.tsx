@@ -87,7 +87,7 @@ export default function SearchBar({
  </svg>
  </button>
  ) : (
- <kbd className="top-[calc(var(--header max-sm:px-4-height) + var(--space-md))] bg-card border-edge shadow-md-kbd sticky z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-[0]">
+ <kbd className="top-[calc(var(--header-height)+0.75rem)] bg-card border-edge shadow-md sticky z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-0">
  /
  </kbd>
  )}

@@ -239,7 +239,7 @@ export default function AdminTabs({
 function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  if (messages.length === 0) {
  return (
- <div className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📬</div>
  <h2>No Messages Yet</h2>
  <p>Contact form submissions will appear here.</p>
@@ -342,7 +342,7 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
 function ReportsTab({ reports }: { reports: Report[] }) {
  if (reports.length === 0) {
  return (
- <div className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🎉</div>
  <h2>All Clear</h2>
  <p>No open reports to review.</p>
@@ -377,7 +377,7 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
  if (suggestions.length === 0) {
  return (
- <div className="bg-card border-edge rounded-lg border px-8 py-[var(--space-3xl)] text-center shadow-md transition-all">
+ <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📚</div>
  <h2>No Pending Catalog Suggestions</h2>
  <p>Community suggestions will appear here for review.</p>

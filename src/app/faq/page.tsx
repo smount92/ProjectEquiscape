@@ -170,7 +170,7 @@ export default function FaqPage() {
  {categories.map((cat) => (
  <button
  key={cat}
- className={`border-edge cursor-pointer rounded-full border px-4 py-1 text-sm font-[var(--font-family)] font-semibold whitespace-nowrap transition-all ${activeCategory === cat ?"bg-forest !border-forest text-white" :"text-muted hover:text-ink hover:border-forest bg-[var(--color-bg-input)]"}`}
+ className={`border-edge cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat ?"bg-forest !border-forest text-white" :"text-muted hover:text-ink hover:border-forest bg-[var(--color-bg-input)]"}`}
  onClick={() => {
  setActiveCategory(cat);
  setOpenIndex(null);
@@ -226,7 +226,7 @@ export default function FaqPage() {
  </div>
 
  {/* CTA */}
- <div className="bg-card border-edge mt-[var(--space-3xl)] rounded-lg border text-center">
+ <div className="bg-card border-edge mt-12 rounded-lg border text-center">
  <p>Still have questions?</p>
  <Link
  href="/contact"

@@ -16,7 +16,7 @@ export default async function SuggestNewEntryPage() {
  if (!user) redirect("/login");
 
  return (
- <div className="mx-auto max-w-[720] max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[720] max-w-[var(--max-width)] px-6 py-0">
  <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">
  <Link href="/catalog">📚 Catalog</Link>
  <span className="text-muted mb-6-sep flex items-center gap-1 text-[calc(0.85rem*var(--font-scale))]">

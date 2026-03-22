@@ -75,7 +75,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-[0]">
+ <div className="mx-auto max-w-[var(--max-width)] px-6 py-0">
  {/* Hero */}
  <div className="animate-fade-in-up rounded-lg border border-[rgba(139,92,246,0.15)] bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] px-6 py-8">
  <div className="max-w-[800px]">
@@ -290,7 +290,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.acceptingTypes.map((t) => (
  <div
  key={t}
- className="p-[var(--space-xs) 0] gap-2"
+ className="py-1 gap-2"
  style={{ display:"flex", alignItems:"center" }}
  >
  <span className="text-[#22c55e]">✓</span>
