@@ -4,7 +4,6 @@ import Link from"next/link";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import CollectionManager from"@/components/CollectionManager";
 
-export const dynamic ="force-dynamic";
 
 interface CollectionHorse {
  id: string;

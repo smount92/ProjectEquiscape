@@ -4,7 +4,6 @@ import Link from"next/link";
 import { getArtistProfile, getArtistCommissions } from"@/app/actions/art-studio";
 import CommissionBoard from"@/components/CommissionBoard";
 
-export const dynamic ="force-dynamic";
 
 export const metadata = {
  title:"Studio Dashboard — Model Horse Hub",

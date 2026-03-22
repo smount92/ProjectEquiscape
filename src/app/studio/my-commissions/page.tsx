@@ -3,7 +3,6 @@ import { redirect } from"next/navigation";
 import Link from"next/link";
 import { getClientCommissions } from"@/app/actions/art-studio";
 
-export const dynamic ="force-dynamic";
 
 export const metadata = {
  title:"My Commissions — Model Horse Hub",

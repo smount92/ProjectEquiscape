@@ -20,7 +20,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  };
 }
 
-export const dynamic ="force-dynamic";
 
 export default async function ShowDetailPage({ params }: { params: Promise<{ id: string }> }) {
  const { id: showId } = await params;

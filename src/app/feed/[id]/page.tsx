@@ -5,7 +5,6 @@ import RichText from"@/components/RichText";
 import LikeToggle from"@/components/LikeToggle";
 import { togglePostLike } from"@/app/actions/posts";
 
-export const dynamic ="force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;

@@ -15,7 +15,6 @@ import RatingForm from"@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import TrophyCase from"@/components/TrophyCase";
 
-export const dynamic ="force-dynamic";
 
 // Types
 interface ProfileHorse {

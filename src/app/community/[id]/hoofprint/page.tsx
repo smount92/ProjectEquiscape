@@ -5,7 +5,6 @@ import { getHoofprint } from"@/app/actions/hoofprint";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import ShareButton from"@/components/ShareButton";
 
-export const dynamic ="force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;

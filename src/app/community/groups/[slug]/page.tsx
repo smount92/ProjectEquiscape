@@ -6,7 +6,6 @@ import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
 import { getPosts } from"@/app/actions/posts";
 import GroupDetailClient from"@/components/GroupDetailClient";
 
-export const dynamic ="force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
  const { slug } = await params;

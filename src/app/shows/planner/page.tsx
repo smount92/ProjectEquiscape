@@ -4,7 +4,6 @@ import Link from"next/link";
 import { getShowStrings } from"@/app/actions/competition";
 import ShowStringManager from"@/components/ShowStringManager";
 
-export const dynamic ="force-dynamic";
 
 export const metadata = {
  title:"Show String Planner — Model Horse Hub",

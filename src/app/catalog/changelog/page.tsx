@@ -8,7 +8,6 @@ export const metadata: Metadata = {
 "See recent community updates to the Model Horse Hub reference catalog. Corrections, additions, and photo submissions.",
 };
 
-export const dynamic ="force-dynamic";
 
 export default async function ChangelogPage() {
  const supabase = await createClient();

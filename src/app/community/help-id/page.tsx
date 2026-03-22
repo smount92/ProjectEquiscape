@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 "Can't identify a model horse? Upload a photo and let the community help! Our collectors can identify from 10,500+ reference releases and artist resins.",
 };
 
-export const dynamic ="force-dynamic";
 
 export default async function HelpIdPage() {
  const supabase = await createClient();

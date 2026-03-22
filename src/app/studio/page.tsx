@@ -3,7 +3,6 @@ import { redirect } from"next/navigation";
 import { browseArtists } from"@/app/actions/art-studio";
 import ArtistBrowser from"@/components/ArtistBrowser";
 
-export const dynamic ="force-dynamic";
 
 export const metadata = {
  title:"Art Studios — Model Horse Hub",

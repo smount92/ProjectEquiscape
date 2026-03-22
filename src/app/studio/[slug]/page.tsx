@@ -4,7 +4,6 @@ import Link from"next/link";
 import { getArtistProfileBySlug } from"@/app/actions/art-studio";
 import ShareButton from"@/components/ShareButton";
 
-export const dynamic ="force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
  const { slug } = await params;

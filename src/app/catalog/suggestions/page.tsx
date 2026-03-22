@@ -9,7 +9,6 @@ export const metadata: Metadata = {
 "View community suggestions for the Model Horse Hub reference catalog. Vote, discuss, and help keep catalog data accurate.",
 };
 
-export const dynamic ="force-dynamic";
 
 interface Props {
  searchParams: Promise<{ status?: string; item?: string }>;

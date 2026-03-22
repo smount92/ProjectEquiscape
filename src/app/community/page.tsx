@@ -1,6 +1,7 @@
 import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
 import Link from"next/link";
+import { Suspense } from"react";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import ShowRingGrid from"@/components/ShowRingGrid";
 import FeaturedHorseCard from"@/components/FeaturedHorseCard";
@@ -39,24 +40,40 @@ export const metadata = {
  description:"Browse the community showcase of model horses cataloged by collectors around the world.",
 };
 
-export const dynamic ="force-dynamic";
+/** Skeleton shown while ShowRingContent loads */
+function ShowRingSkeleton() {
+ return (
+ <div className="space-y-6">
+  {/* Search bar skeleton */}
+  <div className="animate-pulse rounded-xl bg-stone-100 p-4">
+   <div className="h-10 rounded-lg bg-stone-200" />
+  </div>
+  {/* Grid skeleton — 12 card placeholders */}
+  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+   {Array.from({ length: 12 }).map((_, i) => (
+    <div key={i} className="animate-pulse rounded-lg border border-stone-200 bg-white shadow-sm">
+     <div className="aspect-square rounded-t-lg bg-stone-200" />
+     <div className="space-y-2 p-3">
+      <div className="h-4 w-3/4 rounded bg-stone-200" />
+      <div className="h-3 w-1/2 rounded bg-stone-100" />
+      <div className="h-3 w-1/3 rounded bg-stone-100" />
+     </div>
+    </div>
+   ))}
+  </div>
+ </div>
+ );
+}
 
-export default async function CommunityPage({
+/** Async server component that fetches all community data and renders the grid */
+async function ShowRingContent({
+ userId,
  searchParams,
 }: {
- searchParams: Promise<{ q?: string; finishType?: string; tradeStatus?: string; sortBy?: string }>;
+ userId: string;
+ searchParams: { q?: string; finishType?: string; tradeStatus?: string; sortBy?: string };
 }) {
- const params = await searchParams;
  const supabase = await createClient();
-
- // Auth check — community requires login (RLS needs authenticated user)
- const {
- data: { user },
- } = await supabase.auth.getUser();
-
- if (!user) {
- redirect("/login");
- }
 
  // ================================================================
  // COMMUNITY QUERY: Public horses across all users (server-side filtered)
@@ -74,18 +91,18 @@ export default async function CommunityPage({
  .eq("visibility","public");
 
  // Apply server-side filters
- if (params.q) {
- query = query.or(`custom_name.ilike.%${params.q}%,sculptor.ilike.%${params.q}%`);
+ if (searchParams.q) {
+ query = query.or(`custom_name.ilike.%${searchParams.q}%,sculptor.ilike.%${searchParams.q}%`);
  }
- if (params.finishType && params.finishType !=="all") {
- query = query.eq("finish_type", params.finishType);
+ if (searchParams.finishType && searchParams.finishType !=="all") {
+ query = query.eq("finish_type", searchParams.finishType);
  }
- if (params.tradeStatus && params.tradeStatus !=="all") {
- query = query.eq("trade_status", params.tradeStatus);
+ if (searchParams.tradeStatus && searchParams.tradeStatus !=="all") {
+ query = query.eq("trade_status", searchParams.tradeStatus);
  }
 
  // Sorting
- if (params.sortBy ==="oldest") {
+ if (searchParams.sortBy ==="oldest") {
  query = query.order("created_at", { ascending: true });
  } else {
  query = query.order("created_at", { ascending: false });
@@ -94,7 +111,7 @@ export default async function CommunityPage({
  const { data: rawHorses } = await query.limit(60);
 
  // Filter out blocked users
- const { data: myBlocks } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", user.id);
+ const { data: myBlocks } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", userId);
  const blockedOwnerIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
 
  const horses = ((rawHorses as unknown as CommunityHorse[]) ?? []).filter((h) => !blockedOwnerIds.has(h.owner_id));
@@ -127,7 +144,7 @@ export default async function CommunityPage({
  const { data: userFavs } = await supabase
  .from("horse_favorites")
  .select("horse_id")
- .eq("user_id", user.id)
+ .eq("user_id", userId)
  .in("horse_id", horseIds);
 
  const userFavSet = new Set((userFavs ?? []).map((f: { horse_id: string }) => f.horse_id));
@@ -249,35 +266,64 @@ export default async function CommunityPage({
  }
 
  return (
+ <>
+  {/* Stats + Help ID link */}
+  <div className="mt-6 flex items-center gap-6">
+  <div className="flex items-baseline gap-2">
+  <span className="text-2xl font-bold text-forest">{communityCards.length}</span>
+  <span className="text-sm font-medium text-stone-500">Models Showcased</span>
+  </div>
+  <Link
+  href="/community/help-id"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-5 py-2 text-sm font-semibold text-stone-700 no-underline shadow-sm transition-all hover:border-stone-400 hover:bg-stone-50"
+  id="help-id-link"
+  >
+  🔍 Help Me ID
+  </Link>
+  </div>
+
+  {/* Featured Horse */}
+  {featuredHorse && <FeaturedHorseCard {...featuredHorse} />}
+
+  {/* Grid with Search */}
+  <ShowRingGrid communityCards={communityCards} />
+ </>
+ );
+}
+
+export default async function CommunityPage({
+ searchParams,
+}: {
+ searchParams: Promise<{ q?: string; finishType?: string; tradeStatus?: string; sortBy?: string }>;
+}) {
+ const params = await searchParams;
+ const supabase = await createClient();
+
+ // Auth check — community requires login (RLS needs authenticated user)
+ const {
+ data: { user },
+ } = await supabase.auth.getUser();
+
+ if (!user) {
+ redirect("/login");
+ }
+
+ return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
- {/* Hero */}
- <div className="animate-fade-in-up mb-8">
- <h1 className="text-2xl font-bold tracking-tight">
- 🏆 The <span className="text-forest">Show Ring</span>
- </h1>
- <p className="mt-2 max-w-xl text-base text-stone-500">
- Browse the latest models shared by collectors from around the world. Every horse has a story.
- </p>
- <div className="mt-6 flex items-center gap-6">
- <div className="flex items-baseline gap-2">
- <span className="text-2xl font-bold text-forest">{communityCards.length}</span>
- <span className="text-sm font-medium text-stone-500">Models Showcased</span>
- </div>
- <Link
- href="/community/help-id"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-5 py-2 text-sm font-semibold text-stone-700 no-underline shadow-sm transition-all hover:border-stone-400 hover:bg-stone-50"
- id="help-id-link"
- >
- 🔍 Help Me ID
- </Link>
- </div>
- </div>
+  {/* Hero — renders immediately */}
+  <div className="animate-fade-in-up mb-8">
+  <h1 className="text-2xl font-bold tracking-tight">
+  🏆 The <span className="text-forest">Show Ring</span>
+  </h1>
+  <p className="mt-2 max-w-xl text-base text-stone-500">
+  Browse the latest models shared by collectors from around the world. Every horse has a story.
+  </p>
+  </div>
 
- {/* Featured Horse */}
- {featuredHorse && <FeaturedHorseCard {...featuredHorse} />}
-
- {/* Grid with Search */}
- <ShowRingGrid communityCards={communityCards} />
+  {/* Show Ring content streams in via Suspense */}
+  <Suspense fallback={<ShowRingSkeleton />}>
+  <ShowRingContent userId={user.id} searchParams={params} />
+  </Suspense>
  </div>
  );
 }

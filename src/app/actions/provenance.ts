@@ -189,6 +189,48 @@ export async function savePedigree(data: {
 
     if (!user) return { success: false, error: "You must be logged in." };
 
+    // ── Gender validation for linked parents ──
+    if (data.sireId) {
+        if (data.sireId === data.horseId) {
+            return { success: false, error: "A horse cannot be its own Sire." };
+        }
+        const { data: sireHorse } = await supabase
+            .from("user_horses")
+            .select("assigned_gender")
+            .eq("id", data.sireId)
+            .single();
+
+        if (sireHorse?.assigned_gender) {
+            const femaleGenders = ["Mare", "Filly"];
+            if (femaleGenders.includes(sireHorse.assigned_gender)) {
+                return { success: false, error: `A ${sireHorse.assigned_gender} cannot be assigned as a Sire.` };
+            }
+        }
+    }
+
+    if (data.damId) {
+        if (data.damId === data.horseId) {
+            return { success: false, error: "A horse cannot be its own Dam." };
+        }
+        const { data: damHorse } = await supabase
+            .from("user_horses")
+            .select("assigned_gender")
+            .eq("id", data.damId)
+            .single();
+
+        if (damHorse?.assigned_gender) {
+            const maleGenders = ["Stallion", "Gelding", "Colt"];
+            if (maleGenders.includes(damHorse.assigned_gender)) {
+                return { success: false, error: `A ${damHorse.assigned_gender} cannot be assigned as a Dam.` };
+            }
+        }
+    }
+
+    // Also prevent sire === dam
+    if (data.sireId && data.damId && data.sireId === data.damId) {
+        return { success: false, error: "Sire and Dam cannot be the same horse." };
+    }
+
     // Check if pedigree exists
     const { data: existing } = await supabase
         .from("horse_pedigrees")

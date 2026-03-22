@@ -7,7 +7,6 @@ import RatingForm from"@/components/RatingForm";
 import GuestLinkButton from"@/components/GuestLinkButton";
 import LinkHorseToCommission from"@/components/LinkHorseToCommission";
 
-export const dynamic ="force-dynamic";
 
 const STATUS_COLORS: Record<string, string> = {
  requested:"#6b7280",

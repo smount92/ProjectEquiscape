@@ -6,7 +6,6 @@ import EventBrowser from"@/components/EventBrowser";
 
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
 
-export const dynamic ="force-dynamic";
 
 export const metadata = {
  title:"Events — Model Horse Hub",

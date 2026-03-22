@@ -162,5 +162,159 @@ describe("provenance.ts — Show Records & Pedigree", () => {
             });
             expect(result.success).toBe(true);
         });
+
+        // ── Gender validation tests ──
+
+        it("rejects Mare as Sire", async () => {
+            // Override from() to return gender data for the sire lookup
+            const originalFrom = mockClient.from;
+            mockClient.from = vi.fn().mockImplementation((table: string) => {
+                const base = originalFrom(table);
+                if (table === "user_horses") {
+                    return {
+                        ...base,
+                        select: vi.fn().mockReturnValue({
+                            ...base,
+                            eq: vi.fn().mockReturnValue({
+                                ...base,
+                                single: vi.fn().mockResolvedValue({
+                                    data: { assigned_gender: "Mare" },
+                                    error: null,
+                                }),
+                            }),
+                        }),
+                    };
+                }
+                return base;
+            });
+            const result = await savePedigree({
+                horseId: "h1",
+                sireId: "horse-mare",
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/Mare.*cannot.*Sire/i);
+            mockClient.from = originalFrom;
+        });
+
+        it("rejects Stallion as Dam", async () => {
+            const originalFrom = mockClient.from;
+            mockClient.from = vi.fn().mockImplementation((table: string) => {
+                const base = originalFrom(table);
+                if (table === "user_horses") {
+                    return {
+                        ...base,
+                        select: vi.fn().mockReturnValue({
+                            ...base,
+                            eq: vi.fn().mockReturnValue({
+                                ...base,
+                                single: vi.fn().mockResolvedValue({
+                                    data: { assigned_gender: "Stallion" },
+                                    error: null,
+                                }),
+                            }),
+                        }),
+                    };
+                }
+                return base;
+            });
+            const result = await savePedigree({
+                horseId: "h1",
+                damId: "horse-stallion",
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/Stallion.*cannot.*Dam/i);
+            mockClient.from = originalFrom;
+        });
+
+        it("rejects horse as its own Sire", async () => {
+            const result = await savePedigree({
+                horseId: "h1",
+                sireId: "h1",
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/own Sire/i);
+        });
+
+        it("rejects horse as its own Dam", async () => {
+            const result = await savePedigree({
+                horseId: "h1",
+                damId: "h1",
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/own Dam/i);
+        });
+
+        it("rejects same horse as both Sire and Dam", async () => {
+            const originalFrom = mockClient.from;
+            mockClient.from = vi.fn().mockImplementation((table: string) => {
+                const base = originalFrom(table);
+                if (table === "user_horses") {
+                    return {
+                        ...base,
+                        select: vi.fn().mockReturnValue({
+                            ...base,
+                            eq: vi.fn().mockReturnValue({
+                                ...base,
+                                single: vi.fn().mockResolvedValue({
+                                    data: { assigned_gender: null },
+                                    error: null,
+                                }),
+                            }),
+                        }),
+                    };
+                }
+                return base;
+            });
+            const result = await savePedigree({
+                horseId: "h1",
+                sireId: "horse-x",
+                damId: "horse-x",
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/Sire and Dam cannot be the same/i);
+            mockClient.from = originalFrom;
+        });
+
+        it("allows horse with no assigned_gender as Sire", async () => {
+            const originalFrom = mockClient.from;
+            mockClient.from = vi.fn().mockImplementation((table: string) => {
+                const base = originalFrom(table);
+                if (table === "user_horses") {
+                    return {
+                        ...base,
+                        select: vi.fn().mockReturnValue({
+                            ...base,
+                            eq: vi.fn().mockReturnValue({
+                                ...base,
+                                single: vi.fn().mockResolvedValue({
+                                    data: { assigned_gender: null },
+                                    error: null,
+                                }),
+                            }),
+                        }),
+                    };
+                }
+                if (table === "horse_pedigrees") {
+                    return {
+                        ...base,
+                        select: vi.fn().mockReturnValue({
+                            ...base,
+                            eq: vi.fn().mockReturnValue({
+                                ...base,
+                                maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+                            }),
+                        }),
+                        insert: vi.fn().mockResolvedValue({ data: null, error: null }),
+                    };
+                }
+                return base;
+            });
+            const result = await savePedigree({
+                horseId: "h1",
+                sireId: "horse-unknown",
+            });
+            expect(result.success).toBe(true);
+            mockClient.from = originalFrom;
+        });
     });
 });

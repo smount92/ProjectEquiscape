@@ -7,7 +7,6 @@ export const metadata = {
  description:"Browse active collectors in the Model Horse Hub community. Find stables to follow and admire.",
 };
 
-export const dynamic ="force-dynamic";
 
 export default async function DiscoverPage() {
  const supabase = await createClient();

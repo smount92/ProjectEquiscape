@@ -13,7 +13,6 @@ import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
 
-export const dynamic ="force-dynamic";
 
 // Types
 interface HorseDetail {

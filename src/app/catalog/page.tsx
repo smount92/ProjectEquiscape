@@ -8,7 +8,6 @@ export const metadata: Metadata = {
 "Browse 10,500+ model horse reference entries. Search by name, maker, mold, color, and scale. Community-maintained catalog for Breyer, Stone, and Artist Resins.",
 };
 
-export const dynamic ="force-dynamic";
 
 export default async function ReferencePage() {
  const supabase = await createClient();

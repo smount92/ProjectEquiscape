@@ -5,7 +5,6 @@ import { getGroups, getMyGroups } from"@/app/actions/groups";
 import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
 import GroupBrowser from"@/components/GroupBrowser";
 
-export const dynamic ="force-dynamic";
 
 export const metadata = {
  title:"Groups — Model Horse Hub",

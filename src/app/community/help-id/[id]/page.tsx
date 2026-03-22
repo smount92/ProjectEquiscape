@@ -5,7 +5,6 @@ import type { Metadata } from"next";
 import { getPublicImageUrl } from"@/lib/utils/storage";
 import HelpIdDetailClient from"@/components/HelpIdDetailClient";
 
-export const dynamic ="force-dynamic";
 
 export const metadata: Metadata = {
  title:"Help ID Request — Model Horse Hub",

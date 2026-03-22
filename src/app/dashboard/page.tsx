@@ -25,7 +25,6 @@ import NanDashboardWidget from"@/components/NanDashboardWidget";
 import ShowHistoryWidget from"@/components/ShowHistoryWidget";
 import { getShowHistory } from"@/app/actions/shows";
 
-export const dynamic ="force-dynamic";
 
 // Types for the dashboard query results
 interface HorseWithDetails {
@@ -61,24 +60,59 @@ async function ShowHistoryWidgetWrapper() {
  }
 }
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+/** Skeleton shown while DashboardContent loads */
+function DashboardSkeleton() {
+ return (
+ <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_360px]">
+  {/* Main Column Skeleton — Horse Card Grid */}
+  <main className="min-w-0">
+   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+    {Array.from({ length: 12 }).map((_, i) => (
+     <div key={i} className="bg-card border-edge animate-pulse rounded-lg border shadow-sm">
+      <div className="aspect-square rounded-t-lg bg-stone-200" />
+      <div className="space-y-2 p-3">
+       <div className="h-4 w-3/4 rounded bg-stone-200" />
+       <div className="h-3 w-1/2 rounded bg-stone-100" />
+      </div>
+     </div>
+    ))}
+   </div>
+  </main>
+
+  {/* Sidebar Skeleton — Stat Cards */}
+  <aside className="space-y-6">
+   <div className="bg-card border-edge animate-pulse rounded-lg border p-6 shadow-md">
+    <div className="mb-4 h-4 w-1/2 rounded bg-stone-200" />
+    <div className="space-y-3">
+     {Array.from({ length: 4 }).map((_, i) => (
+      <div key={i} className="flex justify-between">
+       <div className="h-3 w-24 rounded bg-stone-100" />
+       <div className="h-3 w-12 rounded bg-stone-200" />
+      </div>
+     ))}
+    </div>
+   </div>
+   <div className="bg-card border-edge animate-pulse rounded-lg border p-6 shadow-md">
+    <div className="mb-4 h-4 w-1/3 rounded bg-stone-200" />
+    <div className="space-y-2">
+     {Array.from({ length: 3 }).map((_, i) => (
+      <div key={i} className="h-8 rounded bg-stone-100" />
+     ))}
+    </div>
+   </div>
+  </aside>
+ </div>
+ );
+}
+
+/** The heavy async component that fetches all dashboard data and renders the content */
+async function DashboardContent({ userId, page }: { userId: string; page: number }) {
  const supabase = await createClient();
- const {
- data: { user },
- } = await supabase.auth.getUser();
-
- if (!user) {
- redirect("/login");
- }
-
- const params = await searchParams;
- const page = Math.max(1, parseInt(params.page ||"1"));
  const offset = (page - 1) * HORSES_PER_PAGE;
 
  // ── Round 1: Independent queries in parallel ──
- const [profileResult, summaryResult, horsesResult, collectionsResult, showRecordsResult, convosResult] =
+ const [summaryResult, horsesResult, collectionsResult, showRecordsResult, convosResult] =
  await Promise.all([
- supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>(),
  supabase
  .from("user_horses")
  .select(
@@ -87,7 +121,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  `,
  { count:"exact" },
  )
- .eq("owner_id", user.id),
+ .eq("owner_id", userId),
  supabase
  .from("user_horses")
  .select(
@@ -97,15 +131,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  horse_images(image_url, angle_profile)
  `,
  )
- .eq("owner_id", user.id)
+ .eq("owner_id", userId)
  .order("created_at", { ascending: false })
  .range(offset, offset + HORSES_PER_PAGE - 1),
- supabase.from("user_collections").select("id, name, description").eq("user_id", user.id).order("name"),
- supabase.from("show_records").select("id", { count:"exact", head: true }).eq("user_id", user.id),
- supabase.from("conversations").select("id").or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`),
+ supabase.from("user_collections").select("id, name, description").eq("user_id", userId).order("name"),
+ supabase.from("show_records").select("id", { count:"exact", head: true }).eq("user_id", userId),
+ supabase.from("conversations").select("id").or(`buyer_id.eq.${userId},seller_id.eq.${userId}`),
  ]);
 
- const profile = profileResult.data;
  const totalHorseCount = summaryResult.count ?? 0;
  const allHorsesSummary =
  (summaryResult.data as unknown as {
@@ -144,7 +177,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  ? supabase
  .from("messages")
  .select("id", { count:"exact", head: true })
- .neq("sender_id", user.id)
+ .neq("sender_id", userId)
  .eq("is_read", false)
  .in("conversation_id", convoIds)
  : Promise.resolve({ count: 0 }),
@@ -227,49 +260,231 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  });
 
  return (
+ <>
+  {/* Welcome Card for new users — FULL WIDTH */}
+  {horseCards.length === 0 && (
+  <div className="bg-card border-edge animate-fade-in-up mb-8 rounded-lg border border-[rgba(44,85,69,0.15)] bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] px-8 py-16 text-center shadow-md transition-all">
+  <h2>Welcome to Model Horse Hub!</h2>
+  <p>Let&apos;s get started by adding your first model to your digital stable.</p>
+  <div className="mx-auto mb-8 flex max-w-[360px] flex-col gap-4 text-left">
+  <div className="flex items-center gap-4 text-base">
+  <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
+  1
+  </span>
+  <span>
+  <Camera size={16} strokeWidth={1.5} /> Add your first horse with photos
+  </span>
+  </div>
+  <div className="flex items-center gap-4 text-base">
+  <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
+  2
+  </span>
+  <span>
+  <Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring
+  </span>
+  </div>
+  <div className="flex items-center gap-4 text-base">
+  <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
+  3
+  </span>
+  <span>
+  <Users size={16} strokeWidth={1.5} /> Discover and follow other collectors
+  </span>
+  </div>
+  </div>
+  <Link
+  href="/add-horse"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+  >
+  <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
+  </Link>
+  </div>
+  )}
+
+  {/* Shelf Header — model count + action buttons */}
+  <div className="flex flex-wrap items-center gap-4">
+  {totalHorseCount > 0 && (
+  <span className="text-muted text-sm">
+  {totalHorseCount} model{totalHorseCount === 1 ?"" :"s"}
+  </span>
+  )}
+  {totalHorseCount > 0 && <ExportButton />}
+  {totalHorseCount > 0 && <InsuranceReportButton />}
+  </div>
+
+  {/* TWO-COLUMN GRID: Main (horses) + Sidebar (widgets) */}
+  <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_360px]">
+  {/* ── MAIN COLUMN: Horse Grid ── */}
+  <main className="min-w-0">
+  <DashboardShell
+  horseCards={horseCards}
+  collections={collections.map((c) => ({ id: c.id, name: c.name }))}
+  />
+
+  {/* Pagination */}
+  {totalPages > 1 && (
+  <div className="border-edge mt-6 mt-8 flex items-center justify-between border-t pt-6">
+  {page > 1 ? (
+  <Link
+  href={`/dashboard?page=${page - 1}`}
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+  >
+  ← Previous
+  </Link>
+  ) : (
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+  disabled
+  >
+  ← Previous
+  </button>
+  )}
+  <span className="text-muted text-sm">
+  Page {page} of {totalPages}
+  </span>
+  {page < totalPages ? (
+  <Link
+  href={`/dashboard?page=${page + 1}`}
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+  >
+  Next →
+  </Link>
+  ) : (
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+  disabled
+  >
+  Next →
+  </button>
+  )}
+  </div>
+  )}
+  </main>
+
+  {/* ── SIDEBAR: Widgets ── */}
+  <aside className="space-y-6">
+  {/* Analytics — Compact stat rows */}
+  {totalHorseCount > 0 && (
+  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
+               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-500 uppercase">
+                 <BarChart3 size={14} strokeWidth={1.5} /> Stable Overview
+  </h3>
+  <div className="flex flex-col gap-[2px]">
+  <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
+  <span className="text-ink-light text-sm">
+  <Plus size={14} strokeWidth={1.5} /> Total Models
+  </span>
+  <span className="text-ink text-sm font-bold">{totalHorseCount}</span>
+  </div>
+  <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
+  <span className="text-ink-light text-sm">
+  <FolderOpen size={14} strokeWidth={1.5} /> Collections
+  </span>
+  <span className="text-ink text-sm font-bold">{collections.length}</span>
+  </div>
+  <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
+  <span className="text-ink-light text-sm">
+  <DollarSign size={14} strokeWidth={1.5} /> Vault Value
+  </span>
+  <span className="text-ink text-sm font-bold">
+  {totalVaultValue > 0
+  ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+  :"—"}
+  </span>
+  </div>
+  <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
+  <span className="text-ink-light text-sm">
+  <Award size={14} strokeWidth={1.5} /> Show Placings
+  </span>
+  <span className="text-ink text-sm font-bold">{totalShowRecords ?? 0}</span>
+  </div>
+
+  {unreadMsgCount > 0 && (
+  <Link
+  href="/inbox"
+  className="flex items-center justify-between rounded-sm px-1 py-2 no-underline transition-colors hover:bg-black/[0.03]"
+  style={{ textDecoration:"none" }}
+  >
+  <span className="flex items-center gap-1.5 text-sm text-stone-500">
+  <Mail size={14} strokeWidth={1.5} /> Unread Messages
+  </span>
+  <span className="text-ink text-forest text-sm font-bold">
+  {unreadMsgCount}
+  </span>
+  </Link>
+  )}
+  </div>
+  </div>
+  )}
+
+  {/* Collections — Vertical list */}
+  {collections.length > 0 && (
+  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
+               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-500 uppercase">
+                 <FolderOpen size={14} strokeWidth={1.5} /> Collections
+  </h3>
+  <div className="flex flex-col gap-1">
+  {collections.map((col) => (
+  <Link
+  key={col.id}
+  href={`/stable/collection/${col.id}`}
+  className="text-ink hover:border-edge flex items-center justify-between rounded-md border border-transparent bg-black/[0.02] px-4 py-2 text-sm no-underline transition-all hover:bg-black/[0.06] hover:no-underline"
+  id={`collection-${col.id}`}
+  >
+  <span>{col.name}</span>
+  <span className="text-muted text-xs whitespace-nowrap">
+  {collectionCounts.get(col.id) || 0}
+  {(collectionValues.get(col.id) || 0) > 0 && (
+  <>
+  · $
+  {(collectionValues.get(col.id) || 0).toLocaleString("en-US", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+  })}
+  </>
+  )}
+  </span>
+  </Link>
+  ))}
+  </div>
+  </div>
+  )}
+
+  {/* NAN Qualification Dashboard */}
+  <Suspense fallback={null}>
+  <NanDashboardWidget />
+  <ShowHistoryWidgetWrapper />
+  </Suspense>
+
+  {/* Transfer History */}
+  <TransferHistorySection />
+  </aside>
+  </div>
+ </>
+ );
+}
+
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+ const supabase = await createClient();
+ const {
+ data: { user },
+ } = await supabase.auth.getUser();
+
+ if (!user) {
+ redirect("/login");
+ }
+
+ const params = await searchParams;
+ const page = Math.max(1, parseInt(params.page ||"1"));
+
+ // Fast query for profile name (needed for shelf header)
+ const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>();
+
+ return (
  <div className="mx-auto max-w-[1600px] px-6 max-lg:px-4">
  <div className="animate-fade-in-up">
- {/* Welcome Card for new users — FULL WIDTH */}
- {horseCards.length === 0 && (
- <div className="bg-card border-edge animate-fade-in-up mb-8 rounded-lg border border-[rgba(44,85,69,0.15)] bg-[linear-gradient(135deg,rgba(44,85,69,0.06)_0%,rgba(44,85,69,0.02)_50%,rgba(129,140,248,0.06)_100%)] px-8 py-16 text-center shadow-md transition-all">
- <h2>Welcome to Model Horse Hub!</h2>
- <p>Let&apos;s get started by adding your first model to your digital stable.</p>
- <div className="mx-auto mb-8 flex max-w-[360px] flex-col gap-4 text-left">
- <div className="flex items-center gap-4 text-base">
- <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
- 1
- </span>
- <span>
- <Camera size={16} strokeWidth={1.5} /> Add your first horse with photos
- </span>
- </div>
- <div className="flex items-center gap-4 text-base">
- <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
- 2
- </span>
- <span>
- <Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring
- </span>
- </div>
- <div className="flex items-center gap-4 text-base">
- <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] text-sm font-bold">
- 3
- </span>
- <span>
- <Users size={16} strokeWidth={1.5} /> Discover and follow other collectors
- </span>
- </div>
- </div>
- <Link
- href="/add-horse"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- >
- <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
- </Link>
- </div>
- )}
 
- {/* Shelf Header — FULL WIDTH */}
+ {/* Shelf Header — FULL WIDTH (renders immediately) */}
  <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
  <div>
  <h1>
@@ -282,13 +497,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  </h1>
  </div>
  <div className="flex flex-wrap items-center gap-4">
- {totalHorseCount > 0 && (
- <span className="text-muted text-sm">
- {totalHorseCount} model{totalHorseCount === 1 ?"" :"s"}
- </span>
- )}
- {totalHorseCount > 0 && <ExportButton />}
- {totalHorseCount > 0 && <InsuranceReportButton />}
  <Link
  href="/stable/import"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -318,156 +526,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  <DashboardToast />
  </Suspense>
 
- {/* ══════════════════════════════════════════════════════════════
- TWO-COLUMN GRID: Main (horses) + Sidebar (widgets)
- ══════════════════════════════════════════════════════════════ */}
- <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] 2xl:grid-cols-[1fr_360px]">
- {/* ── MAIN COLUMN: Horse Grid ── */}
- <main className="min-w-0">
- <DashboardShell
- horseCards={horseCards}
- collections={collections.map((c) => ({ id: c.id, name: c.name }))}
- />
-
- {/* Pagination */}
- {totalPages > 1 && (
- <div className="border-edge mt-6 mt-8 flex items-center justify-between border-t pt-6">
- {page > 1 ? (
- <Link
- href={`/dashboard?page=${page - 1}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- >
- ← Previous
- </Link>
- ) : (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- disabled
- >
- ← Previous
- </button>
- )}
- <span className="text-muted text-sm">
- Page {page} of {totalPages}
- </span>
- {page < totalPages ? (
- <Link
- href={`/dashboard?page=${page + 1}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- >
- Next →
- </Link>
- ) : (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- disabled
- >
- Next →
- </button>
- )}
- </div>
- )}
- </main>
-
- {/* ── SIDEBAR: Widgets ── */}
- <aside className="space-y-6">
- {/* Analytics — Compact stat rows */}
- {totalHorseCount > 0 && (
- <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
-              <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-500 uppercase">
-                <BarChart3 size={14} strokeWidth={1.5} /> Stable Overview
- </h3>
- <div className="flex flex-col gap-[2px]">
- <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
- <span className="text-ink-light text-sm">
- <Plus size={14} strokeWidth={1.5} /> Total Models
- </span>
- <span className="text-ink text-sm font-bold">{totalHorseCount}</span>
- </div>
- <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
- <span className="text-ink-light text-sm">
- <FolderOpen size={14} strokeWidth={1.5} /> Collections
- </span>
- <span className="text-ink text-sm font-bold">{collections.length}</span>
- </div>
- <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
- <span className="text-ink-light text-sm">
- <DollarSign size={14} strokeWidth={1.5} /> Vault Value
- </span>
- <span className="text-ink text-sm font-bold">
- {totalVaultValue > 0
- ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
- :"—"}
- </span>
- </div>
- <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
- <span className="text-ink-light text-sm">
- <Award size={14} strokeWidth={1.5} /> Show Placings
- </span>
- <span className="text-ink text-sm font-bold">{totalShowRecords ?? 0}</span>
- </div>
-
- {unreadMsgCount > 0 && (
- <Link
- href="/inbox"
- className="flex items-center justify-between rounded-sm px-1 py-2 no-underline transition-colors hover:bg-black/[0.03]"
- style={{ textDecoration:"none" }}
- >
- <span className="flex items-center gap-1.5 text-sm text-stone-500">
- <Mail size={14} strokeWidth={1.5} /> Unread Messages
- </span>
- <span className="text-ink text-forest text-sm font-bold">
- {unreadMsgCount}
- </span>
- </Link>
- )}
- </div>
- </div>
- )}
-
- {/* Collections — Vertical list */}
- {collections.length > 0 && (
- <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
-              <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-500 uppercase">
-                <FolderOpen size={14} strokeWidth={1.5} /> Collections
- </h3>
- <div className="flex flex-col gap-1">
- {collections.map((col) => (
- <Link
- key={col.id}
- href={`/stable/collection/${col.id}`}
- className="text-ink hover:border-edge flex items-center justify-between rounded-md border border-transparent bg-black/[0.02] px-4 py-2 text-sm no-underline transition-all hover:bg-black/[0.06] hover:no-underline"
- id={`collection-${col.id}`}
- >
- <span>{col.name}</span>
- <span className="text-muted text-xs whitespace-nowrap">
- {collectionCounts.get(col.id) || 0}
- {(collectionValues.get(col.id) || 0) > 0 && (
- <>
- · $
- {(collectionValues.get(col.id) || 0).toLocaleString("en-US", {
- minimumFractionDigits: 0,
- maximumFractionDigits: 0,
- })}
- </>
- )}
- </span>
- </Link>
- ))}
- </div>
- </div>
- )}
-
- {/* NAN Qualification Dashboard */}
- <Suspense fallback={null}>
- <NanDashboardWidget />
- <ShowHistoryWidgetWrapper />
+ {/* Dashboard content streams in via Suspense */}
+ <Suspense fallback={<DashboardSkeleton />}>
+ <DashboardContent userId={user.id} page={page} />
  </Suspense>
 
- {/* Transfer History */}
- <TransferHistorySection />
- </aside>
- </div>
  </div>
  </div>
  );

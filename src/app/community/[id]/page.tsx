@@ -16,7 +16,6 @@ import ReportButton from"@/components/ReportButton";
 import MessageSellerButton from"@/components/MessageSellerButton";
 
 // Force fresh data on every request — prevents stale comments/favorites
-export const dynamic ="force-dynamic";
 
 // Types — mirrors the private passport but WITHOUT VaultData
 interface PublicHorseDetail {

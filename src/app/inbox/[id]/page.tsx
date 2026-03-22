@@ -18,7 +18,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  };
 }
 
-export const dynamic ="force-dynamic";
 
 interface ConversationData {
  id: string;

@@ -7,7 +7,6 @@ export const metadata = {
  description:"Your private conversations with other collectors.",
 };
 
-export const dynamic ="force-dynamic";
 
 interface ConversationRow {
  id: string;

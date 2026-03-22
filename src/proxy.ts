@@ -57,6 +57,14 @@ export async function proxy(request: NextRequest) {
         "/api",
         "/_next",
         "/favicon.ico",
+        "/catalog",
+        "/market",
+        "/show-ring",
+        "/faq",
+        "/privacy",
+        "/terms",
+        "/leaderboard",
+        "/search",
     ];
 
     const isPublicRoute =
