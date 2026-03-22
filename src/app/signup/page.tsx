@@ -28,30 +28,26 @@ export default function SignupPage() {
  if (success) {
  return (
  <div className="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center px-6 py-12">
- <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
- <div className="px-6 py-6">
- <div
- style={{
- fontSize:"3rem",
- marginBottom:"var(--space-md)",
- }}
- aria-hidden="true"
- >
- ✉️
- </div>
- <h1>Check Your Email</h1>
- <p className="mt-4">
+ <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-edge bg-card shadow-lg">
+ {/* Header */}
+ <div className="border-b border-edge bg-gradient-to-b from-[var(--color-bg-parchment-dark)] to-card px-8 pb-6 pt-8 text-center">
+ <div className="mb-3 text-4xl" aria-hidden="true">✉️</div>
+ <h1 className="text-2xl font-bold tracking-tight">Check Your Email</h1>
+ <p className="mt-2 text-sm leading-relaxed text-muted">
  We&apos;ve sent a confirmation link to your email address. Click the link to activate your
  account and start building your Digital Stable!
  </p>
  </div>
+ {/* Body */}
+ <div className="px-8 pb-8 pt-6 text-center">
  <Link
  href="/login"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-block w-full cursor-pointer rounded-lg border-0 bg-forest px-6 py-3 text-center text-sm font-semibold text-inverse shadow-sm transition-all hover:bg-forest-dark hover:shadow-md no-underline"
  id="back-to-login"
  >
  Back to Sign In
  </Link>
+ </div>
  </div>
  </div>
  );
@@ -59,29 +55,25 @@ export default function SignupPage() {
 
  return (
  <div className="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center px-6 py-12">
- <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
- <div className="px-6 py-6">
- <h1>
+ <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-edge bg-card shadow-lg">
+ {/* Header */}
+ <div className="border-b border-edge bg-gradient-to-b from-[var(--color-bg-parchment-dark)] to-card px-8 pb-6 pt-8 text-center">
+ <div className="mb-3 text-4xl">🐴</div>
+ <h1 className="text-2xl font-bold tracking-tight">
  Join the <span className="text-forest">Stable</span>
  </h1>
- <p>Create your account and start cataloging your collection</p>
+ <p className="mt-1 text-sm text-muted">Create your account and start cataloging your collection</p>
  </div>
 
+ {/* Body */}
+ <div className="px-8 pb-8 pt-6">
  {error && (
  <div
- className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+ className="mb-6 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-3 text-sm text-danger"
  role="alert"
  id="signup-error"
  >
- <svg
- width="16"
- height="16"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- aria-hidden="true"
- >
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
  <circle cx="12" cy="12" r="10" />
  <line x1="15" y1="9" x2="9" y2="15" />
  <line x1="9" y1="9" x2="15" y2="15" />
@@ -90,35 +82,30 @@ export default function SignupPage() {
  </div>
  )}
 
- {/* ---- Privacy Callout (PRD Requirement) ---- */}
+ {/* Privacy Callout */}
  <div
- className="bg-[rgba(44,85,69,0.08)] border-[rgba(44,85,69,0.2)] mb-6 flex items-start gap-2 rounded-md border p-4"
+ className="mb-6 flex items-start gap-3 rounded-lg border border-forest/20 bg-forest/5 p-4"
  role="note"
  aria-label="Privacy information"
  >
- <span
- className="bg-[rgba(44,85,69,0.08)] border-[rgba(44,85,69,0.2)] mb-6-icon flex items-start gap-2 rounded-md border p-4"
- aria-hidden="true"
- >
- 🛡️
- </span>
- <p>
- <strong>Your real name is private.</strong> Your alias is how the community will know you. Only
+ <span className="mt-0.5 text-lg" aria-hidden="true">🛡️</span>
+ <p className="text-sm leading-relaxed text-ink-light">
+ <strong className="text-ink">Your real name is private.</strong> Your alias is how the community will know you. Only
  you can see your personal details — we take your privacy seriously.
  </p>
  </div>
 
  <form action={handleSubmit} noValidate>
  {/* Alias Name */}
- <div className="mb-6">
- <label htmlFor="signup-alias" className="text-ink mb-1 block text-sm font-semibold">
+ <div className="mb-5">
+ <label htmlFor="signup-alias" className="mb-1.5 block text-sm font-semibold text-ink">
  Choose Your Alias *
  </label>
  <input
  id="signup-alias"
  name="aliasName"
  type="text"
- className="form-input"
+ className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="e.g. StableQueen42"
  required
  minLength={3}
@@ -126,91 +113,59 @@ export default function SignupPage() {
  autoFocus
  autoComplete="username"
  />
- <span className="text-muted mt-1 block text-xs">
- This is your public display name (3–30 characters). Choose wisely — this is how collectors
- will know you!
+ <span className="mt-1.5 block text-xs text-muted">
+ This is your public display name (3–30 characters). Choose wisely!
  </span>
  </div>
 
  {/* Email */}
- <div className="mb-6">
- <label htmlFor="signup-email" className="text-ink mb-1 block text-sm font-semibold">
+ <div className="mb-5">
+ <label htmlFor="signup-email" className="mb-1.5 block text-sm font-semibold text-ink">
  Email Address *
  </label>
  <input
  id="signup-email"
  name="email"
  type="email"
- className="form-input"
+ className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="you@example.com"
  required
  autoComplete="email"
  />
- <span className="text-muted mt-1 block text-xs">
+ <span className="mt-1.5 block text-xs text-muted">
  We&apos;ll send a confirmation link. Your email is never shared.
  </span>
  </div>
 
  {/* Password */}
- <div className="mb-6">
- <label htmlFor="signup-password" className="text-ink mb-1 block text-sm font-semibold">
+ <div className="mb-5">
+ <label htmlFor="signup-password" className="mb-1.5 block text-sm font-semibold text-ink">
  Password *
  </label>
- <div style={{ position:"relative" }}>
+ <div className="relative">
  <input
  id="signup-password"
  name="password"
  type={showPassword ?"text" :"password"}
- className="form-input"
+ className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="At least 6 characters"
  required
  minLength={6}
  autoComplete="new-password"
- style={{ paddingRight:"48px" }}
  />
  <button
  type="button"
  onClick={() => setShowPassword(!showPassword)}
  aria-label={showPassword ?"Hide password" :"Show password"}
- style={{
- position:"absolute",
- right:"12px",
- top:"50%",
- transform:"translateY(-50%)",
- background:"none",
- border:"none",
- color:"var(--color-text-muted)",
- cursor:"pointer",
- padding:"4px",
- display:"flex",
- alignItems:"center",
- }}
+ className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center border-none bg-transparent p-1 text-muted transition-colors hover:text-ink"
  >
  {showPassword ? (
- <svg
- width="18"
- height="18"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
  <line x1="1" y1="1" x2="23" y2="23" />
  </svg>
  ) : (
- <svg
- width="18"
- height="18"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
  <circle cx="12" cy="12" r="3" />
  </svg>
@@ -221,14 +176,14 @@ export default function SignupPage() {
 
  {/* Confirm Password */}
  <div className="mb-6">
- <label htmlFor="signup-confirm-password" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="signup-confirm-password" className="mb-1.5 block text-sm font-semibold text-ink">
  Confirm Password *
  </label>
  <input
  id="signup-confirm-password"
  name="confirmPassword"
  type={showPassword ?"text" :"password"}
- className="form-input"
+ className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="Re-enter your password"
  required
  autoComplete="new-password"
@@ -237,31 +192,22 @@ export default function SignupPage() {
 
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="w-full cursor-pointer rounded-lg border-0 bg-forest px-6 py-3 text-sm font-semibold text-inverse shadow-sm transition-all hover:bg-forest-dark hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
  disabled={isPending}
  id="signup-submit"
  >
- {isPending ? (
- <>
- <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- aria-hidden="true"
- />
- Creating Account...
- </>
- ) : (
-"Create My Account"
- )}
+ {isPending ?"Creating Account..." :"Create My Account"}
  </button>
  </form>
 
- <div className="text-muted mt-8 text-center text-sm">
+ <div className="mt-6 border-t border-edge pt-5 text-center text-sm text-muted">
  <p>
- Already have an account?{""}
- <Link href="/login" id="go-to-login">
+ Already have an account?{" "}
+ <Link href="/login" className="font-semibold text-forest hover:underline" id="go-to-login">
  Sign in here
  </Link>
  </p>
+ </div>
  </div>
  </div>
  </div>
