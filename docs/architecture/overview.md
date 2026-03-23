@@ -41,12 +41,12 @@ graph TD
 |-------|-----------|---------|---------|
 | **Framework** | Next.js (App Router) | 16.1.6 | Server Components, server actions, Turbopack |
 | **Runtime** | React | 19.2.3 | UI rendering (Server + Client Components) |
-| **Language** | TypeScript | 5.x | Strict mode, manual DB types |
+| **Language** | TypeScript | 5.x | Strict mode, auto-generated DB types via `npm run gen-types` |
 | **Database** | Supabase (PostgreSQL) | — | RLS on every table, materialized views, RPC functions |
 | **Auth** | Supabase Auth | — | PKCE flow, cookie-based SSR sessions |
 | **Storage** | Supabase Storage | — | Private `horse-images` bucket with signed URLs |
 | **Hosting** | Vercel | Serverless | Hobby tier, auto-deploy on push to `main` |
-| **CSS** | Vanilla CSS | — | Design tokens in `:root` + 49 CSS files (19 Modules + 30 extracted globals) |
+| **CSS** | Tailwind CSS v4 | — | Utility-first classes + globals.css shared primitives |
 | **Email** | Resend | 6.9.3 | Transactional notifications (offers, comments, follows) |
 | **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, Certificate of Authenticity exports |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching for reference catalog |
@@ -117,12 +117,12 @@ The materialized view UNION ALLs these into a single chronological timeline.
 | Metric | Count |
 |--------|-------|
 | Page routes | 28+ route groups |
-| Client components | 111 |
-| Server action files | 35 |
-| Database migrations | 89 (001–093) |
-| CSS files | 49 (19 Modules + 30 extracted globals) |
+| Client components | 116 |
+| Server action files | 36 |
+| Database migrations | 97 (001–097) |
+| CSS architecture | Tailwind CSS v4 + legacy CSS Modules |
 | Reference catalog entries | 10,500+ |
-| Unit/component tests | 227 (across 22 test files) |
+| Unit/component tests | 245 (across 23 test files) |
 | E2E test specs | 7 |
 | CI | GitHub Actions (build + test on every push) |
 

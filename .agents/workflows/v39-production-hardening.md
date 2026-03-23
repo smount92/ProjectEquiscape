@@ -215,11 +215,13 @@ DashboardPage (immediate render — shell + skeleton)
 
 ---
 
-## EPIC 3: Type Safety & Eliminating Blindspots
+## EPIC 3: Type Safety & Eliminating Blindspots ✅ COMPLETED
 
-### Task 3.1: Generate Supabase TypeScript Types
+### Task 3.1: Generate Supabase TypeScript Types ✅ DONE
 
-**Problem:** The codebase uses a manually maintained `src/lib/types/database.ts` (420+ lines). There are **41 instances** of `as unknown as` type casts across 20+ files. These completely bypass TypeScript's safety — if the database schema drifts from the manual types, the app crashes silently at runtime.
+**Problem:** The codebase used a manually maintained `src/lib/types/database.ts` (420+ lines). There were **41 instances** of `as unknown as` type casts across 20+ files. These completely bypass TypeScript's safety — if the database schema drifts from the manual types, the app crashes silently at runtime.
+
+**Result:** All three Supabase clients are now typed with the generated `Database` generic. Removed unsafe casts from 20 files across action files, pages, and API routes. Only 13 intentional casts remain (test mocks, CSV parsing, Json→concrete type conversions). `InsuranceReport.tsx` updated to accept nullable types. Build passes cleanly, all 245 tests pass.
 
 **Steps:**
 
@@ -327,10 +329,10 @@ DashboardPage (immediate render — shell + skeleton)
    - `src/lib/utils/__tests__/rateLimit.test.ts` — test mocks, acceptable
 
 // turbo
-5. **Verify:** Run `npx next build` — expect clean build with zero `as unknown as` in production code.
+5. **Verify:** Run `npx next build` — ✅ clean build with only 13 intentional `as unknown as` remaining (test mocks, CSV parsing, Json conversions).
 
 // turbo
-6. **Verify:** Run `npm test` — confirm 239/239 still pass.
+6. **Verify:** Run `npm test` — ✅ 245/245 pass.
 
 ---
 

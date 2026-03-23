@@ -1,6 +1,6 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** March 18, 2026
+> **Last Updated:** March 23, 2026
 > **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference.
 
 ---
@@ -47,8 +47,8 @@ docs/
 │   ├── state-machines.md              # Commerce, commission, transfer flows
 │   └── adrs/
 │       ├── 001-server-actions-over-api.md
-│       ├── 002-vanilla-css-over-tailwind.md
-│       ├── 003-manual-types-over-generated.md
+│       ├── 002-vanilla-css-over-tailwind.md  # ⚠️ SUPERSEDED — migrated to Tailwind CSS v4
+│       ├── 003-manual-types-over-generated.md # ⚠️ SUPERSEDED — now uses generated types via `npm run gen-types`
 │       ├── 004-materialized-views-for-reads.md
 │       ├── 005-soft-delete-tombstone.md
 │       ├── 006-private-storage-signed-urls.md
@@ -57,10 +57,10 @@ docs/
 │   ├── schema-overview.md             # Visual ERD + table groups
 │   ├── rls-policies.md                # Row Level Security inventory
 │   ├── materialized-views.md          # Computed views and refresh schedules
-│   ├── migrations.md                  # Migration index (001—089)
+│   ├── migrations.md                  # Migration index (001—097)
 │   └── seed-data.md                   # Reference catalog seeding
 ├── api/
-│   ├── server-actions.md              # Index of all 35 server action files
+│   ├── server-actions.md              # Index of all 36 server action files
 │   └── routes.md                      # API route reference (6 routes)
 ├── components/
 │   ├── catalog.md                     # 95-component index by domain

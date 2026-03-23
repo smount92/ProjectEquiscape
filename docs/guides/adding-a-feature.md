@@ -71,30 +71,15 @@ See [Adding a Migration](adding-a-migration.md) for the full guide.
 
 ### 3. Update TypeScript Types
 
-Add or update interfaces in `src/lib/types/database.ts`:
+After creating a migration, regenerate the TypeScript types:
 
-```typescript
-export interface MyFeature {
-    id: string;
-    userId: string;
-    // fields...
-    createdAt: string;
-}
+```bash
+npm run gen-types
 ```
 
-If adding to the `Database` interface for typed Supabase queries:
+This updates `src/lib/types/database.generated.ts` with types matching the live database schema. All three Supabase clients (`createClient`, `getAdminClient`) are typed with the generated `Database` generic, so TypeScript will automatically infer correct types from your queries.
 
-```typescript
-my_feature: {
-    Row: MyFeature;
-    Insert: Omit<MyFeature, "id" | "createdAt"> & {
-        id?: string;
-        createdAt?: string;
-    };
-    Update: Partial<Omit<MyFeature, "id">>;
-    Relationships: [];
-};
-```
+> **Do NOT** manually define database row interfaces. The generated types are the single source of truth.
 
 ### 4. Create Server Actions
 
@@ -132,10 +117,10 @@ export async function createMyFeature(data: {
         // Notifications, activity events, achievement evaluation
     });
 
-    return { success: true, data: { id: (result as { id: string }).id } };
+    return { success: true, data: { id: result.id } };
 }
 
-export async function getMyFeatures(): Promise<MyFeature[]> {
+export async function getMyFeatures() {
     const { supabase, user } = await requireAuth();
 
     const { data } = await supabase
@@ -144,7 +129,7 @@ export async function getMyFeatures(): Promise<MyFeature[]> {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-    return (data ?? []) as MyFeature[];
+    return data ?? [];
 }
 ```
 
@@ -153,6 +138,8 @@ export async function getMyFeatures(): Promise<MyFeature[]> {
 - Always return `{ success, error?, data? }`
 - Use `revalidatePath()` after mutations
 - Put notifications/events in `after()` blocks
+- **Never** use `as unknown as` casts on query results — let TypeScript infer types from the typed Supabase client
+- For nullable fields, coerce with `?? "default"` when passing to components
 
 ### 5. Create the Page (Server Component)
 
@@ -219,27 +206,21 @@ export default function MyFeatureClient({ features }: Props) {
 }
 ```
 
-### 7. Add CSS Module
+### 7. Add Styles
 
-Create `src/components/MyFeatureClient.module.css`:
+Use Tailwind CSS v4 utility classes directly in JSX:
 
-```css
-.container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-}
-
-/* Use design tokens, never hard-code colors */
-.featureCard {
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-xl);
+```tsx
+export default function MyComponent() {
+    return <div className="rounded-lg border border-edge bg-card p-6 shadow-md">
+        <h2 className="text-lg font-bold text-ink">Hello</h2>
+    </div>;
 }
 ```
 
-See [CSS Conventions](css-conventions.md) for the rules.
+For shared primitives (`.btn`, `.card`, `.form-*`), use the global class names from `globals.css`.
+
+> **Legacy:** Some components still use CSS Modules (`.module.css`). These are tolerated but Tailwind classes are preferred for new work. See [CSS Conventions](css-conventions.md).
 
 ### 8. Write Tests
 
@@ -284,13 +265,14 @@ npm run test:e2e
 
 - [ ] Migration has RLS policies on all new tables
 - [ ] Migration has indexes on FK columns
-- [ ] TypeScript types updated in `database.ts`
+- [ ] Ran `npm run gen-types` to regenerate TypeScript types
 - [ ] Server actions use `requireAuth()` for mutations
 - [ ] Server actions return `{ success, error?, data? }`
+- [ ] No `as unknown as` casts on Supabase query results
+- [ ] Nullable fields coerced with `?? default` when needed
 - [ ] `revalidatePath()` called after mutations
 - [ ] Side effects in `after()` blocks
-- [ ] Client component uses CSS Module (not inline styles)
-- [ ] CSS uses design tokens (not hard-coded colors)
+- [ ] Uses Tailwind utility classes (not new CSS Module files)
 - [ ] Build passes (`npm run build`)
 - [ ] No sensitive data exposed in public-facing pages
 

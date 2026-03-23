@@ -5,8 +5,10 @@
 ### TypeScript
 
 - **Strict mode** is enabled in `tsconfig.json`
-- Manual database types in `src/lib/types/database.ts` — keep in sync with migrations
-- Prefer explicit types over `any`. Use `unknown` when the type is truly unknown, then narrow with type assertions
+- **Strict mode** is enabled in `tsconfig.json`
+- **Generated database types** via `npm run gen-types` → `src/lib/types/database.generated.ts` — all three Supabase clients (`createClient`, `getAdminClient`) are typed with the `Database` generic
+- **Do not** use `as unknown as` casts on Supabase query results in production code — let TypeScript infer types from the typed client. The only acceptable uses are: test mocks, CSV row parsing, and `Json` → concrete type conversions
+- When nullable DB fields (e.g., `finish_type`, `condition_grade`) are passed to components expecting strings, coerce with `?? "default"` rather than casting
 
 ### Server Actions (`src/app/actions/*.ts`)
 
@@ -57,23 +59,23 @@ export async function doSomething(data: { ... }): Promise<{ success: boolean; er
 
 ### CSS Architecture
 
+The project uses **Tailwind CSS v4** for styling:
+
 | Scope | Where to Add Styles |
 |-------|-------------------|
-| New component | Create a `.module.css` file alongside the component |
+| New component | Tailwind utility classes inline in JSX |
 | Shared primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`) | `globals.css` |
-| Art Studio features | `studio.css` |
-| Competition features | `competition.css` |
-| Design tokens (colors, spacing, fonts) | `globals.css` `:root` block |
+| Design tokens | Tailwind theme config + `globals.css` `@theme` block |
 
 **Rules:**
-- New components should use **CSS Modules** (`styles.className`), not add to `globals.css`
-- Use design tokens from `:root` — don't hard-code colors or spacing
-- The warm earth-toned theme uses: cream/parchment background (`#faf6f0`), sage green accent (`#3d5a3e`), brown/leather tones
+- New components should use **Tailwind utility classes** directly in JSX — do not create new CSS Module files
+- Legacy CSS Modules (`.module.css`) are tolerated but not for new work
+- Use Tailwind theme tokens (`text-forest`, `bg-card`, `border-edge`) — don't hard-code colors or spacing
 - Simple Mode: `[data-simple-mode="true"]` — 130% font scale, 60px min buttons
 
 ### Database
 
-- Migrations in `supabase/migrations/` — **sequential numbering** (currently at 090)
+- Migrations in `supabase/migrations/` — **sequential numbering** (currently at 097)
 - Always add **RLS policies** to new tables
 - Add **foreign key indexes** for any new FK columns
 - Use **soft delete** (tombstone) when records are referenced by other tables
@@ -137,8 +139,9 @@ When adding new features, verify:
 
 - **Utility functions** (`src/lib/utils/`) — Write unit tests in `__tests__/`. Pure functions are highest-ROI.
 - **Critical server actions** — When modifying `transactions.ts`, `hoofprint.ts`, `horse.ts`, `collections.ts`, or `competition.ts`, add or update integration tests. Mock `after()` from `next/server` as a no-op.
-- **UI components** — Write React Testing Library tests in `src/components/__tests__/`. Use `// @vitest-environment jsdom` and the shared `setup.ts` for mocks. Currently 58 component tests covering 5 components.
+- **UI components** — Write React Testing Library tests in `src/components/__tests__/`. Use `// @vitest-environment jsdom` and the shared `setup.ts` for mocks. Currently 245 tests across 23 test files.
 - **New features** — If it involves a state machine, complex validation, or financial data, it needs tests.
+- **Type safety** — After schema changes, run `npm run gen-types` to regenerate TypeScript types. The build will fail if query shapes drift from the schema.
 
 ## Getting Help
 

@@ -62,7 +62,8 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 ## ✅ V34/P4: Playwright E2E Show Tests — 16 tests (9 pass, 7 graceful skip), .env.local loading, show listing / detail / entry form / podium / override / mobile / auth guard — DONE
 ## ✅ Judge Notes Fix — wired judge notes textarea through to show_records.judge_notes (was UI-only, never persisted) — DONE
 ## ✅ Notification Deep-Links — added link_url column (migration 096), all notifications now click through to referenced item instead of actor profile — DONE
-## ✅ V39: Production Hardening Sprint — edge security (8 public routes), perf (removed 35 force-dynamic, Suspense streaming on dashboard + show ring), pedigree validation (6 new tests, 245 total) — DONE
+## ✅ V39: Production Hardening Sprint — edge security (8 public routes), perf (removed 35 force-dynamic, Suspense streaming on dashboard + show ring), pedigree validation (6 new tests, 245 total) — DONE\r
+## ✅ V39/EPIC3: Type Safety Cleanup — generated Supabase types injected into all clients, removed `as unknown as` casts from 20 files (9 action files, 7 pages, 2 API routes, 2 support files), removed redundant manual interfaces (`HorseRow`, `SuggestionWithCatalog`, `ExportHorse`), updated `InsuranceReport.tsx` to accept nullable types, coerced nullable DB fields with defaults — 245/245 tests pass, build clean — DONE
 
 ---
 
