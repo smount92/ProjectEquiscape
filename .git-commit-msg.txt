@@ -1,1 +1,13 @@
-chore: update dev-nextsteps with V39 completion
+EPIC 3: Type Safety - Generated Supabase types, typed browser client
+
+- Generated database.generated.ts (3,394 lines) from remote Supabase schema
+- Typed browser client (client.ts) with Database generic for full client-side type safety
+- Server and admin clients remain untyped - several tables exist in SQL migrations
+  that have not yet been deployed to the remote database (show_records, events,
+  event_entries, show_strings, etc.). Once those migrations are applied and
+  gen-types is re-run, these clients can be fully typed.
+- Fixed package.json gen-types script to use hardcoded project ID (Windows compat)
+- Cleaned up temporary remove-force-dynamic.ps1 script
+- Created src/lib/types/supabase.ts re-export module
+
+Build: clean, Tests: 245/245 passing

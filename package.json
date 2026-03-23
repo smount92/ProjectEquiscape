@@ -13,7 +13,7 @@
     "test:unit:coverage": "vitest run --coverage",
     "test:components": "vitest run src/components/__tests__",
     "test:e2e": "npx playwright test",
-    "gen-types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/lib/types/database.generated.ts",
+    "gen-types": "npx supabase gen types typescript --project-id bdmwubihwinsxfykjqfe > src/lib/types/database.generated.ts",
     "prepare": "husky"
   },
   "dependencies": {
