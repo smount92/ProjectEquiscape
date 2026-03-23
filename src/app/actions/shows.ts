@@ -56,7 +56,7 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
     const { data: shows } = await supabase
         .from("events")
         .select("id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at, created_by, users!created_by(alias_name)")
-        .in("event_type", ["photo_show", "live_show"])
+        .eq("event_type", "photo_show")
         .order("created_at", { ascending: false });
 
     if (!shows || shows.length === 0) return [];

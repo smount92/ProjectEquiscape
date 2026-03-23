@@ -18,6 +18,9 @@ const SPECIALTIES = [
 "Pastels",
 "Oils",
 "Acrylics",
+"Props",
+"Other Animals",
+"Dolls/Riders",
 ];
 
 const MEDIUMS = ["Acrylics","Oils","Pastels","Airbrush","Prismacolor Pencils","Chalk","Epoxy","Mixed Media"];
