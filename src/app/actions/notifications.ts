@@ -55,18 +55,7 @@ export async function getNotifications(
         .order("created_at", { ascending: false })
         .limit(limit);
 
-    const notifs = (rawNotifs as unknown as {
-        id: string;
-        type: string;
-        content: string | null;
-        actor_id: string | null;
-        horse_id: string | null;
-        conversation_id: string | null;
-        link_url: string | null;
-        is_read: boolean;
-        created_at: string;
-        users: { alias_name: string } | null;
-    }[]) ?? [];
+    const notifs = rawNotifs ?? [];
 
     if (notifs.length === 0) return [];
 

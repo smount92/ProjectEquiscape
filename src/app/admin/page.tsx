@@ -48,7 +48,7 @@ export default async function AdminPage() {
  .limit(100),
  ]);
 
- const totalUsers = (usersResult.data as unknown as { users: unknown[]; total?: number })?.total ?? 0;
+ const totalUsers = usersResult.data?.users?.length ?? 0;
  const totalHorses = horsesResult.count ?? 0;
  const unreadMessages = unreadResult.count ?? 0;
  const messages = (messagesResult.data as ContactMessage[]) ?? [];
@@ -67,17 +67,7 @@ export default async function AdminPage() {
 
  // Enrich with author info
  const catalogSuggestions = [];
- for (const row of (catalogSuggestionRows ?? []) as {
- id: string;
- user_id: string;
- suggestion_type: string;
- field_changes: Record<string, unknown>;
- reason: string;
- status: string;
- upvotes: number;
- downvotes: number;
- created_at: string;
- }[]) {
+ for (const row of catalogSuggestionRows ?? []) {
  const { data: author } = await supabaseAdmin
  .from("users")
  .select("alias_name, approved_suggestions_count")
@@ -85,9 +75,9 @@ export default async function AdminPage() {
  .single();
  catalogSuggestions.push({
  ...row,
- author_alias: (author as { alias_name: string } | null)?.alias_name ??"Unknown",
- author_approved_count:
- (author as { approved_suggestions_count: number } | null)?.approved_suggestions_count ?? 0,
+ field_changes: (row.field_changes ?? {}) as Record<string, unknown>,
+ author_alias: author?.alias_name ?? "Unknown",
+ author_approved_count: author?.approved_suggestions_count ?? 0,
  });
  }
 

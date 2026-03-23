@@ -5,16 +5,6 @@ import { getPublicImageUrls } from"@/lib/utils/storage";
 import CollectionManager from"@/components/CollectionManager";
 
 
-interface CollectionHorse {
- id: string;
- custom_name: string;
- finish_type: string;
- condition_grade: string;
- created_at: string;
- trade_status: string;
- catalog_items: { title: string; maker: string; item_type: string } | null;
- horse_images: { image_url: string; angle_profile: string }[];
-}
 
 function getFinishBadgeClass(finishType: string): string {
  switch (finishType) {
@@ -77,7 +67,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  .select("horse_id")
  .eq("collection_id", collectionId);
 
- const horseIdsInCollection = (junctionRows || []).map((r: { horse_id: string }) => r.horse_id);
+ const horseIdsInCollection = (junctionRows || []).map((r) => r.horse_id);
 
  // Fallback: also check legacy FK for horses not yet migrated
  const { data: legacyHorses } = await supabase
@@ -86,7 +76,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  .eq("owner_id", user.id)
  .eq("collection_id", collectionId);
 
- const legacyIds = (legacyHorses || []).map((h: { id: string }) => h.id);
+ const legacyIds = (legacyHorses || []).map((h) => h.id);
  const allHorseIds = [...new Set([...horseIdsInCollection, ...legacyIds])];
 
  // Fetch full horse data for the resolved IDs
@@ -106,7 +96,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  .order("created_at", { ascending: false })
  : { data: [] };
 
- const horses = (rawHorses as unknown as CollectionHorse[]) ?? [];
+ const horses = rawHorses ?? [];
 
  // Generate signed URLs
  const thumbnailUrls: string[] = [];
@@ -153,8 +143,8 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  return {
  id: horse.id,
  customName: horse.custom_name,
- finishType: horse.finish_type,
- conditionGrade: horse.condition_grade,
+ finishType: horse.finish_type ?? "OF",
+ conditionGrade: horse.condition_grade ?? "",
  createdAt: horse.created_at,
  refName,
  releaseLine,

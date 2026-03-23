@@ -271,14 +271,7 @@ export async function getUserReviewSummary(
         .eq("target_id", userId)
         .order("created_at", { ascending: false });
 
-    const reviews = (rawReviews as unknown as {
-        id: string;
-        stars: number;
-        content: string | null;
-        created_at: string;
-        reviewer_id: string;
-        users: { alias_name: string } | null;
-    }[]) ?? [];
+    const reviews = rawReviews ?? [];
 
     if (reviews.length === 0) {
         return { average: 0, count: 0, ratings: [] };

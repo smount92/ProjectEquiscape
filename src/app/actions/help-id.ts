@@ -234,7 +234,7 @@ export async function addIdentifiedHorse(
             free_text: string | null;
             catalog_items: { id: string; title: string; maker: string; item_type: string } | null;
         }
-        const s = suggestion as unknown as SuggestionWithCatalog;
+        const s = suggestion;
 
         let customName = "Identified Model";
         const horseInsert: UserHorseInsert = {

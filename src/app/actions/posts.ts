@@ -467,11 +467,7 @@ export async function getEventMedia(eventId: string) {
         .eq("event_id", eventId)
         .order("created_at", { ascending: false });
 
-    const items = ((data ?? []) as unknown as {
-        id: string; storage_path: string; caption: string | null;
-        created_at: string; uploader_id: string;
-        users: { alias_name: string } | null;
-    }[]);
+    const items = data ?? [];
 
     if (items.length === 0) return [];
     const paths = items.map(i => i.storage_path);

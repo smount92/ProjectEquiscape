@@ -798,11 +798,7 @@ export async function getEventPhotos(eventId: string) {
         .eq("event_id", eventId)
         .order("created_at", { ascending: false });
 
-    const photos = ((data ?? []) as unknown as {
-        id: string; image_path: string; caption: string | null;
-        created_at: string; user_id: string;
-        users: { alias_name: string } | null;
-    }[]);
+    const photos = data ?? [];
 
     // Batch public URLs
     if (photos.length === 0) return [];

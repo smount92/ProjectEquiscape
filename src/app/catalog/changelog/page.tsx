@@ -36,18 +36,7 @@ export default async function ChangelogPage() {
  </p>
 
  <div className="flex flex-col gap-0">
- {(
- entries as unknown as {
- id: string;
- suggestion_id: string | null;
- catalog_item_id: string | null;
- change_type: string;
- change_summary: string;
- contributed_by: string | null;
- contributor_alias: string;
- created_at: string;
- }[]
- )?.map((entry) => {
+ {(entries ?? [])?.map((entry) => {
  const timeAgo = getTimeAgo(entry.created_at);
 
  return (

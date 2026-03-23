@@ -149,12 +149,7 @@ export async function getShowEntries(showId: string): Promise<{
         .eq("entry_type", "entered")
         .order("votes_count", { ascending: false });
 
-    const entryList = (rawEntries as unknown as {
-        id: string; horse_id: string; user_id: string; votes_count: number;
-        created_at: string; placing: string | null; class_id: string | null;
-        entry_image_path: string | null; caption: string | null;
-        users: { alias_name: string } | null;
-    }[]) ?? [];
+    const entryList = rawEntries ?? [];
 
     if (entryList.length === 0) {
         return {

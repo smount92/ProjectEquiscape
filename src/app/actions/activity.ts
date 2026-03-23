@@ -122,17 +122,7 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
 
     const { data: events } = await query;
 
-    const allItems = (events as unknown as {
-        id: string;
-        actor_id: string;
-        event_type: string;
-        horse_id: string | null;
-        metadata: Json | null;
-        created_at: string;
-        likes_count: number;
-        image_urls: string[] | null;
-        users: { alias_name: string } | null;
-    }[]) ?? [];
+    const allItems = events ?? [];
 
     // Filter out blocked users
     const filteredItems = blockedIds.length > 0
@@ -257,17 +247,7 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
 
     const { data: events } = await query;
 
-    const allItems = (events as unknown as {
-        id: string;
-        actor_id: string;
-        event_type: string;
-        horse_id: string | null;
-        metadata: Json | null;
-        created_at: string;
-        likes_count: number;
-        image_urls: string[] | null;
-        users: { alias_name: string } | null;
-    }[]) ?? [];
+    const allItems = events ?? [];
 
     const hasMore = allItems.length > limit;
     const items = hasMore ? allItems.slice(0, limit) : allItems;

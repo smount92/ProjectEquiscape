@@ -79,7 +79,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
             horse_images: { image_url: string; angle_profile: string }[];
         }
 
-        const horses = (rawHorses as unknown as HorseRow[]) ?? [];
+        const horses = rawHorses ?? [];
 
         // Fetch vault data (private — owner only via RLS)
         const horseIds = horses.map((h) => h.id);
@@ -131,7 +131,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
                 name: horse.custom_name,
                 reference,
                 condition: horse.condition_grade || "Not Graded",
-                finish: horse.finish_type,
+                finish: horse.finish_type ?? "OF",
                 purchasePrice: vault?.purchase_price ?? null,
                 estimatedValue: vault?.estimated_current_value ?? null,
                 photoUrl: signedUrlMap.get(horse.id) || null,

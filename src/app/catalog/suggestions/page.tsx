@@ -39,20 +39,20 @@ export default async function SuggestionsPage({ searchParams }: Props) {
 
  // Enrich with user data from public.users via admin client
  const admin = getAdminClient();
- const userIds = [...new Set((suggestions ?? []).map((s: { user_id: string }) => s.user_id))];
+ const userIds = [...new Set((suggestions ?? []).map((s) => s.user_id))];
  const userMap: Record<string, { alias_name: string; approved_suggestions_count: number }> = {};
  if (userIds.length > 0) {
  const { data: users } = await admin
  .from("users")
  .select("id, alias_name, approved_suggestions_count")
  .in("id", userIds);
- for (const u of (users ?? []) as { id: string; alias_name: string; approved_suggestions_count: number }[]) {
+ for (const u of users ?? []) {
  userMap[u.id] = { alias_name: u.alias_name, approved_suggestions_count: u.approved_suggestions_count };
  }
  }
 
  // Get comment counts per suggestion
- const suggestionIds = (suggestions ?? []).map((s: { id: string }) => s.id);
+ const suggestionIds = (suggestions ?? []).map((s) => s.id);
 
  let commentCounts: Record<string, number> = {};
  if (suggestionIds.length > 0) {
@@ -60,7 +60,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  .from("catalog_suggestion_comments")
  .select("suggestion_id")
  .in("suggestion_id", suggestionIds);
- for (const c of (comments ?? []) as { suggestion_id: string }[]) {
+ for (const c of comments ?? []) {
  commentCounts[c.suggestion_id] = (commentCounts[c.suggestion_id] || 0) + 1;
  }
  }
@@ -108,20 +108,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  <p className="text-muted mb-2 text-sm">{count ?? 0} suggestions</p>
 
  <div className="flex flex-col gap-2">
- {(
- suggestions as unknown as {
- id: string;
- user_id: string;
- catalog_item_id: string | null;
- suggestion_type: string;
- field_changes: Record<string, unknown>;
- reason: string;
- status: string;
- upvotes: number;
- downvotes: number;
- created_at: string;
- }[]
- )?.map((s) => {
+ {(suggestions ?? [])?.map((s) => {
  const userData = userMap[s.user_id];
  const typeIcon =
  s.suggestion_type ==="correction"

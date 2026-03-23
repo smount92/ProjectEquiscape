@@ -48,21 +48,7 @@ export async function GET() {
                     full_name: null,
                     email: user.email || "",
                 },
-                horses: (horses || []) as unknown as Array<{
-                    id: string;
-                    custom_name: string;
-                    finish_type: string;
-                    condition_grade: string;
-                    trade_status: string | null;
-                    created_at: string;
-                    catalog_items: { title: string; maker: string; scale: string | null } | null;
-                    financial_vault: {
-                        purchase_price: number | null;
-                        purchase_date: string | null;
-                        estimated_current_value: number | null;
-                        insurance_notes: string | null;
-                    }[];
-                }>,
+                horses: horses || [],
                 thumbnailMap,
                 generatedAt: new Date().toISOString(),
             })

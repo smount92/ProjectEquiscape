@@ -418,12 +418,7 @@ export async function getCoaData(horseId: string): Promise<{
 
         if (!horse) return { success: false, error: "Horse not found." };
 
-        interface HorseRow {
-            id: string; owner_id: string; custom_name: string; finish_type: string; condition_grade: string;
-            catalog_items: { title: string; maker: string; item_type: string } | null;
-            horse_images: { image_url: string; angle_profile: string }[];
-        }
-        const h = horse as unknown as HorseRow;
+        const h = horse;
 
         if (h.owner_id !== user.id) return { success: false, error: "You don't own this horse." };
 
@@ -484,8 +479,8 @@ export async function getCoaData(horseId: string): Promise<{
             data: {
                 horseName: h.custom_name,
                 reference,
-                finish: h.finish_type,
-                condition: h.condition_grade,
+                finish: h.finish_type ?? "OF",
+                condition: h.condition_grade ?? "Not Graded",
                 pin,
                 timelineCount: timelineCount || 0,
                 ownerCount: (ownerCount || 0) + 1,

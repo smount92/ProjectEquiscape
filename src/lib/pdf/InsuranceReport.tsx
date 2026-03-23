@@ -7,8 +7,8 @@ import { Document, Page, View, Text, Image, StyleSheet } from"@react-pdf/rendere
 interface InsuranceHorse {
  id: string;
  custom_name: string;
- finish_type: string;
- condition_grade: string;
+ finish_type: string | null;
+ condition_grade: string | null;
  trade_status: string | null;
  created_at: string;
  catalog_items: {
@@ -21,7 +21,7 @@ interface InsuranceHorse {
  purchase_date: string | null;
  estimated_current_value: number | null;
  insurance_notes: string | null;
- }[];
+ } | null;
 }
 
 interface InsuranceReportProps {
@@ -333,8 +333,8 @@ function CoverPage({
  Summary Table Page
  ═══════════════════════════════════════════════════════════════ */
 function SummaryPage({ horses, generatedAt }: { horses: InsuranceHorse[]; generatedAt: string }) {
- const totalPurchase = horses.reduce((sum, h) => sum + (h.financial_vault?.[0]?.purchase_price || 0), 0);
- const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.[0]?.estimated_current_value || 0), 0);
+ const totalPurchase = horses.reduce((sum, h) => sum + (h.financial_vault?.purchase_price || 0), 0);
+ const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.estimated_current_value || 0), 0);
 
  return (
  <Page size="LETTER" style={s.page}>
@@ -351,7 +351,7 @@ function SummaryPage({ horses, generatedAt }: { horses: InsuranceHorse[]; genera
 
  {/* Table Rows */}
  {horses.map((horse, i) => {
- const vault = horse.financial_vault?.[0];
+ const vault = horse.financial_vault;
  return (
  <View key={horse.id} style={[s.tableRow, i % 2 === 1 ? s.tableRowAlt : {}]} wrap={false}>
  <Text style={[s.tableCell, { width:"30%" }]}>{horse.custom_name}</Text>
@@ -387,7 +387,7 @@ function DetailPage({
  thumbnailUrl?: string;
  generatedAt: string;
 }) {
- const vault = horse.financial_vault?.[0];
+ const vault = horse.financial_vault;
  const ref = horse.catalog_items;
 
  return (
@@ -459,7 +459,7 @@ function DetailPage({
  ═══════════════════════════════════════════════════════════════ */
 export function InsuranceReportDocument(props: InsuranceReportProps) {
  const { owner, horses, thumbnailMap, generatedAt } = props;
- const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.[0]?.estimated_current_value || 0), 0);
+ const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.estimated_current_value || 0), 0);
 
  return (
  <Document

@@ -38,13 +38,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
 
  if (!horse) notFound();
 
- const h = horse as unknown as {
- id: string;
- custom_name: string;
- finish_type: string;
- condition_grade: string;
- catalog_items: { title: string; maker: string; item_type: string } | null;
- };
+ const h = horse;
 
  const { timeline, ownershipChain, lifeStage } = await getHoofprint(horseId);
 
@@ -55,13 +49,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
  .eq("horse_id", horseId)
  .order("show_date", { ascending: false, nullsFirst: false });
 
- const records = (rawRecords ?? []) as {
- show_name: string;
- show_date: string | null;
- division: string | null;
- placing: string | null;
- ribbon_color: string | null;
- }[];
+ const records = rawRecords ?? [];
 
  const refName = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : null;
 

@@ -16,28 +16,6 @@ import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import TrophyCase from"@/components/TrophyCase";
 
 
-// Types
-interface ProfileHorse {
- id: string;
- custom_name: string;
- finish_type: string;
- condition_grade: string;
- created_at: string;
- trade_status: string;
- listing_price: number | null;
- marketplace_notes: string | null;
- user_collections: { name: string } | null;
- catalog_items: {
- title: string;
- maker: string;
- item_type: string;
- } | null;
- horse_images: {
- image_url: string;
- angle_profile: string;
- }[];
-}
-
 function getFinishBadgeClass(finish: string): string {
  switch (finish) {
  case"OF":
@@ -135,17 +113,17 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  .limit(10);
 
  if (txns && txns.length > 0) {
- const txnIds = (txns as { id: string }[]).map((t) => t.id);
+  const txnIds = txns.map((t) => t.id);
  const { data: existingReviews } = await supabase
  .from("reviews")
  .select("transaction_id")
  .eq("reviewer_id", user.id)
  .in("transaction_id", txnIds);
 
- const reviewedIds = new Set(
- (existingReviews ?? []).map((r: { transaction_id: string }) => r.transaction_id),
- );
- const unreviewed = (txns as { id: string }[]).find((t) => !reviewedIds.has(t.id));
+  const reviewedIds = new Set(
+  (existingReviews ?? []).map((r) => r.transaction_id),
+  );
+  const unreviewed = txns.find((t) => !reviewedIds.has(t.id));
  if (unreviewed) {
  unreviewedTxn = unreviewed;
  }
@@ -161,8 +139,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  .select("studio_slug, studio_name")
  .eq("user_id", profileUser.id)
  .maybeSingle();
- const studioSlug = (studioProfile as { studio_slug: string; studio_name: string } | null)?.studio_slug || null;
- const studioName = (studioProfile as { studio_slug: string; studio_name: string } | null)?.studio_name || null;
+  const studioSlug = studioProfile?.studio_slug || null;
+  const studioName = studioProfile?.studio_name || null;
 
  // Check block status (for other users)
  const blocked = isOwnProfile ? false : await checkIsBlocked(profileUser.id);
@@ -182,15 +160,18 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  .eq("user_id", profileUser.id)
  .order("earned_at", { ascending: false });
 
- const userBadges = (rawBadges ?? []).map((b: Record<string, unknown>) => ({
- id: (b.badges as { id: string }).id,
- name: (b.badges as { name: string }).name,
- description: (b.badges as { description: string }).description,
- icon: (b.badges as { icon: string }).icon,
- category: (b.badges as { category: string }).category,
- tier: (b.badges as { tier: number }).tier,
- earnedAt: b.earned_at as string,
- }));
+  const userBadges = (rawBadges ?? []).map((b) => {
+  const badge = b.badges as { id: string; name: string; description: string; icon: string; category: string; tier: number };
+  return {
+  id: badge.id,
+  name: badge.name,
+  description: badge.description,
+  icon: badge.icon,
+  category: badge.category,
+  tier: badge.tier,
+  earnedAt: b.earned_at ?? "",
+  };
+  });
 
  // ================================================================
  // PROFILE QUERY: Only public horses for this user
@@ -210,7 +191,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  .eq("visibility","public")
  .order("created_at", { ascending: false });
 
- const horses = (rawHorses as unknown as ProfileHorse[]) ?? [];
+  const horses = rawHorses ?? [];
 
  // Generate signed URLs for thumbnails
  const thumbnailUrls: string[] = [];
@@ -239,8 +220,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  return {
  id: horse.id,
  customName: horse.custom_name,
- finishType: horse.finish_type,
- conditionGrade: horse.condition_grade,
+  finishType: horse.finish_type ?? "OF",
+  conditionGrade: horse.condition_grade ?? "",
  createdAt: horse.created_at,
  refName,
  releaseLine,
@@ -379,7 +360,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <div className="animate-fade-in-up mb-6">
  <h3 className="mb-2 text-sm text-stone-500">📁 Public Collections</h3>
  <div className="flex flex-wrap gap-2">
- {(publicCollections as { id: string; name: string }[]).map((col) => (
+  {publicCollections.map((col) => (
  <Link
  key={col.id}
  href={`/stable/collection/${col.id}`}

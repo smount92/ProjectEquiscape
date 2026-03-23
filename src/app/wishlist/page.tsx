@@ -12,19 +12,6 @@ export const metadata = {
 };
 
 
-interface WishlistItem {
- id: string;
- notes: string | null;
- created_at: string;
- catalog_id: string | null;
- catalog_items: {
- title: string;
- maker: string;
- scale: string | null;
- item_type: string;
- } | null;
-}
-
 interface MarketplaceMatch {
  id: string;
  custom_name: string;
@@ -58,7 +45,7 @@ export default async function WishlistPage() {
  .eq("user_id", user.id)
  .order("created_at", { ascending: false });
 
- const items = (rawItems as unknown as WishlistItem[]) ?? [];
+ const items = rawItems ?? [];
 
  // 2. THE MATCHMAKER ENGINE
  // For each wishlist item, find public horses that match the catalog_id AND are for sale/trade
@@ -84,19 +71,7 @@ export default async function WishlistPage() {
  .in("catalog_id", catalogIds)
  .limit(200);
 
- interface RawMatch {
- id: string;
- custom_name: string;
- trade_status: string;
- listing_price: number | null;
- marketplace_notes: string | null;
- catalog_id: string | null;
- owner_id: string;
- users: { alias_name: string } | null;
- horse_images: { image_url: string; angle_profile: string }[];
- }
-
- const matches = (rawMatches as unknown as RawMatch[]) ?? [];
+ const matches = rawMatches ?? [];
 
  // Collect thumbnail URLs for signed URL generation
  const thumbUrls: string[] = [];

@@ -1,24 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-interface ExportHorse {
-    id: string;
-    custom_name: string;
-    finish_type: string;
-    condition_grade: string;
-    sculptor: string | null;
-    trade_status: string | null;
-    listing_price: number | null;
-    created_at: string;
-    catalog_items: { title: string; maker: string; item_type: string; attributes: Record<string, unknown> } | null;
-    user_collections: { name: string } | null;
-    financial_vault: {
-        purchase_price: number | null;
-        estimated_current_value: number | null;
-        insurance_notes: string | null;
-    }[];
-}
-
 function escapeCSV(value: string | null | undefined): string {
     if (value === null || value === undefined) return "";
     const str = String(value);
@@ -62,7 +44,7 @@ export async function GET() {
         );
     }
 
-    const horses = (rawHorses as unknown as ExportHorse[]) ?? [];
+    const horses = rawHorses ?? [];
 
     // CSV Header
     const headers = [
@@ -86,15 +68,15 @@ export async function GET() {
 
     // Build CSV rows
     const rows = horses.map((horse) => {
-        const vault = horse.financial_vault?.[0];
+        const vault = horse.financial_vault;
 
         return [
             escapeCSV(horse.custom_name),
             escapeCSV(horse.catalog_items?.title),
             escapeCSV(horse.catalog_items?.maker),
             escapeCSV(horse.catalog_items?.item_type === "plastic_release" ? horse.catalog_items.title : ""),
-            escapeCSV(horse.catalog_items?.attributes?.model_number as string | null | undefined),
-            escapeCSV(horse.catalog_items?.attributes?.color_description as string | null | undefined),
+            escapeCSV((horse.catalog_items?.attributes as Record<string, unknown> | null)?.model_number as string | null | undefined),
+            escapeCSV((horse.catalog_items?.attributes as Record<string, unknown> | null)?.color_description as string | null | undefined),
             escapeCSV(horse.condition_grade),
             escapeCSV(horse.finish_type),
             escapeCSV(horse.sculptor),
