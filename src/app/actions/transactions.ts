@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import type { Database } from "@/lib/types/database.generated";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -9,6 +10,8 @@ import { createNotification } from "@/app/actions/notifications";
 import { createActivityEvent } from "@/app/actions/activity";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
+
+type TransactionInsert = Database["public"]["Tables"]["transactions"]["Insert"];
 
 // ============================================================
 // UNIVERSAL TRUST ENGINE — Server Actions
@@ -36,7 +39,7 @@ export async function createTransaction(data: {
 }): Promise<{ success: boolean; transactionId?: string; error?: string }> {
     const admin = getAdminClient();
 
-    const insertData: Record<string, unknown> = {
+    const insertData: TransactionInsert = {
         type: data.type,
         status: data.status || "completed",
         party_a_id: data.partyAId,
@@ -45,7 +48,7 @@ export async function createTransaction(data: {
     if (data.horseId) insertData.horse_id = data.horseId;
     if (data.commissionId) insertData.commission_id = data.commissionId;
     if (data.conversationId) insertData.conversation_id = data.conversationId;
-    if (data.metadata) insertData.metadata = data.metadata;
+    if (data.metadata) insertData.metadata = data.metadata as TransactionInsert["metadata"];
     if (data.status === "completed") insertData.completed_at = new Date().toISOString();
 
     const { data: row, error } = await admin
@@ -79,7 +82,7 @@ export async function completeTransaction(
     // Immediately refresh Blue Book prices so the sale appears in /market
     try {
         const admin = getAdminClient();
-        await admin.rpc("refresh_market_prices" as string);
+        await admin.rpc("refresh_market_prices");
     } catch {
         // Non-blocking — cron will catch it within 6 hours
         logger.warn("completeTransaction", "Market price refresh failed (non-blocking)");

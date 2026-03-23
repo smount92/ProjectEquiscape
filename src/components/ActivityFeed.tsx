@@ -15,7 +15,8 @@ export interface FeedItemData {
  horseId: string | null;
  horseName: string | null;
  thumbnailUrl: string | null;
- metadata: Record<string, unknown> | null;
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ metadata: any;
  createdAt: string;
  likesCount: number;
  isLiked: boolean;

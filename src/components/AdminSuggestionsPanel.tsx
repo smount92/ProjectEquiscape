@@ -5,7 +5,7 @@ import { reviewSuggestion } from"@/app/actions/suggestions";
 
 interface Suggestion {
  id: string;
- suggestion_type:"mold" |"release" |"resin";
+ suggestion_type: string;
  name: string;
  details: string | null;
  status: string;

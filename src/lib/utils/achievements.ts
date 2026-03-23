@@ -52,30 +52,39 @@ const TRIGGER_RULES: Record<AchievementTrigger, BadgeCheck[]> = {
         {
             badgeId: "shutterbug_1",
             check: async (admin, userId) => {
+                const { data: horses } = await admin.from("user_horses").select("id").eq("owner_id", userId);
+                if (!horses || horses.length === 0) return false;
+                const horseIds = horses.map((h: { id: string }) => h.id);
                 const { count } = await admin
                     .from("horse_images")
                     .select("id", { count: "exact", head: true })
-                    .in("horse_id", admin.from("user_horses").select("id").eq("owner_id", userId));
+                    .in("horse_id", horseIds);
                 return (count ?? 0) >= 25;
             },
         },
         {
             badgeId: "shutterbug_2",
             check: async (admin, userId) => {
+                const { data: horses } = await admin.from("user_horses").select("id").eq("owner_id", userId);
+                if (!horses || horses.length === 0) return false;
+                const horseIds = horses.map((h: { id: string }) => h.id);
                 const { count } = await admin
                     .from("horse_images")
                     .select("id", { count: "exact", head: true })
-                    .in("horse_id", admin.from("user_horses").select("id").eq("owner_id", userId));
+                    .in("horse_id", horseIds);
                 return (count ?? 0) >= 100;
             },
         },
         {
             badgeId: "shutterbug_3",
             check: async (admin, userId) => {
+                const { data: horses } = await admin.from("user_horses").select("id").eq("owner_id", userId);
+                if (!horses || horses.length === 0) return false;
+                const horseIds = horses.map((h: { id: string }) => h.id);
                 const { count } = await admin
                     .from("horse_images")
                     .select("id", { count: "exact", head: true })
-                    .in("horse_id", admin.from("user_horses").select("id").eq("owner_id", userId));
+                    .in("horse_id", horseIds);
                 return (count ?? 0) >= 250;
             },
         },

@@ -336,31 +336,35 @@ export async function claimParkedHorse(pin: string): Promise<{
         // Close state machine: if this claim came from a commerce offer flow,
         // complete the funds_verified transaction
         try {
-            const admin2 = getAdminClient();
-            const { data: offerTxn } = await admin2
-                .from("transactions")
-                .select("id")
-                .eq("horse_id", result.horse_id)
-                .eq("status", "funds_verified")
-                .maybeSingle();
-
-            if (offerTxn) {
-                await admin2
+            if (result.horse_id) {
+                const admin2 = getAdminClient();
+                const { data: offerTxn } = await admin2
                     .from("transactions")
-                    .update({ status: "completed", completed_at: new Date().toISOString() })
-                    .eq("id", (offerTxn as { id: string }).id);
+                    .select("id")
+                    .eq("horse_id", result.horse_id)
+                    .eq("status", "funds_verified")
+                    .maybeSingle();
+
+                if (offerTxn) {
+                    await admin2
+                        .from("transactions")
+                        .update({ status: "completed", completed_at: new Date().toISOString() })
+                        .eq("id", (offerTxn as { id: string }).id);
+                }
             }
         } catch { /* Non-blocking: state machine closure is best-effort */ }
 
         // Notification (non-critical)
         try {
-            await admin.from("notifications").insert({
-                user_id: result.sender_id,
-                type: "transfer_claimed",
-                actor_id: user.id,
-                content: `@${result.receiver_alias} claimed ${result.horse_name} via PIN!`,
-                horse_id: result.horse_id,
-            });
+            if (result.sender_id) {
+                await admin.from("notifications").insert({
+                    user_id: result.sender_id,
+                    type: "transfer_claimed",
+                    actor_id: user.id,
+                    content: `@${result.receiver_alias} claimed ${result.horse_name} via PIN!`,
+                    horse_id: result.horse_id,
+                });
+            }
         } catch { /* Non-blocking */ }
 
         revalidatePath("/dashboard");

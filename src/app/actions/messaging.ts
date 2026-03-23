@@ -6,6 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sendNewMessageNotification } from "@/lib/email";
 import { sanitizeText } from "@/lib/utils/validation";
+import type { Database } from "@/lib/types/database.generated";
+
+type ConversationInsert = Database["public"]["Tables"]["conversations"]["Insert"];
 
 /**
  * Create or find an existing conversation between buyer and seller for a specific horse.
@@ -72,7 +75,7 @@ export async function createOrFindConversation(
     }
 
     // Create new conversation
-    const insertData: Record<string, unknown> = {
+    const insertData: ConversationInsert = {
         buyer_id: user.id,
         seller_id: sellerId,
     };

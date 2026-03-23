@@ -31,7 +31,8 @@ export async function toggleGroupPostLike(postId: string): Promise<{ success: bo
     try {
         const { user } = await requireAuth();
         const admin = getAdminClient();
-        const { data, error } = await admin.rpc("toggle_group_post_like", {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await admin.rpc("toggle_group_post_like" as any, {
             p_post_id: postId,
             p_user_id: user.id,
         });
@@ -51,7 +52,8 @@ export async function toggleCommentLike(commentId: string): Promise<{ success: b
     try {
         const { user } = await requireAuth();
         const admin = getAdminClient();
-        const { data, error } = await admin.rpc("toggle_comment_like", {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await admin.rpc("toggle_comment_like" as any, {
             p_comment_id: commentId,
             p_user_id: user.id,
         });

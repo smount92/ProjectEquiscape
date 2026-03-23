@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import type { Database } from "@/lib/types/database.generated";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -8,6 +9,9 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
+
+type UserHorseInsert = Database["public"]["Tables"]["user_horses"]["Insert"];
+type FinancialVaultInsert = Database["public"]["Tables"]["financial_vault"]["Insert"];
 
 const ACTIVE_TRANSACTION_STATUSES = ["offer_made", "pending_payment", "funds_verified"];
 
@@ -238,7 +242,7 @@ export async function updateHorseAction(horseId: string, data: {
             if (data.hasExistingVault) {
                 await supabase.from("financial_vault").update(vaultData).eq("horse_id", horseId);
             } else {
-                await supabase.from("financial_vault").insert(vaultData);
+                await supabase.from("financial_vault").insert(vaultData as unknown as FinancialVaultInsert);
             }
         }
 
@@ -304,15 +308,15 @@ export async function createHorseRecord(data: {
         return { success: false, error: "Finish type is required for model horses." };
     }
 
-    const horseInsert: Record<string, unknown> = {
+    const horseInsert: UserHorseInsert = {
         owner_id: user.id,
         custom_name: sanitizeText(data.customName),
         asset_category: category,
-        finish_type: data.finishType || null,
+        finish_type: (data.finishType || null) as UserHorseInsert["finish_type"],
         condition_grade: data.conditionGrade || null,
         is_public: data.isPublic,
         visibility: data.isPublic ? "public" : "private",
-        trade_status: data.tradeStatus || null,
+        trade_status: (data.tradeStatus || null) as UserHorseInsert["trade_status"],
         life_stage: data.lifeStage || "completed",
     };
 
@@ -348,7 +352,7 @@ export async function createHorseRecord(data: {
     // Insert financial vault if any data provided
     const hasVault = data.purchasePrice || data.purchaseDate || data.estimatedValue || data.insuranceNotes || data.purchaseDateText;
     if (hasVault) {
-        const vaultInsert: Record<string, unknown> = { horse_id: horse.id };
+        const vaultInsert: FinancialVaultInsert = { horse_id: horse.id };
         if (data.purchasePrice) vaultInsert.purchase_price = data.purchasePrice;
         if (data.purchaseDate) vaultInsert.purchase_date = data.purchaseDate;
         if (data.estimatedValue) vaultInsert.estimated_current_value = data.estimatedValue;
@@ -577,10 +581,10 @@ export async function quickAddHorse(data: {
     }
     if (!horseName) horseName = "Unnamed Horse";
 
-    const horseInsert: Record<string, unknown> = {
+    const horseInsert: UserHorseInsert = {
         owner_id: user.id,
         custom_name: horseName,
-        finish_type: data.finishType,
+        finish_type: data.finishType as UserHorseInsert["finish_type"],
         condition_grade: data.conditionGrade,
         is_public: false,
         trade_status: "Not for Sale",

@@ -1,7 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
-
+import type { Json } from "@/lib/types/database.generated";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -18,7 +18,7 @@ interface FeedItem {
     horseId: string | null;
     horseName: string | null;
     thumbnailUrl: string | null;
-    metadata: Record<string, unknown> | null;
+    metadata: Json | null;
     createdAt: string;
     likesCount: number;
     isLiked: boolean;
@@ -33,7 +33,7 @@ export async function createActivityEvent(data: {
     eventType: string;
     horseId?: string;
     targetId?: string;
-    metadata?: Record<string, unknown>;
+    metadata?: Json;
 }): Promise<void> {
     try {
         const supabaseAdmin = getAdminClient();
@@ -127,7 +127,7 @@ export async function getActivityFeed(limit: number = 30, cursor?: string): Prom
         actor_id: string;
         event_type: string;
         horse_id: string | null;
-        metadata: Record<string, unknown> | null;
+        metadata: Json | null;
         created_at: string;
         likes_count: number;
         image_urls: string[] | null;
@@ -262,7 +262,7 @@ export async function getFollowingFeed(limit: number = 30, cursor?: string): Pro
         actor_id: string;
         event_type: string;
         horse_id: string | null;
-        metadata: Record<string, unknown> | null;
+        metadata: Json | null;
         created_at: string;
         likes_count: number;
         image_urls: string[] | null;

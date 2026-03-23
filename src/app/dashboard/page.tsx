@@ -26,26 +26,6 @@ import ShowHistoryWidget from"@/components/ShowHistoryWidget";
 import { getShowHistory } from"@/app/actions/shows";
 
 
-// Types for the dashboard query results
-interface HorseWithDetails {
- id: string;
- custom_name: string;
- finish_type: string;
- condition_grade: string;
- created_at: string;
- collection_id: string | null;
- sculptor: string | null;
- trade_status: string;
- asset_category: string;
- catalog_items: { title: string; maker: string; item_type: string } | null;
- horse_images: { image_url: string; angle_profile: string }[];
-}
-
-interface UserCollection {
- id: string;
- name: string;
- description: string | null;
-}
 
 const HORSES_PER_PAGE = 48;
 
@@ -140,16 +120,11 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  ]);
 
  const totalHorseCount = summaryResult.count ?? 0;
- const allHorsesSummary =
- (summaryResult.data as unknown as {
- id: string;
- collection_id: string | null;
- catalog_items: { title: string; maker: string; item_type: string } | null;
- }[]) ?? [];
- const horses = (horsesResult.data as unknown as HorseWithDetails[]) ?? [];
- const collections = (collectionsResult.data as unknown as UserCollection[]) ?? [];
+ const allHorsesSummary = summaryResult.data ?? [];
+ const horses = horsesResult.data ?? [];
+ const collections = collectionsResult.data ?? [];
  const totalShowRecords = showRecordsResult.count;
- const convoIds = (convosResult.data ?? []).map((c: { id: string }) => c.id);
+ const convoIds = (convosResult.data ?? []).map((c) => c.id);
  const totalPages = Math.ceil(totalHorseCount / HORSES_PER_PAGE);
 
  // ── Round 2: Dependent queries in parallel ──
@@ -243,8 +218,8 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  return {
  id: horse.id,
  customName: horse.custom_name,
- finishType: horse.finish_type,
- conditionGrade: horse.condition_grade,
+ finishType: horse.finish_type ?? "OF",
+ conditionGrade: horse.condition_grade ?? "",
  createdAt: horse.created_at,
  refName,
  releaseLine,

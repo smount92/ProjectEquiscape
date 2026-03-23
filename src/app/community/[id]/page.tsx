@@ -17,48 +17,6 @@ import MessageSellerButton from"@/components/MessageSellerButton";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
-// Types — mirrors the private passport but WITHOUT VaultData
-interface PublicHorseDetail {
- id: string;
- owner_id: string;
- custom_name: string;
- finish_type: string | null;
- condition_grade: string | null;
- asset_category: string;
- is_public: boolean;
- created_at: string;
- finishing_artist: string | null;
- finishing_artist_verified: boolean;
- edition_number: number | null;
- edition_size: number | null;
- trade_status: string | null;
- listing_price: number | null;
- catalog_id: string | null;
- users: {
- alias_name: string;
- } | null;
- catalog_items: {
- title: string;
- maker: string;
- scale: string | null;
- item_type: string;
- attributes: Record<string, unknown>;
- } | null;
- finish_details: string | null;
- public_notes: string | null;
- assigned_breed: string | null;
- assigned_gender: string | null;
- assigned_age: string | null;
- regional_id: string | null;
-}
-
-interface HorseImage {
- id: string;
- image_url: string;
- angle_profile: string;
- uploaded_at: string;
-}
-
 const ANGLE_LABELS: Record<string, string> = {
  Primary_Thumbnail:"Near-Side",
  Left_Side:"Left Side",
@@ -115,12 +73,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  .eq("angle_profile","Primary_Thumbnail")
  .single();
 
- const h = horse as unknown as {
- custom_name: string;
- finish_type: string | null;
- condition_grade: string | null;
- catalog_items: { title: string; maker: string } | null;
- };
+ const h = horse;
 
  const title = `${h.custom_name} — Model Horse Hub`;
  const catalogInfo = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` :"";
@@ -186,7 +139,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  notFound();
  }
 
- const horse = rawHorse as unknown as PublicHorseDetail;
+ const horse = rawHorse;
 
  // Fetch all images
  const { data: rawImages } = await supabase
@@ -195,7 +148,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  .eq("horse_id", horseId)
  .order("uploaded_at");
 
- const images = (rawImages as unknown as HorseImage[]) ?? [];
+ const images = rawImages ?? [];
 
  // Sort by angle priority
  images.sort((a, b) => {
@@ -248,23 +201,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  .order("show_date", { ascending: false, nullsFirst: false });
 
  const showRecords = (rawRecords ?? []).map(
- (r: {
- id: string;
- show_name: string;
- show_date: string | null;
- division: string | null;
- class_name: string | null;
- placing: string | null;
- ribbon_color: string | null;
- judge_name: string | null;
- is_nan: boolean;
- notes: string | null;
- show_location: string | null;
- section_name: string | null;
- award_category: string | null;
- competition_level: string | null;
- show_date_text: string | null;
- }) => ({
+ (r) => ({
  id: r.id,
  showName: r.show_name,
  showDate: r.show_date,
@@ -291,20 +228,21 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
 
  const pedigree = rawPedigree
  ? {
- id: rawPedigree.id as string,
- sireName: (rawPedigree as { sire_name: string | null }).sire_name,
- damName: (rawPedigree as { dam_name: string | null }).dam_name,
- sireId: (rawPedigree as { sire_id: string | null }).sire_id,
- damId: (rawPedigree as { dam_id: string | null }).dam_id,
- sculptor: (rawPedigree as { sculptor: string | null }).sculptor,
- castNumber: (rawPedigree as { cast_number: string | null }).cast_number,
- editionSize: (rawPedigree as { edition_size: string | null }).edition_size,
- lineageNotes: (rawPedigree as { lineage_notes: string | null }).lineage_notes,
+ id: rawPedigree.id,
+ sireName: rawPedigree.sire_name,
+ damName: rawPedigree.dam_name,
+ sireId: rawPedigree.sire_id,
+ damId: rawPedigree.dam_id,
+ sculptor: rawPedigree.sculptor,
+ castNumber: rawPedigree.cast_number,
+editionSize: rawPedigree.edition_size,
+ lineageNotes: rawPedigree.lineage_notes,
  }
  : null;
 
  // Reference display info
  const cat = horse.catalog_items;
+ const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
  const refInfo = cat
  ? {
  type: cat.item_type ==="artist_resin" ?"Artist Resin" :"Mold",
@@ -313,9 +251,9 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  scale: cat.scale ||"Unknown",
  extra:
  cat.item_type ==="artist_resin"
- ? (cat.attributes?.cast_medium as string | null)
- : cat.attributes?.release_year_start
- ? `First released ${cat.attributes.release_year_start}`
+ ? (attrs.cast_medium as string | null)
+ : attrs.release_year_start
+ ? `First released ${attrs.release_year_start}`
  : null,
  }
  : null;
@@ -324,10 +262,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  cat && cat.item_type ==="plastic_release"
  ? {
  name: cat.title,
- modelNumber: cat.attributes?.model_number as string | null,
- color: cat.attributes?.color_description as string | null,
- yearStart: cat.attributes?.release_year_start as number | null,
- yearEnd: cat.attributes?.release_year_end as number | null,
+ modelNumber: attrs.model_number as string | null,
+ color: attrs.color_description as string | null,
+ yearStart: attrs.release_year_start as number | null,
+ yearEnd: attrs.release_year_end as number | null,
  }
  : null;
 

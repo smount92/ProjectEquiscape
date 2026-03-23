@@ -32,12 +32,12 @@ export async function getMarketPrice(catalogId: string, finishType?: string): Pr
     const supabase = await createClient();
 
     let query = supabase
-        .from("mv_market_prices" as string)
+        .from("mv_market_prices")
         .select("*")
         .eq("catalog_id", catalogId);
 
     if (finishType) {
-        query = query.eq("finish_type", finishType);
+        query = query.eq("finish_type", finishType as "OF" | "Custom" | "Artist Resin");
     }
 
     const { data } = await query.limit(1).maybeSingle();
@@ -91,11 +91,11 @@ export async function searchMarketPrices(query?: string, options?: {
 
     // First get all market data rows (now keyed by catalog_id + finish_type)
     let priceQuery = supabase
-        .from("mv_market_prices" as string)
+        .from("mv_market_prices")
         .select("*");
 
     if (options?.finishType) {
-        priceQuery = priceQuery.eq("finish_type", options.finishType);
+        priceQuery = priceQuery.eq("finish_type", options.finishType as "OF" | "Custom" | "Artist Resin");
     }
 
     if (options?.lifeStage) {
@@ -216,7 +216,7 @@ export async function refreshMarketPrices(): Promise<{ success: boolean; error?:
         return { success: false, error: "Admin access required." };
     }
 
-    const { error } = await supabase.rpc("refresh_market_prices" as string);
+    const { error } = await supabase.rpc("refresh_market_prices");
     if (error) return { success: false, error: error.message };
 
     return { success: true };

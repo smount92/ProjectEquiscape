@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
+import type { Database } from "@/lib/types/database.generated";
+
+type CatalogItemInsert = Database["public"]["Tables"]["catalog_items"]["Insert"];
+type CatalogItemUpdate = Database["public"]["Tables"]["catalog_items"]["Update"];
 
 // ── Type definitions ──
 
@@ -578,16 +582,16 @@ async function applyApprovedSuggestion(
 
     if (s.suggestion_type === "correction" && s.catalog_item_id) {
         // Apply field changes to catalog_items
-        const updates: Record<string, unknown> = {};
+        const updates: CatalogItemUpdate = {};
         for (const [key, value] of Object.entries(
-            s.field_changes
+            s.field_changes as Record<string, unknown>
         )) {
             if (
                 typeof value === "object" &&
                 value !== null &&
                 "to" in value
             ) {
-                updates[key] = (value as { to: unknown }).to;
+                (updates as Record<string, unknown>)[key] = (value as { to: unknown }).to;
             }
         }
         if (Object.keys(updates).length > 0) {
@@ -606,7 +610,7 @@ async function applyApprovedSuggestion(
     } else if (s.suggestion_type === "addition") {
         const { data: newItem } = await admin
             .from("catalog_items")
-            .insert(s.field_changes)
+            .insert(s.field_changes as unknown as CatalogItemInsert)
             .select("id")
             .single();
         catalogItemId = newItem
@@ -631,7 +635,7 @@ async function applyApprovedSuggestion(
     });
 
     // Increment user's approved count atomically
-    await admin.rpc("increment_approved_suggestions" as string, {
+    await admin.rpc("increment_approved_suggestions", {
         target_user_id: userId,
     });
 

@@ -6,34 +6,6 @@ import { getPublicImageUrls } from"@/lib/utils/storage";
 import ShowRingGrid from"@/components/ShowRingGrid";
 import FeaturedHorseCard from"@/components/FeaturedHorseCard";
 
-// Types
-interface CommunityHorse {
- id: string;
- owner_id: string;
- custom_name: string;
- finish_type: string;
- condition_grade: string;
- asset_category: string;
- created_at: string;
- sculptor: string | null;
- trade_status: string;
- listing_price: number | null;
- marketplace_notes: string | null;
- catalog_id: string | null;
- users: {
- alias_name: string;
- } | null;
- catalog_items: {
- title: string;
- maker: string;
- scale: string | null;
- item_type: string;
- } | null;
- horse_images: {
- image_url: string;
- angle_profile: string;
- }[];
-}
 
 export const metadata = {
  title:"The Show Ring — Model Horse Hub",
@@ -95,10 +67,10 @@ async function ShowRingContent({
  query = query.or(`custom_name.ilike.%${searchParams.q}%,sculptor.ilike.%${searchParams.q}%`);
  }
  if (searchParams.finishType && searchParams.finishType !=="all") {
- query = query.eq("finish_type", searchParams.finishType);
+ query = query.eq("finish_type", searchParams.finishType as "OF" | "Custom" | "Artist Resin");
  }
  if (searchParams.tradeStatus && searchParams.tradeStatus !=="all") {
- query = query.eq("trade_status", searchParams.tradeStatus);
+ query = query.eq("trade_status", searchParams.tradeStatus as any);
  }
 
  // Sorting
@@ -112,9 +84,9 @@ async function ShowRingContent({
 
  // Filter out blocked users
  const { data: myBlocks } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", userId);
- const blockedOwnerIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
+ const blockedOwnerIds = new Set((myBlocks ?? []).map((b) => b.blocked_id));
 
- const horses = ((rawHorses as unknown as CommunityHorse[]) ?? []).filter((h) => !blockedOwnerIds.has(h.owner_id));
+ const horses = (rawHorses ?? []).filter((h) => !blockedOwnerIds.has(h.owner_id));
 
  // Collect all thumbnail image URLs and generate signed URLs
  const thumbnailUrls: string[] = [];
@@ -130,13 +102,13 @@ async function ShowRingContent({
  // ================================================================
  // SOCIAL: Fetch favorite counts + user's own favorites
  // ================================================================
- const horseIds = horses.map((h: CommunityHorse) => h.id);
+ const horseIds = horses.map((h) => h.id);
 
  // Get all favorites for displayed horses (to count)
  const { data: allFavs } = await supabase.from("horse_favorites").select("horse_id").in("horse_id", horseIds);
 
  const favCountMap = new Map<string, number>();
- (allFavs ?? []).forEach((f: { horse_id: string }) => {
+ (allFavs ?? []).forEach((f) => {
  favCountMap.set(f.horse_id, (favCountMap.get(f.horse_id) || 0) + 1);
  });
 
@@ -147,7 +119,7 @@ async function ShowRingContent({
  .eq("user_id", userId)
  .in("horse_id", horseIds);
 
- const userFavSet = new Set((userFavs ?? []).map((f: { horse_id: string }) => f.horse_id));
+ const userFavSet = new Set((userFavs ?? []).map((f) => f.horse_id));
 
  // Hoofprint counts (for badge)
  const { data: hoofprintData } = await supabase
@@ -157,8 +129,8 @@ async function ShowRingContent({
  .eq("is_public", true); // v_horse_hoofprint uses is_public from source tables
 
  const hoofprintCountMap = new Map<string, number>();
- (hoofprintData ?? []).forEach((e: { horse_id: string }) => {
- hoofprintCountMap.set(e.horse_id, (hoofprintCountMap.get(e.horse_id) || 0) + 1);
+ (hoofprintData ?? []).forEach((e) => {
+ if (e.horse_id) hoofprintCountMap.set(e.horse_id, (hoofprintCountMap.get(e.horse_id) || 0) + 1);
  });
 
  // Build display data
@@ -180,8 +152,8 @@ async function ShowRingContent({
  id: horse.id,
  ownerId: horse.owner_id,
  customName: horse.custom_name,
- finishType: horse.finish_type,
- conditionGrade: horse.condition_grade,
+ finishType: horse.finish_type ?? "OF",
+ conditionGrade: horse.condition_grade ?? "",
  createdAt: horse.created_at,
  refName,
  releaseLine,
@@ -239,13 +211,7 @@ async function ShowRingContent({
  .single();
 
  if (fHorse) {
- const h = fHorse as unknown as {
- id: string;
- custom_name: string;
- finish_type: string;
- users: { alias_name: string };
- horse_images: { image_url: string; angle_profile: string }[];
- };
+ const h = fHorse;
  const thumb = h.horse_images?.find((i) => i.angle_profile ==="Primary_Thumbnail");
  const imgUrl = thumb?.image_url || h.horse_images?.[0]?.image_url;
  let signedFeatUrl: string | null = null;
@@ -260,7 +226,7 @@ async function ShowRingContent({
  description: feat.description,
  ownerAlias: h.users.alias_name,
  thumbnailUrl: signedFeatUrl,
- finishType: h.finish_type,
+ finishType: h.finish_type ?? "OF",
  };
  }
  }

@@ -4,6 +4,9 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
+import type { Database } from "@/lib/types/database.generated";
+
+type UserHorseInsert = Database["public"]["Tables"]["user_horses"]["Insert"];
 
 // ============================================================
 // Help Me ID — Server Actions
@@ -234,8 +237,9 @@ export async function addIdentifiedHorse(
         const s = suggestion as unknown as SuggestionWithCatalog;
 
         let customName = "Identified Model";
-        const horseInsert: Record<string, unknown> = {
+        const horseInsert: UserHorseInsert = {
             owner_id: user.id,
+            custom_name: "Identified Model",
             finish_type: "OF",
             condition_grade: "Not Graded",
             is_public: false,

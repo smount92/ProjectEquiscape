@@ -25,19 +25,19 @@ export async function GET(request: NextRequest) {
 
     try {
         const admin = getAdminClient();
-        await admin.rpc("refresh_market_prices" as string);
+        await admin.rpc("refresh_market_prices");
 
         // Auto-unpark horses with expired transfer PINs (Trn-04 fix)
         let unparkResult = null;
         try {
-            const { data } = await admin.rpc("auto_unpark_expired_transfers" as string);
+            const { data } = await admin.rpc("auto_unpark_expired_transfers");
             unparkResult = data;
         } catch { /* non-blocking */ }
 
         // System garbage collection
         let gcResult = null;
         try {
-            const { data } = await admin.rpc("cleanup_system_garbage" as string);
+            const { data } = await admin.rpc("cleanup_system_garbage");
             gcResult = data;
         } catch { /* non-blocking */ }
 

@@ -6,6 +6,9 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
+import type { Database } from "@/lib/types/database.generated";
+
+type EventEntryInsert = Database["public"]["Tables"]["event_entries"]["Insert"];
 
 // ============================================================
 // UNIFIED COMPETITION — Server Actions
@@ -168,8 +171,8 @@ export async function getShowEntries(showId: string): Promise<{
         .in("id", horseIds);
 
     const horseMap = new Map<string, { name: string; finish: string }>();
-    (horses ?? []).forEach((h: { id: string; custom_name: string; finish_type: string }) => {
-        horseMap.set(h.id, { name: h.custom_name, finish: h.finish_type });
+    (horses ?? []).forEach((h: { id: string; custom_name: string; finish_type: string | null }) => {
+        horseMap.set(h.id, { name: h.custom_name, finish: h.finish_type || "OF" });
     });
 
     // Check if current user has voted on each entry
@@ -341,7 +344,7 @@ export async function enterShow(
         }
     }
 
-    const insertData: Record<string, unknown> = {
+    const insertData: EventEntryInsert = {
         event_id: showId,
         horse_id: horseId,
         user_id: user.id,
@@ -638,6 +641,7 @@ export async function batchRecordResults(records: {
 
     const inserts = validRecords.map(r => ({
         horse_id: r.horseId,
+        user_id: user.id,
         show_name: r.showName,
         show_date: r.showDate,
         division: r.division,

@@ -62,7 +62,7 @@ export async function getHoofprint(horseId: string): Promise<{
         .order("created_at", { ascending: false });
 
     // Fetch user aliases for all unique user IDs in the results
-    const userIds = [...new Set((rawTimeline ?? []).map((e: { user_id: string }) => e.user_id).filter(Boolean))];
+    const userIds = [...new Set((rawTimeline ?? []).map((e: { user_id: string | null }) => e.user_id).filter(Boolean))] as string[];
     let aliasMap = new Map<string, string>();
     if (userIds.length > 0) {
         const { data: users } = await supabase
@@ -73,21 +73,21 @@ export async function getHoofprint(horseId: string): Promise<{
     }
 
     const timeline: TimelineEvent[] = (rawTimeline ?? []).map((e: {
-        source_id: string; event_type: string; title: string; description: string | null;
-        event_date: string | null; metadata: Record<string, unknown>; is_public: boolean;
-        created_at: string; user_id: string; source_table: string;
+        source_id: string | null; event_type: string | null; title: string | null; description: string | null;
+        event_date: string | null; metadata: unknown; is_public: boolean | null;
+        created_at: string | null; user_id: string | null; source_table: string | null;
     }) => ({
-        id: e.source_id,
-        eventType: e.event_type,
-        title: e.title,
+        id: e.source_id || "",
+        eventType: e.event_type || "",
+        title: e.title || "",
         description: e.description,
         eventDate: e.event_date,
-        metadata: e.metadata || {},
-        isPublic: e.is_public,
-        createdAt: e.created_at,
-        userAlias: aliasMap.get(e.user_id) || "Unknown",
-        userId: e.user_id,
-        sourceTable: e.source_table,
+        metadata: (e.metadata as Record<string, unknown>) || {},
+        isPublic: e.is_public ?? true,
+        createdAt: e.created_at || "",
+        userAlias: e.user_id ? (aliasMap.get(e.user_id) || "Unknown") : "Unknown",
+        userId: e.user_id || "",
+        sourceTable: e.source_table || undefined,
     }));
 
     // Fetch ownership chain (direct table query — unchanged)
@@ -100,7 +100,7 @@ export async function getHoofprint(horseId: string): Promise<{
     const ownershipChain: OwnershipRecord[] = (rawOwnership ?? []).map((o: {
         id: string; owner_alias: string; owner_id: string | null; acquired_at: string;
         released_at: string | null; acquisition_type: string; sale_price: number | null;
-        is_price_public: boolean; notes: string | null;
+        is_price_public: boolean | null; notes: string | null;
     }) => ({
         id: o.id,
         ownerAlias: o.owner_alias,
@@ -109,7 +109,7 @@ export async function getHoofprint(horseId: string): Promise<{
         releasedAt: o.released_at,
         acquisitionType: o.acquisition_type,
         salePrice: o.is_price_public ? o.sale_price : null,
-        isPricePublic: o.is_price_public,
+        isPricePublic: o.is_price_public ?? false,
         notes: o.notes,
     }));
 
@@ -387,13 +387,15 @@ export async function claimTransfer(transferCode: string): Promise<{
 
     // Background: Send notifications (non-critical — OK to fail)
     try {
-        await admin.from("notifications").insert({
-            user_id: result.sender_id,
-            type: "transfer_claimed",
-            actor_id: user.id,
-            content: `@${result.receiver_alias} claimed ${result.horse_name}!`,
-            horse_id: result.horse_id,
-        });
+        if (result.sender_id) {
+            await admin.from("notifications").insert({
+                user_id: result.sender_id,
+                type: "transfer_claimed",
+                actor_id: user.id,
+                content: `@${result.receiver_alias} claimed ${result.horse_name}!`,
+                horse_id: result.horse_id,
+            });
+        }
     } catch { /* Non-blocking */ }
 
     revalidatePath("/dashboard");

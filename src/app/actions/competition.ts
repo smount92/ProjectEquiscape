@@ -59,7 +59,7 @@ export async function getNanQualifications(horseId: string): Promise<NanQualific
 
     const { data } = await supabase
         .from("show_records")
-        .select("id, horse_id, show_name, placement, class_name, nan_card_type, nan_year, verification_tier")
+        .select("id, horse_id, show_name, placing, class_name, nan_card_type, nan_year, verification_tier")
         .eq("horse_id", horseId)
         .eq("is_nan_qualifying", true)
         .order("nan_year", { ascending: false });
@@ -81,7 +81,7 @@ export async function getNanQualifications(horseId: string): Promise<NanQualific
         nanYear: r.nan_year as number,
         cardType: r.nan_card_type as string,
         showName: r.show_name as string,
-        placement: r.placement as string,
+        placement: r.placing as string,
         className: r.class_name as string | null,
         recordId: r.id as string,
         verificationTier: r.verification_tier as string,
@@ -178,7 +178,7 @@ export async function addShowRecord(data: {
         user_id: user.id,
         show_name: data.showName,
         show_date: data.showDate,
-        placement: data.placement,
+        placing: data.placement,
         show_type: data.showType || "photo_other",
         sanctioning_body: data.sanctioningBody || null,
         class_name: data.className || null,
@@ -445,7 +445,7 @@ export async function convertShowStringToResults(
                 user_id: user.id,
                 show_name: ss.name,
                 show_date: showDate,
-                placement: r.placement,
+                placing: r.placement,
                 class_name: entry.class_name,
                 total_entries: r.totalEntries || null,
                 is_nan_qualifying: r.isNanQualifying || false,
