@@ -18,6 +18,7 @@ export async function GET() {
                 financial_vault(purchase_price, purchase_date, estimated_current_value, insurance_notes)
             `)
             .eq("owner_id", user.id)
+            .is("deleted_at", null)
             .order("custom_name");
 
         // Fetch owner profile for report header

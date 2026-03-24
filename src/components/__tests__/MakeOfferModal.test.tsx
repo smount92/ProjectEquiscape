@@ -109,6 +109,10 @@ describe("MakeOfferModal", () => {
  const { makeOffer } = await import("@/app/actions/transactions");
  render(<MakeOfferModal {...defaultProps} />);
 
+ // Must check the disclaimer checkbox first
+ const disclaimer = screen.getByRole("checkbox", { name: /does not process payments/i });
+ await user.click(disclaimer);
+
  await user.click(screen.getByText("Submit Offer"));
 
  expect(makeOffer).toHaveBeenCalledWith({

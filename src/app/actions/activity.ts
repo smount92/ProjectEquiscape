@@ -86,7 +86,7 @@ export async function createTextPost(text: string, imageUrls?: string[]): Promis
             try {
                 const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
                 await parseAndNotifyMentions(trimmed, userId, actorName, "/feed");
-            } catch { /* non-blocking */ }
+            } catch (err) { logger.error("Activity", "Background task failed", err); }
         });
     }
 

@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -383,7 +385,7 @@ export async function claimTransfer(transferCode: string): Promise<{
                 sale_price: result.sale_price || null,
             },
         });
-    } catch { /* Non-blocking */ }
+    } catch (err) { logger.error("Hoofprint", "Background task failed", err); }
 
     // Background: Send notifications (non-critical — OK to fail)
     try {
@@ -396,7 +398,7 @@ export async function claimTransfer(transferCode: string): Promise<{
                 horse_id: result.horse_id,
             });
         }
-    } catch { /* Non-blocking */ }
+    } catch (err) { logger.error("Hoofprint", "Background task failed", err); }
 
     revalidatePath("/dashboard");
     revalidatePath(`/stable/${result.horse_id}`);

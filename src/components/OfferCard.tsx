@@ -197,7 +197,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  onClick={handleMarkPaid}
  disabled={saving}
  >
- {saving ?"…" :"💳 I Have Paid"}
+ {saving ?"…" :"💳 External Payment Sent"}
  </button>
  </div>
  )}
@@ -212,7 +212,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  onClick={handleVerify}
  disabled={saving}
  >
- {saving ?"Verifying…" :"✅ Confirm Funds & Release"}
+ {saving ?"Verifying…" :"✅ Acknowledge External Payment & Release"}
  </button>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"

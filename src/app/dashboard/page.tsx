@@ -101,7 +101,8 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  `,
  { count:"exact" },
  )
- .eq("owner_id", userId),
+ .eq("owner_id", userId)
+ .is("deleted_at", null),
  supabase
  .from("user_horses")
  .select(
@@ -112,6 +113,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  `,
  )
  .eq("owner_id", userId)
+ .is("deleted_at", null)
  .order("created_at", { ascending: false })
  .range(offset, offset + HORSES_PER_PAGE - 1),
  supabase.from("user_collections").select("id, name, description").eq("user_id", userId).order("name"),

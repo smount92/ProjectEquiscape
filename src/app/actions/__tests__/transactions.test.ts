@@ -71,40 +71,30 @@ describe("Commerce State Machine — transactions.ts", () => {
         });
 
         it("rejects when horse not found", async () => {
-            mockClient._mockQuery.single.mockResolvedValueOnce({ data: null, error: null });
+            // RPC returns error for missing horse
+            mockAdmin.rpc.mockResolvedValueOnce({ data: { success: false, error: "Horse not found or not for sale" }, error: null });
             const result = await makeOffer({ horseId: "h1", sellerId: "s1", amount: 100 });
             expect(result.success).toBe(false);
             expect(result.error).toMatch(/not found/i);
         });
 
         it("rejects when horse not For Sale", async () => {
-            mockClient._mockQuery.single.mockResolvedValueOnce({
-                data: { id: "h1", trade_status: "Not for Sale", custom_name: "Test", owner_id: "s1" },
-                error: null,
-            });
+            // RPC returns error for not-for-sale horse
+            mockAdmin.rpc.mockResolvedValueOnce({ data: { success: false, error: "Horse is not available for offers" }, error: null });
             const result = await makeOffer({ horseId: "h1", sellerId: "s1", amount: 100 });
             expect(result.success).toBe(false);
             expect(result.error).toMatch(/not available/i);
         });
 
         it("succeeds with valid offer on For Sale horse", async () => {
-            // Horse lookup (user supabase)
-            mockClient._mockQuery.single
-                .mockResolvedValueOnce({
-                    data: { id: "h1", trade_status: "For Sale", custom_name: "Trigger", owner_id: "s1" },
-                    error: null,
-                })
-                // Buyer profile (second .single call on mockClient)
-                .mockResolvedValueOnce({
-                    data: { alias_name: "BuyerAlias" },
-                    error: null,
-                });
-
-            // Admin: existing offer check
-            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
-            // Admin: transaction insert
-            mockAdmin._mockQuery.single.mockResolvedValueOnce({
-                data: { id: "txn-1" },
+            // RPC returns success
+            mockAdmin.rpc.mockResolvedValueOnce({
+                data: { success: true, transaction_id: "txn-1" },
+                error: null,
+            });
+            // Buyer profile for notification
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: { alias_name: "BuyerAlias" },
                 error: null,
             });
 
@@ -127,8 +117,14 @@ describe("Commerce State Machine — transactions.ts", () => {
             mockClient.auth.getUser.mockResolvedValueOnce({
                 data: { user: { id: "random-user", email: "r@test.com" } },
             });
+            // Admin: txn lookup
             mockAdmin._mockQuery.single.mockResolvedValueOnce({
                 data: { id: "txn-1", status: "offer_made", party_a_id: "seller-1", party_b_id: "buyer-1", horse_id: "h1", conversation_id: "c1", offer_amount: 100 },
+                error: null,
+            });
+            // RPC returns auth error
+            mockAdmin.rpc.mockResolvedValueOnce({
+                data: { success: false, error: "Only the seller can respond" },
                 error: null,
             });
             const result = await respondToOffer("txn-1", "accept");
@@ -137,8 +133,14 @@ describe("Commerce State Machine — transactions.ts", () => {
         });
 
         it("rejects already-accepted offer", async () => {
+            // Admin: txn lookup
             mockAdmin._mockQuery.single.mockResolvedValueOnce({
                 data: { id: "txn-1", status: "pending_payment", party_a_id: "seller-1", party_b_id: "buyer-1", horse_id: "h1", conversation_id: "c1", offer_amount: 100 },
+                error: null,
+            });
+            // RPC returns error for wrong status
+            mockAdmin.rpc.mockResolvedValueOnce({
+                data: { success: false, error: "Offer is no longer pending" },
                 error: null,
             });
             const result = await respondToOffer("txn-1", "accept");
@@ -152,7 +154,12 @@ describe("Commerce State Machine — transactions.ts", () => {
                 data: { id: "txn-1", status: "offer_made", party_a_id: "seller-1", party_b_id: "buyer-1", horse_id: "h1", conversation_id: "c1", offer_amount: 100 },
                 error: null,
             });
-            // User: seller profile
+            // RPC returns success
+            mockAdmin.rpc.mockResolvedValueOnce({
+                data: { success: true, action: "declined" },
+                error: null,
+            });
+            // Seller profile for notification
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: { alias_name: "SellerAlias" },
                 error: null,

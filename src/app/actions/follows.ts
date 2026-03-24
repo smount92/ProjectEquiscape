@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/app/actions/notifications";
 import { createActivityEvent } from "@/app/actions/activity";
@@ -74,7 +76,7 @@ export async function toggleFollow(
             try {
                 const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
                 await evaluateUserAchievements(targetId, "follower_gained");
-            } catch { /* non-blocking */ }
+            } catch (err) { logger.error("Follows", "Background task failed", err); }
         });
     }
 

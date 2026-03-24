@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -259,7 +261,7 @@ export async function joinGroup(groupId: string): Promise<{ success: boolean; er
             const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
             if (g) await supabase.from("groups").update({ member_count: ((g as { member_count: number }).member_count || 0) + 1 }).eq("id", groupId);
         }
-    } catch { /* best effort */ }
+    } catch (err) { logger.error("Groups", "Background task failed", err); }
 
     revalidatePath("/community/groups");
     return { success: true };
@@ -293,7 +295,7 @@ export async function leaveGroup(groupId: string): Promise<{ success: boolean; e
     try {
         const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
         if (g) await supabase.from("groups").update({ member_count: Math.max(0, ((g as { member_count: number }).member_count || 1) - 1) }).eq("id", groupId);
-    } catch { /* best effort */ }
+    } catch (err) { logger.error("Groups", "Background task failed", err); }
 
     revalidatePath("/community/groups");
     return { success: true };
@@ -373,7 +375,7 @@ export async function createGroupPost(
         try {
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
             await parseAndNotifyMentions(trimmed, userId, actorAlias, `/community/groups`);
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Groups", "Background task failed", err); }
     });
 
     revalidatePath(`/community/groups`);
@@ -468,7 +470,7 @@ export async function replyToPost(postId: string, content: string): Promise<{ su
     try {
         const { data: p } = await supabase.from("group_posts").select("reply_count").eq("id", postId).single();
         if (p) await supabase.from("group_posts").update({ reply_count: ((p as { reply_count: number }).reply_count || 0) + 1 }).eq("id", postId);
-    } catch { /* best effort */ }
+    } catch (err) { logger.error("Groups", "Background task failed", err); }
 
     revalidatePath("/community/groups");
     return { success: true };
@@ -656,7 +658,7 @@ export async function deleteGroupFile(
                 await supabase.storage.from("horse-images").remove([match[1]]);
             }
         }
-    } catch { /* best effort */ }
+    } catch (err) { logger.error("Groups", "Background task failed", err); }
 
     const { error } = await supabase.from("group_files").delete().eq("id", fileId);
     if (error) return { success: false, error: error.message };
@@ -777,7 +779,7 @@ export async function removeMember(
     try {
         const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
         if (g) await supabase.from("groups").update({ member_count: Math.max(0, ((g as { member_count: number }).member_count || 1) - 1) }).eq("id", groupId);
-    } catch { /* best effort */ }
+    } catch (err) { logger.error("Groups", "Background task failed", err); }
 
     revalidatePath("/community/groups");
     return { success: true };

@@ -3048,6 +3048,7 @@ export type Database = {
           condition_grade: string | null
           created_at: string
           custom_name: string
+          deleted_at: string | null
           edition_number: number | null
           edition_size: number | null
           finish_details: string | null
@@ -3077,6 +3078,7 @@ export type Database = {
           condition_grade?: string | null
           created_at?: string
           custom_name: string
+          deleted_at?: string | null
           edition_number?: number | null
           edition_size?: number | null
           finish_details?: string | null
@@ -3106,6 +3108,7 @@ export type Database = {
           condition_grade?: string | null
           created_at?: string
           custom_name?: string
+          deleted_at?: string | null
           edition_number?: number | null
           edition_size?: number | null
           finish_details?: string | null
@@ -3441,6 +3444,40 @@ export type Database = {
       vote_for_entry: {
         Args: { p_entry_id: string; p_user_id: string }
         Returns: Json
+      }
+      make_offer_atomic: {
+        Args: {
+          p_horse_id: string
+          p_buyer_id: string
+          p_seller_id: string
+          p_offered_price: number
+          p_conversation_id: string
+          p_message?: string | null
+          p_is_bundle?: boolean
+        }
+        Returns: Json
+      }
+      respond_to_offer_atomic: {
+        Args: {
+          p_transaction_id: string
+          p_seller_id: string
+          p_action: string
+        }
+        Returns: Json
+      }
+      search_catalog_fuzzy: {
+        Args: {
+          search_term: string
+          max_results?: number
+        }
+        Returns: {
+          id: string
+          name: string
+          item_type: string
+          parent_id: string | null
+          parent_name: string | null
+          similarity: number
+        }[]
       }
     }
     Enums: {

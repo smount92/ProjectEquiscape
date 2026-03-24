@@ -94,7 +94,7 @@ export async function completeTransaction(
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(completingUserId, "transaction_completed");
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Commerce", "Background task failed", err); }
     });
 
     return { success: true };
@@ -457,57 +457,37 @@ export async function makeOffer(data: {
     if (user.id === data.sellerId) return { success: false, error: "You cannot make an offer on your own horse." };
     if (data.amount <= 0) return { success: false, error: "Offer amount must be positive." };
 
-    // Verify horse exists and is tradeable
+    // Pre-fetch horse name for notifications (non-blocking if RPC fails)
     const { data: horse } = await supabase
         .from("user_horses")
-        .select("id, trade_status, custom_name, owner_id")
+        .select("custom_name")
         .eq("id", data.horseId)
         .single();
+    const horseName = (horse as { custom_name: string } | null)?.custom_name || "the horse";
 
-    if (!horse) return { success: false, error: "Horse not found." };
-    const h = horse as { id: string; trade_status: string; custom_name: string; owner_id: string };
-    if (h.owner_id !== data.sellerId) return { success: false, error: "Seller does not own this horse." };
-    if (h.trade_status !== "For Sale" && h.trade_status !== "Open to Offers") {
-        return { success: false, error: "This horse is not available for offers." };
-    }
-
-    // Check for existing active offer by this buyer on this horse
-    const admin = getAdminClient();
-    const { data: existingOffer } = await admin
-        .from("transactions")
-        .select("id")
-        .eq("horse_id", data.horseId)
-        .eq("party_b_id", user.id)
-        .in("status", ["offer_made", "pending_payment", "funds_verified"])
-        .maybeSingle();
-
-    if (existingOffer) return { success: false, error: "You already have an active offer on this horse." };
-
-    // Create or find conversation
+    // Create or find conversation (needed before the atomic RPC)
     const { createOrFindConversation } = await import("@/app/actions/messaging");
     const convoResult = await createOrFindConversation(data.sellerId, data.horseId);
     if (!convoResult.success || !convoResult.conversationId) {
         return { success: false, error: convoResult.error || "Failed to create conversation." };
     }
 
-    // Insert transaction with offer_made status
-    const { data: txn, error } = await admin
-        .from("transactions")
-        .insert({
-            type: "marketplace_sale",
-            status: "offer_made",
-            party_a_id: data.sellerId,
-            party_b_id: user.id,
-            horse_id: data.horseId,
-            conversation_id: convoResult.conversationId,
-            offer_amount: data.amount,
-            offer_message: data.message?.trim() || null,
-            metadata: data.isBundle ? { is_bundle_sale: true } : null,
-        })
-        .select("id")
-        .single();
+    // Atomic RPC: row-locks horse + checks state + inserts transaction in one Postgres call
+    const admin = getAdminClient();
+    const { data: rpcResult, error: rpcError } = await admin.rpc("make_offer_atomic", {
+        p_horse_id: data.horseId,
+        p_buyer_id: user.id,
+        p_seller_id: data.sellerId,
+        p_offered_price: data.amount,
+        p_conversation_id: convoResult.conversationId,
+        p_message: data.message?.trim() || null,
+        p_is_bundle: data.isBundle || false,
+    });
 
-    if (error) return { success: false, error: error.message };
+    if (rpcError) return { success: false, error: rpcError.message };
+
+    const result = rpcResult as { success: boolean; error?: string; transaction_id?: string };
+    if (!result.success) return { success: false, error: result.error || "Offer failed." };
 
     // Get buyer alias for notification
     const { data: buyerProfile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
@@ -518,13 +498,13 @@ export async function makeOffer(data: {
         userId: data.sellerId,
         type: "offer",
         actorId: user.id,
-        content: `@${buyerAlias} made a $${data.amount.toFixed(2)} offer on ${h.custom_name}`,
+        content: `@${buyerAlias} made a $${data.amount.toFixed(2)} offer on ${horseName}`,
         horseId: data.horseId,
         conversationId: convoResult.conversationId,
     });
 
     revalidatePath(`/inbox/${convoResult.conversationId}`);
-    return { success: true, transactionId: (txn as { id: string }).id, conversationId: convoResult.conversationId };
+    return { success: true, transactionId: result.transaction_id, conversationId: convoResult.conversationId };
 }
 
 // ── Respond to Offer ──
@@ -552,12 +532,18 @@ export async function respondToOffer(
     if (!txn) return { success: false, error: "Transaction not found." };
     const t = txn as { id: string; status: string; party_a_id: string; party_b_id: string; horse_id: string; conversation_id: string; offer_amount: number };
 
-    if (t.party_a_id !== user.id) return { success: false, error: "Only the seller can respond to offers." };
-    if (t.status !== "offer_made") return { success: false, error: "This offer is no longer pending." };
+    // Use atomic RPC for state transition (row-locked in Postgres)
+    const { data: rpcResult, error: rpcError } = await admin.rpc("respond_to_offer_atomic", {
+        p_transaction_id: transactionId,
+        p_seller_id: user.id,
+        p_action: action,
+    });
+
+    if (rpcError) return { success: false, error: rpcError.message };
+    const result = rpcResult as { success: boolean; error?: string };
+    if (!result.success) return { success: false, error: result.error || "Action failed." };
 
     if (action === "decline") {
-        await admin.from("transactions").update({ status: "cancelled" }).eq("id", transactionId);
-
         // Notify buyer
         const { data: sellerProfile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
         const sellerAlias = (sellerProfile as { alias_name: string } | null)?.alias_name || "Seller";
@@ -573,13 +559,7 @@ export async function respondToOffer(
         return { success: true };
     }
 
-    // Accept: update status, lock horse
-    await admin.from("transactions").update({
-        status: "pending_payment",
-        accepted_at: new Date().toISOString(),
-    }).eq("id", transactionId);
-
-    // Lock horse trade status
+    // Accept path: lock horse trade status
     await admin.from("user_horses").update({ trade_status: "Pending Sale" }).eq("id", t.horse_id);
 
     // Notify buyer

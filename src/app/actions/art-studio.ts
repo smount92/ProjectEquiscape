@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -490,7 +492,7 @@ export async function updateCommissionStatus(
                     horseId: c.horse_id || undefined,
                     status: "completed",
                 });
-            } catch { /* Non-blocking */ }
+            } catch (err) { logger.error("ArtStudio", "Background task failed", err); }
         }
 
         // ── Verified Artist Stamp ──
@@ -512,7 +514,7 @@ export async function updateCommissionStatus(
                         } as Record<string, unknown>)
                         .eq("id", c.horse_id);
                 }
-            } catch { /* non-blocking */ }
+            } catch (err) { logger.error("ArtStudio", "Background task failed", err); }
         }
 
         if (c.horse_id) {

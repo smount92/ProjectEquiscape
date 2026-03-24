@@ -24,12 +24,44 @@ export default function NotificationBell() {
  }, [supabase]);
 
  useEffect(() => {
+ // Fetch immediately on mount
  fetchCount();
 
- // Poll every 60 seconds instead of Realtime WebSocket
- // Realtime was a connection pool black hole on Vercel serverless
- const interval = setInterval(fetchCount, 60_000);
- return () => clearInterval(interval);
+ let intervalId: ReturnType<typeof setInterval> | null = null;
+
+ const startPolling = () => {
+  if (!intervalId) {
+   intervalId = setInterval(fetchCount, 60_000);
+  }
+ };
+
+ const stopPolling = () => {
+  if (intervalId) {
+   clearInterval(intervalId);
+   intervalId = null;
+  }
+ };
+
+ const handleVisibility = () => {
+  if (document.visibilityState === "visible") {
+   fetchCount(); // Immediate fetch when user returns
+   startPolling();
+  } else {
+   stopPolling();
+  }
+ };
+
+ // Only poll if tab is visible
+ if (document.visibilityState === "visible") {
+  startPolling();
+ }
+
+ document.addEventListener("visibilitychange", handleVisibility);
+
+ return () => {
+  stopPolling();
+  document.removeEventListener("visibilitychange", handleVisibility);
+ };
  }, [fetchCount]);
 
  return (

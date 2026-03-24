@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -362,7 +364,7 @@ export async function enterShow(
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(showUserId, "show_entered");
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Shows", "Background task failed", err); }
     });
 
     return { success: true };
@@ -410,7 +412,7 @@ export async function voteForEntry(
                 actor_id: user.id,
                 content: `@${voterAlias} voted for your show entry!`,
             });
-        } catch { /* Non-blocking */ }
+        } catch (err) { logger.error("Shows", "Background task failed", err); }
     }
 
     revalidatePath("/shows");
@@ -548,7 +550,7 @@ export async function updateShowStatus(
                         });
                     }
                 }
-            } catch { /* non-blocking */ }
+            } catch (err) { logger.error("Shows", "Background task failed", err); }
         });
     }
 

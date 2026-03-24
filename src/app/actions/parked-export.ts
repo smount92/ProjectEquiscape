@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
@@ -207,7 +209,7 @@ export async function getParkedHorseByPin(pin: string): Promise<{
                     horse_id: t.horse_id,
                     content: "⏰ Parked transfer expired. Horse has been automatically unparked and returned to your stable.",
                 });
-            } catch { /* best effort */ }
+            } catch (err) { logger.error("Transfer", "Background task failed", err); }
 
             return { success: false, error: "This claim PIN has expired." };
         }
@@ -238,7 +240,7 @@ export async function getParkedHorseByPin(pin: string): Promise<{
             if (imageUrl) {
                 photo = getPublicImageUrl(imageUrl);
             }
-        } catch { /* photo is optional for preview */ }
+        } catch (err) { logger.error("Transfer", "Background task failed", err); }
 
         // 5. Get counts (non-blocking)
         let timelineCount = 0;
@@ -256,7 +258,7 @@ export async function getParkedHorseByPin(pin: string): Promise<{
                 .select("id", { count: "exact", head: true })
                 .eq("horse_id", t.horse_id);
             ownerCount = (oc || 0) + 1;
-        } catch { /* counts are optional */ }
+        } catch (err) { logger.error("Transfer", "Background task failed", err); }
 
         return {
             success: true,
@@ -331,7 +333,7 @@ export async function claimParkedHorse(pin: string): Promise<{
                     sale_price: result.sale_price || null,
                 },
             });
-        } catch { /* Non-blocking */ }
+        } catch (err) { logger.error("Transfer", "Background task failed", err); }
 
         // Close state machine: if this claim came from a commerce offer flow,
         // complete the funds_verified transaction
@@ -352,7 +354,7 @@ export async function claimParkedHorse(pin: string): Promise<{
                         .eq("id", (offerTxn as { id: string }).id);
                 }
             }
-        } catch { /* Non-blocking: state machine closure is best-effort */ }
+        } catch (err) { logger.error("Transfer", "Background task failed", err); }
 
         // Notification (non-critical)
         try {
@@ -365,7 +367,7 @@ export async function claimParkedHorse(pin: string): Promise<{
                     horse_id: result.horse_id,
                 });
             }
-        } catch { /* Non-blocking */ }
+        } catch (err) { logger.error("Transfer", "Background task failed", err); }
 
         revalidatePath("/dashboard");
         revalidatePath(`/stable/${result.horse_id}`);

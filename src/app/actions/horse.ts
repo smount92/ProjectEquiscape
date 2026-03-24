@@ -33,9 +33,9 @@ async function checkActiveTransaction(horseId: string): Promise<string | null> {
 }
 
 /**
- * Permanently delete a horse and all associated data (images, vault, records).
+ * Soft-delete a horse — scrubs PII and hides it, but preserves the row for provenance chains.
  * Guards against deletion while an active Safe-Trade transaction is pending.
- * Cleans up Supabase Storage files before removing the DB record.
+ * Cleans up Supabase Storage files to free storage costs.
  * @param horseId - UUID of the horse to delete (must be owned by caller)
  */
 export async function deleteHorse(horseId: string): Promise<{ success: boolean; error?: string }> {
@@ -74,23 +74,30 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
         }
     }
 
-    // Delete the horse (cascades to horse_images, financial_vault, etc.)
+    // Soft-delete: scrub PII but preserve the row for provenance chains
     const { error } = await supabase
         .from("user_horses")
-        .delete()
+        .update({
+            deleted_at: new Date().toISOString(),
+            life_stage: "orphaned",
+            visibility: "private",
+            custom_name: "[Deleted]",
+            trade_status: "Not for Sale",
+        })
         .eq("id", horseId);
 
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard");
+    revalidatePath(`/stable/${horseId}`);
     revalidateTag("public_horses", "max");
     return { success: true };
 }
 
 /**
- * Permanently delete a horse and all associated data (images, vault, records).
- * Guards against deletion while an active Safe-Trade transaction is pending.
- * Cleans up Supabase Storage files before removing the DB record.
+ * Delete a horse image record and its associated storage file.
+ * @param recordId - UUID of the horse_images row
+ * @param storagePath - Storage path to clean up (nullable)
  * @param horseId - UUID of the horse to delete (must be owned by caller)
  */
 export async function deleteHorseImageAction(recordId: string, storagePath: string | null): Promise<{ success: boolean; error?: string }> {
@@ -163,7 +170,7 @@ export async function updateHorseAction(horseId: string, data: {
                     .eq("id", horseId)
                     .eq("life_stage", "parked");
             }
-        } catch { /* non-blocking cleanup */ }
+        } catch (err) { logger.error("Horse", "Auto-unpark expired transfer failed", err); }
 
         // ── Security: whitelist allowed fields to prevent column injection ──
         const HORSE_ALLOWED = [
@@ -228,7 +235,7 @@ export async function updateHorseAction(horseId: string, data: {
                             content: `📋 Reference identity updated from "${oldName}" to "${newName}".`,
                         });
                     }
-                } catch { /* non-blocking audit log */ }
+                } catch (err) { logger.error("Horse", "Catalog identity audit log failed", err); }
             }
 
             const { error: updErr } = await supabase.from("user_horses").update(horseUpdate).eq("id", horseId).eq("owner_id", user.id);
@@ -370,7 +377,7 @@ export async function createHorseRecord(data: {
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(finalUserId, "horse_added");
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Horse", "Achievement evaluation failed after horse add", err); }
     });
 
     return { success: true, horseId: horse.id };
@@ -419,7 +426,7 @@ export async function finalizeHorseImages(
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(finalUserId, "photo_uploaded");
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Horse", "Achievement evaluation failed after photo upload", err); }
     });
 
     return { success: true };
@@ -536,9 +543,16 @@ export async function bulkDeleteHorses(
         }
     }
 
+    // Soft-delete: scrub PII but preserve rows for provenance chains
     const { error } = await supabase
         .from("user_horses")
-        .delete()
+        .update({
+            deleted_at: new Date().toISOString(),
+            life_stage: "orphaned",
+            visibility: "private",
+            custom_name: "[Deleted]",
+            trade_status: "Not for Sale",
+        })
         .in("id", horseIds)
         .eq("owner_id", user.id);
 
@@ -657,6 +671,7 @@ export async function searchPublicHorses(query: string): Promise<{ id: string; c
         .from("user_horses")
         .select("id, custom_name, finish_type")
         .eq("is_public", true)
+        .is("deleted_at", null)
         .ilike("custom_name", `%${query}%`)
         .limit(10);
     return (data ?? []) as { id: string; custom_name: string; finish_type: string }[];

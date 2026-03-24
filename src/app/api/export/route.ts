@@ -35,6 +35,7 @@ export async function GET() {
     `
         )
         .eq("owner_id", user.id)
+        .is("deleted_at", null)
         .order("custom_name");
 
     if (error) {

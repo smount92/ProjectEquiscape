@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -135,7 +137,7 @@ export async function createPost(data: {
             // Evaluate post achievements
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(userId, "post_created");
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Posts", "Background task failed", err); }
     });
 
     return { success: true, postId: post!.id };
@@ -189,7 +191,7 @@ export async function replyToPost(
             // @mentions in reply
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
             await parseAndNotifyMentions(trimmedContent, userId, alias, `/feed`);
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Posts", "Background task failed", err); }
     });
 
     return { success: true };
@@ -234,7 +236,7 @@ export async function deletePost(
                 await supabase.storage.from("horse-images").remove(paths);
             }
         }
-    } catch { /* best effort — don't block deletion */ }
+    } catch (err) { logger.error("Posts", "Media cleanup failed during post deletion", err); }
 
     const { error } = await supabase.from("posts").delete().eq("id", postId);
     if (error) return { success: false, error: error.message };
@@ -318,7 +320,7 @@ export async function togglePostLike(
                         linkUrl: `/feed`,
                     });
                 }
-            } catch { /* non-blocking */ }
+            } catch (err) { logger.error("Posts", "Background task failed", err); }
         });
     }
 
@@ -533,7 +535,7 @@ export async function deleteEventMedia(
                 await supabase.storage.from("horse-images").remove([match[1]]);
             }
         }
-    } catch { /* best effort */ }
+    } catch (err) { logger.error("Posts", "Background task failed", err); }
 
     const { error } = await supabase.from("media_attachments").delete().eq("id", mediaId);
     if (error) return { success: false, error: error.message };

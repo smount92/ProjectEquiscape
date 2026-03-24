@@ -114,3 +114,51 @@ function mapCatalogRow(row: Record<string, unknown>): CatalogItem {
         attributes: (row.attributes as Record<string, unknown>) || {},
     };
 }
+
+// ============================================================
+// SERVER-SIDE FUZZY SEARCH (pg_trgm)
+// Replaces client-side fuzzysort for CSV import bulk matching
+// ============================================================
+
+/**
+ * Fuzzy search catalog items using trigram similarity (server-side).
+ * Much lighter than fetching all 10,500+ rows for client-side matching.
+ * @param term - Search term to fuzzy-match against catalog names
+ * @param maxResults - Maximum number of results (default 20)
+ */
+export async function searchCatalogFuzzy(term: string, maxResults = 20) {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("search_catalog_fuzzy", {
+        search_term: term,
+        max_results: maxResults,
+    });
+    if (error) return [];
+    return data ?? [];
+}
+
+/**
+ * Batch-match CSV rows against the catalog using server-side fuzzy search.
+ * Used by the CSV import component instead of fetching the full reference dictionary.
+ * @param rows - Parsed CSV rows with name and optional moldName
+ */
+export async function matchCsvRowsBatch(
+    rows: { name: string; moldName?: string }[]
+): Promise<{ matches: { rowIndex: number; catalogId: string | null; catalogName: string | null }[] }> {
+    const supabase = await createClient();
+    const matches = await Promise.all(
+        rows.map(async (row, index) => {
+            const searchTerm = row.moldName || row.name;
+            const { data } = await supabase.rpc("search_catalog_fuzzy", {
+                search_term: searchTerm,
+                max_results: 1,
+            });
+            const best = (data as { id: string; name: string }[] | null)?.[0];
+            return {
+                rowIndex: index,
+                catalogId: best?.id ?? null,
+                catalogName: best?.name ?? null,
+            };
+        })
+    );
+    return { matches };
+}

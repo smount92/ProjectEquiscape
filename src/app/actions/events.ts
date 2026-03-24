@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -436,7 +438,7 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
                 }
             }
         }
-    } catch { /* best effort */ }
+    } catch (err) { logger.error("Events", "Background task failed", err); }
 
     // Delete RSVPs first
     await supabase.from("event_rsvps").delete().eq("event_id", eventId);
@@ -602,7 +604,7 @@ export async function addEventJudge(
                 content: `@${alias} assigned you as an expert judge for "${showName}"`,
                 linkUrl: `/shows/${eventId}`,
             });
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Events", "Background task failed", err); }
     });
 
     return { success: true };
@@ -693,7 +695,7 @@ export async function addEventComment(
                 const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
                 await parseAndNotifyMentions(trimmedContent, userId, alias, `/community/events/${eventId}`);
             }
-        } catch { /* non-blocking */ }
+        } catch (err) { logger.error("Events", "Background task failed", err); }
     });
 
     return { success: true };
@@ -839,7 +841,7 @@ export async function deleteEventPhoto(
                 await supabase.storage.from("horse-images").remove([match[1]]);
             }
         }
-    } catch { /* best effort */ }
+    } catch (err) { logger.error("Events", "Background task failed", err); }
 
     const { error } = await supabase.from("event_photos").delete().eq("id", photoId);
     if (error) return { success: false, error: error.message };

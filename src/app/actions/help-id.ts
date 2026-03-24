@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/logger";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -127,7 +129,7 @@ export async function createSuggestion(
                         content: `@${alias} suggested an identification for your Help ID request!`,
                     });
                 }
-            } catch { /* non-blocking */ }
+            } catch (err) { logger.error("HelpId", "Background task failed", err); }
         });
 
         revalidatePath(`/community/help-id/${requestId}`);
@@ -281,7 +283,7 @@ export async function addIdentifiedHorse(
                     });
                 }
             }
-        } catch { /* Photo transfer is best-effort */ }
+        } catch (err) { logger.error("HelpId", "Background task failed", err); }
 
         revalidatePath("/dashboard");
         return { success: true, horseId: horse.id };
@@ -316,7 +318,7 @@ export async function deleteIdRequest(requestId: string): Promise<{ success: boo
     if (r.image_url) {
         try {
             await supabase.storage.from("horse-images").remove([r.image_url]);
-        } catch { /* best effort */ }
+        } catch (err) { logger.error("HelpId", "Background task failed", err); }
     }
 
     revalidatePath("/community/help-id");

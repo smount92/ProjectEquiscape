@@ -20,6 +20,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  const [isBundle, setIsBundle] = useState(false);
  const [saving, setSaving] = useState(false);
  const [error, setError] = useState("");
+ const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
  const router = useRouter();
 
  // Risky payment detection
@@ -119,6 +120,16 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  This is a bundle/lot sale (excluded from market price index)
  </label>
 
+ <label
+  className="mb-2 flex cursor-pointer items-start gap-2 text-xs text-muted mt-4"
+ >
+  <input type="checkbox" checked={disclaimerAccepted} onChange={(e) => setDisclaimerAccepted(e.target.checked)} className="mt-0.5" required />
+  <span>
+   I understand that Model Horse Hub does not process payments and cannot
+   mediate financial disputes. All transactions are between buyer and seller.
+  </span>
+ </label>
+
  {error && <div className="mt-2 text-sm text-danger">{error}</div>}
 
  <div className="mt-6 flex gap-3 max-sm:flex-col">
@@ -133,7 +144,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  <button
  type="submit"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- disabled={saving}
+ disabled={saving || !disclaimerAccepted}
  >
  {saving ?"Submitting…" :"Submit Offer"}
  </button>

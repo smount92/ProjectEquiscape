@@ -289,7 +289,7 @@ export async function markTransactionComplete(
             horseId: c.horse_id || undefined,
             status: "completed",
         });
-    } catch { /* Non-blocking */ }
+    } catch (err) { logger.error("Messaging", "Background task failed", err); }
 
     return { success: true };
 }
