@@ -480,7 +480,7 @@ export async function makeOffer(data: {
         p_seller_id: data.sellerId,
         p_offered_price: data.amount,
         p_conversation_id: convoResult.conversationId,
-        p_message: data.message?.trim() || null,
+        p_message: data.message?.trim() || undefined,
         p_is_bundle: data.isBundle || false,
     });
 
