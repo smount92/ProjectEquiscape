@@ -1,8 +1,8 @@
 # Model Horse Hub — Complete Project Report
 
-> **Report Date:** March 18, 2026  
+> **Report Date:** March 24, 2026  
 > **Repository:** `smount92/ProjectEquiscape` (GitHub, private)  
-> **Total Commits:** 267 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
+> **Total Commits:** 370 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
 > **Status:** Closed beta with active testers
 
 ---
@@ -11,25 +11,26 @@
 
 **Model Horse Hub** is a privacy-first digital stable, social platform, and marketplace purpose-built for the model horse collecting hobby. It serves as a comprehensive tool for cataloging, insuring, showing, trading, commissioning art, and socializing around model horses (Breyer, Stone, artist resins, etc.).
 
-The platform was built from scratch in ~12 days using AI-assisted pair programming. Despite the rapid pace, the architecture follows enterprise-grade patterns: event-sourced provenance, a unified polymorphic catalog, formal commerce state machine, a gamification achievement engine, and comprehensive Row Level Security across every table. Full JSDoc documentation and a comprehensive `/docs` folder were added as part of a formal documentation sprint.
+The platform was built from scratch in ~18 days using AI-assisted pair programming. Despite the rapid pace, the architecture follows enterprise-grade patterns: event-sourced provenance, a unified polymorphic catalog, formal commerce state machine, a gamification achievement engine, auto-generated Supabase TypeScript types, and comprehensive Row Level Security across every table. Full JSDoc documentation and a comprehensive `/docs` folder were added as part of a formal documentation sprint.
 
 ### Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| **TypeScript/TSX source lines** | 35,703 |
-| **CSS lines** | 12,411 (globals: 4,673 + 49 CSS files) |
-| **Total source size** | 2.11 MB |
-| **Page routes** | 53 |
-| **Client components** | 98 (+14 CSS Modules) |
-| **Server action files** | 35 |
-| **Database migrations** | 86 (001–090) |
-| **SQL migration lines** | 6,532 |
-| **Unit/component tests** | 194 (across 20 test files) |
+| **TypeScript/TSX source lines** | ~50,200 |
+| **CSS** | Tailwind CSS v4 + globals.css (2,211 lines for shared primitives) |
+| **Total source size** | 1.84 MB |
+| **Page routes** | 59 |
+| **Client components** | 105 |
+| **Server action files** | 36 |
+| **Database migrations** | 93 (001–097) |
+| **SQL migration lines** | 9,216 |
+| **Unit/component tests** | 245 (across 23 test files) |
+| **E2E test specs** | 7 (Playwright) |
 | **CI pipeline** | GitHub Actions (build + test on every push) |
-| **Documentation pages** | 31 (in `/docs/`) |
-| **Workflow documents** | 57 |
-| **Strategic docs** | 16 |
+| **Documentation pages** | 33 (in `/docs/`) |
+| **Workflow documents** | 61 |
+| **Strategic docs** | 17 |
 
 ---
 
@@ -39,11 +40,11 @@ The platform was built from scratch in ~12 days using AI-assisted pair programmi
 |-------|-----------|---------|-------|
 | **Framework** | Next.js (App Router) | 16.1.6 | Turbopack for dev/build |
 | **Runtime** | React | 19.2.3 | Server Components + Client Components |
-| **Language** | TypeScript | 5.x | Strict mode, manual DB types |
+| **Language** | TypeScript | 5.x | Strict mode, auto-generated DB types via `npm run gen-types` |
 | **Database** | Supabase (PostgreSQL) | — | RLS on every table, materialized views |
 | **Auth** | Supabase Auth | — | PKCE flow, cookie-based SSR, `requireAuth()` helper |
 | **Hosting** | Vercel | Serverless | Hobby tier |
-| **CSS** | Vanilla CSS | — | Design tokens + 49 CSS files (19 Modules + 30 extracted globals) |
+| **CSS** | Tailwind CSS v4 | — | Utility-first classes + globals.css shared primitives |
 | **Testing** | Vitest + Playwright | 4.x / 1.58 | Unit + component (RTL) + E2E scaffolding |
 | **Email** | Resend | 6.9.3 | Transactional notifications |
 | **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, CoA exports |
@@ -58,9 +59,9 @@ The platform was built from scratch in ~12 days using AI-assisted pair programmi
 
 - **Next.js App Router** — Server Components reduce client JS bundle; server actions eliminate the need for a separate API layer. The entire backend is co-located with the frontend.
 - **Supabase** — PostgreSQL with RLS provides row-level security without application middleware. Signed URLs for private storage. Real-time subscriptions for future features.
-- **Vanilla CSS** — The design system predates component-scoped styling. A `globals.css` monolith was refactored in the March 2026 CSS Modularization Sprint: 30 page-specific blocks were extracted into co-located `.css` files, reducing `globals.css` from 11,701 to 4,673 lines (60% reduction). 19 CSS Modules provide scoped styles for newer components. Shared primitives (buttons, cards, forms, modals) remain global.
-- **No ORM** — Direct Supabase client calls with PostgREST joins. Manual TypeScript types mirror the schema. This avoids ORM abstraction leaks and keeps queries transparent.
-- **Vitest** — Lightweight, fast unit testing with good TypeScript support. 194 tests cover critical server action logic, utility functions, and 5 UI components via React Testing Library. GitHub Actions CI runs all tests on every push.
+- **Tailwind CSS v4** — Migrated from vanilla CSS in March 2026. The original `globals.css` monolith (~12,000 lines) went through a CSS Modules extraction (V20), then a full Tailwind CSS v4 migration. Design tokens are mapped in the Tailwind `@theme` block. Shared primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`) remain in `globals.css` (2,211 lines). All new components use Tailwind utility classes directly in JSX.
+- **No ORM** — Direct Supabase client calls with PostgREST joins. Auto-generated TypeScript types via `npm run gen-types` ensure compile-time safety. No `as unknown as` casts in production code.
+- **Vitest** — Lightweight, fast unit testing with good TypeScript support. 245 tests across 23 files cover server action logic, utility functions, and 6 UI components via React Testing Library. 7 Playwright E2E specs for critical flows. GitHub Actions CI runs all tests on every push.
 
 ---
 
@@ -71,41 +72,39 @@ The platform was built from scratch in ~12 days using AI-assisted pair programmi
 ```
 model-horse-hub/
 ├── .agents/
-│   ├── workflows/           # 57 workflow documents (.md)
-│   └── docs/                # 16 strategic/planning documents
-├── docs/                    # 31 documentation pages (architecture, guides, API, database)
+│   ├── workflows/           # 61 workflow documents (.md)
+│   └── docs/                # 17 strategic/planning documents
+├── docs/                    # 33 documentation pages (architecture, guides, API, database)
 │   ├── architecture/        # ADRs, data-flow diagrams, system overview
 │   ├── api/                 # API route documentation
 │   ├── components/          # Component catalog
 │   ├── database/            # Schema overview, migrations log, RLS policies
-│   ├── getting-started/     # Setup, project structure
-│   ├── guides/              # Adding features, migrations
+│   ├── getting-started/     # Setup, project structure, test accounts
+│   ├── guides/              # Adding features, migrations, CSS conventions, testing
 │   └── routes/              # Page route documentation
 ├── scripts/                 # 7 data scraping/seeding scripts
 ├── supabase/
-│   └── migrations/          # 86 SQL migration files (001–090)
+│   └── migrations/          # 93 SQL migration files (001–097)
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx       # Root layout (Inter font, GA, SimpleModeProvider, Header)
-│   │   ├── globals.css      # ~4,673 lines — design tokens + shared styles
-│   │   ├── studio.css       # Art Studio styles
-│   │   ├── competition.css  # Competition/show styles
-│   │   ├── [12 extracted .css] # Page-specific blocks extracted from globals
-│   │   ├── actions/         # 35 server action files (ALL backend logic)
-│   │   │   └── __tests__/   # 15 test files, 136 server action tests
-│   │   ├── api/             # 11 API routes
-│   │   └── [53 route dirs]  # Page routes
-│   ├── components/          # 98 client components + 19 CSS Modules + 16 extracted .css
-│   │   ├── __tests__/       # 5 component test files, 58 RTL tests
+│   │   ├── globals.css      # ~2,211 lines — Tailwind imports + shared primitives
+│   │   ├── actions/         # 36 server action files (ALL backend logic)
+│   │   │   └── __tests__/   # 6 test files
+│   │   ├── api/             # 7 API routes
+│   │   └── [59 route dirs]  # Page routes
+│   ├── components/          # 105 client components
+│   │   ├── __tests__/       # 6 component test files
 │   │   └── pdf/             # PDF generation components
 │   └── lib/
-│       ├── supabase/        # admin.ts, client.ts, server.ts
-│       ├── types/           # database.ts (manual types), csv-import.ts
+│       ├── supabase/        # admin.ts, client.ts, server.ts (all typed with Database generic)
+│       ├── types/           # database.generated.ts (auto-gen), database.ts (supplementary), supabase.ts, csv-import.ts
 │       ├── utils/           # achievements, imageCompression, mentions, rateLimit, storage, validation
+│       │   └── __tests__/   # 4 utility test files
 │       ├── context/         # SimpleModeContext (accessibility)
 │       ├── constants/       # Shared constants
 │       └── auth.ts          # requireAuth() helper
-├── e2e/                     # Playwright E2E test scaffolding
+├── e2e/                     # 7 Playwright E2E test specs
 └── public/                  # Static assets, fonts
 ```
 
@@ -121,7 +120,7 @@ graph TD
     F -->|Notifications, Activity Events, Achievements| C
     G["Vercel Cron"] -->|Daily 6 AM UTC| H["/api/cron/refresh-market"]
     H -->|Refresh materialized view| C
-    A -->|Public URLs| D
+    A -->|Signed URLs| D
 ```
 
 **Key pattern:** Pages are Server Components that fetch data directly. Client Components call server actions (imported directly — Next.js handles serialization). The `after()` API from Next.js wraps deferred tasks (notifications, activity events, achievement evaluation) so they don't block the response — critical for serverless cold start budget.
@@ -141,7 +140,7 @@ graph TD
 | Layer | Implementation |
 |-------|---------------|
 | **Row Level Security** | Every table has RLS policies. Users can only read/write their own data. |
-| **Auth helper** | `requireAuth()` centralizes auth checks across all 35 server action files |
+| **Auth helper** | `requireAuth()` centralizes auth checks across all 36 server action files |
 | **Admin bypass** | `getAdminClient()` uses `SUPABASE_SERVICE_ROLE_KEY` for cross-user writes (notifications, transfers) |
 | **Rate limiting** | `checkRateLimit()` utility — configurable per-action limits |
 | **Chat guardrails** | `RISKY_PAYMENT_REGEX` warns when users mention off-platform payment methods |
@@ -156,7 +155,7 @@ graph TD
 
 ## 4. Database Schema
 
-### 4.1 Schema Evolution
+### 4.1 Schema Evolution (93 migrations, 001–097)
 
 The database went through a **Grand Unification** (documented in `Grand_Unification_Plan.md`) across phases V6–V11 that consolidated legacy tables into universal, polymorphic structures:
 
@@ -433,11 +432,11 @@ The CSS layer evolved through several phases:
 
 1. **V1–V15:** Everything in `globals.css` (grew to ~12,000 lines)
 2. **V20 (CSS Maturity Sprint):** Extracted 19 CSS Modules, reducing globals by 28%
-3. **Current state:** `globals.css` (~11,700 lines) contains design tokens + shared primitives. Component-specific styles live in co-located CSS Modules.
+3. **Tailwind CSS v4 migration:** Full migration from vanilla CSS to Tailwind CSS v4 utility-first framework. All CSS Modules and extracted page CSS files were replaced with inline Tailwind classes. `globals.css` reduced to ~2,211 lines containing Tailwind imports, `@theme` design tokens, and shared component primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`).
 
-**CSS Modules in use (19):** ChatThread, OfferCard, MakeOfferModal, DashboardShell, DashboardToast, StableLedger, GroupDetailClient, GroupAdminPanel, GroupFiles, FeaturedHorseCard, MatchmakerMatches, FavoriteButton, WishlistButton, RatingForm, discover, inbox, settings, page.module.css
+**Current state:** Single `globals.css` file (2,211 lines). New components use Tailwind utility classes directly in JSX. Design tokens are defined in the `@theme` block and accessed via semantic class names (e.g., `text-forest`, `bg-card`, `border-edge`).
 
-**Convention:** New components should use CSS Modules. Shared primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`, `.horse-card-*`, `.feed-*`) remain in globals.
+**Convention:** New components use **Tailwind utility classes** — do not create new CSS Module files. Legacy CSS Modules are tolerated but not for new work. Use Tailwind theme tokens instead of hard-coded colors.
 
 ### 6.4 Responsive Design
 
@@ -452,46 +451,47 @@ The CSS layer evolved through several phases:
 
 ## 7. Server Actions — The Backend
 
-All backend logic lives in 35 `"use server"` action files under `src/app/actions/`. There is no separate API layer — Next.js server actions ARE the API.
+All backend logic lives in 36 `"use server"` action files under `src/app/actions/`. There is no separate API layer — Next.js server actions ARE the API.
 
 ### 7.1 Action Files by Domain
 
 | File | Size | Purpose |
 |------|------|---------|
-| `horse.ts` | 27KB | Core CRUD — create, update, delete, finalize images, bulk ops |
+| `shows.ts` | 36KB | Photo shows, voting, show records |
+| `transactions.ts` | 33KB | Commerce state machine — offers, payments, completion |
 | `competition.ts` | 32KB | Event divisions, classes, entries, placings |
-| `transactions.ts` | 34KB | Commerce state machine — offers, payments, completion |
-| `art-studio.ts` | 32KB | Artist profiles, commissions, WIP updates, shipping |
-| `groups.ts` | 32KB | Group CRUD, membership, files, sub-channels |
+| `groups.ts` | 31KB | Group CRUD, membership, files, sub-channels |
+| `art-studio.ts` | 31KB | Artist profiles, commissions, WIP updates, shipping |
 | `events.ts` | 29KB | Event CRUD, RSVP, judges, comments, photos |
-| `shows.ts` | 25KB | Photo shows, voting, show records |
-| `parked-export.ts` | 19KB | CoA PDF data assembly |
-| `hoofprint.ts` | 18KB | Provenance timeline, transfers, life stage |
-| `posts.ts` | 17KB | Social posts, comments, media |
-| `activity.ts` | 13KB | Feed generation, activity events |
-| `help-id.ts` | 11KB | Community identification requests |
-| `messaging.ts` | 10KB | DM conversations, messages |
+| `horse.ts` | 27KB | Core CRUD — create, update, delete, finalize images, bulk ops |
+| `catalog-suggestions.ts` | 21KB | Catalog suggestion management |
+| `posts.ts` | 20KB | Social posts, comments, media |
+| `parked-export.ts` | 18KB | CoA PDF data assembly |
+| `hoofprint.ts` | 17KB | Provenance timeline, transfers, life stage |
+| `help-id.ts` | 12KB | Community identification requests |
+| `activity.ts` | 12KB | Feed generation, activity events |
+| `provenance.ts` | 10KB | Hoofprint timeline queries |
 | `settings.ts` | 10KB | User preferences, profile, password |
-| `provenance.ts` | 9KB | Hoofprint timeline queries |
+| `messaging.ts` | 10KB | DM conversations, messages |
 | `market.ts` | 8KB | Blue Book price queries |
 | `insurance-report.ts` | 6KB | Insurance PDF data |
-| `admin.ts` | 7KB | Admin dashboard, suggestions |
-| `collections.ts` | 5KB | Multi-collection management |
+| `admin.ts` | 6KB | Admin dashboard, suggestions |
 | `moderation.ts` | 5KB | Reports, admin actions |
-| `notifications.ts` | 5KB | Notification queue management |
+| `collections.ts` | 5KB | Multi-collection management |
 | `follows.ts` | 4KB | Follow/unfollow |
 | `reference.ts` | 4KB | Catalog item queries |
+| `notifications.ts` | 4KB | Notification queue with deep-link URLs |
 | `suggestions.ts` | 4KB | Reference catalog suggestions |
+| `blocks.ts` | 3KB | Block/unblock |
+| `likes.ts` | 3KB | Like/unlike toggle |
 | `horse-events.ts` | 3KB | Activity event emission for horses |
 | `csv-import.ts` | 3KB | Batch import RPC |
-| `blocks.ts` | 3KB | Block/unblock |
 | `contact.ts` | 2KB | Contact form submission |
-| `likes.ts` | 2KB | Like/unlike toggle |
-| `wishlist.ts` | 2KB | Wishlist management |
 | `social.ts` | 2KB | Legacy social helpers |
-| `mentions.ts` | 2KB | @mention parsing and notification |
-| `ratings.ts` | 2KB | Transaction review queries |
 | `header.ts` | 2KB | Header data (unread counts) |
+| `mentions.ts` | 2KB | @mention parsing and notification |
+| `wishlist.ts` | 2KB | Wishlist management |
+| `ratings.ts` | 2KB | Transaction review queries |
 | `profile.ts` | 1KB | Public profile query |
 
 ### 7.2 Patterns Used
@@ -513,30 +513,50 @@ after(async () => {
 
 // Cache invalidation
 revalidatePath("/dashboard");
+
+// Type safety: let TypeScript infer from the typed client
+const { data } = await supabase.from("user_horses").select("*");
+// data is automatically typed — never use `as unknown as`
 ```
 
 ### 7.3 Test Coverage
 
-194 tests across 20 test files covering server actions, utilities, and UI components:
+245 tests across 23 test files covering server actions, utilities, and UI components:
 
-#### Server Action Tests (136 tests, 15 files)
+#### Server Action Tests (6 files)
 
-| Suite | Tests | Coverage |
-|-------|-------|----------|
-| `collections.test.ts` | Collection CRUD, M:N junction ops | 30+ |
-| `horse.test.ts` | Create, delete, quick-add, finalize images | 12 |
-| `provenance.test.ts` | Show records, pedigree, timeline queries | 30+ |
-| `transactions.test.ts` | Commerce state machine, offers, payments, cancellations | 40+ |
+| Suite | Coverage |
+|-------|----------|
+| `collections.test.ts` | Collection CRUD, M:N junction ops |
+| `horse.test.ts` | Create, delete, quick-add, finalize images |
+| `provenance.test.ts` | Show records, pedigree, timeline queries |
+| `transactions.test.ts` | Commerce state machine, offers, payments, cancellations |
+| `competition.test.ts` | Event, division, class creation + entries |
+| `hoofprint.test.ts` | Pedigree validation, timeline assembly |
 
-#### Component Tests — React Testing Library (58 tests, 5 files)
+#### Component Tests — React Testing Library (6 files)
 
-| Component | Tests | Coverage Highlights |
-|-----------|-------|-------------------|
-| `PhotoLightbox.test.tsx` | 15 | Keyboard nav, portal rendering, body scroll lock, wrap-around |
-| `TrophyCase.test.tsx` | 9 | Empty state, category grouping, sort order, tier classes |
-| `MarketFilters.test.tsx` | 10 | Filter controls, URL param updates, dropdowns, accessibility IDs |
-| `MakeOfferModal.test.tsx` | 11 | Form validation, payment safety warnings, offer submission |
-| `HoofprintTimeline.test.tsx` | 13 | Timeline events, ownership chain, add note form, stage selector |
+| Component | Coverage Highlights |
+|-----------|-------------------|
+| `PhotoLightbox.test.tsx` | Keyboard nav, portal rendering, body scroll lock, wrap-around |
+| `TrophyCase.test.tsx` | Empty state, category grouping, sort order, tier classes |
+| `MarketFilters.test.tsx` | Filter controls, URL param updates, dropdowns, accessibility IDs |
+| `MakeOfferModal.test.tsx` | Form validation, payment safety warnings, offer submission |
+| `HoofprintTimeline.test.tsx` | Timeline events, ownership chain, add note form, stage selector |
+| `PedigreeCard.test.tsx` | Resin lineage display, edge cases |
+
+#### Utility Tests (4 files)
+
+| Suite | Coverage |
+|-------|----------|
+| `rateLimit.test.ts` | Rate limiter window, threshold, reset |
+| `achievements.test.ts` | Badge evaluation logic |
+| `validation.test.ts` | Input validation utilities |
+| `mentions.test.ts` | @mention parsing and extraction |
+
+#### E2E Tests — Playwright (7 specs)
+
+Show listing, detail, entry form, podium, override, mobile responsiveness, auth guards.
 
 Setup: `src/components/__tests__/setup.ts` provides shared mocks for Next.js navigation, Supabase clients, and `@testing-library/jest-dom` matchers. Tests use `// @vitest-environment jsdom` and `userEvent` for interaction simulation.
 
@@ -553,21 +573,23 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` or `qua
 
 ## 8. API Routes
 
-Eleven API routes handle concerns that can't be server actions:
+Seven API routes handle concerns that can't be server actions:
 
 | Route | Purpose |
 |-------|---------|
 | `/api/auth/callback` | Supabase PKCE code exchange + session setup |
 | `/api/cron/refresh-market` | Daily materialized view refresh (Vercel cron) |
 | `/api/export/[horseId]` | CoA/parked export PDF generation |
+| `/api/insurance-report` | Insurance report PDF generation |
 | `/api/identify-mold` | AI-powered mold identification (image analysis) |
 | `/api/reference-dictionary` | Reference data dictionary for search |
+| `/api/auth/me` | Current user session check |
 
 ---
 
 ## 9. Client Components
 
-98 client components power the interactive UI. Major categories:
+105 client components power the interactive UI. Major categories:
 
 ### 9.1 Core UI Components
 
@@ -666,12 +688,12 @@ The polymorphic `item_type` column + `parent_id` FK enables arbitrary hierarchy 
 
 ### 11.1 Documentation Structure
 
-The `/docs/` directory contains 31 pages organized into 7 sections:
+The `/docs/` directory contains 33 pages organized into 7 sections:
 
 | Section | Contents |
 |---------|----------|
 | `getting-started/` | Setup guide, project structure reference |
-| `architecture/` | System overview, data flow diagrams, ADRs (6 decisions documented) |
+| `architecture/` | System overview, data flow diagrams, ADRs (7 decisions documented, 2 superseded) |
 | `database/` | Schema overview, migrations log, RLS policy catalog |
 | `api/` | API route documentation |
 | `components/` | Component catalog with props |
@@ -680,11 +702,11 @@ The `/docs/` directory contains 31 pages organized into 7 sections:
 
 ### 11.2 JSDoc Coverage
 
-All 35 server action files have JSDoc comments on exported functions, documenting parameters, return types, and behavior. Coverage was achieved through a formal documentation sprint (Phase 5 of the documentation plan).
+All 36 server action files have JSDoc comments on exported functions, documenting parameters, return types, and behavior. Coverage was achieved through a formal documentation sprint (Phase 5 of the documentation plan).
 
 ### 11.3 Workflow Documents
 
-57 workflow files in `.agents/workflows/` document every sprint, from the initial mobile polish through the latest commission refinements. Each workflow follows a standard format with `// turbo-all` annotations for automated execution.
+61 workflow files in `.agents/workflows/` document every sprint, from the initial mobile polish through the latest production hardening. Each workflow follows a standard format with `// turbo-all` annotations for automated execution. The `dev-nextsteps.md` workflow serves as a living task queue for cleanup items.
 
 ---
 
@@ -732,14 +754,18 @@ All 35 server action files have JSDoc comments on exported functions, documentin
 | **V36** | Commission Refinement | Shipping status, WIP photos, status transition fixes |
 | **V37** | Documentation Sprint | 31 doc pages, JSDoc on all exports, architecture diagrams |
 | **V38** | Photo Upload Fixes | Lightbox portal, angle_profile enum fix, upload error visibility |
+| **V39** | Production Hardening | Edge security (8 public routes), perf (removed 35 force-dynamic, Suspense streaming), type safety (generated Supabase types, removed 242 lines of unsafe casts from 20 files), pedigree validation (6 new tests) |
+| — | Tailwind CSS v4 Migration | Full migration from vanilla CSS to Tailwind v4, eliminated all CSS Modules and extracted page CSS files, globals.css reduced from ~12,000 to 2,211 lines |
+| — | Notification Deep-Links | `link_url` column (migration 096), all notifications now click through to referenced item |
+| — | Show Polish & Realism | Entry preview, smart class browser, results podium, personalized notifications, show history widget, expert judging, cron auto-transition, host override, enriched show records, judge notes |
 
 ### 12.2 Key Architectural Decisions Log
 
 | Decision | Rationale |
 |----------|-----------|
 | **Server actions over API routes** | Co-locates backend with frontend; Next.js handles serialization. Eliminates boilerplate API layer. |
-| **Manual TypeScript types** | Generated Supabase types were too permissive. Manual typing ensures compile-time safety for the specific columns we use. |
-| **Vanilla CSS over Tailwind** | Full design token control. The token system predates the project; Tailwind would require mapping all tokens to utility classes. |
+| **Auto-generated Supabase types** | `npm run gen-types` produces `database.generated.ts` from the live schema. All Supabase clients are typed with the `Database` generic. No `as unknown as` casts in production code — TypeScript infers types from queries. |
+| **Tailwind CSS v4** | After evolving through vanilla CSS → CSS Modules → Tailwind, the project standardized on Tailwind CSS v4 for its utility-first approach and design token mapping via `@theme`. |
 | **`after()` for background tasks** | Serverless functions have cold start budgets. Notifications and activity events are deferred so they don't block the user-facing response. |
 | **Junction table for collections** | The original single FK (`collection_id`) limited horses to one collection. Real-world use cases demanded M:N. Legacy FK kept in sync. |
 | **Materialized views** | Provenance timeline and market prices are expensive UNION ALL queries. Materialized views pre-compute results; market refreshes daily via cron. |
@@ -752,14 +778,14 @@ All 35 server action files have JSDoc comments on exported functions, documentin
 
 ## 13. Testing & Quality
 
-### 13.1 Unit Tests
+### 13.1 Test Suite
 
-136 tests across 15 test files covering critical server action logic:
+245 tests across 23 test files:
 
-- **Collections:** M:N junction CRUD, collection assignment, deletion
-- **Horse CRUD:** Create, delete, quick-add, finalize images
-- **Provenance:** Show records, pedigree, timeline queries
-- **Commerce:** Full state machine (offer → payment → completion → rating), cancellation, retraction
+- **Server actions (6 files):** Collections M:N CRUD, horse CRUD, provenance timeline, commerce state machine, competition engine, pedigree validation
+- **Components (6 files):** PhotoLightbox, TrophyCase, MarketFilters, MakeOfferModal, HoofprintTimeline, PedigreeCard
+- **Utilities (4 files):** Rate limiting, achievements, validation, mentions
+- **E2E (7 specs):** Show listing, detail, entry form, podium, override, mobile, auth guards
 
 All tests pass with pre-commit hooks via Husky.
 
@@ -769,21 +795,19 @@ Every sprint ends with `npx next build` — the Turbopack build catches type err
 
 ### 13.3 QA Process
 
-- **Automated:** Vitest unit tests (136 tests, pre-commit hook)
-- **E2E scaffold:** Playwright configured with axe-core accessibility testing
+- **Automated:** Vitest unit tests (245 tests, pre-commit hook)
+- **E2E:** 7 Playwright specs with axe-core accessibility testing
 - **Manual:** Beta testers provide feedback via structured rounds
 - **Lint:** ESLint with Next.js config + security plugin
-- **Type safety:** Strict TypeScript with manual database types
+- **Type safety:** Strict TypeScript with auto-generated database types (`npm run gen-types`)
 
 ### 13.4 Known Limitations
 
 | Area | Limitation | Mitigation |
 |------|-----------|------------|
-| **Test coverage** | Unit tests cover server actions; no component tests | Build verification + E2E scaffold + manual testing |
-| **Database types** | Manual types, not auto-generated | Types are comprehensive and kept in sync with migrations |
-| **CSS monolith** | `globals.css` still ~11,700 lines | 19 CSS Modules extracted (V20). New components use CSS Modules. |
-| **No SSR caching** | All dynamic pages fetch on every request | Supabase RLS requires authenticated requests; static generation not viable for private data |
+| **No SSR caching** | All dynamic pages fetch on every request | Supabase RLS requires authenticated requests; static generation not viable for private data. Suspense streaming on dashboard + show ring. |
 | **Hobby tier Vercel** | Cron limited to daily frequency | Market price refresh is daily (sufficient for hobby volumes) |
+| **Image optimization** | Raw `<img>` tags, no Next.js Image component | Private Supabase storage uses signed URLs; Next.js Image requires public URLs or custom loader |
 
 ---
 
@@ -820,28 +844,36 @@ The platform is feature-complete for closed beta. All core inventory, social, co
 
 ### 15.2 Migration Status
 
-All 86 migrations (001–090) have been deployed to production Supabase. The most recent, migration **090** (`angle_profile_extras.sql`), added the `extra_detail` and `Belly_Makers_Mark` values to the `angle_profile` PostgreSQL enum — fixing a bug where extra detail photo uploads silently failed.
+All 93 migrations (001–097) have been deployed to production Supabase. Key recent migrations:
 
-### 15.3 Recent Bug Fixes (V38)
+| Migration | Purpose |
+|-----------|---------|
+| 091–092 | Supabase linter fixes (security definer, extension management, RLS audit) |
+| 093 | Notification deep-link type migrations |
+| 094–095 | Show polish (judge notes, show records enrichment, auto-transition) |
+| 096 | `link_url` column on notifications for deep-linking |
+| 097 | Backfill missing tables for type generation |
 
-| Bug | Root Cause | Fix |
-|-----|-----------|-----|
-| Photo lightbox not working on stable page | `overflow: hidden` on `.passport-layout` clipped the inline lightbox | `PhotoLightbox` now uses `createPortal(…, document.body)` |
-| Extra detail photos not saving | PostgreSQL `angle_profile` enum missing `extra_detail` value | Migration 090 added missing enum values |
-| No feedback when photos uploaded during edit | Silent redirect with no indication of photo status | Added `photos_updated` and `photo_error` toast variants |
-| Stable page missing photo angles | `ANGLE_ORDER` and `ANGLE_LABELS` missing `Belly_Makers_Mark` and `extra_detail` | Synced stable page maps with community page |
+### 15.3 Recent Work (V39+)
+
+| Sprint | Key Deliverables |
+|--------|------------------|
+| **V39: Production Hardening** | Edge security on 8 public routes, removed 35 `force-dynamic` in favor of Suspense streaming, type safety audit (removed unsafe casts from 20 files), 6 new pedigree validation tests |
+| **Type Safety Cleanup** | Generated Supabase types injected into all clients, removed `as unknown as` from 20 files, removed redundant manual interfaces, coerced nullable DB fields with defaults |
+| **Tailwind CSS v4 Migration** | Full CSS architecture migration, eliminated all CSS Modules and extracted page CSS, reduced globals.css from ~12,000 to 2,211 lines |
+| **Notification Deep-Links** | All notifications now click through to referenced item instead of actor profile |
+| **Beta Feedback Hotfixes** | Photo show filter fix, art studio specialty expansion, inline style cleanup |
 
 ### 15.4 Recommended Next Steps
 
-1. **Production hardening** — Rate limit tuning, error monitoring (Sentry), performance profiling
-2. **Component tests** — React Testing Library coverage for critical UI flows
-3. **Search infrastructure** — Server-side full-text search (Supabase pg_search or external)
-4. **Image optimization** — Next.js Image component integration (currently raw `<img>`)
-5. **Progressive Web App** — Offline show mode for live events without WiFi
-6. **Mobile app** — React Native or Capacitor wrapper for app store presence
-7. **Real-time features** — Supabase Realtime for live chat and notification push
-8. **Marketplace expansion** — Escrow integration, shipping label generation
+1. **Search infrastructure** — Server-side full-text search (Supabase pg_search or external)
+2. **Image optimization** — Next.js Image component integration (currently raw `<img>`)
+3. **Error monitoring** — Sentry or equivalent for production error tracking
+4. **Progressive Web App** — Offline show mode for live events without WiFi
+5. **Mobile app** — React Native or Capacitor wrapper for app store presence
+6. **Real-time features** — Supabase Realtime for live chat and notification push
+7. **Marketplace expansion** — Escrow integration, shipping label generation
 
 ---
 
-*This report covers the complete Model Horse Hub project as of commit `2dbeedf` (March 17, 2026). Total development time: ~12 days from first commit to current state.*
+*This report covers the complete Model Horse Hub project as of commit `cdaf3c3` (March 24, 2026). Total development time: ~18 days from first commit to current state.*
