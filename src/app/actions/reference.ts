@@ -152,11 +152,11 @@ export async function matchCsvRowsBatch(
                 search_term: searchTerm,
                 max_results: 1,
             });
-            const best = (data as { id: string; name: string }[] | null)?.[0];
+            const best = (data as { id: string; title: string }[] | null)?.[0];
             return {
                 rowIndex: index,
                 catalogId: best?.id ?? null,
-                catalogName: best?.name ?? null,
+                catalogName: best?.title ?? null,
             };
         })
     );

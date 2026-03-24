@@ -2,10 +2,10 @@
 -- MIGRATION 100: Server-side fuzzy catalog search
 -- ═══════════════════════════════════════
 
--- Ensure trigram index exists on catalog_items.name
+-- Ensure trigram index exists on catalog_items.title
 -- Note: pg_trgm extension lives in 'extensions' schema per migration 092
-CREATE INDEX IF NOT EXISTS idx_catalog_items_name_trgm
-  ON catalog_items USING gin (name extensions.gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_catalog_items_title_trgm
+  ON catalog_items USING gin (title extensions.gin_trgm_ops);
 
 -- RPC: search_catalog_fuzzy
 CREATE OR REPLACE FUNCTION search_catalog_fuzzy(
@@ -13,28 +13,29 @@ CREATE OR REPLACE FUNCTION search_catalog_fuzzy(
     max_results INT DEFAULT 20
 ) RETURNS TABLE (
     id UUID,
-    name TEXT,
+    title TEXT,
     item_type TEXT,
     parent_id UUID,
-    parent_name TEXT,
+    parent_title TEXT,
     similarity REAL
 ) AS $$
 BEGIN
     RETURN QUERY
     SELECT
         ci.id,
-        ci.name,
+        ci.title,
         ci.item_type,
         ci.parent_id,
-        p.name AS parent_name,
-        extensions.similarity(ci.name, search_term) AS similarity
+        p.title AS parent_title,
+        extensions.similarity(ci.title, search_term) AS similarity
     FROM catalog_items ci
     LEFT JOIN catalog_items p ON ci.parent_id = p.id
-    WHERE extensions.similarity(ci.name, search_term) > 0.15
-       OR ci.name ILIKE '%' || search_term || '%'
-    ORDER BY extensions.similarity(ci.name, search_term) DESC
+    WHERE extensions.similarity(ci.title, search_term) > 0.15
+       OR ci.title ILIKE '%' || search_term || '%'
+    ORDER BY extensions.similarity(ci.title, search_term) DESC
     LIMIT max_results;
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public;
 
 GRANT EXECUTE ON FUNCTION search_catalog_fuzzy TO authenticated, anon;
+
