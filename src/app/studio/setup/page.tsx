@@ -175,8 +175,7 @@ export default function StudioSetupPage() {
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div
- className="bg-card border-edge mx-auto max-w-[700] rounded-lg border shadow-md transition-all"
- style={{ textAlign:"center" }}
+ className="bg-card border-edge mx-auto max-w-[700] rounded-lg border text-center shadow-md transition-all"
  >
  <p className="text-muted">Loading studio settings…</p>
  </div>
@@ -188,7 +187,7 @@ export default function StudioSetupPage() {
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[700] rounded-lg border shadow-md transition-all">
  {/* Header */}
- <div className="mb-8" style={{ textAlign:"center" }}>
+ <div className="mb-8 text-center">
  <div className="mb-2 text-[2.5rem]">🎨</div>
  <h1 className="text-xl">
  <span className="text-forest">{existing ?"Edit Your Studio" :"Set Up Your Art Studio"}</span>
@@ -220,23 +219,21 @@ export default function StudioSetupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Studio URL Slug</label>
- <div className="gap-1" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-1">
  <span
- className="text-muted text-sm"
- style={{ whiteSpace:"nowrap" }}
+ className="text-muted whitespace-nowrap text-sm"
  >
  /studio/
  </span>
  <input
  type="text"
- className="form-input"
+ className="form-input font-mono"
  value={studioSlug}
  onChange={(e) =>
  setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,""))
  }
  placeholder="painted-ponies"
  maxLength={50}
- style={{ fontFamily:"monospace" }}
  />
  </div>
  </div>
@@ -331,7 +328,7 @@ export default function StudioSetupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Commission Status</label>
- <div className="gap-2" style={{ display:"flex" }}>
+ <div className="flex gap-2">
  {(["open","waitlist","closed"] as const).map((s) => (
  <button
  key={s}
@@ -362,6 +359,7 @@ export default function StudioSetupPage() {
  else if (val > 50) setMaxSlots("50");
  else setMaxSlots(val.toString());
  }}
+ placeholder="5"
  min={1}
  max={50}
  />
@@ -457,16 +455,14 @@ export default function StudioSetupPage() {
  {/* Feedback */}
  {error && (
  <p
- className="mb-4 text-sm text-[#ef4444]"
- style={{ textAlign:"center" }}
+ className="mb-4 text-center text-sm text-[#ef4444]"
  >
  {error}
  </p>
  )}
  {success && (
  <p
- className="mb-4 text-sm text-[#22c55e]"
- style={{ textAlign:"center" }}
+ className="mb-4 text-center text-sm text-[#22c55e]"
  >
  {success}
  </p>
@@ -474,16 +470,15 @@ export default function StudioSetupPage() {
 
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex w-full min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
  disabled={saving || !studioName.trim()}
- style={{ width:"100%" }}
  id="save-studio-btn"
  >
  {saving ?"Saving…" : existing ?"💾 Save Changes" :"🎨 Create Studio"}
  </button>
 
  {existing && (
- <div className="mt-4" style={{ textAlign:"center" }}>
+ <div className="mt-4 text-center">
  <a
  href={`/studio/${existing.studioSlug}`}
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
