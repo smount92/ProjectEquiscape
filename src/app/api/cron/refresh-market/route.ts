@@ -52,8 +52,7 @@ export async function GET(request: NextRequest) {
         // Refresh trusted sellers materialized view (Community Trusted badge)
         let trustedRefreshed = false;
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (admin as any).rpc("refresh_mv_trusted_sellers");
+            await admin.rpc("refresh_mv_trusted_sellers");
             trustedRefreshed = true;
         } catch (err) { logger.error("CronMarket", "refresh_mv_trusted_sellers failed", err); }
 

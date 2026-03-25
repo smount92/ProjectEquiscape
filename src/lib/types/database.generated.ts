@@ -60,6 +60,13 @@ export type Database = {
             foreignKeyName: "activity_events_actor_id_users_fkey"
             columns: ["actor_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "activity_events_actor_id_users_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -102,6 +109,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "activity_likes_user_id_fkey"
@@ -183,6 +197,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "artist_profiles_user_id_fkey"
@@ -499,6 +520,13 @@ export type Database = {
             foreignKeyName: "commission_updates_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "commission_updates_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -599,6 +627,13 @@ export type Database = {
             foreignKeyName: "commissions_artist_id_fkey"
             columns: ["artist_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "commissions_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -608,6 +643,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "commissions_client_id_fkey"
@@ -890,6 +932,13 @@ export type Database = {
             foreignKeyName: "event_comments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "event_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1031,6 +1080,13 @@ export type Database = {
             foreignKeyName: "event_entries_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "event_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1069,6 +1125,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_judges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "event_judges_user_id_fkey"
@@ -1123,6 +1186,13 @@ export type Database = {
             foreignKeyName: "event_photos_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "event_photos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1166,6 +1236,13 @@ export type Database = {
             foreignKeyName: "event_rsvps_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "event_rsvps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1204,6 +1281,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "event_votes_user_id_fkey"
@@ -1300,6 +1384,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "events_created_by_fkey"
@@ -1513,6 +1604,13 @@ export type Database = {
             foreignKeyName: "group_memberships_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "group_memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1554,6 +1652,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_post_replies_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "group_post_replies_user_id_fkey"
@@ -1630,6 +1735,13 @@ export type Database = {
             foreignKeyName: "group_posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "group_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1688,6 +1800,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "groups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "groups_created_by_fkey"
@@ -1858,6 +1977,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_ownership_history_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "horse_ownership_history_owner_id_fkey"
@@ -2149,6 +2275,13 @@ export type Database = {
             foreignKeyName: "likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2233,6 +2366,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_attachments_uploader_id_fkey"
+            columns: ["uploader_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "media_attachments_uploader_id_fkey"
@@ -2327,6 +2467,13 @@ export type Database = {
             foreignKeyName: "notifications_actor_id_users_fkey"
             columns: ["actor_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "notifications_actor_id_users_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2408,6 +2555,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "posts_author_id_fkey"
@@ -2531,6 +2685,13 @@ export type Database = {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2540,6 +2701,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "reviews_target_id_fkey"
@@ -2673,6 +2841,13 @@ export type Database = {
             foreignKeyName: "show_records_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2682,6 +2857,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_records_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "show_records_verified_by_fkey"
@@ -2790,6 +2972,13 @@ export type Database = {
             foreignKeyName: "show_strings_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_strings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2883,6 +3072,13 @@ export type Database = {
             foreignKeyName: "transactions_party_a_id_fkey"
             columns: ["party_a_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "transactions_party_a_id_fkey"
+            columns: ["party_a_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2892,6 +3088,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_party_b_id_fkey"
+            columns: ["party_b_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "transactions_party_b_id_fkey"
@@ -2937,6 +3140,13 @@ export type Database = {
             foreignKeyName: "user_badges_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_badges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2970,6 +3180,13 @@ export type Database = {
             foreignKeyName: "user_blocks_blocked_id_fkey"
             columns: ["blocked_id"]
             isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2979,6 +3196,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "user_blocks_blocker_id_fkey"
@@ -3149,6 +3373,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "discover_users_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_horses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "user_horses_owner_id_fkey"
@@ -3362,6 +3593,17 @@ export type Database = {
           },
         ]
       }
+      mv_trusted_sellers: {
+        Row: {
+          account_created: string | null
+          alias_name: string | null
+          avg_rating: number | null
+          distinct_buyers: number | null
+          review_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       v_horse_hoofprint: {
         Row: {
           created_at: string | null
@@ -3423,6 +3665,7 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: undefined
       }
+      is_trusted_seller: { Args: { p_user_id: string }; Returns: boolean }
       make_offer_atomic: {
         Args: {
           p_buyer_id: string
@@ -3436,6 +3679,7 @@ export type Database = {
         Returns: Json
       }
       refresh_market_prices: { Args: never; Returns: undefined }
+      refresh_mv_trusted_sellers: { Args: never; Returns: undefined }
       respond_to_offer_atomic: {
         Args: {
           p_action: string

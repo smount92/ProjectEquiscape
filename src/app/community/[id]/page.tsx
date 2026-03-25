@@ -274,8 +274,7 @@ editionSize: rawPedigree.edition_size,
  const isOwnHorse = horse.owner_id === user.id;
 
  // Check if owner is a Community Trusted seller
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const { data: trustedData } = await (supabase as any)
+ const { data: trustedData } = await supabase
  .from("mv_trusted_sellers")
  .select("user_id")
  .eq("user_id", horse.owner_id)

@@ -43,3 +43,16 @@ export async function optionalAuth(): Promise<{
     } = await supabase.auth.getUser();
     return { supabase, user };
 }
+
+/**
+ * Get the current user's subscription tier from JWT app_metadata.
+ * Zero-latency: reads from the session token, no DB query.
+ * Returns 'pro' | 'free'. Defaults to 'free' if unauthenticated.
+ */
+export async function getUserTier(): Promise<"pro" | "free"> {
+    const supabase = await createClient();
+    const {
+        data: { session },
+    } = await supabase.auth.getSession();
+    return (session?.user?.app_metadata?.tier as "pro" | "free") || "free";
+}
