@@ -30,6 +30,7 @@ import {
  ChevronDown,
  MoreHorizontal,
  BookOpen,
+ Gem,
 } from"lucide-react";
 
 // Priority-ordered nav links — highest priority first
@@ -461,6 +462,13 @@ export default function Header() {
  <Zap size={16} strokeWidth={1.5} /> Admin
  </Link>
  )}
+ <Link
+  href="/upgrade"
+  className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-amber-600 no-underline transition-all hover:bg-amber-50"
+  onClick={() => setUserMenuOpen(false)}
+ >
+  <Gem size={16} strokeWidth={1.5} /> Upgrade to Pro
+ </Link>
  <div className="mx-1 my-1 h-px bg-edge" />
  <button
  className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-[var(--color-text-secondary)] no-underline transition-all"
@@ -646,8 +654,16 @@ export default function Header() {
  Admin <Zap size={16} strokeWidth={1.5} />
  </Link>
  )}
- {/* ── Mobile-only: Sign Out + Simple Mode ── */}
+ {/* ── Mobile-only: Upgrade + Sign Out + Simple Mode ── */}
  <div className="mt-2 flex flex-col gap-1 border-t border-edge pt-2">
+ <Link
+  href="/upgrade"
+  className="flex items-center gap-1 rounded-md bg-gradient-to-r from-amber-50 to-orange-50 px-2 py-1.5 text-sm font-semibold whitespace-nowrap text-amber-700 no-underline transition-all"
+  id="nav-upgrade-m"
+  onClick={closeMobileMenu}
+ >
+  <Gem size={16} strokeWidth={1.5} /> 💎 Upgrade to Pro
+ </Link>
  <button
  className="flex w-full cursor-pointer items-center justify-start gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm text-[var(--color-text-secondary)] transition-all"
  onClick={() => {

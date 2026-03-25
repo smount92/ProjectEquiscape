@@ -475,6 +475,25 @@ export default function SettingsPage() {
  </div>
  </div>
 
+ {/* ═══ Subscription ═══ */}
+ <div className="mb-12 max-sm:mb-8">
+ <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
+ 💎 Subscription
+ </h2>
+ <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
+ <p className="mb-4 text-sm leading-[1.6]">
+ Upgrade to <strong>MHH Pro</strong> for advanced analytics, expanded photo storage,
+ AI-powered collection reports, and more.
+ </p>
+ <Link
+  href="/upgrade"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2.5 text-sm font-bold text-white no-underline shadow-sm transition-all hover:from-amber-600 hover:to-orange-600"
+ >
+  💎 View Plans & Upgrade
+ </Link>
+ </div>
+ </div>
+
  {/* ═══ Danger Zone ═══ */}
  <div className="mb-12 max-sm:mb-8">
  <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight text-[#ef4444]">
