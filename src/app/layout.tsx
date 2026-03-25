@@ -1,5 +1,5 @@
 import type { Metadata } from"next";
-import { Inter, Playfair_Display, Geist } from"next/font/google";
+import { Inter, Playfair_Display } from"next/font/google";
 import Script from"next/script";
 import"./globals.css";
 
@@ -11,7 +11,7 @@ import BackToTop from"@/components/BackToTop";
 import CookieConsent from"@/components/CookieConsent";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
 
 const GA_MEASUREMENT_ID ="G-7DWKBT1JV9";
 
@@ -52,7 +52,7 @@ export default function RootLayout({
  children: React.ReactNode;
 }>) {
  return (
- <html lang="en" data-simple-mode="false" className={cn(inter.variable, playfair.variable, "font-sans", geist.variable)}>
+ <html lang="en" data-simple-mode="false" className={`${inter.variable} ${playfair.variable}`}>
  <head>
  <Script
  src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
