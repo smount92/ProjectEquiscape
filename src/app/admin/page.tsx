@@ -38,7 +38,7 @@ export default async function AdminPage() {
 
  // Fetch metrics in parallel
  const [usersResult, horsesResult, unreadResult, messagesResult] = await Promise.all([
- supabaseAdmin.auth.admin.listUsers({ perPage: 1, page: 1 }),
+ supabaseAdmin.auth.admin.listUsers({ perPage: 1000, page: 1 }),
  supabaseAdmin.from("user_horses").select("id", { count:"exact", head: true }),
  supabaseAdmin.from("contact_messages").select("id", { count:"exact", head: true }).eq("is_read", false),
  supabaseAdmin
