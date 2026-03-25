@@ -14,6 +14,7 @@ import HoofprintTimeline from"@/components/HoofprintTimeline";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import ReportButton from"@/components/ReportButton";
 import MessageSellerButton from"@/components/MessageSellerButton";
+import TrustedBadge from"@/components/TrustedBadge";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -272,6 +273,15 @@ editionSize: rawPedigree.edition_size,
  const ownerAlias = horse.users?.alias_name ??"Unknown";
  const isOwnHorse = horse.owner_id === user.id;
 
+ // Check if owner is a Community Trusted seller
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ const { data: trustedData } = await (supabase as any)
+ .from("mv_trusted_sellers")
+ .select("user_id")
+ .eq("user_id", horse.owner_id)
+ .maybeSingle();
+ const isTrustedSeller = !!trustedData;
+
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  {/* Breadcrumb */}
@@ -347,6 +357,7 @@ editionSize: rawPedigree.edition_size,
  </svg>
  </span>
  <span>@{ownerAlias}</span>
+ {isTrustedSeller && <TrustedBadge />}
  {isOwnHorse && (
  <span className="bg-forest inline-flex rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase">
  You
