@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getUserTier } from "@/lib/auth";
 import Stripe from "stripe";
 
 // ============================================================
@@ -12,6 +13,15 @@ export async function POST() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Prevent double-subscription
+    const tier = await getUserTier();
+    if (tier === "pro") {
+        return NextResponse.json(
+            { error: "You're already on MHH Pro! No need to upgrade again." },
+            { status: 400 }
+        );
     }
 
     const stripeKey = process.env.STRIPE_SECRET_KEY;

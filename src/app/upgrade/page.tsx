@@ -96,6 +96,9 @@ export default async function UpgradePage({
                         ? "Thank you for supporting Model Horse Hub! Here's what's included in your plan."
                         : "Take your collection management to the next level with premium tools and AI insights."}
                 </p>
+                <p className="mt-2 inline-block rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500">
+                    Current plan: <span className={tier === 'pro' ? 'font-bold text-amber-600' : 'font-bold'}>{tier === 'pro' ? '💎 Pro' : 'Free'}</span>
+                </p>
             </div>
 
             {/* Pricing cards */}
@@ -173,7 +176,7 @@ export default async function UpgradePage({
                     <div className="rounded-lg border border-edge bg-card p-4">
                         <h3 className="font-semibold">Will I lose my data if I downgrade?</h3>
                         <p className="mt-1 text-sm text-stone-500">
-                            Never. All your horses, photos, and provenance data are safe. Pro features (like extra photos beyond 10) become view-only.
+                            Never. All your horses, photos, and provenance data are safe. Extra detail photos become view-only until you re-subscribe.
                         </p>
                     </div>
                     <div className="rounded-lg border border-edge bg-card p-4">
