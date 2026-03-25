@@ -132,7 +132,7 @@ export default async function UpgradePage({
                     <div className="mb-4">
                         <span className="text-sm font-semibold uppercase tracking-wider text-amber-600">Pro</span>
                         <div className="mt-2 flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-stone-800">$9</span>
+                            <span className="text-3xl font-bold text-stone-800">$5</span>
                             <span className="text-sm text-stone-500">/month</span>
                         </div>
                     </div>

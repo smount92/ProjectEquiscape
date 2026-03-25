@@ -45,7 +45,7 @@ export default function UpgradeButton() {
                         Starting checkout…
                     </span>
                 ) : (
-                    "💎 Upgrade to MHH Pro — $9/mo"
+                    "💎 Upgrade to MHH Pro — $5/mo"
                 )}
             </button>
             {error && (
