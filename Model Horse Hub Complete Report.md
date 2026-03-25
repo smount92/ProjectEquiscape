@@ -1,9 +1,9 @@
 # Model Horse Hub — Complete Project Report
 
-> **Report Date:** March 24, 2026  
+> **Report Date:** March 25, 2026  
 > **Repository:** `smount92/ProjectEquiscape` (GitHub, private)  
-> **Total Commits:** 370 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
-> **Status:** Closed beta with active testers
+> **Total Commits:** 384 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
+> **Status:** Open beta with active testers — Freemium tier live with Stripe billing
 
 ---
 
@@ -17,19 +17,20 @@ The platform was built from scratch in ~18 days using AI-assisted pair programmi
 
 | Metric | Value |
 |--------|-------|
-| **TypeScript/TSX source lines** | ~50,200 |
+| **TypeScript/TSX source lines** | ~54,400 |
 | **CSS** | Tailwind CSS v4 + globals.css (2,211 lines for shared primitives) |
-| **Total source size** | 1.84 MB |
-| **Page routes** | 59 |
-| **Client components** | 105 |
-| **Server action files** | 36 |
-| **Database migrations** | 93 (001–097) |
-| **SQL migration lines** | 9,216 |
+| **Total source size** | 1.94 MB |
+| **Page routes** | 61 |
+| **Client components** | 114 |
+| **Server action files** | 42 |
+| **Database migrations** | 98 (001–102) |
+| **SQL migration lines** | ~9,600 |
 | **Unit/component tests** | 245 (across 23 test files) |
 | **E2E test specs** | 7 (Playwright) |
 | **CI pipeline** | GitHub Actions (build + test on every push) |
+| **API Routes** | 15 |
 | **Documentation pages** | 33 (in `/docs/`) |
-| **Workflow documents** | 61 |
+| **Workflow documents** | 64 |
 | **Strategic docs** | 17 |
 
 ---
@@ -49,6 +50,8 @@ The platform was built from scratch in ~18 days using AI-assisted pair programmi
 | **Email** | Resend | 6.9.3 | Transactional notifications |
 | **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, CoA exports |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching |
+| **Payments** | Stripe | 18.x | Checkout Sessions + webhooks for subscription billing |
+| **AI** | Google Gemini | 2.x | AI-powered collection analysis (Stablemaster) |
 | **CSV** | PapaParse | 5.5.3 | Batch import |
 | **QR Codes** | qrcode.react | 4.2.0 | Passport/transfer QR codes |
 | **Markdown** | react-markdown + remark-gfm | 10.1.0 | Rich text rendering |
@@ -119,8 +122,12 @@ graph TD
     B -->|after()| F["Background Tasks"]
     F -->|Notifications, Activity Events, Achievements| C
     G["Vercel Cron"] -->|Daily 6 AM UTC| H["/api/cron/refresh-market"]
+    I["Vercel Cron"] -->|1st of month 9 AM UTC| J["/api/cron/stablemaster-agent"]
+    J -->|Gemini AI + Resend| K["User Email"]
     H -->|Refresh materialized view| C
     A -->|Signed URLs| D
+    L["Stripe Webhook"] -->|checkout.session.completed| M["/api/webhooks/stripe"]
+    M -->|Admin API: update tier| C
 ```
 
 **Key pattern:** Pages are Server Components that fetch data directly. Client Components call server actions (imported directly — Next.js handles serialization). The `after()` API from Next.js wraps deferred tasks (notifications, activity events, achievement evaluation) so they don't block the response — critical for serverless cold start budget.
@@ -145,6 +152,7 @@ graph TD
 | **Rate limiting** | `checkRateLimit()` utility — configurable per-action limits |
 | **Chat guardrails** | `RISKY_PAYMENT_REGEX` warns when users mention off-platform payment methods |
 | **Tombstone deletion** | Soft delete preserves data integrity for provenance chains |
+| **Tier gating** | JWT `app_metadata.tier` checked server-side; freemium features enforced at query and action level |
 | **Crypto PINs** | `crypto.randomInt()` for transfer claim PINs (not `Math.random()`) |
 | **Watermarking** | Opt-in image watermarking at upload time (username overlay) |
 | **Block system** | Blocked users cannot interact — filtered at query level |
@@ -155,7 +163,7 @@ graph TD
 
 ## 4. Database Schema
 
-### 4.1 Schema Evolution (93 migrations, 001–097)
+### 4.1 Schema Evolution (98 migrations, 001–102)
 
 The database went through a **Grand Unification** (documented in `Grand_Unification_Plan.md`) across phases V6–V11 that consolidated legacy tables into universal, polymorphic structures:
 
@@ -251,6 +259,7 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 |------|---------|---------| 
 | `v_horse_hoofprint` | Universal provenance ledger — UNION ALL across transfers, condition changes, show records, customization logs, pedigrees | On demand |
 | `mv_market_prices` | Blue Book price guide — aggregated from completed transactions by catalog item, finish type, life stage | Vercel cron daily at 6 AM UTC |
+| `mv_trusted_sellers` | Trusted seller badges — users with ≥3 completed transactions and ≥4.5 avg rating | Vercel cron daily at 6 AM UTC |
 | `discover_users_view` | Active collectors with horse counts and rating averages | — |
 
 ### 4.10 Key Design Decisions
@@ -277,7 +286,7 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | Edit Horse (all fields) | ✅ Complete | `/stable/[id]/edit` |
 | Delete Horse (tombstone) | ✅ Complete | Delete modal |
 | 5 LSQ Photo Slots | ✅ Complete | Near-Side, Off-Side, Front, Hind, Belly/Mark |
-| Extra Detail Photos (10 max) | ✅ Complete | Dropzone in add/edit forms |
+| Extra Detail Photos (Pro only, 30 max) | ✅ Complete | Dropzone in add/edit forms — free users see upgrade prompt |
 | Image Crop Tool | ✅ Complete | Aspect ratio presets, rule-of-thirds grid |
 | Photo Lightbox | ✅ Complete | Portal-based fullscreen viewer with keyboard nav |
 | Opt-in Watermarking | ✅ Complete | Settings toggle |
@@ -382,7 +391,23 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | Async Evaluation | ✅ Complete | `after()` hook evaluates on triggers |
 | Cron Evaluation | ✅ Complete | Complex badges via scheduled job |
 
-### 5.9 Platform & Infrastructure
+### 5.9 Monetization & Billing
+
+| Feature | Status | Entry Point |
+|---------|--------|-------------|
+| Freemium Tier (Free vs Pro) | ✅ Complete | JWT `app_metadata.tier` |
+| Stripe Checkout Sessions | ✅ Complete | `/api/checkout` |
+| Stripe Webhook Handler | ✅ Complete | `/api/webhooks/stripe` |
+| Upgrade Page | ✅ Complete | `/upgrade` — pricing comparison, FAQ |
+| Upgrade CTAs | ✅ Complete | Header dropdown, mobile nav, settings |
+| Double-Subscription Prevention | ✅ Complete | Server-side tier check before checkout |
+| Photo Suite+ (Pro gate) | ✅ Complete | Extra detail photos locked behind Pro |
+| Blue Book PRO Charts | ✅ Complete | Interactive scatter plots (Pro) / blurred (Free) |
+| Smart Insurance Reports (Pro) | ✅ Complete | Market Replacement Values in Pro PDFs |
+| Stablemaster AI (Pro) | ✅ Complete | Monthly Gemini-powered collection analysis email |
+| Google Pay / Apple Pay / Link | ✅ Complete | Auto-enabled via Stripe dynamic payment methods |
+
+### 5.10 Platform & Infrastructure
 
 | Feature | Status | Entry Point |
 |---------|--------|-------------|
@@ -573,17 +598,20 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` or `qua
 
 ## 8. API Routes
 
-Seven API routes handle concerns that can't be server actions:
+15 API routes handle concerns that can't be server actions:
 
 | Route | Purpose |
 |-------|---------|
 | `/api/auth/callback` | Supabase PKCE code exchange + session setup |
+| `/api/auth/me` | Current user session check |
+| `/api/checkout` | Stripe Checkout Session creation (subscription) |
+| `/api/webhooks/stripe` | Stripe webhook handler — updates `app_metadata.tier` on subscription events |
 | `/api/cron/refresh-market` | Daily materialized view refresh (Vercel cron) |
+| `/api/cron/stablemaster-agent` | Monthly AI collection analysis + email (Vercel cron, 1st of month) |
 | `/api/export/[horseId]` | CoA/parked export PDF generation |
 | `/api/insurance-report` | Insurance report PDF generation |
 | `/api/identify-mold` | AI-powered mold identification (image analysis) |
 | `/api/reference-dictionary` | Reference data dictionary for search |
-| `/api/auth/me` | Current user session check |
 
 ---
 
@@ -826,6 +854,11 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 RESEND_API_KEY=...
+STRIPE_SECRET_KEY=...
+STRIPE_PRO_PRICE_ID=price_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+CRON_SECRET=...
+GEMINI_API_KEY=...
 ```
 
 ### 14.3 Cron Jobs
@@ -833,6 +866,7 @@ RESEND_API_KEY=...
 | Schedule | Endpoint | Purpose |
 |----------|----------|---------|
 | Daily 6 AM UTC | `/api/cron/refresh-market` | Refresh `mv_market_prices` materialized view |
+| 1st of month, 9 AM UTC | `/api/cron/stablemaster-agent` | AI portfolio analysis + branded email to Pro users |
 
 ---
 
@@ -853,6 +887,11 @@ All 93 migrations (001–097) have been deployed to production Supabase. Key rec
 | 094–095 | Show polish (judge notes, show records enrichment, auto-transition) |
 | 096 | `link_url` column on notifications for deep-linking |
 | 097 | Backfill missing tables for type generation |
+| 098 | Tombstone soft-delete for `user_horses` |
+| 099 | Atomic commerce RPCs (`make_offer_atomic`, `respond_to_offer_atomic`) |
+| 100 | Fuzzy search RPC (`search_catalog_fuzzy` with `pg_trgm`) |
+| 101 | Trusted seller materialized view (`mv_trusted_sellers`) |
+| 102 | Pro tier RLS functions (`get_user_tier`, `get_photo_limit`, `get_extra_photo_count`) |
 
 ### 15.3 Recent Work (V39+)
 
@@ -863,6 +902,7 @@ All 93 migrations (001–097) have been deployed to production Supabase. Key rec
 | **Tailwind CSS v4 Migration** | Full CSS architecture migration, eliminated all CSS Modules and extracted page CSS, reduced globals.css from ~12,000 to 2,211 lines |
 | **Notification Deep-Links** | All notifications now click through to referenced item instead of actor profile |
 | **Beta Feedback Hotfixes** | Photo show filter fix, art studio specialty expansion, inline style cleanup |
+| **V40: Monetization Sprint** | Stripe integration (checkout + webhook), freemium tier system (JWT-based), upgrade page with pricing comparison, Stablemaster AI cron (Gemini + Resend), Blue Book PRO charts, Photo Suite+ gating (5 LSQ free / 30 extra Pro), Smart Insurance Reports (Pro), double-subscription prevention, admin user count fix |
 
 ### 15.4 Recommended Next Steps
 
@@ -876,4 +916,4 @@ All 93 migrations (001–097) have been deployed to production Supabase. Key rec
 
 ---
 
-*This report covers the complete Model Horse Hub project as of commit `cdaf3c3` (March 24, 2026). Total development time: ~18 days from first commit to current state.*
+*This report covers the complete Model Horse Hub project as of commit `65e8ff2` (March 25, 2026). Total development time: ~19 days from first commit to current state.*
