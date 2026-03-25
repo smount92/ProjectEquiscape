@@ -404,6 +404,31 @@ export async function finalizeHorseImages(
 
     if (images.length === 0) return { success: true };
 
+    // Enforce tier-based photo limits for extra_detail uploads
+    const extraDetailImages = images.filter(img => img.angle === "extra_detail");
+    if (extraDetailImages.length > 0) {
+        const { getUserTier } = await import("@/lib/auth");
+        const tier = await getUserTier();
+        const limit = tier === "pro" ? 30 : 10;
+
+        // Count existing extra_detail photos
+        const { count } = await supabase
+            .from("horse_images")
+            .select("id", { count: "exact", head: true })
+            .eq("horse_id", horseId)
+            .eq("angle_profile", "extra_detail");
+
+        const currentCount = count ?? 0;
+        if (currentCount + extraDetailImages.length > limit) {
+            return {
+                success: false,
+                error: tier === "free"
+                    ? `Extra detail photo limit reached (${currentCount}/${limit}). Upgrade to MHH Pro for up to 30 photos.`
+                    : `Extra detail photo limit reached (${currentCount}/${limit}).`,
+            };
+        }
+    }
+
     // Build public URLs and insert image records
     const inserts = images.map((img) => {
         const { data: { publicUrl } } = supabase.storage.from("horse-images").getPublicUrl(img.path);

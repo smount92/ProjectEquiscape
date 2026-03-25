@@ -11,6 +11,7 @@ interface InsuranceHorse {
  condition_grade: string | null;
  trade_status: string | null;
  created_at: string;
+ catalog_id: string | null;
  catalog_items: {
  title: string;
  maker: string;
@@ -24,11 +25,13 @@ interface InsuranceHorse {
  } | null;
 }
 
-interface InsuranceReportProps {
+export interface InsuranceReportProps {
  owner: { alias_name: string; full_name: string | null; email: string };
  horses: InsuranceHorse[];
  thumbnailMap: Map<string, string>;
  generatedAt: string;
+ tier?: "free" | "pro";
+ marketValueMap?: Map<string, number>;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -382,10 +385,12 @@ function DetailPage({
  horse,
  thumbnailUrl,
  generatedAt,
+ marketValue,
 }: {
  horse: InsuranceHorse;
  thumbnailUrl?: string;
  generatedAt: string;
+ marketValue?: number;
 }) {
  const vault = horse.financial_vault;
  const ref = horse.catalog_items;
@@ -440,6 +445,14 @@ function DetailPage({
  <Text style={s.detailFieldLabel}>Date Added</Text>
  <Text style={s.detailFieldValue}>{fmtDate(horse.created_at)}</Text>
  </View>
+ {marketValue != null && (
+ <View style={[s.detailField, { borderColor: '#2563eb', borderWidth: 1 }]}>
+ <Text style={[s.detailFieldLabel, { color: '#2563eb' }]}>Market Replacement Value (PRO)</Text>
+ <Text style={[s.detailFieldValue, { color: '#2563eb', fontFamily: 'Helvetica-Bold' }]}>
+ {fmt$(marketValue)}
+ </Text>
+ </View>
+ )}
  </View>
 
  {vault?.insurance_notes && (
@@ -458,7 +471,7 @@ function DetailPage({
  Main Document Export
  ═══════════════════════════════════════════════════════════════ */
 export function InsuranceReportDocument(props: InsuranceReportProps) {
- const { owner, horses, thumbnailMap, generatedAt } = props;
+ const { owner, horses, thumbnailMap, generatedAt, tier, marketValueMap } = props;
  const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.estimated_current_value || 0), 0);
 
  return (
@@ -476,6 +489,7 @@ export function InsuranceReportDocument(props: InsuranceReportProps) {
  horse={horse}
  thumbnailUrl={thumbnailMap.get(horse.id)}
  generatedAt={generatedAt}
+ marketValue={tier === 'pro' && horse.catalog_id ? marketValueMap?.get(horse.catalog_id) : undefined}
  />
  ))}
  </Document>
