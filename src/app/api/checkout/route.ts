@@ -33,7 +33,8 @@ export async function POST() {
     try {
         const session = await stripe.checkout.sessions.create({
             mode: "subscription",
-            payment_method_types: ["card"],
+            // Uses whatever payment methods you've enabled in Stripe Dashboard
+            // (card, PayPal, Apple Pay, Google Pay, etc.)
             line_items: [{ price: priceId, quantity: 1 }],
             // This is the critical link — maps Stripe customer back to Supabase user
             client_reference_id: user.id,
