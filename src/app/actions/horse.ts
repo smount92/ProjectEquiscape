@@ -405,13 +405,21 @@ export async function finalizeHorseImages(
     if (images.length === 0) return { success: true };
 
     // Enforce tier-based photo limits for extra_detail uploads
+    // Free: 5 standard LSQ angles only (no extra_detail)
+    // Pro: 5 standard LSQ angles + up to 30 extra_detail photos
     const extraDetailImages = images.filter(img => img.angle === "extra_detail");
     if (extraDetailImages.length > 0) {
         const { getUserTier } = await import("@/lib/auth");
         const tier = await getUserTier();
-        const limit = tier === "pro" ? 30 : 10;
 
-        // Count existing extra_detail photos
+        if (tier === "free") {
+            return {
+                success: false,
+                error: "Extra detail photos are an MHH Pro feature. Upgrade to add close-ups, markings, and detail shots (up to 30 per horse).",
+            };
+        }
+
+        // Pro users: enforce 30 extra_detail limit
         const { count } = await supabase
             .from("horse_images")
             .select("id", { count: "exact", head: true })
@@ -419,12 +427,10 @@ export async function finalizeHorseImages(
             .eq("angle_profile", "extra_detail");
 
         const currentCount = count ?? 0;
-        if (currentCount + extraDetailImages.length > limit) {
+        if (currentCount + extraDetailImages.length > 30) {
             return {
                 success: false,
-                error: tier === "free"
-                    ? `Extra detail photo limit reached (${currentCount}/${limit}). Upgrade to MHH Pro for up to 30 photos.`
-                    : `Extra detail photo limit reached (${currentCount}/${limit}).`,
+                error: `Extra detail photo limit reached (${currentCount}/30).`,
             };
         }
     }

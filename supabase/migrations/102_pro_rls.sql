@@ -31,13 +31,15 @@ $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public;
 GRANT EXECUTE ON FUNCTION get_extra_photo_count TO authenticated;
 
 -- ── RPC: get photo upload limit based on tier ──
+-- Free: 0 extra_detail (standard LSQ angles only)
+-- Pro: 30 extra_detail
 CREATE OR REPLACE FUNCTION get_photo_limit()
 RETURNS INT AS $$
 BEGIN
     IF get_user_tier() = 'pro' THEN
         RETURN 30;
     ELSE
-        RETURN 10;
+        RETURN 0;
     END IF;
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = public;

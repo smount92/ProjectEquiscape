@@ -18,7 +18,7 @@ const PRO_FEATURES = [
     {
         icon: "📸",
         title: "Photo Suite+",
-        description: "Up to 30 extra detail photos per horse (vs 10 free)",
+        description: "Up to 30 extra detail photos per horse — close-ups, markings, and more",
     },
     {
         icon: "📄",
@@ -47,7 +47,7 @@ const FREE_FEATURES = [
     "Hoofprint™ provenance tracking",
     "Community Show Ring & social features",
     "Basic Price Guide (avg / median)",
-    "10 extra detail photos per horse",
+    "5 standard LSQ photo angles per horse",
     "Standard insurance reports",
 ];
 
