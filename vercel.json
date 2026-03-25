@@ -7,6 +7,10 @@
         {
             "path": "/api/cron/transition-shows",
             "schedule": "0 6 * * *"
+        },
+        {
+            "path": "/api/cron/stablemaster-agent",
+            "schedule": "0 9 1 * *"
         }
     ]
 }
