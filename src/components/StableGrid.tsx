@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo } from"react";
-import Link from"next/link";
-import SearchBar from"@/components/SearchBar";
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import SearchBar from "@/components/SearchBar";
+import { Badge } from "@/components/ui/badge";
 
 interface HorseCardData {
  id: string;
@@ -21,24 +23,37 @@ interface HorseCardData {
  assetCategory?: string;
 }
 
-function getFinishBadgeClass(finishType: string): string {
- switch (finishType) {
- case"OF":
- return"of";
- case"Custom":
- return"custom";
- case"Artist Resin":
- return"resin";
- default:
- return"";
- }
-}
+const FINISH_BADGE_CLASSES: Record<string, string> = {
+ "OF": "bg-amber-50 text-amber-700 border-amber-200",
+ "Custom": "bg-indigo-50 text-indigo-700 border-indigo-200",
+ "Custom/Resin": "bg-violet-50 text-violet-700 border-violet-200",
+ "Artist Resin": "bg-rose-50 text-rose-700 border-rose-200",
+ "Test Run": "bg-cyan-50 text-cyan-700 border-cyan-200",
+ "Decorator": "bg-emerald-50 text-emerald-700 border-emerald-200",
+ "default": "bg-stone-100 text-stone-600 border-stone-200",
+};
+
+const containerVariants = {
+ hidden: {},
+ visible: {
+  transition: { staggerChildren: 0.06 },
+ },
+} as const;
+
+const cardVariants = {
+ hidden: { opacity: 0, y: 20 },
+ visible: {
+  opacity: 1,
+  y: 0,
+  transition: { type: "spring" as const, stiffness: 300, damping: 30 },
+ },
+};
 
 function formatDate(dateStr: string): string {
  return new Date(dateStr).toLocaleDateString("en-US", {
- month:"short",
- day:"numeric",
- year:"numeric",
+  month: "short",
+  day: "numeric",
+  year: "numeric",
  });
 }
 
@@ -54,186 +69,215 @@ export default function StableGrid({
  onToggleSelect?: (id: string) => void;
 }) {
  const [searchQuery, setSearchQuery] = useState("");
- const [sortBy, setSortBy] = useState<"newest" |"oldest" |"name-az" |"name-za" |"condition">("newest");
+ const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name-az" | "name-za" | "condition">("newest");
 
- const CONDITION_ORDER = ["Mint","Near Mint","Excellent","Very Good","Good","Fair","Poor","Play Grade"];
+ const CONDITION_ORDER = ["Mint", "Near Mint", "Excellent", "Very Good", "Good", "Fair", "Poor", "Play Grade"];
 
  const filteredCards = useMemo(() => {
- // Step 1: Filter
- let filtered = horseCards;
- if (searchQuery.trim()) {
- const q = searchQuery.toLowerCase().trim();
- filtered = horseCards.filter(
- (horse) =>
- horse.customName.toLowerCase().includes(q) ||
- (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
- (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
- (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
- horse.refName.toLowerCase().includes(q),
- );
- }
+  // Step 1: Filter
+  let filtered = horseCards;
+  if (searchQuery.trim()) {
+   const q = searchQuery.toLowerCase().trim();
+   filtered = horseCards.filter(
+    (horse) =>
+     horse.customName.toLowerCase().includes(q) ||
+     (horse.moldName && horse.moldName.toLowerCase().includes(q)) ||
+     (horse.releaseName && horse.releaseName.toLowerCase().includes(q)) ||
+     (horse.sculptor && horse.sculptor.toLowerCase().includes(q)) ||
+     horse.refName.toLowerCase().includes(q),
+   );
+  }
 
- // Step 2: Sort
- const sorted = [...filtered];
- if (sortBy ==="oldest") {
- sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
- } else if (sortBy ==="name-az") {
- sorted.sort((a, b) => a.customName.localeCompare(b.customName));
- } else if (sortBy ==="name-za") {
- sorted.sort((a, b) => b.customName.localeCompare(a.customName));
- } else if (sortBy ==="condition") {
- sorted.sort((a, b) => {
- const aIdx = CONDITION_ORDER.indexOf(a.conditionGrade);
- const bIdx = CONDITION_ORDER.indexOf(b.conditionGrade);
- return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
- });
- }
- //"newest" is the default server order — no re-sort needed
- return sorted;
+  // Step 2: Sort
+  const sorted = [...filtered];
+  if (sortBy === "oldest") {
+   sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  } else if (sortBy === "name-az") {
+   sorted.sort((a, b) => a.customName.localeCompare(b.customName));
+  } else if (sortBy === "name-za") {
+   sorted.sort((a, b) => b.customName.localeCompare(a.customName));
+  } else if (sortBy === "condition") {
+   sorted.sort((a, b) => {
+    const aIdx = CONDITION_ORDER.indexOf(a.conditionGrade);
+    const bIdx = CONDITION_ORDER.indexOf(b.conditionGrade);
+    return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+   });
+  }
+  // "newest" is the default server order — no re-sort needed
+  return sorted;
  }, [searchQuery, horseCards, sortBy, CONDITION_ORDER]);
 
  return (
- <>
- {horseCards.length > 0 && (
- <div className="mb-6 flex flex-wrap items-center gap-4">
- <div className="min-w-[200px] flex-1">
- <SearchBar
- value={searchQuery}
- onChange={setSearchQuery}
- placeholder="Search your stable by name, mold, release, or sculptor…"
- id="stable-search-bar"
- />
- </div>
- <select
- value={sortBy}
- onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[160px] text-sm"
- id="stable-sort"
- aria-label="Sort your stable"
- >
- <option value="newest">🕐 Newest First</option>
- <option value="oldest">🕐 Oldest First</option>
- <option value="name-az">🔤 Name A→Z</option>
- <option value="name-za">🔤 Name Z→A</option>
- <option value="condition">⭐ By Condition</option>
- </select>
- </div>
- )}
+  <>
+   {horseCards.length > 0 && (
+    <div className="mb-6 flex flex-wrap items-center gap-4">
+     <div className="min-w-[200px] flex-1">
+      <SearchBar
+       value={searchQuery}
+       onChange={setSearchQuery}
+       placeholder="Search your stable by name, mold, release, or sculptor…"
+       id="stable-search-bar"
+      />
+     </div>
+     <select
+      value={sortBy}
+      onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+      className="flex h-10 w-auto min-w-[160px] rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      id="stable-sort"
+      aria-label="Sort your stable"
+     >
+      <option value="newest">🕐 Newest First</option>
+      <option value="oldest">🕐 Oldest First</option>
+      <option value="name-az">🔤 Name A→Z</option>
+      <option value="name-za">🔤 Name Z→A</option>
+      <option value="condition">⭐ By Condition</option>
+     </select>
+    </div>
+   )}
 
- {searchQuery.trim() && (
- <div className="text-muted mb-6 pl-1 text-sm">
- {filteredCards.length === 0
- ?"No models match your search"
- : `Showing ${filteredCards.length} of ${horseCards.length} models`}
- </div>
- )}
+   {searchQuery.trim() && (
+    <div className="text-muted mb-6 pl-1 text-sm">
+     {filteredCards.length === 0
+      ? "No models match your search"
+      : `Showing ${filteredCards.length} of ${horseCards.length} models`}
+    </div>
+   )}
 
- {filteredCards.length === 0 && !searchQuery.trim() ? (
- <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
- <div className="mb-4 text-5xl">🏠</div>
- <h2>Your Stable is Empty</h2>
- <p>You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
- <Link
- href="/add-horse"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- id="add-first-horse"
- >
- 🐴 Add Your First Horse
- </Link>
- </div>
- ) : filteredCards.length === 0 && searchQuery.trim() ? (
- <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
- <div className="mb-4 text-5xl">🔍</div>
- <h2>No Results</h2>
- <p>No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
- </div>
- ) : (
- <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
- {filteredCards.map((horse) => {
- const isSelected = selectedIds.has(horse.id);
- const CardWrapper = selectMode ?"div" : Link;
- const wrapperProps = selectMode
- ? {
- onClick: () => onToggleSelect?.(horse.id),
-                  className: `group relative flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${isSelected ? "ring-2 ring-forest" : ""}`,
-                  id: `horse-card-${horse.id}`,
-                }
-              : { href: `/stable/${horse.id}`, className: "group relative flex flex-col overflow-hidden rounded-xl border border-stone-200 bg-card no-underline shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md", id: `horse-card-${horse.id}` };
- return (
- // @ts-expect-error — dynamic component type
- <CardWrapper key={horse.id} {...wrapperProps}>
- {selectMode && (
- <div className="pointer-events-none absolute top-[8px] left-[8px] z-[5]">
- <input type="checkbox" checked={isSelected} readOnly aria-label={`Select ${horse.customName}`} />
- </div>
- )}
-              <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
-                {horse.thumbnailUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]" />
-                ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-400">
-                    <span className="text-4xl opacity-50">🐴</span>
-                    <span className="text-xs font-medium">No photo</span>
-                  </div>
-                )}
- {horse.finishType && (
- <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
- {horse.finishType}
- </span>
- )}
- {horse.assetCategory && horse.assetCategory !=="model" && (
- <span className="absolute top-2 right-2 rounded-md bg-[rgba(124,109,240,0.15)] px-2 py-0.5 text-xs font-bold text-white">
- {horse.assetCategory ==="tack"
- ?"🏇 Tack"
- : horse.assetCategory ==="prop"
- ?"🌲 Prop"
- :"🎭 Diorama"}
- </span>
- )}
- {horse.tradeStatus ==="For Sale" && (
- <span className="trade-badge border border-[rgba(34,197,94,0.5)] bg-[rgba(34,197,94,0.85)] text-white">
- 💲 For Sale
- </span>
- )}
- {horse.tradeStatus ==="Open to Offers" && (
- <span className="trade-badge border border-[rgba(59,130,246,0.5)] bg-[rgba(59,130,246,0.85)] text-white">
- 🤝 Open to Offers
- </span>
- )}
-              </div>
-              <div className="flex flex-1 flex-col px-4 py-3">
-                <div className="truncate text-[0.9rem] font-semibold leading-snug text-stone-800">
-                  {horse.customName}
-                </div>
-                <div className="mt-0.5 truncate text-xs text-stone-500">
-                  {horse.refName}
-                </div>
-                {horse.releaseLine && (
-                  <div className="mt-0.5 truncate text-[0.7rem] text-stone-400">
-                    🎨 {horse.releaseLine}
-                  </div>
-                )}
-                {horse.sculptor && (
-                  <div className="mt-0.5 truncate text-[0.7rem] text-stone-400">
-                    ✂️ {horse.sculptor}
-                  </div>
-                )}
-                <div className="mt-auto flex items-center justify-between border-t border-stone-100 pt-2.5 text-[0.7rem] text-stone-400">
-                  {horse.conditionGrade && <span>{horse.conditionGrade}</span>}
-                  <span>{formatDate(horse.createdAt)}</span>
-                </div>
-                {horse.collectionName && (
-                  <div className="mt-1 truncate text-[0.7rem] text-stone-400">
-                    📁 {horse.collectionName}
-                  </div>
-                )}
-              </div>
- </CardWrapper>
- );
- })}
- </div>
- )}
- </>
+   {filteredCards.length === 0 && !searchQuery.trim() ? (
+    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-stone-200 bg-stone-50/50 p-16">
+     <span className="mb-4 text-6xl">🏠</span>
+     <h2 className="mb-2 font-serif text-xl font-semibold text-ink">Your Stable is Empty</h2>
+     <p className="mb-6 max-w-sm text-center text-muted">You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
+     <Link
+      href="/add-horse"
+      className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+      id="add-first-horse"
+     >
+      🐴 Add Your First Horse
+     </Link>
+    </div>
+   ) : filteredCards.length === 0 && searchQuery.trim() ? (
+    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-stone-200 bg-stone-50/50 p-16">
+     <span className="mb-4 text-6xl">🔍</span>
+     <h2 className="mb-2 font-serif text-xl font-semibold text-ink">No Results</h2>
+     <p className="max-w-sm text-center text-muted">No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
+    </div>
+   ) : (
+    <motion.div
+     className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3 xl:grid-cols-4"
+     variants={containerVariants}
+     initial="hidden"
+     animate="visible"
+    >
+     {filteredCards.map((horse) => {
+      const isSelected = selectedIds.has(horse.id);
+      const finishClass = FINISH_BADGE_CLASSES[horse.finishType] ?? FINISH_BADGE_CLASSES.default;
+
+      const cardContent = (
+       <>
+        {selectMode && (
+         <div className="pointer-events-none absolute top-3 left-3 z-[5]">
+          <input type="checkbox" checked={isSelected} readOnly aria-label={`Select ${horse.customName}`} />
+         </div>
+        )}
+
+        {/* Image container */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-stone-100">
+         {horse.thumbnailUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+           src={horse.thumbnailUrl}
+           alt={horse.customName}
+           loading="lazy"
+           className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
+          />
+         ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-400">
+           <span className="text-4xl opacity-50">🐴</span>
+           <span className="text-xs font-medium">No photo</span>
+          </div>
+         )}
+
+         {/* Overlay badges */}
+         {horse.assetCategory && horse.assetCategory !== "model" && (
+          <span className="absolute top-2 right-2 rounded-md bg-black/40 px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">
+           {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
+          </span>
+         )}
+         {horse.tradeStatus === "For Sale" && (
+          <span className="absolute bottom-2 left-2 rounded-full bg-emerald-500 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+           💲 For Sale
+          </span>
+         )}
+         {horse.tradeStatus === "Open to Offers" && (
+          <span className="absolute bottom-2 left-2 rounded-full bg-blue-500 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+           🤝 Open to Offers
+          </span>
+         )}
+        </div>
+
+        {/* Content area */}
+        <div className="mt-3 px-1">
+         <h3 className="truncate font-serif text-lg font-bold text-stone-800">
+          {horse.customName}
+         </h3>
+         <p className="mt-0.5 truncate text-sm text-stone-500">{horse.refName}</p>
+
+         {/* Badge row */}
+         <div className="mt-2 flex flex-wrap gap-1.5">
+          {horse.finishType && (
+           <Badge className={finishClass}>{horse.finishType}</Badge>
+          )}
+          {horse.conditionGrade && (
+           <Badge variant="outline">{horse.conditionGrade}</Badge>
+          )}
+         </div>
+
+         {/* Metadata */}
+         <div className="mt-2 flex items-center gap-2 text-xs text-stone-400">
+          <span>{formatDate(horse.createdAt)}</span>
+          {horse.sculptor && <span>· ✂️ {horse.sculptor}</span>}
+         </div>
+         {horse.releaseLine && (
+          <div className="mt-0.5 truncate text-[0.7rem] text-stone-400">
+           🎨 {horse.releaseLine}
+          </div>
+         )}
+         {horse.collectionName && (
+          <div className="mt-1 truncate text-[0.7rem] text-stone-400">
+           📁 {horse.collectionName}
+          </div>
+         )}
+        </div>
+       </>
+      );
+
+      return (
+       <motion.div key={horse.id} variants={cardVariants}>
+        {selectMode ? (
+         <div
+          onClick={() => onToggleSelect?.(horse.id)}
+          className={`group relative cursor-pointer rounded-2xl border bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
+           isSelected ? "border-[var(--color-accent-primary)] ring-2 ring-forest" : "border-stone-200"
+          }`}
+          id={`horse-card-${horse.id}`}
+         >
+          {cardContent}
+         </div>
+        ) : (
+         <Link
+          href={`/stable/${horse.id}`}
+          className="group relative block rounded-2xl border border-stone-200 bg-white p-3 no-underline shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+          id={`horse-card-${horse.id}`}
+         >
+          {cardContent}
+         </Link>
+        )}
+       </motion.div>
+      );
+     })}
+    </motion.div>
+   )}
+  </>
  );
 }
