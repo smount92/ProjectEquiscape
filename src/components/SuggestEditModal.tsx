@@ -153,6 +153,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  className="input"
  value={field.current}
  onChange={(e) => handleFieldChange(i, e.target.value)}
+ aria-label={field.label}
  />
  {field.current !== field.original && (
  <span className="text-muted mt-[4px] text-xs italic">

@@ -528,12 +528,11 @@ export default function SettingsPage() {
  />
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- style={{
- background: deleteConfirm ==="DELETE" ?"#ef4444" :"var(--color-surface-elevated)",
- color: deleteConfirm ==="DELETE" ?"#fff" :"var(--color-text-muted)",
- cursor: deleteConfirm ==="DELETE" ?"pointer" :"not-allowed",
- }}
+ className={`inline-flex min-h-[36px] items-center justify-center gap-2 rounded-md border border-edge px-6 py-2 text-sm font-semibold no-underline transition-all ${
+ deleteConfirm ==="DELETE"
+ ? "cursor-pointer bg-[#ef4444] text-white"
+ : "cursor-not-allowed bg-[var(--color-surface-elevated)] text-muted"
+ }`}
  disabled={deleteConfirm !=="DELETE" || isDeleting}
  onClick={async () => {
  if (deleteConfirm !=="DELETE") return;

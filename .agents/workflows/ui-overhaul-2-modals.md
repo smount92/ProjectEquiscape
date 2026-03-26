@@ -235,13 +235,13 @@ cd c:\Project Equispace\model-horse-hub && npx vitest run
 ```
 
 Check that:
-- [ ] 11 components now use shadcn `<Dialog>` instead of `createPortal`
-- [ ] `PhotoLightbox` retains `createPortal` (intentional exception)
-- [ ] `.modal-overlay` and `.modal-content` removed from `globals.css`
-- [ ] `MakeOfferModal.test.tsx` updated — no longer mocks `createPortal`
-- [ ] All 245+ tests pass
-- [ ] Build passes cleanly
+- [x] 12 components now use shadcn `<Dialog>` instead of `createPortal` (11 listed + event manage copy modal)
+- [x] `PhotoLightbox` retains `createPortal` (intentional exception)
+- [x] `.modal-overlay` and `.modal-content` removed from `globals.css`
+- [x] `MakeOfferModal.test.tsx` updated — uses `getByRole` for Dialog close button
+- [x] All 245 tests pass
+- [x] Build passes cleanly
 
-```
-cd c:\Project Equispace\model-horse-hub && git add -A && git commit -m "feat(ui): migrate 11 modals from createPortal to shadcn Dialog, clean up modal CSS"
-```
+**✅ COMPLETED: 2026-03-26**
+
+Committed as `b0c9239` on `main` (local only, not pushed).

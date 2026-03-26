@@ -381,8 +381,7 @@ export default function ManageEventPage() {
  className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- style={{ borderTopColor:"var(--color-accent-primary)" }}
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge border-t-[var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  />
  <p>Loading event…</p>
  </div>
@@ -438,36 +437,18 @@ export default function ManageEventPage() {
  </div>
 
  {/* Tab Bar */}
- <div
- style={{
- display:"flex",
- gap:"var(--space-xs)",
- marginBottom:"var(--space-xl)",
- borderBottom:"1px solid var(--color-border)",
- paddingBottom:"0",
- }}
- >
+ <div className="flex gap-[var(--space-xs)] mb-[var(--space-xl)] border-b border-edge pb-0">
  {tabs
  .filter((t) => !t.hidden)
  .map((tab) => (
  <button
  key={tab.id}
  onClick={() => setActiveTab(tab.id)}
- style={{
- padding:"var(--space-sm) var(--space-md)",
- background:"none",
- border:"none",
- borderBottom:
+ className={`cursor-pointer border-0 border-b-2 bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-sm transition-all duration-200 ${
  activeTab === tab.id
- ?"2px solid var(--color-accent-primary)"
- :"2px solid transparent",
- color:
- activeTab === tab.id ?"var(--color-text-primary)" :"var(--color-text-muted)",
- fontWeight: activeTab === tab.id ? 600 : 400,
- cursor:"pointer",
- fontSize:"0.875rem",
- transition:"all 0.2s ease",
- }}
+ ? "border-b-[var(--color-accent-primary)] font-semibold text-ink"
+ : "border-b-transparent font-normal text-muted"
+ }`}
  >
  {tab.icon} {tab.label}
  </button>
@@ -479,13 +460,7 @@ export default function ManageEventPage() {
  ⚠️ {error}
  <button
  onClick={() => setError(null)}
- style={{
- marginLeft:"auto",
- background:"none",
- border:"none",
- cursor:"pointer",
- color:"inherit",
- }}
+ className="ml-auto cursor-pointer border-0 bg-transparent text-inherit"
  >
  ✕
  </button>
@@ -562,6 +537,7 @@ export default function ManageEventPage() {
  onChange={(e) =>
  setEventData((prev) => ({ ...prev, timezone: e.target.value }))
  }
+ title="Timezone"
  >
  <option value="America/New_York">Eastern</option>
  <option value="America/Chicago">Central</option>
@@ -1007,20 +983,7 @@ export default function ManageEventPage() {
  {/* Autocomplete dropdown */}
  {userSuggestions.length > 0 && newJudgeAlias.trim().length >= 2 && (
  <div
- style={{
- position:"absolute",
- top:"100%",
- left: 0,
- right: 0,
- zIndex: 50,
- background:"var(--color-surface-elevated)",
- border:"1px solid var(--color-border)",
- borderRadius:"var(--radius-md)",
- boxShadow:"0 8px 24px rgba(0,0,0,0.3)",
- marginTop: 4,
- maxHeight: 240,
- overflow:"auto",
- }}
+ className="absolute top-full left-0 right-0 z-50 mt-1 max-h-[240px] overflow-auto rounded-md border border-edge bg-card shadow-lg"
  >
  {userSuggestions.map((u) => (
  <button
@@ -1030,47 +993,15 @@ export default function ManageEventPage() {
  setNewJudgeAlias(u.aliasName);
  setUserSuggestions([]);
  }}
- style={{
- display:"flex",
- alignItems:"center",
- gap:"var(--space-sm)",
- width:"100%",
- padding:"var(--space-sm) var(--space-md)",
- background:"none",
- border:"none",
- cursor:"pointer",
- color:"var(--color-text-primary)",
- fontSize:"0.875rem",
- textAlign:"left",
- borderBottom:"1px solid var(--color-border)",
- }}
- onMouseEnter={(e) =>
- (e.currentTarget.style.background =
-"var(--color-surface-hover)")
- }
- onMouseLeave={(e) => (e.currentTarget.style.background ="none")}
+ className="flex w-full cursor-pointer items-center gap-[var(--space-sm)] border-0 border-b border-edge bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-left text-sm text-ink hover:bg-[rgba(0,0,0,0.03)]"
  >
- <div
- style={{
- width: 28,
- height: 28,
- borderRadius:"50%",
- background:"var(--color-accent-primary-glow)",
- display:"flex",
- alignItems:"center",
- justifyContent:"center",
- fontSize:"0.75rem",
- flexShrink: 0,
- overflow:"hidden",
- }}
- >
+ <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent-primary-glow)] text-xs">
  {u.avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
  src={u.avatarUrl}
  alt={u.aliasName}
- className="h-full w-full"
- style={{ objectFit:"cover" }}
+ className="h-full w-full object-cover"
  />
  ) : (
 "👤"
@@ -1083,8 +1014,7 @@ export default function ManageEventPage() {
  )}
  {isSearching && (
  <div
- className="text-muted top-[50%] right-[8] translate-y-[-50%] text-xs"
- style={{ position:"absolute" }}
+ className="text-muted absolute top-1/2 right-2 -translate-y-1/2 text-xs"
  >
  Searching…
  </div>
@@ -1108,44 +1038,23 @@ export default function ManageEventPage() {
 
  {/* Judge List */}
  {judges.length === 0 ? (
- <div className="text-muted p-8" style={{ textAlign:"center" }}>
+ <div className="p-8 text-center text-muted">
  No judges assigned yet. Add judges by their user alias above.
  </div>
  ) : (
- <div className="gap-2" style={{ display:"flex", flexDirection:"column" }}>
+ <div className="flex flex-col gap-2">
  {judges.map((judge) => (
  <div
  key={judge.id}
- style={{
- display:"flex",
- alignItems:"center",
- gap:"var(--space-md)",
- padding:"var(--space-sm) var(--space-md)",
- background:"rgba(var(--color-surface-rgb, 30, 30, 30), 0.5)",
- borderRadius:"var(--radius-sm)",
- }}
+ className="flex items-center gap-[var(--space-md)] rounded-sm bg-[rgba(0,0,0,0.03)] px-[var(--space-md)] py-[var(--space-sm)]"
  >
- <div
- style={{
- width: 36,
- height: 36,
- borderRadius:"50%",
- background:"var(--color-accent-primary-glow)",
- display:"flex",
- alignItems:"center",
- justifyContent:"center",
- fontSize:"1rem",
- flexShrink: 0,
- overflow:"hidden",
- }}
- >
+ <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent-primary-glow)] text-base">
  {judge.avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
  src={judge.avatarUrl}
  alt={judge.aliasName}
- className="h-full w-full"
- style={{ objectFit:"cover" }}
+ className="h-full w-full object-cover"
  />
  ) : (
 "🧑‍⚖️"
@@ -1155,12 +1064,8 @@ export default function ManageEventPage() {
  <div className="text-sm font-semibold">@{judge.aliasName}</div>
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-xs font-semibold text-danger no-underline transition-all"
  onClick={() => handleRemoveJudge(judge.id)}
- style={{
- fontSize:"0.75rem",
- color:"var(--color-accent-danger)",
- }}
  >
  Remove
  </button>
@@ -1188,6 +1093,7 @@ export default function ManageEventPage() {
  className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4"
  value={selectedSourceEvent}
  onChange={(e) => setSelectedSourceEvent(e.target.value)}
+ title="Source event"
  >
  <option value="">Select an event…</option>
  {userEvents.map((ev) => (
