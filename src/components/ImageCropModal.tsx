@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from"react";
-import { createPortal } from"react-dom";
-
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 interface ImageCropModalProps {
  file: File;
  aspectRatio?: number | null; // e.g., 4/3 for passport hero. null = free crop
@@ -285,8 +289,9 @@ export default function ImageCropModal({
  },
  ];
 
- const overlay = (
- <div className="modal-overlay" onClick={onCancel}>
+ return (
+ <Dialog open={true} onOpenChange={(open) => { if (!open) onCancel(); }}>
+ <DialogContent className="sm:max-w-2xl">
  <div
  className="w-[95vw] max-w-[700px] overflow-hidden rounded-lg border border-edge bg-card p-0 shadow-md transition-all"
  onClick={(e) => e.stopPropagation()}
@@ -442,8 +447,7 @@ export default function ImageCropModal({
  </div>
  </div>
  </div>
- </div>
+ </DialogContent>
+ </Dialog>
  );
-
- return createPortal(overlay, document.body);
 }

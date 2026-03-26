@@ -1,10 +1,15 @@
 "use client";
 
 import { useState } from"react";
-import { createPortal } from"react-dom";
 import { useRouter } from"next/navigation";
 import { updateCollectionAction, deleteCollectionAction } from"@/app/actions/collections";
 import { Input } from "@/components/ui/input";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 
 interface CollectionManagerProps {
  collection: {
@@ -51,24 +56,23 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  }
  }
 
- if (!showModal) {
  return (
+ <>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setShowModal(true)}
  >
  ⚙️ Manage Collection
  </button>
- );
- }
 
- return createPortal(
- <div className="modal-overlay" onClick={() => setShowModal(false)}>
- <div className="modal-content max-w-[480] max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
- <h3 className="mb-6">Manage Collection</h3>
+ <Dialog open={showModal} onOpenChange={setShowModal}>
+ <DialogContent className="sm:max-w-[480px]">
+ <DialogHeader>
+ <DialogTitle>Manage Collection</DialogTitle>
+ </DialogHeader>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Name</label>
- <Input  value={name} onChange={(e) => setName(e.target.value)} placeholder="Collection name" />
+ <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Collection name" />
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
@@ -109,8 +113,8 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  </button>
  </div>
  </div>
- </div>
- </div>,
- document.body,
+ </DialogContent>
+ </Dialog>
+ </>
  );
 }

@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from"react";
-import { createPortal } from"react-dom";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { useRouter } from"next/navigation";
 import StableGrid from"@/components/StableGrid";
 import StableLedger from"@/components/StableLedger";
@@ -238,9 +243,10 @@ export default function DashboardShell({
 
  {/* Delete Confirmation Modal */}
  {showDeleteConfirm &&
- createPortal(
- <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
- <div className="modal-content max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
+ (
+ <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+ <DialogContent className="sm:max-w-md">
+ 
  <h3 className="mb-4">🗑️ Confirm Delete</h3>
  <p className="text-ink-light mb-6">
  Are you sure you want to delete <strong>{selectedIds.size}</strong> item
@@ -264,9 +270,8 @@ export default function DashboardShell({
  : `Delete ${selectedIds.size} item${selectedIds.size !== 1 ?"s" :""}`}
  </button>
  </div>
- </div>
- </div>,
- document.body,
+ </DialogContent>
+ </Dialog>
  )}
  </>
  );

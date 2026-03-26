@@ -1,11 +1,17 @@
 "use client";
 
 import { useState, useMemo } from"react";
-import { createPortal } from"react-dom";
 import { useRouter } from"next/navigation";
 import { makeOffer } from"@/app/actions/transactions";
 import { RISKY_PAYMENT_REGEX, RISKY_PAYMENT_WARNING } from"@/lib/safety";
 import { Input } from "@/components/ui/input";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 
 interface MakeOfferModalProps {
  horseId: string;
@@ -24,7 +30,6 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
  const router = useRouter();
 
- // Risky payment detection
  const showPaymentWarning = useMemo(() => RISKY_PAYMENT_REGEX.test(message), [message]);
 
  const handleSubmit = async (e: React.FormEvent) => {
@@ -53,23 +58,15 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  }
  };
 
- return createPortal(
- <div className="modal-overlay" onClick={onClose}>
- <div className="modal-content max-w-[420px] max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
- <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <h3>💰 Make an Offer</h3>
- <button
- className="text-muted cursor-pointer rounded-md border-0 bg-transparent p-1 text-[1.2rem] transition-all duration-150"
- onClick={onClose}
- aria-label="Close"
- >
- ×
- </button>
- </div>
-
- <p className="text-muted mb-4 text-sm">
+ return (
+ <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
+ <DialogContent className="sm:max-w-[420px]">
+ <DialogHeader>
+ <DialogTitle>💰 Make an Offer</DialogTitle>
+ <DialogDescription>
  🐴 <strong>{horseName}</strong>
- </p>
+ </DialogDescription>
+ </DialogHeader>
 
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
@@ -83,7 +80,6 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  value={amount}
  onChange={(e) => setAmount(e.target.value)}
  placeholder="0.00"
- 
  required
  autoFocus
  />
@@ -101,29 +97,25 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  value={message}
  onChange={(e) => setMessage(e.target.value)}
  placeholder="Tell the seller about your interest…"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-edge bg-transparent px-4 py-2 text-sm transition-all"
  rows={3}
  maxLength={500}
  />
  {showPaymentWarning && (
  <div
- className="mt-2 text-sm text-[var(--color-warning,#eab308)] py-1 px-2 mt-1 rounded-sm border border-[rgba(234,179,8,0.3)] bg-[rgba(234,179,8,0.15)]"
+ className="mt-2 text-sm text-[var(--color-warning,#eab308)] py-1 px-2 rounded-sm border border-[rgba(234,179,8,0.3)] bg-[rgba(234,179,8,0.15)]"
  >
  {RISKY_PAYMENT_WARNING}
  </div>
  )}
  </div>
 
- <label
- className="mb-2 flex cursor-pointer items-center gap-1 text-sm"
- >
+ <label className="mb-2 flex cursor-pointer items-center gap-1 text-sm">
  <Input type="checkbox" checked={isBundle} onChange={(e) => setIsBundle(e.target.checked)} />
  This is a bundle/lot sale (excluded from market price index)
  </label>
 
- <label
-  className="mb-2 flex cursor-pointer items-start gap-2 text-xs text-muted mt-4"
- >
+ <label className="mb-2 flex cursor-pointer items-start gap-2 text-xs text-muted mt-4">
   <Input type="checkbox" checked={disclaimerAccepted} onChange={(e) => setDisclaimerAccepted(e.target.checked)} className="mt-0.5" required />
   <span>
    I understand that Model Horse Hub does not process payments and cannot
@@ -151,8 +143,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  </button>
  </div>
  </form>
- </div>
- </div>,
- document.body,
+ </DialogContent>
+ </Dialog>
  );
 }

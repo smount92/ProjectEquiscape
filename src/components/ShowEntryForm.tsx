@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from"react";
-import { createPortal } from"react-dom";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { enterShow } from"@/app/actions/shows";
 import { createClient } from"@/lib/supabase/client";
 import { getPublicImageUrl } from"@/lib/utils/storage";
@@ -177,12 +182,10 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  // Preview modal rendered via portal
  const previewModal =
  showPreview && selectedPhotoObj && typeof document !=="undefined"
- ? createPortal(
- <div className="modal-overlay" onClick={() => setShowPreview(false)}>
- <div
- className="modal-content max-w-[480px] text-center max-sm:max-w-full"
- onClick={(e) => e.stopPropagation()}
- >
+ && (
+ <Dialog open={true} onOpenChange={() => setShowPreview(false)}>
+ <DialogContent className="sm:max-w-[480px] text-center">
+ 
  <div className="text-muted mb-4 text-center text-xs tracking-[0.05em] uppercase">
  This is what judges & voters will see
  </div>
@@ -222,11 +225,9 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  ← Choose Different Photo
  </button>
  </div>
- </div>
- </div>,
- document.body,
- )
- : null;
+ </DialogContent>
+ </Dialog>
+ );
 
  return (
  <>

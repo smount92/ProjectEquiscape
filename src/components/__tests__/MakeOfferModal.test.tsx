@@ -4,7 +4,7 @@ import { render, screen } from"@testing-library/react";
 import userEvent from"@testing-library/user-event";
 import MakeOfferModal from"../MakeOfferModal";
 
-// Mock createPortal to render inline
+// Mock createPortal for Radix Dialog (renders via portal internally)
 vi.mock("react-dom", async () => {
  const actual = await vi.importActual<typeof import("react-dom")>("react-dom");
  return {
@@ -61,7 +61,7 @@ describe("MakeOfferModal", () => {
  const user = userEvent.setup();
  render(<MakeOfferModal {...defaultProps} />);
 
- await user.click(screen.getByLabelText("Close"));
+ await user.click(screen.getByRole("button", { name: "Close" }));
  expect(defaultProps.onClose).toHaveBeenCalledOnce();
  });
 

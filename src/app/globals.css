@@ -536,10 +536,6 @@ p {
   }
 }
 
-.modal-card.danger {
-  border-color: rgba(240, 108, 126, 0.4);
-}
-
 .modal-card.danger::before {
   content: '';
   display: block;
@@ -653,30 +649,6 @@ p {
   border: 1px solid var(--color-border);
 }
 
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: var(--space-lg);
-  animation: fadeIn 0.15s ease-out;
-}
-
-.modal-content {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 440px;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.2s ease-out;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -711,10 +683,7 @@ p {
     align-items: stretch;
   }
 
-  .modal-content {
-    max-width: 100%;
   }
-}
 
 @media (max-width: 640px) {
   .search-bar {

@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from"react";
-import { createPortal } from"react-dom";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { getCollectionsAction, createCollectionAction } from"@/app/actions/collections";
 import { Input } from "@/components/ui/input";
 
@@ -148,30 +153,14 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  </span>
 
  {/* ---- Create Collection Modal ---- */}
- {showModal &&
- createPortal(
- <div className="modal-overlay" onClick={() => setShowModal(false)}>
- <div
- className="modal-content max-w-[480px] max-sm:max-w-full"
- onClick={(e) => e.stopPropagation()}
- role="dialog"
- aria-modal="true"
- aria-label="Create new collection"
- >
- <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <h3>📁 New Collection</h3>
- <button
- type="button"
- className="text-muted cursor-pointer rounded-md border-0 bg-transparent p-1 text-[1.2rem] transition-all duration-150"
- onClick={() => setShowModal(false)}
- aria-label="Close"
- >
- ✕
- </button>
- </div>
+ <Dialog open={showModal} onOpenChange={setShowModal}>
+ <DialogContent className="sm:max-w-[480px]">
+ <DialogHeader>
+ <DialogTitle>📁 New Collection</DialogTitle>
+ </DialogHeader>
 
- <div className="flex flex-col gap-4 p-8">
- <div className="mb-6">
+ <div className="flex flex-col gap-4">
+ <div>
  <label
  htmlFor="new-collection-name"
  className="text-ink mb-1 block text-sm font-semibold"
@@ -182,7 +171,6 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  ref={nameInputRef}
  id="new-collection-name"
  type="text"
- 
  placeholder="e.g. Childhood Herd, Show String…"
  value={newName}
  onChange={(e) => setNewName(e.target.value)}
@@ -193,7 +181,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  />
  </div>
 
- <div className="mb-6">
+ <div>
  <label
  htmlFor="new-collection-desc"
  className="text-ink mb-1 block text-sm font-semibold"
@@ -203,7 +191,6 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <Input
  id="new-collection-desc"
  type="text"
- 
  placeholder="A short note about this collection…"
  value={newDesc}
  onChange={(e) => setNewDesc(e.target.value)}
@@ -211,7 +198,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  />
  </div>
 
- <div className="mb-6 flex items-center gap-2">
+ <div className="flex items-center gap-2">
  <Input
  id="new-collection-public"
  type="checkbox"
@@ -221,14 +208,14 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  />
  <label
  htmlFor="new-collection-public"
- className="text-ink m-0 mb-1 block text-sm font-semibold"
+ className="text-ink m-0 block text-sm font-semibold"
  >
  🌐 Make public on profile
  </label>
  </div>
  </div>
 
- <div className="flex gap-4">
+ <div className="flex justify-end gap-4 pt-2">
  <button
  type="button"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -245,10 +232,8 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  {creating ?"Creating…" :"Create Collection"}
  </button>
  </div>
- </div>
- </div>,
- document.body,
- )}
+ </DialogContent>
+ </Dialog>
  </div>
  );
 }

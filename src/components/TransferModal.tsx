@@ -1,11 +1,17 @@
 "use client";
 
 import { useState } from"react";
-import { createPortal } from"react-dom";
 import { useRouter } from"next/navigation";
 import { generateTransferCode, cancelTransfer } from"@/app/actions/hoofprint";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 
 interface TransferModalProps {
  horseId: string;
@@ -22,7 +28,6 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  const [transferId, setTransferId] = useState<string | null>(null);
  const [copied, setCopied] = useState(false);
 
- // Form state
  const [acquisitionType, setAcquisitionType] = useState<"purchase" |"trade" |"gift" |"transfer">("purchase");
  const [salePrice, setSalePrice] = useState("");
  const [isPricePublic, setIsPricePublic] = useState(false);
@@ -73,7 +78,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  setError(null);
  };
 
- void transferId; // will be used when cancel is wired to the generated transfer
+ void transferId;
 
  return (
  <>
@@ -84,21 +89,18 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  📦 Transfer Ownership
  </button>
 
- {isOpen &&
- createPortal(
- <div className="modal-overlay" onClick={handleClose}>
- <div
- className="modal-content max-w-[420px] max-sm:max-w-full"
- onClick={(e) => e.stopPropagation()}
- >
+ <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
+ <DialogContent className="sm:max-w-[420px]">
  {step ==="form" ? (
  <>
- <h3 className="mb-4">📦 Transfer &ldquo;{horseName}&rdquo;</h3>
- <p className="text-muted mb-4 text-sm">
+ <DialogHeader>
+ <DialogTitle>📦 Transfer &ldquo;{horseName}&rdquo;</DialogTitle>
+ <DialogDescription>
  Generate a 6-character code to send to the new owner. They&apos;ll enter it on
  the Claim page to complete the transfer.
  <strong> The code expires in 48 hours.</strong>
- </p>
+ </DialogDescription>
+ </DialogHeader>
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">
@@ -126,16 +128,13 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  </label>
  <Input
  type="number"
- 
  value={salePrice}
  onChange={(e) => setSalePrice(e.target.value)}
  placeholder="0.00"
  min="0"
  step="0.01"
  />
- <label
- className="mt-[6px] flex cursor-pointer items-center gap-[6px] text-sm"
- >
+ <label className="mt-[6px] flex cursor-pointer items-center gap-[6px] text-sm">
  <Input
  type="checkbox"
  checked={isPricePublic}
@@ -151,7 +150,6 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  Notes (optional)
  </label>
  <Textarea
- 
  value={notes}
  onChange={(e) => setNotes(e.target.value)}
  placeholder="e.g. Sold at BreyerFest 2026"
@@ -160,9 +158,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  </div>
 
  {error && (
- <p className="mb-2 text-sm text-[#ef4444]">
- {error}
- </p>
+ <p className="mb-2 text-sm text-[#ef4444]">{error}</p>
  )}
 
  <div className="mt-4 flex justify-end gap-2">
@@ -183,15 +179,11 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  </>
  ) : (
  <>
- <h3 className="mb-4 text-center">
- 🐾 Transfer Code Ready!
- </h3>
- <div
- className="mb-4 rounded-lg border-2 border-dashed border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.1)] p-6 text-center"
- >
- <div
- className="font-mono text-[2.5rem] font-extrabold tracking-[0.3em] text-[#f59e0b]"
- >
+ <DialogHeader>
+ <DialogTitle className="text-center">🐾 Transfer Code Ready!</DialogTitle>
+ </DialogHeader>
+ <div className="mb-4 rounded-lg border-2 border-dashed border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.1)] p-6 text-center">
+ <div className="font-mono text-[2.5rem] font-extrabold tracking-[0.3em] text-[#f59e0b]">
  {generatedCode}
  </div>
  <button
@@ -201,15 +193,11 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  {copied ?"✅ Copied!" :"📋 Copy Code"}
  </button>
  </div>
- <p
- className="text-muted text-center text-sm"
- >
+ <p className="text-muted text-center text-sm">
  Send this code to the buyer/receiver. They can enter it on
  <strong> /claim</strong> to complete the transfer.
  <br />
- <span className="text-[var(--color-accent, #f59e0b)]">
- Expires in 48 hours.
- </span>
+ <span className="text-[var(--color-accent,#f59e0b)]">Expires in 48 hours.</span>
  </p>
  <div className="mt-4 flex justify-center gap-2">
  <button
@@ -227,10 +215,8 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  </div>
  </>
  )}
- </div>
- </div>,
- document.body,
- )}
+ </DialogContent>
+ </Dialog>
  </>
  );
 }

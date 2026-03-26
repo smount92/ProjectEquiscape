@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from"react";
-import { createPortal } from"react-dom";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 import { useRouter, useParams } from"next/navigation";
 import Link from"next/link";
 import { createClient } from"@/lib/supabase/client";
@@ -1165,25 +1171,23 @@ export default function ManageEventPage() {
  </div>
  )}
 
- {/* Copy Modal */}
- {showCopyModal &&
- createPortal(
- <div className="modal-overlay" onClick={() => setShowCopyModal(false)}>
- <div className="modal-content max-sm:max-w-full" onClick={(e) => e.stopPropagation()}>
- <h3>📋 Copy Division Tree From…</h3>
- <p className="text-ink-light mb-4 text-sm">
+ <Dialog open={showCopyModal} onOpenChange={setShowCopyModal}>
+ <DialogContent className="sm:max-w-md">
+ <DialogHeader>
+ <DialogTitle>📋 Copy Division Tree From…</DialogTitle>
+ <DialogDescription>
  This will copy all divisions and classes from the selected event. Existing divisions
  in this event will NOT be removed.
- </p>
+ </DialogDescription>
+ </DialogHeader>
  {userEvents.length === 0 ? (
  <p className="text-muted">No other events found.</p>
  ) : (
  <>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4"
  value={selectedSourceEvent}
  onChange={(e) => setSelectedSourceEvent(e.target.value)}
- style={{ marginBottom:"var(--space-md)" }}
  >
  <option value="">Select an event…</option>
  {userEvents.map((ev) => (
@@ -1192,7 +1196,7 @@ export default function ManageEventPage() {
  </option>
  ))}
  </select>
- <div className="justify-end gap-2" style={{ display:"flex" }}>
+ <div className="flex justify-end gap-2">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setShowCopyModal(false)}
@@ -1209,10 +1213,8 @@ export default function ManageEventPage() {
  </div>
  </>
  )}
- </div>
- </div>,
- document.body,
- )}
+ </DialogContent>
+ </Dialog>
  </div>
  </div>
  );

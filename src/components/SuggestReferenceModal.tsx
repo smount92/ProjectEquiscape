@@ -1,10 +1,16 @@
 "use client";
 
 import { useState } from"react";
-import { createPortal } from"react-dom";
 import { submitSuggestion } from"@/app/actions/suggestions";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 
 interface SuggestReferenceModalProps {
  isOpen: boolean;
@@ -39,8 +45,6 @@ export default function SuggestReferenceModal({
  const [status, setStatus] = useState<"idle" |"submitting" |"success" |"error">("idle");
  const [errorMsg, setErrorMsg] = useState("");
 
- if (!isOpen) return null;
-
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
  if (!name.trim() || status ==="submitting") return;
@@ -70,31 +74,30 @@ export default function SuggestReferenceModal({
  onClose();
  };
 
- const overlay = (
- <div className="modal-overlay" onClick={handleClose}>
- <div
- className="bg-card border-edge max-w-[520px] rounded-lg border shadow-md transition-all"
- onClick={(e) => e.stopPropagation()}
- >
+ return (
+ <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
+ <DialogContent className="sm:max-w-[520px]">
  {status ==="success" ? (
  <div className="px-4 py-5 text-center">
  <div className="mb-4 text-[3rem]">✅</div>
- <h3 className="mb-2">Suggestion Submitted!</h3>
- <p className="text-muted text-sm">
+ <DialogHeader>
+ <DialogTitle>Suggestion Submitted!</DialogTitle>
+ <DialogDescription>
  Our team will review your suggestion. If approved, it will appear in the reference database.
- </p>
+ </DialogDescription>
+ </DialogHeader>
  </div>
  ) : (
  <form onSubmit={handleSubmit}>
- <h3 className="mb-1">📝 Suggest a Reference</h3>
- <p
- className="text-muted mb-6 text-sm"
- >
+ <DialogHeader>
+ <DialogTitle>📝 Suggest a Reference</DialogTitle>
+ <DialogDescription>
  Help us grow the database! Tell us about the model you couldn&apos;t find.
- </p>
+ </DialogDescription>
+ </DialogHeader>
 
  {/* Suggestion Type */}
- <div className="mb-4 mb-6">
+ <div className="mb-6 mt-4">
  <label className="text-ink mb-1 block text-sm font-semibold">
  What are you suggesting?
  </label>
@@ -118,11 +121,7 @@ export default function SuggestReferenceModal({
  />
  <div>
  <div className="text-sm font-semibold">{type.label}</div>
- <div
- className="text-muted text-xs"
- >
- {type.description}
- </div>
+ <div className="text-muted text-xs">{type.description}</div>
  </div>
  </label>
  ))}
@@ -130,12 +129,11 @@ export default function SuggestReferenceModal({
  </div>
 
  {/* Name */}
- <div className="mb-4 mb-6">
+ <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">
  Name <span className="text-[#e74c6f]">*</span>
  </label>
  <Input
- 
  type="text"
  value={name}
  onChange={(e) => setName(e.target.value)}
@@ -148,10 +146,9 @@ export default function SuggestReferenceModal({
  </div>
 
  {/* Details */}
- <div className="mb-4 mb-6">
+ <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Additional Details</label>
  <Textarea
- 
  value={details}
  onChange={(e) => setDetails(e.target.value)}
  placeholder={
@@ -165,9 +162,7 @@ export default function SuggestReferenceModal({
  rows={3}
  id="suggest-details"
  />
- <small
- className="text-muted text-xs"
- >
+ <small className="text-muted text-xs">
  The more detail you provide, the faster we can add it.
  </small>
  </div>
@@ -193,9 +188,7 @@ export default function SuggestReferenceModal({
  </div>
  </form>
  )}
- </div>
- </div>
+ </DialogContent>
+ </Dialog>
  );
-
- return createPortal(overlay, document.body);
 }

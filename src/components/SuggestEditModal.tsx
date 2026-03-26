@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useTransition, useEffect } from"react";
-import { createPortal } from"react-dom";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
 import { useToast } from"@/lib/context/ToastContext";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 
 interface CatalogItem {
  id: string;
@@ -33,7 +39,6 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  const [error, setError] = useState("");
  const { toast } = useToast();
 
- // Build editable fields
  const attrs = catalogItem.attributes ?? {};
  const initialFields: FieldEdit[] = [
  { key:"title", label:"Title", original: catalogItem.title, current: catalogItem.title },
@@ -51,7 +56,6 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
 
  const [fields, setFields] = useState<FieldEdit[]>(initialFields);
 
- // Reset on open
  useEffect(() => {
  if (isOpen) {
  setFields(initialFields);
@@ -109,18 +113,6 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  });
  };
 
- // Lock body scroll when modal open
- useEffect(() => {
- if (isOpen) {
- document.body.style.overflow ="hidden";
- } else {
- document.body.style.overflow ="";
- }
- return () => {
- document.body.style.overflow ="";
- };
- }, [isOpen]);
-
  return (
  <>
  <button
@@ -131,54 +123,18 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  ✏️ Suggest Edit
  </button>
 
- {isOpen &&
- createPortal(
- <div
- className="modal-overlay"
- onClick={() => setIsOpen(false)}
- style={{
- position:"fixed",
- inset: 0,
- background:"rgba(0, 0, 0, 0.7)",
- backdropFilter:"blur(4px)",
- WebkitBackdropFilter:"blur(4px)",
- display:"flex",
- alignItems:"center",
- justifyContent:"center",
- zIndex: 1000,
- padding:"24px",
- }}
- >
- <div
- className="border-edge bg-glass rounded-[var(--radius-xl) var(--radius-xl) 0 0] flex items-center justify-between border-b px-8 py-6"
- onClick={(e) => e.stopPropagation()}
- style={{
- background:"#faf6ef",
- border:"1px solid #d4c9a8",
- borderRadius:"16px",
- width:"100%",
- maxWidth: 580,
- maxHeight:"85vh",
- overflowY:"auto",
- boxShadow:"0 24px 64px rgba(0,0,0,0.4)",
- }}
- >
- <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <h2>✏️ Suggest Edit</h2>
- <button
- className="text-muted cursor-pointer rounded-md border-0 bg-transparent p-1 text-[1.2rem] transition-all duration-150"
- onClick={() => setIsOpen(false)}
- >
- ✕
- </button>
- </div>
- <p className="text-[var(--color-text)]">
+ <Dialog open={isOpen} onOpenChange={setIsOpen}>
+ <DialogContent className="sm:max-w-[580px] max-h-[85vh] overflow-y-auto">
+ <DialogHeader>
+ <DialogTitle>✏️ Suggest Edit</DialogTitle>
+ <DialogDescription>
  Editing: <strong>{catalogItem.title}</strong> by {catalogItem.maker}
- </p>
+ </DialogDescription>
+ </DialogHeader>
 
- <div className="px-8 py-6">
+ <div className="flex flex-col gap-4">
  {/* Editable Fields */}
- <div className="mb-6 flex flex-col gap-4">
+ <div className="flex flex-col gap-4">
  {fields.map((field, i) => (
  <div
  key={field.key}
@@ -208,7 +164,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  </div>
 
  {/* Reason */}
- <div className="mb-6">
+ <div>
  <label className="border-[transparent]-label rounded-md border-l-[3px] p-2 transition-colors">
  Reason for change *
  </label>
@@ -226,7 +182,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  </div>
 
  {error && (
- <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-danger flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
  {error}
  </p>
  )}
@@ -243,8 +199,8 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  <li key={f.key}>
  <span className="font-bold text-[var(--color-text)]">
  {f.label}:
- </span>{""}
- <span className="ref-diff-from">{f.original}</span> →{""}
+ </span>{" "}
+ <span className="ref-diff-from">{f.original}</span> →{" "}
  <span className="font-bold text-[#66bb6a]">{f.current}</span>
  </li>
  ))}
@@ -253,7 +209,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  )}
  </div>
 
- <div className="modal-footer">
+ <div className="flex justify-end gap-2 pt-4">
  <button
  className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  onClick={() => setIsOpen(false)}
@@ -268,10 +224,8 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  {isPending ?"Submitting…" :"Submit Suggestion"}
  </button>
  </div>
- </div>
- </div>,
- document.body,
- )}
+ </DialogContent>
+ </Dialog>
  </>
  );
 }
