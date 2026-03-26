@@ -3,6 +3,7 @@
 import { useActionState } from"react";
 import Link from"next/link";
 import { forgotPasswordAction, type AuthFormState } from"@/app/auth/actions";
+import { Input } from "@/components/ui/input";
 
 const initialState: AuthFormState = { error: null, success: false };
 
@@ -73,11 +74,11 @@ export default function ForgotPasswordPage() {
  <label htmlFor="forgot-email" className="text-ink mb-1 block text-sm font-semibold">
  Email Address
  </label>
- <input
+ <Input
  id="forgot-email"
  name="email"
  type="email"
- className="form-input"
+ 
  placeholder="you@example.com"
  required
  autoComplete="email"

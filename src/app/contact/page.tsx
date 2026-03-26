@@ -3,6 +3,8 @@
 import { useActionState } from"react";
 import { submitContactForm, type ContactFormState } from"@/app/actions/contact";
 import { useRef, useEffect } from"react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const initialState: ContactFormState = {
  error: null,
@@ -77,11 +79,11 @@ export default function ContactPage() {
  <label htmlFor="contact-name" className="text-ink mb-1 block text-sm font-semibold">
  Your Name
  </label>
- <input
+ <Input
  id="contact-name"
  name="name"
  type="text"
- className="form-input"
+ 
  placeholder="Jane Doe"
  required
  autoComplete="name"
@@ -93,11 +95,11 @@ export default function ContactPage() {
  <label htmlFor="contact-email" className="text-ink mb-1 block text-sm font-semibold">
  Email Address
  </label>
- <input
+ <Input
  id="contact-email"
  name="email"
  type="email"
- className="form-input"
+ 
  placeholder="you@example.com"
  required
  autoComplete="email"
@@ -108,11 +110,11 @@ export default function ContactPage() {
  <label htmlFor="contact-subject" className="text-ink mb-1 block text-sm font-semibold">
  Subject <span className="text-muted font-normal">(optional)</span>
  </label>
- <input
+ <Input
  id="contact-subject"
  name="subject"
  type="text"
- className="form-input"
+ 
  placeholder="How can we help?"
  />
  </div>
@@ -121,10 +123,10 @@ export default function ContactPage() {
  <label htmlFor="contact-message" className="text-ink mb-1 block text-sm font-semibold">
  Message
  </label>
- <textarea
+ <Textarea
  id="contact-message"
  name="message"
- className="form-input min-h-[140px] resize-y"
+ className="min-h-[140px] resize-y"
  placeholder="Tell us what's on your mind..."
  rows={6}
  required

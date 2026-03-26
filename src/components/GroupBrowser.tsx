@@ -4,6 +4,7 @@ import { useState } from"react";
 import Link from"next/link";
 import { joinGroup, leaveGroup, type Group } from"@/app/actions/groups";
 import { useRouter } from"next/navigation";
+import { Input } from "@/components/ui/input";
 
 interface Props {
  allGroups: Group[];
@@ -78,9 +79,9 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
 
  {/* Search */}
  <div className="sticky top-[calc(var(--header-height)+0.75rem)] z-[10] mb-8 flex items-center gap-2 rounded-xl border border-edge bg-card px-6 py-2 shadow-md transition-all max-sm:py-0">
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  placeholder="🔍 Search groups by name or description…"
  value={search}
  onChange={(e) => setSearch(e.target.value)}

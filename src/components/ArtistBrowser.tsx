@@ -3,6 +3,7 @@
 import { useState } from"react";
 import Link from"next/link";
 import type { ArtistProfile } from"@/app/actions/art-studio";
+import { Input } from "@/components/ui/input";
 
 const STATUS_EMOJI: Record<string, string> = { open:"🟢", waitlist:"🟡", closed:"🔴" };
 const STATUS_LABEL: Record<string, string> = { open:"Open", waitlist:"Waitlist", closed:"Closed" };
@@ -30,9 +31,9 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  <div className="animate-fade-in-up">
  {/* Search */}
  <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-edge z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  placeholder="🔍 Search studios by name, artist, or specialty…"
  value={search}
  onChange={(e) => setSearch(e.target.value)}
@@ -61,7 +62,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  </div>
  {allSpecialties.length > 0 && (
  <select
- className="form-select max-w-[200px]"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
  value={specialtyFilter}
  onChange={(e) => setSpecialtyFilter(e.target.value)}
  aria-label="Filter by specialty"

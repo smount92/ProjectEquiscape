@@ -2,6 +2,8 @@
 
 import { useState } from"react";
 import { createPhotoShow } from"@/app/actions/shows";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CreateShowForm() {
  const [title, setTitle] = useState("");
@@ -43,9 +45,9 @@ export default function CreateShowForm() {
  <form onSubmit={handleSubmit} className="flex max-w-[500px] flex-col gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Show Title</label>
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  value={title}
  onChange={(e) => setTitle(e.target.value)}
  placeholder="e.g. Spring Breyer Showcase"
@@ -54,9 +56,9 @@ export default function CreateShowForm() {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Theme (optional)</label>
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  value={theme}
  onChange={(e) => setTheme(e.target.value)}
  placeholder="e.g. Best OF Breyer"
@@ -64,8 +66,8 @@ export default function CreateShowForm() {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={description}
  onChange={(e) => setDescription(e.target.value)}
  placeholder="Show rules and details…"
@@ -75,9 +77,9 @@ export default function CreateShowForm() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Entries Close (optional)</label>
- <input
+ <Input
  type="datetime-local"
- className="form-input"
+ 
  value={endAt}
  onChange={(e) => setEndAt(e.target.value)}
  />

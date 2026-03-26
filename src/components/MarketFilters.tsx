@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from"next/navigation";
 import { useState, useCallback, useEffect } from"react";
+import { Input } from "@/components/ui/input";
 
 const ITEM_TYPE_LABELS: Record<string, string> = {
  all:"All Types",
@@ -76,8 +77,8 @@ export default function MarketFilters() {
  return (
  <div className="mb-8">
  <div className="mb-4">
- <input
- className="form-input w-full rounded-lg p-3 text-base"
+ <Input
+ className="w-full rounded-lg p-3 text-base"
  type="search"
  placeholder="Search by mold, release, or artist resin…"
  value={searchInput}

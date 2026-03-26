@@ -5,6 +5,7 @@ import { createPortal } from"react-dom";
 import { useRouter } from"next/navigation";
 import { makeOffer } from"@/app/actions/transactions";
 import { RISKY_PAYMENT_REGEX, RISKY_PAYMENT_WARNING } from"@/lib/safety";
+import { Input } from "@/components/ui/input";
 
 interface MakeOfferModalProps {
  horseId: string;
@@ -75,14 +76,14 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  <label className="text-ink mb-1 block text-sm font-semibold">Your Offer</label>
  <div className="flex items-center gap-1">
  <span className="text-muted text-lg font-bold">$</span>
- <input
+ <Input
  type="number"
  step="0.01"
  min="0.01"
  value={amount}
  onChange={(e) => setAmount(e.target.value)}
  placeholder="0.00"
- className="form-input"
+ 
  required
  autoFocus
  />
@@ -116,14 +117,14 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  <label
  className="mb-2 flex cursor-pointer items-center gap-1 text-sm"
  >
- <input type="checkbox" checked={isBundle} onChange={(e) => setIsBundle(e.target.checked)} />
+ <Input type="checkbox" checked={isBundle} onChange={(e) => setIsBundle(e.target.checked)} />
  This is a bundle/lot sale (excluded from market price index)
  </label>
 
  <label
   className="mb-2 flex cursor-pointer items-start gap-2 text-xs text-muted mt-4"
  >
-  <input type="checkbox" checked={disclaimerAccepted} onChange={(e) => setDisclaimerAccepted(e.target.checked)} className="mt-0.5" required />
+  <Input type="checkbox" checked={disclaimerAccepted} onChange={(e) => setDisclaimerAccepted(e.target.checked)} className="mt-0.5" required />
   <span>
    I understand that Model Horse Hub does not process payments and cannot
    mediate financial disputes. All transactions are between buyer and seller.

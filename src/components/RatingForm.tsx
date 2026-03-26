@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { leaveReview, deleteReview } from"@/app/actions/transactions";
 import RatingStars from"@/components/RatingStars";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ExistingRating {
  id: string;
@@ -141,8 +142,8 @@ export default function RatingForm({
  </div>
 
  <div className="mb-6">
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={reviewText}
  onChange={(e) => setReviewText(e.target.value)}
  placeholder="Optional: Share details about your experience…"

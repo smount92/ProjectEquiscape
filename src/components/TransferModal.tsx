@@ -4,6 +4,8 @@ import { useState } from"react";
 import { createPortal } from"react-dom";
 import { useRouter } from"next/navigation";
 import { generateTransferCode, cancelTransfer } from"@/app/actions/hoofprint";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TransferModalProps {
  horseId: string;
@@ -103,7 +105,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  Transfer Type
  </label>
  <select
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={acquisitionType}
  onChange={(e) =>
  setAcquisitionType(e.target.value as typeof acquisitionType)
@@ -122,9 +124,9 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  <label className="text-ink mb-1 block text-sm font-semibold">
  Sale Price
  </label>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  value={salePrice}
  onChange={(e) => setSalePrice(e.target.value)}
  placeholder="0.00"
@@ -134,7 +136,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  <label
  className="mt-[6px] flex cursor-pointer items-center gap-[6px] text-sm"
  >
- <input
+ <Input
  type="checkbox"
  checked={isPricePublic}
  onChange={(e) => setIsPricePublic(e.target.checked)}
@@ -148,8 +150,8 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  <label className="text-ink mb-1 block text-sm font-semibold">
  Notes (optional)
  </label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={notes}
  onChange={(e) => setNotes(e.target.value)}
  placeholder="e.g. Sold at BreyerFest 2026"

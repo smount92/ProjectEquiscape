@@ -15,6 +15,7 @@ import {
  type ShowStringEntry,
 } from"@/app/actions/competition";
 import { batchRecordResults } from"@/app/actions/shows";
+import { Input } from "@/components/ui/input";
 
 interface Props {
  showStrings: ShowString[];
@@ -146,8 +147,8 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Show Name *</label>
- <input
- className="form-input"
+ <Input
+ 
  value={newName}
  onChange={(e) => setNewName(e.target.value)}
  placeholder="e.g. Spring Fling 2026"
@@ -155,8 +156,8 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Show Date</label>
- <input
- className="form-input"
+ <Input
+ 
  type="date"
  value={newDate}
  onChange={(e) => setNewDate(e.target.value)}
@@ -334,7 +335,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  Horse *
  </label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={entryHorseId}
  onChange={(e) => setEntryHorseId(e.target.value)}
  title="Select horse"
@@ -351,8 +352,8 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Class *
  </label>
- <input
- className="form-input"
+ <Input
+ 
  value={entryClassName}
  onChange={(e) => setEntryClassName(e.target.value)}
  placeholder="e.g. Arabian Stallion"
@@ -364,8 +365,8 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Division
  </label>
- <input
- className="form-input"
+ <Input
+ 
  value={entryDivision}
  onChange={(e) => setEntryDivision(e.target.value)}
  placeholder="e.g. Breed"
@@ -375,8 +376,8 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Time Slot
  </label>
- <input
- className="form-input"
+ <Input
+ 
  value={entryTimeSlot}
  onChange={(e) => setEntryTimeSlot(e.target.value)}
  placeholder="e.g. 10:00 AM"

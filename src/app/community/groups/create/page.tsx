@@ -5,6 +5,8 @@ import { useRouter } from"next/navigation";
 import { createGroup } from"@/app/actions/groups";
 
 import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 export default function CreateGroupPage() {
  const router = useRouter();
  const [name, setName] = useState("");
@@ -57,8 +59,8 @@ export default function CreateGroupPage() {
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Group Name *</label>
- <input
- className="form-input"
+ <Input
+ 
  value={name}
  onChange={(e) => autoSlug(e.target.value)}
  placeholder="Pacific Northwest Model Horse Collectors"
@@ -68,8 +70,8 @@ export default function CreateGroupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">URL Slug</label>
- <input
- className="form-input"
+ <Input
+ 
  value={slug}
  onChange={(e) => setSlug(e.target.value)}
  placeholder="pnw-collectors"
@@ -79,8 +81,8 @@ export default function CreateGroupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
- <textarea
- className="form-input w-full resize-y"
+ <Textarea
+ className="w-full resize-y"
  rows={3}
  value={description}
  onChange={(e) => setDescription(e.target.value)}
@@ -92,7 +94,7 @@ export default function CreateGroupPage() {
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Group Type *</label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={groupType}
  onChange={(e) => setGroupType(e.target.value)}
  title="Group type"
@@ -106,8 +108,8 @@ export default function CreateGroupPage() {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Region</label>
- <input
- className="form-input"
+ <Input
+ 
  value={region}
  onChange={(e) => setRegion(e.target.value)}
  placeholder="e.g. Pacific Northwest"

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from"react";
 import { createPortal } from"react-dom";
 import { getCollectionsAction, createCollectionAction } from"@/app/actions/collections";
+import { Input } from "@/components/ui/input";
 
 interface Collection {
  id: string;
@@ -106,7 +107,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  : "bg-transparent"
  }`}
  >
- <input
+ <Input
  type="checkbox"
  checked={selectedCollectionIds.includes(c.id)}
  onChange={() => handleToggle(c.id)}
@@ -177,11 +178,11 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  >
  Collection Name *
  </label>
- <input
+ <Input
  ref={nameInputRef}
  id="new-collection-name"
  type="text"
- className="form-input"
+ 
  placeholder="e.g. Childhood Herd, Show String…"
  value={newName}
  onChange={(e) => setNewName(e.target.value)}
@@ -199,10 +200,10 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  >
  Description <span className="opacity-[0.6]">(Optional)</span>
  </label>
- <input
+ <Input
  id="new-collection-desc"
  type="text"
- className="form-input"
+ 
  placeholder="A short note about this collection…"
  value={newDesc}
  onChange={(e) => setNewDesc(e.target.value)}
@@ -211,7 +212,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  </div>
 
  <div className="mb-6 flex items-center gap-2">
- <input
+ <Input
  id="new-collection-public"
  type="checkbox"
  checked={newIsPublic}

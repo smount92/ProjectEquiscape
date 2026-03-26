@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { useRouter } from"next/navigation";
 import { saveExpertPlacings, overrideFinalPlacings } from"@/app/actions/shows";
+import { Textarea } from "@/components/ui/textarea";
 
 interface EntryForJudging {
  id: string;
@@ -150,7 +151,7 @@ export default function ExpertJudgingPanel({
  {classes && classes.length > 0 && (
  <div className="mb-4">
  <select
- className="form-input max-w-[400px]"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[400px]"
  value={selectedClassId}
  onChange={(e) => setSelectedClassId(e.target.value)}
  title="Filter by class"
@@ -239,7 +240,7 @@ export default function ExpertJudgingPanel({
  📝
  </button>
  <select
- className="form-input w-[140px] shrink-0"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[140px] shrink-0"
  value={placings[entry.id] ||""}
  onChange={(e) => setPlacings((prev) => ({ ...prev, [entry.id]: e.target.value }))}
  title={`Placing for ${entry.horseName}`}
@@ -261,8 +262,8 @@ export default function ExpertJudgingPanel({
  borderTop:"1px solid rgba(255,255,255,0.05)",
  }}
  >
- <textarea
- className="form-input text-sm resize-y"
+ <Textarea
+ className="text-sm resize-y"
  value={notes[entry.id] ||""}
  onChange={(e) => setNotes((prev) => ({ ...prev, [entry.id]: e.target.value }))}
  placeholder="Private judge notes (critique, reasoning)…"

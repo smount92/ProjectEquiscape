@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from"next/navigation";
 import Link from"next/link";
 import { claimTransfer } from"@/app/actions/hoofprint";
 import { getParkedHorseByPin, claimParkedHorse } from"@/app/actions/parked-export";
+import { Input } from "@/components/ui/input";
 
 export default function ClaimPage() {
  const router = useRouter();
@@ -257,9 +258,9 @@ export default function ClaimPage() {
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Transfer Code or PIN</label>
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  value={code}
  onChange={(e) => {
  setCode(e.target.value.toUpperCase());

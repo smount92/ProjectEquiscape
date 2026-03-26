@@ -5,6 +5,8 @@ import { useRouter } from"next/navigation";
 import Link from"next/link";
 import { savePedigree } from"@/app/actions/provenance";
 import { searchPublicHorses } from"@/app/actions/horse";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface PedigreeData {
  id: string;
@@ -200,8 +202,8 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  {/* Sire with search */}
  <div className="relative mb-6" ref={sireRef}>
  <label className="text-ink mb-1 block text-sm font-semibold">Sire (Father)</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={sireName}
  onChange={(e) => {
@@ -244,8 +246,8 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  {/* Dam with search */}
  <div className="relative mb-6" ref={damRef}>
  <label className="text-ink mb-1 block text-sm font-semibold">Dam (Mother)</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={damName}
  onChange={(e) => {
@@ -289,8 +291,8 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Sculptor / Artist</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={sculptor}
  onChange={(e) => setSculptor(e.target.value)}
@@ -302,8 +304,8 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Cast Number</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={castNumber}
  onChange={(e) => setCastNumber(e.target.value)}
@@ -313,8 +315,8 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Edition Size</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={editionSize}
  onChange={(e) => setEditionSize(e.target.value)}
@@ -326,8 +328,8 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Lineage Notes</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={lineageNotes}
  onChange={(e) => setLineageNotes(e.target.value)}
  placeholder="Additional lineage details…"

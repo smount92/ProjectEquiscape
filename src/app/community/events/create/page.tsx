@@ -5,6 +5,8 @@ import { useRouter } from"next/navigation";
 import { createEvent } from"@/app/actions/events";
 
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CreateEventPage() {
  const router = useRouter();
@@ -63,8 +65,8 @@ export default function CreateEventPage() {
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Event Name *</label>
- <input
- className="form-input"
+ <Input
+ 
  value={name}
  onChange={(e) => setName(e.target.value)}
  placeholder="Spring Fling Live Show 2026"
@@ -74,7 +76,7 @@ export default function CreateEventPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Event Type *</label>
- <select className="form-input" value={eventType} onChange={(e) => setEventType(e.target.value)} title="Event type">
+ <select className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" value={eventType} onChange={(e) => setEventType(e.target.value)} title="Event type">
  {Object.entries(EVENT_TYPE_LABELS).map(([key, label]) => (
  <option key={key} value={key}>
  {label}
@@ -120,8 +122,8 @@ export default function CreateEventPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
- <textarea
- className="form-input w-full resize-y"
+ <Textarea
+ className="w-full resize-y"
  rows={4}
  value={description}
  onChange={(e) => setDescription(e.target.value)}
@@ -132,8 +134,8 @@ export default function CreateEventPage() {
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Start *</label>
- <input
- className="form-input"
+ <Input
+ 
  type="datetime-local"
  value={startsAt}
  onChange={(e) => setStartsAt(e.target.value)}
@@ -142,8 +144,8 @@ export default function CreateEventPage() {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">End</label>
- <input
- className="form-input"
+ <Input
+ 
  type="datetime-local"
  value={endsAt}
  onChange={(e) => setEndsAt(e.target.value)}
@@ -169,8 +171,8 @@ export default function CreateEventPage() {
  {isVirtual ? (
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Virtual URL</label>
- <input
- className="form-input"
+ <Input
+ 
  type="url"
  value={virtualUrl}
  onChange={(e) => setVirtualUrl(e.target.value)}
@@ -181,8 +183,8 @@ export default function CreateEventPage() {
  <>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Location Name</label>
- <input
- className="form-input"
+ <Input
+ 
  value={locationName}
  onChange={(e) => setLocationName(e.target.value)}
  placeholder="Convention Center"
@@ -190,8 +192,8 @@ export default function CreateEventPage() {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Address</label>
- <input
- className="form-input"
+ <Input
+ 
  value={locationAddress}
  onChange={(e) => setLocationAddress(e.target.value)}
  placeholder="123 Main St, City, State"
@@ -202,8 +204,8 @@ export default function CreateEventPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Region</label>
- <input
- className="form-input"
+ <Input
+ 
  value={region}
  onChange={(e) => setRegion(e.target.value)}
  placeholder="e.g. Pacific Northwest, Northeast"

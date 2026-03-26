@@ -3,6 +3,7 @@
 import { useState, useEffect } from"react";
 import Link from"next/link";
 import { getGroupRegistry, type RegistryEntry } from"@/app/actions/groups";
+import { Input } from "@/components/ui/input";
 
 interface Props {
  groupId: string;
@@ -65,8 +66,8 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  <p className="text-muted">No public models from group members yet.</p>
  ) : (
  <>
- <input
- className="form-input mb-4 max-w-[300px]"
+ <Input
+ className="mb-4 max-w-[300px]"
  placeholder="Search by name or owner…"
  value={search}
  onChange={(e) => setSearch(e.target.value)}

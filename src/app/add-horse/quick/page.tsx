@@ -7,6 +7,7 @@ import { quickAddHorse } from"@/app/actions/horse";
 import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
 import { createClient } from"@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
 
 const FINISH_TYPES = ["OF","Custom","Artist Resin"];
 const CONDITION_GRADES = [
@@ -157,8 +158,8 @@ export default function QuickAddPage() {
  {!selectedCatalog && (
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Name</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={customName}
  onChange={(e) => setCustomName(e.target.value)}
@@ -172,7 +173,7 @@ export default function QuickAddPage() {
  <div>
  <label className="text-ink mb-1 block text-sm font-semibold">Finish</label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={finishType}
  onChange={(e) => setFinishType(e.target.value)}
  id="quick-finish"
@@ -187,7 +188,7 @@ export default function QuickAddPage() {
  <div>
  <label className="text-ink mb-1 block text-sm font-semibold">Condition</label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  id="quick-condition"
@@ -202,7 +203,7 @@ export default function QuickAddPage() {
  <div>
  <label className="text-ink mb-1 block text-sm font-semibold">Collection</label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={collectionId}
  onChange={(e) => setCollectionId(e.target.value)}
  id="quick-collection"

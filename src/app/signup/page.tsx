@@ -3,6 +3,7 @@
 import { useState } from"react";
 import Link from"next/link";
 import { signupAction, type AuthFormState } from"@/app/auth/actions";
+import { Input } from "@/components/ui/input";
 
 export default function SignupPage() {
  const [error, setError] = useState<string | null>(null);
@@ -101,11 +102,11 @@ export default function SignupPage() {
  <label htmlFor="signup-alias" className="mb-1.5 block text-sm font-semibold text-ink">
  Choose Your Alias *
  </label>
- <input
+ <Input
  id="signup-alias"
  name="aliasName"
  type="text"
- className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+ className="w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="e.g. StableQueen42"
  required
  minLength={3}
@@ -123,11 +124,11 @@ export default function SignupPage() {
  <label htmlFor="signup-email" className="mb-1.5 block text-sm font-semibold text-ink">
  Email Address *
  </label>
- <input
+ <Input
  id="signup-email"
  name="email"
  type="email"
- className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+ className="w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="you@example.com"
  required
  autoComplete="email"
@@ -143,11 +144,11 @@ export default function SignupPage() {
  Password *
  </label>
  <div className="relative">
- <input
+ <Input
  id="signup-password"
  name="password"
  type={showPassword ?"text" :"password"}
- className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+ className="w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="At least 6 characters"
  required
  minLength={6}
@@ -179,11 +180,11 @@ export default function SignupPage() {
  <label htmlFor="signup-confirm-password" className="mb-1.5 block text-sm font-semibold text-ink">
  Confirm Password *
  </label>
- <input
+ <Input
  id="signup-confirm-password"
  name="confirmPassword"
  type={showPassword ?"text" :"password"}
- className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+ className="w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="Re-enter your password"
  required
  autoComplete="new-password"

@@ -5,6 +5,8 @@ import { useRouter } from"next/navigation";
 import { createClient } from"@/lib/supabase/client";
 import { createCommission } from"@/app/actions/art-studio";
 import type { ArtistProfile } from"@/app/actions/art-studio";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CommissionRequestForm({ artist }: { artist: ArtistProfile }) {
  const router = useRouter();
@@ -78,7 +80,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Commission Type *</label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={commissionType}
  onChange={(e) => setCommissionType(e.target.value)}
  required
@@ -96,7 +98,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Link a Horse (optional)</label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={selectedHorseId}
  onChange={(e) => setSelectedHorseId(e.target.value)}
  title="Link a horse"
@@ -115,8 +117,8 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description *</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={description}
  onChange={(e) => setDescription(e.target.value)}
  placeholder="Describe what you'd like — colors, breed, reference photos, any details that help the artist understand your vision…"
@@ -128,9 +130,9 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Your Budget ($)</label>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  value={budget}
  onChange={(e) => setBudget(e.target.value)}
  placeholder={artist.priceRangeMin ? `Starting from $${artist.priceRangeMin}` :"Optional"}

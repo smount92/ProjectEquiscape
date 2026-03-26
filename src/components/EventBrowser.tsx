@@ -4,6 +4,7 @@ import { useState } from"react";
 import Link from"next/link";
 import { rsvpEvent, type MHHEvent } from"@/app/actions/events";
 import { useRouter } from"next/navigation";
+import { Input } from "@/components/ui/input";
 
 interface Props {
  events: MHHEvent[];
@@ -49,9 +50,9 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  <div>
  {/* Search */}
  <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-edge z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  placeholder="🔍 Search events by name, location, or group…"
  value={search}
  onChange={(e) => setSearch(e.target.value)}

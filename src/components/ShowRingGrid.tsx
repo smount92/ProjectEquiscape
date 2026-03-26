@@ -7,6 +7,7 @@ import ShowRingFilters from"@/components/ShowRingFilters";
 import type { FilterState } from"@/components/ShowRingFilters";
 import WishlistButton from"@/components/WishlistButton";
 import FavoriteButton from"@/components/FavoriteButton";
+import { Input } from "@/components/ui/input";
 
 interface CommunityCardData {
  id: string;
@@ -139,7 +140,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  <>
  {communityCards.length > 0 && (
  <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-edge shadow-md z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-0">
- <input
+ <Input
  type="text"
  value={searchInput}
  onChange={(e) => handleSearch(e.target.value)}
@@ -148,7 +149,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  }}
  onBlur={handleSearchSubmit}
  placeholder="Search the Show Ring by name, sculptor, or collector…"
- className="form-input"
+ 
  id="showring-search-bar"
  />
  </div>

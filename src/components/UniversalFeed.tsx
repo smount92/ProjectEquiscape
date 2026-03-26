@@ -9,6 +9,7 @@ import { createClient } from"@/lib/supabase/client";
 import RichText from"@/components/RichText";
 import LikeToggle from"@/components/LikeToggle";
 import { safeUUID } from"@/lib/utils/uuid";
+import { Input } from "@/components/ui/input";
 
 // ============================================================
 // UNIVERSAL FEED — renders posts for ANY context
@@ -519,8 +520,8 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  ))}
  {/* Reply composer */}
  <div className="mt-2 flex gap-2">
- <input
- className="form-input flex-1 text-sm"
+ <Input
+ className="flex-1 text-sm"
  placeholder="Reply…"
  value={replyText}
  onChange={(e) => setReplyText(e.target.value)}

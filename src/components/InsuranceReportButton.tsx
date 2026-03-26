@@ -131,7 +131,7 @@ export default function InsuranceReportButton() {
  </p>
 
  <select
- className="form-select mb-4 w-full"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4 w-full"
  value={selectedCollection}
  onChange={(e) => setSelectedCollection(e.target.value)}
  id="insurance-collection-select"

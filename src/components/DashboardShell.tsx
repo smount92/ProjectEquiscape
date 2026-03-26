@@ -181,7 +181,7 @@ export default function DashboardShell({
  <div className="flex flex-wrap items-center gap-2">
  {/* Move to Collection */}
  <select
- className="form-select border-edge bg-parchment-dark text-ink font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-edge bg-parchment-dark text-ink font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
  value=""
  onChange={(e) => {
  const val = e.target.value;
@@ -202,7 +202,7 @@ export default function DashboardShell({
 
  {/* Trade Status */}
  <select
- className="form-select border-edge bg-parchment-dark text-ink font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-edge bg-parchment-dark text-ink font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
  value=""
  onChange={(e) => {
  if (e.target.value) handleBulkTradeStatus(e.target.value);

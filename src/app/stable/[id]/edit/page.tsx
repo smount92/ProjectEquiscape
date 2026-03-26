@@ -15,6 +15,8 @@ import { getProfile } from"@/app/actions/settings";
 import { getHorseCollections, setHorseCollections } from"@/app/actions/collections";
 import ImageCropModal from"@/components/ImageCropModal";
 import { getPublicImageUrl } from"@/lib/utils/storage";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 // ---- Types ----
 
@@ -707,7 +709,7 @@ export default function EditHorsePage() {
  tabIndex={0}
  aria-label={`Upload ${slot.label} photo`}
  >
- <input
+ <Input
  ref={(el) => {
  if (el) fileInputRefs.current[slot.angle] = el;
  }}
@@ -817,7 +819,7 @@ export default function EditHorsePage() {
  role="button"
  tabIndex={0}
  >
- <input
+ <Input
  ref={extraInputRef}
  type="file"
  accept="image/*"
@@ -960,10 +962,10 @@ export default function EditHorsePage() {
  <label htmlFor="edit-name" className="text-ink mb-1 block text-sm font-semibold">
  Custom Name *
  </label>
- <input
+ <Input
  id="edit-name"
  type="text"
- className="form-input"
+ 
  value={customName}
  onChange={(e) => setCustomName(e.target.value)}
  maxLength={100}
@@ -974,10 +976,10 @@ export default function EditHorsePage() {
  <label htmlFor="edit-sculptor" className="text-ink mb-1 block text-sm font-semibold">
  Sculptor / Artist
  </label>
- <input
+ <Input
  id="edit-sculptor"
  type="text"
- className="form-input"
+ 
  value={sculptor}
  onChange={(e) => setSculptor(e.target.value)}
  maxLength={100}
@@ -992,10 +994,10 @@ export default function EditHorsePage() {
  <label htmlFor="edit-finishing-artist" className="text-ink mb-1 block text-sm font-semibold">
  🎨 Finishing Artist
  </label>
- <input
+ <Input
  id="edit-finishing-artist"
  type="text"
- className="form-input"
+ 
  value={finishingArtist}
  onChange={(e) => setFinishingArtist(e.target.value)}
  maxLength={100}
@@ -1009,18 +1011,18 @@ export default function EditHorsePage() {
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">📋 Edition Info</label>
  <div className="flex items-center gap-2">
- <input
+ <Input
  type="number"
- className="form-input w-[80px]"
+ className="w-[80px]"
  placeholder="#"
  value={editionNumber}
  onChange={(e) => setEditionNumber(e.target.value)}
  min="1"
  />
  <span className="text-muted">of</span>
- <input
+ <Input
  type="number"
- className="form-input w-[80px]"
+ className="w-[80px]"
  placeholder="Total"
  value={editionSize}
  onChange={(e) => setEditionSize(e.target.value)}
@@ -1035,8 +1037,8 @@ export default function EditHorsePage() {
  {/* Finish Details */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Finish Details</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={finishDetails}
  onChange={(e) => setFinishDetails(e.target.value)}
@@ -1049,7 +1051,7 @@ export default function EditHorsePage() {
  {/* Public Notes */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Public Notes</label>
- <textarea
+ <Textarea
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  value={publicNotes}
  onChange={(e) => setPublicNotes(e.target.value)}
@@ -1076,8 +1078,8 @@ export default function EditHorsePage() {
  <div className="flex flex-wrap gap-4">
  <div className="mb-6 min-w-[200px] flex-[1_1_200px]">
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Breed</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={assignedBreed}
  onChange={(e) => setAssignedBreed(e.target.value)}
@@ -1089,7 +1091,7 @@ export default function EditHorsePage() {
  <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={assignedGender}
  onChange={(e) => setAssignedGender(e.target.value)}
  id="edit-assigned-gender"
@@ -1108,8 +1110,8 @@ export default function EditHorsePage() {
  <div className="flex flex-wrap gap-4">
  <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Age</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={assignedAge}
  onChange={(e) => setAssignedAge(e.target.value)}
@@ -1120,8 +1122,8 @@ export default function EditHorsePage() {
  </div>
  <div className="mb-6 min-w-[200px] flex-[1_1_200px]">
  <label className="text-ink mb-1 block text-sm font-semibold">Regional Show ID</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={regionalId}
  onChange={(e) => setRegionalId(e.target.value)}
@@ -1141,7 +1143,7 @@ export default function EditHorsePage() {
  </label>
  <select
  id="edit-finish"
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={finishType}
  onChange={(e) => setFinishType(e.target.value as FinishType)}
  >
@@ -1158,7 +1160,7 @@ export default function EditHorsePage() {
  </label>
  <select
  id="edit-condition"
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  >
@@ -1176,8 +1178,8 @@ export default function EditHorsePage() {
  <div className="mb-1 text-xs font-semibold text-[var(--color-accent-warning,#f59e0b)]">
  📝 Condition changed: {originalCondition} → {conditionGrade}
  </div>
- <textarea
- className="form-input text-sm"
+ <Textarea
+ className="text-sm"
  rows={2}
  maxLength={300}
  placeholder="What happened? (optional — visible on Hoofprint™)"
@@ -1201,7 +1203,7 @@ export default function EditHorsePage() {
  </label>
  <select
  id="edit-life-stage"
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={lifeStage}
  onChange={(e) => {
  setLifeStage(e.target.value);
@@ -1241,7 +1243,7 @@ export default function EditHorsePage() {
  </label>
  <select
  id="edit-trade-status"
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={tradeStatus}
  onChange={(e) => setTradeStatus(e.target.value)}
  >
@@ -1262,10 +1264,10 @@ export default function EditHorsePage() {
  >
  💲 Listing Price
  </label>
- <input
+ <Input
  id="edit-listing-price"
  type="number"
- className="form-input"
+ 
  placeholder="0.00"
  min="0"
  step="0.01"
@@ -1283,7 +1285,7 @@ export default function EditHorsePage() {
  >
  📝 Seller Notes
  </label>
- <textarea
+ <Textarea
  id="edit-marketplace-notes"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  rows={3}
@@ -1393,10 +1395,10 @@ export default function EditHorsePage() {
  <label htmlFor="edit-price" className="text-ink mb-1 block text-sm font-semibold">
  Purchase Price
  </label>
- <input
+ <Input
  id="edit-price"
  type="number"
- className="form-input"
+ 
  placeholder="0.00"
  min="0"
  step="0.01"
@@ -1408,10 +1410,10 @@ export default function EditHorsePage() {
  <label htmlFor="edit-date" className="text-ink mb-1 block text-sm font-semibold">
  Purchase Date
  </label>
- <input
+ <Input
  id="edit-date"
  type="date"
- className="form-input"
+ 
  value={purchaseDate}
  onChange={(e) => setPurchaseDate(e.target.value)}
  />
@@ -1421,8 +1423,8 @@ export default function EditHorsePage() {
  {/* Fuzzy Purchase Date */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Approximate Purchase Date</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={purchaseDateText}
  onChange={(e) => setPurchaseDateText(e.target.value)}
@@ -1439,10 +1441,10 @@ export default function EditHorsePage() {
  <label htmlFor="edit-value" className="text-ink mb-1 block text-sm font-semibold">
  Estimated Current Value
  </label>
- <input
+ <Input
  id="edit-value"
  type="number"
- className="form-input"
+ 
  placeholder="0.00"
  min="0"
  step="0.01"
@@ -1454,10 +1456,10 @@ export default function EditHorsePage() {
  <label htmlFor="edit-insurance" className="text-ink mb-1 block text-sm font-semibold">
  Insurance Notes
  </label>
- <input
+ <Input
  id="edit-insurance"
  type="text"
- className="form-input"
+ 
  placeholder="Policy number, coverage details, etc."
  value={insuranceNotes}
  onChange={(e) => setInsuranceNotes(e.target.value)}

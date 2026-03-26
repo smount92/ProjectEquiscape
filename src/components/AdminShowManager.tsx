@@ -52,7 +52,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  <select
  value={show.status}
  onChange={(e) => handleStatusChange(show.id, e.target.value)}
- className="form-input w-auto min-w-[120px]"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[120px]"
  disabled={busy === show.id}
  title={`Status for ${show.title}`}
  >

@@ -60,7 +60,7 @@ export default function LinkHorseToCommission({ commissionId }: { commissionId: 
  </p>
  <div className="flex items-center gap-2">
  <select
- className="form-input flex-1"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex-1"
  value={selectedHorseId}
  onChange={(e) => setSelectedHorseId(e.target.value)}
  title="Select a horse to link"

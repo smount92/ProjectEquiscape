@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from"react";
 import { useRouter } from"next/navigation";
 import { getArtistProfile, createArtistProfile, updateArtistProfile } from"@/app/actions/art-studio";
 import type { ArtistProfile } from"@/app/actions/art-studio";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 // ── Option Lists ──
 const SPECIALTIES = [
@@ -206,9 +208,9 @@ export default function StudioSetupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Studio Name *</label>
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  value={studioName}
  onChange={(e) => setStudioName(e.target.value)}
  placeholder="e.g. Painted Ponies Studio"
@@ -225,9 +227,9 @@ export default function StudioSetupPage() {
  >
  /studio/
  </span>
- <input
+ <Input
  type="text"
- className="form-input font-mono"
+ className="font-mono"
  value={studioSlug}
  onChange={(e) =>
  setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,""))
@@ -240,8 +242,8 @@ export default function StudioSetupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Artist Bio</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={bioArtist}
  onChange={(e) => setBioArtist(e.target.value)}
  placeholder="Tell clients about your style, experience, and what inspires your work…"
@@ -348,9 +350,9 @@ export default function StudioSetupPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Max Commission Slots
  </label>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  value={maxSlots}
  onChange={(e) => setMaxSlots(e.target.value)}
  onBlur={() => {
@@ -372,9 +374,9 @@ export default function StudioSetupPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Turnaround (min days)
  </label>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  value={turnaroundMin}
  onChange={(e) => setTurnaroundMin(e.target.value)}
  placeholder="e.g. 14"
@@ -385,9 +387,9 @@ export default function StudioSetupPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Turnaround (max days)
  </label>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  value={turnaroundMax}
  onChange={(e) => setTurnaroundMax(e.target.value)}
  placeholder="e.g. 60"
@@ -399,9 +401,9 @@ export default function StudioSetupPage() {
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Price Range (min $)</label>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  value={priceMin}
  onChange={(e) => setPriceMin(e.target.value)}
  placeholder="e.g. 50"
@@ -411,9 +413,9 @@ export default function StudioSetupPage() {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Price Range (max $)</label>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  value={priceMax}
  onChange={(e) => setPriceMax(e.target.value)}
  placeholder="e.g. 500"
@@ -430,8 +432,8 @@ export default function StudioSetupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Terms & Conditions</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={termsText}
  onChange={(e) => setTermsText(e.target.value)}
  placeholder="Deposit policy, revision limits, turnaround expectations, cancellation rules…"
@@ -442,9 +444,9 @@ export default function StudioSetupPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">PayPal.me Link</label>
- <input
+ <Input
  type="url"
- className="form-input"
+ 
  value={paypalMeLink}
  onChange={(e) => setPaypalMeLink(e.target.value)}
  placeholder="https://paypal.me/yourstudio"

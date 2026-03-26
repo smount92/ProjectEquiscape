@@ -66,7 +66,7 @@ export default function AssignPlacings({
  <span className="text-muted ml-1">by @{entry.ownerAlias}</span>
  </span>
  <select
- className="form-input w-[140px]"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[140px]"
  value={placings[entry.id] ||""}
  onChange={(e) => setPlacings((prev) => ({ ...prev, [entry.id]: e.target.value }))}
  title={`Placing for ${entry.horseName}`}

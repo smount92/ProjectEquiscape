@@ -2,6 +2,8 @@
 
 import { useState } from"react";
 import { featureHorse } from"@/app/actions/admin";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function FeatureHorseForm() {
  const [horseId, setHorseId] = useState("");
@@ -39,9 +41,9 @@ export default function FeatureHorseForm() {
  <form onSubmit={handleSubmit} className="flex max-w-[500px] flex-col gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Horse ID (UUID)</label>
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  value={horseId}
  onChange={(e) => setHorseId(e.target.value)}
  placeholder="Paste the public horse ID here…"
@@ -50,9 +52,9 @@ export default function FeatureHorseForm() {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Title</label>
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  value={title}
  onChange={(e) => setTitle(e.target.value)}
  required
@@ -60,8 +62,8 @@ export default function FeatureHorseForm() {
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={description}
  onChange={(e) => setDescription(e.target.value)}
  placeholder="Why is this horse being featured?"

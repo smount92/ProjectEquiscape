@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from"react";
 import Link from"next/link";
 import { loginAction, type AuthFormState } from"@/app/auth/actions";
+import { Input } from "@/components/ui/input";
 
 const initialState: AuthFormState = {
  error: null,
@@ -47,11 +48,11 @@ export default function LoginPage() {
  <label htmlFor="login-email" className="mb-1.5 block text-sm font-semibold text-ink">
  Email Address
  </label>
- <input
+ <Input
  id="login-email"
  name="email"
  type="email"
- className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+ className="w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="you@example.com"
  required
  autoComplete="email"
@@ -64,11 +65,11 @@ export default function LoginPage() {
  Password
  </label>
  <div className="relative">
- <input
+ <Input
  id="login-password"
  name="password"
  type={showPassword ?"text" :"password"}
- className="form-input w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+ className="w-full rounded-lg border border-edge bg-[var(--color-bg-input)] px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
  placeholder="Enter your password"
  required
  autoComplete="current-password"

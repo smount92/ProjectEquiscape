@@ -21,6 +21,8 @@ import { createHorseRecord, finalizeHorseImages } from"@/app/actions/horse";
 import { getProfile } from"@/app/actions/settings";
 import { setHorseCollections } from"@/app/actions/collections";
 import ImageCropModal from"@/components/ImageCropModal";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -727,7 +729,7 @@ export default function AddHorsePage() {
  {/* AI hint hidden for now */}
  </>
  )}
- <input
+ <Input
  type="file"
  accept="image/jpeg,image/png,image/webp,image/gif"
  onChange={(e) => {
@@ -762,7 +764,7 @@ export default function AddHorsePage() {
  role="button"
  tabIndex={0}
  >
- <input
+ <Input
  ref={extraInputRef}
  type="file"
  accept="image/*"
@@ -1000,10 +1002,10 @@ export default function AddHorsePage() {
  <label htmlFor="custom-name" className="text-ink mb-1 block text-sm font-semibold">
  Custom Name *
  </label>
- <input
+ <Input
  id="custom-name"
  type="text"
- className="form-input"
+ 
  placeholder="e.g. Midnight Star, Patches, Stormy…"
  value={customName}
  onChange={(e) => setCustomName(e.target.value)}
@@ -1019,10 +1021,10 @@ export default function AddHorsePage() {
  <label htmlFor="sculptor" className="text-ink mb-1 block text-sm font-semibold">
  Sculptor / Artist
  </label>
- <input
+ <Input
  id="sculptor"
  type="text"
- className="form-input"
+ 
  placeholder="e.g. Sarah Rose, Brigitte Eberl, Kathleen Moody…"
  value={sculptor}
  onChange={(e) => setSculptor(e.target.value)}
@@ -1037,10 +1039,10 @@ export default function AddHorsePage() {
  <label htmlFor="finishing-artist" className="text-ink mb-1 block text-sm font-semibold">
  🎨 Finishing Artist
  </label>
- <input
+ <Input
  id="finishing-artist"
  type="text"
- className="form-input"
+ 
  placeholder="Who painted or customized this model?"
  value={finishingArtist}
  onChange={(e) => setFinishingArtist(e.target.value)}
@@ -1054,9 +1056,9 @@ export default function AddHorsePage() {
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">📋 Edition Info</label>
  <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  placeholder="#"
  value={editionNumber}
  onChange={(e) => setEditionNumber(e.target.value)}
@@ -1064,9 +1066,9 @@ export default function AddHorsePage() {
  min="1"
  />
  <span className="text-muted">of</span>
- <input
+ <Input
  type="number"
- className="form-input"
+ 
  placeholder="Total"
  value={editionSize}
  onChange={(e) => setEditionSize(e.target.value)}
@@ -1087,7 +1089,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="finish-type"
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={finishType}
  onChange={(e) => {
  setFinishType(e.target.value as FinishType);
@@ -1104,8 +1106,8 @@ export default function AddHorsePage() {
  {/* Finish Details */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Finish Details</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={finishDetails}
  onChange={(e) => setFinishDetails(e.target.value)}
@@ -1118,8 +1120,8 @@ export default function AddHorsePage() {
  {/* Public Notes */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Public Notes</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={publicNotes}
  onChange={(e) => setPublicNotes(e.target.value)}
  placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
@@ -1149,8 +1151,8 @@ export default function AddHorsePage() {
  >
  <div className="mb-6" style={{ flex:"1 1 200px" }}>
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Breed</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={assignedBreed}
  onChange={(e) => setAssignedBreed(e.target.value)}
@@ -1162,7 +1164,7 @@ export default function AddHorsePage() {
  <div className="mb-6" style={{ flex:"1 1 150px" }}>
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={assignedGender}
  onChange={(e) => setAssignedGender(e.target.value)}
  id="assigned-gender"
@@ -1184,8 +1186,8 @@ export default function AddHorsePage() {
  >
  <div className="mb-6" style={{ flex:"1 1 150px" }}>
  <label className="text-ink mb-1 block text-sm font-semibold">Assigned Age</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={assignedAge}
  onChange={(e) => setAssignedAge(e.target.value)}
@@ -1196,8 +1198,8 @@ export default function AddHorsePage() {
  </div>
  <div className="mb-6" style={{ flex:"1 1 200px" }}>
  <label className="text-ink mb-1 block text-sm font-semibold">Regional Show ID</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={regionalId}
  onChange={(e) => setRegionalId(e.target.value)}
@@ -1216,7 +1218,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="condition-grade"
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  >
@@ -1238,7 +1240,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="life-stage"
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={lifeStage}
  onChange={(e) => setLifeStage(e.target.value)}
  >
@@ -1266,7 +1268,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="trade-status"
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={tradeStatus}
  onChange={(e) => setTradeStatus(e.target.value)}
  >
@@ -1287,10 +1289,10 @@ export default function AddHorsePage() {
  >
  💲 Listing Price
  </label>
- <input
+ <Input
  id="listing-price"
  type="number"
- className="form-input"
+ 
  placeholder="0.00"
  min="0"
  step="0.01"
@@ -1308,7 +1310,7 @@ export default function AddHorsePage() {
  >
  📝 Seller Notes
  </label>
- <textarea
+ <Textarea
  id="marketplace-notes"
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  rows={3}
@@ -1430,10 +1432,10 @@ export default function AddHorsePage() {
  <label htmlFor="purchase-price" className="text-ink mb-1 block text-sm font-semibold">
  Purchase Price
  </label>
- <input
+ <Input
  id="purchase-price"
  type="number"
- className="form-input"
+ 
  placeholder="0.00"
  min="0"
  step="0.01"
@@ -1446,10 +1448,10 @@ export default function AddHorsePage() {
  <label htmlFor="purchase-date" className="text-ink mb-1 block text-sm font-semibold">
  Purchase Date
  </label>
- <input
+ <Input
  id="purchase-date"
  type="date"
- className="form-input"
+ 
  value={purchaseDate}
  onChange={(e) => setPurchaseDate(e.target.value)}
  />
@@ -1461,8 +1463,8 @@ export default function AddHorsePage() {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Approximate Purchase Date
  </label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={purchaseDateText}
  onChange={(e) => setPurchaseDateText(e.target.value)}
@@ -1479,10 +1481,10 @@ export default function AddHorsePage() {
  <label htmlFor="estimated-value" className="text-ink mb-1 block text-sm font-semibold">
  Estimated Current Value
  </label>
- <input
+ <Input
  id="estimated-value"
  type="number"
- className="form-input"
+ 
  placeholder="0.00"
  min="0"
  step="0.01"
@@ -1495,10 +1497,10 @@ export default function AddHorsePage() {
  <label htmlFor="insurance-notes" className="text-ink mb-1 block text-sm font-semibold">
  Insurance Notes
  </label>
- <input
+ <Input
  id="insurance-notes"
  type="text"
- className="form-input"
+ 
  placeholder="Policy number, coverage details, etc."
  value={insuranceNotes}
  onChange={(e) => setInsuranceNotes(e.target.value)}

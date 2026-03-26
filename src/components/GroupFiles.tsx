@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from"react";
 import { getGroupFiles, uploadGroupFile, deleteGroupFile, type GroupFile } from"@/app/actions/groups";
 import { safeUUID } from"@/lib/utils/uuid";
+import { Input } from "@/components/ui/input";
 
 interface Props {
  groupId: string;
@@ -94,18 +95,18 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  <div className="flex flex-wrap items-end gap-2">
  <div className="min-w-[200] flex-1">
  <label className="text-ink mb-1 block text-sm font-semibold">Upload File</label>
- <input
+ <Input
  ref={fileRef}
  type="file"
- className="form-input"
+ 
  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.webp"
  title="Choose file to upload"
  />
  </div>
  <div className="min-w-[200] flex-1">
  <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
- <input
- className="form-input"
+ <Input
+ 
  value={description}
  onChange={(e) => setDescription(e.target.value)}
  placeholder="What's this file about?"

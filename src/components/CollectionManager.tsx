@@ -4,6 +4,7 @@ import { useState } from"react";
 import { createPortal } from"react-dom";
 import { useRouter } from"next/navigation";
 import { updateCollectionAction, deleteCollectionAction } from"@/app/actions/collections";
+import { Input } from "@/components/ui/input";
 
 interface CollectionManagerProps {
  collection: {
@@ -67,7 +68,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  <h3 className="mb-6">Manage Collection</h3>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Name</label>
- <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Collection name" />
+ <Input  value={name} onChange={(e) => setName(e.target.value)} placeholder="Collection name" />
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description</label>

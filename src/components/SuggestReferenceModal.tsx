@@ -3,6 +3,8 @@
 import { useState } from"react";
 import { createPortal } from"react-dom";
 import { submitSuggestion } from"@/app/actions/suggestions";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface SuggestReferenceModalProps {
  isOpen: boolean;
@@ -132,8 +134,8 @@ export default function SuggestReferenceModal({
  <label className="text-ink mb-1 block text-sm font-semibold">
  Name <span className="text-[#e74c6f]">*</span>
  </label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={name}
  onChange={(e) => setName(e.target.value)}
@@ -148,8 +150,8 @@ export default function SuggestReferenceModal({
  {/* Details */}
  <div className="mb-4 mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Additional Details</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={details}
  onChange={(e) => setDetails(e.target.value)}
  placeholder={

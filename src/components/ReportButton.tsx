@@ -61,7 +61,7 @@ export default function ReportButton({
  return (
  <div className="bg-card border-edge mt-2 rounded-lg border p-4 shadow-md transition-all">
  <select
- className="form-input mb-2 text-sm"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-2 text-sm"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
  title="Report reason"

@@ -5,6 +5,7 @@ import { createPortal } from"react-dom";
 import { enterShow } from"@/app/actions/shows";
 import { createClient } from"@/lib/supabase/client";
 import { getPublicImageUrl } from"@/lib/utils/storage";
+import { Input } from "@/components/ui/input";
 
 interface ClassDetail {
  id: string;
@@ -240,7 +241,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  {/* Top row: Horse selector */}
  <div className="grid grid-cols-2 gap-4">
  <select
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={selectedHorse}
  onChange={(e) => {
  setSelectedHorse(e.target.value);
@@ -263,9 +264,9 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  {classes && classes.length > 0 && selectedHorse && (
  <div className="mb-4">
  <label className="text-ink mb-1 block text-sm font-semibold">📋 Select Class</label>
- <input
+ <Input
  type="text"
- className="form-input mb-2"
+ className="mb-2"
  placeholder="Search classes…"
  value={classSearch}
  onChange={(e) => setClassSearch(e.target.value)}

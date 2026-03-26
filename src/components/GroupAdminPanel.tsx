@@ -100,7 +100,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  <div className="flex items-center gap-1">
  {isOwner && (
  <select
- className="form-select text-xs min-h-0 py-1 pl-2 pr-7"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-xs min-h-0 py-1 pl-2 pr-7"
  value={m.role}
  onChange={(e) =>
  handleRoleChange(

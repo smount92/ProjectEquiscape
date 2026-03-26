@@ -3,6 +3,8 @@
 import { useState, useRef } from"react";
 import { createIdRequest } from"@/app/actions/help-id";
 import { compressImage } from"@/lib/utils/imageCompression";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function HelpIdRequestForm() {
  const [isOpen, setIsOpen] = useState(false);
@@ -129,10 +131,10 @@ export default function HelpIdRequestForm() {
  <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="help-id-description">
  Description
  </label>
- <textarea
+ <Textarea
  id="help-id-description"
  name="description"
- className="form-input resize-y"
+ className="resize-y"
  rows={3}
  placeholder="What do you know about this model? Size, material, markings, where you got it..."
  />
@@ -143,11 +145,11 @@ export default function HelpIdRequestForm() {
  <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="help-id-marks">
  Any identifying marks?
  </label>
- <input
+ <Input
  id="help-id-marks"
  type="text"
  name="identifyingMarks"
- className="form-input"
+ 
  placeholder="Mold marks, stamps, stickers, model numbers..."
  />
  </div>

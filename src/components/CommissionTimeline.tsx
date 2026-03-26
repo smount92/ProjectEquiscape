@@ -5,6 +5,8 @@ import { useRouter } from"next/navigation";
 import { createClient } from"@/lib/supabase/client";
 import { addCommissionUpdate, updateCommissionStatus } from"@/app/actions/art-studio";
 import type { CommissionUpdate } from"@/app/actions/art-studio";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const UPDATE_ICONS: Record<string, string> = {
  wip_photo:"📸",
@@ -216,9 +218,9 @@ export default function CommissionTimeline({
  🎨 Actions — {STATUS_LABELS[commissionStatus] || commissionStatus}
  </div>
  <div className="flex flex-wrap items-center gap-2">
- <input
+ <Input
  type="text"
- className="form-input min-w-[150px] flex-1 text-sm"
+ className="min-w-[150px] flex-1 text-sm"
  placeholder="Optional note…"
  value={statusNote}
  onChange={(e) => setStatusNote(e.target.value)}
@@ -247,9 +249,9 @@ export default function CommissionTimeline({
  <div className="mb-2 text-sm font-semibold">
  🔎 The artist has submitted this for your review
  </div>
- <input
+ <Input
  type="text"
- className="form-input mb-2 text-sm"
+ className="mb-2 text-sm"
  placeholder="Add revision notes (optional)…"
  value={statusNote}
  onChange={(e) => setStatusNote(e.target.value)}
@@ -282,7 +284,7 @@ export default function CommissionTimeline({
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Update Type</label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={updateType}
  onChange={(e) => setUpdateType(e.target.value)}
  title="Update type"
@@ -295,9 +297,9 @@ export default function CommissionTimeline({
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Title (optional)</label>
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  value={title}
  onChange={(e) => setTitle(e.target.value)}
  placeholder="e.g. Base coat applied"
@@ -306,8 +308,8 @@ export default function CommissionTimeline({
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Details</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={body}
  onChange={(e) => setBody(e.target.value)}
  placeholder="Describe the update…"
@@ -321,11 +323,11 @@ export default function CommissionTimeline({
  📎 Attach Photo{""}
  {updateType !=="wip_photo" && <span className="opacity-[0.6]">(optional)</span>}
  </label>
- <input
+ <Input
  ref={fileInputRef}
  type="file"
  accept="image/*"
- className="form-input"
+ 
  onChange={(e) => setAttachFile(e.target.files?.[0] || null)}
  title="Attach photo"
  />
@@ -345,7 +347,7 @@ export default function CommissionTimeline({
  <label
  className="mb-2 flex cursor-pointer items-center gap-1 text-sm"
  >
- <input
+ <Input
  type="checkbox"
  checked={isVisibleToClient}
  onChange={(e) => setIsVisibleToClient(e.target.checked)}

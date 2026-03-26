@@ -2,6 +2,7 @@
 
 import { useState } from"react";
 import { addShowRecord, updateShowRecord } from"@/app/actions/provenance";
+import { Input } from "@/components/ui/input";
 
 const RIBBON_COLORS = [
  { value:"", label:"Select ribbon/award…" },
@@ -127,8 +128,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <label className="text-ink mb-1 block text-sm font-semibold">
  Show Name <span className="text-[#e74c6f]">*</span>
  </label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={showName}
  onChange={(e) => setShowName(e.target.value)}
@@ -142,8 +143,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
  <label htmlFor="show-record-date" className="text-ink mb-1 block text-sm font-semibold">Show Date</label>
- <input
- className="form-input"
+ <Input
+ 
  type="date"
  value={showDate}
  onChange={(e) => setShowDate(e.target.value)}
@@ -153,8 +154,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Division / Section</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={division}
  onChange={(e) => setDivision(e.target.value)}
@@ -167,8 +168,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  {/* Class Name — between Division and Placing */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Class Name</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={className}
  onChange={(e) => setClassName(e.target.value)}
@@ -183,8 +184,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  {/* Fuzzy Date fallback */}
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Approximate Date</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={showDateText}
  onChange={(e) => setShowDateText(e.target.value)}
@@ -199,8 +200,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Placing</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={placing}
  onChange={(e) => setPlacing(e.target.value)}
@@ -211,7 +212,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <label htmlFor="show-record-ribbon" className="text-ink mb-1 block text-sm font-semibold">Ribbon Color</label>
  <select
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={ribbonColor}
  onChange={(e) => setRibbonColor(e.target.value)}
  id="show-record-ribbon"
@@ -227,8 +228,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Judge</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={judgeName}
  onChange={(e) => setJudgeName(e.target.value)}
@@ -280,8 +281,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Location</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={showLocation}
  onChange={(e) => setShowLocation(e.target.value)}
@@ -291,8 +292,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Section</label>
- <input
- className="form-input"
+ <Input
+ 
  type="text"
  value={sectionName}
  onChange={(e) => setSectionName(e.target.value)}
@@ -306,7 +307,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <label htmlFor="show-record-award-category" className="text-ink mb-1 block text-sm font-semibold">Award Category</label>
  <select
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={awardCategory}
  onChange={(e) => setAwardCategory(e.target.value)}
  id="show-record-award-category"
@@ -323,7 +324,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <label htmlFor="show-record-competition-level" className="text-ink mb-1 block text-sm font-semibold">Competition Level</label>
  <select
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={competitionLevel}
  onChange={(e) => setCompetitionLevel(e.target.value)}
  id="show-record-competition-level"

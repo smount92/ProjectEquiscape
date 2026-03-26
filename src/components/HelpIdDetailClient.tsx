@@ -9,6 +9,7 @@ import {
  deleteIdRequest,
 } from"@/app/actions/help-id";
 import { useRouter } from"next/navigation";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Suggestion {
  id: string;
@@ -177,12 +178,12 @@ export default function HelpIdDetailClient({
  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">Your Suggestion</h3>
  <div className="mb-6">
- <textarea
+ <Textarea
  rows={3}
  value={suggestText}
  onChange={(e) => setSuggestText(e.target.value)}
  placeholder="What model do you think this is? Include manufacturer, mold name, release name, model number if known..."
- className="form-input resize-y"
+ className="resize-y"
  />
  </div>
  <div className="flex gap-4">

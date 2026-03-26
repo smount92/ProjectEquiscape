@@ -11,6 +11,8 @@ import {
  uploadAvatar,
  deleteAccount,
 } from"@/app/actions/settings";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
  { key:"show_votes", emoji:"📸", label:"Show votes on your entries" },
@@ -188,7 +190,7 @@ export default function SettingsPage() {
  >
  {isUploadingAvatar ?"Uploading…" :"📷 Change Avatar"}
  </button>
- <input
+ <Input
  ref={avatarInputRef}
  type="file"
  accept="image/*"
@@ -207,10 +209,10 @@ export default function SettingsPage() {
  <label htmlFor="settings-alias" className="text-ink mb-1 block text-sm font-semibold">
  Display Name
  </label>
- <input
+ <Input
  id="settings-alias"
  type="text"
- className="form-input"
+ 
  value={aliasName}
  onChange={(e) => setAliasName(e.target.value)}
  maxLength={30}
@@ -224,7 +226,7 @@ export default function SettingsPage() {
  <label htmlFor="settings-bio" className="text-ink mb-1 block text-sm font-semibold">
  Bio
  </label>
- <textarea
+ <Textarea
  id="settings-bio"
  className="w-full resize-y rounded-lg border border-stone-300 bg-white px-4 py-3 text-sm text-stone-800 transition-colors focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
  rows={3}
@@ -298,7 +300,7 @@ export default function SettingsPage() {
  </label>
  <select
  id="settings-currency"
- className="form-select max-w-[200px]"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
  value={currencySymbol}
  onChange={(e) => setCurrencySymbol(e.target.value)}
  >
@@ -345,9 +347,9 @@ export default function SettingsPage() {
  <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Email</label>
- <input
+ <Input
  type="email"
- className="form-input opacity-60"
+ className="opacity-60"
  value={email}
  disabled
  title="Email address"
@@ -364,10 +366,10 @@ export default function SettingsPage() {
  >
  New Password
  </label>
- <input
+ <Input
  id="settings-new-password"
  type="password"
- className="form-input"
+ 
  value={newPassword}
  onChange={(e) => setNewPassword(e.target.value)}
  placeholder="At least 8 characters"
@@ -382,10 +384,10 @@ export default function SettingsPage() {
  >
  Confirm Password
  </label>
- <input
+ <Input
  id="settings-confirm-password"
  type="password"
- className="form-input"
+ 
  value={confirmPassword}
  onChange={(e) => setConfirmPassword(e.target.value)}
  placeholder="Type it again"
@@ -515,10 +517,10 @@ export default function SettingsPage() {
  <label htmlFor="delete-confirm" className="text-ink mb-1 block text-sm font-semibold">
  Type <strong>DELETE</strong> to confirm
  </label>
- <input
+ <Input
  id="delete-confirm"
  type="text"
- className="form-input"
+ 
  value={deleteConfirm}
  onChange={(e) => setDeleteConfirm(e.target.value)}
  placeholder="DELETE"

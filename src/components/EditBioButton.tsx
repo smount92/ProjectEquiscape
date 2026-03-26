@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { updateBio } from"@/app/actions/profile";
 import { useRouter } from"next/navigation";
+import { Textarea } from "@/components/ui/textarea";
 
 interface EditBioButtonProps {
  currentBio: string | null;
@@ -43,11 +44,11 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
 
  return (
  <div className="edit-bio-form mt-2 w-full max-w-[480px]">
- <textarea
+ <Textarea
  value={bio}
  onChange={(e) => setBio(e.target.value.slice(0, 500))}
  placeholder="Tell collectors about yourself… (500 chars max)"
- className="form-input min-h-[80px] resize-y text-sm"
+ className="min-h-[80px] resize-y text-sm"
  maxLength={500}
  id="bio-textarea"
  autoFocus

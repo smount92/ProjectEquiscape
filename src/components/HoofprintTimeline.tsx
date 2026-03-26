@@ -5,6 +5,8 @@ import { useRouter } from"next/navigation";
 import Link from"next/link";
 import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from"@/app/actions/hoofprint";
 import type { TimelineEvent, OwnershipRecord } from"@/app/actions/hoofprint";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface HoofprintTimelineProps {
  horseId: string;
@@ -111,7 +113,7 @@ export default function HoofprintTimeline({
  {isOwner && (
  <>
  <select
- className="form-input w-auto min-w-[140px] text-sm"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[140px] text-sm"
  value={lifeStage}
  onChange={(e) => handleStageChange(e.target.value)}
  disabled={stageUpdating}
@@ -167,9 +169,9 @@ export default function HoofprintTimeline({
  >
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Title</label>
- <input
+ <Input
  type="text"
- className="form-input"
+ 
  value={formState.title}
  onChange={(e) => setFormState({ ...formState, title: e.target.value })}
  placeholder="e.g. Won 1st at Breyerfest 2025"
@@ -178,8 +180,8 @@ export default function HoofprintTimeline({
  </div>
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={formState.description}
  onChange={(e) => setFormState({ ...formState, description: e.target.value })}
  placeholder="Add details..."

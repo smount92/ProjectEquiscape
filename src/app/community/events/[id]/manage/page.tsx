@@ -19,6 +19,8 @@ import {
 } from"@/app/actions/competition";
 import type { Division } from"@/app/actions/competition";
 import { updateEvent, getEventJudges, addEventJudge, removeEventJudge, searchUsers } from"@/app/actions/events";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type TabId ="details" |"classes" |"judges";
 
@@ -492,8 +494,8 @@ export default function ManageEventPage() {
  <div className="flex flex-col gap-6">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Event Name</label>
- <input
- className="form-input"
+ <Input
+ 
  value={eventData.name}
  onChange={(e) => setEventData((prev) => ({ ...prev, name: e.target.value }))}
  placeholder="Event name"
@@ -502,8 +504,8 @@ export default function ManageEventPage() {
 
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
- <textarea
- className="form-input"
+ <Textarea
+ 
  value={eventData.description}
  onChange={(e) => setEventData((prev) => ({ ...prev, description: e.target.value }))}
  placeholder="Describe your event…"
@@ -514,9 +516,9 @@ export default function ManageEventPage() {
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Starts At</label>
- <input
+ <Input
  type="datetime-local"
- className="form-input"
+ 
  value={eventData.startsAt ? eventData.startsAt.slice(0, 16) :""}
  onChange={(e) =>
  setEventData((prev) => ({ ...prev, startsAt: e.target.value }))
@@ -527,9 +529,9 @@ export default function ManageEventPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Ends At (optional)
  </label>
- <input
+ <Input
  type="datetime-local"
- className="form-input"
+ 
  value={eventData.endsAt ? eventData.endsAt.slice(0, 16) :""}
  onChange={(e) => setEventData((prev) => ({ ...prev, endsAt: e.target.value }))}
  />
@@ -539,8 +541,8 @@ export default function ManageEventPage() {
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Region</label>
- <input
- className="form-input"
+ <Input
+ 
  value={eventData.region}
  onChange={(e) => setEventData((prev) => ({ ...prev, region: e.target.value }))}
  placeholder="e.g. Northeast US"
@@ -549,7 +551,7 @@ export default function ManageEventPage() {
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Timezone</label>
  <select
- className="form-input"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={eventData.timezone}
  onChange={(e) =>
  setEventData((prev) => ({ ...prev, timezone: e.target.value }))
@@ -568,7 +570,7 @@ export default function ManageEventPage() {
  <label
  className="flex cursor-pointer items-center gap-1"
  >
- <input
+ <Input
  type="checkbox"
  checked={eventData.isAllDay}
  onChange={(e) =>
@@ -580,7 +582,7 @@ export default function ManageEventPage() {
  <label
  className="flex cursor-pointer items-center gap-1"
  >
- <input
+ <Input
  type="checkbox"
  checked={eventData.isVirtual}
  onChange={(e) =>
@@ -597,8 +599,8 @@ export default function ManageEventPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Location Name
  </label>
- <input
- className="form-input"
+ <Input
+ 
  value={eventData.locationName}
  onChange={(e) =>
  setEventData((prev) => ({ ...prev, locationName: e.target.value }))
@@ -610,8 +612,8 @@ export default function ManageEventPage() {
  <label className="text-ink mb-1 block text-sm font-semibold">
  Location Address
  </label>
- <input
- className="form-input"
+ <Input
+ 
  value={eventData.locationAddress}
  onChange={(e) =>
  setEventData((prev) => ({ ...prev, locationAddress: e.target.value }))
@@ -625,8 +627,8 @@ export default function ManageEventPage() {
  {eventData.isVirtual && (
  <div className="mb-6">
  <label className="text-ink mb-1 block text-sm font-semibold">Virtual URL</label>
- <input
- className="form-input"
+ <Input
+ 
  value={eventData.virtualUrl}
  onChange={(e) =>
  setEventData((prev) => ({ ...prev, virtualUrl: e.target.value }))
@@ -643,7 +645,7 @@ export default function ManageEventPage() {
  <label
  className="flex cursor-pointer items-center gap-1 rounded-md px-3 py-2"
  >
- <input
+ <Input
  type="radio"
  name="judging"
  value="community_vote"
@@ -657,7 +659,7 @@ export default function ManageEventPage() {
  <label
  className="flex cursor-pointer items-center gap-1 rounded-md px-3 py-2"
  >
- <input
+ <Input
  type="radio"
  name="judging"
  value="expert_judge"
@@ -720,8 +722,8 @@ export default function ManageEventPage() {
 
  {editingDivision === div.id ? (
  <div className="flex flex-1 items-center gap-1">
- <input
- className="form-input"
+ <Input
+ 
  value={editName}
  onChange={(e) => setEditName(e.target.value)}
  onKeyDown={(e) => e.key ==="Enter" && handleSaveDivision(div.id)}
@@ -806,14 +808,14 @@ export default function ManageEventPage() {
 
  {editingClass === cls.id ? (
  <div className="flex flex-1 items-center gap-1">
- <input
- className="form-input w-[60px]"
+ <Input
+ className="w-[60px]"
  value={editClassNumber}
  onChange={(e) => setEditClassNumber(e.target.value)}
  placeholder="#"
  />
- <input
- className="form-input"
+ <Input
+ 
  value={editName}
  onChange={(e) => setEditName(e.target.value)}
  onKeyDown={(e) =>
@@ -895,14 +897,14 @@ export default function ManageEventPage() {
  {/* Add class inline form */}
  {addingClassToDivision === div.id && (
  <div className="bg-glass animate-fade-in-up border-b-0">
- <input
- className="form-input w-[60px]"
+ <Input
+ className="w-[60px]"
  value={newClassNumber}
  onChange={(e) => setNewClassNumber(e.target.value)}
  placeholder="#"
  />
- <input
- className="form-input flex-1"
+ <Input
+ className="flex-1"
  value={newClassName}
  onChange={(e) => setNewClassName(e.target.value)}
  onKeyDown={(e) => e.key ==="Enter" && handleAddClass(div.id)}
@@ -938,8 +940,8 @@ export default function ManageEventPage() {
  {/* Add Division */}
  <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div className="flex items-center gap-2">
- <input
- className="form-input flex-1"
+ <Input
+ className="flex-1"
  value={newDivisionName}
  onChange={(e) => setNewDivisionName(e.target.value)}
  onKeyDown={(e) => e.key ==="Enter" && handleAddDivision()}
@@ -985,8 +987,8 @@ export default function ManageEventPage() {
  <div className="relative mb-6">
  <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
  <div className="relative max-w-[300] flex-1">
- <input
- className="form-input"
+ <Input
+ 
  value={newJudgeAlias}
  onChange={(e) => {
  setNewJudgeAlias(e.target.value);
@@ -1178,7 +1180,7 @@ export default function ManageEventPage() {
  ) : (
  <>
  <select
- className="form-select"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={selectedSourceEvent}
  onChange={(e) => setSelectedSourceEvent(e.target.value)}
  style={{ marginBottom:"var(--space-md)" }}
