@@ -364,7 +364,7 @@ export default function CsvImport() {
  <span className="bg-card border-edge text-muted flex h-[36px] w-[36px] items-center justify-center rounded-full rounded-lg border border-[2px] text-sm font-bold shadow-md transition-all">
  {s.num}
  </span>
- <span className="text-muted text-xs font-medium transition-all">{s.label}</span>
+ <span className="text-ink-light text-xs font-medium transition-all">{s.label}</span>
  </div>
  ))}
  </div>
@@ -566,7 +566,7 @@ export default function CsvImport() {
  .map(([k, v]) => (
  <span
  key={k}
- className="bg-elevated text-muted rounded-sm px-[8px] py-[2px] text-xs"
+ className="bg-elevated text-ink-light rounded-sm px-[8px] py-[2px] text-xs"
  >
  {k}: {v}
  </span>
@@ -589,7 +589,7 @@ export default function CsvImport() {
  />
  <span className="transition-colors-text flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2">
  <span className="text-ink text-sm">{match.display}</span>
- <span className="text-muted text-xs tabular-nums">
+ <span className="text-ink-light text-xs tabular-nums">
  Score: {match.score > 0 ? `+${match.score}` : match.score}
  </span>
  </span>
@@ -639,7 +639,7 @@ export default function CsvImport() {
  />
  <span>Publish imported models to the community feed</span>
  </label>
- <span className="text-muted mt-1 block text-right text-xs">
+ <span className="text-ink-light mt-1 block text-right text-xs">
  Models without photos will be excluded regardless.
  </span>
  <button

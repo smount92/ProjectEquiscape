@@ -61,12 +61,12 @@ export default async function DiscoverPage() {
  <h1 className="text-2xl font-bold tracking-tight">
  👥 <span className="text-forest">Discover Collectors</span>
  </h1>
- <p className="mt-2 max-w-xl text-base text-stone-500">
+ <p className="mt-2 max-w-xl text-base text-ink-light">
  Find fellow collectors, browse their stables, and connect with the community.
  </p>
  <div className="mt-6 flex items-baseline gap-2">
  <span className="text-2xl font-bold text-forest">{activeUsers.length}</span>
- <span className="text-sm font-medium text-stone-500">Active Collectors</span>
+ <span className="text-sm font-medium text-ink-light">Active Collectors</span>
  </div>
  </div>
 

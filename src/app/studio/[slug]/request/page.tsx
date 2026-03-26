@@ -33,7 +33,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  >
  <div className="mb-4 text-[2.5rem]">🔴</div>
  <h1 className="text-xl">Commissions Closed</h1>
- <p className="text-muted mt-2">{profile.studioName} is not accepting commissions right now.</p>
+ <p className="text-ink-light mt-2">{profile.studioName} is not accepting commissions right now.</p>
  <Link
  href={`/studio/${slug}`}
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
@@ -54,7 +54,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  >
  <div className="mb-4 text-[2.5rem]">🎨</div>
  <h1 className="text-xl">This is your studio!</h1>
- <p className="text-muted mt-2">
+ <p className="text-ink-light mt-2">
  You can&apos;t commission yourself. Manage your commissions from the dashboard.
  </p>
  <Link
@@ -77,7 +77,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  <h1 className="text-xl">
  <span className="text-forest">Request a Commission</span>
  </h1>
- <p className="text-muted mt-1 text-sm">
+ <p className="text-ink-light mt-1 text-sm">
  from <strong>{profile.studioName}</strong> by @{profile.ownerAlias}
  </p>
  {profile.status ==="waitlist" && (

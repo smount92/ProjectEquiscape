@@ -62,7 +62,7 @@ export default async function ReferencePage() {
  <h1>
  📚 <span className="text-forest">Reference Catalog</span>
  </h1>
- <p className="mt-2 text-base text-muted">
+ <p className="mt-2 text-base text-ink-light">
  {(count ?? 0).toLocaleString()}+ model horse entries, maintained by the community
  </p>
  </div>
@@ -97,7 +97,7 @@ export default async function ReferencePage() {
  <aside className="flex flex-col gap-4">
  {/* Quick Links */}
  <div className="flex flex-col gap-3 rounded-lg border border-edge bg-card p-5 shadow-sm">
- <h3 className="text-sm font-bold uppercase tracking-wider text-muted">📋 Community</h3>
+ <h3 className="text-sm font-bold uppercase tracking-wider text-ink-light">📋 Community</h3>
  <div className="flex flex-col gap-2">
  <a
  href="/catalog/suggestions"
@@ -128,7 +128,7 @@ export default async function ReferencePage() {
  {/* Top Curators */}
  {(curators ?? []).length > 0 && (
  <div className="flex flex-col gap-3 rounded-lg border border-edge bg-card p-5 shadow-sm">
- <h3 className="text-sm font-bold uppercase tracking-wider text-muted">🏆 Top Curators</h3>
+ <h3 className="text-sm font-bold uppercase tracking-wider text-ink-light">🏆 Top Curators</h3>
  <ul className="m-0 list-none p-0">
  {(
  curators as {

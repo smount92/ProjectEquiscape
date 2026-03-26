@@ -73,7 +73,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  className="flex cursor-pointer items-center justify-between"
  onClick={() => setExpanded(!expanded)}
  >
- <h3 className="text-muted m-0 text-xs font-bold tracking-[0.08em] uppercase">⚙️ Admin Panel</h3>
+ <h3 className="text-ink-light m-0 text-xs font-bold tracking-[0.08em] uppercase">⚙️ Admin Panel</h3>
  <span className="text-muted text-sm">{expanded ?"▲" :"▼"}</span>
  </div>
 
@@ -83,7 +83,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  <p className="text-muted">Loading members…</p>
  ) : (
  <>
- <div className="text-muted mb-2 text-xs">
+ <div className="text-ink-light mb-2 text-xs">
  👥 {members.length} member{members.length !== 1 ?"s" :""}
  </div>
  <div className="flex flex-col gap-[2px]">
@@ -94,7 +94,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  >
  <div className="flex items-center gap-2">
  <span className="text-ink text-sm font-semibold">@{m.alias}</span>
- <span className="text-muted text-xs">{roleBadge(m.role)}</span>
+ <span className="text-ink-light text-xs">{roleBadge(m.role)}</span>
  </div>
  {m.userId !== currentUserId && m.role !=="owner" && (
  <div className="flex items-center gap-1">

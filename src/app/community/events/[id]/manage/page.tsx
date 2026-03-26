@@ -960,7 +960,7 @@ export default function ManageEventPage() {
  <h3 className="mb-4">
  🧑‍⚖️ <span className="text-forest">Assigned Judges</span>
  </h3>
- <p className="text-muted mb-6 text-sm">
+ <p className="text-ink-light mb-6 text-sm">
  Add users by their alias to grant them access to the Expert Judging Panel. They&apos;ll be
  able to assign placings during the &quot;Judging&quot; phase.
  </p>

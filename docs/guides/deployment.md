@@ -42,6 +42,10 @@ Configure in **Vercel Dashboard → Settings → Environment Variables**:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key (public) | Same location |
 | `SUPABASE_SERVICE_ROLE_KEY` | Admin access (server-only) | Same location |
 | `RESEND_API_KEY` | Email sending | Resend Dashboard |
+| `STRIPE_SECRET_KEY` | Stripe payments | Stripe Dashboard |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook verification | Stripe Dashboard → Webhooks |
+| `STRIPE_PRO_PRICE_ID` | Pro subscription price | Stripe Dashboard → Products |
+| `GEMINI_API_KEY` | Stablemaster AI | Google AI Studio |
 | `CRON_SECRET` | Validates cron requests | Generate a random secret |
 
 > ⚠️ **Never expose `SUPABASE_SERVICE_ROLE_KEY` client-side.** It bypasses all RLS.
@@ -103,7 +107,7 @@ Configured in **Supabase Dashboard → Authentication → Settings**:
 ### Before Deploying
 
 - [ ] `npm run build` passes locally
-- [ ] `npm run test` passes (all 194 tests)
+- [ ] `npm run test` passes (all 245 tests)
 - [ ] GitHub Actions CI is green
 - [ ] No TypeScript errors
 - [ ] New migrations applied to Supabase production

@@ -16,7 +16,7 @@ export default function AboutPage() {
  <h1>
  About <span className="text-forest">Model Horse Hub</span>
  </h1>
- <p className="mt-2 text-lg text-muted">
+ <p className="mt-2 text-lg text-ink-light">
  Built by a collector who was tired of the status quo.
  </p>
  </div>

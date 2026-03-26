@@ -23,7 +23,7 @@ export default function LoginPage() {
  <h1 className="text-2xl font-bold tracking-tight">
  Welcome <span className="text-forest">Back</span>
  </h1>
- <p className="mt-1 text-sm text-muted">Sign in to your Digital Stable</p>
+ <p className="mt-1 text-sm text-ink-light">Sign in to your Digital Stable</p>
  </div>
 
  {/* Body */}

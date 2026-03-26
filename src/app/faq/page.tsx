@@ -159,7 +159,7 @@ export default function FaqPage() {
  <h1>
  Frequently Asked <span className="text-forest">Questions</span>
  </h1>
- <p className="mt-2 text-lg text-muted">
+ <p className="mt-2 text-lg text-ink-light">
  Everything you need to know about Model Horse Hub. Can&apos;t find your answer?{" "}
  <Link href="/contact">Contact us</Link>.
  </p>

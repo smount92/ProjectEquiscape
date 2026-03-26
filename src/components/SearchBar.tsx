@@ -52,7 +52,7 @@ export default function SearchBar({
  <input
  ref={inputRef}
  type="text"
- className="text-muted transition-colors"
+ className="text-ink placeholder:text-muted transition-colors"
  placeholder={placeholder}
  value={value}
  onChange={(e) => onChange(e.target.value)}

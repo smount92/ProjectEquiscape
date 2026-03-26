@@ -1,6 +1,6 @@
 # Component Patterns
 
-Recurring patterns used across the 95 client components.
+Recurring patterns used across the 107 client components.
 
 ---
 
@@ -76,35 +76,39 @@ export default function FollowButton({ userId, initialFollowing }: Props) {
 
 ## Pattern 3: Modal with Form
 
-Modals use a pattern of controlled visibility with form submission.
+Modals use **shadcn/ui `<Dialog>`** (Radix-based) for controlled visibility with form submission.
 
 ```tsx
 "use client";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function ExampleModal({ isOpen, onClose }: Props) {
-    if (!isOpen) return null;
-
     return (
-        <div className="modal-backdrop" onClick={onClose}>
-            <div className="modal-content card" onClick={e => e.stopPropagation()}>
-                <div className="modal-header">
-                    <h3>Title</h3>
-                    <button onClick={onClose}>✕</button>
-                </div>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Title</DialogTitle>
+                </DialogHeader>
                 <form onSubmit={handleSubmit}>
-                    {/* Form fields */}
-                    <button className="btn btn-primary" type="submit">Submit</button>
+                    <Input name="field" placeholder="Enter value" />
+                    <DialogFooter>
+                        <Button type="submit">Submit</Button>
+                    </DialogFooter>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }
 ```
 
-**CSS classes:** `.modal-backdrop`, `.modal-content`, `.modal-header` from `globals.css`.
+**Components:** `<Dialog>`, `<DialogContent>`, `<DialogHeader>`, `<DialogTitle>`, `<DialogFooter>` from `@/components/ui/dialog`.
 
-**Used by:** `MakeOfferModal`, `DeleteHorseModal`, `TransferModal`, `ImageCropModal`, `SuggestReferenceModal`.
+**Used by:** `MakeOfferModal`, `DeleteHorseModal`, `TransferModal`, `ImageCropModal`, `SuggestReferenceModal`, and all other modals.
+
+> **Exception:** `PhotoLightbox.tsx` retains `createPortal` for custom keyboard navigation.
 
 ---
 
@@ -193,9 +197,7 @@ export default function MyComponent() {
 }
 ```
 
-For shared primitives (`.btn`, `.card`, `.form-*`), use the global class names from `globals.css`.
-
-> **Legacy:** Some components still use CSS Modules (`.module.css`). These are tolerated but Tailwind classes are preferred for new work. See [CSS Conventions](../guides/css-conventions.md).
+> **Convention:** CSS Modules have been eliminated. Use Tailwind utility classes for all new styling.
 
 ---
 
@@ -208,7 +210,8 @@ For shared primitives (`.btn`, `.card`, `.form-*`), use the global class names f
 | Create inline styles for static values | Use Tailwind utility classes or global design tokens |
 | Call `getAdminClient()` from client | Always use server actions for mutations |
 | Hard-code colors | Use Tailwind theme tokens (`text-forest`, `bg-card`) or CSS properties (`var(--color-*)`) |
-| Create new CSS Module files | Use Tailwind classes (legacy modules are tolerated) |
+| Use createPortal for modals | Use shadcn `<Dialog>` (exception: PhotoLightbox) |
+| Use raw HTML form inputs | Use shadcn `<Input>`, `<Textarea>`, `<Select>` |
 
 ---
 

@@ -1,6 +1,6 @@
 # Design System
 
-The Model Horse Hub design system is built on **Tailwind CSS v4** with design tokens defined via the `@theme` directive in `globals.css`. The visual identity is **"Warm Equestrian Parchment"** — earthy, warm, and premium-feeling. See [CSS Conventions](../guides/css-conventions.md) for usage guidelines.
+The Model Horse Hub design system is built on **Tailwind CSS v4** with design tokens defined via the `@theme` directive in `globals.css`. The visual identity is **"Cozy Scrapbook"** — warm serif headings, tactile cards, and earthy tones. See [Design System Guide](../guides/design-system.md) for the full specification.
 
 ## Color Palette
 
@@ -113,15 +113,15 @@ All shadows are **warm brown-tinted** (`rgba(80, 60, 40, ...)`) — not standard
 
 ### Forms
 
-| Class | Usage |
-|-------|-------|
-| `.form-group` | Form field wrapper |
-| `.form-label` | Field label |
-| `.form-input` | Text input |
-| `.form-select` | Dropdown select |
-| `.form-textarea` | Multi-line input |
-| `.form-hint` | Helper text below field |
-| `.form-error` | Error message |
+Form elements use **shadcn/ui** components (Radix-based). Legacy `.form-*` classes are deprecated.
+
+| Component | Import | Replaces |
+|-----------|--------|---------|
+| `<Input>` | `@/components/ui/input` | `.form-input` |
+| `<Textarea>` | `@/components/ui/textarea` | `.form-textarea` |
+| `<Select>` | `@/components/ui/select` | `.form-select` |
+
+Global class `.form-group`, `.form-label`, `.form-hint`, `.form-error` remain for layout/labeling.
 
 ### Layout
 
@@ -132,29 +132,36 @@ All shadows are **warm brown-tinted** (`rgba(80, 60, 40, ...)`) — not standard
 
 ### Modals
 
-| Class | Usage |
-|-------|-------|
-| `.modal-backdrop` | Full-screen overlay |
-| `.modal-content` | Modal container |
-| `.modal-header` | Modal title bar |
+Modals use **shadcn/ui `<Dialog>`** (Radix-based). Legacy `.modal-*` classes are deprecated.
+
+```tsx
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+<Dialog open={isOpen} onOpenChange={setIsOpen}>
+  <DialogContent>
+    <DialogHeader><DialogTitle>Title</DialogTitle></DialogHeader>
+    {/* Content */}
+  </DialogContent>
+</Dialog>
+```
+
+> **Exception:** `PhotoLightbox.tsx` retains `createPortal` for custom keyboard navigation.
 
 ## CSS Architecture
 
 ```
 src/app/
-├── globals.css          ← @theme design tokens + shared primitives (~2,200 lines)
-├── studio.css           ← Art Studio feature styles
-├── competition.css      ← Competition feature styles
+├── globals.css          ← @theme design tokens + shared primitives (~2,220 lines)
 ├── [page]/page.tsx      ← Styling via Tailwind utility classes in className
-└── layout.tsx           ← Imports legacy CSS files
+└── layout.tsx           ← Imports globals.css
 
 src/components/
-├── *.tsx                ← Styling via Tailwind utility classes in className
-├── 14 *.module.css      ← Legacy component-scoped CSS Modules
-└── 16 extracted *.css   ← Legacy component-specific blocks extracted from globals
+├── ui/                  ← 8 shadcn/ui primitives (Button, Input, Select, etc.)
+├── layouts/             ← 4 Page Archetypes (Explorer, Scrapbook, CommandCenter, Focus)
+└── *.tsx                ← Styling via Tailwind utility classes in className
 ```
 
-> **Migration status (March 2026):** The project migrated from Vanilla CSS to Tailwind CSS v4. Legacy CSS Modules and extracted `.css` files still exist but are not the pattern for new work. An ongoing inline style audit is converting remaining `style={{}}` usage to Tailwind utility classes. See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for rationale.
+> **Migration status (March 2026):** CSS Modules and legacy `.css` files have been fully eliminated. All styling is now Tailwind utility classes + `globals.css` shared primitives. Form inputs use shadcn/ui. Modals use shadcn Dialog. See the [Design System Guide](../guides/design-system.md) for the 4 page archetypes and the full design specification.
 
 ---
 

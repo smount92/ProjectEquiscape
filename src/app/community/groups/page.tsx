@@ -28,7 +28,7 @@ export default async function GroupsPage() {
  >
  <div>
  <h1>🏛️ Groups</h1>
- <p className="text-muted mt-1">Clubs, circuits, and communities</p>
+ <p className="text-ink-light mt-1">Clubs, circuits, and communities</p>
  </div>
  <Link
  href="/community/groups/create"

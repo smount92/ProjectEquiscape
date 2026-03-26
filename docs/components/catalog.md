@@ -1,6 +1,6 @@
 # Component Catalog
 
-All 101 client components live in `src/components/`. Every component is a `"use client"` React component.
+All 107 client components live in `src/components/`. Every component is a `"use client"` React component.
 
 ## Component Index by Domain
 
@@ -136,9 +136,33 @@ All 101 client components live in `src/components/`. Every component is a `"use 
 | `UserAvatar` | `UserAvatar.tsx` | User avatar with fallback |
 | `BackToTop` | `BackToTop.tsx` | Scroll to top button |
 | `CookieConsent` | `CookieConsent.tsx` | GDPR cookie consent banner |
+| `EmptyState` | `EmptyState.tsx` | Standardized empty states with icon + CTA |
+| `UpgradeButton` | `UpgradeButton.tsx` | Pro tier upgrade CTA |
 | `TrophyCase` | `TrophyCase.tsx` | Badge/achievement display |
 | `FeaturedHorseCard` | `FeaturedHorseCard.tsx` | Featured horse card |
 | `FeatureHorseForm` | `FeatureHorseForm.tsx` | Admin: feature a horse |
+
+### 🎨 shadcn/ui Primitives
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `Button` | `ui/button.tsx` | Variants: default, outline, ghost, destructive |
+| `Input` | `ui/input.tsx` | Text input |
+| `Textarea` | `ui/textarea.tsx` | Multi-line text input |
+| `Select` | `ui/select.tsx` | Dropdown select (Radix) |
+| `Badge` | `ui/badge.tsx` | Status/tag badges |
+| `Dialog` | `ui/dialog.tsx` | Modal dialog (Radix) |
+| `Skeleton` | `ui/skeleton.tsx` | Loading skeleton |
+| `Separator` | `ui/separator.tsx` | Visual divider |
+
+### 📌 Page Layout Archetypes
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `ExplorerLayout` | `layouts/ExplorerLayout.tsx` | Browsing grids (max-w-7xl, sticky filters) |
+| `ScrapbookLayout` | `layouts/ScrapbookLayout.tsx` | Split-view details (1.5fr/1fr, sticky sidebar) |
+| `CommandCenterLayout` | `layouts/CommandCenterLayout.tsx` | Dashboards (max-w-[1600px], main + sidebar) |
+| `FocusLayout` | `layouts/FocusLayout.tsx` | Forms/data entry (max-w-2xl, centered) |
 
 ### 📚 Catalog Curation (V32)
 
@@ -171,7 +195,7 @@ All 101 client components live in `src/components/`. Every component is a `"use 
 | `WishlistSearch` | `WishlistSearch.tsx` | Search wishlist items |
 | `EditBioButton` | `EditBioButton.tsx` | Inline bio editing button |
 
-## Total Component Count: 102
+## Total Component Count: 107
 
 ---
 

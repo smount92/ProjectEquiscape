@@ -92,13 +92,21 @@ All SQL migrations are located in `supabase/migrations/` and are applied sequent
 | 092 | `092_supabase_linter_fixes.sql` | Security & performance hardening: views → `security_invoker`, `SET search_path = ''` on 19 SECURITY DEFINER functions, `pg_trgm` → extensions schema, RLS initplan wraps, merged permissive policies, 6 duplicate indexes dropped, 28 FK indexes added |
 | 093 | `093_bugfixes_delete_policies.sql` | Missing RLS DELETE policies: `id_requests` (owner deletes own), `id_suggestions` (owner deletes own), `posts` (author deletes own — guard) |
 | 094 | `094_judge_entry_update_policy.sql` | Expert judging RLS fix: replaces owner-only UPDATE policy on `event_entries` with one allowing entry owner, event creator, AND assigned judges |
+| 095 | `095_show_polish.sql` | Show polish: entry preview, smart class browser, results podium, show history widget |
+| 096 | `096_notification_deep_links.sql` | `link_url` column on notifications — clickable deep links to referenced items |
+| 097 | `097_backfill_missing_tables.sql` | Backfill missing tables and columns for schema completeness |
+| 098 | `098_soft_delete_horses.sql` | Tombstone soft-delete for `user_horses` (is_tombstone flag) |
+| 099 | `099_commerce_locks.sql` | Atomic commerce RPCs: `claim_transfer_atomic`, `make_offer_atomic` |
+| 100 | `100_fuzzy_search_rpc.sql` | `pg_trgm` fuzzy search RPC for catalog and user search |
+| 101 | `101_trusted_sellers.sql` | Trusted seller materialized view + seller verification |
+| 102 | `102_pro_rls.sql` | Pro tier RLS functions for freemium feature gating |
 
 > **Note:** Migration numbers 045, 047, 049, 051, 090 are intentionally skipped (consolidated into adjacent migrations during development).
 
 ## Adding New Migrations
 
 1. Create a new file: `supabase/migrations/NNN_description.sql`
-2. Use the next sequential number (currently: **095**)
+2. Use the next sequential number (currently: **103**)
 3. Always include RLS policies for new tables
 4. Add foreign key indexes for new FK columns
 5. Test by running the SQL in Supabase Dashboard → SQL Editor

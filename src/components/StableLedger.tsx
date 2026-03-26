@@ -288,7 +288,7 @@ export default function StableLedger({
  <td className="max-md:hidden">
  {horse.vaultValue ? `$${horse.vaultValue.toLocaleString()}` :"—"}
  </td>
- <td className="text-muted text-xs">{formatRelDate(horse.createdAt)}</td>
+ <td className="text-ink-light text-xs">{formatRelDate(horse.createdAt)}</td>
  </tr>
  ))}
  </tbody>

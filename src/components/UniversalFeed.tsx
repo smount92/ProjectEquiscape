@@ -445,7 +445,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  🐴 View Horse Passport
  </div>
  <p className="mt-1 text-sm text-muted">Click to view this model on Model Horse Hub</p>
- <span className="mt-1 block text-xs text-muted opacity-60">
+ <span className="mt-1 block text-xs text-muted">
  modelhorsehub.com/community/{horseId.slice(0, 8)}…
  </span>
  </Link>

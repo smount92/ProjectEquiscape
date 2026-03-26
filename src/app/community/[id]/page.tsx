@@ -284,7 +284,7 @@ editionSize: rawPedigree.edition_size,
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  {/* Breadcrumb */}
- <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/community">Show Ring</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -385,7 +385,7 @@ editionSize: rawPedigree.edition_size,
 
  {horse.asset_category && horse.asset_category !=="model" && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Category
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -400,7 +400,7 @@ editionSize: rawPedigree.edition_size,
 
  {horse.finish_type && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Finish Type
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -411,7 +411,7 @@ editionSize: rawPedigree.edition_size,
 
  {horse.condition_grade && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Condition
  </span>
  <span className="text-success inline-flex items-center gap-[4px] rounded-full border border-[rgba(92,224,160,0.25)] bg-[rgba(92,224,160,0.1)] px-[10px] py-[2px] text-sm font-semibold">
@@ -423,7 +423,7 @@ editionSize: rawPedigree.edition_size,
  {refInfo ? (
  <>
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  {refInfo.type}
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -432,7 +432,7 @@ editionSize: rawPedigree.edition_size,
  </div>
 
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  {refInfo.type ==="Mold" ?"Manufacturer" :"Sculptor"}
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -441,7 +441,7 @@ editionSize: rawPedigree.edition_size,
  </div>
 
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Scale
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -451,7 +451,7 @@ editionSize: rawPedigree.edition_size,
 
  {refInfo.extra && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  {refInfo.type ==="Mold" ?"Released" :"Medium"}
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -462,7 +462,7 @@ editionSize: rawPedigree.edition_size,
  </>
  ) : (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Reference
  </span>
  <span
@@ -476,7 +476,7 @@ editionSize: rawPedigree.edition_size,
  {releaseInfo && (
  <>
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Release
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -486,7 +486,7 @@ editionSize: rawPedigree.edition_size,
 
  {releaseInfo.modelNumber && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Model #
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -497,7 +497,7 @@ editionSize: rawPedigree.edition_size,
 
  {releaseInfo.color && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Color
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -508,7 +508,7 @@ editionSize: rawPedigree.edition_size,
 
  {releaseInfo.yearStart && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Release Years
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -524,7 +524,7 @@ editionSize: rawPedigree.edition_size,
 
  {horse.finishing_artist && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  🎨 Finished by
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -543,7 +543,7 @@ editionSize: rawPedigree.edition_size,
 
  {(horse.edition_number || horse.edition_size) && (
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  📋 Edition
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
@@ -557,7 +557,7 @@ editionSize: rawPedigree.edition_size,
  )}
 
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">Added</span>
+ <span className="text-ink-light text-sm font-medium">Added</span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">
  {new Date(horse.created_at).toLocaleDateString("en-US", {
  year:"numeric",
@@ -575,7 +575,7 @@ editionSize: rawPedigree.edition_size,
  <span aria-hidden="true">✨</span> Finish
  </h3>
  <div className="border-[rgba(255,255,255,0.04)] flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted text-sm font-medium">
+ <span className="text-ink-light text-sm font-medium">
  Finish Details
  </span>
  <span className="text-ink max-w-[60%] text-right text-sm font-semibold">

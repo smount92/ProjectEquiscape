@@ -59,7 +59,7 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  >
  <summary className="text-ink flex cursor-pointer list-none items-center gap-2 px-4 py-2 text-base font-bold select-none [&::-webkit-details-marker]:hidden">
  🎪 <span>Show Placings</span>
- <span className="text-muted ml-auto text-xs font-normal">
+ <span className="text-ink-light ml-auto text-xs font-normal">
  {totalRibbons} ribbons · {totalShows} shows
  </span>
  </summary>
@@ -80,10 +80,10 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  </span>
  )}
  </span>
- <span className="text-muted flex-1 text-right text-xs font-normal">
+ <span className="text-ink-light flex-1 text-right text-xs font-normal">
  {summarizeYear(records)}
  </span>
- <span className="text-muted text-[0.8em]">{expandedYear === year ?"▾" :"▸"}</span>
+ <span className="text-ink-light text-[0.8em]">{expandedYear === year ?"▾" :"▸"}</span>
  </button>
 
  {expandedYear === year && (
@@ -100,7 +100,7 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  >
  {record.horseName}
  </Link>
- <span className="text-muted overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+ <span className="text-ink-light overflow-hidden text-xs text-ellipsis whitespace-nowrap">
  {record.showName} · {record.placing}
  </span>
  </div>

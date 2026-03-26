@@ -105,7 +105,7 @@ export default function HelpIdDetailClient({
  ✅ Accepted Answer
  </span>
  )}
- <span className="text-muted ml-auto text-xs">
+ <span className="text-ink-light ml-auto text-xs">
  {new Date(s.created_at).toLocaleDateString()}
  </span>
  </div>

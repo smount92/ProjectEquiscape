@@ -87,7 +87,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  <h1 className="mb-1 font-sans text-2xl">
  📝 <span className="text-forest">Catalog Suggestions</span>
  </h1>
- <p className="text-muted mb-6">
+ <p className="text-ink-light mb-6">
  Community proposals to improve the reference catalog. Vote and discuss to help admins review.
  </p>
 

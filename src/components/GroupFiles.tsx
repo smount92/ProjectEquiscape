@@ -140,7 +140,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  <span className="text-ink overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
  {f.fileName}
  </span>
- <span className="text-muted text-xs">
+ <span className="text-ink-light text-xs">
  {formatSize(f.fileSize)}
  {f.description && <> · {f.description}</>}
  {" ·"}@{f.uploaderAlias} · {timeAgo(f.createdAt)}

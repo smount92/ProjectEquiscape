@@ -93,7 +93,7 @@ export default async function HelpIdPage() {
  <h1>
  <span className="text-forest">Help Me ID This Model</span>
  </h1>
- <p className="text-muted mt-1">Upload a mystery model and let the community help identify it</p>
+ <p className="text-ink-light mt-1">Upload a mystery model and let the community help identify it</p>
  </div>
  <Link
  href="/community"

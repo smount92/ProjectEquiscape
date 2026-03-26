@@ -281,7 +281,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {/* Shelf Header — model count + action buttons */}
   <div className="flex flex-wrap items-center gap-4">
   {totalHorseCount > 0 && (
-  <span className="text-muted text-sm">
+  <span className="text-ink-light text-sm">
   {totalHorseCount} model{totalHorseCount === 1 ?"" :"s"}
   </span>
   )}
@@ -343,7 +343,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {/* Analytics — Compact stat rows */}
   {totalHorseCount > 0 && (
   <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
-               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-500 uppercase">
+               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-ink-light uppercase">
                  <BarChart3 size={14} strokeWidth={1.5} /> Stable Overview
   </h3>
   <div className="flex flex-col gap-[2px]">
@@ -382,7 +382,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   className="flex items-center justify-between rounded-sm px-1 py-2 no-underline transition-colors hover:bg-black/[0.03]"
   style={{ textDecoration:"none" }}
   >
-  <span className="flex items-center gap-1.5 text-sm text-stone-500">
+  <span className="flex items-center gap-1.5 text-sm text-ink-light">
   <Mail size={14} strokeWidth={1.5} /> Unread Messages
   </span>
   <span className="text-ink text-forest text-sm font-bold">
@@ -397,7 +397,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {/* Collections — Vertical list */}
   {collections.length > 0 && (
   <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
-               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-500 uppercase">
+               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-ink-light uppercase">
                  <FolderOpen size={14} strokeWidth={1.5} /> Collections
   </h3>
   <div className="flex flex-col gap-1">
@@ -409,7 +409,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   id={`collection-${col.id}`}
   >
   <span>{col.name}</span>
-  <span className="text-muted text-xs whitespace-nowrap">
+  <span className="text-ink-light text-xs whitespace-nowrap">
   {collectionCounts.get(col.id) || 0}
   {(collectionValues.get(col.id) || 0) > 0 && (
   <>

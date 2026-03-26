@@ -49,7 +49,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
  {activeTab ==="feed" && channels.length > 1 && (
  <div className="scrollbar-none mb-6 flex gap-1 overflow-x-auto pb-1">
  <button
- className={`border-edge text-muted hover:text-ink cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === null ?"text-forest border-[rgba(44,85,69,0.4)] bg-[rgba(44,85,69,0.15)]" :""}`}
+ className={`border-edge text-ink-light hover:text-ink cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === null ?"text-forest border-[rgba(44,85,69,0.4)] bg-[rgba(44,85,69,0.15)]" :""}`}
  onClick={() => setActiveChannel(null)}
  >
  # all
@@ -57,7 +57,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
  {channels.map((ch) => (
  <button
  key={ch.id}
- className={`border-edge text-muted hover:text-ink cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === ch.id ?"text-forest border-[rgba(44,85,69,0.4)] bg-[rgba(44,85,69,0.15)]" :""}`}
+ className={`border-edge text-ink-light hover:text-ink cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === ch.id ?"text-forest border-[rgba(44,85,69,0.4)] bg-[rgba(44,85,69,0.15)]" :""}`}
  onClick={() => setActiveChannel(ch.id)}
  >
  # {ch.name.toLowerCase()}

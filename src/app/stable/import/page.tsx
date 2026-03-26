@@ -28,7 +28,7 @@ export default async function ImportPage() {
  <h1>
  <span className="text-forest">Batch Import</span>
  </h1>
- <p className="text-muted mt-1">Import your collection from a CSV spreadsheet</p>
+ <p className="text-ink-light mt-1">Import your collection from a CSV spreadsheet</p>
  </div>
  <Link
  href="/dashboard"

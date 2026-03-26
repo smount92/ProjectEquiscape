@@ -90,7 +90,7 @@ export default async function AdminPage() {
  <h1>
  <span className="text-forest">⚡ Admin Console</span>
  </h1>
- <p className="mt-1 text-muted">
+ <p className="mt-1 text-ink-light">
  Founder&apos;s Command Center — Full system overview
  </p>
  </div>

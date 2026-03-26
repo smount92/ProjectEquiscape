@@ -24,7 +24,7 @@ export default async function StudiosPage() {
  <h1 className="text-2xl font-bold tracking-tight">
  🎨 <span className="text-forest">Art Studios</span>
  </h1>
- <p className="mt-2 max-w-xl text-base text-stone-500">
+ <p className="mt-2 max-w-xl text-base text-ink-light">
  Find custom painters, sculptors, and tack makers.
  </p>
  </div>

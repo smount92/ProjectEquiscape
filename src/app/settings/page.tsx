@@ -153,7 +153,7 @@ export default function SettingsPage() {
 
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
- <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -184,7 +184,7 @@ export default function SettingsPage() {
  </div>
  <div>
  <button
-                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-300 bg-transparent px-6 py-2 text-sm font-medium text-stone-600 no-underline transition-all hover:border-forest hover:text-forest"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-300 bg-transparent px-6 py-2 text-sm font-medium text-ink-light no-underline transition-all hover:border-forest hover:text-forest"
  onClick={() => avatarInputRef.current?.click()}
  disabled={isUploadingAvatar}
  >
@@ -198,7 +198,7 @@ export default function SettingsPage() {
  className="hidden"
  aria-label="Upload avatar"
  />
-              <p className="mt-1 text-xs text-stone-400">
+              <p className="mt-1 text-xs text-ink-light">
  Max 2MB. JPG, PNG, or WebP.
  </p>
  </div>
@@ -455,7 +455,7 @@ export default function SettingsPage() {
  >
  📄 Download Collection (CSV)
  </a>
- <p className="text-muted mt-1 mt-[4] block text-xs">
+ <p className="text-ink-light mt-1 mt-[4] block text-xs">
  Spreadsheet format — compatible with Excel, Google Sheets.
  </p>
  </div>
@@ -469,7 +469,7 @@ export default function SettingsPage() {
  >
  🛡️ Download Insurance Report (PDF)
  </a>
- <p className="text-muted mt-1 mt-[4] block text-xs">
+ <p className="text-ink-light mt-1 mt-[4] block text-xs">
  Professional PDF with photos and values — share with your insurance agent.
  </p>
  </div>

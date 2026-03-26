@@ -143,7 +143,7 @@ export default async function CommissionDetailPage({
 
  {/* Description */}
  <div className="bg-card mt-6 rounded-md p-4">
- <h3 className="text-muted mb-1 text-sm">Description</h3>
+ <h3 className="text-ink-light mb-1 text-sm">Description</h3>
  <p className="text-sm leading-[1.6] whitespace-pre-wrap">
  {commission.description}
  </p>

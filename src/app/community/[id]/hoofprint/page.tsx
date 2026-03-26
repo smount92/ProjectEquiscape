@@ -61,11 +61,11 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
  <h1 className="text-2xl font-bold tracking-tight">
  🐾 <span className="text-forest">Hoofprint™ Report</span>
  </h1>
- <p className="mt-2 text-base text-stone-500">
+ <p className="mt-2 text-base text-ink-light">
  Full provenance record for <strong>{h.custom_name}</strong>
  </p>
  {refName && (
- <p className="text-muted mt-1 text-sm">
+ <p className="text-ink-light mt-1 text-sm">
  {refName} · {h.finish_type} · {h.condition_grade}
  </p>
  )}

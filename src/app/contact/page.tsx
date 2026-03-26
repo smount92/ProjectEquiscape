@@ -30,7 +30,7 @@ export default function ContactPage() {
  <h1>
  <span className="text-forest">Contact</span> Us
  </h1>
- <p className="mt-2 text-lg text-muted">
+ <p className="mt-2 text-lg text-ink-light">
  Have a question, suggestion, or just want to say hello? We&apos;d love to hear from you.
  </p>
  </div>

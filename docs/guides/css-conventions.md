@@ -7,9 +7,9 @@ See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the mig
 ## Current Stack
 
 - **Tailwind CSS v4** — Utility classes in JSX (`className="flex items-center gap-2"`)
-- **`globals.css`** — `@theme` design tokens + shared primitives (`.btn-*`, `.card`, `.form-*`, `.settings-toggle-*`)
-- **Legacy CSS Modules** — Still present in some components; not the pattern for new work
-- **Extracted `.css` files** — Legacy page-specific styles imported via `layout.tsx`
+- **`globals.css`** — `@theme` design tokens + shared primitives (`.btn-*`, `.card`, `.settings-toggle-*`)
+- **shadcn/ui** — Form inputs (`<Input>`, `<Select>`, `<Textarea>`), modals (`<Dialog>`), badges (`<Badge>`)
+- **Framer Motion** — Micro-interactions (`whileTap`, `whileHover`, `staggerChildren`)
 
 ## Rules
 
@@ -65,16 +65,16 @@ Use `style={{}}` only when the value depends on runtime data:
 If a class is used across multiple components, it belongs in `globals.css`:
 - `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`
 - `.card`, `.card-auth`
-- `.form-group`, `.form-input`, `.form-select`, `.form-textarea`
-- `.modal-backdrop`, `.modal-content`
+- `.form-group`, `.form-label`, `.form-hint`, `.form-error`
 - `.settings-toggle`, `.settings-toggle-active`
 
-### 5. Legacy CSS Modules
+> **Note:** `.form-input`, `.form-select`, `.form-textarea` are deprecated. Use shadcn/ui `<Input>`, `<Select>`, `<Textarea>` instead.
 
-Some components still use CSS Modules (`.module.css`). These are tolerated but not the preferred pattern:
-- **Don't create new** CSS Module files
-- **If touching a component** with a CSS Module, consider migrating its styles to Tailwind
-- **Combining** is fine: `className={\`btn btn-primary ${styles.myCustomButton}\`}`
+### 5. Modals
+
+All modals use **shadcn/ui `<Dialog>`** (Radix-based). Legacy `.modal-*` CSS classes and `createPortal` patterns are deprecated.
+
+> **Exception:** `PhotoLightbox.tsx` retains `createPortal` for custom keyboard navigation.
 
 ### 6. Simple Mode Compatibility
 
@@ -121,16 +121,14 @@ Shadows use warm brown tint (defined in theme):
 
 ```
 src/app/
-├── globals.css              # @theme tokens + shared primitives (~2,200 lines)
-├── studio.css               # Art Studio feature styles
-├── competition.css          # Competition feature styles
-├── layout.tsx               # Imports legacy CSS files
+├── globals.css              # @theme tokens + shared primitives (~2,220 lines)
+├── layout.tsx               # Imports globals.css
 └── [page]/page.tsx          # Styling via Tailwind className
 
 src/components/
-├── *.tsx                    # Styling via Tailwind className
-├── 14 legacy *.module.css   # CSS Modules (not the pattern for new work)
-└── 16 extracted *.css       # Legacy extracted globals
+├── ui/                      # 8 shadcn/ui primitives (Button, Input, Dialog, etc.)
+├── layouts/                 # 4 Page Archetypes (Explorer, Scrapbook, CommandCenter, Focus)
+└── *.tsx                    # Styling via Tailwind className
 ```
 
 ## Design Token Quick Reference
@@ -151,9 +149,10 @@ See [Design System](../components/design-system.md) for the complete reference.
 | Scenario | Approach |
 |----------|----------|
 | New styling | Tailwind utility classes |
-| Shared primitives (`.btn`, `.card`, `.form-*`) | `globals.css` |
+| Shared primitives (`.btn`, `.card`) | `globals.css` |
+| Form inputs | shadcn/ui (`<Input>`, `<Select>`, `<Textarea>`) |
+| Modals | shadcn/ui `<Dialog>` |
 | Truly dynamic values (runtime colors, coordinates) | Inline `style={{}}` |
-| Legacy CSS Modules | Leave as-is unless actively editing the component |
 | React-PDF components | Inline style objects (required by library) |
 
 ---

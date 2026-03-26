@@ -89,7 +89,7 @@ export default async function MarketPricePage({
  <h1 className="text-2xl font-bold tracking-tight">
  📈 Model Horse <span className="text-forest">Price Guide</span>
  </h1>
- <p className="mt-2 text-base text-stone-500">
+ <p className="mt-2 text-base text-ink-light">
  The Blue Book — Real sale data from real collectors
  </p>
  </div>

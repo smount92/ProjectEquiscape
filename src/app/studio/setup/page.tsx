@@ -194,7 +194,7 @@ export default function StudioSetupPage() {
  <h1 className="text-xl">
  <span className="text-forest">{existing ?"Edit Your Studio" :"Set Up Your Art Studio"}</span>
  </h1>
- <p className="text-muted mt-1 text-sm">
+ <p className="text-ink-light mt-1 text-sm">
  {existing
  ?"Update your studio profile and commission settings."
  :"Create your artist profile to start accepting commissions."}

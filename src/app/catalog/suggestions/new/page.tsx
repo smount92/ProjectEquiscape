@@ -32,7 +32,7 @@ export default async function SuggestNewEntryPage() {
  >
  📗 Suggest a New Catalog Entry
  </h1>
- <p className="text-muted mb-6">
+ <p className="text-ink-light mb-6">
  Can&apos;t find a model in the catalog? Submit the details below and the community will review your
  suggestion.
  </p>

@@ -16,7 +16,7 @@ export default function GettingStartedPage() {
  <h1>
  Getting Started with <span className="text-forest">Model Horse Hub</span>
  </h1>
- <p className="mt-2 text-lg text-muted">
+ <p className="mt-2 text-lg text-ink-light">
  Your digital stable is ready. Here&apos;s how to make the most of it.
  </p>
  </div>

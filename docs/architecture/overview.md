@@ -7,10 +7,11 @@ graph TD
     subgraph Vercel["Vercel (Hosting)"]
         subgraph Next["Next.js 16 (App Router)"]
             SC["Server Components (pages)"]
-            CC["Client Components (116)"]
+            CC["Client Components (107)"]
             SA["Server Actions (36 files)"]
         end
-        Cron["Vercel Cron (daily 6AM UTC)"]
+        Cron["Vercel Cron (daily 6AM + monthly 1st)"]
+        Stripe["Stripe (Payments)"]
     end
 
     subgraph Supabase["Supabase"]
@@ -22,6 +23,11 @@ graph TD
     end
 
     Email["Resend (Transactional Email)"]
+    Gemini["Google Gemini (AI)"]
+
+    SA -->|"Checkout Sessions"| Stripe
+    Stripe -->|"Webhooks"| SA
+    Cron -->|"Monthly analysis"| Gemini
 
     SC --> SA
     CC --> SA
@@ -46,7 +52,11 @@ graph TD
 | **Auth** | Supabase Auth | — | PKCE flow, cookie-based SSR sessions |
 | **Storage** | Supabase Storage | — | Private `horse-images` bucket with signed URLs |
 | **Hosting** | Vercel | Serverless | Hobby tier, auto-deploy on push to `main` |
-| **CSS** | Tailwind CSS v4 | — | Utility-first classes + globals.css shared primitives |
+| **CSS** | Tailwind CSS v4 | — | Utility-first classes + `@theme` design tokens in globals.css |
+| **UI Components** | shadcn/ui (Radix) | — | Button, Input, Select, Textarea, Badge, Dialog, Skeleton, Separator |
+| **Animations** | Framer Motion | — | Spring physics, staggered grid reveals, tactile micro-interactions |
+| **Payments** | Stripe | — | Checkout Sessions + Webhooks for Pro tier subscriptions |
+| **AI** | Google Gemini | — | Stablemaster collection analysis (monthly cron) |
 | **Email** | Resend | 6.9.3 | Transactional notifications (offers, comments, follows) |
 | **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, Certificate of Authenticity exports |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching for reference catalog |
@@ -64,10 +74,15 @@ This means:
 - Backend and frontend are co-located
 - Type safety is end-to-end (TypeScript on both sides)
 
-**Exception:** 5 API routes exist for concerns that can't be server actions:
+**Exception:** 10 API routes exist for concerns that can't be server actions:
 - `/api/auth/callback` — PKCE code exchange (must be a GET endpoint)
-- `/api/cron/refresh-market` — Vercel cron trigger
+- `/api/auth/me` — Session check (GET endpoint)
+- `/api/checkout` — Stripe Checkout Session creation
+- `/api/webhooks/stripe` — Stripe webhook handler
+- `/api/cron/refresh-market` — Vercel cron trigger (daily)
+- `/api/cron/stablemaster-agent` — Stablemaster AI cron (monthly)
 - `/api/export/[horseId]` — PDF generation (streaming response)
+- `/api/insurance-report` — Insurance PDF (streaming response)
 - `/api/identify-mold` — AI image analysis
 - `/api/reference-dictionary` — Reference data for search
 
@@ -112,15 +127,16 @@ Horse provenance is assembled from **immutable source tables** via a regular vie
 
 The materialized view UNION ALLs these into a single chronological timeline.
 
-## Scale (as of March 18, 2026)
+## Scale (as of March 26, 2026)
 
 | Metric | Count |
 |--------|-------|
-| Page routes | 28+ route groups |
-| Client components | 116 |
+| Page routes | 60 across 35 route groups |
+| Client components | 107 (incl. 8 shadcn/ui primitives) |
 | Server action files | 36 |
-| Database migrations | 97 (001–097) |
-| CSS architecture | Tailwind CSS v4 + legacy CSS Modules |
+| API routes | 10 |
+| Database migrations | 98 files (001–102, some skipped) |
+| CSS architecture | Tailwind CSS v4 + shadcn/ui + Framer Motion |
 | Reference catalog entries | 10,500+ |
 | Unit/component tests | 245 (across 23 test files) |
 | E2E test specs | 7 |

@@ -93,7 +93,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  <div className="mb-6 flex items-start justify-between">
  <div>
  <h1 className="m-0 font-sans text-2xl">{catalogItem.title}</h1>
- <p className="text-muted mt-[4px] text-base">
+ <p className="text-ink-light mt-[4px] text-base">
  by {catalogItem.maker}
  </p>
  </div>

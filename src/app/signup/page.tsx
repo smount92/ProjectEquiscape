@@ -34,7 +34,7 @@ export default function SignupPage() {
  <div className="border-b border-edge bg-gradient-to-b from-[var(--color-bg-parchment-dark)] to-card px-8 pb-6 pt-8 text-center">
  <div className="mb-3 text-4xl" aria-hidden="true">✉️</div>
  <h1 className="text-2xl font-bold tracking-tight">Check Your Email</h1>
- <p className="mt-2 text-sm leading-relaxed text-muted">
+ <p className="mt-2 text-sm leading-relaxed text-ink-light">
  We&apos;ve sent a confirmation link to your email address. Click the link to activate your
  account and start building your Digital Stable!
  </p>
@@ -63,7 +63,7 @@ export default function SignupPage() {
  <h1 className="text-2xl font-bold tracking-tight">
  Join the <span className="text-forest">Stable</span>
  </h1>
- <p className="mt-1 text-sm text-muted">Create your account and start cataloging your collection</p>
+ <p className="mt-1 text-sm text-ink-light">Create your account and start cataloging your collection</p>
  </div>
 
  {/* Body */}

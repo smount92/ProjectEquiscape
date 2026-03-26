@@ -237,7 +237,7 @@ async function ShowRingContent({
   <div className="mt-6 flex items-center gap-6">
   <div className="flex items-baseline gap-2">
   <span className="text-2xl font-bold text-forest">{communityCards.length}</span>
-  <span className="text-sm font-medium text-stone-500">Models Showcased</span>
+  <span className="text-sm font-medium text-ink-light">Models Showcased</span>
   </div>
   <Link
   href="/community/help-id"
@@ -281,7 +281,7 @@ export default async function CommunityPage({
   <h1 className="text-2xl font-bold tracking-tight">
   🏆 The <span className="text-forest">Show Ring</span>
   </h1>
-  <p className="mt-2 max-w-xl text-base text-stone-500">
+  <p className="mt-2 max-w-xl text-base text-ink-light">
   Browse the latest models shared by collectors from around the world. Every horse has a story.
   </p>
   </div>

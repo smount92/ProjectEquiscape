@@ -86,7 +86,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  >
  @{ownerAlias}
  </Link>
- <span className="text-muted text-xs">
+ <span className="text-ink-light text-xs">
  {horses.length} model{horses.length !== 1 ?"s" :""}
  </span>
  </div>
@@ -98,13 +98,13 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  className="border-edge text-ink hover:text-forest flex items-center gap-2 border-b py-1.5 text-sm no-underline last:border-b-0"
  >
  <span>🐴 {h.horseName}</span>
- <span className="text-muted ml-auto text-xs">
+ <span className="text-ink-light ml-auto text-xs">
  {h.finishType}
  </span>
  </Link>
  ))}
  {horses.length > 8 && (
- <p className="text-muted mt-[4] text-xs">+{horses.length - 8} more</p>
+ <p className="text-ink-light mt-[4] text-xs">+{horses.length - 8} more</p>
  )}
  </div>
  </div>

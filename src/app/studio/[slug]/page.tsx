@@ -86,7 +86,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}
  </span>
  </div>
- <p className="text-muted mt-1 text-sm">
+ <p className="text-ink-light mt-1 text-sm">
  by{""}
  <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest">
  @{profile.ownerAlias}

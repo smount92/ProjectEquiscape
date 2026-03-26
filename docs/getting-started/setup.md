@@ -10,6 +10,8 @@
 | **Supabase account** | — | [supabase.com](https://supabase.com) — free tier is sufficient |
 | **Vercel account** | — | [vercel.com](https://vercel.com) — for deployment (optional for local dev) |
 
+> ⚠️ **This project runs on Windows with PowerShell.** Use `cmd /c "npx next build 2>&1"` to capture build output. Avoid bash-isms like `$(...)` subshells. See the [onboard workflow](../../.agents/workflows/onboard.md) for PowerShell-specific patterns.
+
 ## 1. Clone and Install
 
 ```bash
@@ -37,6 +39,11 @@ cp .env.local.example .env.local
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API → `anon` `public` key | Public anonymous key (safe for client-side, RLS enforced) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → `service_role` key | **Secret.** Bypasses RLS. Used server-side only via `getAdminClient()` |
 | `RESEND_API_KEY` | [resend.com](https://resend.com) → API Keys | Transactional email delivery (notifications, password reset) |
+| `STRIPE_SECRET_KEY` | [stripe.com](https://stripe.com) → Developers → API Keys | Stripe payment processing (server-side only) |
+| `STRIPE_PRO_PRICE_ID` | Stripe Dashboard → Products → Pro plan → Price ID | The `price_...` ID for the Pro subscription |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Developers → Webhooks → Signing secret | Webhook signature verification |
+| `CRON_SECRET` | Generate a random string | Authenticates Vercel cron job requests |
+| `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com) → API Keys | Stablemaster AI collection analysis |
 
 ### Optional Variables (E2E Testing)
 
@@ -63,7 +70,7 @@ Open [http://localhost:3000](http://localhost:3000). The app uses Turbopack for 
 npm run build
 ```
 
-This runs the Turbopack production build. It catches:
+This runs the Next.js production build. It catches:
 - TypeScript type errors
 - Import issues and dead code
 - Missing environment variables (for server-rendered pages)
@@ -92,7 +99,7 @@ See [Testing Guide](../guides/testing.md) for detailed test strategy.
 
 ### Applying Migrations
 
-Migrations live in `supabase/migrations/` and are numbered sequentially (001–089+). To apply migrations to your Supabase project:
+Migrations live in `supabase/migrations/` and are numbered sequentially (001–102, 98 files). To apply migrations to your Supabase project:
 
 **Option A: Supabase CLI**
 ```bash

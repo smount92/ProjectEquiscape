@@ -47,7 +47,7 @@ export default function BlueBookProCharts({
                     <span className="text-2xl">📊</span>
                     <div>
                         <h3 className="text-lg font-bold text-stone-800">{title}</h3>
-                        <p className="text-sm text-stone-500">
+                        <p className="text-sm text-ink-light">
                             Avg: {formatCurrency(averagePrice)} · Median: {formatCurrency(medianPrice)} · {transactionVolume} sale{transactionVolume !== 1 ? "s" : ""}
                         </p>
                     </div>
@@ -65,7 +65,7 @@ export default function BlueBookProCharts({
                                 />
                             ))}
                         </div>
-                        <div className="mt-2 flex justify-between text-xs text-stone-400">
+                        <div className="mt-2 flex justify-between text-xs text-muted">
                             <span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span>
                         </div>
                     </div>
@@ -103,7 +103,7 @@ export default function BlueBookProCharts({
                     <span className="text-2xl">📊</span>
                     <div>
                         <h3 className="text-lg font-bold text-stone-800">{title}</h3>
-                        <p className="text-sm text-stone-500">
+                        <p className="text-sm text-ink-light">
                             Avg: {formatCurrency(averagePrice)} · Median: {formatCurrency(medianPrice)} · {transactionVolume} sale{transactionVolume !== 1 ? "s" : ""}
                         </p>
                     </div>
@@ -162,7 +162,7 @@ export default function BlueBookProCharts({
                     )}
 
                     {/* Legend */}
-                    <div className="mt-3 flex gap-4 text-xs text-stone-500">
+                    <div className="mt-3 flex gap-4 text-xs text-ink-light">
                         <span className="flex items-center gap-1">
                             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" /> Original Finish
                         </span>
@@ -172,7 +172,7 @@ export default function BlueBookProCharts({
                     </div>
                 </div>
             ) : (
-                <div className="rounded-lg bg-white/70 p-8 text-center text-sm text-stone-500">
+                <div className="rounded-lg bg-white/70 p-8 text-center text-sm text-ink-light">
                     No historical transaction data available yet for this item.
                 </div>
             )}

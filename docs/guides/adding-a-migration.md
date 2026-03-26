@@ -6,20 +6,20 @@ All database changes go through SQL migration files in `supabase/migrations/`.
 
 ### 1. Choose the Next Number
 
-Check the latest migration file in `supabase/migrations/`. As of March 2026, the latest is `089_commission_wip_photos.sql`, so the next number is **090**.
+Check the latest migration file in `supabase/migrations/`. As of March 2026, the latest is `102_pro_rls.sql`, so the next number is **103**.
 
 > **Note:** Numbers 045, 047, 049, and 051 are intentionally skipped (consolidated into adjacent migrations during early development).
 
 ### 2. Create the File
 
 ```
-supabase/migrations/090_your_feature_name.sql
+supabase/migrations/103_your_feature_name.sql
 ```
 
 **Naming conventions:**
 - Use snake_case
-- Be descriptive: `090_user_preferences.sql`, not `090_update.sql`
-- Prefix with a verb for alterations: `090_add_bio_field.sql`
+- Be descriptive: `103_user_preferences.sql`, not `103_update.sql`
+- Prefix with a verb for alterations: `103_add_bio_field.sql`
 
 ### 3. Write the SQL
 
@@ -27,7 +27,7 @@ Every migration should follow this structure:
 
 ```sql
 -- ============================================================
--- Migration 090: Feature Name
+-- Migration 103: Feature Name
 -- 1. Brief description of change 1
 -- 2. Brief description of change 2
 -- ============================================================
@@ -143,12 +143,15 @@ CREATE POLICY "participant_access" ON my_table FOR SELECT
 2. **Paste the migration SQL** and run it
 3. **Verify** the table/columns appear correctly
 4. **Test RLS** by querying as different users
-5. **Update TypeScript types** in `src/lib/types/database.ts`
+5. **Regenerate TypeScript types:**
+   ```bash
+   npm run gen-types
+   ```
 
 ## After Writing the Migration
 
 1. ☐ Test the SQL in Supabase Dashboard
-2. ☐ Update `src/lib/types/database.ts` if new tables/columns
+2. ☐ Run `npm run gen-types` to regenerate TypeScript types
 3. ☐ Update `docs/database/migrations.md` with the new entry
 4. ☐ If new table, add to `docs/database/schema-overview.md`
 5. ☐ If new RLS policies, add to `docs/database/rls-policies.md`

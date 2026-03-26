@@ -116,7 +116,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
  {vault.purchase_price !== null && (
  <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-muted mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Price
  </div>
  <div className="text-success text-base font-bold">
@@ -127,7 +127,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  {vault.estimated_current_value !== null && (
  <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-muted mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Estimated Value
  </div>
  <div className="text-success text-base font-bold">
@@ -138,7 +138,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  {vault.purchase_date !== null && (
  <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-muted mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Date
  </div>
  <div className="text-ink text-base font-bold">
@@ -149,7 +149,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  {vault.purchase_date_text && !vault.purchase_date && (
  <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-muted mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Date
  </div>
  <div className="text-ink text-base font-bold">{vault.purchase_date_text}</div>
@@ -158,7 +158,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  {vault.insurance_notes !== null && (
  <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-muted mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Insurance Notes
  </div>
  <div className="text-ink text-base font-bold">{vault.insurance_notes}</div>
@@ -166,7 +166,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  )}
  </div>
 
- <div className="border-edge text-muted mt-4 flex items-center gap-1 border-t pt-4 text-xs">
+ <div className="border-edge text-ink-light mt-4 flex items-center gap-1 border-t pt-4 text-xs">
  <span>🛡️</span>
  <span>
  This data is encrypted and only visible to you. Protected by Row Level Security.

@@ -125,7 +125,7 @@ export default async function WishlistPage() {
  <h1>
  <span className="text-forest">❤️ My Wishlist</span>
  </h1>
- <p className="text-muted mt-1">
+ <p className="text-ink-light mt-1">
  Models you&apos;re hunting for — {items.length} item{items.length !== 1 ?"s" :""}
  {totalMatches > 0 && (
  <span className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">

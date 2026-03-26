@@ -40,7 +40,7 @@ export default async function StudioDashboardPage() {
  <h1 className="m-0 text-2xl">
  <span className="text-forest">{profile.studioName}</span>
  </h1>
- <p className="text-muted mt-1 text-sm">Studio Dashboard</p>
+ <p className="text-ink-light mt-1 text-sm">Studio Dashboard</p>
  </div>
  <div className="gap-2" style={{ display:"flex", flexWrap:"wrap" }}>
  <Link

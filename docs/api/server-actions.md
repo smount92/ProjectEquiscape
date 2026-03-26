@@ -1,6 +1,6 @@
 # Server Actions Reference
 
-All backend logic lives in 35 `"use server"` files under `src/app/actions/`. This document is the master index with function counts and domain groupings.
+All backend logic lives in 36 `"use server"` files under `src/app/actions/`. This document is the master index with function counts and domain groupings.
 
 ## How Server Actions Work
 

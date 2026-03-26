@@ -171,7 +171,7 @@ export default function WishlistSearch() {
  {/* Molds */}
  {molds.length > 0 && (
  <>
- <div className="text-muted border-edge bg-[rgba(0,0,0,0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-ink-light border-edge bg-[rgba(0,0,0,0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  🏭 Base Molds
  </div>
  {molds.map((item) => (
@@ -202,7 +202,7 @@ export default function WishlistSearch() {
  {/* Releases */}
  {releases.length > 0 && (
  <>
- <div className="text-muted border-edge bg-[rgba(0,0,0,0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-ink-light border-edge bg-[rgba(0,0,0,0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  📦 Releases
  </div>
  {releases.map((item) => (
@@ -238,7 +238,7 @@ export default function WishlistSearch() {
  {/* Resins */}
  {resins.length > 0 && (
  <>
- <div className="text-muted border-edge bg-[rgba(0,0,0,0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-ink-light border-edge bg-[rgba(0,0,0,0.02)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  🎨 Artist Resins
  </div>
  {resins.map((item) => (

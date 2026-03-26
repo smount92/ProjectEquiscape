@@ -129,7 +129,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Timeline */}
  {records.length === 0 ? (
- <div className="text-muted py-6 text-center text-sm">
+ <div className="text-ink-light py-6 text-center text-sm">
  {isOwner ?"No show records yet. Add your first win! 🏆" :"No show records yet."}
  </div>
  ) : (
@@ -159,7 +159,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  )}
  </div>
 
- <div className="text-muted flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+ <div className="text-ink-light flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
  {record.placing && <span>🎖️ {record.placing}</span>}
  {record.division && <span>📂 {record.division}</span>}
@@ -170,7 +170,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Advanced details row */}
  {(record.sectionName || record.awardCategory || record.competitionLevel) && (
- <div className="text-muted mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+ <div className="text-ink-light mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  {record.sectionName && <span>🏷️ {record.sectionName}</span>}
  {record.awardCategory && <span>🎯 {record.awardCategory}</span>}
  {record.competitionLevel && <span>📊 {record.competitionLevel}</span>}
@@ -178,7 +178,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  )}
 
  {record.notes && (
- <div className="text-muted mt-1 text-sm italic">
+ <div className="text-ink-light mt-1 text-sm italic">
  {record.notes}
  </div>
  )}

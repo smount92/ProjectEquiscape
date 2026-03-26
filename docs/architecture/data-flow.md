@@ -76,8 +76,9 @@ if (!result.success) {
 | Schedule | Endpoint | Action |
 |----------|----------|--------|
 | Daily 6 AM UTC | `/api/cron/refresh-market` | Refreshes `mv_market_prices` materialized view |
+| Monthly 1st 8 AM UTC | `/api/cron/stablemaster-agent` | AI collection analysis via Gemini |
 
-Configured in `vercel.json`. The cron endpoint validates the request is from Vercel before executing.
+Configured in `vercel.json`. The cron endpoints validate the `CRON_SECRET` header before executing.
 
 ## Image Flow
 

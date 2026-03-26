@@ -17,25 +17,39 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | Database | Supabase (PostgreSQL + Row Level Security) |
 | Auth | Supabase Auth (PKCE flow, cookie-based SSR) |
 | Hosting | Vercel (serverless) |
-| CSS | Vanilla CSS design system (`globals.css` ~11K lines + 19 CSS Modules + `studio.css` + `competition.css`) |
+| CSS | Tailwind CSS v4 (`@theme` tokens) + `globals.css` (~2,220 lines for primitives) |
+| UI Components | shadcn/ui (Radix UI primitives — Button, Input, Select, Textarea, Badge, Dialog, Skeleton, Separator) |
+| Animations | Framer Motion (spring physics, staggered reveals) |
+| Payments | Stripe (Checkout Sessions + webhooks for subscription billing) |
+| AI | Google Gemini (Stablemaster collection analysis) |
 | Email | Resend |
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **37+ routes**, **94+ components**, **35 server action files**, and **92 database migrations** (001–092).
+The platform has **60 page routes**, **107+ client components** (incl. 8 shadcn ui primitives), **36 server action files**, **10 API routes**, and **98 database migrations** (001–102).
+
+### ⚠️ Development Environment: Windows + PowerShell
+
+This project runs on **Windows** using **PowerShell** as the shell. Key gotchas:
+- Use `cmd /c "npx next build 2>&1"` to capture combined stdout/stderr from npm scripts
+- Avoid `$()` subshells and backtick escapes — use `-File` flag with `.ps1` scripts for complex commands
+- Use double quotes `"` for outer strings and single quotes `'` for inner strings (opposite of bash)
+- Pipe to `| Select-Object -Last N` instead of `| tail -n N`
+- For `grep`-like searches, use `Select-String -Path "src\**\*.tsx" -Pattern "search-term" -List`
+- For file counts: `(Get-ChildItem -Recurse -Filter '*.tsx' -Path 'src\app').Count`
 
 ## Step 2 — Read the Current State Report
 
 The most up-to-date overview of the entire project (every route, component, server action, migration, and feature):
 
 ```
-View file: c:\Project Equispace\model-horse-hub\.agents\docs\model_horse_hub_state_report.md
+View file: Model Horse Hub Complete Report.md
 ```
 
 For deep architecture understanding:
 
 ```
-View file: c:\Project Equispace\model-horse-hub\.agents\docs\platform_architecture_deep_dive.md
+View file: .agents\docs\platform_architecture_deep_dive.md
 ```
 
 ## Step 3 — Read the Active Blueprint / Dev Queue
@@ -43,19 +57,20 @@ View file: c:\Project Equispace\model-horse-hub\.agents\docs\platform_architectu
 The current active development queue:
 
 ```
-View file: c:\Project Equispace\model-horse-hub\.agents\workflows\dev-nextsteps.md
+View file: .agents\workflows\dev-nextsteps.md
 ```
 
-For the Phase 6 blueprint (the most recent major planning document):
+For strategic planning documents:
 
 ```
-View file: c:\Project Equispace\model-horse-hub\.agents\docs\Phase6_master_blueprint.md
+View files in: .agents\docs\
+Key docs: Open_Beta_Plan.md, UI_Update_Plan.md, Layout_Unification.md
 ```
 
 For historical context on the schema unification that shaped the database:
 
 ```
-View file: c:\Project Equispace\model-horse-hub\.agents\docs\Grand_Unification_Plan.md
+View file: .agents\docs\Grand_Unification_Plan.md
 ```
 
 ## Step 4 — Understand Key Conventions
@@ -64,18 +79,21 @@ View file: c:\Project Equispace\model-horse-hub\.agents\docs\Grand_Unification_P
 ```
 src/
 ├── app/
-│   ├── layout.tsx          # Root layout — Inter font, GA, SimpleModeProvider, Header
-│   ├── globals.css         # ~11,000 lines — design system tokens + shared component styles
-│   ├── studio.css          # Art Studio styles
-│   ├── competition.css     # Show/competition styles
-│   ├── actions/            # 34 "use server" action files — ALL backend logic
-│   ├── api/                # API routes (auth, cron, export, identify-mold, reference-dictionary)
-│   └── [route folders]/    # 50+ page.tsx files across ~30 route groups
-├── components/             # 80+ client components + 19 CSS Modules
+│   ├── layout.tsx          # Root layout — Inter + Playfair Display, GA, SimpleModeProvider, Header
+│   ├── globals.css         # ~2,220 lines — Tailwind v4 @theme tokens + shared component styles
+│   ├── actions/            # 36 "use server" action files — ALL backend logic
+│   ├── api/                # 10 API routes (auth, cron, checkout, webhooks, export, identify-mold)
+│   └── [route folders]/    # 60 page.tsx files across ~35 route groups
+├── components/             # 107+ client components
+│   ├── ui/                 # 8 shadcn/ui primitives (button, input, select, textarea, badge, dialog, skeleton, separator)
+│   ├── layouts/            # 4 Page Archetype wrappers (Explorer, Scrapbook, CommandCenter, Focus)
+│   ├── EmptyState.tsx      # Standardized empty state component
+│   └── *.tsx               # Domain-specific components
 └── lib/
     ├── supabase/           # admin.ts (service role), client.ts (browser), server.ts (SSR)
-    ├── types/              # database.ts (manual types), csv-import.ts
-    ├── utils/              # imageCompression, mentions, rateLimit, storage, validation
+    ├── types/              # database.ts (generated types), csv-import.ts
+    ├── utils/              # imageCompression, mentions, rateLimit, storage, validation, cn
+    ├── utils.ts            # cn() utility (clsx + tailwind-merge)
     └── context/            # SimpleModeContext.tsx (accessibility)
 ```
 
@@ -83,7 +101,7 @@ src/
 
 **Server Components** (pages):
 - Default export, `async function`, fetch data with `await createClient()` from `@/lib/supabase/server`
-- Auth check: `const { data: { user } } = await supabase.auth.getUser()`
+- Auth check: use `requireAuth()` from `@/lib/auth` (returns user or redirects)
 - RLS handles row-level access — no manual auth checks on SELECT queries for own data
 
 **Server Actions** (`src/app/actions/*.ts`):
@@ -92,31 +110,52 @@ src/
 - Use `getAdminClient()` for cross-user writes (bypasses RLS)
 - Use `revalidatePath()` after mutations
 - Wrap background tasks in `after()` from `next/server` for serverless safety
+- Use `logger.error()` (from `@/lib/logger`) for error handling — NEVER use silent `catch {}`
 
 **Client Components** (`src/components/*.tsx`):
 - Always `"use client"` at top
 - Use `useState` for loading/error states
 - Import server actions directly — Next.js handles serialization
-- Prefer CSS Modules (`styles.className`) for new components; shared classes stay in globals
-- **Modals MUST use `createPortal(overlay, document.body)`** from `react-dom` to avoid CSS containment issues from parent transforms
+- **Use shadcn/ui** for inputs, buttons, selects, textareas, badges, and dialogs
+- **Use `<Dialog>` from `@/components/ui/dialog`** for modals (NOT `createPortal`). Exception: `PhotoLightbox.tsx` retains `createPortal` for its custom keyboard nav
+- **Use Framer Motion** for tactile animations (`whileTap`, `whileHover`, `staggerChildren`)
 
-**CSS Architecture:**
-- Design tokens in `:root` of `globals.css` — colors, spacing, radii, shadows, transitions
-- Warm earth-toned theme — cream/parchment background (`#faf6f0`), sage green accent (`#3d5a3e`), brown/leather tones
+**CSS & Styling Architecture:**
+- **Tailwind CSS v4** with `@theme` block in `globals.css` for design tokens
+- **shadcn/ui** for form primitives — no `form-input` or `form-select` classes
+- **No inline `style={{...}}`** for layout, padding, or colors
+- Warm "Cozy Scrapbook" theme — parchment background (`#F0EAD6`), forest green accent (`#2C5545`), espresso text (`#2D2318`)
 - Simple Mode: `[data-simple-mode="true"]` — 130% font scale, 60px min buttons
-- **19 CSS Modules** for component-specific styles (ChatThread, OfferCard, DashboardShell, etc.)
-- Shared primitives (`horse-card-*`, `btn-*`, `form-*`, `modal-*`, `feed-*`) stay in globals
-- New components should use CSS Modules, not add to globals
+- Typography: `font-serif` (Playfair Display) for headings, `font-sans` (Inter) for UI text
+- Design System Guide: `docs/guides/design-system.md`
+
+**Page Layouts — Use Archetypes:**
+- **ExplorerLayout** — browsing grids with sticky filters (Show Ring, Market, Catalog...)
+- **ScrapbookLayout** — split-view details (Horse Passport, Studio Profile...)
+- **CommandCenterLayout** — dashboards with sidebar (Stable Dashboard, Admin...)
+- **FocusLayout** — forms and data entry (Add Horse, Login, Settings...)
+- NEVER create custom `max-w-[var(--max-width)] mx-auto px-6` wrapper divs on pages
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 092)
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 102)
 - Universal Catalog (`catalog_items`) — 10,500+ entries for molds, releases, artist resins, tack
 - Universal Ledger — `v_horse_hoofprint` regular view (UNION ALL across 6 source tables) with `security_invoker = true`
 - Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
 - Market Price Guide — `mv_market_prices` materialized view refreshed by cron (`authenticated` only, no `anon`)
+- Trusted Sellers — `mv_trusted_sellers` materialized view (≥3 transactions, ≥4.5 avg rating)
+- Soft Delete — `deleted_at` tombstone column on `user_horses` (NOT hard delete)
+- Atomic Commerce — `make_offer_atomic` and `respond_to_offer_atomic` RPCs with `FOR UPDATE` row-locking
+- Fuzzy Search — `search_catalog_fuzzy` RPC using `pg_trgm`
+- Pro Tier — `get_user_tier()`, `get_photo_limit()`, `get_extra_photo_count()` functions
 - All SECURITY DEFINER functions use `SET search_path = ''` with fully qualified `public.table_name` references
 - `pg_trgm` extension lives in the `extensions` schema (not `public`)
 - All RLS policies use `(SELECT auth.uid())` (InitPlan pattern) for performance
+
+**Monetization:**
+- Freemium tier system (Free vs Pro) — JWT `app_metadata.tier`
+- Stripe Checkout Sessions via `/api/checkout`
+- Stripe Webhook handler at `/api/webhooks/stripe`
+- Pro features: Photo Suite+ (30 extra photos), Blue Book PRO charts, Smart Insurance Reports, Stablemaster AI
 
 **Privacy Rules:**
 - `financial_vault` is NEVER queried on public routes (only owner via RLS)
@@ -135,13 +174,14 @@ src/
 - Tombstone deletion (soft delete) for data integrity
 - `after()` wraps in: `posts.ts`, `groups.ts`, `events.ts`, `activity.ts`
 - Cryptographic PIN generation using `crypto.randomInt()` (not `Math.random()`)
+- Tier gating: JWT `app_metadata.tier` checked server-side
 
 ## Step 5 — Explore the Codebase
 
 Key entry points for understanding the code:
 
 | Area | Start Here |
-|------|-----------
+|------|-----------|
 | Dashboard | `src/app/dashboard/page.tsx` |
 | Add Horse (multi-step form) | `src/app/add-horse/page.tsx` |
 | Horse Passport (private) | `src/app/stable/[id]/page.tsx` |
@@ -152,7 +192,10 @@ Key entry points for understanding the code:
 | Reference Search | `src/components/UnifiedReferenceSearch.tsx` |
 | Feed | `src/app/feed/page.tsx` + `src/app/actions/activity.ts` |
 | Header Nav | `src/components/Header.tsx` |
-| Design Tokens | `src/app/globals.css` lines 1–120 |
+| Stripe Checkout | `src/app/api/checkout/route.ts` + `src/app/upgrade/page.tsx` |
+| Design Tokens | `src/app/globals.css` lines 1–47 (`@theme` block) |
+| shadcn Components | `src/components/ui/` |
+| Layout Archetypes | `src/components/layouts/` |
 
 ## Step 6 — Documentation Responsibility
 

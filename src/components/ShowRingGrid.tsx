@@ -44,7 +44,7 @@ const FINISH_BADGE_CLASSES: Record<string, string> = {
  "Artist Resin": "bg-rose-50 text-rose-700 border-rose-200",
  "Test Run": "bg-cyan-50 text-cyan-700 border-cyan-200",
  "Decorator": "bg-emerald-50 text-emerald-700 border-emerald-200",
- "default": "bg-stone-100 text-stone-600 border-stone-200",
+ "default": "bg-stone-100 text-ink-light border-stone-200",
 };
 
 const containerVariants = {
@@ -239,7 +239,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
             className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
            />
           ) : (
-           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-400">
+           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted">
             <span className="text-4xl opacity-50">🐴</span>
             <span className="text-xs font-medium">No photo</span>
            </div>
@@ -281,7 +281,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
             </span>
            )}
           </h3>
-          <p className="truncate text-sm text-stone-500">{horse.refName}</p>
+          <p className="truncate text-sm text-ink-light">{horse.refName}</p>
 
           {/* Badge row */}
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -295,13 +295,13 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
           </div>
 
           {/* Metadata line */}
-          <div className="mt-2 flex items-center gap-2 text-xs text-stone-400">
+          <div className="mt-2 flex items-center gap-2 text-xs text-ink-light">
            <span>{timeAgo(horse.createdAt)}</span>
            {horse.sculptor && <span>· ✂️ {horse.sculptor}</span>}
           </div>
 
           {isListed && horse.marketplaceNotes && (
-           <div className="mt-1.5 truncate rounded-md bg-stone-50 px-2 py-1 text-xs text-stone-500" title={horse.marketplaceNotes}>
+           <div className="mt-1.5 truncate rounded-md bg-stone-50 px-2 py-1 text-xs text-ink-light" title={horse.marketplaceNotes}>
             📝 {horse.marketplaceNotes.length > 60 ? horse.marketplaceNotes.slice(0, 60) + "…" : horse.marketplaceNotes}
            </div>
           )}

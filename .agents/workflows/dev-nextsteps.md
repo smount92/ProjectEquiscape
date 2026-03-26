@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-03-22
+> **Last Updated:** 2026-03-26
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 
 // turbo-all
@@ -62,8 +62,12 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 ## ✅ V34/P4: Playwright E2E Show Tests — 16 tests (9 pass, 7 graceful skip), .env.local loading, show listing / detail / entry form / podium / override / mobile / auth guard — DONE
 ## ✅ Judge Notes Fix — wired judge notes textarea through to show_records.judge_notes (was UI-only, never persisted) — DONE
 ## ✅ Notification Deep-Links — added link_url column (migration 096), all notifications now click through to referenced item instead of actor profile — DONE
-## ✅ V39: Production Hardening Sprint — edge security (8 public routes), perf (removed 35 force-dynamic, Suspense streaming on dashboard + show ring), pedigree validation (6 new tests, 245 total) — DONE\r
-## ✅ V39/EPIC3: Type Safety Cleanup — generated Supabase types injected into all clients, removed `as unknown as` casts from 20 files (9 action files, 7 pages, 2 API routes, 2 support files), removed redundant manual interfaces (`HorseRow`, `SuggestionWithCatalog`, `ExportHorse`), updated `InsuranceReport.tsx` to accept nullable types, coerced nullable DB fields with defaults — 245/245 tests pass, build clean — DONE
+## ✅ V39: Production Hardening Sprint — edge security, perf, pedigree validation, type safety — DONE
+## ✅ Tailwind CSS v4 Migration — eliminated all CSS Modules, extracted page CSS, reduced globals.css to ~2,220 lines — DONE
+## ✅ Open Beta Hardening (Phase 1) — soft-delete, atomic commerce RPCs, fuzzy search, trusted sellers, observability — DONE
+## ✅ V40: Monetization Sprint — Stripe integration, freemium tier, upgrade page, Stablemaster AI, Blue Book PRO, Photo Suite+ — DONE
+## ✅ UI Overhaul Part 1 — shadcn/ui + Framer Motion installed, all form-input/form-select replaced with shadcn primitives (48 files), globals.css cleaned — DONE
+## ✅ UI Overhaul Part 2 — 12 createPortal modals migrated to shadcn Dialog, PhotoLightbox retained as exception — DONE
 
 ---
 
@@ -73,90 +77,52 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
-## ✅ Task C-1: Clean Up Test Horses from Database — DONE (deleted Test, Test Horse, Test 2, cm bug)
+## Task C-1: UI Overhaul Part 3 — Tactile Grids & Micro-Interactions
 
-**Why:** During the reference link bug investigation, several test horses were created with null catalog_id values ("Test Horse Bug", "Test Horse Bug 2", "Debug Ref Test", "Test Fix Verify", "AlboRef Test"). These should be removed.
-
-**How:**
-1. Navigate to `/dashboard` and delete these test horses via the UI
-2. Or use Supabase dashboard to delete from `user_horses` where `custom_name` IN ('Test Horse Bug', 'Test Horse Bug 2', 'Debug Ref Test', 'Test Fix Verify', 'AlboRef Test')
+**Workflow:** `.agents/workflows/ui-overhaul-3-grids-animations.md`
+**Status:** In progress (Framer Motion stagger in StableGrid/ShowRingGrid/HoofprintTimeline done, FavoriteButton/WishlistButton bounce done, EmptyState component created)
+**Remaining:** Badge color overhaul, LikeToggle bounce, skeleton cards with shadcn, legacy CSS cleanup
 
 ---
 
-## ✅ Task C-2: Audit Other Modals for Portal Pattern — DONE (SuggestEditModal was the only one missing createPortal; now fixed)
+## Task C-2: Layout Unification Part 1 — Design System & Archetypes
 
-**Why:** The delete modal had a centering bug because it was nested inside elements with CSS transforms. Other modals may have the same issue.
-
-**How:**
-1. Search for all `modal-overlay` usage in `.tsx` files:
-   ```
-   cd c:\Project Equispace\model-horse-hub && Select-String -Path "src\components\*.tsx" -Pattern "modal-overlay" | Select-Object Filename
-   ```
-2. For each modal component found, check if it uses `createPortal(overlay, document.body)`
-3. If not, add `import { createPortal } from "react-dom"` and wrap the modal overlay in `createPortal(..., document.body)`
-4. Build and verify each change
+**Workflow:** `.agents/workflows/layout-unification-1-archetypes.md`
+**Status:** Not started
+**Scope:** Create design system docs + build 4 layout wrapper components (Explorer, Scrapbook, CommandCenter, Focus)
 
 ---
 
-## ✅ Task C-3: Deduplicate .modal-overlay CSS Definitions — DONE (already unified; only 1 canonical definition at z-index 1000)
+## Task C-3: Layout Unification Part 2 — The Great Alignment
 
-**Why:** There are 3 separate `.modal-overlay` definitions in `globals.css` (lines ~2338, ~3498, ~10034) with different z-index values and slightly different styles. The last one wins due to CSS cascade, which has the lowest z-index (200).
-
-**How:**
-1. Audit all three definitions and unify into a single canonical `.modal-overlay` rule
-2. Use the highest z-index (1000) and include padding for safe area
-3. Remove the duplicate definitions
-4. Build and test that all modals still render correctly
+**Workflow:** `.agents/workflows/layout-unification-2-alignment.md`
+**Status:** Not started (requires C-2 first)
+**Scope:** Refactor 48 page.tsx files to use layout archetypes, remove custom container divs
 
 ---
 
 # 🟡 Priority: Medium
 
-## ⏭️ Task M-1: globals.css Continued Extraction — DEFERRED (4,674 lines is manageable; will revisit during full app refresh)
+## Task M-1: Open Beta Hardening (Remaining)
 
-**Why:** `globals.css` is still ~11,000 lines. The V20 CSS module extraction was partial. More page-level and component-level styles should be extracted to CSS Modules.
-
-**Time:** Ongoing, do in batches
-
-**How:**
-1. Identify the largest remaining style blocks in `globals.css`
-2. Extract to `.module.css` files alongside their components
-3. Update component imports to use the CSS module
-4. Verify no regressions with `npx next build`
+**Workflow:** `.agents/workflows/open-beta-hardening.md`
+**Status:** Phase 1 substantially complete; some items remain (visibility-aware polling, payment disclaimers)
+**Scope:** NotificationBell polling optimization, liability UX, remaining observability gaps
 
 ---
 
-## ✅ Task M-2: Comprehensive Passport Portal Audit — DONE (TransferModal already uses createPortal; ParkedExportPanel is inline, not a modal)
+## Task M-2: Landing Page Refresh
 
-**Why:** The passport page (`/stable/[id]`) renders multiple modals (Delete, Transfer, Parked Export). All should use the portal pattern.
-
-**How:**
-1. Check `TransferModal.tsx`, `ParkedExportPanel.tsx` for portal usage
-2. Apply the same `createPortal` pattern if missing
-3. Test by scrolling to the bottom of a passport page and triggering each modal
-
----
-
-## ✅ Task M-3: Review UnifiedReferenceSearch Release Panel UX — DONE (code review verified: mold click pre-selects immediately, releases panel shows for drill-down, override works correctly)
-
-**Why:** The fix to `handleMoldClick` now pre-selects the mold immediately. For molds with many releases, the releases panel may not be visible since `selectedCatalogId` is now truthy and the display switches to the "selected" badge (we added `releases.length === 0` check). Verify that:
-- Molds with releases still show the releases panel for drill-down
-- Molds without releases correctly show the selected badge
-- Users can override a mold selection by picking a specific release
-
-**How:**
-1. Test with a mold that has multiple releases (search for "Ideal" or "Stablemate" in the catalog)
-2. Verify the releases panel appears after clicking the mold
-3. Verify picking a release overrides the mold selection
-4. Verify proceeding without picking a release still saves the mold correctly
+**Why:** The landing page (`src/app/page.tsx`) needs updated imagery and value proposition now that the platform has grown to include Stripe billing, AI features, and 10,500+ catalog items.
 
 ---
 
 # 🟢 Priority: Nice-to-Have
 
-## ⏭️ Task N-1: Landing Page Refresh — DEFERRED (will revisit during full app refresh)
+## Task N-1: globals.css Continued Cleanup
 
-**Why:** The landing page (`src/app/page.tsx`) could benefit from updated imagery and a more compelling value proposition now that the platform has grown substantially.
+**Why:** `globals.css` is ~2,220 lines. Many class-based styles (`.show-record-*`, `.settings-toggle`, `.filter-*`, `.profile-hero`, `.collection-hero`) could be replaced with Tailwind utility classes as their consuming components are touched.
+**Approach:** Remove classes organically as layout unification converts pages. Verify each class has zero consumers before deletion.
 
 ---
 

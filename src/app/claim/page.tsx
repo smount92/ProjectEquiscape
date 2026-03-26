@@ -120,7 +120,7 @@ export default function ClaimPage() {
  >
  <div className="mb-4 text-[3rem]">🎉</div>
  <h1 className="text-2xl">Welcome to your stable!</h1>
- <p className="text-muted mt-2 mb-6">
+ <p className="text-ink-light mt-2 mb-6">
  <strong>{success.horseName}</strong> has been successfully transferred to your account. The full
  Hoofprint™ history has been preserved.
  </p>
@@ -163,7 +163,7 @@ export default function ClaimPage() {
  <h1 className="text-xl">
  <span className="text-forest">Claim a Horse</span>
  </h1>
- <p className="text-muted mt-1 text-sm">
+ <p className="text-ink-light mt-1 text-sm">
  Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
  </p>
  </div>

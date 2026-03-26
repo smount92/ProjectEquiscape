@@ -94,12 +94,12 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  📸 <span className="text-forest">{show.title}</span>
  </h1>
  {show.theme && (
- <p className="mt-2 text-base italic text-stone-600">
+ <p className="mt-2 text-base italic text-ink-light">
  Theme: {show.theme}
  </p>
  )}
  {show.description && (
- <p className="mt-2 text-sm text-stone-500">
+ <p className="mt-2 text-sm text-ink-light">
  {show.description}
  </p>
  )}
@@ -108,7 +108,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  className={`mt-2 text-sm font-medium ${
  new Date(show.endAt) > new Date()
  ? "text-amber-600"
- : "text-stone-400"
+ : "text-muted"
  }`}
  >
  ⏰{" "}
@@ -118,7 +118,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  </p>
  )}
  {show.creatorAlias && (
- <p className="mt-1 text-sm text-stone-400">
+ <p className="mt-1 text-sm text-ink-light">
  Hosted by @{show.creatorAlias}
  </p>
  )}
@@ -126,19 +126,19 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div className="mt-6 flex justify-center gap-8">
  <div className="flex flex-col items-center">
  <span className="text-xl font-bold">{entries.length}</span>
- <span className="text-xs text-stone-500">Entries</span>
+ <span className="text-xs text-ink-light">Entries</span>
  </div>
  <div className="flex flex-col items-center">
  <span className="text-xl">
  {show.status ==="open" ?"🟢" : show.status ==="judging" ?"🟡" :"🔴"}
  </span>
- <span className="text-xs text-stone-500">
+ <span className="text-xs text-ink-light">
  {show.status.charAt(0).toUpperCase() + show.status.slice(1)}
  </span>
  </div>
  <div className="flex flex-col items-center">
  <span className="text-xl">{isExpertJudged ?"🏅" :"🗳️"}</span>
- <span className="text-xs text-stone-500">
+ <span className="text-xs text-ink-light">
  {isExpertJudged ?"Expert Judge" :"Community Vote"}
  </span>
  </div>
@@ -361,7 +361,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Remaining placed entries below podium */}
  {topPlaced.length > 3 && (
  <div className="mt-4">
- <h3 className="text-muted mb-2 text-sm">
+ <h3 className="text-ink-light mb-2 text-sm">
  Also Placed
  </h3>
  {topPlaced.slice(3).map((entry) => {

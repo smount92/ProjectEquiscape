@@ -246,7 +246,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
  {/* Breadcrumb */}
- <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -303,7 +303,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {horse.asset_category && horse.asset_category !=="model" && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Category
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -318,7 +318,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {horse.finish_type && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Finish Type
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -329,7 +329,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {horse.condition_grade && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Condition
  </span>
  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
@@ -341,7 +341,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {refInfo ? (
  <>
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  {refInfo.type}
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -350,7 +350,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
 
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  {refInfo.type ==="Mold" ?"Manufacturer" :"Sculptor"}
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -359,7 +359,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
 
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Scale
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -369,7 +369,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {refInfo.extra && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  {refInfo.type ==="Mold" ?"Released" :"Medium"}
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -380,7 +380,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </>
  ) : (
               <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
-                <span className="text-sm font-medium text-[#7a6b5a]">
+                <span className="text-sm font-medium text-[#59493A]">
  Reference
  </span>
  <span
@@ -394,7 +394,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {releaseInfo && (
  <>
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Release
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -404,7 +404,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {releaseInfo.modelNumber && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Model #
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -415,7 +415,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {releaseInfo.color && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Color
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -426,7 +426,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {releaseInfo.yearStart && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Release Years
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -441,7 +441,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
 
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">Added</span>
+ <span className="text-sm font-medium text-[#59493A]">Added</span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
  {new Date(horse.created_at).toLocaleDateString("en-US", {
  month:"long",
@@ -452,7 +452,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
 
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">Photos</span>
+ <span className="text-sm font-medium text-[#59493A]">Photos</span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
  {images.length} uploaded
  </span>
@@ -460,7 +460,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {horse.sculptor && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Sculptor / Artist
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -471,7 +471,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {horse.finishing_artist && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  🎨 Finished by
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -490,7 +490,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {(horse.edition_number || horse.edition_size) && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  📋 Edition
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -511,7 +511,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <span aria-hidden="true">✨</span> Finish
  </h3>
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Finish Details
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -529,7 +529,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
               </h3>
  {horse.assigned_breed && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Breed
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -539,7 +539,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
  {horse.assigned_gender && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Gender
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -549,7 +549,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
  {horse.assigned_age && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Age
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
@@ -559,7 +559,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
  {horse.regional_id && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#7a6b5a]">
+ <span className="text-sm font-medium text-[#59493A]">
  Regional ID
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">

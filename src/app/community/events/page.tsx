@@ -29,7 +29,7 @@ export default async function EventsPage() {
  >
  <div>
  <h1>📅 Events</h1>
- <p className="text-muted mt-1">Shows, swap meets, meetups, and more</p>
+ <p className="text-ink-light mt-1">Shows, swap meets, meetups, and more</p>
  </div>
  <Link
  href="/community/events/create"

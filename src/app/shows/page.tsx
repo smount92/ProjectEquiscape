@@ -49,14 +49,14 @@ export default async function ShowsPage() {
  <h1 className="text-2xl font-bold tracking-tight">
  📸 <span className="text-forest">Virtual Photo Shows</span>
  </h1>
- <p className="mt-2 max-w-xl text-base text-stone-500">
+ <p className="mt-2 max-w-xl text-base text-ink-light">
  Enter your models, vote for your favorites, and compete for community glory!
  </p>
  <div className="mt-6 flex items-baseline gap-2">
  <span className="text-2xl font-bold text-forest">
  {shows.filter((s) => s.status ==="open").length}
  </span>
- <span className="text-sm font-medium text-stone-500">Open Shows</span>
+ <span className="text-sm font-medium text-ink-light">Open Shows</span>
  </div>
  </div>
 

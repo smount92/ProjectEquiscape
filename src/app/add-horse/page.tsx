@@ -532,7 +532,7 @@ export default function AddHorsePage() {
           <h1 className="text-2xl font-bold tracking-tight">
             Add to <span className="text-forest">Stable</span>
           </h1>
-          <p className="mt-2 text-sm text-stone-500">
+          <p className="mt-2 text-sm text-ink-light">
  {isModel
  ?"Catalog a new model horse in your digital collection"
  : assetCategory ==="tack"
@@ -559,7 +559,7 @@ export default function AddHorsePage() {
  id={`category-${cat.value}`}
  >
  <span className="text-2xl">{cat.icon}</span>
-              <span className="text-sm font-semibold text-stone-600">{cat.label}</span>
+              <span className="text-sm font-semibold text-ink-light">{cat.label}</span>
  </button>
  ))}
  </div>
@@ -589,7 +589,7 @@ export default function AddHorsePage() {
  ? "border-forest bg-forest text-white"
  : i < currentStep
  ? "border-forest bg-forest text-white"
- : "border-gray-300 bg-white text-gray-400"
+ : "border-gray-300 bg-white text-muted"
  }`}
  aria-current={i === currentStep ?"step" : undefined}
  >

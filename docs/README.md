@@ -1,6 +1,6 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** March 23, 2026
+> **Last Updated:** March 26, 2026
 > **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference.
 
 ---
@@ -22,7 +22,7 @@
 | **Add a new feature end-to-end** | [Guides → Adding a Feature](guides/adding-a-feature.md) |
 | **Write or run tests** | [Guides → Testing](guides/testing.md) |
 | **Deploy to production** | [Guides → Deployment](guides/deployment.md) |
-| **Understand CSS architecture** | [Guides → CSS Conventions](guides/css-conventions.md) |
+| **Understand CSS/UI architecture** | [Guides → Design System](guides/design-system.md) |
 | **Add a database migration** | [Guides → Adding a Migration](guides/adding-a-migration.md) |
 | **Find a component** | [Components → Catalog](components/catalog.md) |
 | **Find a page route** | [Routes → Route Map](routes/route-map.md) |
@@ -57,24 +57,25 @@ docs/
 │   ├── schema-overview.md             # Visual ERD + table groups
 │   ├── rls-policies.md                # Row Level Security inventory
 │   ├── materialized-views.md          # Computed views and refresh schedules
-│   ├── migrations.md                  # Migration index (001—097)
+│   ├── migrations.md                  # Migration index (001—102)
 │   └── seed-data.md                   # Reference catalog seeding
 ├── api/
 │   ├── server-actions.md              # Index of all 36 server action files
-│   └── routes.md                      # API route reference (6 routes)
+│   └── routes.md                      # API route reference (10 routes)
 ├── components/
-│   ├── catalog.md                     # 95-component index by domain
+│   ├── catalog.md                     # 107-component index by domain
 │   ├── patterns.md                    # 7 common component patterns
 │   └── design-system.md              # Tokens, colors, typography, primitives
 ├── guides/
 │   ├── adding-a-feature.md            # End-to-end feature workflow
 │   ├── adding-a-migration.md          # SQL migration guide
-│   ├── css-conventions.md             # CSS architecture rules
+│   ├── css-conventions.md             # CSS architecture rules (legacy — see design-system.md)
+│   ├── design-system.md               # "Cozy Scrapbook" design system + 4 page archetypes
 │   ├── testing.md                     # Test strategy and commands
 │   ├── catalog-curation.md            # Catalog curation guide (V32)
 │   └── deployment.md                  # Vercel + Supabase deployment
 └── routes/
-    └── route-map.md                   # Complete URL → page mapping (57 routes)
+    └── route-map.md                   # Complete URL → page mapping (60 routes)
 ```
 
 
@@ -85,7 +86,7 @@ docs/
 | Document | Location | Purpose |
 |---|---|---|
 | `CONTRIBUTING.md` | Project root | Code style, commit conventions, PR process |
-| `Model Horse Hub Complete Report.md` | Project root | Comprehensive project report (March 18, 2026 snapshot) |
+| `Model Horse Hub Complete Report.md` | Project root | Comprehensive project report (updated March 25, 2026) |
 | `.agents/workflows/onboard.md` | `.agents/` | AI agent onboarding workflow |
 | `.agents/workflows/dev-nextsteps.md` | `.agents/` | Living development task queue |
 | `.agents/docs/` | `.agents/` | Strategic planning documents and research briefs |

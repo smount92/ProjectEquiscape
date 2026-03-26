@@ -26,14 +26,14 @@ export default async function NotificationsPage() {
  <h1 className="text-2xl font-bold tracking-tight">
  🔔 <span className="text-forest">Notifications</span>
  </h1>
- <p className="mt-2 max-w-xl text-base text-stone-500">
+ <p className="mt-2 max-w-xl text-base text-ink-light">
  Stay updated on favorites, comments, ratings, and more.
  </p>
  <div className="mt-6 flex items-baseline gap-2">
  <span className="text-2xl font-bold text-forest">
  {notifications.filter((n) => !n.isRead).length}
  </span>
- <span className="text-sm font-medium text-stone-500">Unread</span>
+ <span className="text-sm font-medium text-ink-light">Unread</span>
  </div>
  </div>
 

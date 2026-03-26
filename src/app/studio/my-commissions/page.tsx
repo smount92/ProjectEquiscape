@@ -95,7 +95,7 @@ export default async function MyCommissionsPage() {
  <h1 className="text-2xl font-bold tracking-tight">
  🎨 <span className="text-forest">My Commissions</span>
  </h1>
- <p className="mt-2 text-sm text-stone-500">
+ <p className="mt-2 text-sm text-ink-light">
  Track commissions you&apos;ve requested from artists.
  </p>
  </div>

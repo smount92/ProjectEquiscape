@@ -15,10 +15,10 @@ export default function TermsPage() {
  <h1>
  <span className="text-forest">Terms</span> of Service
  </h1>
- <p className="mt-2 text-lg text-muted">
+ <p className="mt-2 text-lg text-ink-light">
  Fair rules for a fair platform.
  </p>
- <p className="text-muted mt-2 text-sm">Last updated: March 14, 2026</p>
+ <p className="text-ink-light mt-2 text-sm">Last updated: March 14, 2026</p>
  </div>
 
  {/* Agreement */}

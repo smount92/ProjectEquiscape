@@ -40,7 +40,7 @@ export default async function ShowPlannerPage() {
  >
  <div>
  <h1>📋 Show String Planner</h1>
- <p className="text-muted mt-1">
+ <p className="text-ink-light mt-1">
  Plan your entries, detect conflicts, and convert results into records.
  </p>
  </div>

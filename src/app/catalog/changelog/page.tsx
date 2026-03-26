@@ -31,7 +31,7 @@ export default async function ChangelogPage() {
  <h1 className="mb-1 font-sans text-2xl">
  📋 <span className="text-forest">Catalog Changelog</span>
  </h1>
- <p className="text-muted mb-6">
+ <p className="text-ink-light mb-6">
  Community-approved updates to the reference catalog. {count ?? 0} total changes.
  </p>
 

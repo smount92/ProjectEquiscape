@@ -184,7 +184,7 @@ export default async function InboxPage() {
  <h1 className="text-2xl font-bold tracking-tight">
  <span className="text-forest">✉️ Inbox</span>
  </h1>
- <p className="mt-2 max-w-xl text-base text-stone-500">
+ <p className="mt-2 max-w-xl text-base text-ink-light">
  Your private conversations — {inboxItems.length} thread{inboxItems.length !== 1 ?"s" :""}
  </p>
  </div>
@@ -268,7 +268,7 @@ export default async function InboxPage() {
  💬 Direct Message
  </div>
  )}
- <div className="text-muted mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+ <div className="text-ink-light mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
  {item.latestMessage ? (
  <>
  {item.latestSenderIsMe && (
@@ -279,7 +279,7 @@ export default async function InboxPage() {
  : item.latestMessage}
  </>
  ) : (
- <span className="opacity-[0.5]">No messages yet</span>
+ <span className="text-muted">No messages yet</span>
  )}
  </div>
  </div>

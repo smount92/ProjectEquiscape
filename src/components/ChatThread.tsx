@@ -184,7 +184,7 @@ export default function ChatThread({ conversationId, currentUserId, otherAlias, 
  >
  <div className="break-words whitespace-pre-wrap">{msg.content}</div>
  <div
- className={`text-muted mt-1 text-[0.6rem] opacity-70 ${msg.isMe ?"text-right" :""}`}
+ className={`text-muted mt-1 text-[0.6rem] ${msg.isMe ?"text-right" :""}`}
  >
  {formatTime(msg.createdAt)}
  </div>
@@ -257,7 +257,7 @@ export default function ChatThread({ conversationId, currentUserId, otherAlias, 
  )}
  </button>
  </div>
- <div className="text-muted mt-1.5 text-center text-[0.6rem] opacity-50">
+ <div className="text-muted mt-1.5 text-center text-[0.6rem]">
  Press Enter to send · Shift+Enter for new line
  </div>
  </div>

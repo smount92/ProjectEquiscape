@@ -148,18 +148,20 @@ Create `src/app/my-feature/page.tsx`:
 ```tsx
 import { getMyFeatures } from "@/app/actions/my-feature";
 import MyFeatureClient from "@/components/MyFeatureClient";
+import { ExplorerLayout } from "@/components/layouts/ExplorerLayout";
 
 export default async function MyFeaturePage() {
     const features = await getMyFeatures();
 
     return (
-        <main className="page-container" style={{ padding: "var(--space-2xl) 0" }}>
-            <h1>My Feature</h1>
+        <ExplorerLayout title="My Feature">
             <MyFeatureClient features={features} />
-        </main>
+        </ExplorerLayout>
     );
 }
 ```
+
+> **Page containers:** Every page must use one of the 4 layout archetypes: `ExplorerLayout`, `ScrapbookLayout`, `CommandCenterLayout`, or `FocusLayout`. Custom container `<div>`s are forbidden.
 
 ### 6. Create the Client Component
 
@@ -170,7 +172,6 @@ Create `src/components/MyFeatureClient.tsx`:
 
 import { useState } from "react";
 import { createMyFeature } from "@/app/actions/my-feature";
-import styles from "./MyFeatureClient.module.css";
 
 interface Props {
     features: MyFeature[];
@@ -191,13 +192,13 @@ export default function MyFeatureClient({ features }: Props) {
     }
 
     return (
-        <div className={styles.container}>
+        <div className="space-y-4">
             {error && <p className="form-error">{error}</p>}
-            <button className="btn btn-primary" onClick={handleCreate} disabled={loading}>
+            <Button onClick={handleCreate} disabled={loading}>
                 {loading ? "Creating..." : "Create"}
-            </button>
+            </Button>
             {features.map(f => (
-                <div key={f.id} className="card">
+                <div key={f.id} className="rounded-lg border border-edge bg-card p-6 shadow-md">
                     {/* Feature content */}
                 </div>
             ))}
@@ -218,9 +219,7 @@ export default function MyComponent() {
 }
 ```
 
-For shared primitives (`.btn`, `.card`, `.form-*`), use the global class names from `globals.css`.
-
-> **Legacy:** Some components still use CSS Modules (`.module.css`). These are tolerated but Tailwind classes are preferred for new work. See [CSS Conventions](css-conventions.md).
+> **Convention:** CSS Modules have been fully eliminated. All styling uses Tailwind utility classes. See [Design System Guide](../guides/design-system.md).
 
 ### 8. Write Tests
 

@@ -58,7 +58,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  {/* Tabs */}
  <div className="mb-6 flex gap-1 border-b border-edge">
  <button
- className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="browse" ?"border-forest text-forest" :"border-transparent text-muted hover:text-ink"}`}
+ className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="browse" ?"border-forest text-forest" :"border-transparent text-ink-light hover:text-ink"}`}
  onClick={() => setTab("browse")}
  >
  🌐 Browse All
@@ -67,7 +67,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  </span>
  </button>
  <button
- className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="mine" ?"border-forest text-forest" :"border-transparent text-muted hover:text-ink"}`}
+ className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="mine" ?"border-forest text-forest" :"border-transparent text-ink-light hover:text-ink"}`}
  onClick={() => setTab("mine")}
  >
  ⭐ My Groups
@@ -129,7 +129,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  >
  {g.name}
  </Link>
- <div className="text-xs text-muted">
+ <div className="text-xs text-ink-light">
  {typeLabels[g.groupType] || g.groupType}
  {g.region && <> · {g.region}</>}
  </div>
@@ -143,7 +143,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  )}
  {/* Card Footer */}
  <div className="mt-auto flex items-center justify-between pt-3 border-t border-edge">
- <span className="text-xs text-muted">
+ <span className="text-xs text-ink-light">
  👥 {g.memberCount} member{g.memberCount !== 1 ?"s" :""}
  </span>
  {g.isMember ? (

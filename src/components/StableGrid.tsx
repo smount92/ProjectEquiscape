@@ -30,7 +30,7 @@ const FINISH_BADGE_CLASSES: Record<string, string> = {
  "Artist Resin": "bg-rose-50 text-rose-700 border-rose-200",
  "Test Run": "bg-cyan-50 text-cyan-700 border-cyan-200",
  "Decorator": "bg-emerald-50 text-emerald-700 border-emerald-200",
- "default": "bg-stone-100 text-stone-600 border-stone-200",
+ "default": "bg-stone-100 text-ink-light border-stone-200",
 };
 
 const containerVariants = {
@@ -192,7 +192,7 @@ export default function StableGrid({
            className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
           />
          ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-400">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted">
            <span className="text-4xl opacity-50">🐴</span>
            <span className="text-xs font-medium">No photo</span>
           </div>
@@ -221,7 +221,7 @@ export default function StableGrid({
          <h3 className="truncate font-serif text-lg font-bold text-stone-800">
           {horse.customName}
          </h3>
-         <p className="mt-0.5 truncate text-sm text-stone-500">{horse.refName}</p>
+         <p className="mt-0.5 truncate text-sm text-ink-light">{horse.refName}</p>
 
          {/* Badge row */}
          <div className="mt-2 flex flex-wrap gap-1.5">
@@ -234,17 +234,17 @@ export default function StableGrid({
          </div>
 
          {/* Metadata */}
-         <div className="mt-2 flex items-center gap-2 text-xs text-stone-400">
+         <div className="mt-2 flex items-center gap-2 text-xs text-ink-light">
           <span>{formatDate(horse.createdAt)}</span>
           {horse.sculptor && <span>· ✂️ {horse.sculptor}</span>}
          </div>
          {horse.releaseLine && (
-          <div className="mt-0.5 truncate text-[0.7rem] text-stone-400">
+          <div className="mt-0.5 truncate text-[0.7rem] text-muted">
            🎨 {horse.releaseLine}
           </div>
          )}
          {horse.collectionName && (
-          <div className="mt-1 truncate text-[0.7rem] text-stone-400">
+          <div className="mt-1 truncate text-[0.7rem] text-muted">
            📁 {horse.collectionName}
           </div>
          )}

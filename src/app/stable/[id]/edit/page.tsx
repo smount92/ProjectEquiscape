@@ -632,7 +632,7 @@ export default function EditHorsePage() {
 
  return (
  <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
- <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
  /

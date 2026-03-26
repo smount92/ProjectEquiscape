@@ -91,12 +91,12 @@ export default async function UpgradePage({
                         <>Upgrade to <span className="text-forest">MHH Pro</span></>
                     )}
                 </h1>
-                <p className="mt-3 text-base text-stone-500">
+                <p className="mt-3 text-base text-ink-light">
                     {tier === "pro"
                         ? "Thank you for supporting Model Horse Hub! Here's what's included in your plan."
                         : "Take your collection management to the next level with premium tools and AI insights."}
                 </p>
-                <p className="mt-2 inline-block rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-500">
+                <p className="mt-2 inline-block rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-ink-light">
                     Current plan: <span className={tier === 'pro' ? 'font-bold text-amber-600' : 'font-bold'}>{tier === 'pro' ? '💎 Pro' : 'Free'}</span>
                 </p>
             </div>
@@ -106,22 +106,22 @@ export default async function UpgradePage({
                 {/* Free tier */}
                 <div className="rounded-xl border border-edge bg-card p-8 shadow-md">
                     <div className="mb-4">
-                        <span className="text-sm font-semibold uppercase tracking-wider text-stone-400">Free</span>
+                        <span className="text-sm font-semibold uppercase tracking-wider text-muted">Free</span>
                         <div className="mt-2 flex items-baseline gap-1">
                             <span className="text-3xl font-bold">$0</span>
-                            <span className="text-sm text-stone-400">/forever</span>
+                            <span className="text-sm text-muted">/forever</span>
                         </div>
                     </div>
                     <ul className="space-y-3">
                         {FREE_FEATURES.map((feature) => (
                             <li key={feature} className="flex items-start gap-2 text-sm">
-                                <span className="mt-0.5 text-stone-400">✓</span>
+                                <span className="mt-0.5 text-muted">✓</span>
                                 <span>{feature}</span>
                             </li>
                         ))}
                     </ul>
                     {tier === "free" && (
-                        <div className="mt-6 rounded-lg bg-stone-100 py-2 text-center text-sm font-semibold text-stone-500">
+                        <div className="mt-6 rounded-lg bg-stone-100 py-2 text-center text-sm font-semibold text-ink-light">
                             Current Plan
                         </div>
                     )}
@@ -136,7 +136,7 @@ export default async function UpgradePage({
                         <span className="text-sm font-semibold uppercase tracking-wider text-amber-600">Pro</span>
                         <div className="mt-2 flex items-baseline gap-1">
                             <span className="text-3xl font-bold text-stone-800">$5</span>
-                            <span className="text-sm text-stone-500">/month</span>
+                            <span className="text-sm text-ink-light">/month</span>
                         </div>
                     </div>
                     <ul className="space-y-3">
@@ -145,7 +145,7 @@ export default async function UpgradePage({
                                 <span className="mt-0.5">{feature.icon}</span>
                                 <div>
                                     <span className="font-semibold text-stone-800">{feature.title}</span>
-                                    <span className="text-stone-600"> — {feature.description}</span>
+                                    <span className="text-ink-light"> — {feature.description}</span>
                                 </div>
                             </li>
                         ))}
@@ -169,19 +169,19 @@ export default async function UpgradePage({
                 <div className="space-y-4">
                     <div className="rounded-lg border border-edge bg-card p-4">
                         <h3 className="font-semibold">Can I cancel anytime?</h3>
-                        <p className="mt-1 text-sm text-stone-500">
+                        <p className="mt-1 text-sm text-ink-light">
                             Yes! Cancel from your Stripe billing portal anytime. Your Pro features stay active until the end of the billing period.
                         </p>
                     </div>
                     <div className="rounded-lg border border-edge bg-card p-4">
                         <h3 className="font-semibold">Will I lose my data if I downgrade?</h3>
-                        <p className="mt-1 text-sm text-stone-500">
+                        <p className="mt-1 text-sm text-ink-light">
                             Never. All your horses, photos, and provenance data are safe. Extra detail photos become view-only until you re-subscribe.
                         </p>
                     </div>
                     <div className="rounded-lg border border-edge bg-card p-4">
                         <h3 className="font-semibold">How does the Stablemaster AI work?</h3>
-                        <p className="mt-1 text-sm text-stone-500">
+                        <p className="mt-1 text-sm text-ink-light">
                             On the 1st of each month, our AI analyzes your collection against market data and sends you a personalized report via email.
                         </p>
                     </div>
@@ -190,7 +190,7 @@ export default async function UpgradePage({
 
             {/* Back link */}
             <div className="mt-12 text-center">
-                <Link href="/dashboard" className="text-sm text-stone-400 no-underline hover:text-stone-600">
+                <Link href="/dashboard" className="text-sm text-muted no-underline hover:text-ink-light">
                     ← Back to Dashboard
                 </Link>
             </div>

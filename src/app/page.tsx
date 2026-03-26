@@ -333,12 +333,12 @@ export default function LandingPage() {
  <h2 className="text-[clamp(1.5rem, 3.5vw, 2.5rem)] mb-6 leading-[1.2] font-extrabold">
  Every Horse Has a Story. <span className="text-forest">Hoofprint™ Tells It.</span>
  </h2>
- <p className="text-muted mb-4 text-base leading-[1.7]">
+ <p className="text-ink-light mb-4 text-base leading-[1.7]">
  Imagine a permanent digital identity for every model horse. From the moment a blank resin is
  cast, through the artist&apos;s brushstrokes, to the collector who treasures it for years — and
  the next collector after that.
  </p>
- <p className="text-muted mb-4 text-base leading-[1.7]">
+ <p className="text-ink-light mb-4 text-base leading-[1.7]">
  Hoofprint™ is the first-ever living provenance system for model horses. Photos, ownership
  transfers, customization records, and show results all follow the horse — not the owner. Like a
  passport that never expires.

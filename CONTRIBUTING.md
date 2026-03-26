@@ -5,7 +5,6 @@
 ### TypeScript
 
 - **Strict mode** is enabled in `tsconfig.json`
-- **Strict mode** is enabled in `tsconfig.json`
 - **Generated database types** via `npm run gen-types` → `src/lib/types/database.generated.ts` — all three Supabase clients (`createClient`, `getAdminClient`) are typed with the `Database` generic
 - **Do not** use `as unknown as` casts on Supabase query results in production code — let TypeScript infer types from the typed client. The only acceptable uses are: test mocks, CSV row parsing, and `Json` → concrete type conversions
 - When nullable DB fields (e.g., `finish_type`, `condition_grade`) are passed to components expecting strings, coerce with `?? "default"` rather than casting
@@ -55,7 +54,9 @@ export async function doSomething(data: { ... }): Promise<{ success: boolean; er
 - Always `"use client"` at top
 - Use `useState` for loading/error states
 - Import server actions directly — Next.js handles serialization
-- **Modals MUST use `createPortal(overlay, document.body)`** from `react-dom` to avoid CSS containment issues from parent transforms
+- **Modals MUST use `<Dialog>` from `@/components/ui/dialog`** (shadcn/Radix) — NOT `createPortal`. Exception: `PhotoLightbox.tsx` retains `createPortal` for custom keyboard navigation
+- **Form inputs MUST use shadcn/ui** primitives (`<Input>`, `<Textarea>`, `<Select>`) — NOT raw `<input>` elements or `.form-input` classes
+- **Use Framer Motion** for tactile micro-interactions (`whileTap`, `whileHover`, `staggerChildren`)
 
 ### CSS Architecture
 
@@ -75,10 +76,20 @@ The project uses **Tailwind CSS v4** for styling:
 
 ### Database
 
-- Migrations in `supabase/migrations/` — **sequential numbering** (currently at 097)
+- Migrations in `supabase/migrations/` — **sequential numbering** (currently at 102)
 - Always add **RLS policies** to new tables
 - Add **foreign key indexes** for any new FK columns
 - Use **soft delete** (tombstone) when records are referenced by other tables
+
+### Design System
+
+All UI work MUST follow the Design System Guide: [`docs/guides/design-system.md`](docs/guides/design-system.md)
+
+**Hard Rules:**
+1. **No custom page containers.** Every page must use one of the 4 Layout Archetypes (`ExplorerLayout`, `ScrapbookLayout`, `CommandCenterLayout`, `FocusLayout`).
+2. **No inline styles.** `style={{...}}` is forbidden for layout, padding, or colors.
+3. **Use shadcn/ui components.** Raw `<input>`, `<select>`, `<button>` elements are forbidden except inside shadcn component primitives.
+4. **No pure black text.** Use `text-ink` or `text-stone-900`, never `text-black` or `#000`.
 
 ## Commit Conventions
 
@@ -119,9 +130,9 @@ Husky runs unit tests on every commit. If tests fail, the commit is rejected.
 | Pages | `page.tsx` in route folder | `src/app/dashboard/page.tsx` |
 | Server actions | `kebab-case.ts` | `src/app/actions/art-studio.ts` |
 | Components | `PascalCase.tsx` | `src/components/CommissionTimeline.tsx` |
-| CSS Modules | `ComponentName.module.css` | `src/components/ChatThread.module.css` |
+| CSS Modules | `ComponentName.module.css` | **Legacy — do not create new** |
 | Utility files | `camelCase.ts` | `src/lib/utils/rateLimit.ts` |
-| Migrations | `NNN_description.sql` | `supabase/migrations/089_commission_wip_photos.sql` |
+| Migrations | `NNN_description.sql` | `supabase/migrations/102_pro_rls.sql` |
 
 ## Security Checklist
 

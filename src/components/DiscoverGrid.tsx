@@ -131,12 +131,12 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  {TAGS.map((tag) => (
  <button
  key={tag.key}
- className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${activeTag === tag.key ?"bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :"border-edge text-muted hover:border-forest hover:text-ink bg-[rgba(0,0,0,0.03)]"}`}
+ className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${activeTag === tag.key ?"bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :"border-edge text-ink-light hover:border-forest hover:text-ink bg-[rgba(0,0,0,0.03)]"}`}
  onClick={() => setActiveTag(tag.key)}
  >
  <span>{tag.emoji}</span>
  <span>{tag.label}</span>
- <span className="text-[0.7rem] opacity-60">{tagCounts[tag.key]}</span>
+ <span className="text-[0.7rem]">{tagCounts[tag.key]}</span>
  </button>
  ))}
  </div>
@@ -198,11 +198,11 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  )}
  </div>
  {u.bio && (
- <div className="text-muted flex gap-4 text-xs italic">
+ <div className="text-ink-light flex gap-4 text-xs italic">
  {u.bio.length > 80 ? `${u.bio.slice(0, 80)}…` : u.bio}
  </div>
  )}
- <div className="text-muted flex gap-4 text-xs">
+ <div className="text-ink-light flex gap-4 text-xs">
  <span>
  🐴 {publicCount} model{publicCount !== 1 ?"s" :""}
  </span>
