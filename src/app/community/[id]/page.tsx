@@ -292,15 +292,15 @@ editionSize: rawPedigree.edition_size,
  <span>{horse.custom_name}</span>
  </nav>
 
- {/* Two-column layout: Gallery | Info */}
- <div className="grid-cols-[1fr_420px] animate-fade-in-up grid items-stretch gap-0 overflow-hidden rounded-lg shadow-lg">
+ {/* Two-column layout: Gallery | Ledger Card */}
+ <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
  {/* Left: Gallery */}
- <div className="bg-[var(--color-bg-primary)] p-6">
+ <div className="overflow-hidden rounded-2xl shadow-md">
  <PassportGallery images={galleryImages} />
  </div>
 
- {/* Right: Info sidebar */}
- <div className="flex min-h-[100%] flex-col gap-2 bg-[#C8B596] px-6 py-8">
+ {/* Right: The Ledger Card */}
+ <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-stone-200 bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
  {/* Stolen/Missing Banner */}
  {horse.trade_status ==="Stolen/Missing" && (
  <div
@@ -318,7 +318,7 @@ editionSize: rawPedigree.edition_size,
 
  {/* Free-floating Title — no card wrapper */}
  <div className="p-0">
- <h1 className="mb-1 text-2xl leading-[1.15] font-bold tracking-tight text-[#2D2318]">
+ <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-[#2D2318] md:text-5xl">
  {horse.custom_name}
  </h1>
  {refInfo ? (

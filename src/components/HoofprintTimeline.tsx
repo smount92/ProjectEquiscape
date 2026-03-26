@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { useRouter } from"next/navigation";
 import Link from"next/link";
+import { motion } from"framer-motion";
 import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from"@/app/actions/hoofprint";
 import type { TimelineEvent, OwnershipRecord } from"@/app/actions/hoofprint";
 import { Input } from "@/components/ui/input";
@@ -212,9 +213,14 @@ export default function HoofprintTimeline({
  )}
  </div>
  ) : (
- <div className="relative pl-[32px]">
+ <motion.div
+  className="relative pl-[32px]"
+  initial="hidden"
+  animate="visible"
+  variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
+ >
  {timeline.map((event) => (
- <div key={event.id} className="relative pb-6">
+ <motion.div key={event.id} className="relative pb-6" variants={{ hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 200, damping: 25 } } }}>
  <div className="pb-6-dot relative">{EVENT_ICONS[event.eventType] ||"📋"}</div>
  <div className="flex items-start justify-between">
  <div>
@@ -249,9 +255,9 @@ export default function HoofprintTimeline({
  </button>
  )}
  </div>
- </div>
+ </motion.div>
  ))}
- </div>
+ </motion.div>
  )}
  </div>
  );
