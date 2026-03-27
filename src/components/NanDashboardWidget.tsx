@@ -14,7 +14,7 @@ export default async function NanDashboardWidget() {
  const currentYear = new Date().getFullYear();
 
  return (
- <details className="nan-dashboard-widget" id="nan-dashboard">
+ <details className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm" id="nan-dashboard">
  <summary className="hidden">
  🏆 NAN {currentYear} Qualification Status
  {totalQualified > 0 && (
@@ -60,7 +60,7 @@ export default async function NanDashboardWidget() {
  </div>
  <Link
  href="/shows/planner"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="mt-4 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-50"
  >
  📋 View Full NAN Planner
  </Link>

@@ -628,9 +628,9 @@ export default function AddHorsePage() {
  ================================================================ */}
  {currentStep === 0 && (
  <div className="step-content" key="step-0">
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] relative overflow-visible rounded-lg border shadow-md transition-all">
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] overflow-visible-icon relative rounded-lg border shadow-md transition-all">
+ <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+ <div className="mb-6 flex items-center gap-3">
+ <div className="text-2xl">
  📸
  </div>
  <div>
@@ -884,9 +884,9 @@ export default function AddHorsePage() {
  — Use CSS display instead of unmounting to preserve component state
  ================================================================ */}
  <div className="step-content" key="step-1" style={{ display: currentStep === 1 ?"block" :"none" }}>
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] relative overflow-visible rounded-lg border shadow-md transition-all">
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] overflow-visible-icon relative rounded-lg border shadow-md transition-all">
+ <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+ <div className="mb-6 flex items-center gap-3">
+ <div className="text-2xl">
  🔗
  </div>
  <div>
@@ -973,16 +973,16 @@ export default function AddHorsePage() {
  ================================================================ */}
  {currentStep === 2 && (
  <div className="step-content" key="step-2">
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] relative overflow-visible rounded-lg border shadow-md transition-all">
+ <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
  {/* Reference summary badge */}
  {selectedCatalogItem && (
- <div className="mt-4 mb-6 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-6 py-4 text-sm leading-relaxed">
+ <div className="mt-4 mb-6 rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 text-sm leading-relaxed">
  🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
  </div>
  )}
 
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] overflow-visible-icon relative rounded-lg border shadow-md transition-all">
+ <div className="mb-6 flex items-center gap-3">
+ <div className="text-2xl">
  🏷️
  </div>
  <div>
@@ -1344,7 +1344,7 @@ export default function AddHorsePage() {
  </div>
 
  {/* Community visibility selector */}
- <div className="bg-[rgba(44,85,69,0.04)] border-[rgba(44,85,69,0.12)] mt-6 rounded-lg border px-6 py-4">
+ <div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 px-6 py-4">
  <div
  className="flex items-center justify-between gap-2 gap-6"
  style={{ flexDirection:"column" }}
@@ -1398,12 +1398,12 @@ export default function AddHorsePage() {
  <div className="step-content" key="step-3">
  {/* Reference summary badge */}
  {selectedCatalogItem && (
- <div className="mt-4 mb-6 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-6 py-4 text-sm leading-relaxed">
+ <div className="mt-4 mb-6 rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 text-sm leading-relaxed">
  🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
  </div>
  )}
 
- <div className="bg-card border-edge border-[rgba(44,85,69,0.2)] relative overflow-hidden overflow-visible rounded-lg border shadow-md transition-all">
+ <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
  {/* Vault Header */}
  <div className="border-[rgba(240,160,108,0.2)] mb-8 flex items-center gap-4 border-b pb-6">
  <div className="vault-icon">🔒</div>

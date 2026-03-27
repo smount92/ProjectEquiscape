@@ -165,7 +165,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Judge Assignment Banner — always visible to assigned judges */}
  {isJudge && !isCreator && (
  <div
- className="animate-fade-in-up mb-6 rounded-lg border border-[rgba(139,92,246,0.3)] bg-gradient-to-br from-[rgba(139,92,246,0.15)] to-[rgba(245,158,11,0.1)] p-6 text-center shadow-md transition-all"
+ className="animate-fade-in-up mb-6 rounded-xl border border-stone-200 bg-white p-6 text-center shadow-sm"
  >
  <div className="mb-2 text-[2rem]">🏅</div>
  <h3 className="mb-2">You Are an Assigned Judge</h3>
@@ -187,7 +187,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
 
  {/* Entry Form */}
  {isOpen && (
- <div className="bg-[rgba(129,140,248,0.04)] border-[rgba(129,140,248,0.15)] animate-fade-in-up mb-8 rounded-lg border p-6">
+ <div className="animate-fade-in-up mb-8 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
  <h2 className="mb-4 text-lg">Enter Your Horse</h2>
  <ShowEntryForm
  showId={showId}
@@ -271,7 +271,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
 
  return (
  <div
- className="bg-card border-edge animate-fade-in-up rounded-lg border p-8 mb-6 shadow-md transition-all"
+ className="animate-fade-in-up rounded-xl border border-stone-200 bg-white p-8 mb-6 shadow-sm"
  >
  <h2 className="mb-2 text-xl text-center">
  🏆 <span className="text-forest">Results</span>
@@ -279,7 +279,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
 
  {/* Champion Banners */}
  {champions.map((entry) => (
- <div key={entry.id} className="animate-fade-in-up mb-4 rounded-lg border border-amber-200/30 bg-amber-50/30 p-4 text-center">
+ <div key={entry.id} className="animate-fade-in-up mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-center">
  <div className="mb-2 text-xl font-extrabold">
  {MEDAL_MAP[entry.placing!] ||"🏆"} {entry.placing}
  </div>
@@ -417,14 +417,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Judging Banner */}
  {isJudging && (
  <div
- className="bg-card border-edge animate-fade-in-up rounded-lg border shadow-md transition-all"
- style={{
- textAlign:"center",
- padding:"var(--space-lg)",
- marginBottom:"var(--space-lg)",
- background:"rgba(245, 158, 11, 0.1)",
- border:"1px solid rgba(245, 158, 11, 0.3)",
- }}
+ className="animate-fade-in-up mb-6 rounded-xl border border-stone-200 bg-white p-8 text-center shadow-sm"
  >
  <div className="text-[2rem]">🟡</div>
  <h3>Judging in Progress</h3>
@@ -474,17 +467,17 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
 
  {/* Entries Grid */}
  {entries.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="animate-fade-in-up rounded-xl border border-stone-200 bg-white px-8 py-12 text-center shadow-sm">
  <div className="mb-4 text-5xl">📸</div>
  <h2>No Entries Yet</h2>
  <p>Be the first to enter this show!</p>
  </div>
  ) : (
- <div className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] animate-fade-in-up flex flex-col gap-0 overflow-hidden rounded-lg border">
+ <div className="animate-fade-in-up flex flex-col gap-0 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
  {sortedEntries.map((entry, index) => (
  <div
  key={entry.id}
- className="border-[var(--color-border, rgba(0, 0, 0, 0.06))] flex items-center gap-4 border-b px-6 py-4 transition-colors"
+ className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-stone-50"
  >
  <div className="text-muted min-w-[32px] text-center text-lg font-bold">
  {isExpertJudged && show.status ==="closed" && entry.placing
