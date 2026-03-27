@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-03-26
+> **Last Updated:** 2026-03-27
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 
 // turbo-all
@@ -85,19 +85,17 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task C-2: Layout Unification Part 1 — Design System & Archetypes
+## ✅ Task C-2: Layout Unification Part 1 — Design System & Archetypes — DONE (2026-03-27)
 
 **Workflow:** `.agents/workflows/layout-unification-1-archetypes.md`
-**Status:** Not started
-**Scope:** Create design system docs + build 4 layout wrapper components (Explorer, Scrapbook, CommandCenter, Focus)
+**Status:** ✅ Complete — Design system docs created, 4 layout archetype components built
 
 ---
 
-## Task C-3: Layout Unification Part 2 — The Great Alignment
+## ✅ Task C-3: Layout Unification Part 2 — The Great Alignment — DONE (2026-03-27)
 
 **Workflow:** `.agents/workflows/layout-unification-2-alignment.md`
-**Status:** Not started (requires C-2 first)
-**Scope:** Refactor 48 page.tsx files to use layout archetypes, remove custom container divs
+**Status:** ✅ Complete — 55+ pages migrated to layout archetypes, only root landing page excluded. Build passes, 245 tests green.
 
 ---
 

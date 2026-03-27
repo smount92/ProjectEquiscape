@@ -68,3 +68,22 @@ MHH should feel warm, tactile, physical, and hobby-focused. Think of a beautiful
 - **Max width:** `max-w-2xl` (672px)
 - **Use for:** Add Horse, Edit Horse, Settings, Login, Signup, Contact, Claim
 - **Structure:** Back link + Title + Centered form content
+
+### Migration Status: ✅ COMPLETE (2026-03-27)
+
+All 55+ `page.tsx` files have been migrated to use the 4 layout archetypes. The only page retaining a bespoke layout is the root landing page (`page.tsx`), which has unique hero sections.
+
+**When creating a new page:** Import the appropriate layout component from `@/components/layouts/` and wrap your page content. Never create custom `mx-auto max-w-[...]` container divs.
+
+```tsx
+// ✅ Correct:
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+export default function MyPage() {
+    return <ExplorerLayout title="My Page">...</ExplorerLayout>;
+}
+
+// ❌ Forbidden:
+export default function MyPage() {
+    return <div className="mx-auto max-w-7xl px-6">...</div>;
+}
+```
