@@ -3,6 +3,7 @@ import { redirect, notFound } from"next/navigation";
 import Link from"next/link";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import CollectionManager from"@/components/CollectionManager";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 
@@ -85,11 +86,11 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  ? await supabase
  .from("user_horses")
  .select(
- `
- id, custom_name, finish_type, condition_grade, created_at, trade_status,
- catalog_items:catalog_id(title, maker, item_type),
- horse_images(image_url, angle_profile)
- `,
+  `
+  id, custom_name, finish_type, condition_grade, created_at, trade_status,
+  catalog_items:catalog_id(title, maker, item_type),
+  horse_images(image_url, angle_profile)
+  `,
  )
  .eq("owner_id", user.id)
  .in("id", allHorseIds)
@@ -154,136 +155,135 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  });
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
- {/* Breadcrumb */}
- <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
- <Link href="/dashboard">Digital Stable</Link>
- <span className="separator" aria-hidden="true">
- /
- </span>
- <span>📁 {collection.name}</span>
- </nav>
-
- {/* Collection Header */}
- <div className="collection-hero animate-fade-in-up max-sm:flex-col max-sm:p-6 max-sm:text-center">
- <div className="shrink-0 text-[2.5rem]">📁</div>
- <div className="text-ink mb-1 text-2xl font-bold">
- <h1>{collection.name}</h1>
- {collection.description && (
- <p className="mb-1 text-sm text-[var(--color-text-secondary)]">{collection.description}</p>
- )}
- <span className="text-muted text-sm">
- {horseCards.length} model{horseCards.length !== 1 ?"s" :""} in this collection
- </span>
- <div className="mt-2">
- <CollectionManager collection={collection} />
- </div>
- </div>
- </div>
-
- {/* 🔒 Collection Stats — PRIVATE analytics */}
- {horseCards.length > 0 && (
- <div className="grid-cols-[repeat(3,1fr)] animate-fade-in-up mb-8 grid gap-4">
- <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
- <div className="text-2xl leading-none">🐴</div>
- <div className="analytics-value max-[400px]:text-xl">
- {horseCards.length}
- </div>
- <div className="text-muted text-xs font-medium tracking-[0.05em] uppercase">Models</div>
- </div>
- <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
- <div className="text-2xl leading-none">💰</div>
- <div className="analytics-value max-[400px]:text-xl">
- {collectionVaultValue > 0
- ? `$${collectionVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
- :"—"}
- </div>
- <div className="text-muted text-xs font-medium tracking-[0.05em] uppercase">
- Collection Value
- </div>
- </div>
- <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
- <div className="text-2xl leading-none">📊</div>
- <div className="analytics-value max-[400px]:text-xl">
- {avgValue > 0
- ? `$${avgValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
- :"—"}
- </div>
- <div className="text-muted text-xs font-medium tracking-[0.05em] uppercase">Avg. Value</div>
- </div>
- </div>
- )}
-
- {/* Grid */}
- {horseCards.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
- <div className="mb-4 text-5xl">📂</div>
- <h2>This collection is empty</h2>
- <p>
- Add models to this collection from the &quot;Add to Stable&quot; form or by editing an existing
- model.
- </p>
- <Link
- href="/add-horse"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ <ExplorerLayout
+  title={<>📁 {collection.name}</>}
+  description={collection.description || undefined}
  >
- 🐴 Add to Stable
- </Link>
- </div>
- ) : (
- <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] animate-fade-in-up grid gap-6">
- {horseCards.map((horse) => (
- <Link
- key={horse.id}
- href={`/stable/${horse.id}`}
- className="group overflow-hidden rounded-lg border border-edge bg-card shadow-md transition-all hover:shadow-lg"
- id={`collection-horse-${horse.id}`}
- >
- <div className="relative aspect-square overflow-hidden bg-[rgba(0,0,0,0.03)]">
- {horse.thumbnailUrl ? (
- // eslint-disable-next-line @next/next/no-img-element
- <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
- ) : (
- <div className="flex h-full flex-col items-center justify-center gap-2 text-muted">
- <span className="text-4xl">🐴</span>
- <span className="text-sm">No photo</span>
- </div>
- )}
- <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
- {horse.finishType}
- </span>
- {horse.tradeStatus ==="For Sale" && (
- <span className="trade-badge border border-[rgba(34,197,94,0.5)] bg-[rgba(34,197,94,0.85)] text-white">
- 💲 For Sale
- </span>
- )}
- {horse.tradeStatus ==="Open to Offers" && (
- <span className="trade-badge border border-[rgba(59,130,246,0.5)] bg-[rgba(59,130,246,0.85)] text-white">
- 🤝 Open to Offers
- </span>
- )}
- </div>
- <div className="px-4 py-3">
- <div className="font-semibold text-ink">
- {horse.customName}
- </div>
- <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
- {horse.refName}
- </div>
- {horse.releaseLine && (
- <div className="mt-[2px] overflow-hidden text-xs text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-70">
- 🎨 {horse.releaseLine}
- </div>
- )}
- <div className="border-edge text-muted mt-2 flex items-center justify-between border-t pt-2 text-xs">
- <span>{horse.conditionGrade}</span>
- <span>{formatDate(horse.createdAt)}</span>
- </div>
- </div>
- </Link>
- ))}
- </div>
- )}
- </div>
+  {/* Breadcrumb */}
+  <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+  <Link href="/dashboard">Digital Stable</Link>
+  <span className="separator" aria-hidden="true">
+   /
+  </span>
+  <span>📁 {collection.name}</span>
+  </nav>
+
+  {/* Collection Header */}
+  <div className="collection-hero animate-fade-in-up max-sm:flex-col max-sm:p-6 max-sm:text-center">
+  <div className="shrink-0 text-[2.5rem]">📁</div>
+  <div className="text-ink mb-1 text-2xl font-bold">
+   <span className="text-muted text-sm">
+   {horseCards.length} model{horseCards.length !== 1 ?"s" :""} in this collection
+   </span>
+   <div className="mt-2">
+   <CollectionManager collection={collection} />
+   </div>
+  </div>
+  </div>
+
+  {/* 🔒 Collection Stats — PRIVATE analytics */}
+  {horseCards.length > 0 && (
+  <div className="grid-cols-[repeat(3,1fr)] animate-fade-in-up mb-8 grid gap-4">
+   <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
+   <div className="text-2xl leading-none">🐴</div>
+   <div className="analytics-value max-[400px]:text-xl">
+    {horseCards.length}
+   </div>
+   <div className="text-muted text-xs font-medium tracking-[0.05em] uppercase">Models</div>
+   </div>
+   <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
+   <div className="text-2xl leading-none">💰</div>
+   <div className="analytics-value max-[400px]:text-xl">
+    {collectionVaultValue > 0
+    ? `$${collectionVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    :"—"}
+   </div>
+   <div className="text-muted text-xs font-medium tracking-[0.05em] uppercase">
+    Collection Value
+   </div>
+   </div>
+   <div className="bg-card border-edge relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
+   <div className="text-2xl leading-none">📊</div>
+   <div className="analytics-value max-[400px]:text-xl">
+    {avgValue > 0
+    ? `$${avgValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+    :"—"}
+   </div>
+   <div className="text-muted text-xs font-medium tracking-[0.05em] uppercase">Avg. Value</div>
+   </div>
+  </div>
+  )}
+
+  {/* Grid */}
+  {horseCards.length === 0 ? (
+  <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+   <div className="mb-4 text-5xl">📂</div>
+   <h2>This collection is empty</h2>
+   <p>
+   Add models to this collection from the &quot;Add to Stable&quot; form or by editing an existing
+   model.
+   </p>
+   <Link
+   href="/add-horse"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   >
+   🐴 Add to Stable
+   </Link>
+  </div>
+  ) : (
+  <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] animate-fade-in-up grid gap-6">
+   {horseCards.map((horse) => (
+   <Link
+    key={horse.id}
+    href={`/stable/${horse.id}`}
+    className="group overflow-hidden rounded-lg border border-edge bg-card shadow-md transition-all hover:shadow-lg"
+    id={`collection-horse-${horse.id}`}
+   >
+    <div className="relative aspect-square overflow-hidden bg-[rgba(0,0,0,0.03)]">
+    {horse.thumbnailUrl ? (
+     // eslint-disable-next-line @next/next/no-img-element
+     <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+    ) : (
+     <div className="flex h-full flex-col items-center justify-center gap-2 text-muted">
+     <span className="text-4xl">🐴</span>
+     <span className="text-sm">No photo</span>
+     </div>
+    )}
+    <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
+     {horse.finishType}
+    </span>
+    {horse.tradeStatus ==="For Sale" && (
+     <span className="trade-badge border border-[rgba(34,197,94,0.5)] bg-[rgba(34,197,94,0.85)] text-white">
+     💲 For Sale
+     </span>
+    )}
+    {horse.tradeStatus ==="Open to Offers" && (
+     <span className="trade-badge border border-[rgba(59,130,246,0.5)] bg-[rgba(59,130,246,0.85)] text-white">
+     🤝 Open to Offers
+     </span>
+    )}
+    </div>
+    <div className="px-4 py-3">
+    <div className="font-semibold text-ink">
+     {horse.customName}
+    </div>
+    <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
+     {horse.refName}
+    </div>
+    {horse.releaseLine && (
+     <div className="mt-[2px] overflow-hidden text-xs text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-70">
+     🎨 {horse.releaseLine}
+     </div>
+    )}
+    <div className="border-edge text-muted mt-2 flex items-center justify-between border-t pt-2 text-xs">
+     <span>{horse.conditionGrade}</span>
+     <span>{formatDate(horse.createdAt)}</span>
+    </div>
+    </div>
+   </Link>
+   ))}
+  </div>
+  )}
+ </ExplorerLayout>
  );
 }

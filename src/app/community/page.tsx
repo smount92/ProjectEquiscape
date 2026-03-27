@@ -5,6 +5,7 @@ import { Suspense } from"react";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import ShowRingGrid from"@/components/ShowRingGrid";
 import FeaturedHorseCard from"@/components/FeaturedHorseCard";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 export const metadata = {
@@ -275,21 +276,13 @@ export default async function CommunityPage({
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
-  {/* Hero — renders immediately */}
-  <div className="animate-fade-in-up mb-8">
-  <h1 className="text-2xl font-bold tracking-tight">
-  🏆 The <span className="text-forest">Show Ring</span>
-  </h1>
-  <p className="mt-2 max-w-xl text-base text-ink-light">
-  Browse the latest models shared by collectors from around the world. Every horse has a story.
-  </p>
-  </div>
-
-  {/* Show Ring content streams in via Suspense */}
+ <ExplorerLayout
+  title={<>🏆 The <span className="text-forest">Show Ring</span></>}
+  description="Browse the latest models shared by collectors from around the world. Every horse has a story."
+ >
   <Suspense fallback={<ShowRingSkeleton />}>
   <ShowRingContent userId={user.id} searchParams={params} />
   </Suspense>
- </div>
+ </ExplorerLayout>
  );
 }

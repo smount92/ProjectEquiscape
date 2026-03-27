@@ -1,6 +1,7 @@
 import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
 import DiscoverGrid from"@/components/DiscoverGrid";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata = {
  title:"Discover Collectors — Model Horse Hub",
@@ -55,23 +56,15 @@ export default async function DiscoverPage() {
  const followedIds = new Set((followRows ?? []).map((r: { following_id: string }) => r.following_id));
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
- {/* Hero */}
- <div className="animate-fade-in-up mb-8">
- <h1 className="text-2xl font-bold tracking-tight">
- 👥 <span className="text-forest">Discover Collectors</span>
- </h1>
- <p className="mt-2 max-w-xl text-base text-ink-light">
- Find fellow collectors, browse their stables, and connect with the community.
- </p>
- <div className="mt-6 flex items-baseline gap-2">
- <span className="text-2xl font-bold text-forest">{activeUsers.length}</span>
- <span className="text-sm font-medium text-ink-light">Active Collectors</span>
- </div>
- </div>
-
- {/* Client-side searchable grid with tags */}
- <DiscoverGrid users={activeUsers} currentUserId={user.id} followedIds={Array.from(followedIds)} />
- </div>
+ <ExplorerLayout
+  title={<>👥 <span className="text-forest">Discover Collectors</span></>}
+  description="Find fellow collectors, browse their stables, and connect with the community."
+ >
+  <div className="mb-6 flex items-baseline gap-2">
+  <span className="text-2xl font-bold text-forest">{activeUsers.length}</span>
+  <span className="text-sm font-medium text-ink-light">Active Collectors</span>
+  </div>
+  <DiscoverGrid users={activeUsers} currentUserId={user.id} followedIds={Array.from(followedIds)} />
+ </ExplorerLayout>
  );
 }

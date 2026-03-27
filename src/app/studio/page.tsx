@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
 import { browseArtists } from"@/app/actions/art-studio";
 import ArtistBrowser from"@/components/ArtistBrowser";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 export const metadata = {
@@ -19,16 +20,11 @@ export default async function StudiosPage() {
  const artists = await browseArtists();
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
- <div className="animate-fade-in-up mb-8">
- <h1 className="text-2xl font-bold tracking-tight">
- 🎨 <span className="text-forest">Art Studios</span>
- </h1>
- <p className="mt-2 max-w-xl text-base text-ink-light">
- Find custom painters, sculptors, and tack makers.
- </p>
- </div>
- <ArtistBrowser artists={artists} />
- </div>
+ <ExplorerLayout
+  title={<>🎨 <span className="text-forest">Art Studios</span></>}
+  description="Find custom painters, sculptors, and tack makers."
+ >
+  <ArtistBrowser artists={artists} />
+ </ExplorerLayout>
  );
 }

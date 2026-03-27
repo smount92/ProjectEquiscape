@@ -4,6 +4,7 @@ import Link from"next/link";
 import type { Metadata } from"next";
 import { getPublicImageUrl } from"@/lib/utils/storage";
 import HelpIdRequestForm from"@/components/HelpIdRequestForm";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata: Metadata = {
  title:"Help Me ID This Model — Model Horse Hub",
@@ -86,134 +87,128 @@ export default async function HelpIdPage() {
  const resolvedRequests = requests.filter((r) => r.status ==="resolved");
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
- <div className="animate-fade-in-up">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div>
- <h1>
- <span className="text-forest">Help Me ID This Model</span>
- </h1>
- <p className="text-ink-light mt-1">Upload a mystery model and let the community help identify it</p>
- </div>
- <Link
- href="/community"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ <ExplorerLayout
+  title={<><span className="text-forest">Help Me ID This Model</span></>}
+  description="Upload a mystery model and let the community help identify it"
+  headerActions={
+  <Link
+   href="/community"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+  >
+   ← Back to Show Ring
+  </Link>
+  }
  >
- ← Back to Show Ring
- </Link>
- </div>
+  {/* Submit New Request Form */}
+  <HelpIdRequestForm />
 
- {/* Submit New Request Form */}
- <HelpIdRequestForm />
+  {/* Open Requests */}
+  {openRequests.length > 0 && (
+  <section className="mt-12">
+   <h2 className="mb-6 text-lg font-bold">🔍 Open Requests ({openRequests.length})</h2>
+   <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
+   {openRequests.map((req) => (
+   <Link
+    key={req.id}
+    href={`/community/help-id/${req.id}`}
+    className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
+    id={`help-id-${req.id}`}
+   >
+    <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
+    {signedUrlMap.get(req.id) ? (
+    <img
+     src={signedUrlMap.get(req.id)!}
+     alt="Mystery model"
+     className="h-full w-full object-cover"
+    />
+    ) : (
+    <div className="flex h-full w-full items-center justify-center text-4xl">
+     🐴
+    </div>
+    )}
+    <span className="absolute top-2 right-2 rounded-full bg-[rgba(240,208,108,0.9)] px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+     Open
+    </span>
+    </div>
+    <div className="flex flex-1 flex-col gap-2 p-4">
+    <p className="text-ink-light line-clamp-2 text-sm leading-relaxed">
+     {req.description
+     ? req.description.length > 100
+     ? req.description.substring(0, 100) +"…"
+     : req.description
+     :"No description provided"}
+    </p>
+    <div className="text-muted mt-auto flex items-center justify-between text-xs">
+     <span>by {req.userName}</span>
+     <span>
+     💬 {suggestionCounts.get(req.id) || 0} suggestion
+     {(suggestionCounts.get(req.id) || 0) !== 1 ?"s" :""}
+     </span>
+    </div>
+    </div>
+   </Link>
+   ))}
+   </div>
+  </section>
+  )}
 
- {/* Open Requests */}
- {openRequests.length > 0 && (
- <section className="mt-12">
- <h2 className="mb-6 text-lg font-bold">🔍 Open Requests ({openRequests.length})</h2>
- <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
- {openRequests.map((req) => (
- <Link
- key={req.id}
- href={`/community/help-id/${req.id}`}
- className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
- id={`help-id-${req.id}`}
- >
- <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
- {signedUrlMap.get(req.id) ? (
- <img
- src={signedUrlMap.get(req.id)!}
- alt="Mystery model"
- className="h-full w-full object-cover"
- />
- ) : (
- <div className="flex h-full w-full items-center justify-center text-4xl">
- 🐴
- </div>
- )}
- <span className="absolute top-2 right-2 rounded-full bg-[rgba(240,208,108,0.9)] px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
- Open
- </span>
- </div>
- <div className="flex flex-1 flex-col gap-2 p-4">
- <p className="text-ink-light line-clamp-2 text-sm leading-relaxed">
- {req.description
- ? req.description.length > 100
- ? req.description.substring(0, 100) +"…"
- : req.description
- :"No description provided"}
- </p>
- <div className="text-muted mt-auto flex items-center justify-between text-xs">
- <span>by {req.userName}</span>
- <span>
- 💬 {suggestionCounts.get(req.id) || 0} suggestion
- {(suggestionCounts.get(req.id) || 0) !== 1 ?"s" :""}
- </span>
- </div>
- </div>
- </Link>
- ))}
- </div>
- </section>
- )}
+  {/* Resolved Requests */}
+  {resolvedRequests.length > 0 && (
+  <section className="mt-12">
+   <h2 className="text-ink-light mb-6 text-lg font-bold">
+   ✅ Resolved ({resolvedRequests.length})
+   </h2>
+   <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
+   {resolvedRequests.map((req) => (
+   <Link
+    key={req.id}
+    href={`/community/help-id/${req.id}`}
+    className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
+    id={`help-id-${req.id}`}
+   >
+    <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
+    {signedUrlMap.get(req.id) ? (
+    <img
+     src={signedUrlMap.get(req.id)!}
+     alt="Identified model"
+     className="h-full w-full object-cover"
+    />
+    ) : (
+    <div className="flex h-full w-full items-center justify-center text-4xl">
+     🐴
+    </div>
+    )}
+    <span className="absolute top-2 right-2 rounded-full bg-emerald-500/80 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+     Resolved
+    </span>
+    </div>
+    <div className="flex flex-1 flex-col gap-2 p-4">
+    <p className="text-ink-light line-clamp-2 text-sm leading-relaxed">
+     {req.description
+     ? req.description.length > 100
+     ? req.description.substring(0, 100) +"…"
+     : req.description
+     :"No description"}
+    </p>
+    <div className="text-muted mt-auto flex items-center justify-between text-xs">
+     <span>by {req.userName}</span>
+     <span>💬 {suggestionCounts.get(req.id) || 0}</span>
+    </div>
+    </div>
+   </Link>
+   ))}
+   </div>
+  </section>
+  )}
 
- {/* Resolved Requests */}
- {resolvedRequests.length > 0 && (
- <section className="mt-12">
- <h2 className="text-ink-light mb-6 text-lg font-bold">
- ✅ Resolved ({resolvedRequests.length})
- </h2>
- <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
- {resolvedRequests.map((req) => (
- <Link
- key={req.id}
- href={`/community/help-id/${req.id}`}
- className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
- id={`help-id-${req.id}`}
- >
- <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
- {signedUrlMap.get(req.id) ? (
- <img
- src={signedUrlMap.get(req.id)!}
- alt="Identified model"
- className="h-full w-full object-cover"
- />
- ) : (
- <div className="flex h-full w-full items-center justify-center text-4xl">
- 🐴
- </div>
- )}
- <span className="absolute top-2 right-2 rounded-full bg-emerald-500/80 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
- Resolved
- </span>
- </div>
- <div className="flex flex-1 flex-col gap-2 p-4">
- <p className="text-ink-light line-clamp-2 text-sm leading-relaxed">
- {req.description
- ? req.description.length > 100
- ? req.description.substring(0, 100) +"…"
- : req.description
- :"No description"}
- </p>
- <div className="text-muted mt-auto flex items-center justify-between text-xs">
- <span>by {req.userName}</span>
- <span>💬 {suggestionCounts.get(req.id) || 0}</span>
- </div>
- </div>
- </Link>
- ))}
- </div>
- </section>
- )}
-
- {openRequests.length === 0 && resolvedRequests.length === 0 && (
- <div
- className="bg-card border-edge mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
- >
- <p className="mb-4 text-[2rem]">🔍</p>
- <p className="text-ink-light">No ID requests yet. Be the first to submit one!</p>
- </div>
- )}
- </div>
- </div>
+  {openRequests.length === 0 && resolvedRequests.length === 0 && (
+  <div
+   className="bg-card border-edge mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
+  >
+   <p className="mb-4 text-[2rem]">🔍</p>
+   <p className="text-ink-light">No ID requests yet. Be the first to submit one!</p>
+  </div>
+  )}
+ </ExplorerLayout>
  );
 }

@@ -2,6 +2,7 @@ import Link from"next/link";
 import { Suspense } from"react";
 import { searchMarketPrices } from"@/app/actions/market";
 import MarketFilters from"@/components/MarketFilters";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 const formatCurrency = (value: number) =>
  new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits: 0 }).format(value);
@@ -81,152 +82,143 @@ export default async function MarketPricePage({
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
- <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[900]">
- <div className="animate-fade-in-up">
- {/* Header */}
- <div className="mb-12 text-center">
- <h1 className="text-2xl font-bold tracking-tight">
- 📈 Model Horse <span className="text-forest">Price Guide</span>
- </h1>
- <p className="mt-2 text-base text-ink-light">
- The Blue Book — Real sale data from real collectors
- </p>
- </div>
-
- {/* Filters (Client Component) */}
- <Suspense fallback={null}>
- <MarketFilters />
- </Suspense>
-
- {/* Results (Server-rendered) */}
- {items.length === 0 ? (
- <div
- className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
+ <ExplorerLayout
+  title={<>📈 Model Horse <span className="text-forest">Price Guide</span></>}
+  description="The Blue Book — Real sale data from real collectors"
+  controls={
+  <Suspense fallback={null}>
+   <MarketFilters />
+  </Suspense>
+  }
  >
- <div className="mb-4 text-[3rem]">📊</div>
- <h3 className="mb-2">
- {query || itemType !=="all"
- ?"No matching price data"
- :"The Blue Book Grows With Every Sale"}
- </h3>
- <p className="text-ink-light mx-auto max-w-[400]">
- {query || itemType !=="all"
- ?"Try broadening your search or changing the filter."
- :"Complete a transaction to contribute market data. Prices appear here after verified sales."}
- </p>
- </div>
- ) : (
- <>
- <div className="mb-4">
- <span className="text-muted text-sm">
- {total} item{total !== 1 ?"s" :""} with price data
- </span>
- </div>
+  <div className="mx-auto max-w-[900px]">
+  {/* Results (Server-rendered) */}
+  {items.length === 0 ? (
+   <div
+   className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
+   >
+   <div className="mb-4 text-[3rem]">📊</div>
+   <h3 className="mb-2">
+    {query || itemType !=="all"
+    ?"No matching price data"
+    :"The Blue Book Grows With Every Sale"}
+   </h3>
+   <p className="text-ink-light mx-auto max-w-[400]">
+    {query || itemType !=="all"
+    ?"Try broadening your search or changing the filter."
+    :"Complete a transaction to contribute market data. Prices appear here after verified sales."}
+   </p>
+   </div>
+  ) : (
+   <>
+   <div className="mb-4">
+    <span className="text-muted text-sm">
+    {total} item{total !== 1 ?"s" :""} with price data
+    </span>
+   </div>
 
- <div className="market-bg-[var(--color-surface-secondary)] sticky top-0 font-semibold">
- {items.map((item) => (
- <div
- key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`}
- className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all transition-colors"
- >
- <div className="px-6 py-6">
- <span className="bg-card border-edge transition-colors-icon rounded-lg border p-6 shadow-md transition-all">
- {typeIcon(item.itemType)}
- </span>
- <div className="bg-card border-edge transition-colors-info rounded-lg border p-6 shadow-md transition-all">
- <span className="bg-card border-edge transition-colors-title rounded-lg border p-6 shadow-md transition-all">
- {item.title}
- </span>
- <span className="bg-card border-edge transition-colors-maker rounded-lg border p-6 shadow-md transition-all">
- {item.maker}
- {item.scale ? ` · ${item.scale}` :""}
- {item.finishType ? ` · ${item.finishType}` :""}
- {item.lifeStage && item.lifeStage !=="completed"
- ? ` · ${item.lifeStage ==="blank" ?"Blank" : item.lifeStage ==="stripped" ?"Stripped" :"In Progress"}`
- :""}
- </span>
- </div>
- </div>
+   <div className="market-bg-[var(--color-surface-secondary)] sticky top-0 font-semibold">
+    {items.map((item) => (
+    <div
+     key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`}
+     className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all transition-colors"
+    >
+     <div className="px-6 py-6">
+     <span className="bg-card border-edge transition-colors-icon rounded-lg border p-6 shadow-md transition-all">
+      {typeIcon(item.itemType)}
+     </span>
+     <div className="bg-card border-edge transition-colors-info rounded-lg border p-6 shadow-md transition-all">
+      <span className="bg-card border-edge transition-colors-title rounded-lg border p-6 shadow-md transition-all">
+      {item.title}
+      </span>
+      <span className="bg-card border-edge transition-colors-maker rounded-lg border p-6 shadow-md transition-all">
+      {item.maker}
+      {item.scale ? ` · ${item.scale}` :""}
+      {item.finishType ? ` · ${item.finishType}` :""}
+      {item.lifeStage && item.lifeStage !=="completed"
+       ? ` · ${item.lifeStage ==="blank" ?"Blank" : item.lifeStage ==="stripped" ?"Stripped" :"In Progress"}`
+       :""}
+      </span>
+     </div>
+     </div>
 
- <div className="bg-card border-edge transition-colors-prices rounded-lg border p-6 shadow-md transition-all">
- <div className="text-forest text-lg font-bold">
- {formatCurrency(item.lowestPrice)}
- {item.lowestPrice !== item.highestPrice
- ? ` – ${formatCurrency(item.highestPrice)}`
- :""}
- </div>
- <div className="mt-[2px] text-sm text-[var(--color-text-secondary)]">
- <span>Avg: {formatCurrency(item.averagePrice)}</span>
- <span> · Median: {formatCurrency(item.medianPrice)}</span>
- </div>
- </div>
+     <div className="bg-card border-edge transition-colors-prices rounded-lg border p-6 shadow-md transition-all">
+     <div className="text-forest text-lg font-bold">
+      {formatCurrency(item.lowestPrice)}
+      {item.lowestPrice !== item.highestPrice
+      ? ` – ${formatCurrency(item.highestPrice)}`
+      :""}
+     </div>
+     <div className="mt-[2px] text-sm text-[var(--color-text-secondary)]">
+      <span>Avg: {formatCurrency(item.averagePrice)}</span>
+      <span> · Median: {formatCurrency(item.medianPrice)}</span>
+     </div>
+     </div>
 
- <div className="bg-card border-edge transition-colors-footer rounded-lg border p-6 shadow-md transition-all">
- <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-accent-primary-glow)] px-[8px] py-[2px] font-semibold">
- {item.transactionVolume} sale{item.transactionVolume !== 1 ?"s" :""}
- </span>
- {item.lastSoldAt && (
- <span className="text-muted">
- Last sold: {formatRelativeTime(item.lastSoldAt)}
- </span>
- )}
- </div>
- </div>
- ))}
- </div>
+     <div className="bg-card border-edge transition-colors-footer rounded-lg border p-6 shadow-md transition-all">
+     <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-accent-primary-glow)] px-[8px] py-[2px] font-semibold">
+      {item.transactionVolume} sale{item.transactionVolume !== 1 ?"s" :""}
+     </span>
+     {item.lastSoldAt && (
+      <span className="text-muted">
+      Last sold: {formatRelativeTime(item.lastSoldAt)}
+      </span>
+     )}
+     </div>
+    </div>
+    ))}
+   </div>
 
- {/* Pagination */}
- {totalPages > 1 && (
- <div className="border-edge mt-8 flex items-center justify-between border-t pt-6">
- {page > 1 ? (
- <Link
- href={buildPageUrl(page - 1)}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- >
- ← Previous
- </Link>
- ) : (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- disabled
- >
- ← Previous
- </button>
- )}
- <span className="text-muted text-sm">
- Page {page} of {totalPages} ({total} items)
- </span>
- {page < totalPages ? (
- <Link
- href={buildPageUrl(page + 1)}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- >
- Next →
- </Link>
- ) : (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- disabled
- >
- Next →
- </button>
- )}
- </div>
- )}
- </>
- )}
+   {/* Pagination */}
+   {totalPages > 1 && (
+    <div className="border-edge mt-8 flex items-center justify-between border-t pt-6">
+    {page > 1 ? (
+     <Link
+     href={buildPageUrl(page - 1)}
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+     >
+     ← Previous
+     </Link>
+    ) : (
+     <button
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+     disabled
+     >
+     ← Previous
+     </button>
+    )}
+    <span className="text-muted text-sm">
+     Page {page} of {totalPages} ({total} items)
+    </span>
+    {page < totalPages ? (
+     <Link
+     href={buildPageUrl(page + 1)}
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+     >
+     Next →
+     </Link>
+    ) : (
+     <button
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+     disabled
+     >
+     Next →
+     </button>
+    )}
+    </div>
+   )}
+   </>
+  )}
 
- {/* Disclaimer */}
- <div className="border-edge mt-12 rounded-lg border bg-[var(--color-surface-glass)] p-6 text-xs">
- <p>
- 📋 Prices based on completed transactions recorded on Model Horse Hub. This is not a
- professional appraisal. Market conditions vary. Always research current listings before
- buying or selling.
- </p>
- </div>
- </div>
- </div>
- </div>
+  {/* Disclaimer */}
+  <div className="border-edge mt-12 rounded-lg border bg-[var(--color-surface-glass)] p-6 text-xs">
+   <p>
+   📋 Prices based on completed transactions recorded on Model Horse Hub. This is not a
+   professional appraisal. Market conditions vary. Always research current listings before
+   buying or selling.
+   </p>
+  </div>
+  </div>
+ </ExplorerLayout>
  );
 }
