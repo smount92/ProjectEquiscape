@@ -1,6 +1,6 @@
 # Model Horse Hub — Complete Project Report
 
-> **Report Date:** March 25, 2026  
+> **Report Date:** March 27, 2026  
 > **Repository:** `smount92/ProjectEquiscape` (GitHub, private)  
 > **Total Commits:** 384 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
 > **Status:** Open beta with active testers — Freemium tier live with Stripe billing
@@ -96,9 +96,11 @@ model-horse-hub/
 │   │   │   └── __tests__/   # 6 test files
 │   │   ├── api/             # 7 API routes
 │   │   └── [59 route dirs]  # Page routes
-│   ├── components/          # 105 client components
+│   ├── components/          # 107 client components
 │   │   ├── __tests__/       # 6 component test files
-│   │   └── pdf/             # PDF generation components
+│   │   ├── layouts/         # 4 Page Archetype wrappers (ExplorerLayout, ScrapbookLayout, CommandCenterLayout, FocusLayout)
+│   │   ├── pdf/             # PDF generation components
+│   │   └── ui/              # 8 shadcn/ui primitives (Button, Input, Select, Textarea, Badge, Dialog, Skeleton, Separator)
 │   └── lib/
 │       ├── supabase/        # admin.ts, client.ts, server.ts (all typed with Database generic)
 │       ├── types/           # database.generated.ts (auto-gen), database.ts (supplementary), supabase.ts, csv-import.ts
@@ -459,11 +461,24 @@ The CSS layer evolved through several phases:
 2. **V20 (CSS Maturity Sprint):** Extracted 19 CSS Modules, reducing globals by 28%
 3. **Tailwind CSS v4 migration:** Full migration from vanilla CSS to Tailwind CSS v4 utility-first framework. All CSS Modules and extracted page CSS files were replaced with inline Tailwind classes. `globals.css` reduced to ~2,211 lines containing Tailwind imports, `@theme` design tokens, and shared component primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`).
 
-**Current state:** Single `globals.css` file (2,211 lines). New components use Tailwind utility classes directly in JSX. Design tokens are defined in the `@theme` block and accessed via semantic class names (e.g., `text-forest`, `bg-card`, `border-edge`).
+**Current state:** Single `globals.css` file (2,211 lines). New components use Tailwind utility classes directly in JSX. Design tokens are defined in the `@theme` block and accessed via semantic class names (e.g., `text-forest`, `bg-card`, `border-edge`). All 55+ pages use standardized Layout Archetype components (see §6.4).
 
-**Convention:** New components use **Tailwind utility classes** — do not create new CSS Module files. Legacy CSS Modules are tolerated but not for new work. Use Tailwind theme tokens instead of hard-coded colors.
+**Convention:** New components use **Tailwind utility classes** — do not create new CSS Module files. Legacy CSS Modules are tolerated but not for new work. Use Tailwind theme tokens instead of hard-coded colors. New pages MUST use one of the 4 Layout Archetypes — custom container `div`s are forbidden.
 
-### 6.4 Responsive Design
+### 6.4 Page Layout Archetypes
+
+All page files use one of 4 standardized layout wrapper components from `src/components/layouts/`. These enforce consistent max-widths, spacing, header typography, and Framer Motion page-load animations. Custom container `div`s with `mx-auto max-w-[var(--max-width)]` are forbidden.
+
+| Archetype | Max Width | Use Case | Key Features |
+|-----------|-----------|----------|-------------|
+| `ExplorerLayout` | `max-w-7xl` (1280px) | Browsing grids, list pages | Sticky filter bar with backdrop blur, animated content |
+| `ScrapbookLayout` | `max-w-7xl` (1280px) | Split-view detail pages | `grid-cols-[1.5fr_1fr]` with sticky right column |
+| `CommandCenterLayout` | `max-w-[1600px]` | Dashboards, admin panels | `grid-cols-[1fr_320px]` main + sidebar |
+| `FocusLayout` | `max-w-2xl` (672px) | Forms, data entry, auth pages | Centered content with back link, serif title |
+
+**Migration status:** Complete (March 2026). 55+ pages migrated. Only the root landing page (`page.tsx`) retains its bespoke hero layout.
+
+### 6.5 Responsive Design
 
 - Mobile-first with breakpoints at 600px, 768px, 1024px, 1200px, 1440px
 - Header uses Priority+ pattern with `ResizeObserver` — items collapse into hamburger menu
@@ -786,6 +801,9 @@ All 36 server action files have JSDoc comments on exported functions, documentin
 | — | Tailwind CSS v4 Migration | Full migration from vanilla CSS to Tailwind v4, eliminated all CSS Modules and extracted page CSS files, globals.css reduced from ~12,000 to 2,211 lines |
 | — | Notification Deep-Links | `link_url` column (migration 096), all notifications now click through to referenced item |
 | — | Show Polish & Realism | Entry preview, smart class browser, results podium, personalized notifications, show history widget, expert judging, cron auto-transition, host override, enriched show records, judge notes |
+| — | Open Beta Hardening | Soft-delete, atomic commerce RPCs, fuzzy search, trusted sellers, Pro tier + Stripe billing |
+| — | UI Overhaul (3 parts) | shadcn/ui primitives, createPortal→Dialog migration, Framer Motion micro-interactions |
+| — | Layout Unification (2 parts) | Design System docs, 4 Page Archetype components built, 55+ pages migrated from custom containers to layout wrappers |
 
 ### 12.2 Key Architectural Decisions Log
 
@@ -801,6 +819,7 @@ All 36 server action files have JSDoc comments on exported functions, documentin
 | **`requireAuth()` helper** | Centralized auth gate replaced boilerplate `getUser()` checks across all 35 action files. Reduces duplication and ensures consistent error handling. |
 | **`createPortal` for modals/lightboxes** | All overlay components (modals, lightboxes) render via `createPortal(…, document.body)` to avoid CSS clipping from parent `overflow: hidden` containers. |
 | **Public storage bucket** | Horse images use public Supabase URLs (no signed URL overhead). Image paths include `horses/{horseId}/` prefix for organization. |
+| **Layout Archetypes** | 4 standardized layout wrappers (`ExplorerLayout`, `ScrapbookLayout`, `CommandCenterLayout`, `FocusLayout`) enforce consistent max-widths and page structure. Custom container divs are forbidden — every page passes content as children/props to a layout component. |
 
 ---
 
