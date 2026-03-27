@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { getAdminClient } from"@/lib/supabase/admin";
 import Link from"next/link";
 import type { Metadata } from"next";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata: Metadata = {
  title:"Catalog Suggestions — Model Horse Hub",
@@ -75,7 +76,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  ];
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+  <ExplorerLayout title="Catalog Suggestions" description="Community proposals to improve the reference catalog.">
  <nav className="text-muted mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
  <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
@@ -207,6 +208,6 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  </div>
  )}
  </div>
- </div>
+ </ExplorerLayout>
  );
 }

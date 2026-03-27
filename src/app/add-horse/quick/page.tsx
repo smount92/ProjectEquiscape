@@ -8,6 +8,7 @@ import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
 import { createClient } from"@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
+import FocusLayout from"@/components/layouts/FocusLayout";
 
 const FINISH_TYPES = ["OF","Custom","Artist Resin"];
 const CONDITION_GRADES = [
@@ -114,7 +115,7 @@ export default function QuickAddPage() {
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+  <FocusLayout title="Quick Add" description="Rapidly add horses to your stable.">
  <div className="animate-fade-in-up mx-auto max-w-[640]">
  <div className="mb-6 justify-between" style={{ display:"flex", alignItems:"center" }}>
  <h1>
@@ -290,6 +291,6 @@ export default function QuickAddPage() {
  </div>
  )}
  </div>
- </div>
+ </FocusLayout>
  );
 }

@@ -4,6 +4,7 @@ import Link from"next/link";
 import RichText from"@/components/RichText";
 import LikeToggle from"@/components/LikeToggle";
 import { togglePostLike } from"@/app/actions/posts";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -69,7 +70,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+  <ExplorerLayout title="Post" description="View and interact with this post.">
  <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[640]">
  <Link
  href="/feed"
@@ -115,6 +116,6 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  </div>
  </div>
  </div>
- </div>
+ </ExplorerLayout>
  );
 }

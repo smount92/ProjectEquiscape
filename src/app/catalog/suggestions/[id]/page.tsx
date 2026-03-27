@@ -5,6 +5,7 @@ import type { Metadata } from"next";
 import SuggestionVoteButtons from"@/components/SuggestionVoteButtons";
 import SuggestionCommentThread from"@/components/SuggestionCommentThread";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -128,7 +129,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  :"";
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+  <ExplorerLayout title="Suggestion Detail" description="View, vote on, and discuss a catalog suggestion.">
  <nav className="text-muted mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
  <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
@@ -321,6 +322,6 @@ export default async function SuggestionDetailPage({ params }: Props) {
  </div>
  </div>
  </div>
- </div>
+ </ExplorerLayout>
  );
 }
