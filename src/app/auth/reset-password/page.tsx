@@ -4,6 +4,7 @@ import { useState, useEffect } from"react";
 import { useRouter, useSearchParams } from"next/navigation";
 import { createClient } from"@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
+import FocusLayout from"@/components/layouts/FocusLayout";
 
 export default function ResetPasswordPage() {
  const router = useRouter();
@@ -14,40 +15,36 @@ export default function ResetPasswordPage() {
  const [error, setError] = useState<string | null>(null);
  const [isPending, setIsPending] = useState(false);
  const [success, setSuccess] = useState(false);
- const [ready, setReady] = useState(false); // true when session is ready for password update
+ const [ready, setReady] = useState(false);
 
  useEffect(() => {
- // Method 1: If a PKCE ?code= parameter is present, exchange it
  const code = searchParams.get("code");
  if (code) {
- supabase.auth.exchangeCodeForSession(code).then(({ error: exchangeError }) => {
- if (exchangeError) {
- console.error("[ResetPassword] Code exchange failed:", exchangeError.message);
- setError("This reset link has expired. Please request a new one.");
- } else {
- setReady(true);
- }
- });
- return;
+  supabase.auth.exchangeCodeForSession(code).then(({ error: exchangeError }) => {
+  if (exchangeError) {
+   console.error("[ResetPassword] Code exchange failed:", exchangeError.message);
+   setError("This reset link has expired. Please request a new one.");
+  } else {
+   setReady(true);
+  }
+  });
+  return;
  }
 
- // Method 2: Listen for PASSWORD_RECOVERY event (token-hash flow via URL fragment)
  const {
- data: { subscription },
+  data: { subscription },
  } = supabase.auth.onAuthStateChange((event) => {
- if (event ==="PASSWORD_RECOVERY") {
- setReady(true);
- } else if (event ==="SIGNED_IN") {
- // If the user was signed in via the recovery token, the session is ready
- setReady(true);
- }
+  if (event ==="PASSWORD_RECOVERY") {
+  setReady(true);
+  } else if (event ==="SIGNED_IN") {
+  setReady(true);
+  }
  });
 
- // Method 3: Check if user already has a valid session (e.g., navigated here directly)
  supabase.auth.getUser().then(({ data: { user } }) => {
- if (user) {
- setReady(true);
- }
+  if (user) {
+  setReady(true);
+  }
  });
 
  return () => subscription.unsubscribe();
@@ -58,21 +55,21 @@ export default function ResetPasswordPage() {
  setError(null);
 
  if (password.length < 6) {
- setError("Password must be at least 6 characters.");
- return;
+  setError("Password must be at least 6 characters.");
+  return;
  }
  if (password !== confirmPassword) {
- setError("Passwords do not match.");
- return;
+  setError("Passwords do not match.");
+  return;
  }
 
  setIsPending(true);
  const { error: updateError } = await supabase.auth.updateUser({ password });
 
  if (updateError) {
- setError(updateError.message);
- setIsPending(false);
- return;
+  setError(updateError.message);
+  setIsPending(false);
+  return;
  }
 
  setSuccess(true);
@@ -81,132 +78,112 @@ export default function ResetPasswordPage() {
 
  if (success) {
  return (
- <div className="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center px-6 py-12">
- <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
- <div className="px-6 py-6">
- <div aria-hidden="true" className="mb-4 text-[3rem]">
- ✅
- </div>
- <h1>Password Updated!</h1>
- <p className="mt-4">Redirecting to your stable...</p>
- </div>
- </div>
- </div>
+  <FocusLayout title="Password Updated!">
+  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+   <div className="px-6 py-6">
+   <div aria-hidden="true" className="mb-4 text-[3rem]">
+    ✅
+   </div>
+   <h2>Password Updated!</h2>
+   <p className="mt-4">Redirecting to your stable...</p>
+   </div>
+  </div>
+  </FocusLayout>
  );
  }
 
  if (!ready) {
  return (
- <div className="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center px-6 py-12">
- <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
- <div className="px-6 py-6">
- <div aria-hidden="true" className="mb-4 text-[3rem]">
- 🔐
- </div>
- <h1>
- Verifying <span className="text-forest">Reset Link</span>
- </h1>
- <p className="mt-4">{error ||"Please wait while we verify your reset link..."}</p>
- {error && (
- <a
- href="/forgot-password"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- >
- Request New Reset Link
- </a>
- )}
- </div>
- </div>
- </div>
+  <FocusLayout title={<>Verifying <span className="text-forest">Reset Link</span></>}>
+  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+   <div className="px-6 py-6">
+   <div aria-hidden="true" className="mb-4 text-[3rem]">
+    🔐
+   </div>
+   <p className="mt-4">{error ||"Please wait while we verify your reset link..."}</p>
+   {error && (
+    <a
+    href="/forgot-password"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+    >
+    Request New Reset Link
+    </a>
+   )}
+   </div>
+  </div>
+  </FocusLayout>
  );
  }
 
  return (
- <div className="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center px-6 py-12">
- <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
- <div className="px-6 py-6">
- <h1>
- New <span className="text-forest">Password</span>
- </h1>
- <p>Choose a new password for your account</p>
- </div>
-
- {error && (
- <div
- className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
- role="alert"
+ <FocusLayout
+  title={<>New <span className="text-forest">Password</span></>}
+  description="Choose a new password for your account"
  >
- <svg
- width="16"
- height="16"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- aria-hidden="true"
- >
- <circle cx="12" cy="12" r="10" />
- <line x1="15" y1="9" x2="9" y2="15" />
- <line x1="9" y1="9" x2="15" y2="15" />
- </svg>
- {error}
- </div>
- )}
+  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  {error && (
+   <div
+   className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+   role="alert"
+   >
+   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="15" y1="9" x2="9" y2="15" />
+    <line x1="9" y1="9" x2="15" y2="15" />
+   </svg>
+   {error}
+   </div>
+  )}
 
- <form onSubmit={handleSubmit} noValidate>
- <div className="mb-6">
- <label htmlFor="new-password" className="text-ink mb-1 block text-sm font-semibold">
- New Password
- </label>
- <Input
- id="new-password"
- type="password"
- 
- placeholder="At least 6 characters"
- value={password}
- onChange={(e) => setPassword(e.target.value)}
- required
- minLength={6}
- autoComplete="new-password"
- autoFocus
- />
- </div>
- <div className="mb-6">
- <label htmlFor="confirm-new-password" className="text-ink mb-1 block text-sm font-semibold">
- Confirm New Password
- </label>
- <Input
- id="confirm-new-password"
- type="password"
- 
- placeholder="Re-enter your password"
- value={confirmPassword}
- onChange={(e) => setConfirmPassword(e.target.value)}
- required
- autoComplete="new-password"
- />
- </div>
+  <form onSubmit={handleSubmit} noValidate>
+   <div className="mb-6">
+   <label htmlFor="new-password" className="text-ink mb-1 block text-sm font-semibold">
+    New Password
+   </label>
+   <Input
+    id="new-password"
+    type="password"
+    placeholder="At least 6 characters"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+    minLength={6}
+    autoComplete="new-password"
+    autoFocus
+   />
+   </div>
+   <div className="mb-6">
+   <label htmlFor="confirm-new-password" className="text-ink mb-1 block text-sm font-semibold">
+    Confirm New Password
+   </label>
+   <Input
+    id="confirm-new-password"
+    type="password"
+    placeholder="Re-enter your password"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    required
+    autoComplete="new-password"
+   />
+   </div>
 
- <button
- type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- disabled={isPending}
- id="reset-submit"
- >
- {isPending ? (
- <>
- <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- aria-hidden="true"
- />
- Updating...
- </>
- ) : (
-"Update Password"
- )}
- </button>
- </form>
- </div>
- </div>
+   <button
+   type="submit"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   disabled={isPending}
+   id="reset-submit"
+   >
+   {isPending ? (
+    <>
+    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" aria-hidden="true" />
+    Updating...
+    </>
+   ) : (
+    "Update Password"
+   )}
+   </button>
+  </form>
+  </div>
+ </FocusLayout>
  );
 }

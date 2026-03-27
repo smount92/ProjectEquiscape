@@ -6,6 +6,7 @@ import { getArtistProfile, createArtistProfile, updateArtistProfile } from"@/app
 import type { ArtistProfile } from"@/app/actions/art-studio";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import FocusLayout from"@/components/layouts/FocusLayout";
 
 // ── Option Lists ──
 const SPECIALTIES = [
@@ -76,40 +77,39 @@ export default function StudioSetupPage() {
  const loadProfile = useCallback(async () => {
  setLoading(true);
  try {
- // Get current user ID from cookie-based session
- const res = await fetch("/api/auth/me");
- if (!res.ok) {
- setLoading(false);
- return;
- }
- const { userId: uid } = await res.json();
- if (!uid) {
- setLoading(false);
- return;
- }
- setUserId(uid);
+  const res = await fetch("/api/auth/me");
+  if (!res.ok) {
+  setLoading(false);
+  return;
+  }
+  const { userId: uid } = await res.json();
+  if (!uid) {
+  setLoading(false);
+  return;
+  }
+  setUserId(uid);
 
- const profile = await getArtistProfile(uid);
- if (profile) {
- setExisting(profile);
- setStudioName(profile.studioName);
- setStudioSlug(profile.studioSlug);
- setSpecialties(profile.specialties);
- setMediums(profile.mediums);
- setScalesOffered(profile.scalesOffered);
- setBioArtist(profile.bioArtist ||"");
- setStatus(profile.status);
- setMaxSlots(profile.maxSlots?.toString() ||"5");
- setTurnaroundMin(profile.turnaroundMinDays?.toString() ||"");
- setTurnaroundMax(profile.turnaroundMaxDays?.toString() ||"");
- setPriceMin(profile.priceRangeMin?.toString() ||"");
- setPriceMax(profile.priceRangeMax?.toString() ||"");
- setTermsText(profile.termsText ||"");
- setPaypalMeLink(profile.paypalMeLink ||"");
- setAcceptingTypes(profile.acceptingTypes);
- }
+  const profile = await getArtistProfile(uid);
+  if (profile) {
+  setExisting(profile);
+  setStudioName(profile.studioName);
+  setStudioSlug(profile.studioSlug);
+  setSpecialties(profile.specialties);
+  setMediums(profile.mediums);
+  setScalesOffered(profile.scalesOffered);
+  setBioArtist(profile.bioArtist ||"");
+  setStatus(profile.status);
+  setMaxSlots(profile.maxSlots?.toString() ||"5");
+  setTurnaroundMin(profile.turnaroundMinDays?.toString() ||"");
+  setTurnaroundMax(profile.turnaroundMaxDays?.toString() ||"");
+  setPriceMin(profile.priceRangeMin?.toString() ||"");
+  setPriceMax(profile.priceRangeMax?.toString() ||"");
+  setTermsText(profile.termsText ||"");
+  setPaypalMeLink(profile.paypalMeLink ||"");
+  setAcceptingTypes(profile.acceptingTypes);
+  }
  } catch {
- /* ignore */
+  /* ignore */
  }
  setLoading(false);
  }, []);
@@ -118,16 +118,15 @@ export default function StudioSetupPage() {
  loadProfile();
  }, [loadProfile]);
 
- // Auto-generate slug from studio name
  useEffect(() => {
  if (!existing && studioName) {
- setStudioSlug(
- studioName
- .toLowerCase()
- .replace(/[^a-z0-9-]/g,"-")
- .replace(/-+/g,"-")
- .replace(/^-|-$/g,""),
- );
+  setStudioSlug(
+  studioName
+   .toLowerCase()
+   .replace(/[^a-z0-9-]/g,"-")
+   .replace(/-+/g,"-")
+   .replace(/^-|-$/g,""),
+  );
  }
  }, [studioName, existing]);
 
@@ -161,336 +160,306 @@ export default function StudioSetupPage() {
  const result = existing ? await updateArtistProfile(formData) : await createArtistProfile(formData);
 
  if (result.success) {
- setSuccess(existing ?"Profile updated!" :"Studio created!");
- if (!existing &&"slug" in result && result.slug) {
- setTimeout(() => router.push(`/studio/${result.slug}`), 1500);
- }
- // Reload to refresh state
- await loadProfile();
+  setSuccess(existing ?"Profile updated!" :"Studio created!");
+  if (!existing &&"slug" in result && result.slug) {
+  setTimeout(() => router.push(`/studio/${result.slug}`), 1500);
+  }
+  await loadProfile();
  } else {
- setError(result.error ||"Something went wrong.");
+  setError(result.error ||"Something went wrong.");
  }
  setSaving(false);
  };
 
  if (loading) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
- <div
- className="bg-card border-edge mx-auto max-w-[700] rounded-lg border text-center shadow-md transition-all"
- >
- <p className="text-muted">Loading studio settings…</p>
- </div>
- </div>
+  <FocusLayout title={<><span className="text-forest">Art Studio</span></>}>
+  <div className="bg-card border-edge mx-auto max-w-[700px] rounded-lg border p-12 text-center shadow-md transition-all">
+   <p className="text-muted">Loading studio settings…</p>
+  </div>
+  </FocusLayout>
  );
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
- <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[700] rounded-lg border shadow-md transition-all">
- {/* Header */}
- <div className="mb-8 text-center">
- <div className="mb-2 text-[2.5rem]">🎨</div>
- <h1 className="text-xl">
- <span className="text-forest">{existing ?"Edit Your Studio" :"Set Up Your Art Studio"}</span>
- </h1>
- <p className="text-ink-light mt-1 text-sm">
- {existing
- ?"Update your studio profile and commission settings."
- :"Create your artist profile to start accepting commissions."}
- </p>
- </div>
-
- <form onSubmit={handleSubmit}>
- {/* Studio Identity */}
- <fieldset className="border-edge mb-6 rounded-lg border p-6">
- <legend>🏷️ Studio Identity</legend>
-
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Studio Name *</label>
- <Input
- type="text"
- 
- value={studioName}
- onChange={(e) => setStudioName(e.target.value)}
- placeholder="e.g. Painted Ponies Studio"
- required
- maxLength={80}
- />
- </div>
-
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Studio URL Slug</label>
- <div className="flex items-center gap-1">
- <span
- className="text-muted whitespace-nowrap text-sm"
+ <FocusLayout
+  title={<><span className="text-forest">{existing ?"Edit Your Studio" :"Set Up Your Art Studio"}</span></>}
+  description={existing ?"Update your studio profile and commission settings." :"Create your artist profile to start accepting commissions."}
  >
- /studio/
- </span>
- <Input
- type="text"
- className="font-mono"
- value={studioSlug}
- onChange={(e) =>
- setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,""))
- }
- placeholder="painted-ponies"
- maxLength={50}
- />
- </div>
- </div>
+  <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[700px] rounded-lg border shadow-md transition-all">
+  <form onSubmit={handleSubmit}>
+   {/* Studio Identity */}
+   <fieldset className="border-edge mb-6 rounded-lg border p-6">
+   <legend>🏷️ Studio Identity</legend>
 
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Artist Bio</label>
- <Textarea
- 
- value={bioArtist}
- onChange={(e) => setBioArtist(e.target.value)}
- placeholder="Tell clients about your style, experience, and what inspires your work…"
- rows={4}
- maxLength={2000}
- />
- </div>
- </fieldset>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Studio Name *</label>
+    <Input
+    type="text"
+    value={studioName}
+    onChange={(e) => setStudioName(e.target.value)}
+    placeholder="e.g. Painted Ponies Studio"
+    required
+    maxLength={80}
+    />
+   </div>
 
- {/* Skills & Services */}
- <fieldset className="border-edge mb-6 rounded-lg border p-6">
- <legend>🛠️ Skills & Services</legend>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Studio URL Slug</label>
+    <div className="flex items-center gap-1">
+    <span className="text-muted whitespace-nowrap text-sm">/studio/</span>
+    <Input
+     type="text"
+     className="font-mono"
+     value={studioSlug}
+     onChange={(e) =>
+     setStudioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,""))
+     }
+     placeholder="painted-ponies"
+     maxLength={50}
+    />
+    </div>
+   </div>
 
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Specialties</label>
- <div className="flex flex-wrap gap-1">
- {SPECIALTIES.map((s) => (
- <button
- key={s}
- type="button"
- className={`studio-chip ${specialties.includes(s) ?"active" :""}`}
- onClick={() => toggleArray(specialties, setSpecialties, s)}
- >
- {s}
- </button>
- ))}
- </div>
- </div>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Artist Bio</label>
+    <Textarea
+    value={bioArtist}
+    onChange={(e) => setBioArtist(e.target.value)}
+    placeholder="Tell clients about your style, experience, and what inspires your work…"
+    rows={4}
+    maxLength={2000}
+    />
+   </div>
+   </fieldset>
 
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Mediums</label>
- <div className="flex flex-wrap gap-1">
- {MEDIUMS.map((m) => (
- <button
- key={m}
- type="button"
- className={`studio-chip ${mediums.includes(m) ?"active" :""}`}
- onClick={() => toggleArray(mediums, setMediums, m)}
- >
- {m}
- </button>
- ))}
- </div>
- </div>
+   {/* Skills & Services */}
+   <fieldset className="border-edge mb-6 rounded-lg border p-6">
+   <legend>🛠️ Skills & Services</legend>
 
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Scales Offered</label>
- <div className="flex flex-wrap gap-1">
- {SCALES.map((s) => (
- <button
- key={s}
- type="button"
- className={`studio-chip ${scalesOffered.includes(s) ?"active" :""}`}
- onClick={() => toggleArray(scalesOffered, setScalesOffered, s)}
- >
- {s}
- </button>
- ))}
- </div>
- </div>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Specialties</label>
+    <div className="flex flex-wrap gap-1">
+    {SPECIALTIES.map((s) => (
+     <button
+     key={s}
+     type="button"
+     className={`studio-chip ${specialties.includes(s) ?"active" :""}`}
+     onClick={() => toggleArray(specialties, setSpecialties, s)}
+     >
+     {s}
+     </button>
+    ))}
+    </div>
+   </div>
 
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
- Commission Types Accepted
- </label>
- <div className="flex flex-wrap gap-1">
- {COMMISSION_TYPES.map((t) => (
- <button
- key={t}
- type="button"
- className={`studio-chip ${acceptingTypes.includes(t) ?"active" :""}`}
- onClick={() => toggleArray(acceptingTypes, setAcceptingTypes, t)}
- >
- {t}
- </button>
- ))}
- </div>
- </div>
- </fieldset>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Mediums</label>
+    <div className="flex flex-wrap gap-1">
+    {MEDIUMS.map((m) => (
+     <button
+     key={m}
+     type="button"
+     className={`studio-chip ${mediums.includes(m) ?"active" :""}`}
+     onClick={() => toggleArray(mediums, setMediums, m)}
+     >
+     {m}
+     </button>
+    ))}
+    </div>
+   </div>
 
- {/* Commission Settings */}
- <fieldset className="border-edge mb-6 rounded-lg border p-6">
- <legend>📋 Commission Settings</legend>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Scales Offered</label>
+    <div className="flex flex-wrap gap-1">
+    {SCALES.map((s) => (
+     <button
+     key={s}
+     type="button"
+     className={`studio-chip ${scalesOffered.includes(s) ?"active" :""}`}
+     onClick={() => toggleArray(scalesOffered, setScalesOffered, s)}
+     >
+     {s}
+     </button>
+    ))}
+    </div>
+   </div>
 
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Commission Status</label>
- <div className="flex gap-2">
- {(["open","waitlist","closed"] as const).map((s) => (
- <button
- key={s}
- type="button"
- className={`studio-status-btn ${status === s ? `active-${s}` :""}`}
- onClick={() => setStatus(s)}
- >
- {s ==="open" ?"🟢" : s ==="waitlist" ?"🟡" :"🔴"}{""}
- {s.charAt(0).toUpperCase() + s.slice(1)}
- </button>
- ))}
- </div>
- </div>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">
+    Commission Types Accepted
+    </label>
+    <div className="flex flex-wrap gap-1">
+    {COMMISSION_TYPES.map((t) => (
+     <button
+     key={t}
+     type="button"
+     className={`studio-chip ${acceptingTypes.includes(t) ?"active" :""}`}
+     onClick={() => toggleArray(acceptingTypes, setAcceptingTypes, t)}
+     >
+     {t}
+     </button>
+    ))}
+    </div>
+   </div>
+   </fieldset>
 
- <div className="grid grid-cols-2 gap-4">
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
- Max Commission Slots
- </label>
- <Input
- type="number"
- 
- value={maxSlots}
- onChange={(e) => setMaxSlots(e.target.value)}
- onBlur={() => {
- const val = parseInt(maxSlots);
- if (isNaN(val) || val < 1) setMaxSlots("1");
- else if (val > 50) setMaxSlots("50");
- else setMaxSlots(val.toString());
- }}
- placeholder="5"
- min={1}
- max={50}
- />
- </div>
- <div />
- </div>
+   {/* Commission Settings */}
+   <fieldset className="border-edge mb-6 rounded-lg border p-6">
+   <legend>📋 Commission Settings</legend>
 
- <div className="grid grid-cols-2 gap-4">
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
- Turnaround (min days)
- </label>
- <Input
- type="number"
- 
- value={turnaroundMin}
- onChange={(e) => setTurnaroundMin(e.target.value)}
- placeholder="e.g. 14"
- min={1}
- />
- </div>
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
- Turnaround (max days)
- </label>
- <Input
- type="number"
- 
- value={turnaroundMax}
- onChange={(e) => setTurnaroundMax(e.target.value)}
- placeholder="e.g. 60"
- min={1}
- />
- </div>
- </div>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Commission Status</label>
+    <div className="flex gap-2">
+    {(["open","waitlist","closed"] as const).map((s) => (
+     <button
+     key={s}
+     type="button"
+     className={`studio-status-btn ${status === s ? `active-${s}` :""}`}
+     onClick={() => setStatus(s)}
+     >
+     {s ==="open" ?"🟢" : s ==="waitlist" ?"🟡" :"🔴"}{""}
+     {s.charAt(0).toUpperCase() + s.slice(1)}
+     </button>
+    ))}
+    </div>
+   </div>
 
- <div className="grid grid-cols-2 gap-4">
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Price Range (min $)</label>
- <Input
- type="number"
- 
- value={priceMin}
- onChange={(e) => setPriceMin(e.target.value)}
- placeholder="e.g. 50"
- min={0}
- step="0.01"
- />
- </div>
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Price Range (max $)</label>
- <Input
- type="number"
- 
- value={priceMax}
- onChange={(e) => setPriceMax(e.target.value)}
- placeholder="e.g. 500"
- min={0}
- step="0.01"
- />
- </div>
- </div>
- </fieldset>
+   <div className="grid grid-cols-2 gap-4">
+    <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">
+     Max Commission Slots
+    </label>
+    <Input
+     type="number"
+     value={maxSlots}
+     onChange={(e) => setMaxSlots(e.target.value)}
+     onBlur={() => {
+     const val = parseInt(maxSlots);
+     if (isNaN(val) || val < 1) setMaxSlots("1");
+     else if (val > 50) setMaxSlots("50");
+     else setMaxSlots(val.toString());
+     }}
+     placeholder="5"
+     min={1}
+     max={50}
+    />
+    </div>
+    <div />
+   </div>
 
- {/* Policies & Payment */}
- <fieldset className="border-edge mb-6 rounded-lg border p-6">
- <legend>💰 Policies & Payment</legend>
+   <div className="grid grid-cols-2 gap-4">
+    <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">
+     Turnaround (min days)
+    </label>
+    <Input
+     type="number"
+     value={turnaroundMin}
+     onChange={(e) => setTurnaroundMin(e.target.value)}
+     placeholder="e.g. 14"
+     min={1}
+    />
+    </div>
+    <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">
+     Turnaround (max days)
+    </label>
+    <Input
+     type="number"
+     value={turnaroundMax}
+     onChange={(e) => setTurnaroundMax(e.target.value)}
+     placeholder="e.g. 60"
+     min={1}
+    />
+    </div>
+   </div>
 
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Terms & Conditions</label>
- <Textarea
- 
- value={termsText}
- onChange={(e) => setTermsText(e.target.value)}
- placeholder="Deposit policy, revision limits, turnaround expectations, cancellation rules…"
- rows={5}
- maxLength={5000}
- />
- </div>
+   <div className="grid grid-cols-2 gap-4">
+    <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Price Range (min $)</label>
+    <Input
+     type="number"
+     value={priceMin}
+     onChange={(e) => setPriceMin(e.target.value)}
+     placeholder="e.g. 50"
+     min={0}
+     step="0.01"
+    />
+    </div>
+    <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Price Range (max $)</label>
+    <Input
+     type="number"
+     value={priceMax}
+     onChange={(e) => setPriceMax(e.target.value)}
+     placeholder="e.g. 500"
+     min={0}
+     step="0.01"
+    />
+    </div>
+   </div>
+   </fieldset>
 
- <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">PayPal.me Link</label>
- <Input
- type="url"
- 
- value={paypalMeLink}
- onChange={(e) => setPaypalMeLink(e.target.value)}
- placeholder="https://paypal.me/yourstudio"
- />
- </div>
- </fieldset>
+   {/* Policies & Payment */}
+   <fieldset className="border-edge mb-6 rounded-lg border p-6">
+   <legend>💰 Policies & Payment</legend>
 
- {/* Feedback */}
- {error && (
- <p
- className="mb-4 text-center text-sm text-[#ef4444]"
- >
- {error}
- </p>
- )}
- {success && (
- <p
- className="mb-4 text-center text-sm text-[#22c55e]"
- >
- {success}
- </p>
- )}
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">Terms & Conditions</label>
+    <Textarea
+    value={termsText}
+    onChange={(e) => setTermsText(e.target.value)}
+    placeholder="Deposit policy, revision limits, turnaround expectations, cancellation rules…"
+    rows={5}
+    maxLength={5000}
+    />
+   </div>
 
- <button
- type="submit"
- className="inline-flex w-full min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- disabled={saving || !studioName.trim()}
- id="save-studio-btn"
- >
- {saving ?"Saving…" : existing ?"💾 Save Changes" :"🎨 Create Studio"}
- </button>
+   <div className="mb-6">
+    <label className="text-ink mb-1 block text-sm font-semibold">PayPal.me Link</label>
+    <Input
+    type="url"
+    value={paypalMeLink}
+    onChange={(e) => setPaypalMeLink(e.target.value)}
+    placeholder="https://paypal.me/yourstudio"
+    />
+   </div>
+   </fieldset>
 
- {existing && (
- <div className="mt-4 text-center">
- <a
- href={`/studio/${existing.studioSlug}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- >
- 👁️ View Public Studio Page
- </a>
- </div>
- )}
- </form>
- </div>
- </div>
+   {/* Feedback */}
+   {error && (
+   <p className="mb-4 text-center text-sm text-[#ef4444]">
+    {error}
+   </p>
+   )}
+   {success && (
+   <p className="mb-4 text-center text-sm text-[#22c55e]">
+    {success}
+   </p>
+   )}
+
+   <button
+   type="submit"
+   className="inline-flex w-full min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   disabled={saving || !studioName.trim()}
+   id="save-studio-btn"
+   >
+   {saving ?"Saving…" : existing ?"💾 Save Changes" :"🎨 Create Studio"}
+   </button>
+
+   {existing && (
+   <div className="mt-4 text-center">
+    <a
+    href={`/studio/${existing.studioSlug}`}
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+    >
+    👁️ View Public Studio Page
+    </a>
+   </div>
+   )}
+  </form>
+  </div>
+ </FocusLayout>
  );
 }
