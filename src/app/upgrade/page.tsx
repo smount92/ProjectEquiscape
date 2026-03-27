@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import UpgradeButton from "@/components/UpgradeButton";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 
 export const metadata = {
     title: "Upgrade to MHH Pro — Model Horse Hub",
@@ -65,7 +66,7 @@ export default async function UpgradePage({
     const status = params.status;
 
     return (
-        <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+        <ExplorerLayout title={tier === "pro" ? <>💎 You're on <span className="text-forest">MHH Pro</span></> : <>Upgrade to <span className="text-forest">MHH Pro</span></>} description={tier === "pro" ? "Thank you for supporting Model Horse Hub!" : "Take your collection management to the next level."}>
             {/* Success / Cancel banners */}
             {status === "success" && (
                 <div className="animate-fade-in-up mb-8 rounded-xl border border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 text-center shadow-lg">
@@ -193,7 +194,6 @@ export default async function UpgradePage({
                 <Link href="/dashboard" className="text-sm text-muted no-underline hover:text-ink-light">
                     ← Back to Dashboard
                 </Link>
-            </div>
-        </div>
+            </div>        </ExplorerLayout>
     );
 }

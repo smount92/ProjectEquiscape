@@ -1,5 +1,6 @@
 import Link from"next/link";
 import type { Metadata } from"next";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata: Metadata = {
  title:"Privacy Policy — Model Horse Hub",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title={<><span className="text-forest">Privacy</span> Policy</>} description="Your data is yours. Full stop.">
  <div className="animate-fade-in-up">
  {/* Page Header */}
  <div className="mb-8">
@@ -243,6 +244,6 @@ export default function PrivacyPage() {
  </p>
  </section>
  </div>
- </div>
+  </ExplorerLayout>
  );
 }

@@ -1,5 +1,6 @@
 import Link from"next/link";
 import type { Metadata } from"next";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata: Metadata = {
  title:"Terms of Service — Model Horse Hub",
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title={<><span className="text-forest">Terms</span> of Service</>} description="Fair rules for a fair platform.">
  <div className="animate-fade-in-up">
  {/* Page Header */}
  <div className="mb-8">
@@ -221,6 +222,6 @@ export default function TermsPage() {
  </p>
  </section>
  </div>
- </div>
+  </ExplorerLayout>
  );
 }

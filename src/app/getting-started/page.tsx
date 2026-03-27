@@ -1,5 +1,6 @@
 import Link from"next/link";
 import type { Metadata } from"next";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata: Metadata = {
  title:"Getting Started — Model Horse Hub",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function GettingStartedPage() {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title={<>Getting Started with <span className="text-forest">Model Horse Hub</span></>} description="Your digital stable is ready. Here's how to make the most of it.">
  <div className="animate-fade-in-up">
  {/* Page Header */}
  <div className="mb-8">
@@ -208,6 +209,6 @@ export default function GettingStartedPage() {
  </Link>
  </div>
  </div>
- </div>
+  </ExplorerLayout>
  );
 }
