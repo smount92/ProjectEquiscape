@@ -13,6 +13,7 @@ import {
 } from"@/app/actions/settings";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import FocusLayout from"@/components/layouts/FocusLayout";
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
  { key:"show_votes", emoji:"📸", label:"Show votes on your entries" },
@@ -140,19 +141,19 @@ export default function SettingsPage() {
 
  if (isLoading) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <FocusLayout title="Settings" description="Manage your profile, notifications, and account.">
  <div className="p-12 text-center">
  <div
  className="mx-auto mb-6 h-9 w-9 animate-spin rounded-full border-3 border-edge border-t-forest"
  />
  <p>Loading settings…</p>
  </div>
- </div>
+ </FocusLayout>
  );
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <FocusLayout title="Settings" description="Manage your profile, notifications, and account.">
  <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
@@ -557,6 +558,6 @@ export default function SettingsPage() {
  </div>
  </div>
  </div>
- </div>
+ </FocusLayout>
  );
 }

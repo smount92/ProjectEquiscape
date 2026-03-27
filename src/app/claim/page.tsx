@@ -6,6 +6,7 @@ import Link from"next/link";
 import { claimTransfer } from"@/app/actions/hoofprint";
 import { getParkedHorseByPin, claimParkedHorse } from"@/app/actions/parked-export";
 import { Input } from "@/components/ui/input";
+import FocusLayout from"@/components/layouts/FocusLayout";
 
 export default function ClaimPage() {
  const router = useRouter();
@@ -113,7 +114,7 @@ export default function ClaimPage() {
 
  if (success) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
  <div
  className="bg-card border-edge animate-fade-in-up mx-auto max-w-[500px] rounded-lg border shadow-md transition-all"
  style={{ textAlign:"center" }}
@@ -151,12 +152,12 @@ export default function ClaimPage() {
  ⭐ Had a good experience? You can leave a review from the seller&apos;s profile.
  </p>
  </div>
- </div>
+ </FocusLayout>
  );
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
  <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all">
  <div className="mb-6" style={{ textAlign:"center" }}>
  <div className="mb-2 text-[2.5rem]">📦</div>
@@ -316,6 +317,6 @@ export default function ClaimPage() {
  Photos, show records, and provenance are preserved forever.
  </p>
  </div>
- </div>
+ </FocusLayout>
  );
 }
