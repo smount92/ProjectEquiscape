@@ -27,6 +27,7 @@ import type { Division } from"@/app/actions/competition";
 import { updateEvent, getEventJudges, addEventJudge, removeEventJudge, searchUsers } from"@/app/actions/events";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 type TabId ="details" |"classes" |"judges";
 
@@ -376,7 +377,7 @@ export default function ManageEventPage() {
 
  if (isLoading) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title="Manage Event" description="Manage your event details, divisions, and classes.">
  <div
  className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
  >
@@ -385,13 +386,13 @@ export default function ManageEventPage() {
  />
  <p>Loading event…</p>
  </div>
- </div>
+ </ExplorerLayout>
  );
  }
 
  if (error && !eventName) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title="Manage Event" description="Manage your event details, divisions, and classes.">
  <div
  className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
  >
@@ -403,7 +404,7 @@ export default function ManageEventPage() {
  ← Back to Events
  </Link>
  </div>
- </div>
+ </ExplorerLayout>
  );
  }
 
@@ -417,7 +418,7 @@ export default function ManageEventPage() {
  ];
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title="Manage Event" description="Manage your event details, divisions, and classes.">
  <div className="animate-fade-in-up">
  {/* Header */}
  <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -1122,6 +1123,6 @@ export default function ManageEventPage() {
  </DialogContent>
  </Dialog>
  </div>
- </div>
+ </ExplorerLayout>
  );
 }

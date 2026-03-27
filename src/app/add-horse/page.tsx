@@ -23,6 +23,7 @@ import { setHorseCollections } from"@/app/actions/collections";
 import ImageCropModal from"@/components/ImageCropModal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import FocusLayout from"@/components/layouts/FocusLayout";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -526,7 +527,7 @@ export default function AddHorsePage() {
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <FocusLayout title="Add Horse" description="Add a new model to your digital stable.">
  {/* Page Header */}
  <div className="animate-fade-in-up">
           <h1 className="text-2xl font-bold tracking-tight">
@@ -1587,6 +1588,6 @@ export default function AddHorsePage() {
  }}
  />
  )}
- </div>
+ </FocusLayout>
  );
 }

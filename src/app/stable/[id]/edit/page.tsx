@@ -17,6 +17,7 @@ import ImageCropModal from"@/components/ImageCropModal";
 import { getPublicImageUrl } from"@/lib/utils/storage";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import FocusLayout from"@/components/layouts/FocusLayout";
 
 // ---- Types ----
 
@@ -599,7 +600,7 @@ export default function EditHorsePage() {
 
  if (isLoading) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <FocusLayout title="Edit Horse" description="Update your horse details.">
  <div
  className="mx-auto max-w-[680px] px-0 py-12 text-center"
  >
@@ -608,13 +609,13 @@ export default function EditHorsePage() {
  />
  <p>Loading horse details…</p>
  </div>
- </div>
+ </FocusLayout>
  );
  }
 
  if (error) {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <FocusLayout title="Edit Horse" description="Update your horse details.">
  <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🚫</div>
  <h1>Access Denied</h1>
@@ -626,12 +627,12 @@ export default function EditHorsePage() {
  Back to Stable
  </Link>
  </div>
- </div>
+ </FocusLayout>
  );
  }
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <FocusLayout title="Edit Horse" description="Update your horse details.">
  <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
@@ -1523,6 +1524,6 @@ export default function EditHorsePage() {
  }}
  />
  )}
- </div>
+ </FocusLayout>
  );
 }
