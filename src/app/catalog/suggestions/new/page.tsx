@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
 import Link from"next/link";
 import SuggestNewEntryForm from"@/components/SuggestNewEntryForm";
+import FocusLayout from"@/components/layouts/FocusLayout";
 
 export const metadata = {
  title:"Suggest New Catalog Entry — Model Horse Hub",
@@ -16,29 +17,20 @@ export default async function SuggestNewEntryPage() {
  if (!user) redirect("/login");
 
  return (
- <div className="mx-auto max-w-[720] max-w-[var(--max-width)] px-6 py-8">
- <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-1 text-sm">
- <Link href="/catalog">📚 Catalog</Link>
- <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
- ›
- </span>
- <span>Suggest New Entry</span>
- </nav>
-
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-8 shadow-md transition-all">
- <h1
- className="mb-1 text-2xl"
- style={{ fontFamily:"var(--font-display)" }}
+ <FocusLayout
+  title="📗 Suggest a New Catalog Entry"
+  description="Can't find a model in the catalog? Submit the details below and the community will review your suggestion."
+  backLink={
+  <nav className="text-muted flex items-center gap-1 text-sm">
+   <Link href="/catalog">📚 Catalog</Link>
+   <span className="text-muted">›</span>
+   <span>Suggest New Entry</span>
+  </nav>
+  }
  >
- 📗 Suggest a New Catalog Entry
- </h1>
- <p className="text-ink-light mb-6">
- Can&apos;t find a model in the catalog? Submit the details below and the community will review your
- suggestion.
- </p>
-
- <SuggestNewEntryForm />
- </div>
- </div>
+  <div className="bg-card border-edge rounded-lg border p-8 shadow-md transition-all">
+  <SuggestNewEntryForm />
+  </div>
+ </FocusLayout>
  );
 }
