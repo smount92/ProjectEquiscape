@@ -11,6 +11,7 @@ import WithdrawButton from"@/components/WithdrawButton";
 import UniversalFeed from"@/components/UniversalFeed";
 import CloseShowButton from"@/components/CloseShowButton";
 import ExpertJudgingPanel from"@/components/ExpertJudgingPanel";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
@@ -86,7 +87,10 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  });
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <ExplorerLayout
+  title={<>📸 <span className="text-forest">{show.title}</span></>}
+  description={<>{show.theme && <span className="italic">Theme: {show.theme} · </span>}{show.description && <span>{show.description} · </span>}{show.creatorAlias && <span>Hosted by @{show.creatorAlias}</span>}</>}
+ >
  {/* Hero */}
  <div className="animate-fade-in-up mb-6 text-center">
  <div className="mb-4">
@@ -574,6 +578,6 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  composerPlaceholder="Discuss this show…"
  label="Discussion"
  />
- </div>
+ </ExplorerLayout>
  );
 }

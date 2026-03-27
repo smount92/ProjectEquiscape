@@ -14,6 +14,7 @@ import MessageUserButton from"@/components/MessageUserButton";
 import RatingForm from"@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import TrophyCase from"@/components/TrophyCase";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 function getFinishBadgeClass(finish: string): string {
@@ -243,7 +244,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  ).length;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <ExplorerLayout
+  title={<>@{profileUser.alias_name}{isOwnProfile && <span className="bg-forest ml-2 inline-flex align-middle rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase">You</span>}</>}
+  description={isOwnProfile ?"Your public stable — this is how other collectors see your models." :`@${profileUser.alias_name}'s public collection`}
+ >
  {/* Profile Header */}
  <div className="profile-hero animate-fade-in-up max-md:flex-col max-md:items-center max-md:text-center max-sm:flex-col max-sm:px-4 max-sm:py-8 max-sm:text-center">
  <div className="bg-[rgba(44,85,69,0.12)] border-[rgba(44,85,69,0.3)] text-forest flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full border-[2px]">
@@ -548,6 +552,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  ))}
  </div>
  )}
- </div>
+ </ExplorerLayout>
  );
 }
