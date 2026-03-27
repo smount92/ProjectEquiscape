@@ -12,6 +12,7 @@ import HoofprintTimeline from"@/components/HoofprintTimeline";
 import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 // Types
@@ -244,7 +245,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  : null;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title={horse.custom_name} description="Horse passport and provenance.">
  {/* Breadcrumb */}
  <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
@@ -646,6 +647,6 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
  </div>
  </div>
- </div>
+ </ExplorerLayout>
  );
 }

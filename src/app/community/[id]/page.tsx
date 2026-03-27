@@ -15,6 +15,7 @@ import { getHoofprint } from"@/app/actions/hoofprint";
 import ReportButton from"@/components/ReportButton";
 import MessageSellerButton from"@/components/MessageSellerButton";
 import TrustedBadge from"@/components/TrustedBadge";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -282,7 +283,7 @@ editionSize: rawPedigree.edition_size,
  const isTrustedSeller = !!trustedData;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title={horse.custom_name} description="View this model in the community showcase.">
  {/* Breadcrumb */}
  <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/community">Show Ring</Link>
@@ -748,6 +749,6 @@ editionSize: rawPedigree.edition_size,
  label="Comments"
  />
  </div>
- </div>
+ </ExplorerLayout>
  );
 }
