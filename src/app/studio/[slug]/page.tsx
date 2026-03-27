@@ -3,6 +3,7 @@ import { notFound, redirect } from"next/navigation";
 import Link from"next/link";
 import { getArtistProfileBySlug } from"@/app/actions/art-studio";
 import ShareButton from"@/components/ShareButton";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -74,7 +75,10 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <ExplorerLayout
+  title={<><span className="text-forest">{profile.studioName}</span></>}
+  description={<>by <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest">@{profile.ownerAlias}</Link> · {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}</>}
+ >
  {/* Hero */}
  <div className="animate-fade-in-up rounded-lg border border-[rgba(139,92,246,0.15)] bg-[linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.06))] px-6 py-8">
  <div className="max-w-[800px]">
@@ -301,6 +305,6 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  )}
  </div>
  </div>
- </div>
+ </ExplorerLayout>
  );
 }

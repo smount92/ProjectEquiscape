@@ -5,6 +5,7 @@ import { getGroup, getGroupChannels } from"@/app/actions/groups";
 import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
 import { getPosts } from"@/app/actions/posts";
 import GroupDetailClient from"@/components/GroupDetailClient";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -33,7 +34,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  ]);
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <ExplorerLayout title={group.name} description={<>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}{group.region && <> · 📍 {group.region}</>} · 👥 {group.memberCount} member{group.memberCount !== 1 ?"s" :""}</>}>
  <div className="mx-auto max-w-[var(--max-width)] px-6">
  {/* Group Header */}
  <div className="border-edge mb-6 border-b pb-6">
@@ -66,6 +67,6 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  </div>
  )}
  </div>
- </div>
+  </ExplorerLayout>
  );
 }

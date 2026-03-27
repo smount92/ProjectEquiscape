@@ -13,6 +13,7 @@ import AssignPlacings from"@/components/AssignPlacings";
 import ShowEntryForm from"@/components/ShowEntryForm";
 import VoteButton from"@/components/VoteButton";
 import WithdrawButton from"@/components/WithdrawButton";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
 
@@ -92,7 +93,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  const endDate = event.endsAt ? new Date(event.endsAt) : null;
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-8">
+ <ExplorerLayout title={event.name} description={<>{EVENT_TYPE_LABELS[event.eventType] || event.eventType} · 👥 {event.rsvpCount} attending</>}>
  <div className="mx-auto max-w-[var(--max-width)] px-6 max-w-[720]">
  <Link
  href="/community/events"
@@ -414,6 +415,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  label="Comments"
  />
  </div>
- </div>
+  </ExplorerLayout>
  );
 }
