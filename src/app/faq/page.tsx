@@ -2,6 +2,7 @@
 
 import { useState } from"react";
 import Link from"next/link";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 /* ------------------------------------------------------------------ */
 /* FAQ Data */
@@ -152,7 +153,7 @@ export default function FaqPage() {
  };
 
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title={<>Frequently Asked <span className="text-forest">Questions</span></>} description="Everything you need to know about Model Horse Hub.">
  <div className="animate-fade-in-up mx-auto max-w-[860px]">
  {/* Page Header */}
  <div className="mb-8">
@@ -237,6 +238,6 @@ export default function FaqPage() {
  </Link>
  </div>
  </div>
- </div>
+  </ExplorerLayout>
  );
 }

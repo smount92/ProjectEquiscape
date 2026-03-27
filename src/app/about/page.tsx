@@ -1,5 +1,6 @@
 import Link from"next/link";
 import type { Metadata } from"next";
+import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata: Metadata = {
  title:"About — Model Horse Hub",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
  return (
- <div className="mx-auto max-w-[var(--max-width)] px-6 py-12">
+ <ExplorerLayout title={<>About <span className="text-forest">Model Horse Hub</span></>} description="Built by a collector who was tired of the status quo.">
  <div className="animate-fade-in-up">
  {/* Page Header */}
  <div className="mb-8">
@@ -183,6 +184,6 @@ export default function AboutPage() {
  </Link>
  </div>
  </div>
- </div>
+  </ExplorerLayout>
  );
 }
