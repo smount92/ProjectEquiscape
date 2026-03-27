@@ -24,6 +24,7 @@ import TransferHistorySection from"@/components/TransferHistorySection";
 import NanDashboardWidget from"@/components/NanDashboardWidget";
 import ShowHistoryWidget from"@/components/ShowHistoryWidget";
 import { getShowHistory } from"@/app/actions/shows";
+import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
 
 
 
@@ -458,57 +459,55 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>();
 
  return (
- <div className="mx-auto max-w-[1600px] px-6 max-lg:px-4">
- <div className="animate-fade-in-up">
+ <CommandCenterLayout
+  title={
+  <>
+   <span className="text-forest">Digital Stable</span>
+   {profile?.alias_name && (
+   <span className="ml-4 text-lg font-normal text-muted">
+    {profile.alias_name}&apos;s Herd
+   </span>
+   )}
+  </>
+  }
+  headerActions={
+  <>
+   <Link
+   href="/stable/import"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   id="batch-import-button"
+   >
+   <FileText size={16} strokeWidth={1.5} /> Batch Import
+   </Link>
+   <Link
+   href="/add-horse/quick"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   id="quick-add-button"
+   >
+   <Zap size={16} strokeWidth={1.5} /> Quick Add
+   </Link>
+   <Link
+   href="/add-horse"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   id="add-horse-button"
+   >
+   <Plus size={16} strokeWidth={1.5} /> Add to Stable
+   </Link>
+  </>
+  }
+  mainContent={
+  <>
+   {/* Success toast */}
+   <Suspense fallback={null}>
+   <DashboardToast />
+   </Suspense>
 
- {/* Shelf Header — FULL WIDTH (renders immediately) */}
- <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div>
- <h1>
- <span className="text-forest">Digital Stable</span>
- {profile?.alias_name && (
- <span className="ml-4 text-lg font-normal text-muted">
- {profile.alias_name}&apos;s Herd
- </span>
- )}
- </h1>
- </div>
- <div className="flex flex-wrap items-center gap-4">
- <Link
- href="/stable/import"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- id="batch-import-button"
- >
- <FileText size={16} strokeWidth={1.5} /> Batch Import
- </Link>
- <Link
- href="/add-horse/quick"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- id="quick-add-button"
- >
- <Zap size={16} strokeWidth={1.5} /> Quick Add
- </Link>
- <Link
- href="/add-horse"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
- id="add-horse-button"
- >
- <Plus size={16} strokeWidth={1.5} /> Add to Stable
- </Link>
- </div>
- </div>
-
- {/* Success toast */}
- <Suspense fallback={null}>
- <DashboardToast />
- </Suspense>
-
- {/* Dashboard content streams in via Suspense */}
- <Suspense fallback={<DashboardSkeleton />}>
- <DashboardContent userId={user.id} page={page} />
- </Suspense>
-
- </div>
- </div>
+   {/* Dashboard content streams in via Suspense */}
+   <Suspense fallback={<DashboardSkeleton />}>
+   <DashboardContent userId={user.id} page={page} />
+   </Suspense>
+  </>
+  }
+ />
  );
 }
