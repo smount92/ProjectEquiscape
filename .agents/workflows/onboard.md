@@ -85,7 +85,7 @@ src/
 │   ├── api/                # 10 API routes (auth, cron, checkout, webhooks, export, identify-mold)
 │   └── [route folders]/    # 60 page.tsx files across ~35 route groups
 ├── components/             # 107+ client components
-│   ├── ui/                 # 8 shadcn/ui primitives (button, input, select, textarea, badge, dialog, skeleton, separator)
+│   ├── ui/                 # 10 shadcn/ui primitives (badge, button, card, dialog, input, select, separator, skeleton, table, textarea)
 │   ├── layouts/            # 4 Page Archetype wrappers (Explorer, Scrapbook, CommandCenter, Focus)
 │   ├── EmptyState.tsx      # Standardized empty state component
 │   └── *.tsx               # Domain-specific components
@@ -124,7 +124,7 @@ src/
 - **Tailwind CSS v4** with `@theme` block in `globals.css` for design tokens
 - **shadcn/ui** for form primitives — no `form-input` or `form-select` classes
 - **No inline `style={{...}}`** for layout, padding, or colors
-- Warm "Cozy Scrapbook" theme — parchment background (`#F0EAD6`), forest green accent (`#2C5545`), espresso text (`#2D2318`)
+- "Quiet Luxury" stone palette — stone-50 background (`#FAFAF9`), forest green accent (`#2C5545`), stone-900 text (`#1C1917`)
 - Simple Mode: `[data-simple-mode="true"]` — 130% font scale, 60px min buttons
 - Typography: `font-serif` (Playfair Display) for headings, `font-sans` (Inter) for UI text
 - Design System Guide: `docs/guides/design-system.md`

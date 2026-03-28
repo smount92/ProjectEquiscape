@@ -21,9 +21,9 @@
   --color-glass: rgba(139, 90, 43, 0.04);
   --color-glass-hover: rgba(139, 90, 43, 0.08);
 
-  --color-ink: #2D2318;
-  --color-ink-light: #59493A;
-  --color-muted: #5F5040;
+  --color-ink: #1C1917;
+  --color-ink-light: #44403C;
+  --color-muted: #78716C;
   --color-inverse: #FFFFFF;
 
   --color-forest: #2C5545;
@@ -74,9 +74,9 @@
   --color-surface-glass: rgba(139, 90, 43, 0.04);
   --color-surface-glass-hover: rgba(139, 90, 43, 0.08);
 
-  --color-text-primary: #2D2318;
-  --color-text-secondary: #59493A;
-  --color-text-muted: #5F5040;
+  --color-text-primary: #1C1917;
+  --color-text-secondary: #44403C;
+  --color-text-muted: #78716C;
   --color-text-inverse: #FFFFFF;
 
   --color-accent-primary: #2C5545;
@@ -2186,9 +2186,9 @@ p {
 
 :root {
   --background: #FAFAF9;
-  --foreground: #2D2318;
+  --foreground: #1C1917;
   --card: #FFFFFF;
-  --card-foreground: #2D2318;
+  --card-foreground: #1C1917;
   --popover: #FFFFFF;
   --popover-foreground: #2D2318;
   --primary: #2C5545;

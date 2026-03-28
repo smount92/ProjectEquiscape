@@ -125,18 +125,14 @@ export default function ExpertJudgingPanel({
  }
  }
 
- const borderColor = overrideMode ?"rgba(239, 68, 68, 0.3)" :"rgba(245, 158, 11, 0.3)";
- const bgColor = overrideMode ?"rgba(239, 68, 68, 0.05)" :"rgba(245, 158, 11, 0.05)";
+  const isOverride = overrideMode;
 
- return (
- <div
- className="bg-card border-edge animate-fade-in-up rounded-lg border shadow-md transition-all"
- style={{
- marginBottom:"var(--space-lg)",
- border: `1px solid ${borderColor}`,
- background: bgColor,
- }}
- >
+  return (
+  <div
+  className={`animate-fade-in-up mb-6 rounded-xl border bg-white p-6 shadow-sm ${
+  isOverride ? "border-red-200" : "border-stone-200"
+  }`}
+  >
  <h3 className="mb-4 flex items-center gap-2">
  {overrideMode ?"⚠️" :"🏅"}{""}
  <span className="text-forest">{overrideMode ?"Override Final Placings" :"Expert Judging Panel"}</span>
@@ -170,18 +166,12 @@ export default function ExpertJudgingPanel({
  </optgroup>
  ))}
  </select>
- {currentClass && (
- <div
- style={{
- marginTop:"var(--space-xs)",
- fontSize: "0.875rem",
- color:"var(--color-text-muted)",
- }}
- >
- Currently judging: <strong>{currentClass.divisionName}</strong> ›{""}
- <strong>{currentClass.name}</strong>
- </div>
- )}
+  {currentClass && (
+  <div className="mt-1 text-sm text-muted">
+  Currently judging: <strong>{currentClass.divisionName}</strong> ›{""}
+  <strong>{currentClass.name}</strong>
+  </div>
+  )}
  </div>
  )}
 
@@ -193,18 +183,11 @@ export default function ExpertJudgingPanel({
  ) : (
  filteredEntries.map((entry) => (
  <div key={entry.id}>
- <div
- style={{
- display:"flex",
- alignItems:"center",
- gap:"var(--space-md)",
- padding:"var(--space-sm) var(--space-md)",
- background:"rgba(var(--color-surface-rgb, 30, 30, 30), 0.5)",
- borderRadius: expandedNotes.has(entry.id)
- ?"var(--radius-sm) var(--radius-sm) 0 0"
- :"var(--radius-sm)",
- }}
- >
+  <div
+  className={`flex items-center gap-4 px-4 py-2 bg-stone-50 ${
+  expandedNotes.has(entry.id) ? "rounded-t-md" : "rounded-md"
+  }`}
+  >
  {entry.thumbnailUrl && (
  <div className="h-[40] w-[40] shrink-0 overflow-hidden rounded-sm">
  {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -221,22 +204,14 @@ export default function ExpertJudgingPanel({
  by @{entry.ownerAlias}
  </div>
  </div>
- <button
- type="button"
- onClick={() => toggleNotes(entry.id)}
- title="Judge notes"
- style={{
- background:"none",
- border:"none",
- cursor:"pointer",
- color: notes[entry.id]
- ?"var(--color-accent-primary)"
- :"var(--color-text-muted)",
- fontSize:"1rem",
- padding:"4px",
- flexShrink: 0,
- }}
- >
+  <button
+  type="button"
+  onClick={() => toggleNotes(entry.id)}
+  title="Judge notes"
+  className={`shrink-0 cursor-pointer border-none bg-transparent p-1 text-base ${
+  notes[entry.id] ? "text-forest" : "text-muted"
+  }`}
+  >
  📝
  </button>
  <select
@@ -254,14 +229,7 @@ export default function ExpertJudgingPanel({
  </div>
  {/* Collapsible Judge Notes */}
  {expandedNotes.has(entry.id) && (
- <div
- style={{
- padding:"var(--space-sm) var(--space-md)",
- background:"rgba(var(--color-surface-rgb, 30, 30, 30), 0.3)",
- borderRadius:"0 0 var(--radius-sm) var(--radius-sm)",
- borderTop:"1px solid rgba(255,255,255,0.05)",
- }}
- >
+  <div className="rounded-b-md border-t border-stone-100 bg-stone-50/50 px-4 py-2">
  <Textarea
  className="text-sm resize-y"
  value={notes[entry.id] ||""}
@@ -277,30 +245,20 @@ export default function ExpertJudgingPanel({
  </div>
 
  {error && <div className="mt-2 text-sm text-danger mt-2">{error}</div>}
- {success && (
- <div
- style={{
- marginTop:"var(--space-sm)",
- padding:"var(--space-xs) var(--space-sm)",
- background:"rgba(34, 197, 94, 0.15)",
- color:"#22c55e",
- borderRadius:"var(--radius-sm)",
- fontSize: "0.875rem",
- }}
- >
- ✅ Placings saved!{""}
- {overrideMode
- ?"Show records updated with audit trail."
- :"Show records auto-generated for placed entries."}
- </div>
- )}
+  {success && (
+  <div className="mt-2 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-600">
+  ✅ Placings saved!{""}
+  {overrideMode
+  ?"Show records updated with audit trail."
+  :"Show records auto-generated for placed entries."}
+  </div>
+  )}
 
  <div className="mt-4 flex gap-2">
  <button
- className={`btn ${overrideMode ?"btn-ghost" :"btn-primary"}`}
+  className={`btn ${overrideMode ? "btn-ghost border-red-300 text-red-500" : "btn-primary"}`}
  onClick={handleSave}
  disabled={saving}
- style={overrideMode ? { borderColor:"rgba(239, 68, 68, 0.4)", color:"#ef4444" } : undefined}
  >
  {saving ?"Saving…" : overrideMode ?"⚠️ Override Placings" :"💾 Save Placings"}
  </button>

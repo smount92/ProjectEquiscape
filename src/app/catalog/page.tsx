@@ -64,15 +64,15 @@ export default async function ReferencePage() {
   <div className="mt-2 mb-8 flex flex-wrap items-center justify-center gap-8">
   <div className="flex flex-col items-center">
    <span className="text-3xl font-bold text-ink">{(count ?? 0).toLocaleString()}</span>
-   <span className="text-sm text-muted">Catalog Entries</span>
+   <span className="text-sm text-ink-light">Catalog Entries</span>
   </div>
   <div className="flex flex-col items-center">
    <span className="text-3xl font-bold text-ink">{pendingSuggestions ?? 0}</span>
-   <span className="text-sm text-muted">Pending Suggestions</span>
+   <span className="text-sm text-ink-light">Pending Suggestions</span>
   </div>
   <div className="flex flex-col items-center">
    <span className="text-3xl font-bold text-ink">{recentChanges ?? 0}</span>
-   <span className="text-sm text-muted">Changes This Week</span>
+   <span className="text-sm text-ink-light">Changes This Week</span>
   </div>
   </div>
 

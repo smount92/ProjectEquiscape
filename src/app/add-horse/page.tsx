@@ -628,7 +628,7 @@ export default function AddHorsePage() {
  ================================================================ */}
  {currentStep === 0 && (
  <div className="step-content" key="step-0">
- <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+ <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
  <div className="mb-6 flex items-center gap-3">
  <div className="text-2xl">
  📸
@@ -884,7 +884,7 @@ export default function AddHorsePage() {
  — Use CSS display instead of unmounting to preserve component state
  ================================================================ */}
  <div className="step-content" key="step-1" style={{ display: currentStep === 1 ?"block" :"none" }}>
- <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+ <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
  <div className="mb-6 flex items-center gap-3">
  <div className="text-2xl">
  🔗
@@ -973,7 +973,7 @@ export default function AddHorsePage() {
  ================================================================ */}
  {currentStep === 2 && (
  <div className="step-content" key="step-2">
- <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+ <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
  {/* Reference summary badge */}
  {selectedCatalogItem && (
  <div className="mt-4 mb-6 rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 text-sm leading-relaxed">
@@ -1403,7 +1403,7 @@ export default function AddHorsePage() {
  </div>
  )}
 
- <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm md:p-8">
+ <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
  {/* Vault Header */}
  <div className="border-[rgba(240,160,108,0.2)] mb-8 flex items-center gap-4 border-b pb-6">
  <div className="vault-icon">🔒</div>

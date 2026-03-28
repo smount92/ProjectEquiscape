@@ -1,96 +1,99 @@
 "use client";
 
-import { useState, useRef, useEffect } from"react";
+import { useState, useRef, useEffect } from "react";
 
 interface SearchBarProps {
- value: string;
- onChange: (value: string) => void;
- placeholder?: string;
- id?: string;
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    id?: string;
 }
 
 export default function SearchBar({
- value,
- onChange,
- placeholder ="Search by name, mold, release, or sculptor…",
- id ="search-bar",
+    value,
+    onChange,
+    placeholder = "Search by name, mold, release, or sculptor…",
+    id = "search-bar",
 }: SearchBarProps) {
- const inputRef = useRef<HTMLInputElement>(null);
- const [isFocused, setIsFocused] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [isFocused, setIsFocused] = useState(false);
 
- // Keyboard shortcut:"/" to focus
- useEffect(() => {
- const handleKeyDown = (e: KeyboardEvent) => {
- if (e.key ==="/" && !["INPUT","TEXTAREA","SELECT"].includes((e.target as HTMLElement)?.tagName)) {
- e.preventDefault();
- inputRef.current?.focus();
- }
- };
- document.addEventListener("keydown", handleKeyDown);
- return () => document.removeEventListener("keydown", handleKeyDown);
- }, []);
+    // Keyboard shortcut: "/" to focus
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes((e.target as HTMLElement)?.tagName)) {
+                e.preventDefault();
+                inputRef.current?.focus();
+            }
+        };
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, []);
 
- return (
- <div className={`search-bar ${isFocused ?"search-bar-focused" :""}`} id={id}>
- {/* Search icon */}
- <svg
- className="text-muted shrink-0 transition-colors"
- width="18"
- height="18"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- >
- <circle cx="11" cy="11" r="8" />
- <line x1="21" y1="21" x2="16.65" y2="16.65" />
- </svg>
+    return (
+        <div
+            className={`flex items-center gap-2 rounded-xl border bg-white px-4 py-2.5 transition-all ${isFocused ? "border-forest ring-2 ring-forest/20" : "border-stone-200"}`}
+            id={id}
+        >
+            {/* Search icon */}
+            <svg
+                className="shrink-0 text-stone-400 transition-colors"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+            >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
 
- <input
- ref={inputRef}
- type="text"
- className="text-ink placeholder:text-muted transition-colors"
- placeholder={placeholder}
- value={value}
- onChange={(e) => onChange(e.target.value)}
- onFocus={() => setIsFocused(true)}
- onBlur={() => setIsFocused(false)}
- aria-label="Search horses"
- />
+            <input
+                ref={inputRef}
+                type="text"
+                className="min-w-0 flex-1 border-none bg-transparent text-sm text-stone-900 outline-none placeholder:text-stone-400"
+                placeholder={placeholder}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                aria-label="Search horses"
+            />
 
- {/* Keyboard hint or clear button */}
- {value ? (
- <button
- className="bg-[rgba(0,0,0,0.06)] border-[rgba(0,0,0,0.06)] text-muted flex h-[32px] w-[32px] shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all"
- onClick={() => {
- onChange("");
- inputRef.current?.focus();
- }}
- aria-label="Clear search"
- type="button"
- >
- <svg
- width="16"
- height="16"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2.5"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <line x1="18" y1="6" x2="6" y2="18" />
- <line x1="6" y1="6" x2="18" y2="18" />
- </svg>
- </button>
- ) : (
- <kbd className="top-[calc(var(--header-height)+0.75rem)] bg-card border-edge shadow-md sticky z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-0">
- /
- </kbd>
- )}
- </div>
- );
+            {/* Keyboard hint or clear button */}
+            {value ? (
+                <button
+                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-stone-200 bg-stone-100 text-stone-500 transition-all hover:bg-stone-200"
+                    onClick={() => {
+                        onChange("");
+                        inputRef.current?.focus();
+                    }}
+                    aria-label="Clear search"
+                    type="button"
+                >
+                    <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            ) : (
+                <kbd className="flex h-6 items-center rounded border border-stone-200 bg-stone-50 px-1.5 text-xs text-stone-400">
+                    /
+                </kbd>
+            )}
+        </div>
+    );
 }

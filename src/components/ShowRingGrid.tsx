@@ -286,12 +286,6 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
           {/* Badge row */}
           <div className="mt-2 flex flex-wrap gap-1.5">
            <Badge className={finishClass}>{horse.finishType}</Badge>
-           {horse.tradeStatus === "For Sale" && (
-            <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">For Sale</Badge>
-           )}
-           {horse.tradeStatus === "Open to Offers" && (
-            <Badge className="bg-blue-50 text-blue-700 border-blue-200">Open to Offers</Badge>
-           )}
           </div>
 
           {/* Metadata line */}

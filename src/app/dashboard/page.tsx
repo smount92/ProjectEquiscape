@@ -464,7 +464,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   <>
    <span className="text-forest">Digital Stable</span>
    {profile?.alias_name && (
-   <span className="ml-4 text-lg font-normal text-muted">
+   <span className="ml-4 text-lg font-normal text-stone-500">
     {profile.alias_name}&apos;s Herd
    </span>
    )}

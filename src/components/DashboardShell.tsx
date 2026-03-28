@@ -121,20 +121,20 @@ export default function DashboardShell({
  id="dashboard-view-toggle"
  >
  <button
- className={`text-ink-light font-inherit hover:text-ink cursor-pointer rounded-full border-none bg-transparent px-4 py-1.5 text-sm transition-all duration-200 ${view ==="grid" ?"bg-forest font-semibold text-white" :""}`}
+ className={`font-inherit cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${view ==="grid" ? "bg-forest font-semibold text-white" : "bg-transparent text-stone-600 hover:text-stone-900"}`}
  onClick={() => handleViewChange("grid")}
  >
  🖼️ Gallery
  </button>
  <button
- className={`text-ink-light font-inherit hover:text-ink cursor-pointer rounded-full border-none bg-transparent px-4 py-1.5 text-sm transition-all duration-200 ${view ==="ledger" ?"bg-forest font-semibold text-white" :""}`}
+ className={`font-inherit cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${view ==="ledger" ? "bg-forest font-semibold text-white" : "bg-transparent text-stone-600 hover:text-stone-900"}`}
  onClick={() => handleViewChange("ledger")}
  >
  📋 Ledger
  </button>
  </div>
  <button
- className={`text-ink-light font-inherit hover:text-ink ml-2 cursor-pointer rounded-full border-none bg-transparent px-4 py-1.5 text-sm transition-all duration-200 ${selectMode ?"bg-forest font-semibold text-white" :""}`}
+ className={`font-inherit ml-2 cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${selectMode ? "bg-forest font-semibold text-white" : "bg-transparent text-stone-600 hover:text-stone-900"}`}
  onClick={() => {
  if (selectMode) clearSelection();
  else setSelectMode(true);
