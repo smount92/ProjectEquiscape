@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import * as Sentry from "@sentry/nextjs";
 import type { Database } from "@/lib/types/database.generated";
 
 import { requireAuth } from "@/lib/auth";
@@ -83,8 +84,9 @@ export async function completeTransaction(
     try {
         const admin = getAdminClient();
         await admin.rpc("refresh_market_prices");
-    } catch {
+    } catch (err) {
         // Non-blocking — cron will catch it within 6 hours
+        Sentry.captureException(err, { tags: { domain: "commerce" }, level: "warning" });
         logger.warn("completeTransaction", "Market price refresh failed (non-blocking)");
     }
 
@@ -94,7 +96,7 @@ export async function completeTransaction(
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(completingUserId, "transaction_completed");
-        } catch (err) { logger.error("Commerce", "Background task failed", err); }
+        } catch (err) { Sentry.captureException(err, { tags: { domain: "commerce" } }); logger.error("Commerce", "Background task failed", err); }
     });
 
     return { success: true };

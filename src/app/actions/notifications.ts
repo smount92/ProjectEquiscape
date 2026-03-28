@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import * as Sentry from "@sentry/nextjs";
 
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -152,8 +153,9 @@ export async function createNotification(data: {
             conversation_id: data.conversationId || null,
             link_url: data.linkUrl || null,
         });
-    } catch {
+    } catch (err) {
         // Fire-and-forget — never fail the parent action
+        Sentry.captureException(err, { tags: { domain: "notifications" }, level: "warning" });
         logger.error("Notification", "Failed to create notification");
     }
 }

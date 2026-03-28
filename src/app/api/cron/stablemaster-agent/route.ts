@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
+import * as Sentry from "@sentry/nextjs";
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
@@ -240,6 +241,7 @@ Format your response as HTML with <p> tags for each paragraph. Use <strong> for 
                     processed++;
                 }
             } catch (err) {
+                Sentry.captureException(err, { tags: { domain: "cron", user_id: proUser.id } });
                 logger.error("Stablemaster", `Failed to process user ${proUser.id}`, err);
                 errors++;
             }
@@ -253,6 +255,7 @@ Format your response as HTML with <p> tags for each paragraph. Use <strong> for 
             timestamp: new Date().toISOString(),
         });
     } catch (error) {
+        Sentry.captureException(error, { tags: { domain: "cron" }, level: "fatal" });
         logger.error("Stablemaster", "Cron job failed", error);
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
     }

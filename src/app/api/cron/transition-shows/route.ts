@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * Cron endpoint: Auto-transition expired shows from "open" → "judging".
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
             checkedAt: new Date().toISOString(),
         });
     } catch (error) {
+        Sentry.captureException(error, { tags: { domain: "cron" }, level: "error" });
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
     }
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import * as Sentry from "@sentry/nextjs";
 import type { Json } from "@/lib/types/database.generated";
 
 import { requireAuth } from "@/lib/auth";
@@ -45,7 +46,8 @@ export async function createActivityEvent(data: {
             target_id: data.targetId || null,
             metadata: data.metadata || null,
         });
-    } catch {
+    } catch (err) {
+        Sentry.captureException(err, { tags: { domain: "activity" }, level: "warning" });
         logger.error("Activity", "Failed to log event");
     }
 }
@@ -86,7 +88,7 @@ export async function createTextPost(text: string, imageUrls?: string[]): Promis
             try {
                 const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
                 await parseAndNotifyMentions(trimmed, userId, actorName, "/feed");
-            } catch (err) { logger.error("Activity", "Background task failed", err); }
+            } catch (err) { Sentry.captureException(err, { tags: { domain: "activity" } }); logger.error("Activity", "Background task failed", err); }
         });
     }
 

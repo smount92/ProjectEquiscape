@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * POST /api/identify-mold
@@ -231,7 +232,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (err) {
-    console.error("identify-mold route error:", err);
+    Sentry.captureException(err, { tags: { domain: "ai" }, level: "error" });
     return NextResponse.json(
       { error: "Internal server error." },
       { status: 500 }

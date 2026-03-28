@@ -58,7 +58,8 @@ export async function POST() {
 
         return NextResponse.json({ url: session.url });
     } catch (err) {
-        console.error("Stripe checkout error:", err);
+        const Sentry = await import("@sentry/nextjs");
+        Sentry.captureException(err, { tags: { domain: "commerce" }, level: "error" });
         return NextResponse.json(
             { error: "Failed to create checkout session." },
             { status: 500 }

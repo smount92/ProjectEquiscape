@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
+import * as Sentry from "@sentry/nextjs";
 
 // ============================================================
 // Stripe Webhook Handler
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     try {
         event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
+        Sentry.captureException(err, { tags: { domain: "stripe" }, level: "error" });
         logger.error("StripeWebhook", "Signature verification failed", err);
         return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
@@ -89,6 +91,7 @@ export async function POST(request: NextRequest) {
                 break;
         }
     } catch (err) {
+        Sentry.captureException(err, { tags: { domain: "stripe", event_type: event.type }, level: "fatal" });
         logger.error("StripeWebhook", `Error processing ${event.type}`, err);
         return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
     }

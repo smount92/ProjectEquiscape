@@ -88,7 +88,8 @@ export async function GET() {
             },
         });
     } catch (err) {
-        console.error("Insurance report generation error:", err);
+        const Sentry = await import("@sentry/nextjs");
+        Sentry.captureException(err, { tags: { domain: "pdf" }, level: "error" });
         return NextResponse.json(
             { error: "Failed to generate insurance report." },
             { status: 500 }

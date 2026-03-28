@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import * as Sentry from "@sentry/nextjs";
 import type { Database } from "@/lib/types/database.generated";
 
 import { requireAuth } from "@/lib/auth";
@@ -170,7 +171,7 @@ export async function updateHorseAction(horseId: string, data: {
                     .eq("id", horseId)
                     .eq("life_stage", "parked");
             }
-        } catch (err) { logger.error("Horse", "Auto-unpark expired transfer failed", err); }
+        } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Auto-unpark expired transfer failed", err); }
 
         // ── Security: whitelist allowed fields to prevent column injection ──
         const HORSE_ALLOWED = [
@@ -235,7 +236,7 @@ export async function updateHorseAction(horseId: string, data: {
                             content: `📋 Reference identity updated from "${oldName}" to "${newName}".`,
                         });
                     }
-                } catch (err) { logger.error("Horse", "Catalog identity audit log failed", err); }
+                } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Catalog identity audit log failed", err); }
             }
 
             const { error: updErr } = await supabase.from("user_horses").update(horseUpdate).eq("id", horseId).eq("owner_id", user.id);
@@ -377,7 +378,7 @@ export async function createHorseRecord(data: {
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(finalUserId, "horse_added");
-        } catch (err) { logger.error("Horse", "Achievement evaluation failed after horse add", err); }
+        } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Achievement evaluation failed after horse add", err); }
     });
 
     return { success: true, horseId: horse.id };
@@ -457,7 +458,7 @@ export async function finalizeHorseImages(
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(finalUserId, "photo_uploaded");
-        } catch (err) { logger.error("Horse", "Achievement evaluation failed after photo upload", err); }
+        } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Achievement evaluation failed after photo upload", err); }
     });
 
     return { success: true };
