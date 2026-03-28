@@ -55,14 +55,14 @@ The hobby currently relies on:
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | Next.js 16 (App Router), React 19, Vanilla CSS |
-| **Design Language** | Glassmorphism (backdrop blur, translucent panels, gradient accents) |
+| **Frontend** | Next.js 16 (App Router), React 19, Tailwind CSS |
+| **Design Language** | The Warm Parchment Restoration (Tactile, physical scrapbook aesthetics, strict custom semantic tailwind tokens: `bg-parchment`, `text-ink`, `border-edge`). Inline styles are strictly forbidden. |
 | **Backend / Database** | Supabase (PostgreSQL) with strict Row Level Security (RLS) |
 | **Auth** | Supabase Auth with PKCE (code exchange), password recovery flows |
 | **Storage** | Supabase Storage — private `horse-images` bucket with signed URLs |
 | **Email** | Resend (transactional notifications) |
 | **Hosting** | Vercel |
-| **Data Engineering** | Custom Node.js/Cheerio web scraper with Levenshtein fuzzy-matching |
+| **Data Engineering** | Custom Node.js/Cheerio web scraper with Levenshtein fuzzy-matching, plus Server-Side Catalog Search via `search_catalog_fuzzy` RPC |
 | **Testing** | Vitest (smoke tests) |
 
 ### Codebase Scale (as of March 8, 2026)
@@ -161,6 +161,8 @@ The authenticated collector's home base:
 - **Auth Flows:** Login, signup, password recovery (PKCE-based), branded auth error pages
 - **Admin Console** (`/admin`): Platform metrics, contact message management, photo show admin, "Feature a Horse" tools, community suggestions panel
 - **Security Hardening:** 9-point audit (RLS initplan fixes, FK indexes, policy merges, signed URL authorization)
+- **Open Beta Hardening (Phase 1):** Atomic commerce RPCs (row-level locking), visibility-aware notification polling (neutralizing DDoS risks), and global `deleted_at` soft-delete system.
+- **Accessibility Hardening:** Full WCAG compliance enforced via Next.js `jsx-a11y` linter. ARIA attributes, ID uniqueness rules, and form bindings strictly follow literal boolean schemas.
 - **Settings Page** (`/settings`): Account management with profile editing, email/password changes, and avatar upload
 - **Native Web Sharing:** iOS/Android-native share + clipboard fallback with toast notifications
 
@@ -197,8 +199,8 @@ All of the following have been implemented, committed, and tested:
 |---|---|---|
 | **Market Price Guide ("Blue Book")** | Shelved | No platform shows aggregated model horse prices. Would be a "first in the hobby." Needs user volume for credible data. |
 | **AI Model Identification** | Shelved | Code exists but hidden. Needs training data (10,000+ labeled images) and API budget. |
-| **Insurance PDF Report** | Research | One-click professional document for insurance — extremely high demand from serious collectors. |
-| **Batch CSV Import** | Research | Removes friction for "super-collectors" with 500+ models migrating from spreadsheets. |
+| **Insurance PDF Report** | **Fully Shipped** | One-click professional document for insurance. Now actively generated via `src/lib/pdf/InsuranceReport.tsx`. |
+| **Batch CSV Import** | In Progress | Server-side fuzzy matching (`matchCsvRowsBatch`) foundation is completed. UI pending completion. |
 | **eBay Sold Listing Integration** | Research | Would feed data into Market Price Guide. Requires eBay API access + fuzzy matching. |
 | **Mobile App (PWA/Native)** | Research | Camera integration for show photography, offline access, push notifications. |
 | **Live Show Integration** | Research | Import official NAMHSA results, NAN tracker, show calendars. Political prerequisite: show organizer buy-in. |

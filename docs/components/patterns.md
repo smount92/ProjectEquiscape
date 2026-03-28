@@ -201,6 +201,36 @@ export default function MyComponent() {
 
 ---
 
+## Pattern 8: CSS Grid Image Gallery & Hidden Uploaders
+
+When building tactile image galleries or dropzones (like the Add Horse passport slots), **do not use Shadcn `<Input>` components**. Their internal padded wrappers will break uniform CSS Grid structures.
+
+Instead, build a robust grid and use a native HTML `<input>` positioned absolutely over the tile with `opacity-0`.
+
+```tsx
+<div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+    
+    {/* A square gallery tile */}
+    <div className="relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-md border-2 border-dashed border-edge bg-card">
+        <Camera className="mb-2 h-6 w-6 text-muted" />
+        <span className="text-sm font-medium text-ink-light">Upload File</span>
+        
+        {/* The hidden native input stretches to fill the whole tile container */}
+        <input 
+            type="file" 
+            accept="image/*"
+            className="absolute inset-0 cursor-pointer opacity-0" 
+            onChange={handleUpload}
+        />
+    </div>
+
+</div>
+```
+
+**Used by:** `AddHorse/Page`, `EditHorse/Page`, `CommissionRequestForm`.
+
+---
+
 ## Anti-Patterns to Avoid
 
 | ❌ Don't | ✅ Do |
@@ -209,9 +239,10 @@ export default function MyComponent() {
 | Use `useEffect` for initial data | Use Server Component async fetching |
 | Create inline styles for static values | Use Tailwind utility classes or global design tokens |
 | Call `getAdminClient()` from client | Always use server actions for mutations |
-| Hard-code colors | Use Tailwind theme tokens (`text-forest`, `bg-card`) or CSS properties (`var(--color-*)`) |
+| Hard-code colors | Use Tailwind `@theme` tokens (`text-ink`, `text-forest`, `border-edge`, `bg-[#FEFCF8]`) |
 | Use createPortal for modals | Use shadcn `<Dialog>` (exception: PhotoLightbox) |
-| Use raw HTML form inputs | Use shadcn `<Input>`, `<Textarea>`, `<Select>` |
+| Use raw HTML form inputs for text | Use shadcn `<Input>`, `<Textarea>`, `<Select>` |
+| Use shadcn `<Input file>` for photo grids | Use native `<input type="file" className="opacity-0 absolute inset-0">` |
 
 ---
 

@@ -63,8 +63,7 @@ export default async function StudioDashboardPage() {
     </div>
     <div className="flex flex-col items-center gap-[2px]">
     <span
-     className="text-forest text-xl font-extrabold"
-      /* eslint-disable-next-line react/forbid-dom-props */ style={{ color: pendingRequests.length > 0 ? "var(--color-accent-warm)" : undefined }}
+     className={`text-xl font-extrabold ${pendingRequests.length > 0 ? "text-amber-500" : "text-forest"}`}
     >
      {pendingRequests.length}
     </span>

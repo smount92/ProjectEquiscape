@@ -31,7 +31,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -5
 # TASK 1: Tombstone Soft-Delete (Data Integrity)
 # ═══════════════════════════════════════
 
-## Status: NOT STARTED
+## Status: ✅ COMPLETE
 **Risk:** CRITICAL — Current `deleteHorse()` does a hard DELETE with ON DELETE CASCADE, wiping Hoofprint™ provenance for all previous owners.
 
 ### Step 1.1: Create the migration
@@ -125,7 +125,7 @@ cd c:\Project Equispace\model-horse-hub && npx vitest run
 # TASK 2: Commerce Atomic RPCs (Concurrency)
 # ═══════════════════════════════════════
 
-## Status: NOT STARTED
+## Status: ✅ COMPLETE
 **Risk:** HIGH — `makeOffer()` and `respondToOffer()` manage state checks in Node.js, creating TOCTOU race conditions. Two users can simultaneously lock the same horse.
 
 ### Step 2.1: Create the migration
@@ -270,7 +270,7 @@ cd c:\Project Equispace\model-horse-hub && npx vitest run
 # TASK 3: Neutralize Polling DDoS (Performance)
 # ═══════════════════════════════════════
 
-## Status: NOT STARTED
+## Status: ✅ COMPLETE
 **Risk:** MEDIUM — `NotificationBell.tsx` polls every 60s regardless of tab visibility. At 500+ users with multiple tabs, this hammers the connection pool.
 
 ### Step 3.1: Update `src/components/NotificationBell.tsx`
@@ -332,7 +332,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npx next build 2>&1"
 # TASK 4: Server-Side Catalog Search (Memory/Bandwidth)
 # ═══════════════════════════════════════
 
-## Status: NOT STARTED
+## Status: ✅ COMPLETE
 **Risk:** MEDIUM — The `/api/reference-dictionary` route fetches all 10,500+ catalog rows to the client for `fuzzysort`. This will crash mobile devices at scale.
 
 ### Step 4.1: Create the fuzzy search RPC migration
@@ -452,7 +452,7 @@ cd c:\Project Equispace\model-horse-hub && npx vitest run
 # TASK 5: Escrow Liability UX (Legal/UX)
 # ═══════════════════════════════════════
 
-## Status: NOT STARTED
+## Status: ✅ COMPLETE
 **Risk:** MEDIUM — Commerce UI implies MHH processes payments. This creates legal liability.
 
 ### Step 5.1: Update payment button labels
@@ -500,7 +500,7 @@ cd c:\Project Equispace\model-horse-hub && cmd /c "npx next build 2>&1"
 # TASK 6: Observability — Silent Catch Blocks
 # ═══════════════════════════════════════
 
-## Status: NOT STARTED
+## Status: ✅ COMPLETE
 **Risk:** MEDIUM — 20+ silent `catch { /* non-blocking */ }` blocks inside `after()` hooks. If background tasks fail, we'll never know.
 
 ### Step 6.1: Audit all silent catch blocks

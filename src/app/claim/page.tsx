@@ -115,39 +115,28 @@ export default function ClaimPage() {
  if (success) {
  return (
  <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
- <div
- className="bg-white border-stone-200 animate-fade-in-up mx-auto max-w-[500px] rounded-lg border shadow-md transition-all text-center"
- >
+ <div className="bg-[#FEFCF8] border-edge animate-fade-in-up mx-auto max-w-[500px] rounded-lg border shadow-md transition-all text-center p-8">
  <div className="mb-4 text-[3rem]">🎉</div>
- <h1 className="text-2xl">Welcome to your stable!</h1>
- <p className="text-stone-600 mt-2 mb-6">
+ <h1 className="font-serif text-3xl font-bold text-ink">Welcome to your stable!</h1>
+ <p className="text-ink-light mt-4 mb-8">
  <strong>{success.horseName}</strong> has been successfully transferred to your account. The full
  Hoofprint™ history has been preserved.
  </p>
- <div className="gap-2 flex flex-wrap justify-center gap-2">
+ <div className="flex flex-wrap justify-center gap-4">
  <Link
  href={`/stable/${success.horseId}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-2 text-sm font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90"
  >
  🐴 View Passport
  </Link>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all hover:bg-[#F4EFE6]"
  >
  ← Dashboard
  </Link>
  </div>
- <p
- style={{
- textAlign:"center",
- fontSize:"0.875rem",
- color:"var(--color-text-stone-500)",
- marginTop:"var(--space-lg)",
- borderTop:"1px solid var(--color-border)",
- paddingTop:"var(--space-md)",
- }}
- >
+ <p className="text-center text-sm text-muted mt-8 border-t border-edge pt-4">
  ⭐ Had a good experience? You can leave a review from the seller&apos;s profile.
  </p>
  </div>
@@ -157,74 +146,59 @@ export default function ClaimPage() {
 
  return (
  <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
- <div className="bg-white border-stone-200 animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all">
- <div className="mb-6 text-center">
+ <div className="bg-[#FEFCF8] border-edge animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all p-8">
+ <div className="mb-8 text-center">
  <div className="mb-2 text-[2.5rem]">📦</div>
- <h1 className="text-xl">
- <span className="text-forest">Claim a Horse</span>
+ <h1 className="font-serif text-3xl font-bold text-ink">
+ Claim a Horse
  </h1>
- <p className="text-stone-600 mt-1 text-sm">
+ <p className="text-ink-light mt-2 text-sm">
  Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
  </p>
  </div>
 
  {/* Preview Card (CoA PIN lookup result) */}
  {preview && (
- <div
- className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm border-stone-200 rounded-lg border shadow-md transition-all rounded-xl border border-stone-200 p-6 mb-6 bg-white shadow-sm"
- >
- <div className="gap-6 flex items-center gap-6">
+ <div className="rounded-xl border border-edge p-6 mb-6 bg-[#FEFCF8] shadow-sm transition-all text-left">
+ <div className="flex items-center gap-6">
  {preview.photo ? (
  <img
  src={preview.photo}
  alt={preview.name}
- className="w-20 h-20 rounded-lg object-cover shadow-sm bg-stone-100"
+ className="w-20 h-20 rounded-lg object-cover shadow-sm bg-[#F4EFE6]"
  />
  ) : (
- <div
- style={{
- width: 80,
- height: 80,
- borderRadius:"var(--radius-md)",
- background:"var(--color-bg-white)",
- display:"flex",
- alignItems:"center",
- justifyContent:"center",
- fontSize:"2rem",
- }}
- >
+ <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-[#F4EFE6] text-[2rem]">
  🐴
  </div>
  )}
  <div className="flex-1">
- <h3 className="mb-[4] text-lg font-bold">
+ <h3 className="mb-1 text-lg font-bold text-ink">
  {preview.name}
  </h3>
- <p className="text-stone-500 text-sm">
+ <p className="text-muted text-sm">
  {preview.finish} · {preview.condition}
  </p>
  </div>
  </div>
 
- <div
- className="flex gap-6 mt-4 pt-4 border-t border-stone-100"
- >
+ <div className="flex gap-6 mt-4 pt-4 border-t border-edge">
  <div className="flex-1 text-center">
  <span className="text-forest text-[1.2rem] font-bold">{preview.timelineCount}</span>
  <br />
- <span className="text-stone-500 text-xs">Hoofprint Events</span>
+ <span className="text-muted text-xs">Hoofprint Events</span>
  </div>
  <div className="flex-1 text-center">
  <span className="text-forest text-[1.2rem] font-bold">{preview.ownerCount}</span>
  <br />
- <span className="text-stone-500 text-xs">
+ <span className="text-muted text-xs">
  Previous Owner{preview.ownerCount !== 1 ?"s" :""}
  </span>
  </div>
  </div>
 
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all w-full mt-6"
+ className="inline-flex w-full min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-2 text-sm font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90 mt-6"
  onClick={handleClaim}
  disabled={claiming}
  id="claim-horse-btn"
@@ -236,12 +210,11 @@ export default function ClaimPage() {
 
  {/* Code Input */}
  {!preview && (
- <form onSubmit={handleSubmit}>
+ <form onSubmit={handleSubmit} className="text-left">
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Transfer Code or PIN</label>
+ <label className="text-ink mb-2 block text-sm font-semibold">Transfer Code or PIN</label>
  <Input
  type="text"
- 
  value={code}
  onChange={(e) => {
  setCode(e.target.value.toUpperCase());
@@ -250,7 +223,7 @@ export default function ClaimPage() {
  }}
  placeholder="ABC123"
  maxLength={6}
- className="font-mono text-3xl font-extrabold text-center tracking-[0.3em] p-4 rounded-lg"
+ className="font-mono text-3xl font-extrabold text-center tracking-[0.3em] h-16 rounded-lg bg-[#FEFCF8] border-edge text-ink"
  autoFocus
  />
  </div>
@@ -265,7 +238,7 @@ export default function ClaimPage() {
 
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all w-full"
+ className="inline-flex w-full min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-2 text-sm font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90"
  disabled={claiming || lookingUp || code.trim().length < 6}
  >
  {lookingUp ?"Looking up…" : claiming ?"Claiming…" :"🐴 Look Up & Claim"}
@@ -274,14 +247,12 @@ export default function ClaimPage() {
  )}
 
  {error && preview && (
- <p
- className="mt-4 text-sm text-[#ef4444] text-center"
- >
+ <p className="mt-4 text-sm text-red-700 text-center font-medium">
  {error}
  </p>
  )}
 
- <p className="text-stone-500 mt-4 text-xs text-center">
+ <p className="text-muted mt-6 text-xs text-center border-t border-edge pt-4">
  The horse&apos;s full Hoofprint™ history will transfer with it.
  <br />
  Photos, show records, and provenance are preserved forever.

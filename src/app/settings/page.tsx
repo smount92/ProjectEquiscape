@@ -288,7 +288,7 @@ export default function SettingsPage() {
  type="button"
  className={showBadges ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => setShowBadges(!showBadges)}
- aria-pressed={showBadges}
+ aria-pressed={showBadges ? "true" : "false"}
  aria-label="Toggle Trophy Case on profile"
  title="Toggle Trophy Case visibility"
  />
@@ -302,6 +302,7 @@ export default function SettingsPage() {
  <select
  id="settings-currency"
  className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
+ title="Select preferred currency"
  value={currencySymbol}
  onChange={(e) => setCurrencySymbol(e.target.value)}
  >
@@ -431,7 +432,7 @@ export default function SettingsPage() {
  type="button"
  className={notifPrefs[n.key] ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => handleToggleNotif(n.key)}
- aria-pressed={notifPrefs[n.key]}
+ aria-pressed={notifPrefs[n.key] ? "true" : "false"}
  aria-label={`Toggle ${n.label}`}
  title={`Toggle ${n.label}`}
  />

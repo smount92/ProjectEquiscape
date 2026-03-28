@@ -64,7 +64,7 @@ docs/
 │   └── routes.md                      # API route reference (10 routes)
 ├── components/
 │   ├── catalog.md                     # 107-component index by domain
-│   ├── patterns.md                    # 7 common component patterns
+│   ├── patterns.md                    # 8 common component patterns
 │   └── design-system.md              # Tokens, colors, typography, primitives
 ├── guides/
 │   ├── adding-a-feature.md            # End-to-end feature workflow

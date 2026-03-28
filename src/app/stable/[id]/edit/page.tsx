@@ -8,7 +8,8 @@ import type { FinishType, AngleProfile, AssetCategory } from"@/lib/types/databas
 import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
 import CollectionPicker from"@/components/CollectionPicker";
-import { compressImage, compressImageWithWatermark } from"@/lib/utils/imageCompression";
+import { compressImage, compressImageWithWatermark, generateThumbnail } from"@/lib/utils/imageCompression";
+import type { UserTier } from"@/lib/utils/imageCompression";
 import { updateLifeStage } from"@/app/actions/hoofprint";
 import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages } from"@/app/actions/horse";
 import { getProfile } from"@/app/actions/settings";
@@ -132,6 +133,9 @@ export default function EditHorsePage() {
  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
  const [userAlias, setUserAlias] = useState("");
 
+ // User tier for compression quality
+ const [userTier, setUserTier] = useState<UserTier>("free");
+
  // ---- Load existing data ----
  useEffect(() => {
  async function loadHorse() {
@@ -141,6 +145,11 @@ export default function EditHorsePage() {
  if (!user) {
  router.push("/login");
  return;
+ }
+
+ // Read user tier from JWT
+ if (user.app_metadata?.tier) {
+ setUserTier(user.app_metadata.tier as UserTier);
  }
 
  const { data: horse, error: horseErr } = await supabase
@@ -493,8 +502,8 @@ export default function EditHorsePage() {
  if (newFiles[angle]) {
  const compressed =
  watermarkEnabled && userAlias
- ? await compressImageWithWatermark(newFiles[angle], userAlias)
- : await compressImage(newFiles[angle]);
+ ? await compressImageWithWatermark(newFiles[angle], userAlias, userTier)
+ : await compressImage(newFiles[angle], userTier);
 
  // Delete old image from storage + DB if it exists
  const existing = existingImages[angle];
@@ -515,6 +524,17 @@ export default function EditHorsePage() {
  uploadErrors.push(`${slot.label}: ${uploadError.message}`);
  } else {
  uploadedImages.push({ path: filePath, angle });
+
+ // Generate and upload thumbnail (400px WebP)
+ try {
+ const thumbnail = await generateThumbnail(newFiles[angle]);
+ const thumbPath = filePath.replace(/\.webp$/, "_thumb.webp");
+ await supabase.storage
+ .from("horse-images")
+ .upload(thumbPath, thumbnail, { contentType:"image/webp" });
+ } catch {
+ // Non-fatal — grid will fall back to full-res
+ }
  }
  }
  }
@@ -523,8 +543,8 @@ export default function EditHorsePage() {
  for (let i = 0; i < newExtraFiles.length; i++) {
  const compressed =
  watermarkEnabled && userAlias
- ? await compressImageWithWatermark(newExtraFiles[i].file, userAlias)
- : await compressImage(newExtraFiles[i].file);
+ ? await compressImageWithWatermark(newExtraFiles[i].file, userAlias, userTier)
+ : await compressImage(newExtraFiles[i].file, userTier);
  const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
  const { error: uploadError } = await supabase.storage
  .from("horse-images")

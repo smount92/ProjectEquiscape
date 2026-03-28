@@ -194,8 +194,6 @@ export default function FaqPage() {
  <button
  className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-white px-6 py-5 text-left text-base font-semibold text-stone-900 transition-colors hover:bg-[var(--color-bg-white-hover)]"
  onClick={() => toggle(idx)}
- aria-expanded={isOpen}
- id={`faq-q-${idx}`}
  >
  <span>{item.q}</span>
  <svg

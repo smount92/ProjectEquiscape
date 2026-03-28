@@ -229,6 +229,19 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
 "Grand Champion":"🏆",
 "Reserve Grand Champion":"🥈",
  };
+ const RIBBON_BORDER_MAP: Record<string, string> = {
+ "1st":"border-blue-500",
+ "2nd":"border-red-500",
+ "3rd":"border-yellow-500",
+ "4th":"border-stone-200",
+ "5th":"border-pink-500",
+ "6th":"border-green-500",
+  HM:"border-green-500",
+  Champion:"border-blue-600",
+ "Reserve Champion":"border-red-600",
+ "Grand Champion":"border-blue-700",
+ "Reserve Grand Champion":"border-red-700",
+ };
  const PLACE_ORDER: Record<string, number> = {
 "Grand Champion": 0,
 "Reserve Grand Champion": 1,
@@ -374,10 +387,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  return (
  <div
  key={entry.id}
- className="mb-1 flex items-center gap-4 px-4 py-2"
-  /* eslint-disable-next-line react/forbid-dom-props */ style={{
- borderLeft: `3px solid var(--podium-${ribbon}, #22c55e)`,
- }}
+ className={`mb-1 flex items-center gap-4 px-4 py-2 border-l-[3px] ${RIBBON_BORDER_MAP[placing] || "border-green-500"}`}
  >
  {entry.thumbnailUrl && (
  <div

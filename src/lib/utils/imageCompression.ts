@@ -2,17 +2,35 @@
  * Image Compression Utility
  * PRD requires images to be compressed/resized before upload to save bandwidth.
  * Uses HTML5 Canvas to resize images to a max dimension and compress as WebP/JPEG.
+ *
+ * Tier-aware compression: Free users get 1000px/0.70q, Pro gets 2500px/0.92q,
+ * Studio gets 2500px/0.95q. Thumbnails are always 400px/0.60q WebP.
  */
 
-const MAX_DIMENSION = 1000; // Max width or height in pixels
-const QUALITY = 0.7;        // Compression quality (0-1)
-const MAX_FILE_SIZE_MB = 5;  // Max file size in MB
+export type UserTier = "free" | "pro" | "studio";
 
-export async function compressImage(file: File): Promise<File> {
+interface CompressionConfig {
+    maxDimension: number;
+    quality: number;
+}
+
+const TIER_CONFIG: Record<UserTier, CompressionConfig> = {
+    free:   { maxDimension: 1000, quality: 0.70 },
+    pro:    { maxDimension: 2500, quality: 0.92 },
+    studio: { maxDimension: 2500, quality: 0.95 },
+};
+
+const THUMB_DIMENSION = 400;
+const THUMB_QUALITY = 0.60;
+const MAX_FILE_SIZE_MB = 10; // Bumped for Pro tier high-res
+
+export async function compressImage(file: File, tier: UserTier = "free"): Promise<File> {
   // Skip if already small enough
   if (file.size < 200 * 1024) {
     return file;
   }
+
+  const config = TIER_CONFIG[tier];
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -24,14 +42,14 @@ export async function compressImage(file: File): Promise<File> {
         const canvas = document.createElement("canvas");
         let { width, height } = img;
 
-        // Scale down if larger than MAX_DIMENSION
-        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        // Scale down if larger than tier max dimension
+        if (width > config.maxDimension || height > config.maxDimension) {
           if (width > height) {
-            height = Math.round((height * MAX_DIMENSION) / width);
-            width = MAX_DIMENSION;
+            height = Math.round((height * config.maxDimension) / width);
+            width = config.maxDimension;
           } else {
-            width = Math.round((width * MAX_DIMENSION) / height);
-            height = MAX_DIMENSION;
+            width = Math.round((width * config.maxDimension) / height);
+            height = config.maxDimension;
           }
         }
 
@@ -63,7 +81,7 @@ export async function compressImage(file: File): Promise<File> {
             resolve(compressedFile);
           },
           "image/webp",
-          QUALITY
+          config.quality
         );
       };
       img.onerror = () => reject(new Error("Failed to load image"));
@@ -92,13 +110,67 @@ export function revokeImagePreviewUrl(url: string): void {
 }
 
 /**
+ * Generate a 400px micro-thumbnail (WebP) for grid views.
+ * This runs client-side — zero server compute cost.
+ */
+export async function generateThumbnail(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                let { width, height } = img;
+
+                // Scale down to THUMB_DIMENSION
+                if (width > height) {
+                    height = Math.round((height * THUMB_DIMENSION) / width);
+                    width = THUMB_DIMENSION;
+                } else {
+                    width = Math.round((width * THUMB_DIMENSION) / height);
+                    height = THUMB_DIMENSION;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) { resolve(file); return; }
+
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) { resolve(file); return; }
+                        // Append _thumb suffix before extension
+                        const thumbName = file.name.replace(/\.[^.]+$/, "_thumb.webp");
+                        resolve(new File([blob], thumbName, {
+                            type: "image/webp",
+                            lastModified: Date.now(),
+                        }));
+                    },
+                    "image/webp",
+                    THUMB_QUALITY
+                );
+            };
+            img.onerror = () => reject(new Error("Failed to load image for thumbnail"));
+        };
+        reader.onerror = () => reject(new Error("Failed to read file for thumbnail"));
+    });
+}
+
+/**
  * Compress + resize an image, adding a semi-transparent watermark in the bottom-right.
- * Uses the same MAX_DIMENSION / QUALITY constants as compressImage.
+ * Uses the same tier-aware config as compressImage.
  */
 export async function compressImageWithWatermark(
   file: File,
-  aliasName: string
+  aliasName: string,
+  tier: UserTier = "free"
 ): Promise<File> {
+  const config = TIER_CONFIG[tier];
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -109,14 +181,14 @@ export async function compressImageWithWatermark(
         const canvas = document.createElement("canvas");
         let { width, height } = img;
 
-        // Scale down if larger than MAX_DIMENSION
-        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        // Scale down if larger than tier max dimension
+        if (width > config.maxDimension || height > config.maxDimension) {
           if (width > height) {
-            height = Math.round((height * MAX_DIMENSION) / width);
-            width = MAX_DIMENSION;
+            height = Math.round((height * config.maxDimension) / width);
+            width = config.maxDimension;
           } else {
-            width = Math.round((width * MAX_DIMENSION) / height);
-            height = MAX_DIMENSION;
+            width = Math.round((width * config.maxDimension) / height);
+            height = config.maxDimension;
           }
         }
 
@@ -155,7 +227,7 @@ export async function compressImageWithWatermark(
             }));
           },
           "image/webp",
-          QUALITY
+          config.quality
         );
       };
       img.onerror = () => reject(new Error("Failed to load image"));

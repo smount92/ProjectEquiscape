@@ -4,26 +4,29 @@ The Model Horse Hub design system is built on **Tailwind CSS v4** with design to
 
 ## Color Palette
 
-> **Token Migration Complete (2026-03-28):** All legacy CSS variable tokens (`--color-bg-card`, `--color-border`, etc.) and their Tailwind aliases (`bg-card`, `border-edge`, `text-ink`, `text-muted`) have been replaced with standard Tailwind `stone` palette equivalents across the entire codebase.
+> **Warm Parchment Palette (2026-03-28):** The design system uses custom `@theme` tokens (`text-ink`, `text-muted`, `border-edge`, `bg-forest`) mapped to warm parchment hex values in `globals.css`. The cold default Tailwind `stone` palette (`bg-stone-50`, `text-stone-900`, etc.) is banned. See `docs/guides/design-system.md` for the canonical spec.
 
-### Standard Mode (stone palette)
+### Standard Mode (Warm Parchment Palette)
 
-| Tailwind Class | Usage |
-|----------------|-------|
-| `bg-stone-50` | Page backgrounds (warm off-white) |
-| `bg-white` | Card surfaces, input backgrounds |
-| `bg-stone-100` | Sticky headers, section dividers |
-| `text-stone-900` | Primary text (rich dark) |
-| `text-stone-600` | Secondary/supporting text |
-| `text-stone-500` | Muted text, hints, metadata |
-| `text-forest` / `bg-forest` | Primary accent (Hunter Green `#2C5545`) |
-| `border-stone-200` | All structural borders |
-| `bg-emerald-50` | Success state surfaces |
-| `bg-amber-50` | Warning state surfaces |
-| `bg-red-50` | Error state surfaces |
-| `text-red-700` | Destructive action text |
-| `bg-emerald-500` | Success backgrounds (badges, icons) |
-| `bg-purple-50` | Art Studio accent surfaces |
+> See `docs/guides/design-system.md` for the canonical color reference and banned token list.
+
+| Tailwind Class | Hex | Usage |
+|----------------|-----|-------|
+| `bg-[#F4EFE6]` | `#F4EFE6` | Page backgrounds (warm parchment) |
+| `bg-[#FEFCF8]` | `#FEFCF8` | Card surfaces, input backgrounds |
+| `bg-[#EAE1CD]` | `#EAE1CD` | Sticky headers, section dividers, footer |
+| `text-ink` | `#2D2318` | Primary text (Warm Espresso) |
+| `text-ink-light` | `#594A3C` | Secondary/supporting text |
+| `text-muted` | `#7A6A58` | Muted text, hints, metadata |
+| `text-forest` / `bg-forest` | `#2C5545` | Primary accent (Hunter Green) |
+| `border-edge` | `#E0D5C1` | All structural borders |
+| `bg-emerald-50` | — | Success state surfaces |
+| `bg-amber-50` | — | Warning state surfaces |
+| `bg-red-50` | — | Error state surfaces |
+| `text-red-700` | — | Destructive action text |
+| `bg-purple-50` | — | Art Studio accent surfaces |
+
+**❌ Banned:** `bg-white`, `bg-stone-50`, `bg-stone-100`, `border-stone-200`, `text-stone-900`, `text-stone-600`, `text-stone-500`, `text-stone-400`
 
 ### Simple Mode (Accessibility)
 
@@ -41,8 +44,8 @@ Activated via `[data-simple-mode="true"]` on `<body>`:
 | Page titles, H1-H2 | Playfair Display | `font-serif text-3xl md:text-4xl font-bold tracking-tight` |
 | Section headers, H3 | Playfair Display | `font-serif text-xl font-semibold` |
 | Body text | Inter | `font-sans text-base` |
-| Captions, metadata | Inter | `text-sm text-stone-600` |
-| Hints, badges | Inter | `text-xs text-stone-500` |
+| Captions, metadata | Inter | `text-sm text-ink-light` |
+| Hints, badges | Inter | `text-xs text-muted` |
 
 **All font sizes** use `calc(var(--font-size-*) * var(--font-scale))` to support Simple Mode.
 
@@ -121,7 +124,7 @@ src/components/
 └── *.tsx                ← Styling via Tailwind utility classes in className
 ```
 
-> **Migration status (March 2026):** CSS Modules and legacy `.css` files have been fully eliminated. All styling is now Tailwind utility classes + `globals.css` shared primitives. All legacy color tokens (`bg-card`, `border-edge`, `text-ink`, `text-muted`, etc.) have been replaced with `stone` palette equivalents. Form inputs use shadcn/ui. Modals use shadcn Dialog. See the [Design System Guide](../guides/design-system.md) for the 4 page archetypes, the complete color migration table, and the banned token list.
+> **Migration status (March 2026):** CSS Modules and legacy `.css` files have been fully eliminated. All styling is now Tailwind utility classes + `globals.css` shared primitives. The color palette uses custom `@theme` warm parchment tokens (`text-ink`, `text-muted`, `border-edge`, etc.) — the cold Tailwind `stone` palette is banned. Form inputs use shadcn/ui. Modals use shadcn Dialog. See the [Design System Guide](../guides/design-system.md) for the 4 page archetypes and the banned token list.
 
 ---
 

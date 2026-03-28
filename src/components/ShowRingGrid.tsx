@@ -10,6 +10,7 @@ import WishlistButton from "@/components/WishlistButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { getThumbUrl } from "@/lib/utils/imageUrl";
 
 interface CommunityCardData {
  id: string;
@@ -233,7 +234,11 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
           {horse.thumbnailUrl ? (
            // eslint-disable-next-line @next/next/no-img-element
            <img
-            src={horse.thumbnailUrl}
+            src={getThumbUrl(horse.thumbnailUrl)}
+            onError={(e) => {
+             // Fallback to full-res if thumb doesn't exist (older uploads)
+             (e.target as HTMLImageElement).src = horse.thumbnailUrl!;
+            }}
             alt={horse.customName}
             loading="lazy"
             className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"

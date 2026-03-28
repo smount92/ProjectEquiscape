@@ -432,19 +432,19 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 
 ### 6.1 Theme — "Warm Equestrian Parchment"
 
-The visual identity evokes leather-bound catalogs and vintage horse shows:
+The visual identity uses custom `@theme` variables built on top of Tailwind v4 to evoke leather-bound catalogs and vintage horse shows. The palette intentionally avoids cold SaaS default grays completely:
 
-| Token | Light Mode | Simple Mode Override |
+| Custom Token | Hex Value | Usage |
 |-------|-----------|---------------------|
-| Background | `#F0EAD6` (warm parchment) | `#FFFFFF` (pure white) |
-| Card BG | `#FBF7ED` (cream) | `#FFFFFF` |
-| Text Primary | `#2D2318` (espresso) | `#111111` (near-black) |
-| Text Muted | `#8B7B6A` (warm slate) | `#555555` |
-| Accent Primary | `#2C5545` (hunter green) | `#2C5545` |
-| Accent Secondary | `#8B5A2B` (saddle brown) | — |
-| Danger | `#9B3028` (barn red) | — |
-| Warning | `#B8860B` (dark goldenrod) | — |
-| Border | `#D4C9B5` (warm almond) | `#CCCCCC` |
+| `--color-parchment` | `#F4EFE6` | Warm parchment page backgrounds |
+| `--color-parchment-dark` | `#EAE1CD` | Slightly darker headers and dividers |
+| `--color-card` | `#FEFCF8` | Warm alabaster cards and inputs |
+| `--color-ink` | `#2D2318` | Deep espresso primary text (never `#000`) |
+| `--color-ink-light` | `#594A3C` | Warm secondary text |
+| `--color-muted` | `#7A6A58` | Warm mocha muted text |
+| `--color-forest` | `#2C5545` | Hunter green primary CTA |
+| `--color-saddle` | `#8B5A2B` | Saddle brown accents |
+| `--color-edge` | `#E0D5C1` | Warm almond structural borders |
 
 ### 6.2 Typography
 
@@ -798,12 +798,11 @@ All 36 server action files have JSDoc comments on exported functions, documentin
 | **V37** | Documentation Sprint | 31 doc pages, JSDoc on all exports, architecture diagrams |
 | **V38** | Photo Upload Fixes | Lightbox portal, angle_profile enum fix, upload error visibility |
 | **V39** | Production Hardening | Edge security (8 public routes), perf (removed 35 force-dynamic, Suspense streaming), type safety (generated Supabase types, removed 242 lines of unsafe casts from 20 files), pedigree validation (6 new tests) |
-| — | Tailwind CSS v4 Migration | Full migration from vanilla CSS to Tailwind v4, eliminated all CSS Modules and extracted page CSS files, globals.css reduced from ~12,000 to 2,211 lines |
-| — | Notification Deep-Links | `link_url` column (migration 096), all notifications now click through to referenced item |
-| — | Show Polish & Realism | Entry preview, smart class browser, results podium, personalized notifications, show history widget, expert judging, cron auto-transition, host override, enriched show records, judge notes |
-| — | Open Beta Hardening | Soft-delete, atomic commerce RPCs, fuzzy search, trusted sellers, Pro tier + Stripe billing |
-| — | UI Overhaul (3 parts) | shadcn/ui primitives, createPortal→Dialog migration, Framer Motion micro-interactions |
-| — | Layout Unification (2 parts) | Design System docs, 4 Page Archetype components built, 55+ pages migrated from custom containers to layout wrappers |
+| **V40** | Tailwind v4 Migration | Full migration from vanilla CSS to Tailwind, CSS Modules eliminated, globals.css reduced from ~12,000 to 2,211 lines |
+| **V41** | Notification & Open Beta | Deep links (`link_url`), atomic commerce RPCs, fuzzy search, trusted sellers |
+| **V42** | Show Rules & Realism | Entry preview, smart class browser, results podium, personalized notifications, show history widget, expert judging, cron auto-transition, host override, enriched show records, judge notes |
+| **V43** | Layout & UI Overhaul | shadcn/ui primitives, Framer Motion interactions, createPortal → Dialog migration, Design System docs, 4 Page Archetypes built, 55+ pages migrated from custom containers |
+| **V44** | Warm Parchment Aesthetic | Complete override of standard Tailwind cold stone palette; custom `@theme` mapped to warm espresso, leather, and cream tokens; WCAG contrast fixes on inputs and footers; pure CSS Grid photo gallery restoration |
 
 ### 12.2 Key Architectural Decisions Log
 
@@ -817,7 +816,7 @@ All 36 server action files have JSDoc comments on exported functions, documentin
 | **Materialized views** | Provenance timeline and market prices are expensive UNION ALL queries. Materialized views pre-compute results; market refreshes daily via cron. |
 | **Soft delete (tombstone)** | Hard deleting horses breaks provenance chains, transfer history, and show records. Tombstone preserves FK integrity. |
 | **`requireAuth()` helper** | Centralized auth gate replaced boilerplate `getUser()` checks across all 35 action files. Reduces duplication and ensures consistent error handling. |
-| **`createPortal` for modals/lightboxes** | All overlay components (modals, lightboxes) render via `createPortal(…, document.body)` to avoid CSS clipping from parent `overflow: hidden` containers. |
+| **shadcn `<Dialog>` over `createPortal`** | Moved from legacy React `createPortal` patterns to robust Radix-UI/shadcn Dialogs for proper accessible focus-trapping and simpler component state handling. (Exception: PhotoLightbox retains portal). |
 | **Public storage bucket** | Horse images use public Supabase URLs (no signed URL overhead). Image paths include `horses/{horseId}/` prefix for organization. |
 | **Layout Archetypes** | 4 standardized layout wrappers (`ExplorerLayout`, `ScrapbookLayout`, `CommandCenterLayout`, `FocusLayout`) enforce consistent max-widths and page structure. Custom container divs are forbidden — every page passes content as children/props to a layout component. |
 

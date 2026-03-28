@@ -16,17 +16,17 @@ See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the mig
 ### 1. Prefer Tailwind Utility Classes
 
 ```tsx
-// ✅ Use Tailwind stone palette
-<div className="flex items-center gap-4 rounded-lg border border-stone-200 bg-white p-6 shadow-md">
-  <h2 className="text-lg font-bold text-stone-900">Title</h2>
-  <p className="text-sm text-stone-500">Description</p>
+// ✅ Use Warm Parchment themes & tokens
+<div className="flex items-center gap-4 rounded-lg border border-edge bg-[#FEFCF8] p-6 shadow-md">
+  <h2 className="text-lg font-bold text-ink">Title</h2>
+  <p className="text-sm text-ink-light">Description</p>
 </div>
 ```
 
 ```tsx
-// ❌ Don't use legacy semantic tokens
-<div className="border-edge bg-card text-ink">    // BANNED
-<div className="text-muted text-danger bg-glass">  // BANNED
+// ❌ Don't use cold default Tailwind gray/stone palettes
+<div className="border-stone-200 bg-white text-stone-900">    // BANNED
+<div className="text-stone-500 bg-stone-50">  // BANNED
 ```
 
 ```tsx
@@ -36,18 +36,18 @@ See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the mig
 
 ### 2. Color Token Reference
 
-The "Cozy Scrapbook" palette uses Tailwind's `stone` palette:
+The "Cozy Scrapbook" palette uses custom `@theme` variables heavily tuned to warm parchment:
 
-| Usage | Tailwind Class | Notes |
+| Usage | Semantic Tailwind Class / Hex | Notes |
 |-------|---------------|-------|
-| Page background | `bg-stone-50` | Warm off-white |
-| Card surface | `bg-white` | Clean card contrast |
-| Sticky headers | `bg-stone-50/90 backdrop-blur-md` | Semi-transparent blur |
-| Primary text | `text-stone-900` | Rich dark |
-| Secondary text | `text-stone-600` | Descriptions |
-| Muted text | `text-stone-500` | Hints, metadata |
+| Page background | `bg-[#F4EFE6]` | Warm parchment |
+| Card surface | `bg-[#FEFCF8]` | Warm alabaster cards |
+| Sticky headers | `bg-[#EAE1CD]/90 backdrop-blur-md` | Semi-transparent blur |
+| Primary text | `text-ink` | Deep Espresso (no pure black) |
+| Secondary text | `text-ink-light` | Descriptions |
+| Muted text | `text-muted` | Hints, metadata |
 | Primary accent | `text-forest` / `bg-forest` | Hunter green CTA |
-| Borders | `border-stone-200` | All structural borders |
+| Borders | `border-edge` | Warm almond borders |
 | Success surface | `bg-emerald-50` | Green tint |
 | Warning surface | `bg-amber-50` | Amber tint |
 | Error surface | `bg-red-50` | Red tint |

@@ -9,17 +9,17 @@ import LinkHorseToCommission from"@/components/LinkHorseToCommission";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
-const STATUS_COLORS: Record<string, string> = {
- requested:"#6b7280",
- accepted:"#3b82f6",
- in_progress:"#f59e0b",
- review:"#8b5cf6",
- revision:"#f97316",
- completed:"#22c55e",
- shipping:"#0ea5e9",
- delivered:"#14b8a6",
- declined:"#ef4444",
- cancelled:"#ef4444",
+const STATUS_STYLES: Record<string, string> = {
+ requested: "bg-stone-500/20 text-stone-600 border-stone-500/40",
+ accepted: "bg-blue-500/20 text-blue-600 border-blue-500/40",
+ in_progress: "bg-amber-500/20 text-amber-600 border-amber-500/40",
+ review: "bg-violet-500/20 text-violet-600 border-violet-500/40",
+ revision: "bg-orange-500/20 text-orange-600 border-orange-500/40",
+ completed: "bg-green-500/20 text-green-600 border-green-500/40",
+ shipping: "bg-sky-500/20 text-sky-600 border-sky-500/40",
+ delivered: "bg-teal-500/20 text-teal-600 border-teal-500/40",
+ declined: "bg-red-500/20 text-red-600 border-red-500/40",
+ cancelled: "bg-red-500/20 text-red-600 border-red-500/40",
 };
 
 export default async function CommissionDetailPage({
@@ -121,8 +121,7 @@ export default async function CommissionDetailPage({
   }
   headerActions={
   <span
-   className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap"
-    /* eslint-disable-next-line react/forbid-dom-props */ style={{ backgroundColor: `${STATUS_COLORS[commission.status]}20`, color: STATUS_COLORS[commission.status], borderColor: `${STATUS_COLORS[commission.status]}40`, borderWidth: "1px", borderStyle: "solid" }}
+   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[commission.status] || "bg-stone-500/20 text-stone-600 border-stone-500/40"}`}
   >
    {commission.statusLabel}
   </span>

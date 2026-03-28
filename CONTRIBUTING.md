@@ -65,13 +65,14 @@ The project uses **Tailwind CSS v4** for styling:
 | Scope | Where to Add Styles |
 |-------|-------------------|
 | New component | Tailwind utility classes inline in JSX |
-| Shared primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`) | `globals.css` |
+| Shared primitives (`.btn-*`, `.settings-toggle`) | `globals.css` |
 | Design tokens | Tailwind theme config + `globals.css` `@theme` block |
 
 **Rules:**
 - New components should use **Tailwind utility classes** directly in JSX — do not create new CSS Module files
 - Legacy CSS Modules (`.module.css`) are tolerated but not for new work
-- Use Tailwind theme tokens (`text-forest`, `bg-card`, `border-edge`) — don't hard-code colors or spacing
+- Use Tailwind `@theme` tokens (`text-ink`, `text-muted`, `border-edge`, `bg-forest`) — don't hard-code colors or spacing
+- **Cold palette BANNED** — `bg-white`, `bg-stone-50`, `border-stone-200`, `text-stone-900`, `text-stone-500` are banned. Use the warm semantic tokens (`bg-[#F4EFE6]`, `bg-[#FEFCF8]`, `text-ink`, `text-muted`, `border-edge`) instead. See `docs/guides/design-system.md`
 - Simple Mode: `[data-simple-mode="true"]` — 130% font scale, 60px min buttons
 
 ### Database
@@ -88,8 +89,8 @@ All UI work MUST follow the Design System Guide: [`docs/guides/design-system.md`
 **Hard Rules:**
 1. **No custom page containers.** Every page must use one of the 4 Layout Archetypes (`ExplorerLayout`, `ScrapbookLayout`, `CommandCenterLayout`, `FocusLayout`).
 2. **No inline styles.** `style={{...}}` is forbidden for layout, padding, or colors.
-3. **Use shadcn/ui components.** Raw `<input>`, `<select>`, `<button>` elements are forbidden except inside shadcn component primitives.
-4. **No pure black text.** Use `text-ink` or `text-stone-900`, never `text-black` or `#000`.
+3. **Use shadcn/ui components.** Raw `<input>`, `<select>`, `<button>` elements are forbidden except inside shadcn component primitives. **Exception:** Use native `<input type="file">` for image gallery dropzones.
+4. **No cold palette.** Use `text-ink` or `text-ink-light`, never `text-stone-900` or `text-black` or `#000`.
 
 ## Commit Conventions
 

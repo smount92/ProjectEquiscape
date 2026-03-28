@@ -22,8 +22,10 @@ export function SimpleModeProvider({ children }: { children: ReactNode }) {
  useEffect(() => {
  const stored = localStorage.getItem("pref_simple_mode");
  if (stored ==="true") {
+ // eslint-disable-next-line react-hooks/set-state-in-effect
  setIsSimpleMode(true);
  }
+ // eslint-disable-next-line react-hooks/set-state-in-effect
  setIsLoaded(true);
 
  // Sync with user's database preference if logged in

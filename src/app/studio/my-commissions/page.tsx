@@ -9,16 +9,16 @@ export const metadata = {
  title:"My Commissions — Model Horse Hub",
 };
 
-const STATUS_COLORS: Record<string, string> = {
- requested:"#6b7280",
- accepted:"#3b82f6",
- in_progress:"#f59e0b",
- review:"#8b5cf6",
- revision:"#f97316",
- completed:"#22c55e",
- delivered:"#14b8a6",
- declined:"#ef4444",
- cancelled:"#ef4444",
+const STATUS_STYLES: Record<string, string> = {
+ requested: "bg-stone-500/20 text-stone-600 border-stone-500/40",
+ accepted: "bg-blue-500/20 text-blue-600 border-blue-500/40",
+ in_progress: "bg-amber-500/20 text-amber-600 border-amber-500/40",
+ review: "bg-violet-500/20 text-violet-600 border-violet-500/40",
+ revision: "bg-orange-500/20 text-orange-600 border-orange-500/40",
+ completed: "bg-green-500/20 text-green-600 border-green-500/40",
+ delivered: "bg-teal-500/20 text-teal-600 border-teal-500/40",
+ declined: "bg-red-500/20 text-red-600 border-red-500/40",
+ cancelled: "bg-red-500/20 text-red-600 border-red-500/40",
 };
 
 export default async function MyCommissionsPage() {
@@ -56,12 +56,7 @@ export default async function MyCommissionsPage() {
      {c.commissionType}
     </span>
     <span
-     className="inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap"
-      /* eslint-disable-next-line react/forbid-dom-props */ style={{
-     backgroundColor: `${STATUS_COLORS[c.status]}20`,
-     color: STATUS_COLORS[c.status],
-     border: `1px solid ${STATUS_COLORS[c.status]}40`,
-     }}
+     className={`inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[c.status] || "bg-stone-500/20 text-stone-600 border-stone-500/40"}`}
     >
      {c.statusLabel}
     </span>

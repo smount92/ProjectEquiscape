@@ -200,7 +200,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  >
  Mediums
  </span>
- <div className="gap-1" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap gap-1">
  {profile.mediums.map((m) => (
  <span
  key={m}
@@ -220,7 +220,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  >
  Scales
  </span>
- <div className="gap-1" style={{ display:"flex", flexWrap:"wrap" }}>
+ <div className="flex flex-wrap gap-1">
  {profile.scalesOffered.map((s) => (
  <span
  key={s}

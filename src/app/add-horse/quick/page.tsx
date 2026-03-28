@@ -172,12 +172,13 @@ export default function QuickAddPage() {
  {/* Quick Selectors Row */}
  <div className="quick-add-selectors max-sm:grid-cols-1">
  <div>
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Finish</label>
+ <label className="text-ink mb-1 block text-sm font-semibold">Finish</label>
  <select
  className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={finishType}
  onChange={(e) => setFinishType(e.target.value)}
  id="quick-finish"
+ title="Select finish type"
  >
  {FINISH_TYPES.map((f) => (
  <option key={f} value={f}>
@@ -187,12 +188,13 @@ export default function QuickAddPage() {
  </select>
  </div>
  <div>
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Condition</label>
+ <label className="text-ink mb-1 block text-sm font-semibold">Condition</label>
  <select
  className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  id="quick-condition"
+ title="Select condition grade"
  >
  {CONDITION_GRADES.map((c) => (
  <option key={c} value={c}>
@@ -202,12 +204,13 @@ export default function QuickAddPage() {
  </select>
  </div>
  <div>
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Collection</label>
+ <label className="text-ink mb-1 block text-sm font-semibold">Collection</label>
  <select
  className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={collectionId}
  onChange={(e) => setCollectionId(e.target.value)}
  id="quick-collection"
+ title="Select collection"
  >
  <option value="">— None —</option>
  {collections.map((c) => (

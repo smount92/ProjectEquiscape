@@ -1,0 +1,652 @@
+
+> model-horse-hub@0.1.0 lint
+> eslint
+
+
+C:\Project Equispace\model-horse-hub\coverage\block-navigation.js
+  1:1  warning  Unused eslint-disable directive (no problems were reported)
+
+C:\Project Equispace\model-horse-hub\e2e\hoofprint-transfer.spec.ts
+   1:16  warning  'expect' is defined but never used  @typescript-eslint/no-unused-vars
+   2:27  warning  'USER_B' is defined but never used  @typescript-eslint/no-unused-vars
+  11:61  warning  'page' is defined but never used    @typescript-eslint/no-unused-vars
+  16:59  warning  'page' is defined but never used    @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\e2e\inventory.spec.ts
+  1:16  warning  'expect' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\e2e\safe-trade.spec.ts
+   1:16  warning  'expect' is defined but never used  @typescript-eslint/no-unused-vars
+  18:75  warning  'page' is defined but never used    @typescript-eslint/no-unused-vars
+  24:78  warning  'page' is defined but never used    @typescript-eslint/no-unused-vars
+  30:72  warning  'page' is defined but never used    @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\scripts\db-admin.mjs
+  73:13  warning  'data' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  73:19  warning  'error' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  79:11  warning  'response' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\scripts\migrate-tw-tokens.mjs
+  110:19  warning  Found non-literal argument to RegExp Constructor  security/detect-non-literal-regexp
+
+C:\Project Equispace\model-horse-hub\scripts\scrape_releases.mjs
+  266:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\scripts\seed_releases.mjs
+  118:9  warning  'header' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\__tests__\catalog-suggestions.test.ts
+    1:32  warning  'vi' is defined but never used                        @typescript-eslint/no-unused-vars
+    1:36  warning  'beforeEach' is defined but never used                @typescript-eslint/no-unused-vars
+  166:13  error    'downvotes' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Project Equispace\model-horse-hub\src\app\actions\__tests__\horse.test.ts
+  19:19  warning  'fn' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\competition.ts
+  584:9  error  'entryCountMap' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Project Equispace\model-horse-hub\src\app\actions\events.ts
+  710:23  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  827:23  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\groups.ts
+  208:9   error    'membershipMap' is never reassigned. Use 'const' instead  prefer-const
+  644:23  warning  'user' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+  909:23  warning  'user' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\help-id.ts
+  234:19  warning  'SuggestionWithCatalog' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\hoofprint.ts
+   68:9   error    'aliasMap' is never reassigned. Use 'const' instead  prefer-const
+  340:13  warning  'supabase' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\insurance-report.ts
+  73:19  warning  'HorseRow' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\mentions.ts
+  14:5  warning  '_sourceUrl' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\moderation.ts
+  104:13  warning  'supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  127:13  warning  'supabase' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\parked-export.ts
+  52:15  warning  'h' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\posts.ts
+  521:23  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\actions\transactions.ts
+  238:23  warning  'user' is assigned a value but never used            @typescript-eslint/no-unused-vars
+  359:9   error    'horseMap' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Project Equispace\model-horse-hub\src\app\add-horse\page.tsx
+   80:8  warning  'router' is assigned a value but never used                                                                                           @typescript-eslint/no-unused-vars
+   98:9  warning  'extraCropQueue' is assigned a value but never used                                                                                   @typescript-eslint/no-unused-vars
+  150:2  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  156:5  warning  React Hook useEffect has missing dependencies: 'customName' and 'nameAutoFilled'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Project Equispace\model-horse-hub\src\app\api\cron\refresh-market\route.ts
+  35:13  warning  'unparkResult' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\api\cron\stablemaster-agent\route.ts
+  82:21  error  'marketPrices' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Project Equispace\model-horse-hub\src\app\auth\actions.ts
+  71:3  warning  Potential timing attack, left side: true  security/detect-possible-timing-attacks
+
+C:\Project Equispace\model-horse-hub\src\app\auth\reset-password\page.tsx
+  61:2  warning  Potential timing attack, left side: true  security/detect-possible-timing-attacks
+
+C:\Project Equispace\model-horse-hub\src\app\catalog\page.tsx
+   52:27  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Project Equispace\model-horse-hub\src\app\catalog\page.tsx:52:27
+  50 |
+  51 |  // Get recent changelog count (last 7 days)
+> 52 |  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+     |                           ^^^^^^^^^^ Cannot call impure function
+  53 |  const { count: recentChanges } = await supabase
+  54 |  .from("catalog_changelog")
+  55 |  .select("id", { count:"exact", head: true })  react-hooks/purity
+   96:5   error  Do not use an `<a>` element to navigate to `/catalog/suggestions/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @next/next/no-html-link-for-pages
+   96:5   error  Do not use an `<a>` element to navigate to `/catalog/suggestions/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @next/next/no-html-link-for-pages
+  107:5   error  Do not use an `<a>` element to navigate to `/catalog/suggestions/new/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @next/next/no-html-link-for-pages
+  107:5   error  Do not use an `<a>` element to navigate to `/catalog/suggestions/new/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @next/next/no-html-link-for-pages
+  113:5   error  Do not use an `<a>` element to navigate to `/catalog/changelog/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @next/next/no-html-link-for-pages
+
+C:\Project Equispace\model-horse-hub\src\app\catalog\suggestions\[id]\page.tsx
+  14:42  warning  'params' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\catalog\suggestions\page.tsx
+  58:6  error  'commentCounts' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Project Equispace\model-horse-hub\src\app\claim\page.tsx
+   12:8  warning  'router' is assigned a value but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  165:2  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Project Equispace\model-horse-hub\src\app\community\events\[id]\manage\page.tsx
+   164:2   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\app\community\events\[id]\manage\page.tsx:164:2
+  162 |
+  163 |  useEffect(() => {
+> 164 |  loadData();
+      |  ^^^^^^^^ Avoid calling setState() directly within an effect
+  165 |  }, [loadData]);
+  166 |
+  167 |  // ── Debounced user search for judge autocomplete ──                                            react-hooks/set-state-in-effect
+   170:2   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\app\community\events\[id]\manage\page.tsx:170:2
+  168 |  useEffect(() => {
+  169 |  if (newJudgeAlias.trim().length < 2) {
+> 170 |  setUserSuggestions([]);
+      |  ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  171 |  return;
+  172 |  }
+  173 |  const timer = setTimeout(async () => {  react-hooks/set-state-in-effect
+  1033:62  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react/no-unescaped-entities
+  1033:72  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react/no-unescaped-entities
+
+C:\Project Equispace\model-horse-hub\src\app\community\help-id\[id]\page.tsx
+  136:4  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Project Equispace\model-horse-hub\src\app\community\help-id\page.tsx
+  119:5  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  171:5  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Project Equispace\model-horse-hub\src\app\community\page.tsx
+  74:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Project Equispace\model-horse-hub\src\app\dashboard\page.tsx
+  38:9  error  Error: Avoid constructing JSX within try/catch
+
+React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
+
+C:\Project Equispace\model-horse-hub\src\app\dashboard\page.tsx:38:9
+  36 |  const data = await getShowHistory();
+  37 |  if (data.totalRibbons === 0) return null;
+> 38 |  return <ShowHistoryWidget years={data.years} totalShows={data.totalShows} totalRibbons={data.totalRibbons} />;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
+  39 |  } catch {
+  40 |  return null;
+  41 |  }  react-hooks/error-boundaries
+
+C:\Project Equispace\model-horse-hub\src\app\error.tsx
+  3:33  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\inbox\page.tsx
+  166:30  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Project Equispace\model-horse-hub\src\app\inbox\page.tsx:166:30
+  164 |
+  165 |  function timeAgo(dateStr: string): string {
+> 166 |  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+      |                              ^^^^^^^^^^ Cannot call impure function
+  167 |  if (seconds < 60) return"Just now";
+  168 |  const minutes = Math.floor(seconds / 60);
+  169 |  if (minutes < 60) return `${minutes}m ago`;  react-hooks/purity
+
+C:\Project Equispace\model-horse-hub\src\app\layout.tsx
+  12:10  warning  'cn' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\shows\[id]\page.tsx
+  332:8  warning  'ribbon' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  386:8  warning  'ribbon' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\stable\[id]\edit\page.tsx
+   92:9  warning  'selectedCatalogItem' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  127:9  warning  'extraCropQueue' is assigned a value but never used       @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\app\studio\setup\page.tsx
+   58:9  warning  'userId' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  118:2  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\app\studio\setup\page.tsx:118:2
+  116 |
+  117 |  useEffect(() => {
+> 118 |  loadProfile();
+      |  ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  119 |  }, [loadProfile]);
+  120 |
+  121 |  useEffect(() => {                                                             react-hooks/set-state-in-effect
+  123:3  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\app\studio\setup\page.tsx:123:3
+  121 |  useEffect(() => {
+  122 |  if (!existing && studioName) {
+> 123 |   setStudioSlug(
+      |   ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  124 |   studioName
+  125 |    .toLowerCase()
+  126 |    .replace(/[^a-z0-9-]/g,"-")  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\app\upgrade\page.tsx
+  69:57  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Project Equispace\model-horse-hub\src\components\AdminTabs.tsx
+  158:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\AdminTabs.tsx:158:2
+  156 |  const saved = localStorage.getItem("admin-tab");
+  157 |  if (saved && TABS.some((t) => t.key === saved)) {
+> 158 |  setActiveTab(saved as TabKey);
+      |  ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  159 |  }
+  160 |  }, []);
+  161 |  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\BlueBookProCharts.tsx
+  64:87  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Project Equispace\model-horse-hub\src\components\BlueBookProCharts.tsx:64:87
+  62 |                                     key={i}
+  63 |                                     className="flex-1 rounded-t bg-gradient-to-t from-emerald-400 to-emerald-600"
+> 64 |                                     style={{ height: `${30 + Math.sin(i * 0.8) * 25 + Math.random() * 40}%` }}
+     |                                                                                       ^^^^^^^^^^^^^ Cannot call impure function
+  65 |                                 />
+  66 |                             ))}
+  67 |                         </div>  react-hooks/purity
+
+C:\Project Equispace\model-horse-hub\src\components\CatalogBrowser.tsx
+  275:33  error  Do not use an `<a>` element to navigate to `/catalog/suggestions/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+  275:33  error  Do not use an `<a>` element to navigate to `/catalog/suggestions/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+C:\Project Equispace\model-horse-hub\src\components\CsvImport.tsx
+  9:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+C:\Project Equispace\model-horse-hub\src\components\DashboardShell.tsx
+   7:5   warning  'DialogHeader' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   8:5   warning  'DialogTitle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  49:9   warning  'bulkAction' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+  56:44  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\DashboardShell.tsx:56:44
+  54 |  useEffect(() => {
+  55 |  const saved = localStorage.getItem("mhh-dashboard-view");
+> 56 |  if (saved ==="grid" || saved ==="ledger") setView(saved);
+     |                                            ^^^^^^^ Avoid calling setState() directly within an effect
+  57 |  }, []);
+  58 |
+  59 |  const handleViewChange = useCallback((v:"grid" |"ledger") => {  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\DashboardToast.tsx
+  28:18  warning  '_photos' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+  50:2   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\DashboardToast.tsx:50:2
+  48 |
+  49 |  if (toast && TOAST_MESSAGES[toast]) {
+> 50 |  setToastType(toast);
+     |  ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  51 |  setToastName(name);
+  52 |  setToastPhotos(photos);
+  53 |  setVisible(true);  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\DiscoverGrid.tsx
+   83:32  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Project Equispace\model-horse-hub\src\components\DiscoverGrid.tsx:83:32
+  81 |  break;
+  82 |  case"new_members":
+> 83 |  result = result.filter((u) => Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS);
+     |                                ^^^^^^^^^^ Cannot call impure function
+  84 |  break;
+  85 |  case"big_stables":
+  86 |  result = result                                                                                                                                                     react-hooks/purity
+  109:35  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Project Equispace\model-horse-hub\src\components\DiscoverGrid.tsx:109:35
+  107 |  art_studio: users.filter((u) => u.has_studio).length,
+  108 |  top_rated: users.filter((u) => u.rating_count > 0).length,
+> 109 |  new_members: users.filter((u) => Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS).length,
+      |                                   ^^^^^^^^^^ Cannot call impure function
+  110 |  big_stables: users.filter((u) => u.public_horse_count >= 5).length,
+  111 |  }),
+  112 |  [users],  react-hooks/purity
+
+C:\Project Equispace\model-horse-hub\src\components\GroupAdminPanel.tsx
+  38:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\GroupAdminPanel.tsx:38:2
+  36 |  useEffect(() => {
+  37 |  if (!expanded) return;
+> 38 |  setLoading(true);
+     |  ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  39 |  getGroupMembers(groupId).then((data) => {
+  40 |  setMembers(data);
+  41 |  setLoading(false);  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\GroupRegistry.tsx
+  21:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\GroupRegistry.tsx:21:2
+  19 |  useEffect(() => {
+  20 |  if (!expanded || !isMember) return;
+> 21 |  setLoading(true);
+     |  ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  22 |  getGroupRegistry(groupId).then((data) => {
+  23 |  setEntries(data);
+  24 |  setLoading(false);  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\Header.tsx
+   88:8  warning  'router' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  163:2  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\Header.tsx:163:2
+  161 |  // Close mobile menu on route change (fixes touch devices where onClick can race)
+  162 |  useEffect(() => {
+> 163 |  setMobileMenuOpen(false);
+      |  ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  164 |  }, [pathname]);
+  165 |
+  166 |  // Close user menu on outside click  react-hooks/set-state-in-effect
+  233:8  warning  'visibleLinks' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\components\HelpIdDetailClient.tsx
+  38:2  warning  'acceptedSuggestionId' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\components\HelpIdRequestForm.tsx
+  99:2  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Project Equispace\model-horse-hub\src\components\ImageCropModal.tsx
+    7:5  warning  'DialogHeader' is defined but never used            @typescript-eslint/no-unused-vars
+    8:5  warning  'DialogTitle' is defined but never used             @typescript-eslint/no-unused-vars
+  161:6  error    'newCrop' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Project Equispace\model-horse-hub\src\components\MarketValueBadge.tsx
+  26:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\MarketValueBadge.tsx:26:2
+  24 |  useEffect(() => {
+  25 |  if (!catalogId) {
+> 26 |  setLoading(false);
+     |  ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  27 |  return;
+  28 |  }
+  29 |  let cancelled = false;  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\NotificationBell.tsx
+  28:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\NotificationBell.tsx:28:2
+  26 |  useEffect(() => {
+  27 |  // Fetch immediately on mount
+> 28 |  fetchCount();
+     |  ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |
+  30 |  let intervalId: ReturnType<typeof setInterval> | null = null;
+  31 |  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\PedigreeCard.tsx
+  61:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\PedigreeCard.tsx:61:2
+  59 |  useEffect(() => {
+  60 |  if (!sireName || sireName.length < 2 || sireId) {
+> 61 |  setSireResults([]);
+     |  ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  62 |  return;
+  63 |  }
+  64 |  const timer = setTimeout(async () => {  react-hooks/set-state-in-effect
+  75:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\PedigreeCard.tsx:75:2
+  73 |  useEffect(() => {
+  74 |  if (!damName || damName.length < 2 || damId) {
+> 75 |  setDamResults([]);
+     |  ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  76 |  return;
+  77 |  }
+  78 |  const timer = setTimeout(async () => {       react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\ShowEntryForm.tsx
+   7:5  warning  'DialogHeader' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   8:5  warning  'DialogTitle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  70:2  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\ShowEntryForm.tsx:70:2
+  68 |  useEffect(() => {
+  69 |  if (!selectedHorse) {
+> 70 |  setHorsePhotos([]);
+     |  ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  71 |  setSelectedPhoto(null);
+  72 |  setHorseScale(null);
+  73 |  return;  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\ShowRingGrid.tsx
+  217:21  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Project Equispace\model-horse-hub\src\components\ShowRingGrid.tsx:217:21
+  215 |       const priceLabel = formatPrice(horse.listingPrice);
+  216 |       const isListed = horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers";
+> 217 |       const isNew = Date.now() - new Date(horse.createdAt).getTime() < 48 * 60 * 60 * 1000;
+      |                     ^^^^^^^^^^ Cannot call impure function
+  218 |       const finishClass = FINISH_BADGE_CLASSES[horse.finishType] ?? FINISH_BADGE_CLASSES.default;
+  219 |
+  220 |       return (  react-hooks/purity
+
+C:\Project Equispace\model-horse-hub\src\components\ShowStringManager.tsx
+  5:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\components\StableGrid.tsx
+  74:8  warning  The 'CONDITION_ORDER' array makes the dependencies of useMemo Hook (at line 108) change on every render. Move it inside the useMemo callback. Alternatively, wrap the initialization of 'CONDITION_ORDER' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+C:\Project Equispace\model-horse-hub\src\components\SuggestionCommentThread.tsx
+  51:15  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Project Equispace\model-horse-hub\src\components\SuggestionCommentThread.tsx:51:15
+  49 |
+  50 |  const timeAgo = (dateStr: string) => {
+> 51 |  const diff = Date.now() - new Date(dateStr).getTime();
+     |               ^^^^^^^^^^ Cannot call impure function
+  52 |  const mins = Math.floor(diff / 60000);
+  53 |  if (mins < 60) return `${mins}m ago`;
+  54 |  const hours = Math.floor(mins / 60);  react-hooks/purity
+
+C:\Project Equispace\model-horse-hub\src\components\TransferHistorySection.tsx
+  24:2  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Project Equispace\model-horse-hub\src\components\UnifiedReferenceSearch.tsx
+  66:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\UnifiedReferenceSearch.tsx:66:2
+  64 |  useEffect(() => {
+  65 |  if (externalSearchQuery && externalSearchQuery.trim()) {
+> 66 |  setQuery(externalSearchQuery.trim());
+     |  ^^^^^^^^ Avoid calling setState() directly within an effect
+  67 |  }
+  68 |  }, [externalSearchQuery]);
+  69 |                     react-hooks/set-state-in-effect
+  96:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\UnifiedReferenceSearch.tsx:96:2
+  94 |  if (debounceRef.current) clearTimeout(debounceRef.current);
+  95 |  if (!query.trim() || query.trim().length < 2) {
+> 96 |  setResults([]);
+     |  ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  97 |  setShowDropdown(false);
+  98 |  return;
+  99 |  }  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\UniversalFeed.tsx
+  119:6  error  'uploadedPaths' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Project Equispace\model-horse-hub\src\components\UserAvatar.tsx
+  1:1  warning  Unused eslint-disable directive (no problems were reported from '@next/next/no-img-element')
+
+C:\Project Equispace\model-horse-hub\src\components\WishlistSearch.tsx
+   8:7  warning  'TYPE_ICONS' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  62:2  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\components\WishlistSearch.tsx:62:2
+  60 |  if (fetchTimeoutRef.current) clearTimeout(fetchTimeoutRef.current);
+  61 |  if (!query.trim()) {
+> 62 |  setResults([]);
+     |  ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  63 |  setShowDropdown(false);
+  64 |  return;
+  65 |  }  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\components\__tests__\TrophyCase.test.tsx
+  3:26  warning  'fireEvent' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Project Equispace\model-horse-hub\src\components\pdf\CertificateOfAuthenticity.tsx
+  222:2  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+  266:2  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+C:\Project Equispace\model-horse-hub\src\components\pdf\InsuranceReport.tsx
+  318:2  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+C:\Project Equispace\model-horse-hub\src\lib\context\SimpleModeContext.tsx
+  25:2  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Project Equispace\model-horse-hub\src\lib\context\SimpleModeContext.tsx:25:2
+  23 |  const stored = localStorage.getItem("pref_simple_mode");
+  24 |  if (stored ==="true") {
+> 25 |  setIsSimpleMode(true);
+     |  ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  26 |  }
+  27 |  setIsLoaded(true);
+  28 |  react-hooks/set-state-in-effect
+
+C:\Project Equispace\model-horse-hub\src\lib\pdf\InsuranceReport.tsx
+  402:2  warning  Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images  jsx-a11y/alt-text
+
+C:\Project Equispace\model-horse-hub\src\lib\utils\__tests__\storage.test.ts
+  1:32  warning  'beforeEach' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 123 problems (47 errors, 76 warnings)
+  9 errors and 4 warnings potentially fixable with the `--fix` option.
+

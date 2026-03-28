@@ -10,7 +10,9 @@ import {
  validateImageFile,
  createImagePreviewUrl,
  revokeImagePreviewUrl,
+ generateThumbnail,
 } from"@/lib/utils/imageCompression";
+import type { UserTier } from"@/lib/utils/imageCompression";
 import type { AngleProfile, FinishType, AssetCategory } from"@/lib/types/database";
 import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
@@ -131,6 +133,9 @@ export default function AddHorsePage() {
  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
  const [userAlias, setUserAlias] = useState("");
 
+ // User tier for compression quality
+ const [userTier, setUserTier] = useState<UserTier>("free");
+
  const isModel = assetCategory ==="model";
 
  // Step 4 (index 3): Financial Vault
@@ -155,7 +160,7 @@ export default function AddHorsePage() {
  }
  }, [selectedCatalogItem]);
 
- // Fetch watermark preference
+ // Fetch watermark preference + user tier
  useEffect(() => {
  getProfile().then((profile) => {
  if (profile) {
@@ -163,6 +168,13 @@ export default function AddHorsePage() {
  setUserAlias(profile.aliasName);
  }
  });
+ // Read tier from JWT app_metadata
+ supabase.auth.getUser().then(({ data: { user: u } }) => {
+ if (u?.app_metadata?.tier) {
+ setUserTier(u.app_metadata.tier as UserTier);
+ }
+ });
+ // eslint-disable-next-line react-hooks/exhaustive-deps
  }, []);
 
  // Clean up preview URLs on unmount
@@ -423,13 +435,13 @@ export default function AddHorsePage() {
  // Step 2: Upload images directly from browser to Supabase Storage
  const uploadedImages: { path: string; angle: string }[] = [];
 
- // Compress and upload slot images
+ // Compress and upload slot images + thumbnails
  const imageEntries = Object.entries(imageSlots) as [AngleProfile, ImageSlot][];
  for (const [angle, slot] of imageEntries) {
  const compressed =
  watermarkEnabled && userAlias
- ? await compressImageWithWatermark(slot.file, userAlias)
- : await compressImage(slot.file);
+ ? await compressImageWithWatermark(slot.file, userAlias, userTier)
+ : await compressImage(slot.file, userTier);
  const filePath = `horses/${horseId}/${angle}_${Date.now()}.webp`;
  const { error: uploadError } = await supabase.storage
  .from("horse-images")
@@ -437,6 +449,17 @@ export default function AddHorsePage() {
 
  if (!uploadError) {
  uploadedImages.push({ path: filePath, angle });
+
+ // Generate and upload thumbnail (400px WebP)
+ try {
+ const thumbnail = await generateThumbnail(slot.file);
+ const thumbPath = filePath.replace(/\.webp$/, "_thumb.webp");
+ await supabase.storage
+ .from("horse-images")
+ .upload(thumbPath, thumbnail, { contentType:"image/webp" });
+ } catch {
+ // Non-fatal — grid will fall back to full-res
+ }
  }
  }
 
@@ -444,8 +467,8 @@ export default function AddHorsePage() {
  for (let i = 0; i < extraFiles.length; i++) {
  const compressed =
  watermarkEnabled && userAlias
- ? await compressImageWithWatermark(extraFiles[i].file, userAlias)
- : await compressImage(extraFiles[i].file);
+ ? await compressImageWithWatermark(extraFiles[i].file, userAlias, userTier)
+ : await compressImage(extraFiles[i].file, userTier);
  const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
  const { error: uploadError } = await supabase.storage
  .from("horse-images")
@@ -557,7 +580,6 @@ export default function AddHorsePage() {
  type="button"
               className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/5 shadow-sm" : "border-stone-200 bg-white hover:border-stone-300"}`}
  onClick={() => setAssetCategory(cat.value)}
- id={`category-${cat.value}`}
  >
  <span className="text-2xl">{cat.icon}</span>
               <span className="text-sm font-semibold text-stone-600">{cat.label}</span>
@@ -573,11 +595,10 @@ export default function AddHorsePage() {
  >
  {STEPS.map((step, i) => (
  <button
-  type="button"
-  key={step.label}
-  className="relative flex cursor-pointer flex-col items-center bg-transparent border-0 p-0"
-  style={{ width: `${100 / STEPS.length}%` }}
-  onClick={() => { if (i <= currentStep || canProceedStep(i - 1)) setCurrentStep(i); }}
+ type="button"
+ key={step.label}
+ className="w-1/3 relative flex cursor-pointer flex-col items-center bg-transparent border-0 p-0"
+ onClick={() => { if (i <= currentStep || canProceedStep(i - 1)) setCurrentStep(i); }}
   aria-label={`Go to step ${i + 1}: ${step.label}`}
  >
  {/* Connecting line (before the dot) */}
@@ -749,9 +770,9 @@ export default function AddHorsePage() {
 
  {/* Extra Details Multi-Upload Zone */}
  <div className="mt-6">
- <div
- className="relative flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-stone-300 bg-[#FEFCF8] p-6 text-center transition-all hover:border-forest hover:bg-forest/5"
- onClick={() => extraInputRef.current?.click()}
+ <label
+ htmlFor="extra-photos-input"
+ className="relative flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-edge bg-[#FEFCF8] p-6 text-center transition-all hover:border-forest hover:bg-forest/5"
  onDragOver={(e) => e.preventDefault()}
  onDrop={(e) => {
  e.preventDefault();
@@ -764,15 +785,15 @@ export default function AddHorsePage() {
  }
  startExtraCropQueue(files);
  }}
- role="button"
- tabIndex={0}
  >
  <input
+ id="extra-photos-input"
  ref={extraInputRef}
  type="file"
  accept="image/*"
  multiple
  className="hidden"
+ title="Upload extra photos"
  onChange={(e) => {
  const files = Array.from(e.target.files || []).filter((f) =>
  f.type.startsWith("image/"),
@@ -785,7 +806,6 @@ export default function AddHorsePage() {
  startExtraCropQueue(files);
  e.target.value ="";
  }}
- style={{ display:"none" }}
  />
  <svg
  width="24"
@@ -796,19 +816,19 @@ export default function AddHorsePage() {
  strokeWidth="1.5"
  strokeLinecap="round"
  strokeLinejoin="round"
- className="text-stone-400"
+ className="text-muted"
  >
  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
  <circle cx="12" cy="13" r="3" />
  <line x1="21" y1="9" x2="21.01" y2="9" />
  </svg>
- <span className="text-stone-900 text-sm font-medium">
+ <span className="text-ink text-sm font-medium">
  <strong>Additional photos (up to 10)</strong>
  </span>
- <span className="text-stone-500 text-xs">
+ <span className="text-muted text-xs">
  {extraFiles.length}/10 photos · Click or drag files here
  </span>
- </div>
+ </label>
  {extraFiles.length > 0 && (
  <div className="mt-4 flex flex-wrap gap-2">
  {extraFiles.map((ef, i) => (
@@ -888,8 +908,8 @@ export default function AddHorsePage() {
  STEP 2 (index 1): Reference Link
  — Use CSS display instead of unmounting to preserve component state
  ================================================================ */}
- <div className="step-content" key="step-1" style={{ display: currentStep === 1 ?"block" :"none" }}>
- <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+ <div className={`step-content ${currentStep === 1 ?"block" :"hidden"}`} key="step-1">
+ <div className="relative overflow-visible rounded-xl border border-edge bg-[#FEFCF8] p-6 shadow-sm">
  <div className="mb-6 flex items-center gap-3">
  <div className="text-2xl">
  🔗
@@ -1167,12 +1187,13 @@ export default function AddHorsePage() {
  />
  </div>
  <div className="mb-6 min-w-[150px] flex-1">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Gender</label>
+ <label className="text-ink mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
  className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={assignedGender}
  onChange={(e) => setAssignedGender(e.target.value)}
  id="assigned-gender"
+ title="Select assigned gender"
  >
  <option value="">Select…</option>
  <option value="Stallion">Stallion</option>

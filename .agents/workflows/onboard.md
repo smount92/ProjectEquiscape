@@ -26,7 +26,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **60 page routes**, **107+ client components** (incl. 8 shadcn ui primitives), **36 server action files**, **10 API routes**, and **98 database migrations** (001–102).
+The platform has **60 page routes**, **107+ client components** (incl. 10 shadcn/ui primitives), **36 server action files**, **10 API routes**, and **98 database migrations** (001–102).
 
 ### ⚠️ Development Environment: Windows + PowerShell
 
@@ -65,6 +65,18 @@ For strategic planning documents:
 ```
 View files in: .agents\docs\
 Key docs: Open_Beta_Plan.md, UI_Update_Plan.md, Layout_Unification.md
+```
+
+For upcoming Scale & Revenue features:
+
+```
+View files:
+  .agents\workflows\065-pro-asset-pipeline.md
+  .agents\workflows\066-sentry-observability.md
+  .agents\workflows\067-pwa-offline-stable.md
+  .agents\workflows\068-realtime-engine.md
+  .agents\workflows\069-monetization-core.md
+  .agents\workflows\070-monetization-expansion.md
 ```
 
 For historical context on the schema unification that shaped the database:
@@ -124,8 +136,8 @@ src/
 - **Tailwind CSS v4** with `@theme` block in `globals.css` for design tokens
 - **shadcn/ui** for form primitives — no `form-input` or `form-select` classes
 - **No inline `style={{...}}`** for layout, padding, or colors
-- **"Cozy Scrapbook" stone palette** — `bg-stone-50` backgrounds, `bg-white` cards, `border-stone-200` borders, `text-stone-900` primary text, `text-stone-500` muted text, `text-forest`/`bg-forest` accent (Hunter Green `#2C5545`)
-- **Legacy tokens BANNED** — `bg-card`, `border-edge`, `text-ink`, `text-muted`, `text-inverse`, `bg-glass` are all replaced. See `docs/guides/design-system.md` for the full banned list.
+- **"Cozy Scrapbook" Warm Parchment palette** — `bg-[#F4EFE6]` backgrounds, `bg-[#FEFCF8]` cards, `border-edge` borders, `text-ink` primary text, `text-muted` muted text, `text-forest`/`bg-forest` accent (Hunter Green `#2C5545`)
+- **Cold palette BANNED** — `bg-white`, `bg-stone-50`, `bg-stone-100`, `border-stone-200`, `text-stone-900`, `text-stone-500` are banned. Use the warm semantic tokens above instead. See `docs/guides/design-system.md` for the full banned list.
 - Simple Mode: `[data-simple-mode="true"]` — 130% font scale, 60px min buttons
 - Typography: `font-serif` (Playfair Display) for headings, `font-sans` (Inter) for UI text
 - Design System Guide: `docs/guides/design-system.md`

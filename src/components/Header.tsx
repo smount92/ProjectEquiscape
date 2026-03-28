@@ -160,6 +160,7 @@ export default function Header() {
 
  // Close mobile menu on route change (fixes touch devices where onClick can race)
  useEffect(() => {
+ // eslint-disable-next-line react-hooks/set-state-in-effect
  setMobileMenuOpen(false);
  }, [pathname]);
 
@@ -230,7 +231,6 @@ export default function Header() {
  allLinks.splice(5, 0, getStudioLink(artistSlug));
  const totalLinks = allLinks.length;
  const hasOverflow = visibleCount < totalLinks;
- const visibleLinks = allLinks.slice(0, visibleCount);
  const overflowLinks = allLinks.slice(visibleCount);
 
  return (
@@ -256,7 +256,6 @@ export default function Header() {
  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
  aria-expanded={mobileMenuOpen}
- id="hamburger-menu"
  >
  {mobileMenuOpen ? (
  <svg

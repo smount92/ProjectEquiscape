@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-03-27
+> **Last Updated:** 2026-03-28
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 
 // turbo-all
@@ -90,6 +90,19 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 **Scope:** Restore warm parchment color tokens, shadows, typography, header/footer styling. Pure color/font changes — no DOM restructuring.
 
 # 🟡 Priority: Medium
+
+## Task M-0: Scale & Revenue Epic (6 workflows)
+
+**Workflows:**
+- `.agents/workflows/065-pro-asset-pipeline.md` — Zero-cost thumbnails, tier-gated quality
+- `.agents/workflows/066-sentry-observability.md` — Error tracking, silent catch audit
+- `.agents/workflows/067-pwa-offline-stable.md` — Offline Barn Mode for live shows
+- `.agents/workflows/068-realtime-engine.md` — Replace polling with Supabase Realtime push
+- `.agents/workflows/069-monetization-core.md` — Promoted listings, ISO bounties, à la carte PDFs, Studio Pro
+- `.agents/workflows/070-monetization-expansion.md` — eBay affiliates, printable show tags
+**Status:** Workflows written, not started
+
+---
 
 ## Task M-1: Open Beta Hardening (Remaining)
 

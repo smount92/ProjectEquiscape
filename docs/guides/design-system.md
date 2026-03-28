@@ -12,42 +12,35 @@ MHH should feel warm, tactile, physical, and hobby-focused. Think of a beautiful
 | H3, Section headers | Playfair Display | `font-serif text-xl font-semibold` | |
 | UI text, labels, buttons | Inter | `font-sans text-sm` or `text-base` | Default body font |
 | Muted/secondary | Inter | `text-stone-500` | Never use pure `#000` black |
-| Primary text | Inter | `text-stone-900` | Warm dark |
-| Light secondary | Inter | `text-stone-600` | For descriptions, metadata |
+| Primary text | Inter | `text-ink` | Warm dark (Espresso) |
+| Light secondary | Inter | `text-ink-light` | For descriptions, metadata |
+| Muted | Inter | `text-muted` | For subtle hints |
 
 ## Color Palette
 
-> **Migration complete (2026-03-28):** All legacy semantic tokens (`bg-card`, `border-edge`, `text-ink`, `text-muted`, etc.) have been replaced with Tailwind stone palette equivalents across all 55+ pages and 90+ components.
+> **Restoration complete (2026-03-28):** After moving to Tailwind, we implemented the **Warm Parchment Restoration**. The project officially uses custom `@theme` variables mapped in `globals.css` to ensure the app looks like a physical scrapbook, not a cold SaaS tool.
 
-| Tailwind Class | Usage | Replaces Legacy Token |
-|----------------|-------|-----------------------|
-| `bg-stone-50` | Page backgrounds, elevated surfaces | `bg-parchment`, `bg-elevated`, `bg-glass` |
-| `bg-white` | Card surfaces, input backgrounds | `bg-card` |
-| `bg-stone-100` | Section dividers, sticky headers | `bg-parchment-dark` |
-| `text-stone-900` | Primary text | `text-ink` |
-| `text-stone-600` | Secondary text, descriptions | `text-ink-light` |
-| `text-stone-500` | Muted text, hints, metadata | `text-muted` |
-| `text-white` | Inverse text on dark backgrounds | `text-inverse` |
-| `border-stone-200` | All structural borders | `border-edge` |
-| `text-forest` / `bg-forest` | Primary accent (Hunter Green `#2C5545`) | Unchanged |
-| `text-red-700` | Destructive action text | `text-danger` |
-| `bg-emerald-500` | Success backgrounds | `bg-success` |
-| `bg-emerald-50` | Success state surfaces | RGBA emerald patterns |
-| `bg-amber-50` | Warning state surfaces | RGBA amber patterns |
-| `bg-red-50` | Error state surfaces | RGBA red patterns |
-| `bg-purple-50` | Art Studio accent surfaces | RGBA purple patterns |
+| Semantic Token / Class | Hex code | Usage |
+|------------------------|----------|-------|
+| `bg-[#F4EFE6]` (Parchment) | `#F4EFE6` | Main page backgrounds, elevated surfaces |
+| `bg-[#FEFCF8]` (Card) | `#FEFCF8` | Primary card surfaces, input backgrounds |
+| `bg-[#EAE1CD]` (Parchment Dark) | `#EAE1CD` | Section dividers, header/footer backgrounds |
+| `text-ink` | `#2D2318` | Primary text (Warm Espresso) |
+| `text-ink-light` | `#594A3C` | Secondary text, descriptions |
+| `text-muted` | `#7A6A58` | Muted text, hints, metadata |
+| `border-edge` | `#E0D5C1` | All structural borders |
+| `text-forest` / `bg-forest` | `#2C5545` | Primary accent (Hunter Green) |
 
-### ❌ Banned Legacy Tokens
+### ❌ Banned Utility Classes (The Cold Palette)
 
-The following class names **must never be used** in new code:
+The following default Tailwind utility classes **must be avoided** in favor of their warm semantic counterparts:
 
+```text
+bg-white, bg-stone-50, bg-stone-100
+border-stone-200, border-stone-300
+text-stone-900, text-stone-600, text-stone-500, text-stone-400
 ```
-bg-card, bg-glass, bg-elevated, bg-parchment, bg-parchment-dark, bg-surface-glass
-border-edge, text-ink, text-ink-light, text-muted, text-inverse, text-danger
-bg-success, bg-surface-primary, bg-surface-secondary
-```
-
-Any `bg-[rgba(...)]` or `border-[rgba(...)]` patterns should use Tailwind palette equivalents (e.g., `bg-emerald-50` instead of `bg-[rgba(44,85,69,0.1)]`).
+> **Accessibility Rule:** Never use `text-stone-400` or lighter text colors on the warm `#FEFCF8` cards. Always use `text-muted` or `text-ink-light` to pass WCAG contrast ratios.
 
 ## Spacing Rules
 
@@ -58,12 +51,14 @@ Any `bg-[rgba(...)]` or `border-[rgba(...)]` patterns should use Tailwind palett
 
 ## Component Rules
 
-1. **Inputs:** Always use `<Input>` / `<Textarea>` from `@/components/ui/`
+1. **Inputs:** Use `<Input>` from `@/components/ui/` for text. **Exception:** Always use a native HTML `<input type="file" className="hidden" />` or `<input type="file" className="opacity-0 absolute inset-0 ..." />` when creating robust image galleries or dropzones so Shadcn padding does not interfere with CSS Grid styling.
 2. **Buttons:** Always use `<Button>` from `@/components/ui/button`
 3. **Modals:** Always use `<Dialog>` from `@/components/ui/dialog`
 4. **Badges:** Always use `<Badge>` from `@/components/ui/badge`
-5. **Never** use inline `style={{...}}` for layout, padding, or colors
-6. **Never** create custom page container divs — use Layout Archetypes
+5. **Accessibility (ARIA):** Boolean `aria-expanded` and `aria-pressed` attributes must be explicitly cast to string literals (`"true"`/`"false"`) via ternary operators to satisfy the stringent Next.js `jsx-a11y` linter. E.g. `aria-pressed={isActive ? "true" : "false"}`.
+6. **Accessibility (Nesting):** Avoid wrapping `<input>` elements with `<div>` elements when acting as an interactive dropzone; they must be semantic `<label>` elements to prevent ID collisions and invalid DOM nesting.
+7. **Never** use inline `style={{...}}` for layout, padding, or colors
+8. **Never** create custom page container divs — use Layout Archetypes
 
 ## The 4 Page Archetypes
 
