@@ -104,7 +104,7 @@ src/
 └── lib/
     ├── supabase/           # admin.ts (service role), client.ts (browser), server.ts (SSR)
     ├── types/              # database.ts (generated types), csv-import.ts
-    ├── utils/              # imageCompression, mentions, rateLimit, storage, validation, cn
+    ├── utils/              # imageCompression, imageUrl, mentions, rateLimit, storage, validation, cn
     ├── utils.ts            # cn() utility (clsx + tailwind-merge)
     └── context/            # SimpleModeContext.tsx (accessibility)
 ```

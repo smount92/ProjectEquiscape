@@ -1,6 +1,6 @@
 # Model Horse Hub — Complete Project Report
 
-> **Report Date:** March 27, 2026  
+> **Report Date:** March 28, 2026  
 > **Repository:** `smount92/ProjectEquiscape` (GitHub, private)  
 > **Total Commits:** 384 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
 > **Status:** Open beta with active testers — Freemium tier live with Stripe billing
@@ -104,7 +104,7 @@ model-horse-hub/
 │   └── lib/
 │       ├── supabase/        # admin.ts, client.ts, server.ts (all typed with Database generic)
 │       ├── types/           # database.generated.ts (auto-gen), database.ts (supplementary), supabase.ts, csv-import.ts
-│       ├── utils/           # achievements, imageCompression, mentions, rateLimit, storage, validation
+│       ├── utils/           # achievements, imageCompression, imageUrl, mentions, rateLimit, storage, validation
 │       │   └── __tests__/   # 4 utility test files
 │       ├── context/         # SimpleModeContext (accessibility)
 │       ├── constants/       # Shared constants
@@ -292,6 +292,8 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | Image Crop Tool | ✅ Complete | Aspect ratio presets, rule-of-thirds grid |
 | Photo Lightbox | ✅ Complete | Portal-based fullscreen viewer with keyboard nav |
 | Opt-in Watermarking | ✅ Complete | Settings toggle |
+| Tier-Gated Image Quality | ✅ Complete | Free: 1000px/0.70q, Pro: 2500px/0.92q, Studio: 2500px/0.95q |
+| Auto-Generated Thumbnails | ✅ Complete | 400px WebP micro-thumbnails for grid views (zero server cost) |
 | Unified Reference Search | ✅ Complete | Fuzzy search across 10,500+ catalog items |
 | Suggest Missing Reference | ✅ Complete | Modal with type selection |
 | Batch CSV Import | ✅ Complete | `/stable/import` |
@@ -803,6 +805,7 @@ All 36 server action files have JSDoc comments on exported functions, documentin
 | **V42** | Show Rules & Realism | Entry preview, smart class browser, results podium, personalized notifications, show history widget, expert judging, cron auto-transition, host override, enriched show records, judge notes |
 | **V43** | Layout & UI Overhaul | shadcn/ui primitives, Framer Motion interactions, createPortal → Dialog migration, Design System docs, 4 Page Archetypes built, 55+ pages migrated from custom containers |
 | **V44** | Warm Parchment Aesthetic | Complete override of standard Tailwind cold stone palette; custom `@theme` mapped to warm espresso, leather, and cream tokens; WCAG contrast fixes on inputs and footers; pure CSS Grid photo gallery restoration |
+| **V45** | Pro Asset Pipeline | Tier-gated image compression (free/pro/studio), client-side 400px WebP thumbnail generation, dual-upload in add/edit flows, grid components serve thumbnails with fallback |
 
 ### 12.2 Key Architectural Decisions Log
 
@@ -853,7 +856,7 @@ Every sprint ends with `npx next build` — the Turbopack build catches type err
 |------|-----------|------------|
 | **No SSR caching** | All dynamic pages fetch on every request | Supabase RLS requires authenticated requests; static generation not viable for private data. Suspense streaming on dashboard + show ring. |
 | **Hobby tier Vercel** | Cron limited to daily frequency | Market price refresh is daily (sufficient for hobby volumes) |
-| **Image optimization** | Raw `<img>` tags, no Next.js Image component | Private Supabase storage uses signed URLs; Next.js Image requires public URLs or custom loader |
+| **Image optimization** | Raw `<img>` tags, no Next.js Image component | Client-side Canvas compression with tier-gated quality + 400px WebP thumbnails for grids. Detail/passport pages serve full-res. Older uploads without thumbnails degrade gracefully via `onError` fallback. |
 
 ---
 
@@ -921,11 +924,12 @@ All 93 migrations (001–097) have been deployed to production Supabase. Key rec
 | **Notification Deep-Links** | All notifications now click through to referenced item instead of actor profile |
 | **Beta Feedback Hotfixes** | Photo show filter fix, art studio specialty expansion, inline style cleanup |
 | **V40: Monetization Sprint** | Stripe integration (checkout + webhook), freemium tier system (JWT-based), upgrade page with pricing comparison, Stablemaster AI cron (Gemini + Resend), Blue Book PRO charts, Photo Suite+ gating (5 LSQ free / 30 extra Pro), Smart Insurance Reports (Pro), double-subscription prevention, admin user count fix |
+| **V45: Pro Asset Pipeline** | Tier-gated image compression (`imageCompression.ts`), `generateThumbnail()` for 400px WebP, `imageUrl.ts` helper, dual-upload in add/edit horse, StableGrid + ShowRingGrid serve thumbnails with `onError` fallback |
 
 ### 15.4 Recommended Next Steps
 
 1. **Search infrastructure** — Server-side full-text search (Supabase pg_search or external)
-2. **Image optimization** — Next.js Image component integration (currently raw `<img>`)
+2. **Image optimization** — ~~Next.js Image component integration~~ Addressed by Pro Asset Pipeline (V45): tier-gated compression + 400px WebP thumbnails for grids. Further optimization via CDN or edge transforms if traffic demands.
 3. **Error monitoring** — Sentry or equivalent for production error tracking
 4. **Progressive Web App** — Offline show mode for live events without WiFi
 5. **Mobile app** — React Native or Capacitor wrapper for app store presence
@@ -934,4 +938,4 @@ All 93 migrations (001–097) have been deployed to production Supabase. Key rec
 
 ---
 
-*This report covers the complete Model Horse Hub project as of commit `65e8ff2` (March 25, 2026). Total development time: ~19 days from first commit to current state.*
+*This report covers the complete Model Horse Hub project as of commit `57a78a3` (March 28, 2026). Total development time: ~22 days from first commit to current state.*

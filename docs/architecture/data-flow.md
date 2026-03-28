@@ -84,21 +84,39 @@ Configured in `vercel.json`. The cron endpoints validate the `CRON_SECRET` heade
 
 ```mermaid
 graph TD
-    subgraph Upload["Upload Flow"]
-        A["Client Component"] --> B["Compress image (imageCompression.ts)"]
-        B --> C["Upload to Supabase Storage"]
-        C --> D["Path: horse-images/horse_id/filename"]
-        A --> E["Save metadata to horse_images table"]
+    subgraph Upload["Upload Flow (Client-Side)"]
+        A["Client Component"] --> B["compressImage(file, tier)"]
+        B --> C["Upload main .webp to Supabase Storage"]
+        C --> D["Path: horse-images/horse_id/angle_timestamp.webp"]
+        A --> T["generateThumbnail(file) — 400px WebP"]
+        T --> U["Upload _thumb.webp alongside main"]
+        U --> V["Path: horse-images/horse_id/angle_timestamp_thumb.webp"]
+        A --> E["finalizeHorseImages() — save metadata"]
     end
 
-    subgraph Render["Rendering Flow"]
-        F["Server Component"] --> G["getSignedImageUrl(path)"]
-        G --> H["Time-limited signed URL"]
-        H --> I["img src=signedUrl"]
+    subgraph Render["Grid Rendering"]
+        F["StableGrid / ShowRingGrid"] --> G["getThumbUrl(imageUrl)"]
+        G --> H["Request _thumb.webp first"]
+        H -->|exists| I["img src=thumbUrl — fast, small"]
+        H -->|404 onError| J["Fallback to full-res URL"]
+    end
+
+    subgraph Detail["Detail / Passport Rendering"]
+        K["Horse Passport / PhotoLightbox"] --> L["Full-res URL (no thumbnail)"]
     end
 ```
 
-Horse images are in a **private** Supabase Storage bucket. The `getSignedImageUrl()` utility in `storage.ts` generates time-limited signed URLs for rendering. This prevents hotlinking and unauthorized access.
+### Tier-Gated Compression
+
+| Tier | Max Dimension | Quality | Max Upload Size |
+|------|--------------|---------|-----------------|
+| `free` | 1000px | 0.70 | 10MB |
+| `pro` | 2500px | 0.92 | 10MB |
+| `studio` | 2500px | 0.95 | 10MB |
+
+User tier is read from JWT `app_metadata.tier` on the client side. Thumbnails are always 400px at 0.60 quality regardless of tier.
+
+Horse images are in a **public** Supabase Storage bucket. Grid components use `getThumbUrl()` from `@/lib/utils/imageUrl` to derive the `_thumb.webp` path from the full-res URL. The `onError` fallback ensures horses uploaded before the thumbnail feature was added still render correctly using their full-res images.
 
 ## Cache Invalidation
 
