@@ -67,7 +67,7 @@ export default function RootLayout({
  `}
  </Script>
  </head>
- <body>
+ <body className="antialiased">
  <SimpleModeProvider>
  <ToastProvider>
  <Header />

@@ -646,16 +646,17 @@ export default function AddHorsePage() {
  Click any slot below to upload a photo. Images are automatically compressed before saving.
  The <strong>Primary Thumbnail</strong> will be shown on your Digital Shelf.
  </p>
-
- <div className="grid-cols-[repeat(3,1fr)] grid gap-4">
+ <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
  {GALLERY_SLOTS.map((slot) => {
  const existing = imageSlots[slot.angle];
  const isPrimary = slot.angle ==="Primary_Thumbnail";
  return (
  <div
  key={slot.angle}
- className={`gallery-slot ${slot.primary ?"primary" :""} ${
- existing ?"has-image" :""
+ className={`relative flex aspect-square cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 transition-all hover:bg-forest/5 ${
+ existing
+ ? "border-solid border-forest bg-forest/5 shadow-sm"
+ : "border-dashed border-stone-300 bg-[#FEFCF8]"
  }`}
  >
  {existing ? (
@@ -723,19 +724,17 @@ export default function AddHorsePage() {
  )}
  </>
  ) : (
- <>
- <span className="text-stone-500 text-[1.8rem] transition-colors">
- {isPrimary ?"🖼️" :"📷"}
+ <div className="flex w-full flex-col items-center gap-2 p-2 text-center text-stone-500">
+ <span className="text-3xl opacity-50 transition-colors group-hover:opacity-100">
+ {isPrimary ? "🖼️" : "📷"}
  </span>
- <span className="hover:text-forest hover:border-emerald-700 hover:bg-[var(--color-accent-primary-glow)]-label absolute inset-0 cursor-pointer opacity-[0]">
- {slot.label}
- </span>
- {/* AI hint hidden for now */}
- </>
+ <span className="text-sm font-medium">{slot.label}</span>
+ </div>
  )}
- <Input
+ <input
  type="file"
  accept="image/jpeg,image/png,image/webp,image/gif"
+ className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
  onChange={(e) => {
  const file = e.target.files?.[0];
  if (file) handleImageSelect(slot.angle, file);
@@ -749,9 +748,9 @@ export default function AddHorsePage() {
  </div>
 
  {/* Extra Details Multi-Upload Zone */}
- <div className="border-stone-200 mt-6 border-t pt-6">
+ <div className="mt-6">
  <div
- className="opacity-[0.4]"
+ className="relative flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-stone-300 bg-[#FEFCF8] p-6 text-center transition-all hover:border-forest hover:bg-forest/5"
  onClick={() => extraInputRef.current?.click()}
  onDragOver={(e) => e.preventDefault()}
  onDrop={(e) => {
@@ -768,11 +767,12 @@ export default function AddHorsePage() {
  role="button"
  tabIndex={0}
  >
- <Input
+ <input
  ref={extraInputRef}
  type="file"
  accept="image/*"
  multiple
+ className="hidden"
  onChange={(e) => {
  const files = Array.from(e.target.files || []).filter((f) =>
  f.type.startsWith("image/"),
@@ -796,12 +796,14 @@ export default function AddHorsePage() {
  strokeWidth="1.5"
  strokeLinecap="round"
  strokeLinejoin="round"
+ className="text-stone-400"
  >
- <line x1="12" y1="5" x2="12" y2="19" />
- <line x1="5" y1="12" x2="19" y2="12" />
+ <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+ <circle cx="12" cy="13" r="3" />
+ <line x1="21" y1="9" x2="21.01" y2="9" />
  </svg>
- <span>
- <strong>Extra Details & Flaws</strong> — Upload up to 10
+ <span className="text-stone-900 text-sm font-medium">
+ <strong>Additional photos (up to 10)</strong>
  </span>
  <span className="text-stone-500 text-xs">
  {extraFiles.length}/10 photos · Click or drag files here
@@ -1167,7 +1169,7 @@ export default function AddHorsePage() {
  <div className="mb-6 min-w-[150px] flex-1">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={assignedGender}
  onChange={(e) => setAssignedGender(e.target.value)}
  id="assigned-gender"
@@ -1220,7 +1222,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="condition-grade"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  >
@@ -1242,7 +1244,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="life-stage"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={lifeStage}
  onChange={(e) => setLifeStage(e.target.value)}
  >
@@ -1270,7 +1272,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="trade-status"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={tradeStatus}
  onChange={(e) => setTradeStatus(e.target.value)}
  >
@@ -1376,7 +1378,7 @@ export default function AddHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-white font-inherit text-stone-900 hover:border-emerald-700 hover:bg-stone-50 flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-stone-200"}`}
+ className={`bg-[#FEFCF8] font-inherit text-stone-900 hover:border-emerald-700 hover:bg-stone-50 flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-edge"}`}
  onClick={() => setVisibility(opt.value)}
  id={`visibility-${opt.value}`}
  >

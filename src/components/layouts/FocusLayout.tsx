@@ -25,7 +25,7 @@ export default function FocusLayout({
                     {title}
                 </h1>
                 {description && (
-                    <p className="mt-2 text-stone-500">{description}</p>
+                    <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">{description}</p>
                 )}
             </div>
 

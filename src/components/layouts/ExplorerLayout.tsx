@@ -27,7 +27,7 @@ export default function ExplorerLayout({
                         {title}
                     </h1>
                     {description && (
-                        <p className="mt-1 text-ink-light">{description}</p>
+                        <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">{description}</p>
                     )}
                 </div>
                 {headerActions && <div className="flex gap-3">{headerActions}</div>}
@@ -35,7 +35,7 @@ export default function ExplorerLayout({
 
             {/* Controls row (sticky) */}
             {controls && (
-                <div className="sticky top-[calc(var(--header-height)+1rem)] z-40 mb-8 border-b border-stone-200 bg-stone-50/90 pb-4 pt-2 backdrop-blur-md">
+                <div className="sticky top-[calc(var(--header-height)+1rem)] z-40 mb-8 border-b border-edge bg-[#F4EFE6]/90 pb-4 pt-2 backdrop-blur-md">
                     {controls}
                 </div>
             )}
