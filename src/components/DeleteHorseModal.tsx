@@ -39,7 +39,7 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
  return (
  <>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setShowModal(true)}
  id="delete-horse-button"
  >
@@ -66,7 +66,7 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
  </DialogHeader>
 
  {error && (
- <div className="text-danger flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm" role="alert">
+ <div className="text-red-700 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm" role="alert">
  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
  <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
  </svg>
@@ -76,7 +76,7 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
 
  <div className="flex justify-end gap-4 pt-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowModal(false)}
  disabled={isDeleting}
  id="delete-cancel"

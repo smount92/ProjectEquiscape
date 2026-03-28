@@ -63,16 +63,16 @@ export default async function ReferencePage() {
   {/* Stats */}
   <div className="mt-2 mb-8 flex flex-wrap items-center justify-center gap-8">
   <div className="flex flex-col items-center">
-   <span className="text-3xl font-bold text-ink">{(count ?? 0).toLocaleString()}</span>
-   <span className="text-sm text-ink-light">Catalog Entries</span>
+   <span className="text-3xl font-bold text-stone-900">{(count ?? 0).toLocaleString()}</span>
+   <span className="text-sm text-stone-600">Catalog Entries</span>
   </div>
   <div className="flex flex-col items-center">
-   <span className="text-3xl font-bold text-ink">{pendingSuggestions ?? 0}</span>
-   <span className="text-sm text-ink-light">Pending Suggestions</span>
+   <span className="text-3xl font-bold text-stone-900">{pendingSuggestions ?? 0}</span>
+   <span className="text-sm text-stone-600">Pending Suggestions</span>
   </div>
   <div className="flex flex-col items-center">
-   <span className="text-3xl font-bold text-ink">{recentChanges ?? 0}</span>
-   <span className="text-sm text-ink-light">Changes This Week</span>
+   <span className="text-3xl font-bold text-stone-900">{recentChanges ?? 0}</span>
+   <span className="text-sm text-stone-600">Changes This Week</span>
   </div>
   </div>
 
@@ -90,12 +90,12 @@ export default async function ReferencePage() {
   {/* Sidebar */}
   <aside className="flex flex-col gap-4">
    {/* Quick Links */}
-   <div className="flex flex-col gap-3 rounded-lg border border-edge bg-card p-5 shadow-sm">
-   <h3 className="text-sm font-bold uppercase tracking-wider text-ink-light">📋 Community</h3>
+   <div className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+   <h3 className="text-sm font-bold uppercase tracking-wider text-stone-600">📋 Community</h3>
    <div className="flex flex-col gap-2">
     <a
     href="/catalog/suggestions"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
     >
     View Suggestions
     {(pendingSuggestions ?? 0) > 0 && (
@@ -112,7 +112,7 @@ export default async function ReferencePage() {
     </a>
     <a
     href="/catalog/changelog"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
     >
     📋 View Changelog
     </a>
@@ -121,8 +121,8 @@ export default async function ReferencePage() {
 
    {/* Top Curators */}
    {(curators ?? []).length > 0 && (
-   <div className="flex flex-col gap-3 rounded-lg border border-edge bg-card p-5 shadow-sm">
-    <h3 className="text-sm font-bold uppercase tracking-wider text-ink-light">🏆 Top Curators</h3>
+   <div className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+    <h3 className="text-sm font-bold uppercase tracking-wider text-stone-600">🏆 Top Curators</h3>
     <ul className="m-0 list-none p-0">
     {(
      curators as {
@@ -142,7 +142,7 @@ export default async function ReferencePage() {
      >
       @{curator.alias_name}
      </a>
-     <span className="text-muted ml-auto text-xs">
+     <span className="text-stone-500 ml-auto text-xs">
       {curator.approved_suggestions_count} contributions
      </span>
      </li>

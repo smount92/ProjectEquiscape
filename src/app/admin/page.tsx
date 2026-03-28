@@ -87,7 +87,7 @@ export default async function AdminPage() {
   title={<><span className="text-forest">⚡ Admin Console</span></>}
   description="Founder's Command Center — Full system overview"
   headerActions={
-  <div className="inline-flex items-center gap-2 rounded-full border border-edge bg-[rgba(44,85,69,0.1)] px-3 py-1.5 text-xs font-semibold text-forest">
+  <div className="inline-flex items-center gap-2 rounded-full border border-forest/20 bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
    <svg
    width="14"
    height="14"
@@ -108,20 +108,20 @@ export default async function AdminPage() {
   <>
    {/* Metrics Row */}
    <div className="grid-cols-[repeat(auto-fit,minmax(200px,1fr))] grid gap-4">
-   <div className="bg-glass border-edge rounded-lg border p-6 text-center transition-all">
+   <div className="bg-white border-stone-200 shadow-sm rounded-lg border p-6 text-center transition-all">
     <div className="mb-1 text-[2rem]">👥</div>
-    <div className="text-ink text-3xl leading-none font-bold">{totalUsers}</div>
-    <div className="text-muted mt-1 text-xs font-medium">Registered Users</div>
+    <div className="text-stone-900 text-3xl leading-none font-bold">{totalUsers}</div>
+    <div className="text-stone-500 mt-1 text-xs font-medium">Registered Users</div>
    </div>
-   <div className="bg-glass border-edge rounded-lg border p-6 text-center transition-all">
+   <div className="bg-white border-stone-200 shadow-sm rounded-lg border p-6 text-center transition-all">
     <div className="mb-1 text-[2rem]">🐴</div>
-    <div className="text-ink text-3xl leading-none font-bold">{totalHorses.toLocaleString()}</div>
-    <div className="text-muted mt-1 text-xs font-medium">Horses in Database</div>
+    <div className="text-stone-900 text-3xl leading-none font-bold">{totalHorses.toLocaleString()}</div>
+    <div className="text-stone-500 mt-1 text-xs font-medium">Horses in Database</div>
    </div>
-   <div className="bg-glass border-edge rounded-lg border p-6 text-center text-[#ef4444] transition-all">
+   <div className="bg-white border-stone-200 shadow-sm rounded-lg border p-6 text-center text-[#ef4444] transition-all">
     <div className="mb-1 text-[2rem]">📨</div>
-    <div className="text-ink text-3xl leading-none font-bold">{unreadMessages}</div>
-    <div className="text-muted mt-1 text-xs font-medium">Unread Messages</div>
+    <div className="text-stone-900 text-3xl leading-none font-bold">{unreadMessages}</div>
+    <div className="text-stone-500 mt-1 text-xs font-medium">Unread Messages</div>
    </div>
    </div>
 

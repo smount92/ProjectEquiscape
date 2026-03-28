@@ -23,7 +23,7 @@ export default function EmptyState({
             <h3 className="mb-2 font-serif text-xl font-semibold text-ink">
                 {title}
             </h3>
-            <p className="mb-6 max-w-sm text-center text-muted">{description}</p>
+            <p className="mb-6 max-w-sm text-center text-stone-500">{description}</p>
             {actionLabel && actionHref && (
                 <Button asChild>
                     <Link href={actionHref}>{actionLabel}</Link>

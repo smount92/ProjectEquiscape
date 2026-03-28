@@ -21,14 +21,14 @@ export default async function SuggestNewEntryPage() {
   title="📗 Suggest a New Catalog Entry"
   description="Can't find a model in the catalog? Submit the details below and the community will review your suggestion."
   backLink={
-  <nav className="text-muted flex items-center gap-1 text-sm">
+  <nav className="text-stone-500 flex items-center gap-1 text-sm">
    <Link href="/catalog">📚 Catalog</Link>
-   <span className="text-muted">›</span>
+   <span className="text-stone-500">›</span>
    <span>Suggest New Entry</span>
   </nav>
   }
  >
-  <div className="bg-card border-edge rounded-lg border p-8 shadow-md transition-all">
+  <div className="bg-white border-stone-200 rounded-lg border p-8 shadow-md transition-all">
   <SuggestNewEntryForm />
   </div>
  </FocusLayout>

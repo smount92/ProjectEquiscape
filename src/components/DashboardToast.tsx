@@ -71,7 +71,7 @@ export default function DashboardToast() {
 
  return (
  <div
- className="text-success mb-8 flex animate-[fadeInUp_0.4s_ease_forwards] items-center gap-4 rounded-md border border-[rgba(92,224,160,0.3)] bg-[rgba(92,224,160,0.1)] px-8 py-4 text-sm font-medium"
+ className="text-success mb-8 flex animate-[fadeInUp_0.4s_ease_forwards] items-center gap-4 rounded-md border border-emerald-300 bg-emerald-50 px-8 py-4 text-sm font-medium"
  role="status"
  aria-live="polite"
  >

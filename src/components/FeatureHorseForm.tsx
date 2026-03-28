@@ -40,7 +40,7 @@ export default function FeatureHorseForm() {
  return (
  <form onSubmit={handleSubmit} className="flex max-w-[500px] flex-col gap-4">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Horse ID (UUID)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Horse ID (UUID)</label>
  <Input
  type="text"
  
@@ -51,7 +51,7 @@ export default function FeatureHorseForm() {
  />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Title</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Title</label>
  <Input
  type="text"
  
@@ -61,7 +61,7 @@ export default function FeatureHorseForm() {
  />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Description (optional)</label>
  <Textarea
  
  value={description}
@@ -71,17 +71,17 @@ export default function FeatureHorseForm() {
  />
  </div>
 
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
 
  {status ==="saved" && (
- <div className="mb-4 rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-sm text-[#22C55E]">
+ <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm text-[#22C55E]">
  ✅ Horse featured successfully!
  </div>
  )}
 
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={status ==="saving"}
  >
  {status ==="saving" ?"Featuring…" :"🌟 Feature This Horse"}

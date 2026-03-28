@@ -174,8 +174,8 @@ export default function StudioSetupPage() {
  if (loading) {
  return (
   <FocusLayout title={<><span className="text-forest">Art Studio</span></>}>
-  <div className="bg-card border-edge mx-auto max-w-[700px] rounded-lg border p-12 text-center shadow-md transition-all">
-   <p className="text-muted">Loading studio settings…</p>
+  <div className="bg-white border-stone-200 mx-auto max-w-[700px] rounded-lg border p-12 text-center shadow-md transition-all">
+   <p className="text-stone-500">Loading studio settings…</p>
   </div>
   </FocusLayout>
  );
@@ -186,14 +186,14 @@ export default function StudioSetupPage() {
   title={<><span className="text-forest">{existing ?"Edit Your Studio" :"Set Up Your Art Studio"}</span></>}
   description={existing ?"Update your studio profile and commission settings." :"Create your artist profile to start accepting commissions."}
  >
-  <div className="bg-card border-edge animate-fade-in-up mx-auto max-w-[700px] rounded-lg border shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up mx-auto max-w-[700px] rounded-lg border shadow-md transition-all">
   <form onSubmit={handleSubmit}>
    {/* Studio Identity */}
-   <fieldset className="border-edge mb-6 rounded-lg border p-6">
+   <fieldset className="border-stone-200 mb-6 rounded-lg border p-6">
    <legend>🏷️ Studio Identity</legend>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Studio Name *</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Studio Name *</label>
     <Input
     type="text"
     value={studioName}
@@ -205,9 +205,9 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Studio URL Slug</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Studio URL Slug</label>
     <div className="flex items-center gap-1">
-    <span className="text-muted whitespace-nowrap text-sm">/studio/</span>
+    <span className="text-stone-500 whitespace-nowrap text-sm">/studio/</span>
     <Input
      type="text"
      className="font-mono"
@@ -222,7 +222,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Artist Bio</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Artist Bio</label>
     <Textarea
     value={bioArtist}
     onChange={(e) => setBioArtist(e.target.value)}
@@ -234,11 +234,11 @@ export default function StudioSetupPage() {
    </fieldset>
 
    {/* Skills & Services */}
-   <fieldset className="border-edge mb-6 rounded-lg border p-6">
+   <fieldset className="border-stone-200 mb-6 rounded-lg border p-6">
    <legend>🛠️ Skills & Services</legend>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Specialties</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Specialties</label>
     <div className="flex flex-wrap gap-1">
     {SPECIALTIES.map((s) => (
      <button
@@ -254,7 +254,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Mediums</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Mediums</label>
     <div className="flex flex-wrap gap-1">
     {MEDIUMS.map((m) => (
      <button
@@ -270,7 +270,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Scales Offered</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Scales Offered</label>
     <div className="flex flex-wrap gap-1">
     {SCALES.map((s) => (
      <button
@@ -286,7 +286,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">
     Commission Types Accepted
     </label>
     <div className="flex flex-wrap gap-1">
@@ -305,11 +305,11 @@ export default function StudioSetupPage() {
    </fieldset>
 
    {/* Commission Settings */}
-   <fieldset className="border-edge mb-6 rounded-lg border p-6">
+   <fieldset className="border-stone-200 mb-6 rounded-lg border p-6">
    <legend>📋 Commission Settings</legend>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Commission Status</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Commission Status</label>
     <div className="flex gap-2">
     {(["open","waitlist","closed"] as const).map((s) => (
      <button
@@ -327,7 +327,7 @@ export default function StudioSetupPage() {
 
    <div className="grid grid-cols-2 gap-4">
     <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">
      Max Commission Slots
     </label>
     <Input
@@ -350,7 +350,7 @@ export default function StudioSetupPage() {
 
    <div className="grid grid-cols-2 gap-4">
     <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">
      Turnaround (min days)
     </label>
     <Input
@@ -362,7 +362,7 @@ export default function StudioSetupPage() {
     />
     </div>
     <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">
      Turnaround (max days)
     </label>
     <Input
@@ -377,7 +377,7 @@ export default function StudioSetupPage() {
 
    <div className="grid grid-cols-2 gap-4">
     <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Price Range (min $)</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Price Range (min $)</label>
     <Input
      type="number"
      value={priceMin}
@@ -388,7 +388,7 @@ export default function StudioSetupPage() {
     />
     </div>
     <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Price Range (max $)</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Price Range (max $)</label>
     <Input
      type="number"
      value={priceMax}
@@ -402,11 +402,11 @@ export default function StudioSetupPage() {
    </fieldset>
 
    {/* Policies & Payment */}
-   <fieldset className="border-edge mb-6 rounded-lg border p-6">
+   <fieldset className="border-stone-200 mb-6 rounded-lg border p-6">
    <legend>💰 Policies & Payment</legend>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">Terms & Conditions</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">Terms & Conditions</label>
     <Textarea
     value={termsText}
     onChange={(e) => setTermsText(e.target.value)}
@@ -417,7 +417,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-ink mb-1 block text-sm font-semibold">PayPal.me Link</label>
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">PayPal.me Link</label>
     <Input
     type="url"
     value={paypalMeLink}
@@ -441,7 +441,7 @@ export default function StudioSetupPage() {
 
    <button
    type="submit"
-   className="inline-flex w-full min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex w-full min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    disabled={saving || !studioName.trim()}
    id="save-studio-btn"
    >
@@ -452,7 +452,7 @@ export default function StudioSetupPage() {
    <div className="mt-4 text-center">
     <a
     href={`/studio/${existing.studioSlug}`}
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
     >
     👁️ View Public Studio Page
     </a>

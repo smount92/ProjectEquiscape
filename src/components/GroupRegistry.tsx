@@ -43,27 +43,27 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  });
 
  return (
- <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div
  className="flex cursor-pointer items-center justify-between"
  onClick={() => setExpanded(!expanded)}
  >
  <h3 className="m-0">📋 Group Registry</h3>
- <span className="text-muted text-sm">
+ <span className="text-stone-500 text-sm">
  {expanded ?"▲" :"▼"} {entries.length > 0 ? `${entries.length} models` :""}
  </span>
  </div>
 
  {expanded && (
  <div className="mt-4">
- <p className="text-muted mb-4 text-sm">
+ <p className="text-stone-500 mb-4 text-sm">
  Public models from all group members — a shared catalog of the group&apos;s collection.
  </p>
 
  {loading ? (
- <p className="text-muted">Loading registry…</p>
+ <p className="text-stone-500">Loading registry…</p>
  ) : entries.length === 0 ? (
- <p className="text-muted">No public models from group members yet.</p>
+ <p className="text-stone-500">No public models from group members yet.</p>
  ) : (
  <>
  <Input
@@ -77,7 +77,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  {Array.from(byOwner.entries()).map(([ownerAlias, horses]) => (
  <div
  key={ownerAlias}
- className="bg-surface-secondary border-edge hover:border-forest rounded-lg border p-6 transition-all hover:-translate-y-0.5"
+ className="bg-surface-secondary border-stone-200 hover:border-emerald-700 rounded-lg border p-6 transition-all hover:-translate-y-0.5"
  >
  <div className="mb-2 flex items-center gap-2">
  <Link
@@ -86,7 +86,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  >
  @{ownerAlias}
  </Link>
- <span className="text-ink-light text-xs">
+ <span className="text-stone-600 text-xs">
  {horses.length} model{horses.length !== 1 ?"s" :""}
  </span>
  </div>
@@ -95,16 +95,16 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  <Link
  key={h.horseId}
  href={`/community/${h.horseId}`}
- className="border-edge text-ink hover:text-forest flex items-center gap-2 border-b py-1.5 text-sm no-underline last:border-b-0"
+ className="border-stone-200 text-stone-900 hover:text-forest flex items-center gap-2 border-b py-1.5 text-sm no-underline last:border-b-0"
  >
  <span>🐴 {h.horseName}</span>
- <span className="text-ink-light ml-auto text-xs">
+ <span className="text-stone-600 ml-auto text-xs">
  {h.finishType}
  </span>
  </Link>
  ))}
  {horses.length > 8 && (
- <p className="text-ink-light mt-[4] text-xs">+{horses.length - 8} more</p>
+ <p className="text-stone-600 mt-[4] text-xs">+{horses.length - 8} more</p>
  )}
  </div>
  </div>

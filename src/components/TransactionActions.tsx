@@ -32,14 +32,14 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
  if (status ==="completed") {
  return (
  <div
- className="mt-4 rounded-lg border border-[rgba(34,197,94,0.2)] bg-[rgba(34,197,94,0.06)] px-6 py-4"
+ className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50/60 px-6 py-4"
  id="transaction-status"
  >
  <span className="text-sm font-semibold text-[#22C55E]">
  ✅ Transaction Complete
  </span>
  {!hasRating && (
- <span className="text-muted mt-2 block text-sm">
+ <span className="text-stone-500 mt-2 block text-sm">
  Leave a rating below to close the loop! ⬇️
  </span>
  )}
@@ -49,20 +49,20 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
 
  return (
  <div
- className="bg-card border border-edge mt-4 rounded-lg border px-6 py-4 shadow-md"
+ className="bg-white border border-stone-200 mt-4 rounded-lg border px-6 py-4 shadow-md"
  id="transaction-status"
  >
  <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
- <span className="text-muted text-sm">Transaction is open</span>
+ <span className="text-stone-500 text-sm">Transaction is open</span>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleComplete}
  disabled={saving}
  >
  {saving ?"Completing…" :"✅ Mark as Complete"}
  </button>
  </div>
- {error && <div className="mt-2 text-sm text-danger mt-2">{error}</div>}
+ {error && <div className="mt-2 text-sm text-red-700 mt-2">{error}</div>}
  </div>
  );
 }

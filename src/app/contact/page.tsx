@@ -47,7 +47,7 @@ export default function ContactPage() {
    >
    {state.error && (
     <div
-    className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+    className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
     role="alert"
     id="contact-error"
     >
@@ -69,7 +69,7 @@ export default function ContactPage() {
    )}
 
    <div className="mb-6">
-    <label htmlFor="contact-name" className="text-ink mb-1 block text-sm font-semibold">
+    <label htmlFor="contact-name" className="text-stone-900 mb-1 block text-sm font-semibold">
     Your Name
     </label>
     <Input
@@ -84,7 +84,7 @@ export default function ContactPage() {
    </div>
 
    <div className="mb-6">
-    <label htmlFor="contact-email" className="text-ink mb-1 block text-sm font-semibold">
+    <label htmlFor="contact-email" className="text-stone-900 mb-1 block text-sm font-semibold">
     Email Address
     </label>
     <Input
@@ -98,8 +98,8 @@ export default function ContactPage() {
    </div>
 
    <div className="mb-6">
-    <label htmlFor="contact-subject" className="text-ink mb-1 block text-sm font-semibold">
-    Subject <span className="text-muted font-normal">(optional)</span>
+    <label htmlFor="contact-subject" className="text-stone-900 mb-1 block text-sm font-semibold">
+    Subject <span className="text-stone-500 font-normal">(optional)</span>
     </label>
     <Input
     id="contact-subject"
@@ -110,7 +110,7 @@ export default function ContactPage() {
    </div>
 
    <div className="mb-6">
-    <label htmlFor="contact-message" className="text-ink mb-1 block text-sm font-semibold">
+    <label htmlFor="contact-message" className="text-stone-900 mb-1 block text-sm font-semibold">
     Message
     </label>
     <Textarea
@@ -126,7 +126,7 @@ export default function ContactPage() {
 
    <button
     type="submit"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
     id="contact-submit"
     disabled={isPending}
    >

@@ -68,6 +68,12 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 ## ✅ V40: Monetization Sprint — Stripe integration, freemium tier, upgrade page, Stablemaster AI, Blue Book PRO, Photo Suite+ — DONE
 ## ✅ UI Overhaul Part 1 — shadcn/ui + Framer Motion installed, all form-input/form-select replaced with shadcn primitives (48 files), globals.css cleaned — DONE
 ## ✅ UI Overhaul Part 2 — 12 createPortal modals migrated to shadcn Dialog, PhotoLightbox retained as exception — DONE
+## ✅ UI Overhaul Part 3 — Tactile grids (Polaroid cards), Framer Motion stagger animations, badge color overhaul — DONE
+## ✅ UI Overhaul Part 4 — DOM Flattening ("Quiet Luxury") — nested boxes eliminated, color palette standardized, tables cleaned — DONE
+## ✅ Layout Unification Part 1 — Design system docs created, 4 layout archetype components built (Explorer, Scrapbook, CommandCenter, Focus) — DONE
+## ✅ Layout Unification Part 2 — 55+ pages migrated to layout archetypes, only root landing page + chat excluded (intentional) — DONE
+## ✅ Cozy Scrapbook Token Migration — 143+ legacy RGBA/semantic tokens purged across 80+ files, 4 batch regex passes, all `bg-card`/`border-edge`/`text-ink`/`text-muted` replaced with `stone` palette — DONE (2026-03-28)
+## ✅ Bug Tracker Sprint — Financial Vault navigation (step dots clickable), CSV export filename fix, contrast regression, live/photo show entry differentiation, ShowEntryForm garbled classNames — DONE (2026-03-28)
 
 ---
 
@@ -77,27 +83,11 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
-## Task C-1: UI Overhaul Part 3 — Tactile Grids & Micro-Interactions
+## Task C-1: Warm Parchment Aesthetic Restoration
 
-**Workflow:** `.agents/workflows/ui-overhaul-3-grids-animations.md`
-**Status:** In progress (Framer Motion stagger in StableGrid/ShowRingGrid/HoofprintTimeline done, FavoriteButton/WishlistButton bounce done, EmptyState component created)
-**Remaining:** Badge color overhaul, LikeToggle bounce, skeleton cards with shadcn, legacy CSS cleanup
-
----
-
-## ✅ Task C-2: Layout Unification Part 1 — Design System & Archetypes — DONE (2026-03-27)
-
-**Workflow:** `.agents/workflows/layout-unification-1-archetypes.md`
-**Status:** ✅ Complete — Design system docs created, 4 layout archetype components built
-
----
-
-## ✅ Task C-3: Layout Unification Part 2 — The Great Alignment — DONE (2026-03-27)
-
-**Workflow:** `.agents/workflows/layout-unification-2-alignment.md`
-**Status:** ✅ Complete — 55+ pages migrated to layout archetypes, only root landing page excluded. Build passes, 245 tests green.
-
----
+**Workflow:** `.agents/workflows/warm-parchment-restoration.md`
+**Status:** Not started
+**Scope:** Restore warm parchment color tokens, shadows, typography, header/footer styling. Pure color/font changes — no DOM restructuring.
 
 # 🟡 Priority: Medium
 

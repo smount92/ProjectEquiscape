@@ -160,7 +160,7 @@ export default function FaqPage() {
  <h1>
  Frequently Asked <span className="text-forest">Questions</span>
  </h1>
- <p className="mt-2 text-lg text-ink-light">
+ <p className="mt-2 text-lg text-stone-600">
  Everything you need to know about Model Horse Hub. Can&apos;t find your answer?{" "}
  <Link href="/contact">Contact us</Link>.
  </p>
@@ -171,7 +171,7 @@ export default function FaqPage() {
  {categories.map((cat) => (
  <button
  key={cat}
- className={`border-edge cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat ?"bg-forest !border-forest text-white" :"text-muted hover:text-ink hover:border-forest bg-[var(--color-bg-input)]"}`}
+ className={`border-stone-200 cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat ?"bg-forest !border-forest text-white" :"text-stone-500 hover:text-stone-900 hover:border-emerald-700 bg-white"}`}
  onClick={() => {
  setActiveCategory(cat);
  setOpenIndex(null);
@@ -189,17 +189,17 @@ export default function FaqPage() {
  return (
  <div
  key={`${item.category}-${idx}`}
- className={`overflow-hidden rounded-lg border transition-colors ${isOpen ?"border-[rgba(44,85,69,0.3)]" :"border-edge"}`}
+ className={`overflow-hidden rounded-lg border transition-colors ${isOpen ?"border-forest/30" :"border-stone-200"}`}
  >
  <button
- className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-card px-6 py-5 text-left text-base font-semibold text-ink transition-colors hover:bg-[var(--color-bg-card-hover)]"
+ className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-white px-6 py-5 text-left text-base font-semibold text-stone-900 transition-colors hover:bg-[var(--color-bg-white-hover)]"
  onClick={() => toggle(idx)}
  aria-expanded={isOpen}
  id={`faq-q-${idx}`}
  >
  <span>{item.q}</span>
  <svg
- className={`shrink-0 transition-transform ${isOpen ?"text-forest rotate-180" :"text-muted"}`}
+ className={`shrink-0 transition-transform ${isOpen ?"text-forest rotate-180" :"text-stone-500"}`}
  width="20"
  height="20"
  viewBox="0 0 24 24"
@@ -215,7 +215,7 @@ export default function FaqPage() {
  </button>
  {isOpen && (
  <div
- className="animate-fade-in-up rounded-lg bg-card px-6 pb-5 text-base leading-[1.8] text-ink-light"
+ className="animate-fade-in-up rounded-lg bg-white px-6 pb-5 text-base leading-[1.8] text-stone-600"
  id={`faq-a-${idx}`}
  >
  <p>{item.a}</p>
@@ -227,11 +227,11 @@ export default function FaqPage() {
  </div>
 
  {/* CTA */}
- <div className="bg-card border-edge mt-12 rounded-lg border text-center">
+ <div className="bg-white border-stone-200 mt-12 rounded-lg border text-center">
  <p>Still have questions?</p>
  <Link
  href="/contact"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  id="faq-cta-contact"
  >
  Contact Us

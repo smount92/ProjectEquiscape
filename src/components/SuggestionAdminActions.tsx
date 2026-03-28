@@ -57,14 +57,14 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
  {!showRejectForm ? (
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleApprove}
  disabled={isPending}
  >
  {isPending ?"Applying…" :"✅ Approve"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setShowRejectForm(true)}
  disabled={isPending}
  >
@@ -82,14 +82,14 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
  />
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={handleReject}
  disabled={isPending || !notes.trim()}
  >
  {isPending ?"Rejecting…" :"Confirm Reject"}
  </button>
  <button
- className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowRejectForm(false)}
  >
  Cancel
@@ -102,7 +102,7 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
  {!showRejectForm && (
  <input
  type="text"
- className="input bg-[rgba(255,193,7,0.05)] rounded-r-md my-3-input border-l-[3px] border-[#f9a825] px-4 py-2"
+ className="input bg-yellow-50/50 rounded-r-md my-3-input border-l-[3px] border-[#f9a825] px-4 py-2"
  placeholder="Optional admin notes…"
  value={notes}
  onChange={(e) => setNotes(e.target.value)}

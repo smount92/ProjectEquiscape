@@ -44,12 +44,12 @@ export default function CookieConsent() {
 
  return (
  <div
- className="border-edge animate-fade-in-up fixed right-0 bottom-0 left-0 z-[9999] border-t bg-[rgba(10,10,18,0.92)] px-8 py-4 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]"
+ className="border-stone-200 animate-fade-in-up fixed right-0 bottom-0 left-0 z-[9999] border-t bg-black/90 px-8 py-4 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]"
  role="dialog"
  aria-label="Cookie consent"
  >
  <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-between gap-8 max-md:flex-col max-md:gap-4 max-md:text-center">
- <div className="[&_p]:text-ink-light [&_p:first-child]:text-ink [&_a]:text-forest min-w-0 flex-1 [&_p]:m-0 [&_p]:text-sm [&_p]:leading-relaxed [&_p:first-child]:mb-1">
+ <div className="[&_p]:text-stone-600 [&_p:first-child]:text-stone-900 [&_a]:text-forest min-w-0 flex-1 [&_p]:m-0 [&_p]:text-sm [&_p]:leading-relaxed [&_p:first-child]:mb-1">
  <p>
  <strong>🍪 Cookies &amp; Privacy</strong>
  </p>
@@ -61,14 +61,14 @@ export default function CookieConsent() {
  </div>
  <div className="flex shrink-0 gap-2 max-md:w-full max-md:justify-center">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleAccept}
  id="cookie-accept"
  >
  Accept
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleDecline}
  id="cookie-decline"
  >

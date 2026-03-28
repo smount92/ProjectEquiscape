@@ -24,9 +24,9 @@ export default async function ChangelogPage() {
   title={<>📋 <span className="text-forest">Catalog Changelog</span></>}
   description={`Community-approved updates to the reference catalog. ${count ?? 0} total changes.`}
  >
-  <nav className="text-muted mb-6 flex items-center gap-1 text-sm">
+  <nav className="text-stone-500 mb-6 flex items-center gap-1 text-sm">
   <Link href="/catalog">📚 Reference Catalog</Link>
-  <span className="text-muted">›</span>
+  <span className="text-stone-500">›</span>
   <span>Changelog</span>
   </nav>
 
@@ -35,7 +35,7 @@ export default async function ChangelogPage() {
    const timeAgo = getTimeAgo(entry.created_at);
 
    return (
-   <div key={entry.id} className="border-edge flex gap-4 border-b px-0 py-4">
+   <div key={entry.id} className="border-stone-200 flex gap-4 border-b px-0 py-4">
     <span className="min-w-[28px] text-[1.3rem]">
     {entry.change_type ==="correction"
     ?"🔧"
@@ -46,7 +46,7 @@ export default async function ChangelogPage() {
     :"🗑"}
     </span>
     <div className="space-y-4">
-    <p className="mb-[4px] text-sm font-medium">
+    <p className="mb-[4px] text-sm font-medium text-stone-900">
      {entry.change_summary}
     </p>
     <p className="text-forest">
@@ -62,7 +62,7 @@ export default async function ChangelogPage() {
      {entry.catalog_item_id && (
      <>
       {" ·"}
-      <Link href={`/catalog/${entry.catalog_item_id}`}>View entry →</Link>
+      <Link href={`/catalog/${entry.catalog_item_id}`} className="font-semibold text-stone-600 hover:text-stone-900">View entry →</Link>
      </>
      )}
     </p>
@@ -72,7 +72,7 @@ export default async function ChangelogPage() {
   })}
 
   {(entries ?? []).length === 0 && (
-   <div className="bg-card border-edge text-muted rounded-lg border p-8 text-center shadow-md transition-all">
+   <div className="bg-white border-stone-200 text-stone-500 rounded-lg border p-8 text-center shadow-md transition-all">
    <p>No changes yet. The catalog awaits your contributions!</p>
    <Link
     href="/catalog"

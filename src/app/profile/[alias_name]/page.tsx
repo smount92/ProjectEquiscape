@@ -250,7 +250,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  >
  {/* Profile Header */}
  <div className="profile-hero animate-fade-in-up max-md:flex-col max-md:items-center max-md:text-center max-sm:flex-col max-sm:px-4 max-sm:py-8 max-sm:text-center">
- <div className="bg-[rgba(44,85,69,0.12)] border-[rgba(44,85,69,0.3)] text-forest flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full border-[2px]">
+ <div className="bg-emerald-50 border-emerald-200 text-forest flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full border-[2px]">
  {profileUser.avatar_url ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
@@ -286,13 +286,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </span>
  )}
  </h1>
- <p className="mb-2 text-sm leading-normal text-[var(--color-text-secondary)]">
+ <p className="mb-2 text-sm leading-normal text-stone-500">
  {isOwnProfile
  ?"Your public stable — this is how other collectors see your models."
  : `@${profileUser.alias_name}'s public collection`}
  </p>
  {profileUser.bio && (
- <p className="mt-2 max-w-[480px] text-sm leading-relaxed text-ink-light">
+ <p className="mt-2 max-w-[480px] text-sm leading-relaxed text-stone-600">
  {profileUser.bio}
  </p>
  )}
@@ -300,16 +300,16 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {studioSlug && (
  <Link
  href={`/studio/${studioSlug}`}
- className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  🎨 {isOwnProfile ?"My Studio" : `Visit ${studioName ||"Studio"}`}
  </Link>
  )}
  <div className="flex flex-wrap gap-6">
- <span className="text-sm text-[var(--color-text-secondary)]">
+ <span className="text-sm text-stone-500">
  🐴 {profileCards.length} public model{profileCards.length !== 1 ?"s" :""}
  </span>
- <span className="text-sm text-[var(--color-text-secondary)]">
+ <span className="text-sm text-stone-500">
  📅 Member since {memberSince}
  </span>
  <ShareButton
@@ -321,12 +321,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
  )}
  {(completedTxCount ?? 0) > 0 && (
- <span className="text-sm text-[#22C55E] text-[var(--color-text-secondary)]">
+ <span className="text-sm text-[#22C55E] text-stone-500">
  ✅ {completedTxCount} transaction{completedTxCount !== 1 ?"s" :""} completed
  </span>
  )}
  {forSaleCount > 0 && (
- <span className="text-[var(--color-accent, #f59e0b)] text-sm text-[var(--color-text-secondary)]">
+ <span className="text-amber-500 text-sm text-stone-500">
  💲 {forSaleCount} for sale/trade
  </span>
  )}
@@ -338,7 +338,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  isOwnProfile={isOwnProfile}
  />
  {(followStats.followerCount > 0 || followStats.followingCount > 0) && (
- <div className="mt-1 flex items-center gap-2 text-sm text-ink-light">
+ <div className="mt-1 flex items-center gap-2 text-sm text-stone-600">
  <span>
  {followStats.followerCount} follower{followStats.followerCount !== 1 ?"s" :""}
  </span>
@@ -362,7 +362,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Public Collections */}
  {publicCollections && publicCollections.length > 0 && (
  <div className="animate-fade-in-up mb-6">
- <h3 className="mb-2 text-sm text-ink-light">📁 Public Collections</h3>
+ <h3 className="mb-2 text-sm text-stone-600">📁 Public Collections</h3>
  <div className="flex flex-wrap gap-2">
   {publicCollections.map((col) => (
  <Link
@@ -380,7 +380,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Trophy Case — only if user hasn't hidden badges (owner always sees their own) */}
  {userBadges.length > 0 && (isOwnProfile || (profileUser.show_badges ?? true)) && (
  <div className="animate-fade-in-up mb-6" id="trophies">
- <h3 className="mb-2 text-sm text-ink-light">🏆 Trophy Case</h3>
+ <h3 className="mb-2 text-sm text-stone-600">🏆 Trophy Case</h3>
  <TrophyCase badges={userBadges} />
  </div>
  )}
@@ -399,7 +399,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
  {/* Breadcrumb */}
  <nav
- className="text-muted animate-fade-in-up mb-8 flex items-center gap-2 text-sm"
+ className="text-stone-500 animate-fade-in-up mb-8 flex items-center gap-2 text-sm"
  aria-label="Breadcrumb"
  >
  <Link href="/community">Show Ring</Link>
@@ -411,7 +411,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
  {/* Grid */}
  {profileCards.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🔒</div>
  <h2>
  {isOwnProfile
@@ -426,7 +426,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {isOwnProfile && (
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  >
  🏠 Go to My Stable
  </Link>
@@ -438,7 +438,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <Link
  key={horse.id}
  href={`/community/${horse.id}`}
- className="border-edge text-ink flex flex-col overflow-hidden rounded-lg border bg-[var(--color-bg-secondary)] no-underline transition-all"
+ className="border-stone-200 text-stone-900 flex flex-col overflow-hidden rounded-lg border bg-stone-50 no-underline transition-all"
  id={`profile-card-${horse.id}`}
  >
  <div className="relative">
@@ -448,7 +448,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  ) : (
  <div className="flex flex-col items-center justify-center bg-stone-100 px-4 py-8">
  <span className="text-4xl">🐴</span>
- <span className="mt-1 text-sm text-muted">No photo</span>
+ <span className="mt-1 text-sm text-stone-500">No photo</span>
  </div>
  )}
  <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
@@ -472,29 +472,29 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  )}
  </div>
  <div className="p-4">
- <div className="text-sm font-semibold text-ink">
+ <div className="text-sm font-semibold text-stone-900">
  {horse.customName}
  </div>
- <div className="mt-0.5 text-xs text-ink-light">
+ <div className="mt-0.5 text-xs text-stone-600">
  {horse.refName}
  </div>
  {horse.releaseLine && (
- <div className="mt-0.5 text-xs text-muted">
+ <div className="mt-0.5 text-xs text-stone-500">
  🎨 {horse.releaseLine}
  </div>
  )}
- <div className="mt-2 flex items-center justify-between text-xs text-muted">
+ <div className="mt-2 flex items-center justify-between text-xs text-stone-500">
  <span>{horse.conditionGrade}</span>
  <span>{formatDate(horse.createdAt)}</span>
  </div>
  {horse.collectionName && (
- <div className="mt-2 text-xs text-ink-light">
+ <div className="mt-2 text-xs text-stone-600">
  📁 {horse.collectionName}
  </div>
  )}
  {(horse.tradeStatus ==="For Sale" || horse.tradeStatus ==="Open to Offers") &&
  horse.marketplaceNotes && (
- <div className="mt-1 truncate text-xs text-muted" title={horse.marketplaceNotes}>
+ <div className="mt-1 truncate text-xs text-stone-500" title={horse.marketplaceNotes}>
  📝{""}
  {horse.marketplaceNotes.length > 50
  ? horse.marketplaceNotes.slice(0, 50) +"…"
@@ -522,20 +522,20 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Reviews Section */}
  {ratingSummary.count > 0 && (
  <div
- className="bg-card border border-edge animate-fade-in-up mt-8 rounded-lg border p-6 shadow-md"
+ className="bg-white border border-stone-200 animate-fade-in-up mt-8 rounded-lg border p-6 shadow-md"
  id="reviews"
  >
  <div className="mb-6 flex items-center gap-2">
  <h2 className="m-0 text-lg">⭐ Reviews ({ratingSummary.count})</h2>
  </div>
  {ratingSummary.ratings.map((r) => (
- <div key={r.id} className="border-edge border-b py-4 last:border-b-0">
+ <div key={r.id} className="border-stone-200 border-b py-4 last:border-b-0">
  <div className="mb-1 flex items-center justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
- <span className="text-sm text-ink-light">
+ <span className="text-sm text-stone-600">
  @{r.reviewerAlias} — {"★".repeat(r.stars)}
  {"☆".repeat(5 - r.stars)}
  </span>
- <span className="text-xs text-muted">
+ <span className="text-xs text-stone-500">
  {new Date(r.createdAt).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
@@ -544,7 +544,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </span>
  </div>
  {r.reviewText && (
- <p className="mt-1 text-sm italic text-ink-light">
+ <p className="mt-1 text-sm italic text-stone-600">
  &ldquo;{r.reviewText}&rdquo;
  </p>
  )}

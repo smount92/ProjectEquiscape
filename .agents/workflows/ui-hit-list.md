@@ -5,159 +5,158 @@
 ## 🚨 Phase 1: Pages Missing Layout Archetypes
 *These pages need their custom containers removed and wrapped in one of the 4 layout components.*
 
-- [ ] **src\app\auth\auth-code-error\page.tsx**
-- [ ] **src\app\inbox\[id]\page.tsx**
-- [ ] **src\app\page.tsx**
+- [x] **src\app\auth\auth-code-error\page.tsx**
+- [x] **src\app\inbox\[id]\page.tsx**
+- [x] **src\app\page.tsx**
 
 ## 🧹 Phase 2: Component CSS Violations
 *These files contain legacy inline styles, raw HTML tables, or banned legacy classes.* 
 
-- [ ] **src/app/about/page.tsx**: **11x** Legacy "border-edge" class, **10x** Legacy "bg-card" class
-- [ ] **src/app/add-horse/page.tsx**: **7x** Legacy RGBA Backgrounds, **4x** Legacy RGBA Borders, **15x** Legacy "border-edge" class, **5x** Legacy "bg-card" class, **6x** Inline Layout Styles
-- [ ] **src/app/add-horse/quick/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **10x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, **3x** Inline Layout Styles
-- [ ] **src/app/admin/page.tsx**: **1x** Legacy RGBA Backgrounds, **4x** Legacy "border-edge" class, **3x** Legacy "bg-glass" class
-- [ ] **src/app/auth/auth-code-error/page.tsx**: **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Inline Layout Styles
-- [ ] **src/app/auth/reset-password/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **3x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
-- [ ] **src/app/catalog/changelog/page.tsx**: **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/catalog/page.tsx**: **4x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/catalog/suggestions/new/page.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/catalog/suggestions/page.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/catalog/suggestions/[id]/page.tsx**: **1x** Legacy RGBA Backgrounds, **4x** Legacy "border-edge" class, **1x** Legacy "bg-glass" class, **3x** Legacy "bg-card" class, Raw HTML <table> used instead of shadcn
-- [ ] **src/app/catalog/[id]/page.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-glass" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/claim/page.tsx**: **5x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, **10x** Inline Layout Styles
-- [ ] **src/app/community/events/create/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/community/events/[id]/manage/page.tsx**: **4x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **25x** Legacy "border-edge" class, **2x** Legacy "bg-glass" class, **9x** Legacy "bg-card" class, **1x** Inline Layout Styles
-- [ ] **src/app/community/events/[id]/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **8x** Legacy "border-edge" class, **6x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
-- [ ] **src/app/community/groups/create/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/community/groups/[slug]/page.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
-- [ ] **src/app/community/help-id/page.tsx**: **1x** Legacy RGBA Backgrounds, **4x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
-- [ ] **src/app/community/help-id/[id]/page.tsx**: **1x** Legacy RGBA Backgrounds, **3x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/community/[id]/hoofprint/page.tsx**: **1x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/community/[id]/page.tsx**: **5x** Legacy RGBA Backgrounds, **22x** Legacy RGBA Borders, **7x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/contact/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
-- [ ] **src/app/dashboard/page.tsx**: **3x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **15x** Legacy "border-edge" class, **6x** Legacy "bg-card" class
-- [ ] **src/app/error.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
-- [ ] **src/app/faq/page.tsx**: **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
-- [ ] **src/app/feed/[id]/page.tsx**: **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
-- [ ] **src/app/forgot-password/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/getting-started/page.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/inbox/page.tsx**: **5x** Legacy RGBA Backgrounds, **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/inbox/[id]/page.tsx**: **4x** Legacy RGBA Backgrounds, **8x** Legacy "border-edge" class, **4x** Legacy "bg-glass" class, **2x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
-- [ ] **src/app/loading.tsx**: **6x** Legacy "border-edge" class, **6x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
-- [ ] **src/app/login/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/market/page.tsx**: **14x** Legacy "border-edge" class, **8x** Legacy "bg-card" class
-- [ ] **src/app/not-found.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
-- [ ] **src/app/page.tsx**: **20x** Legacy RGBA Backgrounds, **25x** Legacy RGBA Borders, **22x** Legacy "border-edge" class, **18x** Legacy "bg-card" class, **4x** Legacy Max-Width Container
-- [ ] **src/app/profile/[alias_name]/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/settings/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **13x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/shows/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **7x** Legacy "border-edge" class, **7x** Legacy "bg-card" class
-- [ ] **src/app/shows/planner/page.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/app/shows/[id]/page.tsx**: **1x** Legacy "border-edge" class, **1x** Inline Layout Styles
-- [ ] **src/app/signup/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **8x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/stable/collection/[id]/page.tsx**: **3x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **5x** Legacy "bg-card" class
-- [ ] **src/app/stable/import/page.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/app/stable/[id]/edit/page.tsx**: **12x** Legacy RGBA Backgrounds, **7x** Legacy RGBA Borders, **25x** Legacy "border-edge" class, **14x** Legacy "bg-card" class
-- [ ] **src/app/stable/[id]/page.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **1x** Legacy "border-edge" class
-- [ ] **src/app/studio/commission/[id]/page.tsx**: **3x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/studio/dashboard/page.tsx**: **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class
-- [ ] **src/app/studio/my-commissions/page.tsx**: **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/studio/setup/page.tsx**: **7x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/app/studio/[slug]/page.tsx**: **4x** Legacy RGBA Backgrounds, **4x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, **10x** Inline Layout Styles
-- [ ] **src/app/studio/[slug]/request/page.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/app/upgrade/page.tsx**: **4x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
-- [ ] **src/app/wishlist/page.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/ActivityFeed.tsx**: **4x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/AdminReplyForm.tsx**: **4x** Legacy RGBA Backgrounds, **3x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
-- [ ] **src/components/AdminShowManager.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/AdminSuggestionsPanel.tsx**: **12x** Legacy "border-edge" class, **9x** Legacy "bg-glass" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/AdminTabs.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **9x** Legacy "border-edge" class, **3x** Legacy "bg-glass" class, **5x** Legacy "bg-card" class
-- [ ] **src/components/ArtistBrowser.tsx**: **5x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
-- [ ] **src/components/AssignPlacings.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/BackToTop.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/BlockButton.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/CatalogBrowser.tsx**: **14x** Legacy "border-edge" class, Raw HTML <table> used instead of shadcn
-- [ ] **src/components/ChatThread.tsx**: **1x** Legacy RGBA Backgrounds, **3x** Legacy RGBA Borders, **5x** Legacy "border-edge" class
-- [ ] **src/components/CloseShowButton.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders
-- [ ] **src/components/CollectionManager.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class
-- [ ] **src/components/CollectionPicker.tsx**: **1x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class
-- [ ] **src/components/CommissionBoard.tsx**: **1x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/CommissionRequestForm.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/CommissionTimeline.tsx**: **2x** Legacy RGBA Backgrounds, **3x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **5x** Legacy "bg-card" class
-- [ ] **src/components/CookieConsent.tsx**: **1x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class, **1x** Legacy Max-Width Container
-- [ ] **src/components/CreateShowForm.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
-- [ ] **src/components/CsvImport.tsx**: **4x** Legacy RGBA Backgrounds, **4x** Legacy RGBA Borders, **15x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, Raw HTML <table> used instead of shadcn
-- [ ] **src/components/DashboardShell.tsx**: **10x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/DashboardToast.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
-- [ ] **src/components/DeleteHorseModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class
-- [ ] **src/components/DiscoverGrid.tsx**: **1x** Legacy RGBA Backgrounds, **5x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
-- [ ] **src/components/EditBioButton.tsx**: **2x** Legacy "border-edge" class
-- [ ] **src/components/EventBrowser.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **10x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/EventDeleteButton.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/EventPhotoGallery.tsx**: **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/EventRsvpButton.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/ExpertJudgingPanel.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/ExportButton.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/FeaturedHorseCard.tsx**: **2x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/FeatureHorseForm.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
-- [ ] **src/components/FollowButton.tsx**: **2x** Legacy RGBA Borders
-- [ ] **src/components/Footer.tsx**: **2x** Legacy Max-Width Container
-- [ ] **src/components/GroupAdminPanel.tsx**: **4x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/GroupBrowser.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
-- [ ] **src/components/GroupDetailClient.tsx**: **5x** Legacy RGBA Backgrounds, **5x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
-- [ ] **src/components/GroupFiles.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/GroupRegistry.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/GuestLinkButton.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/Header.tsx**: **1x** Legacy RGBA Backgrounds, **11x** Legacy "border-edge" class, **4x** Legacy "bg-glass" class
-- [ ] **src/components/HelpIdDetailClient.tsx**: **1x** Legacy RGBA Backgrounds, **5x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/HelpIdRequestForm.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
-- [ ] **src/components/HoofprintTimeline.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/ImageCropModal.tsx**: **6x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/InsuranceReportButton.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/LinkHorseToCommission.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/LoadMoreFeed.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/MakeOfferModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class
-- [ ] **src/components/MarketFilters.tsx**: **4x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
-- [ ] **src/components/MarketValueBadge.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy "border-edge" class, **1x** Legacy "bg-glass" class
-- [ ] **src/components/MarkReadButton.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/MatchmakerMatches.tsx**: **2x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **1x** Legacy "border-edge" class
-- [ ] **src/components/MessageSellerButton.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
-- [ ] **src/components/MessageUserButton.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
-- [ ] **src/components/NotificationList.tsx**: **1x** Legacy RGBA Backgrounds, **5x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/OfferCard.tsx**: **4x** Legacy RGBA Backgrounds, **3x** Legacy RGBA Borders, **5x** Legacy "border-edge" class
-- [ ] **src/components/ParkedExportPanel.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/PassportGallery.tsx**: **3x** Legacy RGBA Backgrounds
-- [ ] **src/components/PedigreeCard.tsx**: **1x** Legacy RGBA Backgrounds, **7x** Legacy "border-edge" class, **2x** Legacy "bg-glass" class, **5x** Legacy "bg-card" class
-- [ ] **src/components/PhotoLightbox.tsx**: **3x** Legacy RGBA Backgrounds
-- [ ] **src/components/RatingBadge.tsx**: **1x** Legacy RGBA Borders
-- [ ] **src/components/RatingForm.tsx**: **3x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
-- [ ] **src/components/ReportActions.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/ReportButton.tsx**: **4x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/RichEmbed.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/components/SearchBar.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/ShowEntryForm.tsx**: **4x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **9x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/ShowHistoryWidget.tsx**: **1x** Legacy RGBA Backgrounds
-- [ ] **src/components/ShowRecordForm.tsx**: **7x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
-- [ ] **src/components/ShowRecordTimeline.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/ShowRingFilters.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
-- [ ] **src/components/ShowRingGrid.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/ShowStringManager.tsx**: **5x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **13x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, Raw HTML <table> used instead of shadcn
-- [ ] **src/components/StableGrid.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/StableLedger.tsx**: **6x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, Raw HTML <table> used instead of shadcn
-- [ ] **src/components/SuggestEditModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **1x** Legacy "border-edge" class
-- [ ] **src/components/SuggestionAdminActions.tsx**: **1x** Legacy RGBA Backgrounds, **3x** Legacy "border-edge" class
-- [ ] **src/components/SuggestionCommentThread.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **10x** Legacy "border-edge" class
-- [ ] **src/components/SuggestNewEntryForm.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
-- [ ] **src/components/SuggestReferenceModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy "border-edge" class
-- [ ] **src/components/TransactionActions.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/TransferHistorySection.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/TransferModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/TrophyCase.tsx**: **1x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class
-- [ ] **src/components/UnifiedReferenceSearch.tsx**: **5x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **9x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/UniversalFeed.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **13x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
-- [ ] **src/components/UserAvatar.tsx**: **1x** Legacy RGBA Backgrounds
-- [ ] **src/components/VaultReveal.tsx**: **2x** Legacy RGBA Borders, **7x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
-- [ ] **src/components/WishlistButton.tsx**: **1x** Legacy RGBA Backgrounds
-- [ ] **src/components/WishlistRemoveButton.tsx**: **1x** Legacy RGBA Backgrounds
-- [ ] **src/components/WishlistSearch.tsx**: **7x** Legacy RGBA Backgrounds, **10x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **1x** Legacy "bg-glass" class
-- [ ] **src/components/WithdrawButton.tsx**: **1x** Legacy "border-edge" class
-- [ ] **src/lib/context/ToastContext.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/app/about/page.tsx**: **11x** Legacy "border-edge" class, **10x** Legacy "bg-card" class
+- [x] **src/app/add-horse/page.tsx**: **7x** Legacy RGBA Backgrounds, **4x** Legacy RGBA Borders, **15x** Legacy "border-edge" class, **5x** Legacy "bg-card" class, **6x** Inline Layout Styles
+- [x] **src/app/add-horse/quick/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **10x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, **3x** Inline Layout Styles
+- [x] **src/app/admin/page.tsx**: **1x** Legacy RGBA Backgrounds, **4x** Legacy "border-edge" class, **3x** Legacy "bg-glass" class
+- [x] **src/app/auth/auth-code-error/page.tsx**: **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Inline Layout Styles
+- [x] **src/app/auth/reset-password/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **3x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
+- [x] **src/app/catalog/changelog/page.tsx**: **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/catalog/page.tsx**: **4x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/app/catalog/suggestions/new/page.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/catalog/suggestions/page.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/app/catalog/suggestions/[id]/page.tsx**: **1x** Legacy RGBA Backgrounds, **4x** Legacy "border-edge" class, **1x** Legacy "bg-glass" class, **3x** Legacy "bg-card" class, Raw HTML <table> used instead of shadcn
+- [x] **src/app/catalog/[id]/page.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-glass" class, **2x** Legacy "bg-card" class
+- [x] **src/app/claim/page.tsx**: **5x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, **10x** Inline Layout Styles
+- [x] **src/app/community/events/create/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/community/events/[id]/manage/page.tsx**: **4x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **25x** Legacy "border-edge" class, **2x** Legacy "bg-glass" class, **9x** Legacy "bg-card" class, **1x** Inline Layout Styles
+- [x] **src/app/community/events/[id]/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **8x** Legacy "border-edge" class, **6x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
+- [x] **src/app/community/groups/create/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/community/groups/[slug]/page.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
+- [x] **src/app/community/help-id/page.tsx**: **1x** Legacy RGBA Backgrounds, **4x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
+- [x] **src/app/community/help-id/[id]/page.tsx**: **1x** Legacy RGBA Backgrounds, **3x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/app/community/[id]/hoofprint/page.tsx**: **1x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/community/[id]/page.tsx**: **5x** Legacy RGBA Backgrounds, **22x** Legacy RGBA Borders, **7x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/contact/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
+- [x] **src/app/dashboard/page.tsx**: **3x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **15x** Legacy "border-edge" class, **6x** Legacy "bg-card" class
+- [x] **src/app/error.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
+- [x] **src/app/faq/page.tsx**: **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
+- [x] **src/app/feed/[id]/page.tsx**: **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
+- [x] **src/app/forgot-password/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/app/getting-started/page.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/inbox/page.tsx**: **5x** Legacy RGBA Backgrounds, **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/inbox/[id]/page.tsx**: **4x** Legacy RGBA Backgrounds, **8x** Legacy "border-edge" class, **4x** Legacy "bg-glass" class, **2x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
+- [x] **src/app/loading.tsx**: **6x** Legacy "border-edge" class, **6x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
+- [x] **src/app/login/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/market/page.tsx**: **14x** Legacy "border-edge" class, **8x** Legacy "bg-card" class
+- [x] **src/app/not-found.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class, **1x** Legacy Max-Width Container
+- [x] **src/app/page.tsx**: **20x** Legacy RGBA Backgrounds, **25x** Legacy RGBA Borders, **22x** Legacy "border-edge" class, **18x** Legacy "bg-card" class, **4x** Legacy Max-Width Container
+- [x] **src/app/profile/[alias_name]/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/app/settings/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **13x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/shows/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **7x** Legacy "border-edge" class, **7x** Legacy "bg-card" class
+- [x] **src/app/shows/planner/page.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/app/shows/[id]/page.tsx**: **1x** Legacy "border-edge" class, **1x** Inline Layout Styles
+- [x] **src/app/signup/page.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **8x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/app/stable/collection/[id]/page.tsx**: **3x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **5x** Legacy "bg-card" class
+- [x] **src/app/stable/import/page.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/app/stable/[id]/edit/page.tsx**: **12x** Legacy RGBA Backgrounds, **7x** Legacy RGBA Borders, **25x** Legacy "border-edge" class, **14x** Legacy "bg-card" class
+- [x] **src/app/stable/[id]/page.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **1x** Legacy "border-edge" class
+- [x] **src/app/studio/commission/[id]/page.tsx**: **3x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/app/studio/dashboard/page.tsx**: **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class
+- [x] **src/app/studio/my-commissions/page.tsx**: **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/studio/setup/page.tsx**: **7x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/app/studio/[slug]/page.tsx**: **4x** Legacy RGBA Backgrounds, **4x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, **10x** Inline Layout Styles
+- [x] **src/app/studio/[slug]/request/page.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/app/upgrade/page.tsx**: **4x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
+- [x] **src/app/wishlist/page.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/ActivityFeed.tsx**: **4x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/AdminReplyForm.tsx**: **4x** Legacy RGBA Backgrounds, **3x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
+- [x] **src/components/AdminShowManager.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/AdminSuggestionsPanel.tsx**: **12x** Legacy "border-edge" class, **9x** Legacy "bg-glass" class, **1x** Legacy "bg-card" class
+- [x] **src/components/AdminTabs.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **9x** Legacy "border-edge" class, **3x** Legacy "bg-glass" class, **5x** Legacy "bg-card" class
+- [x] **src/components/ArtistBrowser.tsx**: **5x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
+- [x] **src/components/AssignPlacings.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/BackToTop.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/BlockButton.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/ChatThread.tsx**: **1x** Legacy RGBA Backgrounds, **3x** Legacy RGBA Borders, **5x** Legacy "border-edge" class
+- [x] **src/components/CloseShowButton.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders
+- [x] **src/components/CollectionManager.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class
+- [x] **src/components/CollectionPicker.tsx**: **1x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class
+- [x] **src/components/CommissionBoard.tsx**: **1x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/CommissionRequestForm.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/CommissionTimeline.tsx**: **2x** Legacy RGBA Backgrounds, **3x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **5x** Legacy "bg-card" class
+- [x] **src/components/CookieConsent.tsx**: **1x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class, **1x** Legacy Max-Width Container
+- [x] **src/components/CreateShowForm.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
+- [x] **src/components/CsvImport.tsx**: **4x** Legacy RGBA Backgrounds, **4x** Legacy RGBA Borders, **15x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, Raw HTML <table> used instead of shadcn
+- [x] **src/components/DashboardShell.tsx**: **10x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/DashboardToast.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
+- [x] **src/components/DeleteHorseModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class
+- [x] **src/components/DiscoverGrid.tsx**: **1x** Legacy RGBA Backgrounds, **5x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
+- [x] **src/components/EditBioButton.tsx**: **2x** Legacy "border-edge" class
+- [x] **src/components/EventBrowser.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **10x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/EventDeleteButton.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/EventPhotoGallery.tsx**: **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/EventRsvpButton.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/ExpertJudgingPanel.tsx**: **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/ExportButton.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/FeaturedHorseCard.tsx**: **2x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/FeatureHorseForm.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
+- [x] **src/components/FollowButton.tsx**: **2x** Legacy RGBA Borders
+- [x] **src/components/Footer.tsx**: **2x** Legacy Max-Width Container
+- [x] **src/components/GroupAdminPanel.tsx**: **4x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/GroupBrowser.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
+- [x] **src/components/GroupDetailClient.tsx**: **5x** Legacy RGBA Backgrounds, **5x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
+- [x] **src/components/GroupFiles.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/GroupRegistry.tsx**: **3x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/GuestLinkButton.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/Header.tsx**: **1x** Legacy RGBA Backgrounds, **11x** Legacy "border-edge" class, **4x** Legacy "bg-glass" class
+- [x] **src/components/HelpIdDetailClient.tsx**: **1x** Legacy RGBA Backgrounds, **5x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/HelpIdRequestForm.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
+- [x] **src/components/HoofprintTimeline.tsx**: **2x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/ImageCropModal.tsx**: **6x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/InsuranceReportButton.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **4x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/LinkHorseToCommission.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/LoadMoreFeed.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/MakeOfferModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **2x** Legacy "border-edge" class
+- [x] **src/components/MarketFilters.tsx**: **4x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
+- [x] **src/components/MarketValueBadge.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy "border-edge" class, **1x** Legacy "bg-glass" class
+- [x] **src/components/MarkReadButton.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/MatchmakerMatches.tsx**: **2x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **1x** Legacy "border-edge" class
+- [x] **src/components/MessageSellerButton.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
+- [x] **src/components/MessageUserButton.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
+- [x] **src/components/NotificationList.tsx**: **1x** Legacy RGBA Backgrounds, **5x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/OfferCard.tsx**: **4x** Legacy RGBA Backgrounds, **3x** Legacy RGBA Borders, **5x** Legacy "border-edge" class
+- [x] **src/components/ParkedExportPanel.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/PassportGallery.tsx**: **3x** Legacy RGBA Backgrounds
+- [x] **src/components/PedigreeCard.tsx**: **1x** Legacy RGBA Backgrounds, **7x** Legacy "border-edge" class, **2x** Legacy "bg-glass" class, **5x** Legacy "bg-card" class
+- [x] **src/components/PhotoLightbox.tsx**: **3x** Legacy RGBA Backgrounds
+- [x] **src/components/RatingBadge.tsx**: **1x** Legacy RGBA Borders
+- [x] **src/components/RatingForm.tsx**: **3x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **3x** Legacy "border-edge" class
+- [x] **src/components/ReportActions.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/ReportButton.tsx**: **4x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/RichEmbed.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/components/ShowEntryForm.tsx**: **4x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **9x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/ShowHistoryWidget.tsx**: **1x** Legacy RGBA Backgrounds
+- [x] **src/components/ShowRecordForm.tsx**: **7x** Legacy "border-edge" class, **4x** Legacy "bg-card" class
+- [x] **src/components/ShowRecordTimeline.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/ShowRingFilters.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders
+- [x] **src/components/ShowRingGrid.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/ShowStringManager.tsx**: **5x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **13x** Legacy "border-edge" class, **4x** Legacy "bg-card" class, Raw HTML <table> used instead of shadcn
+- [x] **src/components/StableGrid.tsx**: **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/SuggestEditModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **1x** Legacy "border-edge" class
+- [x] **src/components/SuggestionAdminActions.tsx**: **1x** Legacy RGBA Backgrounds, **3x** Legacy "border-edge" class
+- [x] **src/components/SuggestionCommentThread.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **10x** Legacy "border-edge" class
+- [x] **src/components/SuggestNewEntryForm.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **6x** Legacy "border-edge" class, **3x** Legacy "bg-card" class
+- [x] **src/components/SuggestReferenceModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy "border-edge" class
+- [x] **src/components/TransactionActions.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/TransferHistorySection.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/TransferModal.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/TrophyCase.tsx**: **1x** Legacy RGBA Backgrounds, **2x** Legacy "border-edge" class
+- [x] **src/components/ui/card.tsx**: **1x** Legacy "bg-card" class
+- [x] **src/components/ui/table.tsx**: Raw HTML <table> used instead of shadcn
+- [x] **src/components/UnifiedReferenceSearch.tsx**: **5x** Legacy RGBA Backgrounds, **2x** Legacy RGBA Borders, **9x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/UniversalFeed.tsx**: **1x** Legacy RGBA Backgrounds, **1x** Legacy RGBA Borders, **13x** Legacy "border-edge" class, **2x** Legacy "bg-card" class
+- [x] **src/components/UserAvatar.tsx**: **1x** Legacy RGBA Backgrounds
+- [x] **src/components/VaultReveal.tsx**: **2x** Legacy RGBA Borders, **7x** Legacy "border-edge" class, **1x** Legacy "bg-card" class
+- [x] **src/components/WishlistButton.tsx**: **1x** Legacy RGBA Backgrounds
+- [x] **src/components/WishlistRemoveButton.tsx**: **1x** Legacy RGBA Backgrounds
+- [x] **src/components/WishlistSearch.tsx**: **7x** Legacy RGBA Backgrounds, **10x** Legacy RGBA Borders, **5x** Legacy "border-edge" class, **1x** Legacy "bg-glass" class
+- [x] **src/components/WithdrawButton.tsx**: **1x** Legacy "border-edge" class
+- [x] **src/lib/context/ToastContext.tsx**: **1x** Legacy "border-edge" class

@@ -73,18 +73,18 @@ export default function SuggestNewEntryForm() {
  <h2 className="mb-2 font-display">
  Suggestion Submitted!
  </h2>
- <p className="text-muted mb-6">
+ <p className="text-stone-500 mb-6">
  Your new entry suggestion is now pending review. The community can vote and discuss it.
  </p>
  <div className="flex justify-center gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => router.push("/catalog/suggestions")}
  >
  View All Suggestions
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setSuccess(false);
  setTitle("");
@@ -102,7 +102,7 @@ export default function SuggestNewEntryForm() {
  <div className="flex flex-col gap-4">
  {/* Title */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-title">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-title">
  Title / Name *
  </label>
  <Input
@@ -117,12 +117,12 @@ export default function SuggestNewEntryForm() {
 
  {/* Item Type */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-type">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-type">
  Entry Type
  </label>
  <select
  id="new-entry-type"
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={itemType}
  onChange={(e) => setItemType(e.target.value)}
  >
@@ -136,12 +136,12 @@ export default function SuggestNewEntryForm() {
 
  {/* Maker */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-maker">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-maker">
  Maker / Manufacturer
  </label>
  <select
  id="new-entry-maker"
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={maker}
  onChange={(e) => setMaker(e.target.value)}
  >
@@ -166,12 +166,12 @@ export default function SuggestNewEntryForm() {
  {/* Two-column row: Scale + Color */}
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-scale">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-scale">
  Scale
  </label>
  <select
  id="new-entry-scale"
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={scale}
  onChange={(e) => setScale(e.target.value)}
  >
@@ -185,7 +185,7 @@ export default function SuggestNewEntryForm() {
  </select>
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-color">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-color">
  Color
  </label>
  <Input
@@ -202,7 +202,7 @@ export default function SuggestNewEntryForm() {
  {/* Two-column row: Mold + Year */}
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-mold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-mold">
  Mold Name
  </label>
  <Input
@@ -215,7 +215,7 @@ export default function SuggestNewEntryForm() {
  />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-year">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-year">
  Year
  </label>
  <Input
@@ -233,12 +233,12 @@ export default function SuggestNewEntryForm() {
 
  {/* Reason */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="new-entry-reason">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-reason">
  Reason / Evidence *
  </label>
  <textarea
  id="new-entry-reason"
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all resize-y"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all resize-y"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
  rows={3}
@@ -246,14 +246,14 @@ export default function SuggestNewEntryForm() {
  placeholder="Explain why this entry should be added. Include sources if available (e.g. 'Listed in the 2019 Breyer dealer catalog, page 12')."
  />
  <span
- className="text-muted mt-[4] block text-right text-xs"
+ className="text-stone-500 mt-[4] block text-right text-xs"
  >
  {reason.length}/2000
  </span>
  </div>
 
  {error && (
- <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {error}
  </p>
  )}
@@ -261,14 +261,14 @@ export default function SuggestNewEntryForm() {
  {/* Actions */}
  <div className="flex justify-end gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => router.back()}
  disabled={isPending}
  >
  Cancel
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSubmit}
  disabled={isPending || !title.trim() || !reason.trim()}
  >

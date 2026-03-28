@@ -98,7 +98,7 @@ export default function SuggestReferenceModal({
 
  {/* Suggestion Type */}
  <div className="mb-6 mt-4">
- <label className="text-ink mb-1 block text-sm font-semibold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">
  What are you suggesting?
  </label>
  <div className="flex flex-col gap-1">
@@ -107,7 +107,7 @@ export default function SuggestReferenceModal({
  key={type.value}
  className={`flex cursor-pointer items-start gap-2 rounded-sm border px-4 py-2 transition-all duration-200 ${
  suggestionType === type.value
- ? "border-[var(--color-accent-primary)] bg-[rgba(61,90,62,0.08)]"
+ ? "border-[var(--color-accent-primary)] bg-emerald-50/80"
  : "border-[var(--color-border)] bg-transparent"
  }`}
  >
@@ -121,7 +121,7 @@ export default function SuggestReferenceModal({
  />
  <div>
  <div className="text-sm font-semibold">{type.label}</div>
- <div className="text-muted text-xs">{type.description}</div>
+ <div className="text-stone-500 text-xs">{type.description}</div>
  </div>
  </label>
  ))}
@@ -130,7 +130,7 @@ export default function SuggestReferenceModal({
 
  {/* Name */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">
  Name <span className="text-[#e74c6f]">*</span>
  </label>
  <Input
@@ -147,7 +147,7 @@ export default function SuggestReferenceModal({
 
  {/* Details */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Additional Details</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Additional Details</label>
  <Textarea
  value={details}
  onChange={(e) => setDetails(e.target.value)}
@@ -162,17 +162,17 @@ export default function SuggestReferenceModal({
  rows={3}
  id="suggest-details"
  />
- <small className="text-muted text-xs">
+ <small className="text-stone-500 text-xs">
  The more detail you provide, the faster we can add it.
  </small>
  </div>
 
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
 
  <div className="flex justify-end gap-2">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleClose}
  disabled={status ==="submitting"}
  >
@@ -180,7 +180,7 @@ export default function SuggestReferenceModal({
  </button>
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={!name.trim() || status ==="submitting"}
  >
  {status ==="submitting" ?"Submitting…" :"📤 Submit Suggestion"}

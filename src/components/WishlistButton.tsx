@@ -36,7 +36,7 @@ export default function WishlistButton({ catalogId }: WishlistButtonProps) {
    className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-none bg-transparent p-0 transition-colors duration-200 ${
     status === "saved"
      ? "text-saddle"
-     : "text-muted hover:text-saddle hover:bg-[rgba(139,90,43,0.08)]"
+     : "text-stone-500 hover:text-saddle hover:bg-amber-50/80"
    }`}
    onClick={handleClick}
    disabled={status === "saving"}

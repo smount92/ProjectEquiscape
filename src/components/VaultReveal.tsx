@@ -44,11 +44,11 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  return (
  <div
- className={`vault-reveal relative overflow-hidden rounded-lg border border-[rgba(240,160,108,0.25)] bg-[var(--color-bg-card)] ${isUnlocked ?"unlocked" :""}`}
+ className={`vault-reveal relative overflow-hidden rounded-lg border border-orange-200 bg-[var(--color-bg-white)] ${isUnlocked ?"unlocked" :""}`}
  >
  <div className="flex items-center gap-4 p-8">
  <div
- className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[rgba(240,160,108,0.25)] bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] text-[1.4rem] transition-all"
+ className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-orange-200 bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] text-[1.4rem] transition-all"
  aria-hidden="true"
  >
  {isUnlocked ?"🔓" :"🔒"}
@@ -62,7 +62,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  </p>
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setIsUnlocked(!isUnlocked)}
  aria-expanded={isUnlocked}
  aria-controls="vault-data"
@@ -108,15 +108,15 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  <div className={`overflow-hidden px-8 transition-all duration-300 ${isUnlocked ? "max-h-[500px] py-4" : "max-h-0 py-0"}`} id="vault-data">
  {!hasData ? (
- <div className="text-muted py-6 text-center text-sm">
+ <div className="text-stone-500 py-6 text-center text-sm">
  <p>📭 No financial data recorded yet. You can add purchase details by editing this horse.</p>
  </div>
  ) : (
  <>
  <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
  {vault.purchase_price !== null && (
- <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="border-stone-200 rounded-md border bg-white p-4">
+ <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Price
  </div>
  <div className="text-success text-base font-bold">
@@ -126,8 +126,8 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  )}
 
  {vault.estimated_current_value !== null && (
- <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="border-stone-200 rounded-md border bg-white p-4">
+ <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Estimated Value
  </div>
  <div className="text-success text-base font-bold">
@@ -137,36 +137,36 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  )}
 
  {vault.purchase_date !== null && (
- <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="border-stone-200 rounded-md border bg-white p-4">
+ <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Date
  </div>
- <div className="text-ink text-base font-bold">
+ <div className="text-stone-900 text-base font-bold">
  {formatDate(vault.purchase_date)}
  </div>
  </div>
  )}
 
  {vault.purchase_date_text && !vault.purchase_date && (
- <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="border-stone-200 rounded-md border bg-white p-4">
+ <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Date
  </div>
- <div className="text-ink text-base font-bold">{vault.purchase_date_text}</div>
+ <div className="text-stone-900 text-base font-bold">{vault.purchase_date_text}</div>
  </div>
  )}
 
  {vault.insurance_notes !== null && (
- <div className="border-edge rounded-md border bg-[var(--color-bg-input)] p-4">
- <div className="text-ink-light mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="border-stone-200 rounded-md border bg-white p-4">
+ <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Insurance Notes
  </div>
- <div className="text-ink text-base font-bold">{vault.insurance_notes}</div>
+ <div className="text-stone-900 text-base font-bold">{vault.insurance_notes}</div>
  </div>
  )}
  </div>
 
- <div className="border-edge text-ink-light mt-4 flex items-center gap-1 border-t pt-4 text-xs">
+ <div className="border-stone-200 text-stone-600 mt-4 flex items-center gap-1 border-t pt-4 text-xs">
  <span>🛡️</span>
  <span>
  This data is encrypted and only visible to you. Protected by Row Level Security.

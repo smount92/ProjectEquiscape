@@ -57,7 +57,7 @@ export default function MarketValueBadge({ catalogId, compact = false }: MarketV
  if (compact) {
  return (
  <span
- className="bg-[rgba(16,185,129,0.1)] inline-flex items-center gap-[4px] rounded-full px-[8px] py-[2px] text-xs font-semibold whitespace-nowrap text-[#10b981]"
+ className="bg-teal-50 inline-flex items-center gap-[4px] rounded-full px-[8px] py-[2px] text-xs font-semibold whitespace-nowrap text-[#10b981]"
  title={`${price.volume} sale${price.volume !== 1 ?"s" :""} — Avg: ${formatCurrency(price.average)}`}
  >
  📈 {formatCurrency(price.lowest)}
@@ -67,15 +67,15 @@ export default function MarketValueBadge({ catalogId, compact = false }: MarketV
  }
 
  return (
- <div className="bg-glass border-edge mt-6 rounded-lg border p-6">
- <h4 className="mb-2 flex items-center gap-1 text-sm font-semibold text-[var(--color-text-secondary)]">
+ <div className="bg-stone-50 border-stone-200 mt-6 rounded-lg border p-6">
+ <h4 className="mb-2 flex items-center gap-1 text-sm font-semibold text-stone-500">
  <span aria-hidden="true">📈</span> Market Value
  </h4>
  <div className="text-forest text-lg font-bold">
  {formatCurrency(price.lowest)}
  {price.lowest !== price.highest ? ` – ${formatCurrency(price.highest)}` :""}
  </div>
- <div className="mt-1 flex flex-wrap gap-4 text-sm text-[var(--color-text-secondary)]">
+ <div className="mt-1 flex flex-wrap gap-4 text-sm text-stone-500">
  <span>Avg: {formatCurrency(price.average)}</span>
  <span>Median: {formatCurrency(price.median)}</span>
  <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-accent-primary-glow)] px-[6px] py-[1px] text-xs font-semibold">

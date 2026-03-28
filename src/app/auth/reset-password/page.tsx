@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
  if (success) {
  return (
   <FocusLayout title="Password Updated!">
-  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
    <div className="px-6 py-6">
    <div aria-hidden="true" className="mb-4 text-[3rem]">
     ✅
@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
  if (!ready) {
  return (
   <FocusLayout title={<>Verifying <span className="text-forest">Reset Link</span></>}>
-  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
    <div className="px-6 py-6">
    <div aria-hidden="true" className="mb-4 text-[3rem]">
     🔐
@@ -120,10 +120,10 @@ export default function ResetPasswordPage() {
   title={<>New <span className="text-forest">Password</span></>}
   description="Choose a new password for your account"
  >
-  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
   {error && (
    <div
-   className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+   className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
    role="alert"
    >
    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -137,7 +137,7 @@ export default function ResetPasswordPage() {
 
   <form onSubmit={handleSubmit} noValidate>
    <div className="mb-6">
-   <label htmlFor="new-password" className="text-ink mb-1 block text-sm font-semibold">
+   <label htmlFor="new-password" className="text-stone-900 mb-1 block text-sm font-semibold">
     New Password
    </label>
    <Input
@@ -153,7 +153,7 @@ export default function ResetPasswordPage() {
    />
    </div>
    <div className="mb-6">
-   <label htmlFor="confirm-new-password" className="text-ink mb-1 block text-sm font-semibold">
+   <label htmlFor="confirm-new-password" className="text-stone-900 mb-1 block text-sm font-semibold">
     Confirm New Password
    </label>
    <Input

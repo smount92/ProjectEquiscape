@@ -27,7 +27,7 @@ export default function CommandCenterLayout({
                         {title}
                     </h1>
                     {description && (
-                        <p className="mt-1 text-muted">{description}</p>
+                        <p className="mt-1 text-stone-500">{description}</p>
                     )}
                 </div>
                 {headerActions && <div className="flex gap-3">{headerActions}</div>}

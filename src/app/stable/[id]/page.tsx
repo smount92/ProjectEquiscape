@@ -247,7 +247,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  return (
  <ExplorerLayout title={horse.custom_name} description="Horse passport and provenance.">
  {/* Breadcrumb */}
- <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-stone-600 animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -257,7 +257,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Wishlist demand banner */}
  {wishlistDemand > 0 && (
- <div className="animate-fade-in-up mt-4 mb-6 rounded-lg border border-[rgba(44,85,69,0.2)] border-[rgba(239,68,68,0.3)] bg-[rgba(44,85,69,0.08)] bg-[rgba(239,68,68,0.1)] px-6 py-4 text-sm leading-relaxed">
+ <div className="animate-fade-in-up mt-4 mb-6 rounded-lg border border-emerald-200 border-red-200 bg-emerald-50/80 bg-red-50 px-6 py-4 text-sm leading-relaxed">
  🔥{" "}
  <strong>
  {wishlistDemand} collector{wishlistDemand > 1 ?"s" :""}
@@ -577,7 +577,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-[#59493A] uppercase">
                 <span aria-hidden="true">📝</span> Notes
               </h3>
- <p className="text-ink-light m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
+ <p className="text-stone-600 m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
  </div>
  )}
 
@@ -607,14 +607,14 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <div className="flex flex-wrap gap-4">
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  id="back-to-stable"
  >
  ← Back to Stable
  </Link>
  <Link
  href={`/stable/${horseId}/edit`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  id="edit-horse-button"
  >
  <svg

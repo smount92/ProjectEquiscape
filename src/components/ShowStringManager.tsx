@@ -128,7 +128,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  return (
  <div>
  {error && (
- <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {error}
  </p>
  )}
@@ -136,17 +136,17 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {/* Create New */}
  {!creating ? (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => setCreating(true)}
  >
  + New Show String
  </button>
  ) : (
- <div className="bg-card border-edge mb-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 mb-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">Create Show String</h3>
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Show Name *</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Show Name *</label>
  <Input
  
  value={newName}
@@ -155,7 +155,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Show Date</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Show Date</label>
  <Input
  
  type="date"
@@ -167,14 +167,14 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </div>
  <div className="mt-4 flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleCreate}
  disabled={saving}
  >
  {saving ?"Creating..." :"Create"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setCreating(false)}
  >
  Cancel
@@ -185,7 +185,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  {/* Show Strings List */}
  {showStrings.length === 0 ? (
- <div className="flex flex-col items-center justify-center rounded-lg border border-edge bg-card p-8 text-center shadow-sm">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
  <p>No show strings yet. Create one to start planning!</p>
  </div>
  ) : (
@@ -199,7 +199,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <div>
  <strong>{ss.name}</strong>
  {ss.showDate && (
- <span className="text-muted ml-2 text-sm">
+ <span className="text-stone-500 ml-2 text-sm">
  📅{""}
  {new Date(ss.showDate +"T12:00:00").toLocaleDateString("en-US", {
  month:"short",
@@ -210,11 +210,11 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  )}
  </div>
  <div className="flex items-center gap-2">
- <span className="flex cursor-pointer items-center gap-1 rounded-md border border-edge bg-card px-2 py-1 text-xs text-muted transition-all">
+ <span className="flex cursor-pointer items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-xs text-stone-500 transition-all">
  {ss.entryCount}
  </span>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={async (e) => {
  e.stopPropagation();
  setSaving(true);
@@ -228,7 +228,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  📋
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={(e) => {
  e.stopPropagation();
  handleDeleteString(ss.id);
@@ -242,9 +242,9 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  {/* Expanded: entries + add form */}
  {activeStringId === ss.id && (
- <div className="px-4 pb-4 border-edge border-t">
+ <div className="px-4 pb-4 border-stone-200 border-t">
  {loadingEntries ? (
- <p className="text-muted">Loading entries...</p>
+ <p className="text-stone-500">Loading entries...</p>
  ) : (
  <>
  {/* Ring Conflict Visual Timeline */}
@@ -253,7 +253,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <div
  className="mb-1 flex items-center gap-2"
  >
- <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(239,68,68,0.15)] px-2 py-0.5 text-xs font-semibold text-[#ef4444]">
+ <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-[#ef4444]">
  ⚠️ {conflicts.length} Conflict
  {conflicts.length !== 1 ?"s" :""}
  </span>
@@ -279,7 +279,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {conflicts.map((c, i) => (
  <div
  key={i}
- className="rounded-md border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.1)] px-4 py-2 text-sm text-xs font-semibold text-[#f59e0b]"
+ className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-xs font-semibold text-[#f59e0b]"
  >
  ⚠️ {c.reason}
  </div>
@@ -294,24 +294,24 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {entries.map((entry) => (
  <div
  key={entry.id}
- className="flex items-center gap-2 rounded-md bg-[rgba(0,0,0,0.03)] px-4 py-2 text-sm"
+ className="flex items-center gap-2 rounded-md bg-stone-50 px-4 py-2 text-sm"
  >
  <span className="min-w-[140px] font-bold">
  🐴 {entry.horseName}
  </span>
  <span className="flex-1">{entry.className}</span>
  {entry.division && (
- <span className="rounded-full bg-[rgba(139,92,246,0.1)] px-[8px] py-[2px] text-xs text-[#a78bfa]">
+ <span className="rounded-full bg-purple-100/50 px-[8px] py-[2px] text-xs text-[#a78bfa]">
  {entry.division}
  </span>
  )}
  {entry.timeSlot && (
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  🕐 {entry.timeSlot}
  </span>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => handleRemoveEntry(entry.id)}
  title="Remove"
  >
@@ -321,21 +321,21 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  ))}
  </div>
  ) : (
- <p className="text-muted text-sm">
+ <p className="text-stone-500 text-sm">
  No entries yet. Add horses below.
  </p>
  )}
 
  {/* Add Entry Form */}
- <div className="border-edge mt-6 border-t pt-6">
+ <div className="border-stone-200 mt-6 border-t pt-6">
  <h4>Add Entry</h4>
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">
  Horse *
  </label>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={entryHorseId}
  onChange={(e) => setEntryHorseId(e.target.value)}
  title="Select horse"
@@ -349,7 +349,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </select>
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">
  Class *
  </label>
  <Input
@@ -362,7 +362,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </div>
  <div className="grid grid-cols-2 gap-4">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">
  Division
  </label>
  <Input
@@ -373,7 +373,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">
  Time Slot
  </label>
  <Input
@@ -385,7 +385,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </div>
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleAddEntry}
  disabled={saving || !entryHorseId || !entryClassName.trim()}
  >
@@ -396,11 +396,11 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {/* ── Batch Results Section ── */}
  {entries.length > 0 && (
  <div
- className="mt-6 border-t border-edge pt-4"
+ className="mt-6 border-t border-stone-200 pt-4"
  >
  {!showResults ? (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setShowResults(true);
  setResultsSaved(false);
@@ -420,7 +420,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  ) : (
  <div>
  <h4 className="mb-2">🏆 Batch Results</h4>
- <p className="text-muted mb-2 text-sm">
+ <p className="text-stone-500 mb-2 text-sm">
  Tab through to enter placing and ribbon for each entry.
  Results will be saved as show records.
  </p>
@@ -536,7 +536,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <span className="text-forest text-xl font-bold">
  {filled.length}
  </span>
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  Results
  </span>
  </div>
@@ -544,7 +544,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <span className="text-forest text-xl font-bold">
  {champs}🏆 {reserves}🎖️ {topTens}🔟
  </span>
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  Major Ribbons
  </span>
  </div>
@@ -552,7 +552,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <span className="text-forest text-xl font-bold">
  ~{points}
  </span>
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  Est. NAN Points
  </span>
  </div>
@@ -562,7 +562,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  <div className="mt-4 flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={savingResults}
  onClick={async () => {
  setSavingResults(true);
@@ -599,7 +599,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  : `💾 Save ${Object.values(results).filter((r) => r.placing || r.ribbon).length} Results`}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowResults(false)}
  >
  Cancel

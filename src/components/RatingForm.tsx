@@ -82,31 +82,31 @@ export default function RatingForm({
  // Already rated — show the existing rating
  if (rating) {
  return (
- <div className="border-edge mt-6 rounded-lg border bg-[rgba(0,0,0,0.05)] p-6" id="rating-section">
+ <div className="border-stone-200 mt-6 rounded-lg border bg-stone-100 p-6" id="rating-section">
  <div className="mb-4 flex items-center gap-2 text-base font-semibold">
  <span>⭐ Your Rating for @{targetAlias}</span>
  </div>
  <div className="py-4 text-center">
  <RatingStars rating={rating.stars} size="md" />
  {rating.reviewText && (
- <p className="text-muted mt-4 text-sm italic">&ldquo;{rating.reviewText}&rdquo;</p>
+ <p className="text-stone-500 mt-4 text-sm italic">&ldquo;{rating.reviewText}&rdquo;</p>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleRetract}
  disabled={status ==="retracting"}
  >
  {status ==="retracting" ?"Retracting…" :"Retract Rating"}
  </button>
  </div>
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700">{errorMsg}</div>}
  </div>
  );
  }
 
  // Rating form
  return (
- <div className="border-edge mt-6 rounded-lg border bg-[rgba(0,0,0,0.05)] p-6" id="rating-section">
+ <div className="border-stone-200 mt-6 rounded-lg border bg-stone-100 p-6" id="rating-section">
  <div className="mb-4 flex items-center gap-2 text-base font-semibold">
  <span>⭐ Rate your experience with @{targetAlias}</span>
  </div>
@@ -118,10 +118,10 @@ export default function RatingForm({
  alignItems:"center",
  gap:"var(--space-xs)",
  padding:"var(--space-xs) var(--space-sm)",
- background:"var(--color-bg-elevated)",
+ background:"var(--color-bg-stone-50)",
  borderRadius:"var(--radius-sm)",
  fontSize: "0.75rem",
- color:"var(--color-text-muted)",
+ color:"var(--color-text-stone-500)",
  marginBottom:"var(--space-md)",
  }}
  >
@@ -151,13 +151,13 @@ export default function RatingForm({
  rows={2}
  id="rating-review-text"
  />
- <div className="text-muted mt-1 text-right text-xs">{reviewText.length}/300</div>
+ <div className="text-stone-500 mt-1 text-right text-xs">{reviewText.length}/300</div>
  </div>
 
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
 
  {status ==="saved" && (
- <div className="mb-4 rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-sm text-[#22C55E]">
+ <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm text-[#22C55E]">
  ✅ Rating submitted! Thank you.
  </div>
  )}
@@ -165,7 +165,7 @@ export default function RatingForm({
  <div className="show-record-form-actions">
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={stars === 0 || status ==="saving"}
  >
  {status ==="saving" ?"Submitting…" :"Submit Rating"}

@@ -70,9 +70,9 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
 
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Your Offer</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Your Offer</label>
  <div className="flex items-center gap-1">
- <span className="text-muted text-lg font-bold">$</span>
+ <span className="text-stone-500 text-lg font-bold">$</span>
  <Input
  type="number"
  step="0.01"
@@ -85,25 +85,25 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  />
  </div>
  {askingPrice && (
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  Asking price: ${askingPrice.toLocaleString("en-US")}
  </span>
  )}
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Message (optional)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Message (optional)</label>
  <textarea
  value={message}
  onChange={(e) => setMessage(e.target.value)}
  placeholder="Tell the seller about your interest…"
- className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-edge bg-transparent px-4 py-2 text-sm transition-all"
+ className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm transition-all"
  rows={3}
  maxLength={500}
  />
  {showPaymentWarning && (
  <div
- className="mt-2 text-sm text-[var(--color-warning,#eab308)] py-1 px-2 rounded-sm border border-[rgba(234,179,8,0.3)] bg-[rgba(234,179,8,0.15)]"
+ className="mt-2 text-sm text-[var(--color-warning,#eab308)] py-1 px-2 rounded-sm border border-yellow-300 bg-yellow-50"
  >
  {RISKY_PAYMENT_WARNING}
  </div>
@@ -115,7 +115,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  This is a bundle/lot sale (excluded from market price index)
  </label>
 
- <label className="mb-2 flex cursor-pointer items-start gap-2 text-xs text-muted mt-4">
+ <label className="mb-2 flex cursor-pointer items-start gap-2 text-xs text-stone-500 mt-4">
   <Input type="checkbox" checked={disclaimerAccepted} onChange={(e) => setDisclaimerAccepted(e.target.checked)} className="mt-0.5" required />
   <span>
    I understand that Model Horse Hub does not process payments and cannot
@@ -123,12 +123,12 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
   </span>
  </label>
 
- {error && <div className="mt-2 text-sm text-danger">{error}</div>}
+ {error && <div className="mt-2 text-sm text-red-700">{error}</div>}
 
  <div className="mt-6 flex gap-3 max-sm:flex-col">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={onClose}
  disabled={saving}
  >
@@ -136,7 +136,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  </button>
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={saving || !disclaimerAccepted}
  >
  {saving ?"Submitting…" :"Submit Offer"}

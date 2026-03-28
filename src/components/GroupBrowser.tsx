@@ -56,9 +56,9 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  return (
  <div>
  {/* Tabs */}
- <div className="mb-6 flex gap-1 border-b border-edge">
+ <div className="mb-6 flex gap-1 border-b border-stone-200">
  <button
- className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="browse" ?"border-forest text-forest" :"border-transparent text-ink-light hover:text-ink"}`}
+ className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="browse" ?"border-forest text-forest" :"border-transparent text-stone-600 hover:text-stone-900"}`}
  onClick={() => setTab("browse")}
  >
  🌐 Browse All
@@ -67,7 +67,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  </span>
  </button>
  <button
- className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="mine" ?"border-forest text-forest" :"border-transparent text-ink-light hover:text-ink"}`}
+ className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="mine" ?"border-forest text-forest" :"border-transparent text-stone-600 hover:text-stone-900"}`}
  onClick={() => setTab("mine")}
  >
  ⭐ My Groups
@@ -78,7 +78,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  </div>
 
  {/* Search */}
- <div className="sticky top-[calc(var(--header-height)+0.75rem)] z-[10] mb-8 flex items-center gap-2 rounded-xl border border-edge bg-card px-6 py-2 shadow-md transition-all max-sm:py-0">
+ <div className="sticky top-[calc(var(--header-height)+0.75rem)] z-[10] mb-8 flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-6 py-2 shadow-md transition-all max-sm:py-0">
  <Input
  type="text"
  
@@ -107,7 +107,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
 
  {/* Group Cards */}
  {filtered.length === 0 ? (
- <div className="flex flex-col items-center justify-center rounded-lg border border-edge bg-card p-8 text-center shadow-sm">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
  <p>{tab ==="mine" ?"You haven't joined any groups yet." :"No groups found."}</p>
  </div>
  ) : (
@@ -115,7 +115,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  {filtered.map((g) => (
  <div
  key={g.id}
- className="flex flex-col rounded-lg border border-edge bg-card p-5 transition-shadow hover:shadow-md"
+ className="flex flex-col rounded-lg border border-stone-200 bg-white p-5 transition-shadow hover:shadow-md"
  >
  {/* Card Header */}
  <div className="mb-3 flex items-start gap-3">
@@ -129,33 +129,33 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  >
  {g.name}
  </Link>
- <div className="text-xs text-ink-light">
+ <div className="text-xs text-stone-600">
  {typeLabels[g.groupType] || g.groupType}
  {g.region && <> · {g.region}</>}
  </div>
  </div>
  </div>
  {g.description && (
- <p className="mb-3 text-sm leading-relaxed text-ink-light">
+ <p className="mb-3 text-sm leading-relaxed text-stone-600">
  {g.description.slice(0, 120)}
  {g.description.length > 120 ?"..." :""}
  </p>
  )}
  {/* Card Footer */}
- <div className="mt-auto flex items-center justify-between pt-3 border-t border-edge">
- <span className="text-xs text-ink-light">
+ <div className="mt-auto flex items-center justify-between pt-3 border-t border-stone-200">
+ <span className="text-xs text-stone-600">
  👥 {g.memberCount} member{g.memberCount !== 1 ?"s" :""}
  </span>
  {g.isMember ? (
  <div className="flex items-center gap-2">
  <span
- className="inline-flex items-center rounded-full bg-[rgba(34,197,94,0.12)] px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-[#22c55e] border border-[rgba(34,197,94,0.3)]"
+ className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-[#22c55e] border border-emerald-200"
  >
  ✓ {g.memberRole ||"Member"}
  </span>
  {g.memberRole !=="owner" && (
  <button
- className="rounded-md border border-edge bg-transparent px-3 py-1 text-xs font-medium text-muted transition-colors hover:text-ink"
+ className="rounded-md border border-stone-200 bg-transparent px-3 py-1 text-xs font-medium text-stone-500 transition-colors hover:text-stone-900"
  onClick={() => handleLeave(g.id)}
  disabled={joining === g.id}
  >

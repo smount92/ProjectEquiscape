@@ -293,17 +293,17 @@ export default function ImageCropModal({
  <Dialog open={true} onOpenChange={(open) => { if (!open) onCancel(); }}>
  <DialogContent className="sm:max-w-2xl">
  <div
- className="w-[95vw] max-w-[700px] overflow-hidden rounded-lg border border-edge bg-card p-0 shadow-md transition-all"
+ className="w-[95vw] max-w-[700px] overflow-hidden rounded-lg border border-stone-200 bg-white p-0 shadow-md transition-all"
  onClick={(e) => e.stopPropagation()}
  >
  {/* Header */}
- <div className="flex items-center justify-between border-b border-edge px-6 py-4">
+ <div className="flex items-center justify-between border-b border-stone-200 px-6 py-4">
  <h3 className="m-0 text-base">✂️ Crop Photo</h3>
  <div className="flex flex-wrap gap-1">
  {ASPECT_PRESETS.map((preset) => (
  <button
  key={preset.label}
- className={`inline-flex cursor-pointer items-center justify-center rounded-sm border px-2.5 py-1 text-xs transition-all ${aspectRatio === preset.value ? 'border-0 bg-forest font-bold text-inverse' : 'border-edge bg-transparent font-normal text-ink-light'}`}
+ className={`inline-flex cursor-pointer items-center justify-center rounded-sm border px-2.5 py-1 text-xs transition-all ${aspectRatio === preset.value ? 'border-0 bg-forest font-bold text-white' : 'border-stone-200 bg-transparent font-normal text-stone-600'}`}
  onClick={() => setAspectRatio(preset.value)}
  >
  {preset.label}
@@ -421,9 +421,9 @@ export default function ImageCropModal({
  </div>
 
  {/* Footer actions */}
- <div className="flex items-center justify-between gap-2 border-t border-edge px-6 py-4">
+ <div className="flex items-center justify-between gap-2 border-t border-stone-200 px-6 py-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={onCancel}
  disabled={processing}
  >
@@ -431,14 +431,14 @@ export default function ImageCropModal({
  </button>
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleSkip}
  disabled={processing}
  >
  Skip Crop
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleCropConfirm}
  disabled={processing || !imageLoaded}
  >

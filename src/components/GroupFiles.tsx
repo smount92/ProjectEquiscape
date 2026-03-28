@@ -85,7 +85,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  setFiles(files.filter((f) => f.id !== fileId));
  };
 
- if (loading) return <p className="text-muted">Loading files…</p>;
+ if (loading) return <p className="text-stone-500">Loading files…</p>;
 
  return (
  <div>
@@ -94,7 +94,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  <div className="group-file-upload mb-6">
  <div className="flex flex-wrap items-end gap-2">
  <div className="min-w-[200] flex-1">
- <label className="text-ink mb-1 block text-sm font-semibold">Upload File</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Upload File</label>
  <Input
  ref={fileRef}
  type="file"
@@ -104,7 +104,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  />
  </div>
  <div className="min-w-[200] flex-1">
- <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Description (optional)</label>
  <Input
  
  value={description}
@@ -113,7 +113,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  />
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleUpload}
  disabled={uploading}
  >
@@ -125,7 +125,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
 
  {/* File List */}
  {files.length === 0 ? (
- <div className="flex flex-col items-center justify-center rounded-lg border border-edge bg-card p-8 text-center shadow-sm">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
  <p>No files uploaded yet.</p>
  </div>
  ) : (
@@ -133,14 +133,14 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  {files.map((f) => (
  <div
  key={f.id}
- className="border-edge flex items-center gap-4 rounded-md border bg-black/[0.02] p-4 transition-colors hover:bg-black/[0.05]"
+ className="border-stone-200 flex items-center gap-4 rounded-md border bg-black/[0.02] p-4 transition-colors hover:bg-black/[0.05]"
  >
  <div className="shrink-0 text-2xl">{fileIcon(f.fileType)}</div>
  <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
- <span className="text-ink overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
+ <span className="text-stone-900 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
  {f.fileName}
  </span>
- <span className="text-ink-light text-xs">
+ <span className="text-stone-600 text-xs">
  {formatSize(f.fileSize)}
  {f.description && <> · {f.description}</>}
  {" ·"}@{f.uploaderAlias} · {timeAgo(f.createdAt)}
@@ -149,7 +149,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  <div className="flex gap-1">
  {canDelete && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => handleDelete(f.id)}
  title="Delete file"
  >

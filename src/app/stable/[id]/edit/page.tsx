@@ -605,7 +605,7 @@ export default function EditHorsePage() {
  className="mx-auto max-w-[680px] px-0 py-12 text-center"
  >
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge border-t-[color:var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 border-t-[color:var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  />
  <p>Loading horse details…</p>
  </div>
@@ -616,13 +616,13 @@ export default function EditHorsePage() {
  if (error) {
  return (
  <FocusLayout title="Edit Horse" description="Update your horse details.">
- <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🚫</div>
  <h1>Access Denied</h1>
  <p>{error}</p>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  >
  Back to Stable
  </Link>
@@ -633,7 +633,7 @@ export default function EditHorsePage() {
 
  return (
  <FocusLayout title="Edit Horse" description="Update your horse details.">
- <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-stone-600 animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -652,7 +652,7 @@ export default function EditHorsePage() {
 
  {saveError && (
  <div
- className="text-danger mt-2 mb-8 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+ className="text-red-700 mt-2 mb-8 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
  role="alert"
  >
  <svg
@@ -672,12 +672,12 @@ export default function EditHorsePage() {
  )}
 
  {/* ===== Photo Studio ===== */}
- <div className="bg-card border-edge mb-8 rounded-lg border shadow-md transition-all">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark px-6 py-4">
+ <div className="bg-white border-stone-200 mb-8 rounded-lg border shadow-md transition-all">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100 px-6 py-4">
  <div className="mb-1 text-2xl">📸</div>
  <h2>Photo Studio</h2>
  </div>
- <p className="text-muted mb-4 text-sm">
+ <p className="text-stone-500 mb-4 text-sm">
  Upload up to 4 standardized angles. The primary photo is used as the thumbnail everywhere.
  </p>
 
@@ -689,10 +689,10 @@ export default function EditHorsePage() {
 
  return (
  <div key={slot.angle} className="flex flex-col">
- <div className="text-ink mb-1 flex items-center gap-1 text-sm font-semibold">
+ <div className="text-stone-900 mb-1 flex items-center gap-1 text-sm font-semibold">
  {slot.label}
  {slot.primary && (
- <span className="bg-[rgba(44,85,69,0.1)] rounded-full px-[8px] py-[2px] text-xs font-bold text-[#2C5545]">
+ <span className="bg-emerald-50 rounded-full px-[8px] py-[2px] text-xs font-bold text-[#2C5545]">
  Required
  </span>
  )}
@@ -727,7 +727,7 @@ export default function EditHorsePage() {
  <div className="relative w-full">
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={preview} alt={slot.label} />
- <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[rgba(0,0,0,0.6)] text-sm font-medium text-white opacity-[0] transition-all">
+ <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 text-sm font-medium text-white opacity-[0] transition-all">
  <svg
  width="20"
  height="20"
@@ -746,7 +746,7 @@ export default function EditHorsePage() {
  </div>
  </div>
  ) : (
- <div className="text-muted flex flex-col items-center gap-2 p-8">
+ <div className="text-stone-500 flex flex-col items-center gap-2 p-8">
  <svg
  width="28"
  height="28"
@@ -768,7 +768,7 @@ export default function EditHorsePage() {
  {hasNew && (
  <button
  type="button"
- className="hover:0.2)] hover:0.5)] mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-[rgba(251,146,60,0.3)] bg-[rgba(251,146,60,0.1)] px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#fb923c] transition-all"
+ className="hover:0.2)] hover:0.5)] mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-orange-200 bg-orange-50 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#fb923c] transition-all"
  onClick={(e) => {
  e.stopPropagation();
  handleSlotRevert(slot.angle);
@@ -780,7 +780,7 @@ export default function EditHorsePage() {
  {!hasNew && preview && !slot.primary && (
  <button
  type="button"
- className="mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#ef4444] transition-all"
+ className="mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-red-200 bg-red-50 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#ef4444] transition-all"
  onClick={(e) => {
  e.stopPropagation();
  handleSlotRemove(slot.angle);
@@ -795,10 +795,10 @@ export default function EditHorsePage() {
  </div>
 
  {/* Extra Details Multi-Upload Zone */}
- <div className="border-edge mt-6 border-t pt-6">
- <div className="text-ink mb-1 flex items-center gap-1 text-sm font-semibold">
+ <div className="border-stone-200 mt-6 border-t pt-6">
+ <div className="text-stone-900 mb-1 flex items-center gap-1 text-sm font-semibold">
  Extra Details & Flaws
- <span className="text-muted text-xs font-normal">
+ <span className="text-stone-500 text-xs font-normal">
  {existingExtras.length + newExtraFiles.length}/10
  </span>
  </div>
@@ -898,7 +898,7 @@ export default function EditHorsePage() {
  ⠇
  </div>
  <button
- className="bg-[rgba(0,0,0,0.7)] absolute top-[6px] right-[6px] z-[2] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.85rem] text-white transition-colors"
+ className="bg-black/70 absolute top-[6px] right-[6px] z-[2] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.85rem] text-white transition-colors"
  onClick={async (e) => {
  e.stopPropagation();
  await deleteHorseImageAction(ex.recordId, ex.storagePath || null);
@@ -915,12 +915,12 @@ export default function EditHorsePage() {
  {newExtraFiles.map((ef, i) => (
  <div
  key={`new-${i}`}
- className="border-edge relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ className="border-stone-200 relative h-[100px] w-[100px] overflow-hidden rounded-md border"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={ef.previewUrl} alt={`New extra ${i + 1}`} />
  <button
- className="bg-[rgba(0,0,0,0.7)] absolute top-[6px] right-[6px] z-[2] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.85rem] text-white transition-colors"
+ className="bg-black/70 absolute top-[6px] right-[6px] z-[2] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.85rem] text-white transition-colors"
  onClick={(e) => {
  e.stopPropagation();
  URL.revokeObjectURL(ef.previewUrl);
@@ -931,7 +931,7 @@ export default function EditHorsePage() {
  ✕
  </button>
  <button
- className="bg-[rgba(0,0,0,0.7)] absolute right-[4px] bottom-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white opacity-0 transition-opacity"
+ className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white opacity-0 transition-opacity"
  onClick={(e) => {
  e.stopPropagation();
  setReCropExtraIdx(i);
@@ -951,16 +951,16 @@ export default function EditHorsePage() {
  </div>
 
  {/* ===== Section 1: Identity ===== */}
- <div className="bg-card border-edge mb-8 rounded-lg border shadow-md transition-all">
- <div className="bg-card border-edge mb-8sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div className="bg-card border-edge mb-8-icon rounded-lg border shadow-md transition-all">
+ <div className="bg-white border-stone-200 mb-8 rounded-lg border shadow-md transition-all">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
+ <div className="section-icon rounded-lg border border-stone-200 bg-white shadow-md transition-all">
  🏷️
  </div>
  <h2>Model Identity</h2>
  </div>
 
  <div className="mb-6">
- <label htmlFor="edit-name" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-name" className="text-stone-900 mb-1 block text-sm font-semibold">
  Custom Name *
  </label>
  <Input
@@ -974,7 +974,7 @@ export default function EditHorsePage() {
  </div>
 
  <div className="mb-6">
- <label htmlFor="edit-sculptor" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-sculptor" className="text-stone-900 mb-1 block text-sm font-semibold">
  Sculptor / Artist
  </label>
  <Input
@@ -986,13 +986,13 @@ export default function EditHorsePage() {
  maxLength={100}
  placeholder="e.g. Sarah Rose, Brigitte Eberl…"
  />
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  Optional — tag the sculptor or artist, especially for Artist Resins or custom work.
  </span>
  </div>
 
  <div className="mb-6">
- <label htmlFor="edit-finishing-artist" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-finishing-artist" className="text-stone-900 mb-1 block text-sm font-semibold">
  🎨 Finishing Artist
  </label>
  <Input
@@ -1004,13 +1004,13 @@ export default function EditHorsePage() {
  maxLength={100}
  placeholder="Who painted or customized this model?"
  />
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  The artist who painted/finished this model (if different from sculptor).
  </span>
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">📋 Edition Info</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">📋 Edition Info</label>
  <div className="flex items-center gap-2">
  <Input
  type="number"
@@ -1020,7 +1020,7 @@ export default function EditHorsePage() {
  onChange={(e) => setEditionNumber(e.target.value)}
  min="1"
  />
- <span className="text-muted">of</span>
+ <span className="text-stone-500">of</span>
  <Input
  type="number"
  className="w-[80px]"
@@ -1030,14 +1030,14 @@ export default function EditHorsePage() {
  min="1"
  />
  </div>
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  e.g., &quot;3 of 50&quot; for limited edition runs.
  </span>
  </div>
 
  {/* Finish Details */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Finish Details</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Finish Details</label>
  <Input
  
  type="text"
@@ -1051,9 +1051,9 @@ export default function EditHorsePage() {
 
  {/* Public Notes */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Public Notes</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Public Notes</label>
  <Textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  value={publicNotes}
  onChange={(e) => setPublicNotes(e.target.value)}
  placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
@@ -1061,24 +1061,24 @@ export default function EditHorsePage() {
  rows={2}
  id="edit-public-notes"
  />
- <small className="text-muted text-[var(--font-size-xs)]">
+ <small className="text-stone-500 text-[var(--font-size-xs)]">
  These notes will be visible to anyone viewing this horse&apos;s passport.
  </small>
  </div>
 
  {/* Show Bio */}
- <div className="my-5 text-muted mt-4 mb-3 flex items-center gap-4 text-sm">
- <h4 className="text-ink-light font-semibold text-[var(--font-size-md)]">
+ <div className="my-5 text-stone-500 mt-4 mb-3 flex items-center gap-4 text-sm">
+ <h4 className="text-stone-600 font-semibold text-[var(--font-size-md)]">
  🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]">(Optional)</span>
  </h4>
- <small className="text-muted mt-1 block">
+ <small className="text-stone-500 mt-1 block">
  The show identity you assign for competition — breed, gender, and age for show ring
  divisions.
  </small>
  </div>
  <div className="flex flex-wrap gap-4">
  <div className="mb-6 min-w-[200px] flex-[1_1_200px]">
- <label className="text-ink mb-1 block text-sm font-semibold">Assigned Breed</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Breed</label>
  <Input
  
  type="text"
@@ -1090,9 +1090,9 @@ export default function EditHorsePage() {
  />
  </div>
  <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
- <label className="text-ink mb-1 block text-sm font-semibold">Assigned Gender</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={assignedGender}
  onChange={(e) => setAssignedGender(e.target.value)}
  id="edit-assigned-gender"
@@ -1110,7 +1110,7 @@ export default function EditHorsePage() {
  </div>
  <div className="flex flex-wrap gap-4">
  <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
- <label className="text-ink mb-1 block text-sm font-semibold">Assigned Age</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Age</label>
  <Input
  
  type="text"
@@ -1122,7 +1122,7 @@ export default function EditHorsePage() {
  />
  </div>
  <div className="mb-6 min-w-[200px] flex-[1_1_200px]">
- <label className="text-ink mb-1 block text-sm font-semibold">Regional Show ID</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Regional Show ID</label>
  <Input
  
  type="text"
@@ -1139,12 +1139,12 @@ export default function EditHorsePage() {
  {isModel && (
  <div className="grid grid-cols-2 gap-6">
  <div className="mb-6">
- <label htmlFor="edit-finish" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-finish" className="text-stone-900 mb-1 block text-sm font-semibold">
  Finish Type *
  </label>
  <select
  id="edit-finish"
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={finishType}
  onChange={(e) => setFinishType(e.target.value as FinishType)}
  >
@@ -1156,12 +1156,12 @@ export default function EditHorsePage() {
  </div>
 
  <div className="mb-6">
- <label htmlFor="edit-condition" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-condition" className="text-stone-900 mb-1 block text-sm font-semibold">
  Condition Grade *
  </label>
  <select
  id="edit-condition"
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  >
@@ -1187,7 +1187,7 @@ export default function EditHorsePage() {
  value={conditionNote}
  onChange={(e) => setConditionNote(e.target.value)}
  />
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  e.g., &quot;Minor rub discovered on left hip during cleaning&quot;
  </span>
  </div>
@@ -1199,12 +1199,12 @@ export default function EditHorsePage() {
  {/* Life Stage — model only */}
  {isModel && (
  <div className="mb-6">
- <label htmlFor="edit-life-stage" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-life-stage" className="text-stone-900 mb-1 block text-sm font-semibold">
  🐾 Life Stage
  </label>
  <select
  id="edit-life-stage"
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={lifeStage}
  onChange={(e) => {
  setLifeStage(e.target.value);
@@ -1226,7 +1226,7 @@ export default function EditHorsePage() {
  <option value="completed">✅ Completed</option>
  <option value="for_sale">💲 For Sale</option>
  </select>
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  Changing this will add a stage update to the Hoofprint™ timeline.
  </span>
  </div>
@@ -1239,12 +1239,12 @@ export default function EditHorsePage() {
 
  {/* Marketplace Status */}
  <div className="mb-6">
- <label htmlFor="edit-trade-status" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-trade-status" className="text-stone-900 mb-1 block text-sm font-semibold">
  Marketplace Status
  </label>
  <select
  id="edit-trade-status"
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={tradeStatus}
  onChange={(e) => setTradeStatus(e.target.value)}
  >
@@ -1257,11 +1257,11 @@ export default function EditHorsePage() {
 
  {/* Conditional marketplace fields */}
  {(tradeStatus ==="For Sale" || tradeStatus ==="Open to Offers") && (
- <div className="bg-[rgba(34,197,94,0.05)] border-[rgba(34,197,94,0.15)] animate-fade-in-up mt-4 rounded-md border p-4">
+ <div className="bg-emerald-50/50 border-emerald-200 animate-fade-in-up mt-4 rounded-md border p-4">
  <div className="mb-6">
  <label
  htmlFor="edit-listing-price"
- className="text-ink mb-1 block text-sm font-semibold"
+ className="text-stone-900 mb-1 block text-sm font-semibold"
  >
  💲 Listing Price
  </label>
@@ -1275,20 +1275,20 @@ export default function EditHorsePage() {
  value={listingPrice}
  onChange={(e) => setListingPrice(e.target.value)}
  />
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  Optional — leave blank for &ldquo;Contact for price&rdquo;
  </span>
  </div>
  <div className="mb-6">
  <label
  htmlFor="edit-marketplace-notes"
- className="text-ink mb-1 block text-sm font-semibold"
+ className="text-stone-900 mb-1 block text-sm font-semibold"
  >
  📝 Seller Notes
  </label>
  <Textarea
  id="edit-marketplace-notes"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  rows={3}
  maxLength={500}
  placeholder="e.g. Will ship anywhere, Trades welcome..."
@@ -1301,9 +1301,9 @@ export default function EditHorsePage() {
  </div>
 
  {/* Community visibility selector */}
- <div className="bg-[rgba(44,85,69,0.04)] border-[rgba(44,85,69,0.12)] mt-6 rounded-lg border px-6 py-4">
+ <div className="bg-emerald-50/50 border-emerald-200 mt-6 rounded-lg border px-6 py-4">
  <div className="flex flex-col items-center justify-between gap-6">
- <span className="text-ink text-base font-semibold">
+ <span className="text-stone-900 text-base font-semibold">
  👁️ Visibility
  </span>
  <div className="flex flex-wrap gap-2">
@@ -1330,13 +1330,13 @@ export default function EditHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-surface-primary font-inherit text-ink hover:border-forest hover:bg-surface-secondary flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-[rgba(44,85,69,0.1)]" :"border-edge"}`}
+ className={`bg-surface-primary font-inherit text-stone-900 hover:border-emerald-700 hover:bg-surface-secondary flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-emerald-50" :"border-stone-200"}`}
  onClick={() => setVisibility(opt.value)}
  id={`edit-visibility-${opt.value}`}
  >
  <span className="text-2xl">{opt.icon}</span>
  <span className="text-sm font-semibold">{opt.label}</span>
- <span className="text-muted text-center text-xs">{opt.hint}</span>
+ <span className="text-stone-500 text-center text-xs">{opt.hint}</span>
  </button>
  ))}
  </div>
@@ -1344,9 +1344,9 @@ export default function EditHorsePage() {
  </div>
 
  {/* ===== Section 2: Reference Link (Unified Search) ===== */}
- <div className="bg-card border-edge mb-8 rounded-lg border shadow-md transition-all">
- <div className="bg-card border-edge mb-8sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div className="bg-card border-edge mb-8-icon rounded-lg border shadow-md transition-all">
+ <div className="bg-white border-stone-200 mb-8 rounded-lg border shadow-md transition-all">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
+ <div className="section-icon rounded-lg border border-stone-200 bg-white shadow-md transition-all">
  🔗
  </div>
  <h2>Reference Link</h2>
@@ -1371,8 +1371,8 @@ export default function EditHorsePage() {
  </div>
 
  {/* ===== Section 3: Financial Vault ===== */}
- <div className="bg-card border-edge relative mb-8 overflow-hidden rounded-lg border shadow-md transition-all">
- <div className="border-[rgba(240,160,108,0.2)] mb-8 flex items-center gap-4 border-b pb-6">
+ <div className="bg-white border-stone-200 relative mb-8 overflow-hidden rounded-lg border shadow-md transition-all">
+ <div className="border-orange-200 mb-8 flex items-center gap-4 border-b pb-6">
  <div className="vault-icon">🔒</div>
  <div>
  <h2>Financial Vault</h2>
@@ -1381,7 +1381,7 @@ export default function EditHorsePage() {
  </div>
 
  <div
- className="bg-[rgba(240,160,108,0.08)] border-[rgba(240,160,108,0.2)] mb-8 flex items-start gap-2 rounded-md border p-4"
+ className="bg-orange-50 border-orange-200 mb-8 flex items-start gap-2 rounded-md border p-4"
  role="note"
  >
  <span className="mt-[2px] shrink-0 text-[1.3em]">🛡️</span>
@@ -1393,7 +1393,7 @@ export default function EditHorsePage() {
 
  <div className="grid grid-cols-2 gap-6">
  <div className="mb-6">
- <label htmlFor="edit-price" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-price" className="text-stone-900 mb-1 block text-sm font-semibold">
  Purchase Price
  </label>
  <Input
@@ -1408,7 +1408,7 @@ export default function EditHorsePage() {
  />
  </div>
  <div className="mb-6">
- <label htmlFor="edit-date" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-date" className="text-stone-900 mb-1 block text-sm font-semibold">
  Purchase Date
  </label>
  <Input
@@ -1423,7 +1423,7 @@ export default function EditHorsePage() {
 
  {/* Fuzzy Purchase Date */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Approximate Purchase Date</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Approximate Purchase Date</label>
  <Input
  
  type="text"
@@ -1432,14 +1432,14 @@ export default function EditHorsePage() {
  placeholder="e.g. BreyerFest 2017, Summer 2015"
  id="edit-purchase-date-text"
  />
- <small className="text-muted text-[var(--font-size-xs)]">
+ <small className="text-stone-500 text-[var(--font-size-xs)]">
  Use this when you don&apos;t remember the exact date.
  </small>
  </div>
 
  <div className="grid grid-cols-2 gap-6">
  <div className="mb-6">
- <label htmlFor="edit-value" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-value" className="text-stone-900 mb-1 block text-sm font-semibold">
  Estimated Current Value
  </label>
  <Input
@@ -1454,7 +1454,7 @@ export default function EditHorsePage() {
  />
  </div>
  <div className="mb-6">
- <label htmlFor="edit-insurance" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-insurance" className="text-stone-900 mb-1 block text-sm font-semibold">
  Insurance Notes
  </label>
  <Input
@@ -1473,13 +1473,13 @@ export default function EditHorsePage() {
  <div className="flex justify-end gap-4">
  <Link
  href={`/stable/${horseId}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  id="edit-cancel"
  >
  Cancel
  </Link>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSave}
  disabled={isSaving || !customName.trim() || !finishType || !conditionGrade}
  id="edit-save"
@@ -1487,7 +1487,7 @@ export default function EditHorsePage() {
  {isSaving ? (
  <>
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  {Object.keys(newFiles).length > 0 ?"Uploading…" :"Saving…"}

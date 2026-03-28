@@ -12,13 +12,13 @@ export default function RatingBadge({ average, count }: RatingBadgeProps) {
 
  return (
  <span
- className="inline-flex items-center gap-1 rounded-md border border-[rgba(245,158,11,0.2)] bg-[linear-gradient(135deg,rgba(245,158,11,0.15),rgba(234,179,8,0.05))] px-3 py-1"
+ className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-[linear-gradient(135deg,rgba(245,158,11,0.15),rgba(234,179,8,0.05))] px-3 py-1"
  id="rating-badge"
  title={`${average} out of 5 — ${count} rating${count !== 1 ?"s" :""}`}
  >
  <RatingStars rating={Math.round(average)} size="sm" />
  <span className="text-sm font-bold text-[#F59E0B]">{average}</span>
- <span className="text-muted text-sm">({count})</span>
+ <span className="text-stone-500 text-sm">({count})</span>
  </span>
  );
 }

@@ -112,7 +112,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  className={`mt-2 text-sm font-medium ${
  new Date(show.endAt) > new Date()
  ? "text-amber-600"
- : "text-muted"
+ : "text-stone-500"
  }`}
  >
  ⏰{" "}
@@ -155,7 +155,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div className="animate-fade-in-up mb-4 flex justify-end gap-2">
  <Link
  href={`/community/events/${showId}/manage`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  >
  ⚙️ Manage Classes
  </Link>
@@ -170,17 +170,17 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div className="mb-2 text-[2rem]">🏅</div>
  <h3 className="mb-2">You Are an Assigned Judge</h3>
  {show.status ==="open" ? (
- <p className="text-muted text-sm">
+ <p className="text-stone-500 text-sm">
  This show is still accepting entries. Once the host transitions it to{""}
  <strong>&quot;Judging&quot;</strong> status, the judging panel will appear here for you to
  assign placings.
  </p>
  ) : show.status ==="judging" ? (
- <p className="text-muted text-sm">
+ <p className="text-stone-500 text-sm">
  The judging panel is available below. Scroll down to assign placings to each entry.
  </p>
  ) : (
- <p className="text-muted text-sm">Judging is complete. Results are final.</p>
+ <p className="text-stone-500 text-sm">Judging is complete. Results are final.</p>
  )}
  </div>
  )}
@@ -198,7 +198,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  )}
 
  {/* Breadcrumb */}
- <nav className="text-muted animate-fade-in-up mb-6 flex items-center gap-2 text-sm">
+ <nav className="text-stone-500 animate-fade-in-up mb-6 flex items-center gap-2 text-sm">
  <Link href="/shows">← All Shows</Link>
  </nav>
 
@@ -301,7 +301,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  >
  🐴 {entry.horseName}
  </Link>
- <div className="text-muted text-sm">
+ <div className="text-stone-500 text-sm">
  by{""}
  <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
  @{entry.ownerAlias}
@@ -332,7 +332,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  className="aspect-[4/3] w-full object-cover"
  />
  )}
- <div className="bg-elevated max-w-[220px] min-w-[160px] overflow-hidden rounded-lg p-4 text-center shadow-lg">
+ <div className="bg-white max-w-[220px] min-w-[160px] overflow-hidden rounded-lg p-4 text-center shadow-lg">
  <div className="mb-1 text-[2rem]">{medal}</div>
  <Link
  href={`/community/${entry.horseId}`}
@@ -340,7 +340,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  >
  {entry.horseName}
  </Link>
- <div className="text-muted mt-[2px] text-xs">
+ <div className="text-stone-500 mt-[2px] text-xs">
  by{""}
  <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
  @{entry.ownerAlias}
@@ -375,7 +375,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div
  key={entry.id}
  className="mb-1 flex items-center gap-4 px-4 py-2"
- style={{
+  /* eslint-disable-next-line react/forbid-dom-props */ style={{
  borderLeft: `3px solid var(--podium-${ribbon}, #22c55e)`,
  }}
  >
@@ -398,7 +398,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  >
  {entry.horseName}
  </Link>
- <span className="text-muted ml-1 text-xs">
+ <span className="text-stone-500 ml-1 text-xs">
  by @{entry.ownerAlias}
  </span>
  </div>
@@ -421,7 +421,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  >
  <div className="text-[2rem]">🟡</div>
  <h3>Judging in Progress</h3>
- <p className="text-muted">
+ <p className="text-stone-500">
  {isExpertJudged
  ? isCreator || isJudge
  ?"Use the judging panel below to assign placings."
@@ -479,7 +479,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  key={entry.id}
  className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-stone-50"
  >
- <div className="text-muted min-w-[32px] text-center text-lg font-bold">
+ <div className="text-stone-500 min-w-[32px] text-center text-lg font-bold">
  {isExpertJudged && show.status ==="closed" && entry.placing
  ? entry.placing
  : `#${index + 1}`}
@@ -512,36 +512,19 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  )}
  </span>
  {entry.caption && (
- <p
- style={{
- fontSize:"0.75rem",
- color:"var(--color-text-secondary)",
- margin:"var(--space-xs) 0 0",
- fontStyle:"italic",
- lineHeight: 1.4,
- }}
- >
+ <p className="mt-1 text-xs italic leading-tight text-stone-500">
  &ldquo;{entry.caption}&rdquo;
  </p>
  )}
  </div>
- <div className="gap-1" style={{ display:"flex", alignItems:"center" }}>
+ <div className="flex items-center gap-1">
  {isExpertJudged ? (
  entry.placing && show.status ==="closed" ? (
- <span
- style={{
- fontSize:"0.875rem",
- padding:"var(--space-xs) var(--space-sm)",
- borderRadius:"var(--radius-sm)",
- background:"rgba(245, 158, 11, 0.15)",
- color:"var(--color-accent, #f59e0b)",
- fontWeight: 600,
- }}
- >
+ <span className="rounded-sm bg-amber-500/15 px-2 py-1 text-sm font-semibold text-amber-500">
  {entry.placing}
  </span>
  ) : isJudging ? (
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  🏅 Expert judging
  </span>
  ) : null

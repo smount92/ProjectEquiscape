@@ -168,13 +168,13 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  if (!pedigree && isOwner && !isEditing) {
  return (
  <div
- className="rounded-lg border border-edge bg-card p-4 shadow-sm transition-all"
+ className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm transition-all"
  id="pedigree-card"
  >
- <div className="text-muted py-4 text-center">
+ <div className="text-stone-500 py-4 text-center">
  <p>No pedigree data yet.</p>
  <button
- className="mt-2 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="mt-2 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => setIsEditing(true)}
  id="add-pedigree"
  >
@@ -189,7 +189,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  if (isEditing) {
  return (
  <div
- className="rounded-lg border border-edge bg-card p-4 shadow-sm transition-all"
+ className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm transition-all"
  id="pedigree-card"
  >
  <div className="mb-4 flex items-center justify-between">
@@ -201,7 +201,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  {/* Sire with search */}
  <div className="relative mb-6" ref={sireRef}>
- <label className="text-ink mb-1 block text-sm font-semibold">Sire (Father)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Sire (Father)</label>
  <Input
  
  type="text"
@@ -221,23 +221,23 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <button
  type="button"
  onClick={clearSireLink}
- className="cursor-pointer border-0 bg-transparent text-xs text-muted"
+ className="cursor-pointer border-0 bg-transparent text-xs text-stone-500"
  >
  ✕
  </button>
  </div>
  )}
  {showSireDropdown && sireResults.length > 0 && (
- <div className="absolute top-full right-0 left-0 z-50 max-h-[200px] overflow-y-auto rounded-md border border-edge bg-card shadow-lg">
+ <div className="absolute top-full right-0 left-0 z-50 max-h-[200px] overflow-y-auto rounded-md border border-stone-200 bg-white shadow-lg">
 
  {sireResults.map((h) => (
  <button
  key={h.id}
  type="button"
  onClick={() => selectSire(h)}
- className="block w-full cursor-pointer border-0 bg-transparent px-4 py-2 text-left text-sm text-ink hover:bg-glass"
+ className="block w-full cursor-pointer border-0 bg-transparent px-4 py-2 text-left text-sm text-stone-900 hover:bg-stone-50"
  >
- {h.custom_name} <span className="text-muted">({h.finish_type})</span>
+ {h.custom_name} <span className="text-stone-500">({h.finish_type})</span>
  </button>
  ))}
  </div>
@@ -245,7 +245,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  {/* Dam with search */}
  <div className="relative mb-6" ref={damRef}>
- <label className="text-ink mb-1 block text-sm font-semibold">Dam (Mother)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Dam (Mother)</label>
  <Input
  
  type="text"
@@ -265,23 +265,23 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <button
  type="button"
  onClick={clearDamLink}
- className="cursor-pointer border-0 bg-transparent text-xs text-muted"
+ className="cursor-pointer border-0 bg-transparent text-xs text-stone-500"
  >
  ✕
  </button>
  </div>
  )}
  {showDamDropdown && damResults.length > 0 && (
- <div className="absolute top-full right-0 left-0 z-50 max-h-[200px] overflow-y-auto rounded-md border border-edge bg-card shadow-lg">
+ <div className="absolute top-full right-0 left-0 z-50 max-h-[200px] overflow-y-auto rounded-md border border-stone-200 bg-white shadow-lg">
 
  {damResults.map((h) => (
  <button
  key={h.id}
  type="button"
  onClick={() => selectDam(h)}
- className="block w-full cursor-pointer border-0 bg-transparent px-4 py-2 text-left text-sm text-ink hover:bg-glass"
+ className="block w-full cursor-pointer border-0 bg-transparent px-4 py-2 text-left text-sm text-stone-900 hover:bg-stone-50"
  >
- {h.custom_name} <span className="text-muted">({h.finish_type})</span>
+ {h.custom_name} <span className="text-stone-500">({h.finish_type})</span>
  </button>
  ))}
  </div>
@@ -290,7 +290,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Sculptor / Artist</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Sculptor / Artist</label>
  <Input
  
  type="text"
@@ -303,7 +303,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
 
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Cast Number</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Cast Number</label>
  <Input
  
  type="text"
@@ -314,7 +314,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Edition Size</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Edition Size</label>
  <Input
  
  type="text"
@@ -327,7 +327,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Lineage Notes</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Lineage Notes</label>
  <Textarea
  
  value={lineageNotes}
@@ -339,19 +339,19 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  />
  </div>
 
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-danger mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
 
  <div className="mt-6 flex justify-end gap-2">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleCancel}
  >
  Cancel
  </button>
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={status ==="saving"}
  >
  {status ==="saving" ?"Saving…" :"Save Pedigree"}
@@ -365,7 +365,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  // Read-only display
  return (
  <div
- className="rounded-lg border border-edge bg-card p-4 shadow-sm transition-all"
+ className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm transition-all"
  id="pedigree-card"
  >
  <div className="mb-4 flex items-center justify-between">
@@ -374,7 +374,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </h3>
  {isOwner && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-1 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-1 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setIsEditing(true)}
  >
  ✏️ Edit
@@ -383,8 +383,8 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
 
  {pedigree!.sireName && (
- <div className="flex justify-between border-b border-[var(--color-border,rgba(0,0,0,0.06))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted text-sm">Sire</span>
+ <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <span className="text-stone-500 text-sm">Sire</span>
  <span className="text-sm font-medium">
  {pedigree!.sireId ? (
  <Link
@@ -400,8 +400,8 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  )}
  {pedigree!.damName && (
- <div className="flex justify-between border-b border-[var(--color-border,rgba(0,0,0,0.06))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted text-sm">Dam</span>
+ <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <span className="text-stone-500 text-sm">Dam</span>
  <span className="text-sm font-medium">
  {pedigree!.damId ? (
  <Link
@@ -417,14 +417,14 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  )}
  {pedigree!.sculptor && (
- <div className="flex justify-between border-b border-[var(--color-border,rgba(0,0,0,0.06))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted text-sm">Sculptor</span>
+ <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <span className="text-stone-500 text-sm">Sculptor</span>
  <span className="text-sm font-medium">{pedigree!.sculptor}</span>
  </div>
  )}
  {(pedigree!.castNumber || pedigree!.editionSize) && (
- <div className="flex justify-between border-b border-[var(--color-border,rgba(0,0,0,0.06))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted text-sm">Cast / Edition</span>
+ <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <span className="text-stone-500 text-sm">Cast / Edition</span>
  <span className="text-sm font-medium">
  {pedigree!.castNumber && pedigree!.editionSize
  ? `#${pedigree!.castNumber} of ${pedigree!.editionSize}`
@@ -435,7 +435,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  )}
  {pedigree!.lineageNotes && (
- <div className="text-muted mt-4 rounded-md bg-[rgba(0,0,0,0.03)] px-4 py-2 text-sm whitespace-pre-wrap italic">
+ <div className="text-stone-500 mt-4 rounded-md bg-stone-50 px-4 py-2 text-sm whitespace-pre-wrap italic">
  {pedigree!.lineageNotes}
  </div>
  )}

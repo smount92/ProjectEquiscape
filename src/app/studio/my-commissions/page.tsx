@@ -49,7 +49,7 @@ export default async function MyCommissionsPage() {
    <Link
     key={c.id}
     href={`/studio/commission/${c.id}`}
-    className="border-edge flex flex-col rounded-lg border bg-[var(--color-bg-elevated)] p-6 text-inherit no-underline transition-all hover:-translate-y-[1px] hover:border-[rgba(139,92,246,0.3)]"
+    className="border-stone-200 flex flex-col rounded-lg border bg-stone-50 p-6 text-inherit no-underline transition-all hover:-translate-y-[1px] hover:border-purple-300"
    >
     <div className="mb-2 flex items-center justify-between gap-2">
     <span className="text-base font-bold">
@@ -57,7 +57,7 @@ export default async function MyCommissionsPage() {
     </span>
     <span
      className="inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap"
-     style={{
+      /* eslint-disable-next-line react/forbid-dom-props */ style={{
      backgroundColor: `${STATUS_COLORS[c.status]}20`,
      color: STATUS_COLORS[c.status],
      border: `1px solid ${STATUS_COLORS[c.status]}40`,
@@ -66,15 +66,15 @@ export default async function MyCommissionsPage() {
      {c.statusLabel}
     </span>
     </div>
-    <div className="text-muted mb-2 flex gap-4 text-sm">
+    <div className="text-stone-500 mb-2 flex gap-4 text-sm">
     <span>🎨 @{c.artistAlias}</span>
     {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
     </div>
-    <p className="text-ink-light mb-2 text-sm leading-normal">
+    <p className="text-stone-600 mb-2 text-sm leading-normal">
     {c.description.length > 100 ? c.description.substring(0, 100) +"…" : c.description}
     </p>
     <div
-    className="text-muted mt-auto pt-2 text-xs"
+    className="text-stone-500 mt-auto pt-2 text-xs"
     >
     Last updated{" "}
     {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
@@ -96,13 +96,13 @@ export default async function MyCommissionsPage() {
  >
   {commissions.length === 0 ? (
   <div
-   className="bg-card border-edge animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
+   className="bg-white border-stone-200 animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
   >
    <p className="mb-4 text-[2rem]">🎨</p>
-   <p className="text-muted">You haven&apos;t requested any commissions yet.</p>
+   <p className="text-stone-500">You haven&apos;t requested any commissions yet.</p>
    <Link
    href="/discover"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    Browse Artists →
    </Link>

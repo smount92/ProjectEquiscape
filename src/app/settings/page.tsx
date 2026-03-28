@@ -144,7 +144,7 @@ export default function SettingsPage() {
  <FocusLayout title="Settings" description="Manage your profile, notifications, and account.">
  <div className="p-12 text-center">
  <div
- className="mx-auto mb-6 h-9 w-9 animate-spin rounded-full border-3 border-edge border-t-forest"
+ className="mx-auto mb-6 h-9 w-9 animate-spin rounded-full border-3 border-stone-200 border-t-forest"
  />
  <p>Loading settings…</p>
  </div>
@@ -154,7 +154,7 @@ export default function SettingsPage() {
 
  return (
  <FocusLayout title="Settings" description="Manage your profile, notifications, and account.">
- <nav className="text-ink-light animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-stone-600 animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -169,13 +169,13 @@ export default function SettingsPage() {
 
  {/* ═══ Profile ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
+ <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  👤 Profile
  </h2>
- <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
+ <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  {/* Avatar */}
             <div className="mb-8 flex items-center gap-6 border-b border-stone-200 pb-6 max-sm:gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-stone-300 bg-gradient-to-br from-forest/5 to-amber-800/5 text-[2rem] transition-colors hover:border-forest [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-stone-300 bg-gradient-to-br from-forest/5 to-amber-800/5 text-[2rem] transition-colors hover:border-emerald-700 [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img src={avatarUrl} alt="Your avatar" />
@@ -185,7 +185,7 @@ export default function SettingsPage() {
  </div>
  <div>
  <button
-                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-300 bg-transparent px-6 py-2 text-sm font-medium text-ink-light no-underline transition-all hover:border-forest hover:text-forest"
+                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-300 bg-transparent px-6 py-2 text-sm font-medium text-stone-600 no-underline transition-all hover:border-emerald-700 hover:text-forest"
  onClick={() => avatarInputRef.current?.click()}
  disabled={isUploadingAvatar}
  >
@@ -199,7 +199,7 @@ export default function SettingsPage() {
  className="hidden"
  aria-label="Upload avatar"
  />
-              <p className="mt-1 text-xs text-ink-light">
+              <p className="mt-1 text-xs text-stone-600">
  Max 2MB. JPG, PNG, or WebP.
  </p>
  </div>
@@ -207,7 +207,7 @@ export default function SettingsPage() {
 
  {/* Alias */}
  <div className="mb-6">
- <label htmlFor="settings-alias" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="settings-alias" className="text-stone-900 mb-1 block text-sm font-semibold">
  Display Name
  </label>
  <Input
@@ -219,12 +219,12 @@ export default function SettingsPage() {
  maxLength={30}
  minLength={3}
  />
- <span className="text-muted mt-1 block text-xs">3-30 characters. Must be unique.</span>
+ <span className="text-stone-500 mt-1 block text-xs">3-30 characters. Must be unique.</span>
  </div>
 
  {/* Bio */}
  <div className="mb-6">
- <label htmlFor="settings-bio" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="settings-bio" className="text-stone-900 mb-1 block text-sm font-semibold">
  Bio
  </label>
  <Textarea
@@ -236,12 +236,12 @@ export default function SettingsPage() {
  value={bio}
  onChange={(e) => setBio(e.target.value)}
  />
- <span className="text-muted mt-1 block text-xs">{bio.length}/500</span>
+ <span className="text-stone-500 mt-1 block text-xs">{bio.length}/500</span>
  </div>
 
  {/* Default horse visibility */}
- <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
- <span className="text-ink flex items-center gap-2 text-sm font-medium">
+ <div className="border-stone-200 flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
+ <span className="text-stone-900 flex items-center gap-2 text-sm font-medium">
  🏆 Default new horses to public
  </span>
  <button
@@ -255,12 +255,12 @@ export default function SettingsPage() {
  </div>
 
  {/* Photo watermarking */}
- <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
+ <div className="border-stone-200 flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
  <div>
- <span className="text-ink flex items-center gap-2 text-sm font-medium">
+ <span className="text-stone-900 flex items-center gap-2 text-sm font-medium">
  📸 Watermark uploaded photos
  </span>
- <span className="text-muted mt-1 mt-[2] block text-xs">
+ <span className="text-stone-500 mt-1 mt-[2] block text-xs">
  Adds &ldquo;© @{aliasName} — ModelHorseHub&rdquo; to new uploads
  </span>
  </div>
@@ -275,12 +275,12 @@ export default function SettingsPage() {
  </div>
 
  {/* Show trophies on profile */}
- <div className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
+ <div className="border-stone-200 flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
  <div>
- <span className="text-ink flex items-center gap-2 text-sm font-medium">
+ <span className="text-stone-900 flex items-center gap-2 text-sm font-medium">
  🏆 Show Trophy Case on profile
  </span>
- <span className="text-muted mt-1 mt-[2] block text-xs">
+ <span className="text-stone-500 mt-1 mt-[2] block text-xs">
  When off, your badges are hidden from other users
  </span>
  </div>
@@ -296,12 +296,12 @@ export default function SettingsPage() {
 
  {/* Currency symbol preference */}
  <div className="mb-6">
- <label htmlFor="settings-currency" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="settings-currency" className="text-stone-900 mb-1 block text-sm font-semibold">
  💱 Preferred Currency Symbol
  </label>
  <select
  id="settings-currency"
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
  value={currencySymbol}
  onChange={(e) => setCurrencySymbol(e.target.value)}
  >
@@ -316,7 +316,7 @@ export default function SettingsPage() {
  <option value="₩">₩ — Korean Won</option>
  <option value="zł">zł — Polish Zloty</option>
  </select>
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  Shown on your vault, offers, and listing prices. Market Value (Blue Book) always shows
  USD.
  </span>
@@ -342,12 +342,12 @@ export default function SettingsPage() {
 
  {/* ═══ Security ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
+ <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  🔒 Security
  </h2>
- <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
+ <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Email</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Email</label>
  <Input
  type="email"
  className="opacity-60"
@@ -355,7 +355,7 @@ export default function SettingsPage() {
  disabled
  title="Email address"
  />
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  Email changes require verification (coming soon).
  </span>
  </div>
@@ -363,7 +363,7 @@ export default function SettingsPage() {
  <div className="mb-6">
  <label
  htmlFor="settings-new-password"
- className="text-ink mb-1 block text-sm font-semibold"
+ className="text-stone-900 mb-1 block text-sm font-semibold"
  >
  New Password
  </label>
@@ -381,7 +381,7 @@ export default function SettingsPage() {
  <div className="mb-6">
  <label
  htmlFor="settings-confirm-password"
- className="text-ink mb-1 block text-sm font-semibold"
+ className="text-stone-900 mb-1 block text-sm font-semibold"
  >
  Confirm Password
  </label>
@@ -396,7 +396,7 @@ export default function SettingsPage() {
  </div>
 
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleChangePassword}
  disabled={isSavingPassword || !newPassword || !confirmPassword}
  >
@@ -415,16 +415,16 @@ export default function SettingsPage() {
 
  {/* ═══ Notifications ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
+ <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  🔔 Notifications
  </h2>
- <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
+ <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  {NOTIF_LABELS.map((n) => (
  <div
  key={n.key}
- className="border-edge flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2"
+ className="border-stone-200 flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2"
  >
- <span className="text-ink flex items-center gap-2 text-sm font-medium">
+ <span className="text-stone-900 flex items-center gap-2 text-sm font-medium">
  {n.emoji} {n.label}
  </span>
  <button
@@ -442,21 +442,21 @@ export default function SettingsPage() {
 
  {/* ═══ Data & Reports ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
+ <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  📊 Data & Reports
  </h2>
- <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
+ <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  <div className="flex flex-col gap-6">
  {/* CSV Export */}
  <div>
  <a
  href="/api/export"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  download
  >
  📄 Download Collection (CSV)
  </a>
- <p className="text-ink-light mt-1 mt-[4] block text-xs">
+ <p className="text-stone-600 mt-1 mt-[4] block text-xs">
  Spreadsheet format — compatible with Excel, Google Sheets.
  </p>
  </div>
@@ -465,12 +465,12 @@ export default function SettingsPage() {
  <div>
  <a
  href="/api/insurance-report"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  download
  >
  🛡️ Download Insurance Report (PDF)
  </a>
- <p className="text-ink-light mt-1 mt-[4] block text-xs">
+ <p className="text-stone-600 mt-1 mt-[4] block text-xs">
  Professional PDF with photos and values — share with your insurance agent.
  </p>
  </div>
@@ -480,10 +480,10 @@ export default function SettingsPage() {
 
  {/* ═══ Subscription ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
+ <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  💎 Subscription
  </h2>
- <div className="bg-surface border-edge rounded-xl border p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6">
+ <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  <p className="mb-4 text-sm leading-[1.6]">
  Upgrade to <strong>MHH Pro</strong> for advanced analytics, expanded photo storage,
  AI-powered collection reports, and more.
@@ -499,23 +499,23 @@ export default function SettingsPage() {
 
  {/* ═══ Danger Zone ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-ink mb-4 flex items-center gap-2 text-lg font-bold tracking-tight text-[#ef4444]">
+ <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight text-[#ef4444]">
  ⚠️ Danger Zone
  </h2>
  <div
- className="bg-surface rounded-xl border border-[#ef4444] p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-sm:p-6"
+ className="bg-white rounded-xl border border-[#ef4444] p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6"
  >
  <p className="mb-4 leading-[1.6]">
  Permanently delete your account. This action <strong>cannot be undone</strong>.
  </p>
- <ul className="text-muted mb-4 pl-6 text-sm leading-[1.8]">
+ <ul className="text-stone-500 mb-4 pl-6 text-sm leading-[1.8]">
  <li>Your profile will be anonymized as &ldquo;[Deleted Collector]&rdquo;</li>
  <li>Your horses will be orphaned (Hoofprint™ history preserved)</li>
  <li>Pending transfers and commissions will be cancelled</li>
  <li>You will be signed out and cannot log in again</li>
  </ul>
  <div className="mb-6">
- <label htmlFor="delete-confirm" className="text-ink mb-1 block text-sm font-semibold">
+ <label htmlFor="delete-confirm" className="text-stone-900 mb-1 block text-sm font-semibold">
  Type <strong>DELETE</strong> to confirm
  </label>
  <Input
@@ -529,10 +529,10 @@ export default function SettingsPage() {
  />
  </div>
  <button
- className={`inline-flex min-h-[36px] items-center justify-center gap-2 rounded-md border border-edge px-6 py-2 text-sm font-semibold no-underline transition-all ${
+ className={`inline-flex min-h-[36px] items-center justify-center gap-2 rounded-md border border-stone-200 px-6 py-2 text-sm font-semibold no-underline transition-all ${
  deleteConfirm ==="DELETE"
  ? "cursor-pointer bg-[#ef4444] text-white"
- : "cursor-not-allowed bg-[var(--color-surface-elevated)] text-muted"
+ : "cursor-not-allowed bg-stone-50 text-stone-500"
  }`}
  disabled={deleteConfirm !=="DELETE" || isDeleting}
  onClick={async () => {
@@ -551,7 +551,7 @@ export default function SettingsPage() {
  {isDeleting ?"Deleting…" :"🗑️ Permanently Delete Account"}
  </button>
  {deleteError && (
- <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {deleteError}
  </p>
  )}

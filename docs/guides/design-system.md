@@ -11,22 +11,43 @@ MHH should feel warm, tactile, physical, and hobby-focused. Think of a beautiful
 | Page titles, H1, H2, Hero | Playfair Display | `font-serif text-3xl md:text-4xl font-bold tracking-tight` | Loaded as `--font-serif-theme` |
 | H3, Section headers | Playfair Display | `font-serif text-xl font-semibold` | |
 | UI text, labels, buttons | Inter | `font-sans text-sm` or `text-base` | Default body font |
-| Muted/secondary | Inter | `text-muted` or `text-stone-600` | Never use pure `#000` black |
-| Primary text | Inter | `text-ink` or `text-stone-900` | Espresso, warm dark |
+| Muted/secondary | Inter | `text-stone-500` | Never use pure `#000` black |
+| Primary text | Inter | `text-stone-900` | Warm dark |
+| Light secondary | Inter | `text-stone-600` | For descriptions, metadata |
 
 ## Color Palette
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `parchment` | `#F0EAD6` | Page backgrounds |
-| `card` | `#FBF7ED` | Card surfaces |
-| `ink` | `#2D2318` | Primary text (NOT black) |
-| `muted` | `#8B7B6A` | Secondary/helper text |
-| `forest` | `#2C5545` | Primary accent, CTAs |
-| `saddle` | `#8B5A2B` | Secondary accent |
-| `edge` | `#D4C9B5` | Borders |
-| `danger` | `#9B3028` | Destructive actions |
-| `success` | `#356845` | Positive states |
+> **Migration complete (2026-03-28):** All legacy semantic tokens (`bg-card`, `border-edge`, `text-ink`, `text-muted`, etc.) have been replaced with Tailwind stone palette equivalents across all 55+ pages and 90+ components.
+
+| Tailwind Class | Usage | Replaces Legacy Token |
+|----------------|-------|-----------------------|
+| `bg-stone-50` | Page backgrounds, elevated surfaces | `bg-parchment`, `bg-elevated`, `bg-glass` |
+| `bg-white` | Card surfaces, input backgrounds | `bg-card` |
+| `bg-stone-100` | Section dividers, sticky headers | `bg-parchment-dark` |
+| `text-stone-900` | Primary text | `text-ink` |
+| `text-stone-600` | Secondary text, descriptions | `text-ink-light` |
+| `text-stone-500` | Muted text, hints, metadata | `text-muted` |
+| `text-white` | Inverse text on dark backgrounds | `text-inverse` |
+| `border-stone-200` | All structural borders | `border-edge` |
+| `text-forest` / `bg-forest` | Primary accent (Hunter Green `#2C5545`) | Unchanged |
+| `text-red-700` | Destructive action text | `text-danger` |
+| `bg-emerald-500` | Success backgrounds | `bg-success` |
+| `bg-emerald-50` | Success state surfaces | RGBA emerald patterns |
+| `bg-amber-50` | Warning state surfaces | RGBA amber patterns |
+| `bg-red-50` | Error state surfaces | RGBA red patterns |
+| `bg-purple-50` | Art Studio accent surfaces | RGBA purple patterns |
+
+### ❌ Banned Legacy Tokens
+
+The following class names **must never be used** in new code:
+
+```
+bg-card, bg-glass, bg-elevated, bg-parchment, bg-parchment-dark, bg-surface-glass
+border-edge, text-ink, text-ink-light, text-muted, text-inverse, text-danger
+bg-success, bg-surface-primary, bg-surface-secondary
+```
+
+Any `bg-[rgba(...)]` or `border-[rgba(...)]` patterns should use Tailwind palette equivalents (e.g., `bg-emerald-50` instead of `bg-[rgba(44,85,69,0.1)]`).
 
 ## Spacing Rules
 
@@ -69,9 +90,15 @@ MHH should feel warm, tactile, physical, and hobby-focused. Think of a beautiful
 - **Use for:** Add Horse, Edit Horse, Settings, Login, Signup, Contact, Claim
 - **Structure:** Back link + Title + Centered form content
 
-### Migration Status: ✅ COMPLETE (2026-03-27)
+### Intentional Exceptions
 
-All 55+ `page.tsx` files have been migrated to use the 4 layout archetypes. The only page retaining a bespoke layout is the root landing page (`page.tsx`), which has unique hero sections.
+Two pages intentionally bypass the layout archetype system:
+- **`page.tsx` (Landing page):** Full-bleed marketing page with per-section `max-w-*` constraints
+- **`inbox/[id]/page.tsx` (Chat):** Full-viewport chat shell using `h-[calc(100vh-var(--header-height))]`
+
+### Migration Status: ✅ COMPLETE (2026-03-28)
+
+All 55+ `page.tsx` files and 90+ components have been migrated. Zero legacy tokens remain in TSX/TS files.
 
 **When creating a new page:** Import the appropriate layout component from `@/components/layouts/` and wrap your page content. Never create custom `mx-auto max-w-[...]` container divs.
 

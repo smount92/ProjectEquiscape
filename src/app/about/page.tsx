@@ -17,7 +17,7 @@ export default function AboutPage() {
  <h1>
  About <span className="text-forest">Model Horse Hub</span>
  </h1>
- <p className="mt-2 text-lg text-ink-light">
+ <p className="mt-2 text-lg text-stone-600">
  Built by a collector who was tired of the status quo.
  </p>
  </div>
@@ -25,7 +25,7 @@ export default function AboutPage() {
  {/* Our Story */}
  <section className="mb-12">
  <h2>Our Story</h2>
- <div className="space-y-4 text-base leading-relaxed text-ink-light">
+ <div className="space-y-4 text-base leading-relaxed text-stone-600">
  <p>
  It started the way it starts for most of us: a notebook. Then a spreadsheet. Then another
  spreadsheet because the first one got too messy. Then Facebook albums and mental notes about
@@ -56,7 +56,7 @@ export default function AboutPage() {
  <section className="mb-12">
  <h2>What Makes Us Different</h2>
  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  🔒
  </span>
@@ -68,7 +68,7 @@ export default function AboutPage() {
  access controls. Period.
  </p>
  </div>
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  ✨
  </span>
@@ -79,7 +79,7 @@ export default function AboutPage() {
  collectors actually work — not how a generic inventory app thinks you should.
  </p>
  </div>
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  🐾
  </span>
@@ -97,7 +97,7 @@ export default function AboutPage() {
  {/* The Vision */}
  <section className="mb-12">
  <h2>Where We&apos;re Going</h2>
- <div className="space-y-4 text-base leading-relaxed text-ink-light">
+ <div className="space-y-4 text-base leading-relaxed text-stone-600">
  <p>
  Model Horse Hub isn&apos;t just a collection manager &mdash; it&apos;s becoming the operating
  system for the hobby. Every feature on this platform exists because a real collector said
@@ -106,7 +106,7 @@ export default function AboutPage() {
  <p>Here&apos;s what&apos;s on the roadmap:</p>
  </div>
  <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  🎨
  </span>
@@ -117,7 +117,7 @@ export default function AboutPage() {
  Hoofprint&trade; &mdash; permanently.
  </p>
  </div>
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  📦
  </span>
@@ -128,7 +128,7 @@ export default function AboutPage() {
  condition grades.
  </p>
  </div>
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  🏆
  </span>
@@ -139,7 +139,7 @@ export default function AboutPage() {
  paper cards.
  </p>
  </div>
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  🌍
  </span>
@@ -149,7 +149,7 @@ export default function AboutPage() {
  integrated with your stable, not scattered across Facebook and Discord.
  </p>
  </div>
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  📱
  </span>
@@ -159,7 +159,7 @@ export default function AboutPage() {
  and push notifications &mdash; all from your phone.
  </p>
  </div>
- <div className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all">
  <span className="mb-4 block text-[2rem]" aria-hidden="true">
  🤝
  </span>
@@ -173,11 +173,11 @@ export default function AboutPage() {
  </section>
 
  {/* CTA */}
- <div className="bg-card border-edge rounded-lg border text-center">
+ <div className="bg-white border-stone-200 rounded-lg border text-center">
  <p>Your herd is waiting. Give it the home it deserves.</p>
  <Link
  href="/signup"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  id="about-cta-signup"
  >
  Start Your Digital Stable — Free

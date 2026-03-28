@@ -44,7 +44,7 @@ const FINISH_BADGE_CLASSES: Record<string, string> = {
  "Artist Resin": "bg-rose-50 text-rose-700 border-rose-200",
  "Test Run": "bg-cyan-50 text-cyan-700 border-cyan-200",
  "Decorator": "bg-emerald-50 text-emerald-700 border-emerald-200",
- "default": "bg-stone-100 text-ink-light border-stone-200",
+ "default": "bg-stone-100 text-stone-600 border-stone-200",
 };
 
 const containerVariants = {
@@ -154,7 +154,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
  return (
   <>
    {communityCards.length > 0 && (
-    <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-edge shadow-md z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-0">
+    <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-white border-stone-200 shadow-md z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-0">
      <Input
       type="text"
       value={searchInput}
@@ -179,7 +179,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
    )}
 
    {isFiltering && (
-    <div className="text-muted mb-6 pl-1 text-sm">
+    <div className="text-stone-500 mb-6 pl-1 text-sm">
      {communityCards.length === 0
       ? "No models match your filters"
       : `Showing ${communityCards.length} models`}
@@ -189,11 +189,11 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
    {communityCards.length === 0 && !isFiltering ? (
     <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-stone-200 bg-stone-50/50 p-16">
      <span className="mb-4 text-6xl">🏟️</span>
-     <h2 className="mb-2 font-serif text-xl font-semibold text-ink">The Show Ring is Empty</h2>
-     <p className="mb-6 max-w-sm text-center text-muted">No models have been shared yet. Be the first to showcase your collection!</p>
+     <h2 className="mb-2 font-serif text-xl font-semibold text-stone-900">The Show Ring is Empty</h2>
+     <p className="mb-6 max-w-sm text-center text-stone-500">No models have been shared yet. Be the first to showcase your collection!</p>
      <Link
       href="/add-horse"
-      className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+      className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
      >
       🐴 Add to Stable
      </Link>
@@ -201,8 +201,8 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
    ) : communityCards.length === 0 && isFiltering ? (
     <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-stone-200 bg-stone-50/50 p-16">
      <span className="mb-4 text-6xl">🔍</span>
-     <h2 className="mb-2 font-serif text-xl font-semibold text-ink">No Results</h2>
-     <p className="max-w-sm text-center text-muted">No models match your search. Try different filters.</p>
+     <h2 className="mb-2 font-serif text-xl font-semibold text-stone-900">No Results</h2>
+     <p className="max-w-sm text-center text-stone-500">No models match your search. Try different filters.</p>
     </div>
    ) : (
     <motion.div
@@ -226,7 +226,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
        >
         <Link
          href={`/community/${horse.id}`}
-         className="flex flex-col text-ink no-underline"
+         className="flex flex-col text-stone-900 no-underline"
         >
          {/* Image container — locked aspect ratio */}
          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-stone-100">
@@ -239,7 +239,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
             className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
            />
           ) : (
-           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted">
+           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-500">
             <span className="text-4xl opacity-50">🐴</span>
             <span className="text-xs font-medium">No photo</span>
            </div>
@@ -270,7 +270,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
 
          {/* Content area */}
          <div className="mt-3 px-1">
-          <h3 className="truncate font-serif text-lg font-bold text-ink">
+          <h3 className="truncate font-serif text-lg font-bold text-stone-900">
            {horse.customName}
            {(horse.hoofprintCount ?? 0) > 0 && (
             <span
@@ -281,7 +281,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
             </span>
            )}
           </h3>
-          <p className="truncate text-sm text-ink-light">{horse.refName}</p>
+          <p className="truncate text-sm text-stone-600">{horse.refName}</p>
 
           {/* Badge row */}
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -289,13 +289,13 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
           </div>
 
           {/* Metadata line */}
-          <div className="mt-2 flex items-center gap-2 text-xs text-ink-light">
+          <div className="mt-2 flex items-center gap-2 text-xs text-stone-600">
            <span>{timeAgo(horse.createdAt)}</span>
            {horse.sculptor && <span>· ✂️ {horse.sculptor}</span>}
           </div>
 
           {isListed && horse.marketplaceNotes && (
-           <div className="mt-1.5 truncate rounded-md bg-stone-50 px-2 py-1 text-xs text-ink-light" title={horse.marketplaceNotes}>
+           <div className="mt-1.5 truncate rounded-md bg-stone-50 px-2 py-1 text-xs text-stone-600" title={horse.marketplaceNotes}>
             📝 {horse.marketplaceNotes.length > 60 ? horse.marketplaceNotes.slice(0, 60) + "…" : horse.marketplaceNotes}
            </div>
           )}

@@ -46,21 +46,21 @@ export default function LinkHorseToCommission({ commissionId }: { commissionId: 
 
  if (done) {
  return (
- <div className="mt-4 mb-6 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-6 py-4 text-sm leading-relaxed">
+ <div className="mt-4 mb-6 rounded-lg border border-emerald-200 bg-emerald-50/80 px-6 py-4 text-sm leading-relaxed">
  ✅ Horse linked! WIP photos will appear on its Hoofprint™ upon delivery.
  </div>
  );
  }
 
  return (
- <div className="bg-card border-edge mb-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 mb-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-2">🔗 Link a Horse from Your Stable</h3>
- <p className="text-muted mb-4 text-sm">
+ <p className="text-stone-500 mb-4 text-sm">
  Link a horse so WIP photos are added to its Hoofprint™ when this commission is delivered.
  </p>
  <div className="flex items-center gap-2">
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex-1"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex-1"
  value={selectedHorseId}
  onChange={(e) => setSelectedHorseId(e.target.value)}
  title="Select a horse to link"
@@ -73,7 +73,7 @@ export default function LinkHorseToCommission({ commissionId }: { commissionId: 
  ))}
  </select>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleLink}
  disabled={!selectedHorseId || saving}
  >

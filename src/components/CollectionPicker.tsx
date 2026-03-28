@@ -91,24 +91,24 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
 
  return (
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">
  📁 Collections <span className="font-normal opacity-[0.6]">(Optional — multi-select)</span>
  </label>
 
  {loading ? (
- <div className="text-muted text-sm">Loading collections…</div>
+ <div className="text-stone-500 text-sm">Loading collections…</div>
  ) : collections.length === 0 ? (
- <div className="text-muted mb-2 text-sm">No collections yet. Create one to organize your models.</div>
+ <div className="text-stone-500 mb-2 text-sm">No collections yet. Create one to organize your models.</div>
  ) : (
  <div
- className="flex max-h-[180px] flex-col gap-1 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-bg-input,rgba(0,0,0,0.03))] p-2"
+ className="flex max-h-[180px] flex-col gap-1 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-bg-input,rgb(250 250 249))] p-2"
  >
  {collections.map((c) => (
  <label
  key={c.id}
  className={`flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-[background] duration-150 ${
  selectedCollectionIds.includes(c.id)
- ? "bg-[rgba(44,85,69,0.12)]"
+ ? "bg-emerald-100/70"
  : "bg-transparent"
  }`}
  >
@@ -138,7 +138,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  )}
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowModal(true)}
  aria-label="Create new collection"
  id="create-collection-btn"
@@ -147,7 +147,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  </button>
  </div>
 
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  Organize your models into collections like &quot;Childhood Herd&quot;, &quot;Show String&quot;, or
  &quot;Wishlist&quot;.
  </span>
@@ -163,7 +163,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div>
  <label
  htmlFor="new-collection-name"
- className="text-ink mb-1 block text-sm font-semibold"
+ className="text-stone-900 mb-1 block text-sm font-semibold"
  >
  Collection Name *
  </label>
@@ -184,7 +184,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div>
  <label
  htmlFor="new-collection-desc"
- className="text-ink mb-1 block text-sm font-semibold"
+ className="text-stone-900 mb-1 block text-sm font-semibold"
  >
  Description <span className="opacity-[0.6]">(Optional)</span>
  </label>
@@ -208,7 +208,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  />
  <label
  htmlFor="new-collection-public"
- className="text-ink m-0 block text-sm font-semibold"
+ className="text-stone-900 m-0 block text-sm font-semibold"
  >
  🌐 Make public on profile
  </label>
@@ -218,14 +218,14 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div className="flex justify-end gap-4 pt-2">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowModal(false)}
  >
  Cancel
  </button>
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleCreate}
  disabled={creating || !newName.trim()}
  >

@@ -35,14 +35,14 @@ export default function FollowButton({
  return (
  <div className="mt-2 flex items-center gap-2">
  <button
- className={`btn btn-sm ${isFollowing ?"btn-ghost !border-[rgba(34,197,94,0.3)] !text-[#22C55E] hover:!border-[rgba(239,68,68,0.4)] hover:!text-[#ef4444]" :"btn-primary"}`}
+ className={`btn btn-sm ${isFollowing ?"btn-ghost !border-emerald-300 !text-[#22C55E] hover:!border-red-300 hover:!text-[#ef4444]" :"btn-primary"}`}
  onClick={handleToggle}
  disabled={loading}
  id="follow-button"
  >
  {loading ?"…" : isFollowing ?"✓ Following" :"+ Follow"}
  </button>
- <span className="text-muted text-sm">
+ <span className="text-stone-500 text-sm">
  {followerCount} follower{followerCount !== 1 ?"s" :""}
  </span>
  </div>

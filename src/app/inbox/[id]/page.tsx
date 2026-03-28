@@ -201,12 +201,12 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  );
 
  return (
- <div className="h-[calc(100vh - 70px)] max-h-[calc(100vh - 70px)] mx-auto flex max-w-[var(--max-width)] flex-col overflow-hidden px-6 py-0">
+ <div className="mx-auto flex h-[calc(100vh-var(--header-height))] max-w-6xl flex-col overflow-hidden px-4 md:px-8">
  {/* Header */}
- <div className="bg-glass border-edge animate-fade-in-up mb-4 flex shrink-0 items-center gap-4 rounded-lg border px-6 py-4">
+ <div className="bg-stone-50 border-stone-200 animate-fade-in-up mb-4 flex shrink-0 items-center gap-4 rounded-lg border px-6 py-4">
  <Link
  href="/inbox"
- className="bg-[rgba(0,0,0,0.05)] text-muted flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full no-underline transition-all"
+ className="bg-black/5 text-stone-500 flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full no-underline transition-all"
  aria-label="Back to inbox"
  >
  <svg
@@ -223,17 +223,17 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <polyline points="15 18 9 12 15 6" />
  </svg>
  </Link>
- <div className="bg-glass border-edge shrink-0-info mb-4 flex items-center gap-4 rounded-lg border px-6 py-4">
- <div className="bg-glass border-edge shrink-0-alias mb-4 flex items-center gap-4 rounded-lg border px-6 py-4">
+ <div className="flex min-w-0 flex-1 flex-col">
+ <div className="flex items-center gap-2">
  <Link href={`/profile/${encodeURIComponent(otherAlias)}`}>@{otherAlias}</Link>
- <span className="bg-[rgba(44,85,69,0.1)] rounded-full px-[8px] py-[2px] text-xs font-medium text-[#2C5545]">
+ <span className="bg-emerald-50 rounded-full px-[8px] py-[2px] text-xs font-medium text-[#2C5545]">
  {isBuyer ?"Seller" :"Buyer"}
  </span>
  </div>
  {horseContext ? (
- <span className="text-muted mt-0.5 text-xs">🐴 Re: {horseContext.name}</span>
+ <span className="text-stone-500 mt-0.5 text-xs">🐴 Re: {horseContext.name}</span>
  ) : (
- <span className="text-muted mt-0.5 text-xs opacity-70">💬 Direct Message</span>
+ <span className="text-stone-500 mt-0.5 text-xs opacity-70">💬 Direct Message</span>
  )}
  </div>
 
@@ -241,28 +241,28 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <div className="mt-0.5 flex flex-wrap gap-1">
  {memberSince && (
  <span
- className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-stone-200 text-stone-500 inline-flex items-center gap-[3px] rounded-sm border bg-white px-2 py-0.5 text-xs whitespace-nowrap"
  title="Account age"
  >
  📅 Member since {memberSince}
  </span>
  )}
  <span
- className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-stone-200 text-stone-500 inline-flex items-center gap-[3px] rounded-sm border bg-white px-2 py-0.5 text-xs whitespace-nowrap"
  title="Completed Hoofprint transfers"
  >
  📦 {transferCount || 0} transfer{transferCount !== 1 ?"s" :""}
  </span>
  {avgRating !== null && (
  <span
- className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-[var(--color-bg-elevated)] px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-stone-200 text-stone-500 inline-flex items-center gap-[3px] rounded-sm border bg-white px-2 py-0.5 text-xs whitespace-nowrap"
  title="Average user rating"
  >
  ⭐ {avgRating} ({ratingsArr.length})
  </span>
  )}
  </div>
- <div className="bg-glass border-edge shrink-0-badge mb-4 flex items-center gap-4 rounded-lg border px-6 py-4">
+ <div className="inline-flex items-center gap-1 text-xs text-stone-500">
  <svg
  width="12"
  height="12"
@@ -286,7 +286,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  {horseContext && (
  <Link
  href={`/community/${horseContext.id}`}
- className="group bg-card border-edge text-ink hover:border-forest animate-fade-in-up mb-4 flex items-center gap-4 rounded-lg border p-4 no-underline shadow-md transition-all hover:-translate-y-px hover:bg-[var(--color-bg-card-hover)] hover:shadow-md"
+ className="group animate-fade-in-up mb-4 flex items-center gap-4 rounded-xl border border-stone-200 bg-white p-4 text-stone-900 no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md"
  id="chat-horse-link"
  >
  {horseContext.thumbnailUrl ? (
@@ -297,7 +297,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  className="h-14 w-14 shrink-0 rounded-md object-cover"
  />
  ) : (
- <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-[var(--color-bg-input)] object-cover text-2xl">
+ <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-stone-100 object-cover text-2xl">
  🐴
  </div>
  )}
@@ -306,7 +306,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  {horseContext.name}
  </span>
  {horseContext.refLine && (
- <span className="text-muted overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+ <span className="overflow-hidden text-xs text-stone-500 text-ellipsis whitespace-nowrap">
  {horseContext.refLine}
  </span>
  )}
@@ -314,8 +314,8 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <span
  className={`inline-flex w-fit items-center gap-[3px] rounded-full px-2 py-0.5 text-xs font-bold ${
  horseContext.tradeStatus ==="For Sale"
- ?"bg-[rgba(34,197,94,0.12)] text-[#22c55e]"
- :"bg-[rgba(59,130,246,0.12)] text-[#3b82f6]"
+ ?"bg-emerald-50/80 text-emerald-600"
+ :"bg-blue-50/80 text-blue-500"
  }`}
  >
  {horseContext.tradeStatus ==="For Sale" ?"💲" :"🤝"}{""}
@@ -325,7 +325,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  </span>
  )}
  </div>
- <span className="text-muted group-hover:text-forest shrink-0 text-[1.1rem] transition-transform group-hover:translate-x-[3px]">
+ <span className="shrink-0 text-[1.1rem] text-stone-400 transition-transform group-hover:text-forest group-hover:translate-x-[3px]">
  →
  </span>
  </Link>

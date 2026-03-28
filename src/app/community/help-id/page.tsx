@@ -93,7 +93,7 @@ export default async function HelpIdPage() {
   headerActions={
   <Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
   >
    ← Back to Show Ring
   </Link>
@@ -111,7 +111,7 @@ export default async function HelpIdPage() {
    <Link
     key={req.id}
     href={`/community/help-id/${req.id}`}
-    className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
+    className="bg-white border-stone-200 flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
     <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
@@ -126,19 +126,19 @@ export default async function HelpIdPage() {
      🐴
     </div>
     )}
-    <span className="absolute top-2 right-2 rounded-full bg-[rgba(240,208,108,0.9)] px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+    <span className="absolute top-2 right-2 rounded-full bg-amber-400 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
      Open
     </span>
     </div>
     <div className="flex flex-1 flex-col gap-2 p-4">
-    <p className="text-ink-light line-clamp-2 text-sm leading-relaxed">
+    <p className="text-stone-600 line-clamp-2 text-sm leading-relaxed">
      {req.description
      ? req.description.length > 100
      ? req.description.substring(0, 100) +"…"
      : req.description
      :"No description provided"}
     </p>
-    <div className="text-muted mt-auto flex items-center justify-between text-xs">
+    <div className="text-stone-500 mt-auto flex items-center justify-between text-xs">
      <span>by {req.userName}</span>
      <span>
      💬 {suggestionCounts.get(req.id) || 0} suggestion
@@ -155,7 +155,7 @@ export default async function HelpIdPage() {
   {/* Resolved Requests */}
   {resolvedRequests.length > 0 && (
   <section className="mt-12">
-   <h2 className="text-ink-light mb-6 text-lg font-bold">
+   <h2 className="text-stone-600 mb-6 text-lg font-bold">
    ✅ Resolved ({resolvedRequests.length})
    </h2>
    <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
@@ -163,7 +163,7 @@ export default async function HelpIdPage() {
    <Link
     key={req.id}
     href={`/community/help-id/${req.id}`}
-    className="bg-card border-edge flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
+    className="bg-white border-stone-200 flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
     <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
@@ -183,14 +183,14 @@ export default async function HelpIdPage() {
     </span>
     </div>
     <div className="flex flex-1 flex-col gap-2 p-4">
-    <p className="text-ink-light line-clamp-2 text-sm leading-relaxed">
+    <p className="text-stone-600 line-clamp-2 text-sm leading-relaxed">
      {req.description
      ? req.description.length > 100
      ? req.description.substring(0, 100) +"…"
      : req.description
      :"No description"}
     </p>
-    <div className="text-muted mt-auto flex items-center justify-between text-xs">
+    <div className="text-stone-500 mt-auto flex items-center justify-between text-xs">
      <span>by {req.userName}</span>
      <span>💬 {suggestionCounts.get(req.id) || 0}</span>
     </div>
@@ -203,10 +203,10 @@ export default async function HelpIdPage() {
 
   {openRequests.length === 0 && resolvedRequests.length === 0 && (
   <div
-   className="bg-card border-edge mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
+   className="bg-white border-stone-200 mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
   >
    <p className="mb-4 text-[2rem]">🔍</p>
-   <p className="text-ink-light">No ID requests yet. Be the first to submit one!</p>
+   <p className="text-stone-600">No ID requests yet. Be the first to submit one!</p>
   </div>
   )}
  </ExplorerLayout>

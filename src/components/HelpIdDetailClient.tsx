@@ -86,9 +86,9 @@ export default function HelpIdDetailClient({
 
  {suggestions.length === 0 ? (
  <div
- className="bg-card border-edge rounded-lg border p-8 text-center shadow-md transition-all"
+ className="bg-white border-stone-200 rounded-lg border p-8 text-center shadow-md transition-all"
  >
- <p className="text-muted">No suggestions yet. Be the first to help!</p>
+ <p className="text-stone-600 font-medium my-4">No suggestions yet. Be the first to help!</p>
  </div>
  ) : (
  <div className="flex flex-col gap-4">
@@ -99,13 +99,13 @@ export default function HelpIdDetailClient({
  id={`suggestion-${s.id}`}
  >
  <div className="mb-4 flex flex-wrap items-center gap-4">
- <span className="text-ink text-sm font-semibold">{s.userName}</span>
+ <span className="text-stone-900 text-sm font-semibold">{s.userName}</span>
  {s.isAccepted && (
- <span className="bg-[rgba(92,224,160,0.15)] text-success rounded-full px-[10px] py-[2px] text-xs font-semibold">
+ <span className="bg-emerald-100 text-success rounded-full px-[10px] py-[2px] text-xs font-semibold">
  ✅ Accepted Answer
  </span>
  )}
- <span className="text-ink-light ml-auto text-xs">
+ <span className="text-stone-600 ml-auto text-xs">
  {new Date(s.created_at).toLocaleDateString()}
  </span>
  </div>
@@ -118,7 +118,7 @@ export default function HelpIdDetailClient({
  <p className="text-forest mb-1 text-sm font-semibold">🎨 {s.resinDisplay}</p>
  )}
  {s.free_text && (
- <p className="text-sm leading-[1.6] text-[var(--color-text-secondary)]">
+ <p className="text-sm leading-[1.6] text-stone-500">
  {s.free_text}
  </p>
  )}
@@ -126,7 +126,7 @@ export default function HelpIdDetailClient({
 
  <div className="flex items-center gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => handleUpvote(s.id)}
  title="Upvote this suggestion"
  >
@@ -135,7 +135,7 @@ export default function HelpIdDetailClient({
 
  {isOwner && !isResolved && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleAccept(s.id)}
  >
  ✅ Accept
@@ -144,7 +144,7 @@ export default function HelpIdDetailClient({
 
  {s.isAccepted && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleAddToStable(s.id)}
  disabled={addingHorse === s.id}
  >
@@ -168,14 +168,14 @@ export default function HelpIdDetailClient({
  <div className="mt-8">
  {!showSuggestForm ? (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => setShowSuggestForm(true)}
  id="add-suggestion-btn"
  >
  💡 I Know This Model
  </button>
  ) : (
- <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">Your Suggestion</h3>
  <div className="mb-6">
  <Textarea
@@ -188,7 +188,7 @@ export default function HelpIdDetailClient({
  </div>
  <div className="flex gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setShowSuggestForm(false);
  setSuggestText("");
@@ -197,7 +197,7 @@ export default function HelpIdDetailClient({
  Cancel
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSuggest}
  disabled={submitting || !suggestText.trim()}
  >
@@ -218,7 +218,7 @@ export default function HelpIdDetailClient({
  {isOwner && (
  <div className="mt-8 text-right">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={async () => {
  if (confirm("Delete this Help ID request? This cannot be undone.")) {
  const result = await deleteIdRequest(requestId);

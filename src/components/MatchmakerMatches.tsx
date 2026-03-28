@@ -50,7 +50,7 @@ export default function MatchmakerMatches({
  {matches.map((match) => (
  <div
  key={match.id}
- className="bg-surface-glass border-edge flex gap-2 rounded-md border p-2 transition-all duration-200 hover:border-[rgba(251,146,60,0.4)] hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]"
+ className="bg-stone-50 border-stone-200 flex gap-2 rounded-md border p-2 transition-all duration-200 hover:border-orange-300 hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]"
  >
  <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-sm bg-black/[0.03]">
  {match.thumbnailUrl ? (
@@ -76,7 +76,7 @@ export default function MatchmakerMatches({
  </Link>
  <div className="mt-[2px] flex items-center gap-2">
  <span
- className={`rounded-full px-2 py-[2px] text-xs font-bold ${match.trade_status ==="For Sale" ?"bg-[rgba(34,197,94,0.15)] text-[#22c55e]" :"bg-[rgba(59,130,246,0.15)] text-[#3b82f6]"}`}
+ className={`rounded-full px-2 py-[2px] text-xs font-bold ${match.trade_status ==="For Sale" ?"bg-emerald-100 text-[#22c55e]" :"bg-blue-50 text-[#3b82f6]"}`}
  >
  {match.trade_status ==="For Sale" ?"💲" :"🤝"}{""}
  {match.listing_price
@@ -85,13 +85,13 @@ export default function MatchmakerMatches({
  </span>
  <Link
  href={`/profile/${encodeURIComponent(match.ownerAlias)}`}
- className="text-muted hover:text-forest text-xs no-underline hover:underline"
+ className="text-stone-500 hover:text-forest text-xs no-underline hover:underline"
  >
  @{match.ownerAlias}
  </Link>
  </div>
  {match.marketplace_notes && (
- <div className="text-muted mt-1 text-xs leading-snug italic">
+ <div className="text-stone-500 mt-1 text-xs leading-snug italic">
  {match.marketplace_notes}
  </div>
  )}

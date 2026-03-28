@@ -361,10 +361,10 @@ export default function CsvImport() {
  key={s.num}
  className={`csv-step-dot ${step >= s.num ?"active" :""} ${step === s.num ?"current" :""}`}
  >
- <span className="bg-card border-edge text-muted flex h-[36px] w-[36px] items-center justify-center rounded-full rounded-lg border border-[2px] text-sm font-bold shadow-md transition-all">
+ <span className="bg-white border-stone-200 text-stone-500 flex h-[36px] w-[36px] items-center justify-center rounded-full rounded-lg border border-[2px] text-sm font-bold shadow-md transition-all">
  {s.num}
  </span>
- <span className="text-ink-light text-xs font-medium transition-all">{s.label}</span>
+ <span className="text-stone-600 text-xs font-medium transition-all">{s.label}</span>
  </div>
  ))}
  </div>
@@ -373,7 +373,7 @@ export default function CsvImport() {
  {step === 1 && (
  <div className="animate-fade-in-up mx-auto max-w-[900px]">
  <h2>📄 Upload Your CSV</h2>
- <p className="mb-8 text-base leading-[1.6] text-[var(--color-text-secondary)]">
+ <p className="mb-8 text-base leading-[1.6] text-stone-500">
  Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against our
  10,500+ reference database.
  </p>
@@ -389,7 +389,7 @@ export default function CsvImport() {
  onClick={() => fileInputRef.current?.click()}
  >
  <div className="mb-4 text-[3rem] opacity-[0.7]">📁</div>
- <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-edge bg-card p-8 text-center transition-all">
+ <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-stone-200 bg-white p-8 text-center transition-all">
  Drag &amp; drop your CSV file here
  <br />
  <span className="text-forest text-sm underline">or click to browse</span>
@@ -406,7 +406,7 @@ export default function CsvImport() {
  </div>
 
  {parseError && (
- <div className="text-danger mt-4 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-6 py-4 text-sm">
+ <div className="text-red-700 mt-4 rounded-md border border-red-200 bg-red-50 px-6 py-4 text-sm">
  {parseError}
  </div>
  )}
@@ -415,7 +415,7 @@ export default function CsvImport() {
  <a
  href="/templates/mhh_import_template.csv"
  download
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  📥 Download CSV Template
  </a>
@@ -427,7 +427,7 @@ export default function CsvImport() {
  {step === 2 && (
  <div className="animate-fade-in-up mx-auto max-w-[900px]">
  <h2>🔗 Map Your Columns</h2>
- <p className="mb-8 text-base leading-[1.6] text-[var(--color-text-secondary)]">
+ <p className="mb-8 text-base leading-[1.6] text-stone-500">
  We detected <strong>{csvHeaders.length}</strong> columns and <strong>{csvData.length}</strong>{""}
  rows. Map each column to a Model Horse Hub field.
  </p>
@@ -436,16 +436,16 @@ export default function CsvImport() {
  {csvHeaders.map((header) => (
  <div
  key={header}
- className="bg-card border-edge flex items-center gap-4 rounded-lg rounded-md border px-6 py-4 shadow-md transition-all"
+ className="bg-white border-stone-200 flex items-center gap-4 rounded-lg rounded-md border px-6 py-4 shadow-md transition-all"
  >
- <span className="text-ink min-w-0 flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
+ <span className="text-stone-900 min-w-0 flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
  {header}
  </span>
- <span className="text-muted shrink-0 text-base">
+ <span className="text-stone-500 shrink-0 text-base">
  →
  </span>
  <select
- className="bg-input border-edge-input text-ink flex-1 cursor-pointer rounded-sm border px-4 py-2 font-sans text-sm"
+ className="bg-input border-stone-200-input text-stone-900 flex-1 cursor-pointer rounded-sm border px-4 py-2 font-sans text-sm"
  value={columnMapping[header] ||""}
  onChange={(e) => handleMappingChange(header, e.target.value)}
  aria-label={`Map ${header} to field`}
@@ -463,8 +463,8 @@ export default function CsvImport() {
  {/* Preview first 5 rows */}
  <div className="mb-8">
  <h3>Preview (first {Math.min(5, csvData.length)} rows)</h3>
- <div className="border-edge overflow-x-auto rounded-md border">
- <table className="bg-elevated text-ink border-edge border-b px-4 py-2 text-left font-semibold whitespace-nowrap">
+ <div className="border-stone-200 overflow-x-auto rounded-md border">
+ <table className="bg-stone-50 text-stone-900 border-stone-200 border-b px-4 py-2 text-left font-semibold whitespace-nowrap">
  <thead>
  <tr>
  {csvHeaders.map((h) => (
@@ -485,15 +485,15 @@ export default function CsvImport() {
  </div>
  </div>
 
- <div className="border-edge flex items-center justify-between gap-4 border-t pt-6">
+ <div className="border-stone-200 flex items-center justify-between gap-4 border-t pt-6">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setStep(1)}
  >
  ← Back
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={proceedToMatch}
  disabled={isMatching || !Object.values(columnMapping).some((v) => v ==="name")}
  id="proceed-to-match-btn"
@@ -520,20 +520,20 @@ export default function CsvImport() {
  {step === 3 && (
  <div className="animate-fade-in-up mx-auto max-w-[900px]">
  <h2>🔍 Review Matches</h2>
- <p className="mb-8 text-base leading-[1.6] text-[var(--color-text-secondary)]">
+ <p className="mb-8 text-base leading-[1.6] text-stone-500">
  We matched your {matchResults.length} rows against the reference database. Review and confirm
  the matches below.
  </p>
 
  {/* Match summary badges */}
  <div className="mb-8 flex flex-wrap gap-4">
- <span className="bg-[rgba(92,224,160,0.12)] text-success border-[rgba(92,224,160,0.25)] perfect border">
+ <span className="bg-emerald-100/70 text-success border-emerald-300 perfect border">
  ✅ {perfectCount} perfect
  </span>
- <span className="bg-[rgba(92,224,160,0.12)] text-success border-[rgba(92,224,160,0.25)] review border">
+ <span className="bg-emerald-100/70 text-success border-emerald-300 review border">
  ⚠️ {reviewCount} review
  </span>
- <span className="bg-[rgba(92,224,160,0.12)] text-success border-[rgba(92,224,160,0.25)] no-match border">
+ <span className="bg-emerald-100/70 text-success border-emerald-300 no-match border">
  ❌ {noMatchCount} no match
  </span>
  </div>
@@ -551,7 +551,7 @@ export default function CsvImport() {
  {result.status ==="perfect" ?"✅" : result.status ==="review" ?"⚠️" :"❌"}
  </span>
  <input
- className="bg-input border-edge-input text-ink flex-1 rounded-sm border px-4 py-2 font-sans text-base font-semibold"
+ className="bg-input border-stone-200-input text-stone-900 flex-1 rounded-sm border px-4 py-2 font-sans text-base font-semibold"
  value={result.customName}
  onChange={(e) => handleCustomNameChange(result.rowIndex, e.target.value)}
  placeholder="Horse name..."
@@ -566,7 +566,7 @@ export default function CsvImport() {
  .map(([k, v]) => (
  <span
  key={k}
- className="bg-elevated text-ink-light rounded-sm px-[8px] py-[2px] text-xs"
+ className="bg-stone-50 text-stone-600 rounded-sm px-[8px] py-[2px] text-xs"
  >
  {k}: {v}
  </span>
@@ -588,8 +588,8 @@ export default function CsvImport() {
  onChange={() => handleSelectMatch(result.rowIndex, match)}
  />
  <span className="transition-colors-text flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2">
- <span className="text-ink text-sm">{match.display}</span>
- <span className="text-ink-light text-xs tabular-nums">
+ <span className="text-stone-900 text-sm">{match.display}</span>
+ <span className="text-stone-600 text-xs tabular-nums">
  Score: {match.score > 0 ? `+${match.score}` : match.score}
  </span>
  </span>
@@ -603,7 +603,7 @@ export default function CsvImport() {
  onChange={() => handleSelectMatch(result.rowIndex, null)}
  />
  <span className="transition-colors-text flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2">
- <span className="text-ink text-sm">
+ <span className="text-stone-900 text-sm">
  Custom / Unknown — no reference link
  </span>
  </span>
@@ -612,7 +612,7 @@ export default function CsvImport() {
  )}
 
  {result.matches.length === 0 && (
- <p className="text-muted text-sm italic">
+ <p className="text-stone-500 text-sm italic">
  No matches found in the reference database. This model will be imported as
  custom/unknown.
  </p>
@@ -621,9 +621,9 @@ export default function CsvImport() {
  ))}
  </div>
 
- <div className="border-edge flex items-center justify-between gap-4 border-t pt-6">
+ <div className="border-stone-200 flex items-center justify-between gap-4 border-t pt-6">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setStep(2)}
  >
  ← Back
@@ -639,11 +639,11 @@ export default function CsvImport() {
  />
  <span>Publish imported models to the community feed</span>
  </label>
- <span className="text-ink-light mt-1 block text-right text-xs">
+ <span className="text-stone-600 mt-1 block text-right text-xs">
  Models without photos will be excluded regardless.
  </span>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleImport}
  disabled={isImporting}
  id="import-btn"
@@ -668,19 +668,19 @@ export default function CsvImport() {
  <div className="text-success">
  <div className="csv-success-icon">🎉</div>
  <h2>Import Complete!</h2>
- <p className="text-ink-light mb-8 text-base">
+ <p className="text-stone-600 mb-8 text-base">
  Successfully imported <strong>{importResult.imported}</strong> model
  {importResult.imported !== 1 ?"s" :""} to your stable.
  </p>
  <div className="flex flex-wrap justify-center gap-4">
  <a
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  >
  🐴 View Your Stable
  </a>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setStep(1);
  setCsvData([]);
@@ -695,12 +695,12 @@ export default function CsvImport() {
  </div>
  </div>
  ) : (
- <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-6 text-[4rem]">❌</div>
  <h2>Import Failed</h2>
  <p>{importResult?.error ||"An unexpected error occurred."}</p>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => setStep(3)}
  >
  ← Back to Review

@@ -17,7 +17,7 @@ export default function WithdrawButton({ entryId }: { entryId: string }) {
 
  return (
  <button
- className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-[2px] text-xs font-semibold text-[var(--color-error,#ef4444)] no-underline transition-all"
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-2 py-[2px] text-xs font-semibold text-[var(--color-error,#ef4444)] no-underline transition-all"
  onClick={handleWithdraw}
  disabled={busy}
  title="Withdraw your entry"

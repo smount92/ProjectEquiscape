@@ -54,7 +54,7 @@ export default function AdminReplyForm({
  if (!isOpen) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setIsOpen(true)}
  >
  <svg
@@ -79,11 +79,11 @@ export default function AdminReplyForm({
  return (
  <div className="admin-reply-form">
  <div className="mb-2 flex items-center justify-between">
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  To: <strong>{recipientName}</strong> &lt;{recipientEmail}&gt;
  </span>
  <button
- className="bg-[rgba(0,0,0,0.05)] text-muted flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
+ className="bg-stone-100 text-stone-500 flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
  onClick={() => {
  setIsOpen(false);
  setStatus(null);
@@ -93,16 +93,16 @@ export default function AdminReplyForm({
  ✕
  </button>
  </div>
- <div className="bg-[rgba(0,0,0,0.03)] border-[rgba(44,85,69,0.4)] rounded-r-md mb-2 border-l-[3px] px-[14px] py-[10px]">
- <div className="bg-[rgba(0,0,0,0.03)] border-[rgba(44,85,69,0.4)] rounded-r-md-label mb-2 border-l-[3px] px-[14px] py-[10px]">
+ <div className="bg-stone-50 border-emerald-400 rounded-r-md mb-2 border-l-[3px] px-[14px] py-[10px]">
+ <div className="bg-stone-50 border-emerald-400 rounded-r-md-label mb-2 border-l-[3px] px-[14px] py-[10px]">
  {originalSubject ? `Re: ${originalSubject}` :"Original message"}
  </div>
- <div className="bg-[rgba(0,0,0,0.03)] border-[rgba(44,85,69,0.4)] rounded-r-md-body mb-2 border-l-[3px] px-[14px] py-[10px]">
+ <div className="bg-stone-50 border-emerald-400 rounded-r-md-body mb-2 border-l-[3px] px-[14px] py-[10px]">
  {originalMessage}
  </div>
  </div>
  <textarea
- className="text-muted"
+ className="text-stone-500"
  placeholder={`Write your reply to ${recipientName}…`}
  value={replyText}
  onChange={(e) => setReplyText(e.target.value)}
@@ -123,7 +123,7 @@ export default function AdminReplyForm({
  {sending ? (
  <>
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  Sending…
@@ -149,7 +149,7 @@ export default function AdminReplyForm({
  )}
  </button>
  <button
- className="border-edge text-muted hover:0.05)] hover:text-ink cursor-pointer rounded-full border bg-transparent px-[14px] py-[7px] font-[inherit] text-xs font-medium transition-all"
+ className="border-stone-200 text-stone-500 hover:0.05)] hover:text-stone-900 cursor-pointer rounded-full border bg-transparent px-[14px] py-[7px] font-[inherit] text-xs font-medium transition-all"
  onClick={() => {
  setIsOpen(false);
  setStatus(null);

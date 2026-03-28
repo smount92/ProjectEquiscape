@@ -78,9 +78,9 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  return (
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Commission Type *</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Commission Type *</label>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={commissionType}
  onChange={(e) => setCommissionType(e.target.value)}
  required
@@ -96,9 +96,9 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Link a Horse (optional)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Link a Horse (optional)</label>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={selectedHorseId}
  onChange={(e) => setSelectedHorseId(e.target.value)}
  title="Link a horse"
@@ -110,13 +110,13 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  </option>
  ))}
  </select>
- <span className="text-muted mt-1 block text-xs">
+ <span className="text-stone-500 mt-1 block text-xs">
  Select the model you&apos;re sending in for this commission.
  </span>
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Description *</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Description *</label>
  <Textarea
  
  value={description}
@@ -129,7 +129,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Your Budget ($)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Your Budget ($)</label>
  <Input
  type="number"
  
@@ -141,7 +141,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  />
  {(artist.priceRangeMin || artist.priceRangeMax) && (
  <span
- className="text-muted mt-[4] block text-xs"
+ className="text-stone-500 mt-[4] block text-xs"
  >
  Artist&apos;s range: ${artist.priceRangeMin ||"?"} – ${artist.priceRangeMax ||"?"}
  </span>
@@ -158,7 +158,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
 
  <button
  type="submit"
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={saving}
  id="submit-commission-btn"
  >

@@ -17,7 +17,7 @@ export default function GettingStartedPage() {
  <h1>
  Getting Started with <span className="text-forest">Model Horse Hub</span>
  </h1>
- <p className="mt-2 text-lg text-ink-light">
+ <p className="mt-2 text-lg text-stone-600">
  Your digital stable is ready. Here&apos;s how to make the most of it.
  </p>
  </div>
@@ -40,7 +40,7 @@ export default function GettingStartedPage() {
  Belly/Maker&apos;s Mark) plus unlimited extra detail shots. Set your condition grade, finish
  type, and give your horse a name.
  </p>
- <div className="mt-4 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-6 py-4 text-sm leading-relaxed">
+ <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-4 text-sm leading-relaxed">
  <strong>💡 Tip:</strong> Set your horse to <strong>&ldquo;Public&rdquo;</strong> to share it in
  the Show Ring for the community to discover. Private horses are visible only to you.
  </div>
@@ -190,7 +190,7 @@ export default function GettingStartedPage() {
  </Link>{" "}
  page to send us your thoughts, or message the admin directly through the inbox.
  </p>
- <div className="mt-4 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-6 py-4 text-sm leading-relaxed">
+ <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-4 text-sm leading-relaxed">
  <strong>🙏 Thank you</strong> for being part of the founding herd. Every feature on this
  platform exists because a collector said &ldquo;I wish this existed.&rdquo; Keep telling us what
  you wish for.
@@ -198,11 +198,11 @@ export default function GettingStartedPage() {
  </section>
 
  {/* CTA */}
- <div className="bg-card border-edge rounded-lg border text-center">
+ <div className="bg-white border-stone-200 rounded-lg border text-center">
  <p>Ready to start?</p>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  id="getting-started-cta"
  >
  Go to Your Digital Stable →

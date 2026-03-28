@@ -24,7 +24,7 @@ export default function FeaturedHorseCard({
  return (
  <Link
  href={`/community/${horseId}`}
- className="animate-fade-in-up mb-8 flex gap-8 overflow-hidden rounded-lg border border-[rgba(245,158,11,0.2)] bg-[linear-gradient(135deg,rgba(245,158,11,0.08),rgba(234,179,8,0.03))] p-8 text-inherit no-underline transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(245,158,11,0.4)] hover:shadow-[0_4px_24px_rgba(245,158,11,0.12)] max-sm:flex-col"
+ className="animate-fade-in-up mb-8 flex gap-8 overflow-hidden rounded-lg border border-amber-200 bg-[linear-gradient(135deg,rgba(245,158,11,0.08),rgba(234,179,8,0.03))] p-8 text-inherit no-underline transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(245,158,11,0.4)] hover:shadow-[0_4px_24px_rgba(245,158,11,0.12)] max-sm:flex-col"
  id="featured-horse"
  >
  <div className="relative h-[200px] w-[200px] shrink-0 overflow-hidden rounded-md max-sm:h-[180px] max-sm:w-full">
@@ -37,8 +37,8 @@ export default function FeaturedHorseCard({
  className="h-full w-full bg-black/15 object-contain"
  />
  ) : (
- <div className="rounded-lg border border-edge bg-card p-4 shadow-md transition-all">
- <span className="flex items-center justify-center rounded-lg border border-edge bg-card text-4xl shadow-md">
+ <div className="rounded-lg border border-stone-200 bg-white p-4 shadow-md transition-all">
+ <span className="flex items-center justify-center rounded-lg border border-stone-200 bg-white text-4xl shadow-md">
  🐴
  </span>
  </div>
@@ -49,10 +49,10 @@ export default function FeaturedHorseCard({
  </div>
  <div className="flex min-w-0 flex-1 flex-col justify-center">
  <div className="mb-1 text-[1.4rem] font-bold">{horseName}</div>
- <div className="text-muted mb-4 text-sm">
+ <div className="text-stone-500 mb-4 text-sm">
  by @{ownerAlias} · {finishType}
  </div>
- {description && <p className="text-muted m-0 text-sm leading-relaxed italic">{description}</p>}
+ {description && <p className="text-stone-500 m-0 text-sm leading-relaxed italic">{description}</p>}
  </div>
  </Link>
  );

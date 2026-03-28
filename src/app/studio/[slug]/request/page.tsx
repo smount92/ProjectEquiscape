@@ -30,10 +30,10 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   <FocusLayout title="Commissions Closed">
   <div className="animate-fade-in-up text-center">
    <div className="mb-4 text-[2.5rem]">🔴</div>
-   <p className="text-ink-light mt-2">{profile.studioName} is not accepting commissions right now.</p>
+   <p className="text-stone-600 mt-2">{profile.studioName} is not accepting commissions right now.</p>
    <Link
    href={`/studio/${slug}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    >
    ← Back to Studio
    </Link>
@@ -47,12 +47,12 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   <FocusLayout title="This is your studio!">
   <div className="animate-fade-in-up text-center">
    <div className="mb-4 text-[2.5rem]">🎨</div>
-   <p className="text-ink-light mt-2">
+   <p className="text-stone-600 mt-2">
    You can&apos;t commission yourself. Manage your commissions from the dashboard.
    </p>
    <Link
    href="/studio/dashboard"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    📊 Go to Dashboard
    </Link>
@@ -68,19 +68,19 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   backLink={
   <Link
    href={`/studio/${slug}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
   >
    ← Back to Studio
   </Link>
   }
  >
   {profile.status ==="waitlist" && (
-  <p className="mt-1 text-sm text-[var(--color-accent-warm)]">
+  <p className="mt-1 text-sm text-amber-500">
    🟡 This artist is currently on waitlist — your request will be queued.
   </p>
   )}
 
-  <div className="bg-card border-edge animate-fade-in-up rounded-lg border shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border shadow-md transition-all">
   <CommissionRequestForm artist={profile} />
   </div>
  </FocusLayout>

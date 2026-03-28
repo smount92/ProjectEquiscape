@@ -137,7 +137,7 @@ export default function ExpertJudgingPanel({
  {overrideMode ?"⚠️" :"🏅"}{""}
  <span className="text-forest">{overrideMode ?"Override Final Placings" :"Expert Judging Panel"}</span>
  </h3>
- <p className="text-muted mb-4 text-sm">
+ <p className="text-stone-500 mb-4 text-sm">
  {overrideMode
  ?"Adjust placings after the show has been judged or closed. Changes update show records with an audit trail."
  :"Assign placings to each entry below. Only placed entries will appear in results and auto-generate show records."}
@@ -147,7 +147,7 @@ export default function ExpertJudgingPanel({
  {classes && classes.length > 0 && (
  <div className="mb-4">
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[400px]"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[400px]"
  value={selectedClassId}
  onChange={(e) => setSelectedClassId(e.target.value)}
  title="Filter by class"
@@ -167,7 +167,7 @@ export default function ExpertJudgingPanel({
  ))}
  </select>
   {currentClass && (
-  <div className="mt-1 text-sm text-muted">
+  <div className="mt-1 text-sm text-stone-500">
   Currently judging: <strong>{currentClass.divisionName}</strong> ›{""}
   <strong>{currentClass.name}</strong>
   </div>
@@ -177,7 +177,7 @@ export default function ExpertJudgingPanel({
 
  <div className="flex flex-col gap-2">
  {filteredEntries.length === 0 ? (
- <div className="text-muted p-4 text-center">
+ <div className="text-stone-500 p-4 text-center">
  No entries {selectedClassId !=="all" ?"in this class" :"to judge"}.
  </div>
  ) : (
@@ -200,7 +200,7 @@ export default function ExpertJudgingPanel({
  )}
  <div className="min-w-0 flex-1">
  <div className="text-sm font-semibold">🐴 {entry.horseName}</div>
- <div className="text-muted text-xs">
+ <div className="text-stone-500 text-xs">
  by @{entry.ownerAlias}
  </div>
  </div>
@@ -209,13 +209,13 @@ export default function ExpertJudgingPanel({
   onClick={() => toggleNotes(entry.id)}
   title="Judge notes"
   className={`shrink-0 cursor-pointer border-none bg-transparent p-1 text-base ${
-  notes[entry.id] ? "text-forest" : "text-muted"
+  notes[entry.id] ? "text-forest" : "text-stone-500"
   }`}
   >
  📝
  </button>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[140px] shrink-0"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[140px] shrink-0"
  value={placings[entry.id] ||""}
  onChange={(e) => setPlacings((prev) => ({ ...prev, [entry.id]: e.target.value }))}
  title={`Placing for ${entry.horseName}`}
@@ -244,7 +244,7 @@ export default function ExpertJudgingPanel({
  )}
  </div>
 
- {error && <div className="mt-2 text-sm text-danger mt-2">{error}</div>}
+ {error && <div className="mt-2 text-sm text-red-700 mt-2">{error}</div>}
   {success && (
   <div className="mt-2 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-600">
   ✅ Placings saved!{""}

@@ -60,7 +60,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
   <>
    <Link
    href={`/community/${horseId}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    >
    ← Back to Passport
    </Link>
@@ -82,13 +82,13 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
   />
 
   {records.length > 0 && (
-  <div className="bg-card border-edge mt-8 rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-white border-stone-200 mt-8 rounded-lg border p-6 shadow-md transition-all">
    <h2 className="mb-4 text-lg">🏆 Show Record</h2>
    <div className="grid gap-1">
    {records.map((r, i) => (
     <div
     key={i}
-    className="flex items-center gap-2 rounded-md bg-[rgba(255,255,255,0.03)] px-2 py-1 text-[0.8rem]"
+    className="flex items-center gap-2 rounded-md bg-stone-50/50 border border-stone-100 px-2 py-1 text-[0.8rem]"
     >
     <span className="text-base">
      {r.ribbon_color ==="Blue"
@@ -100,10 +100,10 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
       :"🏅"}
     </span>
     <span className="font-semibold">{r.show_name}</span>
-    {r.division && <span className="text-muted">— {r.division}</span>}
-    {r.placing && <span className="text-muted">({r.placing})</span>}
+    {r.division && <span className="text-stone-500">— {r.division}</span>}
+    {r.placing && <span className="text-stone-500">({r.placing})</span>}
     {r.show_date && (
-     <span className="text-muted ml-auto text-xs">
+     <span className="text-stone-500 ml-auto text-xs">
      {new Date(r.show_date).toLocaleDateString("en-US", {
       month:"short",
       year:"numeric",

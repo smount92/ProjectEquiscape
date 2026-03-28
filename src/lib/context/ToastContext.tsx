@@ -70,15 +70,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
  {/* Toast Container */}
  {toasts.length > 0 && (
  <div
- className="top-[calc(sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark"
+ className="top-[calc(sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100"
  aria-live="polite"
  >
  {toasts.map((t) => (
  <div key={t.id} className={`toast-item toast-${t.variant} animate-fade-in-up`} role="status">
  <span className="shrink-0 text-[1.1rem]">{VARIANT_ICONS[t.variant]}</span>
- <span className="text-ink flex-1 text-sm leading-[1.4]">{t.message}</span>
+ <span className="text-stone-900 flex-1 text-sm leading-[1.4]">{t.message}</span>
  <button
- className="text-muted flex h-[24px] w-[24px] shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent text-xs transition-all"
+ className="text-stone-500 flex h-[24px] w-[24px] shrink-0 cursor-pointer items-center justify-center rounded-sm border-0 bg-transparent text-xs transition-all"
  onClick={() => dismiss(t.id)}
  aria-label="Dismiss"
  >

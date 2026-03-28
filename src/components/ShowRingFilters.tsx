@@ -28,7 +28,7 @@ export default function ShowRingFilters({ filters, onFilterChange, manufacturers
  id="showring-filters"
  >
  {/* Finish Type Pills */}
- <div className="flex gap-[4px] rounded-lg border border-[rgba(0,0,0,0.06)] bg-[rgba(0,0,0,0.04)] p-[3px]">
+ <div className="flex gap-[4px] rounded-lg border border-[rgb(245 245 244)] bg-stone-50 p-[3px]">
  <button
  className={`filter-pill ${filters.finishType === null ?"filter-pill-active" :""}`}
  onClick={() => setFilter("finishType", null)}
@@ -48,7 +48,7 @@ export default function ShowRingFilters({ filters, onFilterChange, manufacturers
 
  {/* Trade Status Dropdown */}
  <select
- className="filter-dropdown hover:border-forest"
+ className="filter-dropdown hover:border-emerald-700"
  value={filters.tradeStatus ||""}
  onChange={(e) => setFilter("tradeStatus", e.target.value || null)}
  id="filter-trade-status"
@@ -61,7 +61,7 @@ export default function ShowRingFilters({ filters, onFilterChange, manufacturers
  {/* Manufacturer Dropdown */}
  {manufacturers.length > 1 && (
  <select
- className="filter-dropdown hover:border-forest"
+ className="filter-dropdown hover:border-emerald-700"
  value={filters.manufacturer ||""}
  onChange={(e) => setFilter("manufacturer", e.target.value || null)}
  id="filter-manufacturer"
@@ -78,7 +78,7 @@ export default function ShowRingFilters({ filters, onFilterChange, manufacturers
  {/* Scale Dropdown */}
  {scales.length > 1 && (
  <select
- className="filter-dropdown hover:border-forest"
+ className="filter-dropdown hover:border-emerald-700"
  value={filters.scale ||""}
  onChange={(e) => setFilter("scale", e.target.value || null)}
  id="filter-scale"
@@ -95,7 +95,7 @@ export default function ShowRingFilters({ filters, onFilterChange, manufacturers
 
  {/* Sort Dropdown */}
  <select
- className="filter-dropdown hover:border-forest"
+ className="filter-dropdown hover:border-emerald-700"
  value={filters.sortBy}
  onChange={(e) => setFilter("sortBy", e.target.value as FilterState["sortBy"])}
  id="filter-sort"

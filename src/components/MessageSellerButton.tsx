@@ -54,7 +54,7 @@ export default function MessageSellerButton({
  return (
  <>
  <button
- className="bg-[rgba(44,85,69,0.1)] border-[rgba(44,85,69,0.25)] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border p-0 text-[#2C5545] transition-all"
+ className="bg-emerald-50 border-emerald-300 flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border p-0 text-[#2C5545] transition-all"
  onClick={handleClick}
  disabled={loading}
  title={isOfferable ?"Make Offer" :"Message Seller"}
@@ -62,7 +62,7 @@ export default function MessageSellerButton({
  >
  {loading ? (
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  ) : isOfferable ? (
@@ -99,14 +99,14 @@ export default function MessageSellerButton({
  return (
  <>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={handleClick}
  disabled={loading}
  >
  {loading ? (
  <>
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  {isOfferable ?"Opening…" :"Opening…"}

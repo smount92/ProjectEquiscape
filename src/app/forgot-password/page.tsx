@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
  if (state.success) {
  return (
   <FocusLayout title="Check Your Email">
-  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
    <div className="px-6 py-6">
    <div aria-hidden="true" className="mb-4 text-[3rem]">
     ✉️
@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
    </div>
    <Link
    href="/login"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    id="back-to-login"
    >
    Back to Sign In
@@ -42,10 +42,10 @@ export default function ForgotPasswordPage() {
   title={<>Reset <span className="text-forest">Password</span></>}
   description="Enter your email and we'll send you a reset link"
  >
-  <div className="bg-card border-edge animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
   {state.error && (
    <div
-   className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm"
+   className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
    role="alert"
    id="forgot-error"
    >
@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
 
   <form action={formAction} noValidate>
    <div className="mb-6">
-   <label htmlFor="forgot-email" className="text-ink mb-1 block text-sm font-semibold">
+   <label htmlFor="forgot-email" className="text-stone-900 mb-1 block text-sm font-semibold">
     Email Address
    </label>
    <Input
@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
 
    <button
    type="submit"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    disabled={isPending}
    id="forgot-submit"
    >
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
    </button>
   </form>
 
-  <div className="text-muted mt-8 text-center text-sm">
+  <div className="text-stone-500 mt-8 text-center text-sm">
    <p>
    Remember your password?{""}
    <Link href="/login" id="go-to-login">

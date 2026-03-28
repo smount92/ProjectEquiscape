@@ -152,8 +152,8 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
 
  if (userHorses.length === 0) {
  return (
- <div className="gap-4-empty flex flex-col">
- <p className="text-muted">You need at least one public horse to enter shows.</p>
+ <div className="flex flex-col gap-4">
+ <p className="text-stone-500">You need at least one public horse to enter shows.</p>
  </div>
  );
  }
@@ -186,7 +186,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  <Dialog open={true} onOpenChange={() => setShowPreview(false)}>
  <DialogContent className="sm:max-w-[480px] text-center">
  
- <div className="text-muted mb-4 text-center text-xs tracking-[0.05em] uppercase">
+ <div className="text-stone-500 mb-4 text-center text-xs tracking-[0.05em] uppercase">
  This is what judges & voters will see
  </div>
  <div className="mb-2 text-center">
@@ -206,20 +206,20 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  className="mx-auto block aspect-[4/3] w-full max-w-[400px] rounded-md object-cover shadow-lg"
  />
  {caption.trim() && (
- <p className="text-ink-light mt-2 text-sm leading-normal italic">
+ <p className="text-stone-600 mt-2 text-sm leading-normal italic">
  &ldquo;{caption.trim()}&rdquo;
  </p>
  )}
  <div className="mt-6 flex flex-wrap justify-center gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleSubmit()}
  disabled={status ==="submitting"}
  >
  {status ==="submitting" ?"Entering…" :"✅ Looks Good — Submit Entry"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowPreview(false)}
  >
  ← Choose Different Photo
@@ -233,7 +233,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  <>
  <form onSubmit={handleSubmit} className="flex flex-col gap-4">
  {/* Guidance tip */}
- <div className="mt-4 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-4 px-6 py-2 py-4 text-sm text-sm leading-relaxed">
+ <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50/80 px-4 px-6 py-2 py-4 text-sm text-sm leading-relaxed">
  💡 <strong>How it works:</strong> Select a horse, pick your best photo, add an optional caption,
  then submit. For best results, upload clear, well-lit photos (at least 800×600) to your horse&apos;s
  passport first.
@@ -242,7 +242,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  {/* Top row: Horse selector */}
  <div className="grid grid-cols-2 gap-4">
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={selectedHorse}
  onChange={(e) => {
  setSelectedHorse(e.target.value);
@@ -264,7 +264,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  {/* Smart Class Browser */}
  {classes && classes.length > 0 && selectedHorse && (
  <div className="mb-4">
- <label className="text-ink mb-1 block text-sm font-semibold">📋 Select Class</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">📋 Select Class</label>
  <Input
  type="text"
  className="mb-2"
@@ -272,7 +272,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  value={classSearch}
  onChange={(e) => setClassSearch(e.target.value)}
  />
- <div className="border-edge bg-elevated max-h-[240px] overflow-y-auto rounded-md border">
+ <div className="border-stone-200 bg-stone-50 max-h-[240px] overflow-y-auto rounded-md border">
  {/* No class option */}
  <button
  type="button"
@@ -283,7 +283,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  </button>
  {Array.from(divisionGroups.entries()).map(([divName, items]) => (
  <div key={divName}>
- <div className="border-edge bg-elevated-division max-h-[240px] overflow-y-auto rounded-md border">
+ <div className="border-b border-stone-200 bg-stone-100 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-stone-500">
  {divName}
  </div>
  {items.map((c) => {
@@ -298,18 +298,18 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  className={`class-browser-item ${selectedClassId === c.id ?"selected" :""}`}
  onClick={() => setSelectedClassId(c.id)}
  >
- <span className="border-edge bg-elevated-name max-h-[240px] overflow-y-auto rounded-md border">
+ <span className="flex-1 text-sm font-medium text-stone-900">
  {c.name}
  </span>
- <span className="border-edge bg-elevated-meta max-h-[240px] overflow-y-auto rounded-md border">
+ <span className="flex items-center gap-1.5">
  {c.currentEntryCount !== undefined && (
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  {c.currentEntryCount}{""}
  {c.currentEntryCount === 1 ?"entry" :"entries"}
  </span>
  )}
  {c.isNanQualifying && (
- <span className="class-inline-flex bg-[rgba(245,158,11,0.15)] items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]">
+ <span className="class-inline-flex bg-amber-50 items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]">
  NAN
  </span>
  )}
@@ -333,7 +333,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  </div>
  ))}
  {filteredClasses.length === 0 && classSearch && (
- <div className="border-edge bg-elevated-empty max-h-[240px] overflow-y-auto rounded-md border">
+ <div className="px-4 py-3 text-sm text-stone-500 italic">
  No classes match &ldquo;{classSearch}&rdquo;
  </div>
  )}
@@ -346,11 +346,11 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  <div className="show-entry-body max-sm:grid-cols-1">
  {/* LEFT: Photo picker */}
  <div className="flex flex-col gap-1">
- <label className="text-ink mb-1 block text-sm font-semibold">📸 Choose Entry Photo</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">📸 Choose Entry Photo</label>
  {loadingPhotos ? (
- <p className="text-muted text-sm">Loading photos…</p>
+ <p className="text-stone-500 text-sm">Loading photos…</p>
  ) : horsePhotos.length === 0 ? (
- <p className="text-muted text-sm">
+ <p className="text-stone-500 text-sm">
  No photos found. Upload photos to your horse&apos;s passport first.
  </p>
  ) : (
@@ -375,13 +375,13 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  ✓
  </div>
  )}
- <div className="absolute right-0 bottom-0 left-0 overflow-hidden bg-[rgba(0,0,0,0.55)] px-[4px] py-[1px] text-center text-[0.55rem] text-ellipsis whitespace-nowrap text-white">
+ <div className="absolute right-0 bottom-0 left-0 overflow-hidden bg-black/55 px-[4px] py-[1px] text-center text-[0.55rem] text-ellipsis whitespace-nowrap text-white">
  {ANGLE_LABELS[photo.angleProfile] || photo.angleProfile}
  </div>
  </button>
  ))}
  </div>
- <p className="text-muted mt-1 block text-xs">
+ <p className="text-stone-500 mt-1 block text-xs">
  Photos display at 4:3 in the show grid. 800×600 minimum recommended.
  </p>
  </>
@@ -400,12 +400,12 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
 
  {/* Caption */}
  <div>
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="entry-caption">
- ✏️ Entry Caption <span className="text-muted font-normal">(optional)</span>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="entry-caption">
+ ✏️ Entry Caption <span className="text-stone-500 font-normal">(optional)</span>
  </label>
  <textarea
  id="entry-caption"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  value={caption}
  onChange={(e) => setCaption(e.target.value)}
  maxLength={280}
@@ -413,7 +413,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  placeholder="Describe your entry, photography setup, or what makes this model special…"
  />
  <span
- className={`text-xs float-right ${caption.length > 250 ? "text-danger" : "text-muted"}`}
+ className={`text-xs float-right ${caption.length > 250 ? "text-red-700" : "text-stone-500"}`}
  >
  {caption.length}/280
  </span>
@@ -423,7 +423,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  <div className="mt-2 flex flex-wrap gap-2">
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={!selectedHorse || status ==="submitting"}
  >
  {status ==="submitting" ?"Entering…" :"🐴 Enter Show"}
@@ -431,7 +431,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  {canPreview && (
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowPreview(true)}
  >
  👁 Preview
@@ -439,11 +439,11 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  )}
  </div>
  {status ==="success" && (
- <span className="rounded-md border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.1)] px-4 py-2 text-sm text-[#22C55E]">
+ <span className="rounded-md border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm text-[#22C55E]">
  ✅ Entered!
  </span>
  )}
- {status ==="error" && errorMsg && <span className="mt-2 text-sm text-danger">{errorMsg}</span>}
+ {status ==="error" && errorMsg && <span className="mt-2 text-sm text-red-700">{errorMsg}</span>}
  </div>
  </div>
  )}
@@ -452,7 +452,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
  {!selectedHorse && (
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={true}
  >
  🐴 Enter Show

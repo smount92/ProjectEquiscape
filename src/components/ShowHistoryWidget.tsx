@@ -59,7 +59,7 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  >
  <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-base font-bold text-stone-900 select-none [&::-webkit-details-marker]:hidden">
  🎪 <span>Show Placings</span>
- <span className="text-ink-light ml-auto text-xs font-normal">
+ <span className="text-stone-600 ml-auto text-xs font-normal">
  {totalRibbons} ribbons · {totalShows} shows
  </span>
  </summary>
@@ -69,21 +69,21 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  <div key={year} className="mb-1">
  <button
  type="button"
- className={`text-ink flex w-full cursor-pointer items-center gap-2 rounded-sm border-none bg-transparent px-2 py-2 text-sm font-semibold transition-colors hover:bg-stone-50 ${expandedYear === year ?"bg-stone-50" :""}`}
+ className={`text-stone-900 flex w-full cursor-pointer items-center gap-2 rounded-sm border-none bg-transparent px-2 py-2 text-sm font-semibold transition-colors hover:bg-stone-50 ${expandedYear === year ?"bg-stone-50" :""}`}
  onClick={() => setExpandedYear(expandedYear === year ? null : year)}
  >
  <span className="flex items-center gap-1">
  {year}
  {year === currentYear && (
- <span className="rounded-full bg-[rgba(34,197,94,0.15)] px-1.5 py-[1px] text-[0.6rem] font-bold tracking-wide text-[#22c55e] uppercase">
+ <span className="rounded-full bg-emerald-100 px-1.5 py-[1px] text-[0.6rem] font-bold tracking-wide text-[#22c55e] uppercase">
  Current
  </span>
  )}
  </span>
- <span className="text-ink-light flex-1 text-right text-xs font-normal">
+ <span className="text-stone-600 flex-1 text-right text-xs font-normal">
  {summarizeYear(records)}
  </span>
- <span className="text-ink-light text-[0.8em]">{expandedYear === year ?"▾" :"▸"}</span>
+ <span className="text-stone-600 text-[0.8em]">{expandedYear === year ?"▾" :"▸"}</span>
  </button>
 
  {expandedYear === year && (
@@ -96,11 +96,11 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  <div className="flex min-w-0 flex-col">
  <Link
  href={`/community/${record.horseId}`}
- className="text-ink overflow-hidden font-semibold text-ellipsis whitespace-nowrap no-underline hover:underline"
+ className="text-stone-900 overflow-hidden font-semibold text-ellipsis whitespace-nowrap no-underline hover:underline"
  >
  {record.horseName}
  </Link>
- <span className="text-ink-light overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+ <span className="text-stone-600 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
  {record.showName} · {record.placing}
  </span>
  </div>

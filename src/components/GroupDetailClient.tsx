@@ -24,21 +24,21 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
  return (
  <>
  {/* Tab Bar */}
- <div className="border-edge my-6 flex gap-[2px] rounded-lg border bg-black/[0.03] p-1">
+ <div className="border-stone-200 my-6 flex gap-[2px] rounded-lg border bg-black/[0.03] p-1">
  <button
- className={`text-muted hover:text-ink flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="feed" ?"text-ink border border-[rgba(44,85,69,0.3)] bg-[rgba(44,85,69,0.12)]" :""}`}
+ className={`text-stone-500 hover:text-stone-900 flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="feed" ?"text-stone-900 border border-emerald-300 bg-emerald-100/70" :""}`}
  onClick={() => setActiveTab("feed")}
  >
  💬 Feed
  </button>
  <button
- className={`text-muted hover:text-ink flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="files" ?"text-ink border border-[rgba(44,85,69,0.3)] bg-[rgba(44,85,69,0.12)]" :""}`}
+ className={`text-stone-500 hover:text-stone-900 flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="files" ?"text-stone-900 border border-emerald-300 bg-emerald-100/70" :""}`}
  onClick={() => setActiveTab("files")}
  >
  📁 Files
  </button>
  <button
- className={`text-muted hover:text-ink flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="registry" ?"text-ink border border-[rgba(44,85,69,0.3)] bg-[rgba(44,85,69,0.12)]" :""}`}
+ className={`text-stone-500 hover:text-stone-900 flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="registry" ?"text-stone-900 border border-emerald-300 bg-emerald-100/70" :""}`}
  onClick={() => setActiveTab("registry")}
  >
  📋 Registry
@@ -49,7 +49,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
  {activeTab ==="feed" && channels.length > 1 && (
  <div className="scrollbar-none mb-6 flex gap-1 overflow-x-auto pb-1">
  <button
- className={`border-edge text-ink-light hover:text-ink cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === null ?"text-forest border-[rgba(44,85,69,0.4)] bg-[rgba(44,85,69,0.15)]" :""}`}
+ className={`border-stone-200 text-stone-600 hover:text-stone-900 cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === null ?"text-forest border-emerald-400 bg-emerald-100" :""}`}
  onClick={() => setActiveChannel(null)}
  >
  # all
@@ -57,7 +57,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
  {channels.map((ch) => (
  <button
  key={ch.id}
- className={`border-edge text-ink-light hover:text-ink cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === ch.id ?"text-forest border-[rgba(44,85,69,0.4)] bg-[rgba(44,85,69,0.15)]" :""}`}
+ className={`border-stone-200 text-stone-600 hover:text-stone-900 cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === ch.id ?"text-forest border-emerald-400 bg-emerald-100" :""}`}
  onClick={() => setActiveChannel(ch.id)}
  >
  # {ch.name.toLowerCase()}

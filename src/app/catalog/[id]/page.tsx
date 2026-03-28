@@ -79,24 +79,24 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
   title={catalogItem.title}
   description={<>by {catalogItem.maker}</>}
   backLink={
-  <nav className="text-muted flex items-center gap-1 text-sm">
+  <nav className="text-stone-500 flex items-center gap-1 text-sm">
    <Link href="/catalog">📚 Reference Catalog</Link>
-   <span className="text-muted">›</span>
+   <span className="text-stone-500">›</span>
    <span>{catalogItem.title}</span>
   </nav>
   }
  >
   <div className="flex flex-col gap-6">
   {/* Main Card */}
-  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
    <div className="mb-6 flex items-start justify-between">
    <div>
-    <h2 className="m-0 font-sans text-2xl">{catalogItem.title}</h2>
-    <p className="text-ink-light mt-[4px] text-base">
+    <h2 className="m-0 font-serif text-3xl font-bold text-stone-900">{catalogItem.title}</h2>
+    <p className="text-stone-600 mt-[4px] text-base font-bold text-stone-900 my-1 font-sans">
     by {catalogItem.maker}
     </p>
    </div>
-   <span className="bg-glass border-edge rounded-lg border px-[12px] py-[4px] text-sm whitespace-nowrap">
+   <span className="bg-stone-50 border-stone-200 rounded-lg border px-[12px] py-[4px] text-sm whitespace-nowrap">
     {formatItemType(catalogItem.item_type)}
    </span>
    </div>
@@ -104,10 +104,10 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
    <div className="grid-cols-[repeat(auto-fill,minmax(200px,1fr))] mb-6 grid gap-4">
    {displayFields.map((field) => (
     <div key={field.label} className="flex flex-col gap-[2px]">
-    <span className="text-muted text-xs font-semibold tracking-[0.05em] uppercase">
+    <span className="text-stone-500 text-xs font-semibold tracking-[0.05em] uppercase">
      {field.label}
     </span>
-    <span className="text-base font-medium">
+    <span className="text-base font-bold text-stone-900 my-1">
      {field.value}
     </span>
     </div>
@@ -131,7 +131,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
 
   {/* Pending Suggestions */}
   {(suggestionCount ?? 0) > 0 && (
-   <div className="bg-card border-edge rounded-lg border p-4 shadow-md transition-all">
+   <div className="bg-white border-stone-200 rounded-lg border p-4 shadow-md transition-all">
    <h3>📝 Pending Suggestions ({suggestionCount})</h3>
    <ul className="my-2 list-none p-0">
     {(
@@ -145,7 +145,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     )?.map((s) => (
     <li
      key={s.id}
-     className="flex items-center gap-2 px-0 py-1 text-[var(--color-text)] no-underline"
+     className="flex items-center gap-2 px-0 py-1 text-stone-900 no-underline"
     >
      <Link href={`/catalog/suggestions/${s.id}`}>
      <span className="text-xs font-semibold uppercase text-forest">
@@ -158,7 +158,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
        :"🗑"}
      </span>
      <span>{formatItemType(s.suggestion_type)} suggestion</span>
-     <span className="text-muted ml-auto text-sm">
+     <span className="text-stone-500 ml-auto text-sm">
       ▲ {s.upvotes}
      </span>
      </Link>

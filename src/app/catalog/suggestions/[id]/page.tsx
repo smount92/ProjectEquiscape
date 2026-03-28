@@ -130,13 +130,13 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  return (
   <ExplorerLayout title="Suggestion Detail" description="View, vote on, and discuss a catalog suggestion.">
- <nav className="text-muted mb-6 flex items-center gap-1 text-sm">
+ <nav className="text-stone-500 mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
+ <span className="text-stone-500 mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <Link href="/catalog/suggestions">Suggestions</Link>
- <span className="text-muted mb-6-sep flex items-center gap-1 text-sm">
+ <span className="text-stone-500 mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <span>Detail</span>
@@ -155,7 +155,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  downvotes={s.downvotes}
  />
  ) : (
- <div className="text-muted flex flex-col items-center gap-1">
+ <div className="text-stone-500 flex flex-col items-center gap-1">
  <span className="font-semibold">▲ {s.upvotes}</span>
  <span className="font-semibold">▼ {s.downvotes}</span>
  </div>
@@ -165,7 +165,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {/* Main Content */}
  <div className="flex flex-col gap-4">
  {/* Header */}
- <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
  <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
  <div>
  <span className={`ref-status-badge ${st.className}`}>
@@ -181,7 +181,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  :"🗑 Removal"}
  </span>
  </div>
- <span className="text-muted text-sm">
+ <span className="text-stone-500 text-sm">
  {new Date(s.created_at).toLocaleDateString("en-US", {
  year:"numeric",
  month:"long",
@@ -226,33 +226,29 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {s.suggestion_type ==="correction" && s.field_changes && (
  <div className="my-3">
  <h3>Changes</h3>
- <table className="border-edge border-b px-2 py-1">
- <thead>
- <tr>
- <th>Field</th>
- <th>Current</th>
- <th></th>
- <th>Proposed</th>
- </tr>
- </thead>
- <tbody>
- {Object.entries(s.field_changes).map(([key, val]) => {
- const v = val as { from: string; to: string };
- return (
- <tr key={key}>
- <td className="font-semibold">
- {key
- .replace(/_/g,"")
- .replace(/\b\w/g, (c) => c.toUpperCase())}
- </td>
- <td className="ref-diff-from">{v.from}</td>
- <td className="text-muted text-center">→</td>
- <td className="font-bold text-[#66bb6a]">{v.to}</td>
- </tr>
- );
- })}
- </tbody>
- </table>
+ <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+      <div className="grid grid-cols-[1fr_1fr_40px_1fr] border-b border-stone-200 bg-stone-50 p-3 text-xs font-bold tracking-wider text-stone-500 uppercase">
+        <div>Field</div>
+        <div>Current</div>
+        <div></div>
+        <div>Proposed</div>
+      </div>
+      <div className="flex flex-col">
+        {Object.entries(s.field_changes).map(([key, val]) => {
+          const v = val as { from: string; to: string };
+          return (
+            <div key={key} className="grid grid-cols-[1fr_1fr_40px_1fr] items-center border-b border-stone-100 p-3 text-sm last:border-0 hover:bg-stone-50/50 transition-colors">
+              <div className="font-semibold text-stone-900">
+                {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+              </div>
+              <div className="font-mono text-stone-500 line-through decoration-red-400/50">{v.from}</div>
+              <div className="text-center text-stone-300">→</div>
+              <div className="font-mono font-bold text-emerald-600">{v.to}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
  </div>
  )}
 
@@ -265,7 +261,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  .filter(([, v]) => v != null && v !=="")
  .map(([k, v]) => (
  <div key={k} className="flex flex-col gap-[2px]">
- <span className="text-muted text-xs font-semibold tracking-[0.05em] uppercase">
+ <span className="text-stone-500 text-xs font-semibold tracking-[0.05em] uppercase">
  {k.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
  </span>
  <span className="text-base font-bold text-[#66bb6a]">
@@ -280,14 +276,14 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {/* Reason */}
  <div className="my-3">
  <h3>Reason</h3>
- <blockquote className="border-forest bg-glass rounded-r-md border-l-[3px] px-4 py-2 text-[var(--color-text)] italic">
+ <blockquote className="border-forest bg-stone-50 rounded-r-md border-l-[3px] px-4 py-2 text-stone-900 italic">
  {s.reason}
  </blockquote>
  </div>
 
  {/* Admin Notes */}
  {s.admin_notes && (
- <div className="bg-[rgba(255,193,7,0.05)] rounded-r-md my-3 border-l-[3px] border-[#f9a825] px-4 py-2">
+ <div className="bg-yellow-50/50 rounded-r-md my-3 border-l-[3px] border-[#f9a825] px-4 py-2">
  <h3>Admin Notes</h3>
  <p>{s.admin_notes}</p>
  </div>
@@ -295,7 +291,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  </div>
 
  {/* Discussion Thread */}
- <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
  <h3>💬 Discussion ({(comments ?? []).length})</h3>
  <SuggestionCommentThread
  suggestionId={s.id}
@@ -314,7 +310,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Admin Actions */}
  {isAdmin && s.status ==="pending" && (
- <div className="bg-card border-edge rounded-lg border border-[#ffc107] p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border border-[#ffc107] p-6 shadow-md transition-all">
  <h3>🛡️ Admin Actions</h3>
  <SuggestionAdminActions suggestionId={s.id} />
  </div>

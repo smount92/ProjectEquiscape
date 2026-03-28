@@ -95,7 +95,7 @@ export default async function MarketPricePage({
   {/* Results (Server-rendered) */}
   {items.length === 0 ? (
    <div
-   className="bg-card border-edge rounded-lg border p-12 text-center shadow-md transition-all"
+   className="bg-white border-stone-200 rounded-lg border p-12 text-center shadow-md transition-all"
    >
    <div className="mb-4 text-[3rem]">📊</div>
    <h3 className="mb-2">
@@ -103,7 +103,7 @@ export default async function MarketPricePage({
     ?"No matching price data"
     :"The Blue Book Grows With Every Sale"}
    </h3>
-   <p className="text-ink-light mx-auto max-w-[400]">
+   <p className="text-stone-600 mx-auto max-w-[400]">
     {query || itemType !=="all"
     ?"Try broadening your search or changing the filter."
     :"Complete a transaction to contribute market data. Prices appear here after verified sales."}
@@ -112,26 +112,26 @@ export default async function MarketPricePage({
   ) : (
    <>
    <div className="mb-4">
-    <span className="text-muted text-sm">
+    <span className="text-stone-500 text-sm">
     {total} item{total !== 1 ?"s" :""} with price data
     </span>
    </div>
 
-   <div className="market-bg-[var(--color-surface-secondary)] sticky top-0 font-semibold">
+   <div className="bg-stone-50 sticky top-0 font-semibold">
     {items.map((item) => (
     <div
      key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`}
-     className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all transition-colors"
+     className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all transition-colors"
     >
      <div className="px-6 py-6">
-     <span className="bg-card border-edge transition-colors-icon rounded-lg border p-6 shadow-md transition-all">
+     <span className="bg-white border-stone-200 transition-colors-icon rounded-lg border p-6 shadow-md transition-all">
       {typeIcon(item.itemType)}
      </span>
-     <div className="bg-card border-edge transition-colors-info rounded-lg border p-6 shadow-md transition-all">
-      <span className="bg-card border-edge transition-colors-title rounded-lg border p-6 shadow-md transition-all">
+     <div className="bg-white border-stone-200 transition-colors-info rounded-lg border p-6 shadow-md transition-all">
+      <span className="bg-white border-stone-200 transition-colors-title rounded-lg border p-6 shadow-md transition-all">
       {item.title}
       </span>
-      <span className="bg-card border-edge transition-colors-maker rounded-lg border p-6 shadow-md transition-all">
+      <span className="bg-white border-stone-200 transition-colors-maker rounded-lg border p-6 shadow-md transition-all">
       {item.maker}
       {item.scale ? ` · ${item.scale}` :""}
       {item.finishType ? ` · ${item.finishType}` :""}
@@ -142,25 +142,25 @@ export default async function MarketPricePage({
      </div>
      </div>
 
-     <div className="bg-card border-edge transition-colors-prices rounded-lg border p-6 shadow-md transition-all">
+     <div className="bg-white border-stone-200 transition-colors-prices rounded-lg border p-6 shadow-md transition-all">
      <div className="text-forest text-lg font-bold">
       {formatCurrency(item.lowestPrice)}
       {item.lowestPrice !== item.highestPrice
       ? ` – ${formatCurrency(item.highestPrice)}`
       :""}
      </div>
-     <div className="mt-[2px] text-sm text-[var(--color-text-secondary)]">
+     <div className="mt-[2px] text-sm text-stone-500">
       <span>Avg: {formatCurrency(item.averagePrice)}</span>
       <span> · Median: {formatCurrency(item.medianPrice)}</span>
      </div>
      </div>
 
-     <div className="bg-card border-edge transition-colors-footer rounded-lg border p-6 shadow-md transition-all">
-     <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-accent-primary-glow)] px-[8px] py-[2px] font-semibold">
+     <div className="bg-white border-stone-200 transition-colors-footer rounded-lg border p-6 shadow-md transition-all">
+     <span className="text-forest inline-flex items-center rounded-full bg-emerald-50 px-[8px] py-[2px] font-semibold">
       {item.transactionVolume} sale{item.transactionVolume !== 1 ?"s" :""}
      </span>
      {item.lastSoldAt && (
-      <span className="text-muted">
+      <span className="text-stone-500">
       Last sold: {formatRelativeTime(item.lastSoldAt)}
       </span>
      )}
@@ -171,35 +171,35 @@ export default async function MarketPricePage({
 
    {/* Pagination */}
    {totalPages > 1 && (
-    <div className="border-edge mt-8 flex items-center justify-between border-t pt-6">
+    <div className="border-stone-200 mt-8 flex items-center justify-between border-t pt-6">
     {page > 1 ? (
      <Link
      href={buildPageUrl(page - 1)}
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
      >
      ← Previous
      </Link>
     ) : (
      <button
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
      disabled
      >
      ← Previous
      </button>
     )}
-    <span className="text-muted text-sm">
+    <span className="text-stone-500 text-sm">
      Page {page} of {totalPages} ({total} items)
     </span>
     {page < totalPages ? (
      <Link
      href={buildPageUrl(page + 1)}
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
      >
      Next →
      </Link>
     ) : (
      <button
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
      disabled
      >
      Next →
@@ -211,7 +211,7 @@ export default async function MarketPricePage({
   )}
 
   {/* Disclaimer */}
-  <div className="border-edge mt-12 rounded-lg border bg-[var(--color-surface-glass)] p-6 text-xs">
+  <div className="border-stone-200 mt-12 rounded-lg border bg-white/50 backdrop-blur-sm p-6 text-xs">
    <p>
    📋 Prices based on completed transactions recorded on Model Horse Hub. This is not a
    professional appraisal. Market conditions vary. Always research current listings before

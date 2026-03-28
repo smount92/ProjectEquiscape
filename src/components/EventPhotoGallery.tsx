@@ -104,11 +104,11 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  }
 
  return (
- <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div className="mb-4 flex items-center justify-between">
  <h3>📸 Event Photos ({photos.length})</h3>
  <label
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  style={{ cursor:"pointer" }}
  >
  {uploading ?"Uploading…" :"+ Add Photo"}
@@ -127,7 +127,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  {error && <p className="mb-2 text-[0.85rem] text-[var(--color-error)]">{error}</p>}
 
  {photos.length === 0 ? (
- <p className="text-muted">No photos yet — share yours!</p>
+ <p className="text-stone-600 font-medium my-4">No photos yet — share yours!</p>
  ) : (
  <div className="grid-cols-[repeat(auto-fill,minmax(140px,1fr))] mt-2 grid gap-2">
  {photos.map((p) => (
@@ -138,7 +138,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  <button
  onClick={() => handleDelete(p.id)}
  disabled={isPending}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  style={{
  position:"absolute",
  top: 4,

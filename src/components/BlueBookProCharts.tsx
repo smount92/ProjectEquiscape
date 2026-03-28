@@ -65,7 +65,7 @@ export default function BlueBookProCharts({
                                 />
                             ))}
                         </div>
-                        <div className="mt-2 flex justify-between text-xs text-muted">
+                        <div className="mt-2 flex justify-between text-xs text-stone-500">
                             <span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span>
                         </div>
                     </div>

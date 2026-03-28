@@ -43,13 +43,13 @@ export default function ReportButton({
  };
 
  if (done) {
- return <span className="text-muted text-xs">✅ Reported</span>;
+ return <span className="text-stone-500 text-xs">✅ Reported</span>;
  }
 
  if (!showForm) {
  return (
  <button
- className="cursor-pointer border-none bg-transparent p-1 text-xs text-muted"
+ className="cursor-pointer border-none bg-transparent p-1 text-xs text-stone-500"
  onClick={() => setShowForm(true)}
  title="Report"
  >
@@ -59,9 +59,9 @@ export default function ReportButton({
  }
 
  return (
- <div className="bg-card border-edge mt-2 rounded-lg border p-4 shadow-md transition-all">
+ <div className="bg-white border-stone-200 mt-2 rounded-lg border p-4 shadow-md transition-all">
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-2 text-sm"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-2 text-sm"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
  title="Report reason"
@@ -74,7 +74,7 @@ export default function ReportButton({
  ))}
  </select>
  <textarea
- className="inline-flex min-h-[36px] w-full rounded-md border border-edge bg-transparent px-4 py-2 text-sm no-underline transition-all mb-2"
+ className="inline-flex min-h-[36px] w-full rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm no-underline transition-all mb-2"
  placeholder="Additional details (optional)"
  value={details}
  onChange={(e) => setDetails(e.target.value)}
@@ -84,14 +84,14 @@ export default function ReportButton({
  {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
  <div className="flex gap-1">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSubmit}
  disabled={saving || !reason}
  >
  {saving ?"…" :"Submit Report"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowForm(false)}
  >
  Cancel

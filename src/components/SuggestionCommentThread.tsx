@@ -64,13 +64,13 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
  <p className="mt-4-empty">No comments yet. Be the first to discuss this suggestion.</p>
  )}
  {initialComments.map((comment) => (
- <div key={comment.id} className="border-edge border-b px-0 py-2">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <span className="border-edge-author border-b px-0 py-2">@{comment.user_alias}</span>
- <span className="border-edge-time border-b px-0 py-2">{timeAgo(comment.created_at)}</span>
+ <div key={comment.id} className="border-stone-200 border-b px-0 py-2">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
+ <span className="border-stone-200-author border-b px-0 py-2">@{comment.user_alias}</span>
+ <span className="border-stone-200-time border-b px-0 py-2">{timeAgo(comment.created_at)}</span>
  {currentUserId === comment.user_id && (
  <button
- className="border-edge-delete border-b px-0 py-2"
+ className="border-stone-200-delete border-b px-0 py-2"
  onClick={() => handleDelete(comment.id)}
  disabled={isPending}
  title="Delete comment"
@@ -79,15 +79,15 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
  </button>
  )}
  </div>
- <p className="border-edge-body border-b px-0 py-2">{comment.body}</p>
+ <p className="border-stone-200-body border-b px-0 py-2">{comment.body}</p>
  </div>
  ))}
 
  {/* Add Comment */}
  {currentUserId ? (
- <div className="border-edge-form border-b px-0 py-2">
+ <div className="border-stone-200-form border-b px-0 py-2">
  <textarea
- className="input border-edge-textarea border-b px-0 py-2"
+ className="input border-stone-200-textarea border-b px-0 py-2"
  placeholder="Share evidence, discuss this change…"
  value={newComment}
  onChange={(e) => setNewComment(e.target.value)}
@@ -95,14 +95,14 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
  maxLength={2000}
  />
  {error && (
- <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {error}
  </p>
  )}
- <div className="border-edge-form-actions border-b px-0 py-2">
- <span className="border-edge-charcount border-b px-0 py-2">{newComment.length}/2000</span>
+ <div className="border-stone-200-form-actions border-b px-0 py-2">
+ <span className="border-stone-200-charcount border-b px-0 py-2">{newComment.length}/2000</span>
  <button
- className="inline-flex min-h-[32px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-4 py-1 text-xs font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[32px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-4 py-1 text-xs font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSubmit}
  disabled={isPending || !newComment.trim()}
  >

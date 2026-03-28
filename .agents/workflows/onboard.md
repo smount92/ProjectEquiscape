@@ -124,7 +124,8 @@ src/
 - **Tailwind CSS v4** with `@theme` block in `globals.css` for design tokens
 - **shadcn/ui** for form primitives — no `form-input` or `form-select` classes
 - **No inline `style={{...}}`** for layout, padding, or colors
-- "Quiet Luxury" stone palette — stone-50 background (`#FAFAF9`), forest green accent (`#2C5545`), stone-900 text (`#1C1917`)
+- **"Cozy Scrapbook" stone palette** — `bg-stone-50` backgrounds, `bg-white` cards, `border-stone-200` borders, `text-stone-900` primary text, `text-stone-500` muted text, `text-forest`/`bg-forest` accent (Hunter Green `#2C5545`)
+- **Legacy tokens BANNED** — `bg-card`, `border-edge`, `text-ink`, `text-muted`, `text-inverse`, `bg-glass` are all replaced. See `docs/guides/design-system.md` for the full banned list.
 - Simple Mode: `[data-simple-mode="true"]` — 130% font scale, 60px min buttons
 - Typography: `font-serif` (Playfair Display) for headings, `font-sans` (Inter) for UI text
 - Design System Guide: `docs/guides/design-system.md`

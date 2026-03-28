@@ -96,7 +96,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  if (status ==="cancelled") {
  return (
  <div
- className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.06)] p-6 opacity-70"
+ className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-red-200 bg-red-50/60 p-6 opacity-70"
  id="offer-card"
  >
  <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
@@ -110,7 +110,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  if (status ==="completed") {
  return (
  <div
- className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(34,197,94,0.2)] bg-[rgba(34,197,94,0.06)] p-6"
+ className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-emerald-200 bg-emerald-50/60 p-6"
  id="offer-card"
  >
  <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
@@ -124,7 +124,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  // ── Active states ──
  return (
  <div
- className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] p-6"
+ className="mb-4 animate-[fadeInUp_0.3s_ease] rounded-lg border border-emerald-200 bg-emerald-50/80 p-6"
  id="offer-card"
  >
  <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-1">
@@ -133,7 +133,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  </div>
 
  {transaction.offerMessage && (
- <p className="text-muted mt-2 text-sm leading-relaxed italic">
+ <p className="text-stone-500 mt-2 text-sm leading-relaxed italic">
  &ldquo;{transaction.offerMessage}&rdquo;
  </p>
  )}
@@ -144,14 +144,14 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  {isSeller ? (
  <div className="mt-2 flex flex-wrap items-center gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleRespond("accept")}
  disabled={saving}
  >
  {saving ?"…" :"✅ Accept Offer"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => handleRespond("decline")}
  disabled={saving}
  >
@@ -160,9 +160,9 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  </div>
  ) : (
  <div>
- <p className="text-muted text-sm">⏳ Waiting for seller response…</p>
+ <p className="text-stone-500 text-sm">⏳ Waiting for seller response…</p>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted mt-1 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-500 mt-1 no-underline transition-all"
  onClick={async () => {
  setSaving(true);
  const result = await retractOffer(transaction.transactionId);
@@ -193,7 +193,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  {isBuyer && !hasPaid && (
  <div className="mt-2 flex flex-wrap items-center gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleMarkPaid}
  disabled={saving}
  >
@@ -202,20 +202,20 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  </div>
  )}
  {isBuyer && hasPaid && (
- <p className="text-muted text-sm">💳 Payment marked as sent. Waiting for seller to verify…</p>
+ <p className="text-stone-500 text-sm">💳 Payment marked as sent. Waiting for seller to verify…</p>
  )}
  {isSeller && hasPaid && (
  <div className="mt-2 flex flex-wrap items-center gap-2">
- <p className="text-muted text-sm">💳 Buyer says they&apos;ve paid.</p>
+ <p className="text-stone-500 text-sm">💳 Buyer says they&apos;ve paid.</p>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleVerify}
  disabled={saving}
  >
  {saving ?"Verifying…" :"✅ Acknowledge External Payment & Release"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={handleCancel}
  disabled={saving}
  >
@@ -225,9 +225,9 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  )}
  {isSeller && !hasPaid && (
  <div className="mt-2 flex flex-wrap items-center gap-2">
- <p className="text-muted text-sm">⏳ Waiting for buyer to send payment…</p>
+ <p className="text-stone-500 text-sm">⏳ Waiting for buyer to send payment…</p>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={handleCancel}
  disabled={saving}
  >
@@ -242,27 +242,27 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  {status ==="funds_verified" && (
  <div className="mt-4">
  {isBuyer && pin ? (
- <div className="border-success mt-2 rounded-lg border-2 bg-[rgba(92,224,160,0.1)] p-6 text-center">
- <span className="text-muted mb-1 block text-xs">🔑 Your Claim PIN</span>
+ <div className="border-success mt-2 rounded-lg border-2 bg-emerald-50 p-6 text-center">
+ <span className="text-stone-500 mb-1 block text-xs">🔑 Your Claim PIN</span>
  <strong className="block font-mono text-2xl font-extrabold tracking-[0.15em] text-[#22c55e]">
  {pin}
  </strong>
  <Link
  href="/claim"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  >
  Go to Claim Page →
  </Link>
  </div>
  ) : isBuyer ? (
- <p className="text-muted text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>
+ <p className="text-stone-500 text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>
  ) : (
- <p className="text-muted text-sm">✅ PIN released to buyer. Transfer in progress…</p>
+ <p className="text-stone-500 text-sm">✅ PIN released to buyer. Transfer in progress…</p>
  )}
  </div>
  )}
 
- {error && <div className="mt-2 text-sm text-danger mt-2">{error}</div>}
+ {error && <div className="mt-2 text-sm text-red-700 mt-2">{error}</div>}
  </div>
  );
 }

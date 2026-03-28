@@ -35,7 +35,7 @@ export default function BlockButton({ targetId, targetAlias, initialBlocked }: B
 
  return (
  <button
- className={`inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold no-underline transition-all ${blocked ?"text-muted" :"text-danger"}`}
+ className={`inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold no-underline transition-all ${blocked ?"text-stone-500" :"text-red-700"}`}
  onClick={handleToggle}
  disabled={isPending}
  >

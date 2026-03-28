@@ -45,7 +45,7 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  if (items.length === 0) {
  return (
  <div
- className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all"
+ className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all"
  >
  <div className="mb-4 text-5xl">✅</div>
  <h2>No Pending Suggestions</h2>
@@ -59,22 +59,22 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  {items.map((s) => (
  <div
  key={s.id}
- className="bg-glass border-edge admin-message hover:opacity-[1]-unread rounded-lg border px-6 py-4 transition-all"
+ className="bg-stone-50 border-stone-200 admin-message hover:opacity-[1]-unread rounded-lg border px-6 py-4 transition-all"
  >
- <div className="bg-glass border-edge sticky top-[var(--header-height)] z-40 border-b border-edge bg-parchment-dark">
- <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
- <span className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+ <div className="bg-stone-50 border-stone-200 sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
+ <div className="rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 transition-all">
+ <span className="rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 transition-all">
  {typeEmoji[s.suggestion_type] ||"📝"}{""}
  {typeLabel[s.suggestion_type] || s.suggestion_type}
  </span>
  <span
- className="cursor-default rounded-lg border border-edge bg-glass px-6 py-4 transition-all"
+ className="cursor-default rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 transition-all"
  >
  {s.name}
  </span>
  </div>
- <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
- <span className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+ <div className="rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 transition-all">
+ <span className="rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 transition-all">
  {new Date(s.created_at).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
@@ -86,20 +86,20 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  </div>
  </div>
  {s.details && (
- <div className="rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+ <div className="rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 transition-all">
  {s.details}
  </div>
  )}
- <div className="flex gap-2 rounded-lg border border-edge bg-glass px-6 py-4 transition-all">
+ <div className="flex gap-2 rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 transition-all">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleReview(s.id,"approved")}
  disabled={isPending && processingId === s.id}
  >
  {isPending && processingId === s.id ?"…" :"✅ Approve"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-500 no-underline transition-all"
  onClick={() => handleReview(s.id,"rejected")}
  disabled={isPending && processingId === s.id}
  >

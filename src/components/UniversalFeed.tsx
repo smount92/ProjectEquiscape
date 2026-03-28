@@ -187,7 +187,7 @@ export default function UniversalFeed({
  };
 
  return (
- <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">
  💬 {label} ({posts.length}
  {hasMore ?"+" :""})
@@ -195,9 +195,9 @@ export default function UniversalFeed({
 
  {/* ── Composer ── */}
  {showComposer && (
- <div className="border-edge mb-6 rounded-lg border bg-[var(--color-surface-1)] p-4">
+ <div className="border-stone-200 mb-6 rounded-lg border bg-stone-50 p-4">
  <textarea
- className="w-full min-h-[100px] resize-y rounded-md border border-edge bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
+ className="w-full min-h-[100px] resize-y rounded-md border border-stone-200 bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
  placeholder={composerPlaceholder}
  value={composerText}
  onChange={(e) => setComposerText(e.target.value)}
@@ -229,7 +229,7 @@ export default function UniversalFeed({
  <div className="flex items-center gap-2">
  <button
  type="button"
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-1 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-2 py-1 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => fileInputRef.current?.click()}
  disabled={imageFiles.length >= 4}
  title="Attach images (up to 4)"
@@ -245,10 +245,10 @@ export default function UniversalFeed({
  className="hidden"
  aria-label="Upload images"
  />
- <span className="text-muted text-xs">{composerText.length}/2000</span>
+ <span className="text-stone-600 font-medium text-xs">{composerText.length}/2000</span>
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handlePost}
  disabled={isPosting || (!composerText.trim() && imageFiles.length === 0)}
  >
@@ -256,7 +256,7 @@ export default function UniversalFeed({
  </button>
  </div>
  {error && (
- <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {error}
  </p>
  )}
@@ -265,7 +265,7 @@ export default function UniversalFeed({
 
  {/* ── Post List ── */}
  {posts.length === 0 ? (
- <p className="text-muted">No {label.toLowerCase()} yet — be the first!</p>
+ <p className="text-stone-600 font-medium my-4">No {label.toLowerCase()} yet — be the first!</p>
  ) : (
  <div className="flex flex-col gap-4">
  {posts.map((post) => (
@@ -277,7 +277,7 @@ export default function UniversalFeed({
  {/* ── Load More Sentinel ── */}
  {hasMore && <div ref={sentinelRef} className="h-[1]" />}
  {isLoadingMore && (
- <p className="text-muted mt-4 text-center">
+ <p className="text-stone-500 mt-4 text-center">
  Loading more…
  </p>
  )}
@@ -355,7 +355,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  };
 
  return (
- <div className="border-b border-edge pb-2">
+ <div className="border-b border-stone-200 pb-2">
  {/* Header */}
  <div className="flex items-center justify-between">
  <Link
@@ -365,7 +365,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  @{post.authorAlias}
  </Link>
  <div className="flex items-center gap-2">
- <Link href={`/feed/${post.id}`} className="text-muted text-xs no-underline hover:underline">
+ <Link href={`/feed/${post.id}`} className="text-stone-500 text-xs no-underline hover:underline">
  {timeAgo(post.createdAt)}
  {wasEdited && (
  <span title="This post was edited" className="opacity-60">
@@ -376,7 +376,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  {post.authorId === currentUserId && (
  <>
  <button
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-1.5 py-0.5 text-xs font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setIsEditing(!isEditing);
  setEditText(displayContent);
@@ -386,7 +386,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  ✏️
  </button>
  <button
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-1.5 py-0.5 text-xs font-semibold text-stone-600 no-underline transition-all"
  onClick={handleDelete}
  disabled={isPending}
  >
@@ -402,7 +402,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  {isEditing ? (
  <div className="flex flex-col gap-1">
  <textarea
- className="min-h-[36px] w-full resize-y rounded-md border border-edge bg-transparent px-4 py-2 text-sm no-underline transition-all"
+ className="min-h-[36px] w-full resize-y rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm no-underline transition-all"
  value={editText}
  onChange={(e) => setEditText(e.target.value)}
  rows={3}
@@ -411,14 +411,14 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  />
  <div className="flex gap-1">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleEdit}
  disabled={isPending || !editText.trim()}
  >
  {isPending ?"Saving…" :"Save"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setIsEditing(false)}
  >
  Cancel
@@ -439,13 +439,13 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  return (
  <Link
  href={`/community/${horseId}`}
- className="mt-2 block rounded-lg border border-edge bg-card p-4 no-underline shadow-sm transition-all hover:shadow-md"
+ className="mt-2 block rounded-lg border border-stone-200 bg-white p-4 no-underline shadow-sm transition-all hover:shadow-md"
  >
- <div className="flex items-center gap-2 font-semibold text-ink">
+ <div className="flex items-center gap-2 font-semibold text-stone-900">
  🐴 View Horse Passport
  </div>
- <p className="mt-1 text-sm text-muted">Click to view this model on Model Horse Hub</p>
- <span className="mt-1 block text-xs text-muted">
+ <p className="mt-1 text-sm text-stone-500">Click to view this model on Model Horse Hub</p>
+ <span className="mt-1 block text-xs text-stone-500">
  modelhorsehub.com/community/{horseId.slice(0, 8)}…
  </span>
  </Link>
@@ -474,7 +474,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  onToggle={() => togglePostLike(post.id)}
  />
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowReplies(!showReplies)}
  >
  💬 {post.repliesCount > 0 ? post.repliesCount :""} {showReplies ?"▲" :"▼"}
@@ -483,7 +483,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
 
  {/* Replies */}
  {showReplies && (
- <div className="mt-2 ml-6 border-l-2 border-edge pl-4">
+ <div className="mt-2 ml-6 border-l-2 border-stone-200 pl-4">
  {replies.map((r) => (
  <div key={r.id} className="mb-2 flex items-start justify-between">
  <div className="flex-1">
@@ -493,7 +493,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  >
  @{r.authorAlias}
  </Link>
- <span className="text-muted ml-1 text-xs">
+ <span className="text-stone-500 ml-1 text-xs">
  {timeAgo(r.createdAt)}
  </span>
  <div className="mt-[2]">
@@ -502,7 +502,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  </div>
  {r.authorId === currentUserId && (
  <button
- className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  if (!confirm("Delete this reply?")) return;
  startTransition(async () => {
@@ -528,7 +528,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  maxLength={500}
  />
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleReply}
  disabled={isPending || !replyText.trim()}
  >

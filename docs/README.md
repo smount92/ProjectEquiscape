@@ -1,6 +1,6 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** March 26, 2026
+> **Last Updated:** March 28, 2026
 > **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference.
 
 ---
@@ -47,7 +47,7 @@ docs/
 │   ├── state-machines.md              # Commerce, commission, transfer flows
 │   └── adrs/
 │       ├── 001-server-actions-over-api.md
-│       ├── 002-vanilla-css-over-tailwind.md  # ⚠️ SUPERSEDED — migrated to Tailwind CSS v4
+│       ├── 002-vanilla-css-over-tailwind.md  # Tailwind CSS v4 — migration ✅ COMPLETE
 │       ├── 003-manual-types-over-generated.md # ⚠️ SUPERSEDED — now uses generated types via `npm run gen-types`
 │       ├── 004-materialized-views-for-reads.md
 │       ├── 005-soft-delete-tombstone.md
@@ -69,7 +69,7 @@ docs/
 ├── guides/
 │   ├── adding-a-feature.md            # End-to-end feature workflow
 │   ├── adding-a-migration.md          # SQL migration guide
-│   ├── css-conventions.md             # CSS architecture rules (legacy — see design-system.md)
+│   ├── css-conventions.md             # CSS architecture rules (Tailwind stone palette, banned tokens)
 │   ├── design-system.md               # "Cozy Scrapbook" design system + 4 page archetypes
 │   ├── testing.md                     # Test strategy and commands
 │   ├── catalog-curation.md            # Catalog curation guide (V32)

@@ -102,7 +102,7 @@ export default function InsuranceReportButton() {
  return (
  <div className="insurance-report-wrapper">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleClick}
  disabled={status ==="loading"}
  id="insurance-report-btn"
@@ -116,22 +116,22 @@ export default function InsuranceReportButton() {
 "📄 Insurance Report"
  )}
  </button>
- {status ==="error" && error && <span className="text-danger ml-2 text-xs">{error}</span>}
+ {status ==="error" && error && <span className="text-red-700 ml-2 text-xs">{error}</span>}
 
  {/* Collection Picker Modal */}
  {status ==="picking" && (
  <div className="modal-backdrop" onClick={handleCancel}>
  <div
- className="bg-card border-edge max-w-[400] rounded-lg border shadow-md transition-all"
+ className="bg-white border-stone-200 max-w-[400] rounded-lg border shadow-md transition-all"
  onClick={(e) => e.stopPropagation()}
  >
  <h3 className="mb-4">📄 Insurance Report Scope</h3>
- <p className="text-ink-light mb-6 text-sm">
+ <p className="text-stone-600 mb-6 text-sm">
  Choose which horses to include in your insurance report.
  </p>
 
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4 w-full"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4 w-full"
  value={selectedCollection}
  onChange={(e) => setSelectedCollection(e.target.value)}
  id="insurance-collection-select"
@@ -146,7 +146,7 @@ export default function InsuranceReportButton() {
  </select>
 
  {!selectedCollection && horseCount !== null && horseCount > 200 && (
- <div className="text-[var(--color-accent-warning, #f59e0b)] mt-4 mb-4 rounded-lg border border-[rgba(44,85,69,0.2)] bg-[rgba(44,85,69,0.08)] px-6 py-4 text-sm leading-relaxed">
+ <div className="text-[var(--color-accent-warning, #f59e0b)] mt-4 mb-4 rounded-lg border border-emerald-200 bg-emerald-50/80 px-6 py-4 text-sm leading-relaxed">
  ⚠️ Your stable has {horseCount} models. Generating a full report may be slow. Consider
  selecting a collection for faster results.
  </div>
@@ -154,13 +154,13 @@ export default function InsuranceReportButton() {
 
  <div className="flex justify-end gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleCancel}
  >
  Cancel
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleConfirm}
  >
  Generate Report

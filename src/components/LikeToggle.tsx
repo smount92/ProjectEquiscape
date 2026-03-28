@@ -32,7 +32,7 @@ export default function LikeToggle({ initialLiked, initialCount, onToggle }: Lik
 
  return (
  <button
- className={`text-muted inline-flex cursor-pointer items-center gap-1 rounded-sm border-none bg-transparent px-1.5 py-0.5 text-sm transition-colors hover:bg-[var(--color-surface-hover)] ${liked ?"text-[var(--color-accent)]" :""}`}
+ className={`text-stone-500 inline-flex cursor-pointer items-center gap-1 rounded-sm border-none bg-transparent px-1.5 py-0.5 text-sm transition-colors hover:bg-[var(--color-surface-hover)] ${liked ?"text-[var(--color-accent)]" :""}`}
  onClick={handleClick}
  disabled={isPending}
  aria-label={liked ?"Unlike" :"Like"}

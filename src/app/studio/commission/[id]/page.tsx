@@ -122,20 +122,16 @@ export default async function CommissionDetailPage({
   headerActions={
   <span
    className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap"
-   style={{
-   backgroundColor: `${STATUS_COLORS[commission.status]}20`,
-   color: STATUS_COLORS[commission.status],
-   border: `1px solid ${STATUS_COLORS[commission.status]}40`,
-   }}
+    /* eslint-disable-next-line react/forbid-dom-props */ style={{ backgroundColor: `${STATUS_COLORS[commission.status]}20`, color: STATUS_COLORS[commission.status], borderColor: `${STATUS_COLORS[commission.status]}40`, borderWidth: "1px", borderStyle: "solid" }}
   >
    {commission.statusLabel}
   </span>
   }
  >
   {/* Header Card */}
-  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
-  <div className="bg-card rounded-md p-4">
-   <h3 className="text-ink-light mb-1 text-sm">Description</h3>
+  <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-white rounded-md p-4">
+   <h3 className="text-stone-600 mb-1 text-sm">Description</h3>
    <p className="text-sm leading-[1.6] whitespace-pre-wrap">
    {commission.description}
    </p>
@@ -144,13 +140,13 @@ export default async function CommissionDetailPage({
   <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4">
    {commission.priceQuoted && (
    <div>
-    <span className="text-muted block text-xs">Price Quoted</span>
+    <span className="text-stone-500 block text-xs">Price Quoted</span>
     <span className="text-base font-bold">${commission.priceQuoted}</span>
    </div>
    )}
    {commission.depositAmount && (
    <div>
-    <span className="text-muted block text-xs">Deposit</span>
+    <span className="text-stone-500 block text-xs">Deposit</span>
     <span className="font-bold">
     ${commission.depositAmount}
     {commission.depositPaid ?" ✅" :" ⏳"}
@@ -159,7 +155,7 @@ export default async function CommissionDetailPage({
    )}
    {commission.estimatedCompletion && (
    <div>
-    <span className="text-muted block text-xs">Est. Completion</span>
+    <span className="text-stone-500 block text-xs">Est. Completion</span>
     <span className="font-semibold">
     {new Date(commission.estimatedCompletion).toLocaleDateString("en-US", {
      month:"short",
@@ -171,7 +167,7 @@ export default async function CommissionDetailPage({
    )}
    {commission.slotNumber && (
    <div>
-    <span className="text-muted block text-xs">Slot</span>
+    <span className="text-stone-500 block text-xs">Slot</span>
     <span className="font-bold">#{commission.slotNumber}</span>
    </div>
    )}
@@ -214,7 +210,7 @@ export default async function CommissionDetailPage({
   {isArtist && (
    <Link
    href="/studio/dashboard"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    >
    ← Dashboard
    </Link>
@@ -222,7 +218,7 @@ export default async function CommissionDetailPage({
   {isClient && (
    <Link
    href="/studio/my-commissions"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    >
    ← My Commissions
    </Link>

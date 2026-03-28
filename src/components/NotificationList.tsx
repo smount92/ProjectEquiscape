@@ -107,17 +107,17 @@ export default function NotificationList({ initialNotifications }: NotificationL
  <div>
  {/* Actions Bar */}
  {notifs.length > 0 && (
- <div className="border-edge mb-6 flex gap-2 border-b pb-2">
+ <div className="border-stone-200 mb-6 flex gap-2 border-b pb-2">
  {unreadCount > 0 && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleMarkAllRead}
  >
  ✓ Mark All Read
  </button>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-500 no-underline transition-all"
  onClick={handleClear}
  disabled={clearing}
  >
@@ -128,7 +128,7 @@ export default function NotificationList({ initialNotifications }: NotificationL
 
  {/* List */}
  {notifs.length === 0 ? (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🔔</div>
  <h2>All Caught Up!</h2>
  <p>No notifications yet. Activity from the community will appear here.</p>
@@ -139,7 +139,7 @@ export default function NotificationList({ initialNotifications }: NotificationL
  <Link
  key={n.id}
  href={getNotifLink(n)}
- className={`border-edge flex items-center gap-4 border-b px-6 py-4 text-inherit no-underline transition-colors hover:bg-black/[0.03] ${n.isRead ?"" :"bg-[rgba(129,140,248,0.04)]"}`}
+ className={`border-stone-200 flex items-center gap-4 border-b px-6 py-4 text-inherit no-underline transition-colors hover:bg-black/[0.03] ${n.isRead ?"" :"bg-indigo-50/40"}`}
  onClick={() => handleClick(n.id)}
  >
  <span className="shrink-0 text-xl">
@@ -149,7 +149,7 @@ export default function NotificationList({ initialNotifications }: NotificationL
  <span className="text-sm">
  {n.content ||"New notification"}
  </span>
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  {timeAgo(n.createdAt)}
  </span>
  </div>

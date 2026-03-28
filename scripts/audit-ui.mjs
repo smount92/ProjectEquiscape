@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SRC_DIR = path.join(__dirname, '../src');
-const REPORT_PATH = path.join(__dirname, '../.agents/workflows/ui-hit-list.md');
+const REPORT_PATH = path.join(__dirname, '../.agents/workflows/ui-hitlist-update.md');
 
 const BANNED_PATTERNS = [
   { regex: /bg-\[rgba\(/g, name: 'Legacy RGBA Backgrounds' },

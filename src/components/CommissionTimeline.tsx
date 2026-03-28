@@ -195,13 +195,13 @@ export default function CommissionTimeline({
  const isTerminal = ["delivered","declined","cancelled"].includes(commissionStatus);
 
  return (
- <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border p-6 shadow-md transition-all">
  {/* ── Header ── */}
  <div className="mb-6 flex items-center justify-between">
  <h2 className="m-0 text-lg">📋 Timeline</h2>
  {(isArtist || isClient) && !isTerminal && !showForm && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => setShowForm(true)}
  >
  + Add Update
@@ -212,9 +212,9 @@ export default function CommissionTimeline({
  {/* ── Artist Status Actions ── */}
  {isArtist && artistActions.length > 0 && (
  <div
- className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4"
+ className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-white)] p-4"
  >
- <div className="text-muted mb-2 text-sm font-semibold">
+ <div className="text-stone-500 mb-2 text-sm font-semibold">
  🎨 Actions — {STATUS_LABELS[commissionStatus] || commissionStatus}
  </div>
  <div className="flex flex-wrap items-center gap-2">
@@ -229,7 +229,7 @@ export default function CommissionTimeline({
  <button
  key={action.label}
  className={`btn ${action.style === "primary" ? "btn-primary" : "btn-ghost"} text-sm ${
- action.style === "danger" ? "text-danger border-[rgba(239,68,68,0.3)]" : ""
+ action.style === "danger" ? "text-red-700 border-red-200" : ""
  }`}
  onClick={() => handleStatusAction(action.label)}
  disabled={acting}
@@ -244,7 +244,7 @@ export default function CommissionTimeline({
  {/* ── Client Review Actions ── */}
  {isClient && commissionStatus ==="review" && (
  <div
- className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-[rgba(139,92,246,0.2)] bg-[rgba(139,92,246,0.06)] p-4"
+ className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-purple-200 bg-purple-50/50 p-4"
  >
  <div className="mb-2 text-sm font-semibold">
  🔎 The artist has submitted this for your review
@@ -258,14 +258,14 @@ export default function CommissionTimeline({
  />
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleClientAction("approval")}
  disabled={acting}
  >
  ✅ Approve
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => handleClientAction("revision_request")}
  disabled={acting}
  >
@@ -279,12 +279,12 @@ export default function CommissionTimeline({
  {showForm && (
  <form
  onSubmit={handleAddUpdate}
- className="bg-card border-edge bg-card mb-6 rounded-lg border p-4 shadow-md transition-all"
+ className="bg-white border-stone-200 bg-white mb-6 rounded-lg border p-4 shadow-md transition-all"
  >
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Update Type</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Update Type</label>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={updateType}
  onChange={(e) => setUpdateType(e.target.value)}
  title="Update type"
@@ -296,7 +296,7 @@ export default function CommissionTimeline({
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Title (optional)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Title (optional)</label>
  <Input
  type="text"
  
@@ -307,7 +307,7 @@ export default function CommissionTimeline({
  </div>
 
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Details</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Details</label>
  <Textarea
  
  value={body}
@@ -319,7 +319,7 @@ export default function CommissionTimeline({
 
  {/* Photo attachment — available for all update types */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">
  📎 Attach Photo{""}
  {updateType !=="wip_photo" && <span className="opacity-[0.6]">(optional)</span>}
  </label>
@@ -332,12 +332,12 @@ export default function CommissionTimeline({
  title="Attach photo"
  />
  {attachFile && (
- <p className="text-muted mt-[4] text-xs">
+ <p className="text-stone-500 mt-[4] text-xs">
  📎 {attachFile.name} ({(attachFile.size / 1024).toFixed(0)} KB)
  </p>
  )}
  {uploadError && (
- <p className="text-danger mt-2 mt-[4] flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-red-700 mt-2 mt-[4] flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {uploadError}
  </p>
  )}
@@ -359,14 +359,14 @@ export default function CommissionTimeline({
  <div className="flex gap-2">
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={saving}
  >
  {saving ?"Posting…" :"Post Update"}
  </button>
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setShowForm(false);
  setUploadError(null);
@@ -380,7 +380,7 @@ export default function CommissionTimeline({
 
  {/* ── Timeline Events ── */}
  {updates.length === 0 ? (
- <p className="text-muted p-6 text-center">
+ <p className="text-stone-500 p-6 text-center">
  No updates yet.
  </p>
  ) : (
@@ -396,7 +396,7 @@ export default function CommissionTimeline({
  {update.title}
  </div>
  )}
- <div className="text-muted mt-[2] text-xs">
+ <div className="text-stone-500 mt-[2] text-xs">
  @{update.authorAlias} ·{""}
  {new Date(update.createdAt).toLocaleDateString("en-US", {
  month:"short",
@@ -410,7 +410,7 @@ export default function CommissionTimeline({
  </div>
  </div>
  {update.requiresPayment && (
- <span className="text-xs font-semibold text-[var(--color-accent-warm)]">
+ <span className="text-xs font-semibold text-amber-500">
  💰 Payment Due
  </span>
  )}
@@ -444,7 +444,7 @@ export default function CommissionTimeline({
  </div>
  )}
  {update.oldStatus && update.newStatus && (
- <div className="text-muted mt-1 text-sm">
+ <div className="text-stone-500 mt-1 text-sm">
  {STATUS_LABELS[update.oldStatus] || update.oldStatus} →{""}
  <strong>{STATUS_LABELS[update.newStatus] || update.newStatus}</strong>
  </div>

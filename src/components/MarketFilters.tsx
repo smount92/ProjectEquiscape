@@ -91,7 +91,7 @@ export default function MarketFilters() {
  {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
  <button
  key={value}
- className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-all ${currentType === value ?"bg-forest border-forest text-white" :"border-edge text-ink-light hover:text-ink hover:border-forest bg-card"}`}
+ className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-all ${currentType === value ?"bg-forest border-forest text-white" :"border-stone-200 text-stone-600 hover:text-stone-900 hover:border-emerald-700 bg-white"}`}
  onClick={() => pushParams({ type: value ==="all" ? null : value })}
  >
  {label}
@@ -100,7 +100,7 @@ export default function MarketFilters() {
  </div>
  <div className="flex flex-wrap items-center gap-3">
  <select
- className="min-w-[140px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
+ className="min-w-[140px] rounded-md border border-stone-200 bg-white px-3 py-2 text-sm"
  value={currentFinish}
  onChange={(e) => pushParams({ finish: e.target.value ==="all" ? null : e.target.value })}
  id="market-finish"
@@ -113,7 +113,7 @@ export default function MarketFilters() {
  ))}
  </select>
  <select
- className="min-w-[140px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
+ className="min-w-[140px] rounded-md border border-stone-200 bg-white px-3 py-2 text-sm"
  value={currentStage}
  onChange={(e) => pushParams({ stage: e.target.value ==="all" ? null : e.target.value })}
  id="market-stage"
@@ -126,7 +126,7 @@ export default function MarketFilters() {
  ))}
  </select>
  <select
- className="min-w-[160px] rounded-md border border-edge bg-card px-3 py-2 text-sm"
+ className="min-w-[160px] rounded-md border border-stone-200 bg-white px-3 py-2 text-sm"
  value={currentSort}
  onChange={(e) => pushParams({ sort: e.target.value })}
  id="market-sort"

@@ -117,22 +117,22 @@ export default function QuickAddPage() {
  return (
   <FocusLayout title="Quick Add" description="Rapidly add horses to your stable.">
  <div className="animate-fade-in-up mx-auto max-w-[640]">
- <div className="mb-6 justify-between" style={{ display:"flex", alignItems:"center" }}>
+ <div className="mb-6 flex items-center justify-between">
  <h1>
  ⚡ <span className="text-forest">Quick Add</span>
  </h1>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  ← Back
  </Link>
  </div>
 
- <div className="bg-card border-edge rounded-lg border p-8 shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border p-8 shadow-md transition-all">
  {/* Catalog Search */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">🔍 Search Catalog</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">🔍 Search Catalog</label>
  <UnifiedReferenceSearch
  selectedCatalogId={selectedCatalog?.id || null}
  onCatalogSelect={(catalogId, item) => {
@@ -147,7 +147,7 @@ export default function QuickAddPage() {
  {selectedCatalog && (
  <div className="ring-2 ring-forest bg-forest/5">
  ✅ {selectedCatalog.maker} — {selectedCatalog.title}
- <span className="text-muted text-xs"> ({selectedCatalog.itemType})</span>
+ <span className="text-stone-500 text-xs"> ({selectedCatalog.itemType})</span>
  </div>
  )}
  {!selectedCatalog && customName && (
@@ -158,7 +158,7 @@ export default function QuickAddPage() {
  {/* Custom Name (optional if catalog selected) */}
  {!selectedCatalog && (
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Name</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Name</label>
  <Input
  
  type="text"
@@ -172,9 +172,9 @@ export default function QuickAddPage() {
  {/* Quick Selectors Row */}
  <div className="quick-add-selectors max-sm:grid-cols-1">
  <div>
- <label className="text-ink mb-1 block text-sm font-semibold">Finish</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Finish</label>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={finishType}
  onChange={(e) => setFinishType(e.target.value)}
  id="quick-finish"
@@ -187,9 +187,9 @@ export default function QuickAddPage() {
  </select>
  </div>
  <div>
- <label className="text-ink mb-1 block text-sm font-semibold">Condition</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Condition</label>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  id="quick-condition"
@@ -202,9 +202,9 @@ export default function QuickAddPage() {
  </select>
  </div>
  <div>
- <label className="text-ink mb-1 block text-sm font-semibold">Collection</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Collection</label>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={collectionId}
  onChange={(e) => setCollectionId(e.target.value)}
  id="quick-collection"
@@ -221,7 +221,7 @@ export default function QuickAddPage() {
 
  {/* Error */}
  {error && (
- <div className="text-danger mt-2 mt-4 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <div className="text-red-700 mt-2 mt-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  ⚠️ {error}
  </div>
  )}
@@ -238,7 +238,7 @@ export default function QuickAddPage() {
  </button>
  {selectedCatalog && recentAdds.length > 0 && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleDuplicate}
  id="quick-duplicate"
  >
@@ -249,7 +249,7 @@ export default function QuickAddPage() {
  </div>
 
  {/* Link to full form */}
- <div className="text-muted mt-4 text-sm" style={{ textAlign:"center" }}>
+ <div className="text-stone-500 mt-4 text-center text-sm">
  Need photos or more details?{""}
  <Link href="/add-horse" className="text-forest">
  Use the full intake form →
@@ -258,33 +258,28 @@ export default function QuickAddPage() {
 
  {/* Recent Adds */}
  {recentAdds.length > 0 && (
- <div className="border-edge mt-8 rounded-lg border bg-[var(--color-surface-primary)] p-6">
+ <div className="border-stone-200 mt-8 rounded-lg border bg-white p-6">
  <h3 className="mb-2 text-base">Recently Added</h3>
  {recentAdds.map((item) => (
  <div
  key={item.id}
- className="border-edge rounded-lg-item mt-8 border bg-[var(--color-surface-primary)] p-6"
+ className="border-stone-200 rounded-lg-item mt-8 border bg-white p-6"
  >
  <span>✅ {item.name}</span>
- <span className="text-muted">
+ <span className="text-stone-500">
  {item.finish} · {item.condition} — {timeSince(item.timestamp)}
  </span>
  <Link
  href={`/stable/${item.id}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
- style={{
- padding:"2px 8px",
- fontSize:"0.75rem",
- }}
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-1 text-xs font-semibold text-stone-600 no-underline transition-all"
  >
  View →
  </Link>
  </div>
  ))}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] mt-4 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => router.push("/dashboard")}
- style={{ marginTop:"var(--space-sm)", width:"100%" }}
  >
  ← Back to Dashboard ({recentAdds.length} added)
  </button>

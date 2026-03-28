@@ -35,7 +35,7 @@ export default function ExplorerLayout({
 
             {/* Controls row (sticky) */}
             {controls && (
-                <div className="sticky top-[calc(var(--header-height)+1rem)] z-40 mb-8 border-b border-stone-200 bg-parchment/90 pb-4 pt-2 backdrop-blur-md">
+                <div className="sticky top-[calc(var(--header-height)+1rem)] z-40 mb-8 border-b border-stone-200 bg-stone-50/90 pb-4 pt-2 backdrop-blur-md">
                     {controls}
                 </div>
             )}

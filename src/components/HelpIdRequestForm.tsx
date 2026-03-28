@@ -68,7 +68,7 @@ export default function HelpIdRequestForm() {
  if (!isOpen) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all mt-8"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all mt-8"
  onClick={() => setIsOpen(true)}
  id="new-id-request-btn"
  >
@@ -78,7 +78,7 @@ export default function HelpIdRequestForm() {
  }
 
  return (
- <div className="help-id-form-bg-card border-edge card animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
+ <div className="help-id-form-bg-white border-stone-200 card animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
  <h3 className="mb-4">📸 Submit a Mystery Model</h3>
 
  {status ==="success" ? (
@@ -90,9 +90,9 @@ export default function HelpIdRequestForm() {
  <form onSubmit={handleSubmit}>
  {/* Photo Upload */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Photo of the model *</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Photo of the model *</label>
  <div
- className="border-edge bg-card flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-12 text-center transition-all"
+ className="border-stone-200 bg-white flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-12 text-center transition-all"
  onClick={() => fileInputRef.current?.click()}
  >
  {preview ? (
@@ -104,7 +104,7 @@ export default function HelpIdRequestForm() {
  ) : (
  <>
  <div className="mb-4 text-[3rem] opacity-[0.7]">📷</div>
- <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-edge bg-card p-8 text-center transition-all">
+ <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-stone-200 bg-white p-8 text-center transition-all">
  Click to upload a photo
  <br />
  <span className="text-forest text-sm underline">
@@ -128,7 +128,7 @@ export default function HelpIdRequestForm() {
 
  {/* Description */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="help-id-description">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="help-id-description">
  Description
  </label>
  <Textarea
@@ -142,7 +142,7 @@ export default function HelpIdRequestForm() {
 
  {/* Identifying Marks */}
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold" htmlFor="help-id-marks">
+ <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="help-id-marks">
  Any identifying marks?
  </label>
  <Input
@@ -155,7 +155,7 @@ export default function HelpIdRequestForm() {
  </div>
 
  {error && (
- <div className="text-danger mt-4 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-6 py-4 text-sm">
+ <div className="text-red-700 mt-4 rounded-md border border-red-200 bg-red-50 px-6 py-4 text-sm">
  {error}
  </div>
  )}
@@ -163,7 +163,7 @@ export default function HelpIdRequestForm() {
  <div className="mt-6 flex gap-4">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setIsOpen(false);
  setPreview(null);
@@ -174,7 +174,7 @@ export default function HelpIdRequestForm() {
  </button>
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={status ==="submitting"}
  id="submit-id-request-btn"
  >

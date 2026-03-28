@@ -113,25 +113,25 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
    <h1>
     <span className="text-forest">Mystery Model</span>
     {isResolved && (
-    <span className="ml-4 rounded-full bg-[rgba(92,224,160,0.15)] px-3 py-1 text-sm font-semibold text-emerald-600">
+    <span className="ml-4 rounded-full bg-emerald-50 text-emerald-600 px-3 py-1 text-sm font-semibold text-emerald-600">
      ✅ Resolved
     </span>
     )}
    </h1>
-   <p className="text-ink-light mt-1">
+   <p className="text-stone-600 mt-1">
     Submitted by {requesterName} on {new Date(req.created_at).toLocaleDateString()}
    </p>
    </div>
    <Link
    href="/community/help-id"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    >
    ← Back to Help ID
    </Link>
   </div>
   }
   leftContent={
-  <div className="bg-card border-edge overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-white border-stone-200 overflow-hidden rounded-lg border shadow-md transition-all">
    {signedImageUrl ? (
    <img
     src={signedImageUrl}
@@ -139,16 +139,16 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     className="block h-auto max-h-[500px] w-full object-contain"
    />
    ) : (
-   <div className="flex h-[300px] items-center justify-center bg-[var(--color-surface-hover)] text-6xl">
+   <div className="flex h-[300px] items-center justify-center bg-stone-50 text-6xl">
     🐴
    </div>
    )}
   </div>
   }
   rightContent={
-  <div className="bg-card border-edge rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
    <h2 className="mb-4 text-base font-semibold">Description</h2>
-   <p className="text-ink-light leading-[1.7]">{req.description ||"No description provided."}</p>
+   <p className="text-stone-600 leading-[1.7]">{req.description ||"No description provided."}</p>
   </div>
   }
   belowContent={

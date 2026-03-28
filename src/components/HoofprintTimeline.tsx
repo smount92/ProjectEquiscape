@@ -114,7 +114,7 @@ export default function HoofprintTimeline({
  {isOwner && (
  <>
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[140px] text-sm"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[140px] text-sm"
  value={lifeStage}
  onChange={(e) => handleStageChange(e.target.value)}
  disabled={stageUpdating}
@@ -127,7 +127,7 @@ export default function HoofprintTimeline({
  <option value="for_sale">💲 For Sale</option>
  </select>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowForm(!showForm)}
  >
  {showForm ?"Cancel" :"📝 Add Note"}
@@ -139,11 +139,11 @@ export default function HoofprintTimeline({
 
  {/* Ownership Chain */}
  {ownershipChain.length > 0 && (
- <div className="bg-[rgba(0,0,0,0.03)] border-[rgba(0,0,0,0.06)] mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
- <span className="text-muted mr-1 text-xs">Chain of Custody:</span>
+ <div className="bg-stone-50 border-[rgb(245 245 244)] mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
+ <span className="text-stone-500 mr-1 text-xs">Chain of Custody:</span>
  {ownershipChain.map((owner, i) => (
  <span key={owner.id} className="inline-flex items-center gap-1">
- {i > 0 && <span className="text-muted text-[0.8rem]">→</span>}
+ {i > 0 && <span className="text-stone-500 text-[0.8rem]">→</span>}
  {owner.ownerId ? (
  <Link
  href={`/profile/${encodeURIComponent(owner.ownerAlias)}`}
@@ -166,10 +166,10 @@ export default function HoofprintTimeline({
  {showForm && (
  <form
  onSubmit={handleAddEvent}
- className="bg-[rgba(0,0,0,0.03)] border-[rgba(0,0,0,0.06)] mb-6 rounded-lg border p-4"
+ className="bg-stone-50 border-[rgb(245 245 244)] mb-6 rounded-lg border p-4"
  >
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Title</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Title</label>
  <Input
  type="text"
  
@@ -180,7 +180,7 @@ export default function HoofprintTimeline({
  />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Description (optional)</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Description (optional)</label>
  <Textarea
  
  value={formState.description}
@@ -190,10 +190,10 @@ export default function HoofprintTimeline({
  />
  </div>
  <div className="mt-2 flex items-center gap-4">
- <span className="text-muted text-xs">📝 Notes appear on the Hoofprint™ timeline</span>
+ <span className="text-stone-500 text-xs">📝 Notes appear on the Hoofprint™ timeline</span>
  <button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all ml-auto"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all ml-auto"
  disabled={saving}
  >
  {saving ?"Saving…" :"Add Note"}
@@ -204,7 +204,7 @@ export default function HoofprintTimeline({
 
  {/* Timeline */}
  {timeline.length === 0 ? (
- <div className="text-muted p-8 text-center">
+ <div className="text-stone-500 p-8 text-center">
  <p>🐾 No timeline events yet.</p>
  {isOwner && (
  <p className="text-sm">

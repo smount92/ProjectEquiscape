@@ -59,7 +59,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  return (
  <>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowModal(true)}
  >
  ⚙️ Manage Collection
@@ -71,13 +71,13 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  <DialogTitle>Manage Collection</DialogTitle>
  </DialogHeader>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Name</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Name</label>
  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Collection name" />
  </div>
  <div className="mb-6">
- <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
+ <label className="text-stone-900 mb-1 block text-sm font-semibold">Description</label>
  <textarea
- className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-edge bg-transparent px-4 py-2 text-sm no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm no-underline transition-all"
  rows={3}
  value={description}
  onChange={(e) => setDescription(e.target.value)}
@@ -85,13 +85,13 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  />
  </div>
  {error && (
- <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {error}
  </p>
  )}
  <div className="mt-6 flex justify-between">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={handleDelete}
  disabled={saving}
  >
@@ -99,13 +99,13 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  </button>
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowModal(false)}
  >
  Cancel
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSave}
  disabled={saving || !name.trim()}
  >

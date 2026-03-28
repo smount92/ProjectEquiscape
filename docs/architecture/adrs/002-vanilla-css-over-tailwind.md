@@ -25,17 +25,20 @@ Use **Tailwind CSS v4** as the primary styling approach:
 
 ## Consequences
 
-- Legacy CSS Modules and extracted `.css` files still exist alongside Tailwind classes
-- Some components use a hybrid of global CSS classes + Tailwind utilities
-- `globals.css` (~2,200 lines) retains design tokens in `@theme`, shared primitives, and component-specific styles that haven't been migrated
+- Legacy CSS Modules and extracted `.css` files have been fully eliminated
+- All components use Tailwind utility classes exclusively
+- `globals.css` (~2,200 lines) retains design tokens in `@theme`, shared primitives (`.btn-*`, `.settings-toggle-*`), and a small number of component-specific styles
 - Inline `style={{}}` is only acceptable for truly dynamic values (runtime-computed colors, crop coordinates, etc.)
+- Legacy semantic tokens (`bg-card`, `border-edge`, `text-ink`, `text-muted`, etc.) have been fully replaced with standard `stone` palette equivalents
 
-## Migration Status (March 2026)
+## Migration Status: ✅ COMPLETE (2026-03-28)
 
 - **Tailwind v4 installed and configured** — `@theme` block in `globals.css` maps design tokens
-- **Inline style audit ongoing** — converting `style={{}}` → Tailwind classes across all pages/components
-- **~41% of pages audited**, ~12% of components audited
-- **Settings toggle CSS** fixed in `globals.css` (was missing dimensions)
+- **Token migration complete** — All 143+ legacy RGBA patterns, semantic tokens, and inline styles converted
+- **100% of pages and components** use standard Tailwind stone palette
+- **4 layout archetypes** deployed (Explorer, Scrapbook, CommandCenter, Focus)
+- **shadcn/ui** for all form inputs, modals, badges
+- **Framer Motion** for micro-interactions
 
 ## Original Decision (January 2026)
 
@@ -49,7 +52,8 @@ Use **Tailwind CSS v4** as the primary styling approach:
 
 | Scenario | Approach |
 |----------|----------|
-| New styling | Tailwind utility classes in `className` |
-| Shared primitives (`.btn`, `.card`, `.form-*`) | Keep in `globals.css` |
+| New styling | Tailwind utility classes (`stone` palette) |
+| Shared primitives (`.btn`) | Keep in `globals.css` |
 | Truly dynamic values (runtime colors, coordinates) | Inline `style={{}}` |
-| Legacy CSS Modules | Leave as-is unless touching the component |
+| Legacy CSS Modules | Fully eliminated — no longer present |
+

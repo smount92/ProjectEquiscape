@@ -68,22 +68,22 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  };
 
  return (
- <div className="bg-card border-edge mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div
  className="flex cursor-pointer items-center justify-between"
  onClick={() => setExpanded(!expanded)}
  >
- <h3 className="text-ink-light m-0 text-xs font-bold tracking-[0.08em] uppercase">⚙️ Admin Panel</h3>
- <span className="text-muted text-sm">{expanded ?"▲" :"▼"}</span>
+ <h3 className="text-stone-600 m-0 text-xs font-bold tracking-[0.08em] uppercase">⚙️ Admin Panel</h3>
+ <span className="text-stone-500 text-sm">{expanded ?"▲" :"▼"}</span>
  </div>
 
  {expanded && (
  <div className="mt-4">
  {loading ? (
- <p className="text-muted">Loading members…</p>
+ <p className="text-stone-500">Loading members…</p>
  ) : (
  <>
- <div className="text-ink-light mb-2 text-xs">
+ <div className="text-stone-600 mb-2 text-xs">
  👥 {members.length} member{members.length !== 1 ?"s" :""}
  </div>
  <div className="flex flex-col gap-[2px]">
@@ -93,14 +93,14 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]"
  >
  <div className="flex items-center gap-2">
- <span className="text-ink text-sm font-semibold">@{m.alias}</span>
- <span className="text-ink-light text-xs">{roleBadge(m.role)}</span>
+ <span className="text-stone-900 text-sm font-semibold">@{m.alias}</span>
+ <span className="text-stone-600 text-xs">{roleBadge(m.role)}</span>
  </div>
  {m.userId !== currentUserId && m.role !=="owner" && (
  <div className="flex items-center gap-1">
  {isOwner && (
  <select
- className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-xs min-h-0 py-1 pl-2 pr-7"
+ className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-xs min-h-0 py-1 pl-2 pr-7"
  value={m.role}
  onChange={(e) =>
  handleRoleChange(
@@ -117,7 +117,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  </select>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-danger no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={() => handleRemove(m.userId, m.alias)}
  disabled={isPending}
  title="Remove member"
@@ -151,7 +151,7 @@ export function PinPostButton({ postId, isPinned }: { postId: string; isPinned: 
 
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-xs font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-xs font-semibold text-stone-600 no-underline transition-all"
  onClick={handleToggle}
  disabled={isPending}
  title={pinned ?"Unpin post" :"Pin post"}

@@ -59,7 +59,7 @@ export default function CreateGroupPage() {
  >
   <form onSubmit={handleSubmit}>
   <div className="mb-6">
-   <label className="text-ink mb-1 block text-sm font-semibold">Group Name *</label>
+   <label className="text-stone-900 mb-1 block text-sm font-semibold">Group Name *</label>
    <Input
    value={name}
    onChange={(e) => autoSlug(e.target.value)}
@@ -69,17 +69,17 @@ export default function CreateGroupPage() {
   </div>
 
   <div className="mb-6">
-   <label className="text-ink mb-1 block text-sm font-semibold">URL Slug</label>
+   <label className="text-stone-900 mb-1 block text-sm font-semibold">URL Slug</label>
    <Input
    value={slug}
    onChange={(e) => setSlug(e.target.value)}
    placeholder="pnw-collectors"
    />
-   <small className="text-muted">modelhorsehub.com/community/groups/{slug ||"your-slug"}</small>
+   <small className="text-stone-500">modelhorsehub.com/community/groups/{slug ||"your-slug"}</small>
   </div>
 
   <div className="mb-6">
-   <label className="text-ink mb-1 block text-sm font-semibold">Description</label>
+   <label className="text-stone-900 mb-1 block text-sm font-semibold">Description</label>
    <Textarea
    className="w-full resize-y"
    rows={3}
@@ -91,9 +91,9 @@ export default function CreateGroupPage() {
 
   <div className="grid grid-cols-2 gap-4">
    <div className="mb-6">
-   <label className="text-ink mb-1 block text-sm font-semibold">Group Type *</label>
+   <label className="text-stone-900 mb-1 block text-sm font-semibold">Group Type *</label>
    <select
-    className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+    className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
     value={groupType}
     onChange={(e) => setGroupType(e.target.value)}
     title="Group type"
@@ -106,7 +106,7 @@ export default function CreateGroupPage() {
    </select>
    </div>
    <div className="mb-6">
-   <label className="text-ink mb-1 block text-sm font-semibold">Region</label>
+   <label className="text-stone-900 mb-1 block text-sm font-semibold">Region</label>
    <Input
     value={region}
     onChange={(e) => setRegion(e.target.value)}
@@ -116,7 +116,7 @@ export default function CreateGroupPage() {
   </div>
 
   <div className="mb-6">
-   <label className="text-ink mb-1 block text-sm font-semibold">Visibility</label>
+   <label className="text-stone-900 mb-1 block text-sm font-semibold">Visibility</label>
    <div className="flex gap-2">
    {["public","restricted","private"].map((v) => (
     <button
@@ -132,7 +132,7 @@ export default function CreateGroupPage() {
   </div>
 
   {error && (
-   <p className="text-danger mt-2 flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+   <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
    {error}
    </p>
   )}
@@ -140,14 +140,14 @@ export default function CreateGroupPage() {
   <div className="mt-6 flex gap-2">
    <button
    type="submit"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    disabled={saving || !name.trim()}
    >
    {saving ?"Creating..." :"Create Group"}
    </button>
    <button
    type="button"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    onClick={() => router.push("/community/groups")}
    >
    Cancel

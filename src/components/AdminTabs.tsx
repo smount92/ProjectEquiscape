@@ -113,14 +113,14 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
  return (
  <span className="inline-flex items-center gap-1">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-[rgba(239,68,68,0.4)] bg-[rgba(239,68,68,0.15)] px-6 py-2 text-sm font-semibold text-[#ef4444] no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-red-300 bg-red-50 px-6 py-2 text-sm font-semibold text-[#ef4444] no-underline transition-all"
  onClick={handleDelete}
  disabled={deleting}
  >
  {deleting ?"…" :"Confirm"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setConfirming(false)}
  disabled={deleting}
  >
@@ -132,7 +132,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
 
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.08)] px-6 py-2 text-sm font-semibold text-[#ef4444] no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50/80 px-6 py-2 text-sm font-semibold text-[#ef4444] no-underline transition-all"
  onClick={() => setConfirming(true)}
  title="Delete this message"
  >
@@ -184,7 +184,7 @@ export default function AdminTabs({
  return (
  <>
  {/* Tab bar */}
- <div className="mb-6 flex gap-1 border-b border-edge">
+ <div className="mb-6 flex gap-1 border-b border-stone-200">
  {TABS.map((tab) => {
  const badge = getBadge(tab.key);
  return (
@@ -193,7 +193,7 @@ export default function AdminTabs({
  className={`flex cursor-pointer items-center gap-1.5 border-0 border-b-[3px] bg-transparent px-4 py-2 text-sm font-semibold whitespace-nowrap transition-all ${
  activeTab === tab.key
  ? "border-forest text-forest"
- : "border-transparent text-muted hover:text-ink"
+ : "border-transparent text-stone-500 hover:text-stone-900"
  }`}
  onClick={() => handleTabChange(tab.key)}
  >
@@ -233,7 +233,7 @@ export default function AdminTabs({
 function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  if (messages.length === 0) {
  return (
- <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📬</div>
  <h2>No Messages Yet</h2>
  <p>Contact form submissions will appear here.</p>
@@ -246,11 +246,11 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  {messages.map((msg) => (
  <div
  key={msg.id}
- className={`rounded-lg border border-edge p-4 transition-all ${msg.is_read ? "bg-card opacity-75" : "bg-card shadow-md"}`}
+ className={`rounded-lg border border-stone-200 p-4 transition-all ${msg.is_read ? "bg-white opacity-75" : "bg-white shadow-md"}`}
  >
  <div className="mb-2 flex items-center justify-between">
  <div className="flex items-center gap-2">
- <span className="text-sm font-semibold text-ink">
+ <span className="text-sm font-semibold text-stone-900">
  {msg.name}
  </span>
  <a
@@ -260,7 +260,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  {msg.email}
  </a>
  </div>
- <span className="text-xs text-muted">
+ <span className="text-xs text-stone-500">
  {formatDate(msg.created_at)}
  </span>
  </div>
@@ -270,10 +270,10 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  {msg.subject}
  </div>
  )}
- <div className="mb-3 text-sm leading-relaxed text-ink-light whitespace-pre-wrap">
+ <div className="mb-3 text-sm leading-relaxed text-stone-600 whitespace-pre-wrap">
  {msg.message}
  </div>
- <div className="flex flex-wrap items-center gap-2 border-t border-edge pt-3">
+ <div className="flex flex-wrap items-center gap-2 border-t border-stone-200 pt-3">
  <AdminReplyForm
  messageId={msg.id}
  recipientEmail={msg.email}
@@ -336,7 +336,7 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
 function ReportsTab({ reports }: { reports: Report[] }) {
  if (reports.length === 0) {
  return (
- <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🎉</div>
  <h2>All Clear</h2>
  <p>No open reports to review.</p>
@@ -347,17 +347,17 @@ function ReportsTab({ reports }: { reports: Report[] }) {
  return (
  <div className="flex flex-col gap-2">
  {reports.map((report) => (
- <div key={report.id} className="bg-glass border-edge rounded-lg border px-6 py-4 transition-all">
+ <div key={report.id} className="bg-white border-stone-200 rounded-lg border px-6 py-4 transition-all">
  <div className="mb-1 flex justify-between">
  <strong>{report.reason}</strong>
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  {report.targetType} · {new Date(report.createdAt).toLocaleDateString()}
  </span>
  </div>
  <p className="mb-1 text-sm">
  Reported by: {report.reporterAlias} · Target: {report.targetId.slice(0, 8)}…
  </p>
- {report.details && <p className="text-muted text-sm">{report.details}</p>}
+ {report.details && <p className="text-stone-500 text-sm">{report.details}</p>}
  <ReportActions reportId={report.id} />
  </div>
  ))}
@@ -371,7 +371,7 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
  if (suggestions.length === 0) {
  return (
- <div className="bg-card border-edge rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📚</div>
  <h2>No Pending Catalog Suggestions</h2>
  <p>Community suggestions will appear here for review.</p>
@@ -416,13 +416,13 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  }
 
  return (
- <div key={s.id} className="bg-glass border-edge rounded-lg border px-6 py-4 transition-all">
+ <div key={s.id} className="bg-white border-stone-200 rounded-lg border px-6 py-4 transition-all">
  <div className="mb-1 flex justify-between">
  <strong>
  {typeIcon}{""}
  {s.suggestion_type.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
  </strong>
- <span className="text-muted text-xs">
+ <span className="text-stone-500 text-xs">
  ▲{s.upvotes} ▼{s.downvotes} · {new Date(s.created_at).toLocaleDateString()}
  </span>
  </div>
@@ -430,11 +430,11 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  By: {curatorIcon} @{s.author_alias}
  </p>
  {changeText && (
- <p className="bg-glass mb-1 rounded-sm p-1 font-mono text-sm">
+ <p className="bg-white mb-1 rounded-sm p-1 font-mono text-sm">
  {changeText}
  </p>
  )}
- <p className="text-muted mb-2 text-sm italic">
+ <p className="text-stone-500 mb-2 text-sm italic">
  &ldquo;{s.reason.slice(0, 200)}
  {s.reason.length > 200 ?"…" :""}&rdquo;
  </p>

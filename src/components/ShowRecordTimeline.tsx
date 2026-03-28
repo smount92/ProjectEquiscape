@@ -105,7 +105,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  return (
  <div
- className="show-record-timeline rounded-lg border border-edge bg-card p-4 shadow-sm transition-all"
+ className="show-record-timeline rounded-lg border border-stone-200 bg-white p-4 shadow-sm transition-all"
  id="show-records"
  >
  <div className="mb-6 flex items-center justify-between">
@@ -115,7 +115,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  </h3>
  {isOwner && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleAdd}
  id="add-show-record"
  >
@@ -129,7 +129,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Timeline */}
  {records.length === 0 ? (
- <div className="text-ink-light py-6 text-center text-sm">
+ <div className="text-stone-600 py-6 text-center text-sm">
  {isOwner ?"No show records yet. Add your first win! 🏆" :"No show records yet."}
  </div>
  ) : (
@@ -137,7 +137,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  {records.map((record) => (
  <div
  key={record.id}
- className={`show-record-item group/record relative mb-4 rounded-md bg-[var(--color-card-bg-hover,rgba(0,0,0,0.03))] p-4 transition-colors hover:bg-[rgba(0,0,0,0.06)] ${getRibbonClass(record.ribbonColor)}`}
+ className={`show-record-item group/record relative mb-4 rounded-md bg-[var(--color-card-bg-hover,rgb(250 250 249))] p-4 transition-colors hover:bg-[rgb(245 245 244)] ${getRibbonClass(record.ribbonColor)}`}
  id={`record-${record.id}`}
  >
  {/* Edit Form Inline */}
@@ -159,7 +159,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  )}
  </div>
 
- <div className="text-ink-light flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+ <div className="text-stone-600 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
  {record.placing && <span>🎖️ {record.placing}</span>}
  {record.division && <span>📂 {record.division}</span>}
@@ -170,7 +170,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Advanced details row */}
  {(record.sectionName || record.awardCategory || record.competitionLevel) && (
- <div className="text-ink-light mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+ <div className="text-stone-600 mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  {record.sectionName && <span>🏷️ {record.sectionName}</span>}
  {record.awardCategory && <span>🎯 {record.awardCategory}</span>}
  {record.competitionLevel && <span>📊 {record.competitionLevel}</span>}
@@ -178,7 +178,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  )}
 
  {record.notes && (
- <div className="text-ink-light mt-1 text-sm italic">
+ <div className="text-stone-600 mt-1 text-sm italic">
  {record.notes}
  </div>
  )}
@@ -186,7 +186,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  {isOwner && (
  <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover/record:opacity-100">
  <button
- className="text-muted hover:text-forest cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors"
+ className="text-stone-500 hover:text-forest cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors"
  onClick={() => handleEdit(record)}
  title="Edit"
  aria-label="Edit record"
@@ -194,7 +194,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  ✏️
  </button>
  <button
- className="text-muted cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors hover:text-[#e74c6f]"
+ className="text-stone-500 cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors hover:text-[#e74c6f]"
  onClick={() => handleDelete(record.id)}
  disabled={deletingId === record.id}
  title="Delete"

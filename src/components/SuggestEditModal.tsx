@@ -117,7 +117,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  <>
  <button
  id="suggest-edit-btn"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => setIsOpen(true)}
  >
  ✏️ Suggest Edit
@@ -156,7 +156,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  aria-label={field.label}
  />
  {field.current !== field.original && (
- <span className="text-muted mt-[4px] text-xs italic">
+ <span className="text-stone-500 mt-[4px] text-xs italic">
  Was: {field.original}
  </span>
  )}
@@ -177,13 +177,13 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  rows={3}
  maxLength={2000}
  />
- <span className="text-muted mt-[4px] block text-right text-xs">
+ <span className="text-stone-500 mt-[4px] block text-right text-xs">
  {reason.length}/2000
  </span>
  </div>
 
  {error && (
- <p className="text-danger flex items-center gap-2 rounded-md border border-[rgba(240,108,126,0.3)] bg-[rgba(240,108,126,0.1)] px-4 py-2 text-sm">
+ <p className="text-red-700 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {error}
  </p>
  )}
@@ -212,13 +212,13 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
 
  <div className="flex justify-end gap-2 pt-4">
  <button
- className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-6 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setIsOpen(false)}
  >
  Cancel
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSubmit}
  disabled={isPending || !hasChanges}
  >

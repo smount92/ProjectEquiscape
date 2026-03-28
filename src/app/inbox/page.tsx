@@ -184,7 +184,7 @@ export default async function InboxPage() {
   headerActions={
   <Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    id="browse-showring"
   >
    🏆 Browse Show Ring
@@ -192,27 +192,27 @@ export default async function InboxPage() {
   }
  >
   {inboxItems.length === 0 ? (
-  <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
    <div className="mb-4 text-5xl">✉️</div>
    <h2>Your Inbox is Empty</h2>
    <p>Browse the Show Ring and message sellers about models you&apos;re interested in!</p>
    <Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    🏆 Browse the Show Ring
    </Link>
   </div>
   ) : (
-  <div className="bg-surface-glass border-edge animate-fade-in-up flex flex-col gap-[2px] overflow-hidden rounded-lg border">
+  <div className="bg-white/80 backdrop-blur-md border-stone-200 animate-fade-in-up flex flex-col gap-[2px] overflow-hidden rounded-lg border">
    {inboxItems.map((item) => (
    <Link
     key={item.id}
     href={`/inbox/${item.id}`}
-    className={`text-ink border-edge flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ?"bg-[rgba(44,85,69,0.05)] hover:bg-[rgba(44,85,69,0.08)]" :"hover:bg-black/[0.03]"}`}
+    className={`text-stone-900 border-stone-200 flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ?"bg-emerald-50/50 hover:bg-emerald-50" :"hover:bg-black/[0.03]"}`}
     id={`inbox-item-${item.id}`}
    >
-    <div className="text-saddle flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[rgba(44,85,69,0.15)] max-md:h-9 max-md:w-9">
+    <div className="text-forest flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100/50 max-md:h-9 max-md:w-9">
     <svg
      width="24"
      height="24"
@@ -231,7 +231,7 @@ export default async function InboxPage() {
     <div className="min-w-0 flex-1">
     <div className="flex items-center justify-between gap-2">
      <span
-     className={`text-sm font-semibold ${item.unreadCount > 0 ?"text-forest" :"text-ink"}`}
+     className={`text-sm font-semibold ${item.unreadCount > 0 ?"text-forest" :"text-stone-900"}`}
      >
      @{item.otherAlias}
      </span>
@@ -240,17 +240,17 @@ export default async function InboxPage() {
       ⭐ Rated
      </span>
      )}
-     <span className="text-muted shrink-0 text-xs">{timeAgo(item.latestTime)}</span>
+     <span className="text-stone-500 shrink-0 text-xs">{timeAgo(item.latestTime)}</span>
     </div>
     {item.horseName ? (
-     <div className="text-muted mt-[2px] flex items-center gap-1 text-xs">
+     <div className="text-stone-500 mt-[2px] flex items-center gap-1 text-xs">
      🐴 Re: {item.horseName}
      {item.horseTradeStatus && item.horseTradeStatus !=="Not for Sale" && (
       <span
       className={
        item.horseTradeStatus ==="For Sale"
-       ?"rounded-full bg-[rgba(34,197,94,0.15)] px-1.5 py-[1px] text-[0.65rem] font-bold text-[#22c55e]"
-       :"rounded-full bg-[rgba(59,130,246,0.15)] px-1.5 py-[1px] text-[0.65rem] font-bold text-[#3b82f6]"
+       ?"rounded-full bg-emerald-100 px-1.5 py-[1px] text-[0.65rem] font-bold text-[#22c55e]"
+       :"rounded-full bg-blue-50 px-1.5 py-[1px] text-[0.65rem] font-bold text-[#3b82f6]"
       }
       >
       {item.horseTradeStatus ==="For Sale" ?"💲 For Sale" :"🤝 Offers"}
@@ -258,22 +258,22 @@ export default async function InboxPage() {
      )}
      </div>
     ) : (
-     <div className="text-muted mt-[2px] flex items-center gap-1 text-xs">
+     <div className="text-stone-500 mt-[2px] flex items-center gap-1 text-xs">
      💬 Direct Message
      </div>
     )}
-    <div className="text-ink-light mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+    <div className="text-stone-600 mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
      {item.latestMessage ? (
      <>
       {item.latestSenderIsMe && (
-      <span className="text-ink font-semibold">You: </span>
+      <span className="text-stone-900 font-semibold">You: </span>
       )}
       {item.latestMessage.length > 80
       ? item.latestMessage.slice(0, 80) +"…"
       : item.latestMessage}
      </>
      ) : (
-     <span className="text-muted">No messages yet</span>
+     <span className="text-stone-500">No messages yet</span>
      )}
     </div>
     </div>

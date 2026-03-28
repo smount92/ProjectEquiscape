@@ -124,7 +124,7 @@ export default async function WishlistPage() {
   headerActions={
   <Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-stone-50orest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    id="browse-showring"
   >
    🏆 Browse Show Ring
@@ -136,13 +136,13 @@ export default async function WishlistPage() {
 
   {/* Wishlist Grid */}
   {items.length === 0 ? (
-  <div className="bg-card border-edge animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+  <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
    <div className="mb-4 text-5xl">❤️</div>
    <h2>Your Wishlist is Empty</h2>
    <p>Browse the Show Ring and tap the heart icon on models you love to start your hunt!</p>
    <Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-stone-50orest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    🏆 Browse the Show Ring
    </Link>
@@ -165,20 +165,20 @@ export default async function WishlistPage() {
    return (
     <div
     key={item.id}
-    className="group/bg-card border-edge hover:border-forest relative flex gap-4 rounded-lg border bg-[var(--color-surface-glass)] p-6 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)]"
+    className="group/bg-white border-stone-200 hover:border-emerald-700 relative flex gap-4 rounded-lg border bg-stone-50/80 backdrop-blur-sm p-6 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)]"
     id={`wishlist-${item.id}`}
     >
     <div className="mt-[2px] shrink-0 text-[2rem] leading-none">🐴</div>
     <div className="min-w-0 flex-1">
-     <div className="text-ink mb-1 text-base font-semibold">
+     <div className="text-stone-900 mb-1 text-base font-semibold">
      {typeIcon} {title}
      </div>
      {maker && <div className="text-forest mb-1 text-sm">{maker}</div>}
-     {scale && <div className="text-muted mb-[2px] text-sm">📏 {scale}</div>}
+     {scale && <div className="text-stone-500 mb-[2px] text-sm">📏 {scale}</div>}
      {item.notes && (
-     <div className="text-muted mt-1 text-sm italic">📝 {item.notes}</div>
+     <div className="text-stone-500 mt-1 text-sm italic">📝 {item.notes}</div>
      )}
-     <div className="text-muted mt-2 text-xs opacity-70">
+     <div className="text-stone-500 mt-2 text-xs opacity-70">
      Added{" "}
      {new Date(item.created_at).toLocaleDateString("en-US", {
       month:"short",
