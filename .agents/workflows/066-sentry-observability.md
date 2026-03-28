@@ -6,6 +6,8 @@ description: Sentry Integration — install @sentry/nextjs, configure error trac
 
 > **Constraint:** Use Sentry's Free Developer Tier (5K errors/month, 1 user). Zero cost.
 > **Last Updated:** 2026-03-28
+> **Status:** ✅ COMPLETE (2026-03-28)
+> **Commit:** `336a6bf`
 > **Prerequisite:** None — standalone feature
 > **Packages:** `@sentry/nextjs`
 
