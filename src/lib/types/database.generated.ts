@@ -2621,6 +2621,38 @@ export type Database = {
           },
         ]
       }
+      purchased_reports: {
+        Row: {
+          horse_id: string
+          id: string
+          purchased_at: string
+          report_type: string
+          user_id: string
+        }
+        Insert: {
+          horse_id: string
+          id?: string
+          purchased_at?: string
+          report_type?: string
+          user_id: string
+        }
+        Update: {
+          horse_id?: string
+          id?: string
+          purchased_at?: string
+          report_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchased_reports_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "user_horses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limits: {
         Row: {
           attempts: number
@@ -3281,6 +3313,7 @@ export type Database = {
           finishing_artist_verified: boolean | null
           id: string
           is_for_sale: boolean
+          is_promoted_until: string | null
           is_public: boolean
           life_stage: string | null
           listing_price: number | null
@@ -3311,6 +3344,7 @@ export type Database = {
           finishing_artist_verified?: boolean | null
           id?: string
           is_for_sale?: boolean
+          is_promoted_until?: string | null
           is_public?: boolean
           life_stage?: string | null
           listing_price?: number | null
@@ -3341,6 +3375,7 @@ export type Database = {
           finishing_artist_verified?: boolean | null
           id?: string
           is_for_sale?: boolean
+          is_promoted_until?: string | null
           is_public?: boolean
           life_stage?: string | null
           listing_price?: number | null
@@ -3437,6 +3472,7 @@ export type Database = {
           catalog_id: string | null
           created_at: string
           id: string
+          is_boosted_until: string | null
           notes: string | null
           user_id: string
         }
@@ -3444,6 +3480,7 @@ export type Database = {
           catalog_id?: string | null
           created_at?: string
           id?: string
+          is_boosted_until?: string | null
           notes?: string | null
           user_id: string
         }
@@ -3451,6 +3488,7 @@ export type Database = {
           catalog_id?: string | null
           created_at?: string
           id?: string
+          is_boosted_until?: string | null
           notes?: string | null
           user_id?: string
         }
@@ -3661,6 +3699,9 @@ export type Database = {
         Args: { p_event_id: string; p_user_id: string }
         Returns: Json
       }
+      get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
+      get_photo_limit: { Args: never; Returns: number }
+      get_user_tier: { Args: never; Returns: string }
       increment_approved_suggestions: {
         Args: { target_user_id: string }
         Returns: undefined
