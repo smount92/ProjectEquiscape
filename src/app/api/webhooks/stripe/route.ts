@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
                 if (metadata.type === "promote_listing") {
                     const promotedUntil = new Date();
                     promotedUntil.setDate(promotedUntil.getDate() + 7);
-                    await (admin
-                        .from("user_horses") as any)
+                    await admin
+                        .from("user_horses")
                         .update({ is_promoted_until: promotedUntil.toISOString() })
                         .eq("id", metadata.horse_id);
                     logger.error("StripeWebhook", `Horse ${metadata.horse_id} promoted until ${promotedUntil.toISOString()}`);
@@ -63,14 +63,14 @@ export async function POST(request: NextRequest) {
                 } else if (metadata.type === "boost_iso") {
                     const boostedUntil = new Date();
                     boostedUntil.setHours(boostedUntil.getHours() + 48);
-                    await (admin
-                        .from("user_wishlists") as any)
+                    await admin
+                        .from("user_wishlists")
                         .update({ is_boosted_until: boostedUntil.toISOString() })
                         .eq("id", metadata.wishlist_item_id);
                     logger.error("StripeWebhook", `ISO ${metadata.wishlist_item_id} boosted until ${boostedUntil.toISOString()}`);
 
                 } else if (metadata.type === "insurance_report") {
-                    await (admin.from("purchased_reports" as any) as any).insert({
+                    await admin.from("purchased_reports").insert({
                         user_id: metadata.supabase_user_id,
                         horse_id: metadata.horse_id,
                         report_type: "insurance",

@@ -17,8 +17,8 @@ export async function POST(request: Request) {
     }
 
     // Verify ownership
-    const { data: item } = await (supabase
-        .from("user_wishlists") as any)
+    const { data: item } = await supabase
+        .from("user_wishlists")
         .select("id, notes")
         .eq("id", wishlistItemId)
         .eq("user_id", user.id)
