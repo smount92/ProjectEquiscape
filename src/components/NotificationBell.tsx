@@ -24,45 +24,68 @@ export default function NotificationBell() {
  }, [supabase]);
 
  useEffect(() => {
- // Fetch immediately on mount
+ // Initial fetch on mount
  fetchCount();
 
- let intervalId: ReturnType<typeof setInterval> | null = null;
+ let cleanupFn: (() => void) | null = null;
 
- const startPolling = () => {
-  if (!intervalId) {
-   intervalId = setInterval(fetchCount, 60_000);
-  }
+ const setupRealtime = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // Subscribe to new notifications for this user
+  const channel = supabase
+   .channel(`notifications-${user.id}`)
+   .on(
+    "postgres_changes",
+    {
+     event: "INSERT",
+     schema: "public",
+     table: "notifications",
+     filter: `user_id=eq.${user.id}`,
+    },
+    () => {
+     // Instantly bump unread count
+     setUnreadCount((prev) => prev + 1);
+    }
+   )
+   .on(
+    "postgres_changes",
+    {
+     event: "UPDATE",
+     schema: "public",
+     table: "notifications",
+     filter: `user_id=eq.${user.id}`,
+    },
+    (payload) => {
+     // If a notification was marked as read, re-fetch the exact count
+     if (payload.new && (payload.new as { is_read: boolean }).is_read) {
+      fetchCount();
+     }
+    }
+   )
+   .subscribe();
+
+  // Re-fetch on tab visibility (catches reads from other tabs/devices)
+  const handleVisibility = () => {
+   if (document.visibilityState === "visible") {
+    fetchCount();
+   }
+  };
+  document.addEventListener("visibilitychange", handleVisibility);
+
+  cleanupFn = () => {
+   supabase.removeChannel(channel);
+   document.removeEventListener("visibilitychange", handleVisibility);
+  };
  };
 
- const stopPolling = () => {
-  if (intervalId) {
-   clearInterval(intervalId);
-   intervalId = null;
-  }
- };
-
- const handleVisibility = () => {
-  if (document.visibilityState === "visible") {
-   fetchCount(); // Immediate fetch when user returns
-   startPolling();
-  } else {
-   stopPolling();
-  }
- };
-
- // Only poll if tab is visible
- if (document.visibilityState === "visible") {
-  startPolling();
- }
-
- document.addEventListener("visibilitychange", handleVisibility);
+ setupRealtime();
 
  return () => {
-  stopPolling();
-  document.removeEventListener("visibilitychange", handleVisibility);
+  cleanupFn?.();
  };
- }, [fetchCount]);
+ }, [supabase, fetchCount]);
 
  return (
  <Link

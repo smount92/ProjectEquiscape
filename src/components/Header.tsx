@@ -134,12 +134,43 @@ export default function Header() {
  return () => subscription.unsubscribe();
  }, [supabase, fetchHeaderInfo]);
 
- // Poll for new messages every 30 seconds
+ // Realtime inbox push + visibility-only refresh (replaces 30s polling)
  useEffect(() => {
  if (!user) return;
- const interval = setInterval(() => fetchHeaderInfo(), 30000);
- return () => clearInterval(interval);
- }, [user, fetchHeaderInfo]);
+
+ // Subscribe to incoming messages for instant inbox badge updates
+ const messageChannel = supabase
+  .channel("inbox-unread")
+  .on(
+   "postgres_changes",
+   {
+    event: "INSERT",
+    schema: "public",
+    table: "messages",
+   },
+   (payload) => {
+    const msg = payload.new as { sender_id: string };
+    // Only bump if message is FROM someone else
+    if (msg.sender_id !== user.id) {
+     setUnreadCount((prev) => prev + 1);
+    }
+   }
+  )
+  .subscribe();
+
+ // Re-fetch header data on tab visibility (catches cross-device changes)
+ const handleVisibility = () => {
+  if (document.visibilityState === "visible") {
+   fetchHeaderInfo();
+  }
+ };
+ document.addEventListener("visibilitychange", handleVisibility);
+
+ return () => {
+  supabase.removeChannel(messageChannel);
+  document.removeEventListener("visibilitychange", handleVisibility);
+ };
+ }, [user, supabase, fetchHeaderInfo]);
 
  const handleSignOut = () => {
  supabase.auth.signOut().catch(() => {});
