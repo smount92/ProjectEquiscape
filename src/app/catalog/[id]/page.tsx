@@ -4,6 +4,7 @@ import type { Metadata } from"next";
 import SuggestEditModal from"@/components/SuggestEditModal";
 import Link from"next/link";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { buildEbaySearchUrl } from"@/lib/utils/ebayAffiliate";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -126,6 +127,14 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     Log in to Suggest Edit
     </Link>
    )}
+   <a
+    href={buildEbaySearchUrl(catalogItem.title, catalogItem.maker, (attrs as Record<string, string>).item_number ?? null)}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-1 text-sm font-semibold text-blue-700 no-underline shadow-sm transition-colors hover:bg-blue-100"
+   >
+    🔎 Find on eBay <span className="text-xs text-blue-400">↗</span>
+   </a>
    </div>
   </div>
 

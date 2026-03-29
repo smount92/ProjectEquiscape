@@ -12,6 +12,7 @@ import UniversalFeed from"@/components/UniversalFeed";
 import CloseShowButton from"@/components/CloseShowButton";
 import ExpertJudgingPanel from"@/components/ExpertJudgingPanel";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { getUserTier } from"@/lib/auth";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
@@ -159,6 +160,19 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  >
  ⚙️ Manage Classes
  </Link>
+ {await getUserTier() !== "free" ? (
+ <a
+  href={`/api/export/show-tags?showId=${showId}`}
+  target="_blank"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-6 py-2 text-sm font-semibold text-amber-700 no-underline transition-all hover:bg-amber-100"
+ >
+  🏷️ Print Show Tags (PDF)
+ </a>
+ ) : (
+ <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+  🏷️ Show Tags are a <Link href="/upgrade" className="font-semibold underline">Pro feature</Link>
+ </div>
+ )}
  </div>
  )}
 
