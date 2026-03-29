@@ -5,9 +5,12 @@ description: Core Monetization — promoted listings, ISO feed bounties, a-la-ca
 # Core Monetization (Microtransactions & Studio Pro)
 
 > **Constraint:** All monetization uses Stripe Checkout Sessions. MHH does NOT hold escrow or process peer-to-peer payments. Each feature creates a new Checkout Session URL and redirects.
-> **Last Updated:** 2026-03-28
+> **Last Updated:** 2026-03-29
+> **Status:** ✅ COMPLETE (2026-03-29)
+> **Commit:** `b54d34a`
 > **Prerequisite:** Existing Stripe integration (`/api/checkout/route.ts`, `/api/webhooks/stripe/route.ts`)
-> **Current Stripe Architecture:** Pro subscription checkout at `/api/checkout` → webhook at `/api/webhooks/stripe` → sets `app_metadata.tier` via admin client.
+> **Current Stripe Architecture:** Pro subscription checkout at `/api/checkout` → webhook at `/api/webhooks/stripe` → routes by `metadata.type` (promote_listing, boost_iso, insurance_report, studio_pro, or default Pro).
+> **Manual Step Required:** Create "MHH Studio Pro" product ($9.99/mo) in Stripe Dashboard → copy Price ID →  set `STRIPE_STUDIO_PRO_PRICE_ID` env var.
 
 // turbo-all
 
