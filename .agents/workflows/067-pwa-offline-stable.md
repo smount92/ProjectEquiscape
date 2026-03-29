@@ -6,8 +6,11 @@ description: PWA Integration — install @serwist/next, configure service worker
 
 > **Constraint:** Offline mode is critical for collectors at live shows where cell signal is poor. Cache the user's stable and dashboard for offline access.
 > **Last Updated:** 2026-03-28
+> **Status:** ✅ COMPLETE (2026-03-28)
+> **Commit:** `b8a9a5c`
 > **Prerequisite:** None — standalone feature
-> **Packages:** `@serwist/next`, `serwist`
+> **Packages:** `@serwist/turbopack`, `serwist`, `esbuild`
+> **Note:** Migrated from `@serwist/next` (webpack) to `@serwist/turbopack` because Next.js 16 defaults to Turbopack.
 
 // turbo-all
 
