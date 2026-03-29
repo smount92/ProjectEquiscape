@@ -39,7 +39,7 @@ export default function LandingPage() {
  </h1>
  <p className="text-stone-600 mx-auto mb-10 max-w-[620px] text-base leading-[1.7]">
  Catalog your herd with a 10,500+ reference database. Track provenance from blank resin to
- finished custom. Sell with verified trust signals. And soon — manage commissions, plan show
+ finished custom. Sell with verified trust signals. Manage commissions, plan show
  strings, and join collector groups. All in one place. Built by collectors, for collectors.
  </p>
  <div className="mb-8 flex flex-wrap items-center justify-center gap-4">
@@ -59,7 +59,7 @@ export default function LandingPage() {
  </Link>
  </div>
  <p className="text-stone-500 text-xs tracking-[0.03em]">
- ✦ No credit card required &nbsp;·&nbsp; ✦ Privacy-first &nbsp;·&nbsp; ✦ Free forever tier
+ ✦ No credit card required &nbsp;·&nbsp; ✦ Privacy-first &nbsp;·&nbsp; ✦ Free forever tier &nbsp;·&nbsp; ✦ Installable as an app
  </p>
  </div>
  </section>
@@ -441,7 +441,7 @@ Every horse gets a permanent digital identity. Track it from blank resin to fini
  <div className="mb-4 text-[3rem]">
  <Palette size={32} strokeWidth={1.5} />
  </div>
- <h3>Art Studio</h3>
+ <h3>Collector Groups</h3>
  <p>
  Commission tracking, WIP photo portals, and artist portfolios. Artists manage their
  queue. Clients watch their custom come to life. Every brushstroke becomes provenance.
@@ -451,7 +451,7 @@ Every horse gets a permanent digital identity. Track it from blank resin to fini
  <div className="mb-4 text-[3rem]">
  <Package size={32} strokeWidth={1.5} />
  </div>
- <h3>Bulk Import</h3>
+ <h3>Mobile App (PWA)</h3>
  <p>
  Upload your entire spreadsheet and we&apos;ll fuzzy-match every row against our 10,500+
  reference database. Go from CSV to cataloged in minutes.
@@ -461,7 +461,7 @@ Every horse gets a permanent digital identity. Track it from blank resin to fini
  <div className="mb-4 text-[3rem]">
  <TrendingUp size={32} strokeWidth={1.5} />
  </div>
- <h3>Price Guide</h3>
+ <h3>AI Stablemaster</h3>
  <p>
  Real sale data from real collectors. Search market values for 10,500+ models based on
  completed transactions. The Blue Book for model horses.
