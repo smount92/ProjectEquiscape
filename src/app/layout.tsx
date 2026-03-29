@@ -9,6 +9,8 @@ import Header from"@/components/Header";
 import Footer from"@/components/Footer";
 import BackToTop from"@/components/BackToTop";
 import CookieConsent from"@/components/CookieConsent";
+import OfflineIndicator from"@/components/OfflineIndicator";
+import { SerwistProvider } from"@/app/serwist-provider";
 import { cn } from "@/lib/utils";
 
 
@@ -66,8 +68,14 @@ export default function RootLayout({
  gtag('config', '${GA_MEASUREMENT_ID}');
  `}
  </Script>
+ <link rel="manifest" href="/manifest.json" />
+ <meta name="theme-color" content="#2C5545" />
+ <meta name="apple-mobile-web-app-capable" content="yes" />
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+ <link rel="apple-touch-icon" href="/icons/icon-192.png" />
  </head>
  <body className="antialiased">
+ <SerwistProvider swUrl="/serwist/sw.js">
  <SimpleModeProvider>
  <ToastProvider>
  <Header />
@@ -75,8 +83,10 @@ export default function RootLayout({
  <Footer />
  <BackToTop />
  <CookieConsent />
+ <OfflineIndicator />
  </ToastProvider>
  </SimpleModeProvider>
+ </SerwistProvider>
  </body>
  </html>
  );
