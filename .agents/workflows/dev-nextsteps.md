@@ -97,10 +97,10 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 - ✅ `.agents/workflows/065-pro-asset-pipeline.md` — Zero-cost thumbnails, tier-gated quality — **DONE (2026-03-28)**
 - ✅ `.agents/workflows/066-sentry-observability.md` — Error tracking, silent catch audit — **DONE (2026-03-28)**
 - ✅ `.agents/workflows/067-pwa-offline-stable.md` — Offline Barn Mode for live shows — **DONE (2026-03-28)**
-- `.agents/workflows/068-realtime-engine.md` — Replace polling with Supabase Realtime push
+- ✅ `.agents/workflows/068-realtime-engine.md` — Replace polling with Supabase Realtime push — **DONE (2026-03-29)**
 - `.agents/workflows/069-monetization-core.md` — Promoted listings, ISO bounties, à la carte PDFs, Studio Pro
 - `.agents/workflows/070-monetization-expansion.md` — eBay affiliates, printable show tags
-**Status:** 3/6 complete (065, 066, 067 done)
+**Status:** 4/6 complete (065, 066, 067, 068 done)
 
 ---
 

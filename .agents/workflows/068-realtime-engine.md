@@ -5,9 +5,11 @@ description: Real-Time DMs & Notification Engine — Supabase Realtime for chat,
 # Real-Time DMs & Notification Engine
 
 > **Constraint:** Supabase Pro Plan gives us 500 concurrent Realtime connections. The chat system already uses Realtime (confirmed in `ChatThread.tsx`). The notification bell still polls every 60 seconds — this wastes bandwidth and adds latency.
-> **Last Updated:** 2026-03-28
+> **Last Updated:** 2026-03-29
+> **Status:** ✅ COMPLETE (2026-03-29)
+> **Commit:** `abae116`
 > **Prerequisite:** None — standalone feature
-> **Current State:** `ChatThread.tsx` already has a working Realtime subscription with proper cleanup. `NotificationBell.tsx` uses `setInterval(60_000)` with Page Visibility API optimization. `Header.tsx` polls via `setInterval(30_000)`.
+> **Current State:** All polling eliminated. `ChatThread.tsx`, `NotificationBell.tsx`, and `Header.tsx` all use Supabase Realtime push.
 
 // turbo-all
 
