@@ -5,9 +5,12 @@ description: Monetization Expansion — eBay affiliate engine, printable show ta
 # Monetization Expansion (Affiliates, Printables, Premium Shows)
 
 > **Constraint:** Passive monetization only — no payment processing for these features. eBay uses EPN affiliate links (commission-based). Printable Show Tags are gated behind Pro tier.
-> **Last Updated:** 2026-03-28
+> **Last Updated:** 2026-03-29
+> **Status:** ✅ COMPLETE (2026-03-29)
+> **Commit:** `80313ba`
 > **Prerequisite:** Pro tier system must be functional (user has `app_metadata.tier`)
-> **Current State:** `@react-pdf/renderer` is already installed (used by `InsuranceReport.tsx` and `CertificateOfAuthenticity.tsx`)
+> **Env Var Required:** `NEXT_PUBLIC_EBAY_CAMPAIGN_ID` — set from EPN Dashboard for affiliate revenue tracking
+> **Current State:** eBay affiliate links live on catalog detail pages. Show Tags PDF at `/api/export/show-tags?showId=X` (Pro-gated).
 
 // turbo-all
 
