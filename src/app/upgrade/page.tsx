@@ -69,7 +69,7 @@ export default async function UpgradePage({
         <ExplorerLayout title={tier === "pro" ? <>💎 You're on <span className="text-forest">MHH Pro</span></> : <>Upgrade to <span className="text-forest">MHH Pro</span></>} description={tier === "pro" ? "Thank you for supporting Model Horse Hub!" : "Take your collection management to the next level."}>
             {/* Success / Cancel banners */}
             {status === "success" && (
-                <div className="animate-fade-in-up mb-8 rounded-xl border border-emerald-300 bg-stone-50radient-to-r from-emerald-50 to-teal-50 p-6 text-center shadow-lg">
+                <div className="animate-fade-in-up mb-8 rounded-xl border border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 text-center shadow-lg">
                     <span className="text-3xl">🎉</span>
                     <h2 className="mt-2 text-xl font-bold text-emerald-800">Welcome to MHH Pro!</h2>
                     <p className="mt-1 text-sm text-emerald-600">
@@ -78,7 +78,7 @@ export default async function UpgradePage({
                 </div>
             )}
             {status === "cancelled" && (
-                <div className="animate-fade-in-up mb-8 rounded-xl border border-amber-300 bg-stone-50mber-50 p-6 text-center">
+                <div className="animate-fade-in-up mb-8 rounded-xl border border-amber-300 bg-amber-50 p-6 text-center">
                     <p className="text-sm text-amber-700">Checkout was cancelled. No charges were made.</p>
                 </div>
             )}
@@ -97,7 +97,7 @@ export default async function UpgradePage({
                         ? "Thank you for supporting Model Horse Hub! Here's what's included in your plan."
                         : "Take your collection management to the next level with premium tools and AI insights."}
                 </p>
-                <p className="mt-2 inline-block rounded-full bg-stone-50tone-100 px-3 py-1 text-xs font-medium text-stone-600">
+                <p className="mt-2 inline-block rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
                     Current plan: <span className={tier === 'pro' ? 'font-bold text-amber-600' : 'font-bold'}>{tier === 'pro' ? '💎 Pro' : 'Free'}</span>
                 </p>
             </div>
@@ -122,15 +122,15 @@ export default async function UpgradePage({
                         ))}
                     </ul>
                     {tier === "free" && (
-                        <div className="mt-6 rounded-lg bg-stone-50tone-100 py-2 text-center text-sm font-semibold text-stone-600">
+                        <div className="mt-6 rounded-lg bg-stone-100 py-2 text-center text-sm font-semibold text-stone-600">
                             Current Plan
                         </div>
                     )}
                 </div>
 
                 {/* Pro tier */}
-                <div className="relative rounded-xl border-2 border-amber-400 bg-stone-50radient-to-br from-amber-50 to-orange-50 p-8 shadow-xl">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-stone-50radient-to-r from-amber-500 to-orange-500 px-4 py-1 text-xs font-bold text-white shadow-md">
+                <div className="relative rounded-xl border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 p-8 shadow-xl">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-1 text-xs font-bold text-white shadow-md">
                         ✨ RECOMMENDED
                     </div>
                     <div className="mb-4">
@@ -153,7 +153,7 @@ export default async function UpgradePage({
                     </ul>
 
                     {tier === "pro" ? (
-                        <div className="mt-6 rounded-lg bg-stone-50merald-100 py-2 text-center text-sm font-bold text-emerald-700">
+                        <div className="mt-6 rounded-lg bg-emerald-100 py-2 text-center text-sm font-bold text-emerald-700">
                             ✅ Active
                         </div>
                     ) : (

@@ -1,16 +1,13 @@
-import { Document, Page, View, Text, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer";
 
-Font.register({
-    family: "Inter",
-    src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2",
-});
-
+// Use Helvetica (built-in to @react-pdf/renderer) — no network fetch needed
 const styles = StyleSheet.create({
     page: {
         padding: 36,
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 12,
+        fontFamily: "Helvetica",
     },
     tag: {
         width: "48%",
@@ -21,30 +18,25 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     horseName: {
-        fontFamily: "Inter",
         fontSize: 11,
-        fontWeight: 700,
+        fontFamily: "Helvetica-Bold",
     },
     moldName: {
-        fontFamily: "Inter",
         fontSize: 9,
         color: "#594A3C",
     },
     showInfo: {
-        fontFamily: "Inter",
         fontSize: 8,
         color: "#7A6A58",
     },
     classLabel: {
-        fontFamily: "Inter",
         fontSize: 10,
-        fontWeight: 600,
+        fontFamily: "Helvetica-Bold",
         color: "#2C5545",
     },
     entryNumber: {
-        fontFamily: "Inter",
         fontSize: 14,
-        fontWeight: 700,
+        fontFamily: "Helvetica-Bold",
         textAlign: "right",
     },
 });
