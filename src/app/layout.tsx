@@ -43,6 +43,18 @@ export const metadata: Metadata = {
  index: true,
  follow: true,
  },
+ manifest: "/manifest.json",
+ appleWebApp: {
+ capable: true,
+ statusBarStyle: "default",
+ title: "Model Horse Hub",
+ },
+ icons: {
+ apple: "/icons/icon-192.png",
+ },
+ other: {
+ "mobile-web-app-capable": "yes",
+ },
 };
 
 const inter = Inter({ subsets: ["latin"], variable:"--font-inter" });
