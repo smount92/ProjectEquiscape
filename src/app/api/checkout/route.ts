@@ -46,6 +46,7 @@ export async function POST() {
             // Uses whatever payment methods you've enabled in Stripe Dashboard
             // (card, PayPal, Apple Pay, Google Pay, etc.)
             line_items: [{ price: priceId, quantity: 1 }],
+            allow_promotion_codes: true,
             // This is the critical link — maps Stripe customer back to Supabase user
             client_reference_id: user.id,
             customer_email: user.email,
