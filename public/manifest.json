@@ -2,7 +2,7 @@
     "name": "Model Horse Hub",
     "short_name": "MHH",
     "description": "Your Digital Stable — catalog, trade, and show model horses",
-    "start_url": "/dashboard",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#F4EFE6",
     "theme_color": "#2C5545",
