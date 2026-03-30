@@ -4,7 +4,10 @@ import { getUserTier } from "@/lib/auth";
 import { renderToBuffer } from "@react-pdf/renderer";
 import ShowTags from "@/components/pdf/ShowTags";
 
-// GET /api/export/show-tags?showId=X — Generate printable show tags PDF (Pro-gated)
+// GET /api/export/show-tags?showId=X — Generate printable show tags PDF
+// Any authenticated user with entries can print THEIR OWN tags.
+// Show hosts can print ALL tags by adding &all=true.
+// Pro-gated.
 export async function GET(request: Request) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -27,10 +30,12 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Missing showId" }, { status: 400 });
     }
 
+    const printAll = searchParams.get("all") === "true";
+
     // Fetch event
     const { data: event } = await supabase
         .from("events")
-        .select("name, starts_at")
+        .select("name, starts_at, created_by")
         .eq("id", showId)
         .single();
 
@@ -38,17 +43,25 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Show not found" }, { status: 404 });
     }
 
-    const ev = event as { name: string; starts_at: string };
+    const ev = event as { name: string; starts_at: string; created_by: string };
+    const isHost = ev.created_by === user.id;
 
-    // Fetch entries with horses + classes + users
-    const { data: rawEntries } = await supabase
+    // Build entry query — user sees their own, host can see all
+    let entryQuery = supabase
         .from("event_entries")
         .select("id, horse_id, user_id, class_id, users!user_id(alias_name)")
         .eq("event_id", showId)
         .eq("entry_type", "entered");
 
+    if (!printAll || !isHost) {
+        // Regular user: only their own entries
+        entryQuery = entryQuery.eq("user_id", user.id);
+    }
+
+    const { data: rawEntries } = await entryQuery;
+
     if (!rawEntries || rawEntries.length === 0) {
-        return NextResponse.json({ error: "No entries found for this show" }, { status: 404 });
+        return NextResponse.json({ error: "No entries found" }, { status: 404 });
     }
 
     // Batch-fetch horse names

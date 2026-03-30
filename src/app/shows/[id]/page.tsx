@@ -53,6 +53,8 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  const isAdmin = user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase();
  const isExpired = show.endAt ? new Date(show.endAt) < new Date() : false;
  const canClose = (isCreator || isAdmin) && show.status !=="closed" && (isExpired || show.status ==="judging");
+ const hasUserEntries = entries.some((e) => e.ownerId === user.id);
+ const userTier = await getUserTier();
 
  // Expert judge flags
  const isExpertJudged = show.judgingMethod ==="expert_judge";
@@ -160,19 +162,38 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  >
  ⚙️ Manage Classes
  </Link>
- {await getUserTier() !== "free" ? (
+ {userTier !== "free" ? (
  <a
-  href={`/api/export/show-tags?showId=${showId}`}
+  href={`/api/export/show-tags?showId=${showId}&all=true`}
   target="_blank"
   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-6 py-2 text-sm font-semibold text-amber-700 no-underline transition-all hover:bg-amber-100"
  >
-  🏷️ Print Show Tags (PDF)
+  🏷️ Print All Tags (PDF)
  </a>
  ) : (
  <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
   🏷️ Show Tags are a <Link href="/upgrade" className="font-semibold underline">Pro feature</Link>
  </div>
  )}
+ </div>
+ )}
+
+ {/* Entrant Tags — any user with entries can print their own tags */}
+ {hasUserEntries && !isCreator && (
+ <div className="animate-fade-in-up mb-4 flex justify-end gap-2">
+  {userTier !== "free" ? (
+  <a
+   href={`/api/export/show-tags?showId=${showId}`}
+   target="_blank"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-6 py-2 text-sm font-semibold text-amber-700 no-underline transition-all hover:bg-amber-100"
+  >
+   🏷️ Print My Show Tags (PDF)
+  </a>
+  ) : (
+  <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+   🏷️ Show Tags are a <Link href="/upgrade" className="font-semibold underline">Pro feature</Link>
+  </div>
+  )}
  </div>
  )}
 
