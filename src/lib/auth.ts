@@ -55,5 +55,8 @@ export async function getUserTier(): Promise<"pro" | "free"> {
     const {
         data: { user },
     } = await supabase.auth.getUser();
-    return (user?.app_metadata?.tier as "pro" | "free") || "free";
+    if (!user) return "free";
+    // Admin always gets Pro
+    if (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()) return "pro";
+    return (user.app_metadata?.tier as "pro" | "free") || "free";
 }
