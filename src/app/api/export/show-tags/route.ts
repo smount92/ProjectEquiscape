@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUserTier } from "@/lib/auth";
 import { renderToBuffer } from "@react-pdf/renderer";
 import ShowTags from "@/components/pdf/ShowTags";
+import QRCode from "qrcode";
 
 // GET /api/export/show-tags?showId=X — Generate printable show tags PDF
 // Any authenticated user with entries can print THEIR OWN tags.
@@ -100,13 +101,26 @@ export async function GET(request: Request) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
 
-    // Transform to PDF props
-    const tagEntries = rawEntries.map((e, i) => {
+    // Generate QR matrices for each entry
+    const tagEntries = await Promise.all(rawEntries.map(async (e, i) => {
         const horse = horseMap.get(e.horse_id);
         const userInfo = (e as any).users as { alias_name: string; exhibitor_number?: string | null } | null;
         const exhibitorNum = userInfo?.exhibitor_number || "000";
         const horseSeq = horse?.regional_id || String(i + 1).padStart(3, "0");
         const horseNumber = `${exhibitorNum}-${horseSeq}`;
+        const passportUrl = `${appUrl}/stable/${e.horse_id}`;
+
+        // Generate real QR code matrix
+        let qrMatrix: boolean[][] = [];
+        try {
+            const qr = QRCode.create(passportUrl, { errorCorrectionLevel: "L" });
+            const size = qr.modules.size;
+            qrMatrix = Array.from({ length: size }, (_, row) =>
+                Array.from({ length: size }, (_, col) => qr.modules.get(row, col) === 1)
+            );
+        } catch {
+            // fallback: no QR
+        }
 
         return {
             horseName: horse?.custom_name || "Unknown",
@@ -118,9 +132,10 @@ export async function GET(request: Request) {
             gender: horse?.assigned_gender || "",
             finishType: horse?.finish_type || "",
             horseNumber,
-            passportUrl: `${appUrl}/stable/${e.horse_id}`,
+            passportUrl,
+            qrMatrix,
         };
-    });
+    }));
 
     const buffer = await renderToBuffer(
         ShowTags({

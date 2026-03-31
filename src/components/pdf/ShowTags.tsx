@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
         padding: 28,
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "flex-start",  // left-aligned for less cutting
+        justifyContent: "flex-start",
         gap: 10,
         fontFamily: "Helvetica",
     },
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 3,
         borderBottomRightRadius: 3,
         padding: 5,
-        flexDirection: "row",            // text left, QR right
+        flexDirection: "row",
         justifyContent: "space-between",
         backgroundColor: "#F8F5F0",
     },
@@ -128,6 +128,7 @@ interface ShowTagEntry {
     finishType: string;
     horseNumber: string;
     passportUrl: string;
+    qrMatrix: boolean[][];
 }
 
 interface ShowTagsProps {
@@ -136,38 +137,33 @@ interface ShowTagsProps {
     entries: ShowTagEntry[];
 }
 
-// Decorative QR-like pattern (not scannable — visual indicator for passport link)
-function QRBlock() {
-    const s = QR_SIZE - 8; // inner size with margin
+/** Render a real QR code from a boolean matrix as SVG Rects */
+function RealQRCode({ matrix }: { matrix: boolean[][] }) {
+    if (!matrix || matrix.length === 0) return null;
+
+    const moduleCount = matrix.length;
+    const svgSize = QR_SIZE - 6; // leave a small margin
+    const cellSize = svgSize / moduleCount;
+
     return (
-        <Svg viewBox={`0 0 ${s} ${s}`} width={s} height={s}>
-            <Rect x={0} y={0} width={s} height={s} rx={2} fill="#FFFFFF" stroke="#D4C9B0" strokeWidth={0.5} />
-            {/* Corner squares */}
-            <Rect x={2} y={2} width={10} height={10} fill="#2C5545" rx={1} />
-            <Rect x={4} y={4} width={6} height={6} fill="#FFFFFF" />
-            <Rect x={5} y={5} width={4} height={4} fill="#2C5545" />
-
-            <Rect x={s-12} y={2} width={10} height={10} fill="#2C5545" rx={1} />
-            <Rect x={s-10} y={4} width={6} height={6} fill="#FFFFFF" />
-            <Rect x={s-9} y={5} width={4} height={4} fill="#2C5545" />
-
-            <Rect x={2} y={s-12} width={10} height={10} fill="#2C5545" rx={1} />
-            <Rect x={4} y={s-10} width={6} height={6} fill="#FFFFFF" />
-            <Rect x={5} y={s-9} width={4} height={4} fill="#2C5545" />
-
-            {/* Center dot */}
-            <Rect x={s/2-3} y={s/2-3} width={6} height={6} fill="#2C5545" rx={1} />
-            <Rect x={s/2-1} y={s/2-1} width={2} height={2} fill="#FFFFFF" />
-
-            {/* Data dots */}
-            <Rect x={15} y={4} width={3} height={3} fill="#594A3C" />
-            <Rect x={20} y={4} width={3} height={3} fill="#594A3C" />
-            <Rect x={4} y={16} width={3} height={3} fill="#594A3C" />
-            <Rect x={9} y={16} width={3} height={3} fill="#594A3C" />
-            <Rect x={s-8} y={16} width={3} height={3} fill="#594A3C" />
-            <Rect x={16} y={s-8} width={3} height={3} fill="#594A3C" />
-            <Rect x={22} y={s-8} width={3} height={3} fill="#594A3C" />
-            <Rect x={s-8} y={s-8} width={3} height={3} fill="#594A3C" />
+        <Svg viewBox={`0 0 ${svgSize} ${svgSize}`} width={svgSize} height={svgSize}>
+            {/* White background */}
+            <Rect x={0} y={0} width={svgSize} height={svgSize} fill="#FFFFFF" />
+            {/* QR modules */}
+            {matrix.map((row, y) =>
+                row.map((cell, x) =>
+                    cell ? (
+                        <Rect
+                            key={`${y}-${x}`}
+                            x={x * cellSize}
+                            y={y * cellSize}
+                            width={cellSize}
+                            height={cellSize}
+                            fill="#2C2017"
+                        />
+                    ) : null
+                )
+            )}
         </Svg>
     );
 }
@@ -229,7 +225,7 @@ export default function ShowTags({ showName, showDate, entries }: ShowTagsProps)
                                 <Text style={styles.backFooter}>modelhorsehub.com</Text>
                             </View>
                             <View style={styles.qrCol}>
-                                <QRBlock />
+                                <RealQRCode matrix={entry.qrMatrix} />
                             </View>
                         </View>
                     </View>
