@@ -3514,6 +3514,7 @@ export type Database = {
           default_horse_public: boolean | null
           deleted_at: string | null
           email: string
+          exhibitor_number: string | null
           full_name: string | null
           id: string
           is_test_account: boolean
@@ -3536,6 +3537,7 @@ export type Database = {
           default_horse_public?: boolean | null
           deleted_at?: string | null
           email: string
+          exhibitor_number?: string | null
           full_name?: string | null
           id: string
           is_test_account?: boolean
@@ -3558,6 +3560,7 @@ export type Database = {
           default_horse_public?: boolean | null
           deleted_at?: string | null
           email?: string
+          exhibitor_number?: string | null
           full_name?: string | null
           id?: string
           is_test_account?: boolean

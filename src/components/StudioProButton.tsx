@@ -44,7 +44,7 @@ export default function StudioProButton() {
                         Starting checkout…
                     </span>
                 ) : (
-                    "🎨 Upgrade to Studio Pro — $9.99/mo"
+                    "🎨 Upgrade to Studio Pro — $10/mo"
                 )}
             </button>
             {error && (

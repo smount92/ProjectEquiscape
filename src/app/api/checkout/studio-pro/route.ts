@@ -4,7 +4,7 @@ import { getUserTier } from "@/lib/auth";
 import * as Sentry from "@sentry/nextjs";
 import Stripe from "stripe";
 
-// POST /api/checkout/studio-pro — Studio Pro artist subscription ($9.99/mo)
+// POST /api/checkout/studio-pro — Studio Pro artist subscription ($10/mo)
 export async function POST() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

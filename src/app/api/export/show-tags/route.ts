@@ -104,7 +104,7 @@ export async function GET(request: Request) {
     // Generate QR matrices for each entry
     const tagEntries = await Promise.all(rawEntries.map(async (e, i) => {
         const horse = horseMap.get(e.horse_id);
-        const userInfo = (e as any).users as { alias_name: string; exhibitor_number?: string | null } | null;
+        const userInfo = e.users as { alias_name: string; exhibitor_number?: string | null } | null;
         const exhibitorNum = userInfo?.exhibitor_number || "000";
         const horseSeq = horse?.regional_id || String(i + 1).padStart(3, "0");
         const horseNumber = `${exhibitorNum}-${horseSeq}`;

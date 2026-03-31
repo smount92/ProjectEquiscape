@@ -201,7 +201,7 @@ export default async function UpgradePage({
                     <div className="mb-4">
                         <span className="text-sm font-semibold uppercase tracking-wider text-violet-600">Studio Pro</span>
                         <div className="mt-2 flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-stone-800">$9.99</span>
+                            <span className="text-3xl font-bold text-stone-800">$10</span>
                             <span className="text-sm text-stone-600">/month</span>
                         </div>
                     </div>

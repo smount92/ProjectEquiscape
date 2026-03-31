@@ -30,8 +30,8 @@ export async function getProfile(): Promise<{
 } | null> {
     const { supabase, user } = await requireAuth();
 
-    const { data } = await (supabase
-        .from("users") as any)
+    const { data } = await supabase
+        .from("users")
         .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, currency_symbol, show_badges, exhibitor_number")
         .eq("id", user.id)
         .single();
