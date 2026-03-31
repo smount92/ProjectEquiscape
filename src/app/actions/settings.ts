@@ -26,12 +26,13 @@ export async function getProfile(): Promise<{
     watermarkPhotos: boolean;
     currencySymbol: string;
     showBadges: boolean;
+    exhibitorNumber: string;
 } | null> {
     const { supabase, user } = await requireAuth();
 
-    const { data } = await supabase
-        .from("users")
-        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, currency_symbol, show_badges")
+    const { data } = await (supabase
+        .from("users") as any)
+        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, currency_symbol, show_badges, exhibitor_number")
         .eq("id", user.id)
         .single();
 
@@ -45,6 +46,7 @@ export async function getProfile(): Promise<{
         watermark_photos: boolean | null;
         currency_symbol: string | null;
         show_badges: boolean | null;
+        exhibitor_number: string | null;
     };
 
     // Generate signed URL for avatar if stored as a storage path
@@ -74,6 +76,7 @@ export async function getProfile(): Promise<{
         watermarkPhotos: d.watermark_photos ?? false,
         currencySymbol: d.currency_symbol || "$",
         showBadges: d.show_badges ?? true,
+        exhibitorNumber: d.exhibitor_number || "",
     };
 }
 
@@ -90,6 +93,7 @@ export async function updateProfile(data: {
     watermarkPhotos?: boolean;
     currencySymbol?: string;
     showBadges?: boolean;
+    exhibitorNumber?: string;
 }): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -131,6 +135,10 @@ export async function updateProfile(data: {
 
     if (data.showBadges !== undefined) {
         updates.show_badges = data.showBadges;
+    }
+
+    if (data.exhibitorNumber !== undefined) {
+        updates.exhibitor_number = data.exhibitorNumber.trim().slice(0, 10) || null;
     }
 
     if (Object.keys(updates).length === 0) return { success: true };

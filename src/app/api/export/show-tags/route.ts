@@ -49,12 +49,11 @@ export async function GET(request: Request) {
     // Build entry query — user sees their own, host can see all
     let entryQuery = supabase
         .from("event_entries")
-        .select("id, horse_id, user_id, class_id, users!user_id(alias_name)")
+        .select("id, horse_id, user_id, class_id, users!user_id(alias_name, exhibitor_number)")
         .eq("event_id", showId)
         .eq("entry_type", "entered");
 
     if (!printAll || !isHost) {
-        // Regular user: only their own entries
         entryQuery = entryQuery.eq("user_id", user.id);
     }
 
@@ -64,20 +63,26 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "No entries found" }, { status: 404 });
     }
 
-    // Batch-fetch horse names
+    // Batch-fetch horse details (name, breed, gender, finish_type, regional_id)
     const horseIds = [...new Set(rawEntries.map(e => e.horse_id))];
     const { data: horses } = await supabase
         .from("user_horses")
-        .select("id, custom_name, catalog_id, catalog_items:catalog_id(title)")
+        .select("id, custom_name, catalog_id, finish_type, assigned_breed, assigned_gender, regional_id, catalog_items:catalog_id(title)")
         .in("id", horseIds);
 
-    type HorseRow = { id: string; custom_name: string; catalog_items: { title: string } | null };
-    const horseMap = new Map<string, { name: string; moldName: string }>();
+    type HorseRow = {
+        id: string;
+        custom_name: string;
+        finish_type: string | null;
+        assigned_breed: string | null;
+        assigned_gender: string | null;
+        regional_id: string | null;
+        catalog_items: { title: string } | null;
+    };
+
+    const horseMap = new Map<string, HorseRow>();
     (horses ?? []).forEach((h: HorseRow) => {
-        horseMap.set(h.id, {
-            name: h.custom_name,
-            moldName: h.catalog_items?.title || "",
-        });
+        horseMap.set(h.id, h);
     });
 
     // Batch-fetch class names
@@ -93,14 +98,29 @@ export async function GET(request: Request) {
         });
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
+
     // Transform to PDF props
-    const tagEntries = rawEntries.map((e, i) => ({
-        horseName: horseMap.get(e.horse_id)?.name || "Unknown",
-        moldName: horseMap.get(e.horse_id)?.moldName || "",
-        className: e.class_id ? (classMap.get(e.class_id) || "General") : "General",
-        entryNumber: i + 1,
-        ownerAlias: (e.users as { alias_name: string } | null)?.alias_name || "Anonymous",
-    }));
+    const tagEntries = rawEntries.map((e, i) => {
+        const horse = horseMap.get(e.horse_id);
+        const userInfo = (e as any).users as { alias_name: string; exhibitor_number?: string | null } | null;
+        const exhibitorNum = userInfo?.exhibitor_number || "000";
+        const horseSeq = horse?.regional_id || String(i + 1).padStart(3, "0");
+        const horseNumber = `${exhibitorNum}-${horseSeq}`;
+
+        return {
+            horseName: horse?.custom_name || "Unknown",
+            moldName: horse?.catalog_items?.title || "",
+            className: e.class_id ? (classMap.get(e.class_id) || "General") : "General",
+            entryNumber: i + 1,
+            ownerAlias: userInfo?.alias_name || "Anonymous",
+            breed: horse?.assigned_breed || "",
+            gender: horse?.assigned_gender || "",
+            finishType: horse?.finish_type || "",
+            horseNumber,
+            passportUrl: `${appUrl}/stable/${e.horse_id}`,
+        };
+    });
 
     const buffer = await renderToBuffer(
         ShowTags({

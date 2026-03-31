@@ -41,6 +41,7 @@ export default function SettingsPage() {
  const [watermarkPhotos, setWatermarkPhotos] = useState(false);
  const [showBadges, setShowBadges] = useState(true);
  const [currencySymbol, setCurrencySymbol] = useState("$");
+ const [exhibitorNumber, setExhibitorNumber] = useState("");
  const [profileMsg, setProfileMsg] = useState<{ type:"success" |"error"; text: string } | null>(null);
  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
@@ -77,6 +78,7 @@ export default function SettingsPage() {
  setWatermarkPhotos(profile.watermarkPhotos);
  setShowBadges(profile.showBadges);
  setCurrencySymbol(profile.currencySymbol);
+ setExhibitorNumber(profile.exhibitorNumber || "");
  setIsLoading(false);
  }
  load();
@@ -93,6 +95,7 @@ export default function SettingsPage() {
  watermarkPhotos,
  showBadges,
  currencySymbol,
+ exhibitorNumber,
  });
  if (result.success) {
  setProfileMsg({ type:"success", text:"Profile updated!" });
@@ -320,6 +323,25 @@ export default function SettingsPage() {
  <span className="text-stone-500 mt-1 block text-xs">
  Shown on your vault, offers, and listing prices. Market Value (Blue Book) always shows
  USD.
+ </span>
+ </div>
+
+ {/* Exhibitor number */}
+ <div className="mb-6">
+ <label htmlFor="settings-exhibitor" className="text-stone-900 mb-1 block text-sm font-semibold">
+ 🏷️ Exhibitor Number
+ </label>
+ <Input
+ id="settings-exhibitor"
+ type="text"
+ className="max-w-[200px]"
+ value={exhibitorNumber}
+ onChange={(e) => setExhibitorNumber(e.target.value)}
+ maxLength={10}
+ placeholder="e.g. 042"
+ />
+ <span className="text-stone-500 mt-1 block text-xs">
+ Your regional exhibitor number for live shows. Used in show tag horse numbers (XXX-YYY).
  </span>
  </div>
 
