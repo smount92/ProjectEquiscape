@@ -49,20 +49,22 @@ model-horse-hub/
 │   └── *.mjs                         # Other data processing scripts
 │
 ├── supabase/
-│   └── migrations/                   # 98 sequential SQL migration files (001–102)
+│   └── migrations/                   # 100 sequential SQL migration files (001–104)
 │       ├── 001_initial_schema.sql    # Core tables (users, user_horses, etc.)
 │       ├── ...                       # Feature additions, schema changes
 │       ├── 098_soft_delete_horses.sql # Tombstone soft-delete
 │       ├── 099_commerce_locks.sql    # Atomic commerce RPCs
 │       ├── 100_fuzzy_search_rpc.sql  # pg_trgm fuzzy search
 │       ├── 101_trusted_sellers.sql   # Trusted seller materialized view
-│       └── 102_pro_rls.sql           # Pro tier RLS functions
+│       ├── 102_pro_rls.sql           # Pro tier RLS functions
+│       ├── 103_core_monetization.sql # Promoted listings, ISO bounties, purchased reports
+│       └── 104_exhibitor_number.sql  # Exhibitor number on users for show tags
 │
 ├── src/                              # Application source code
 │   ├── app/                          # Next.js App Router
 │   │   ├── layout.tsx                # Root layout — Inter + Playfair Display, GA, SimpleModeProvider, Header
 │   │   ├── page.tsx                  # Landing page (public marketing storefront)
-│   │   ├── globals.css               # ~2,220 lines — Tailwind v4 @theme tokens + shared primitives
+│   │   ├── globals.css               # ~1,750 lines — Tailwind v4 @theme tokens + shared primitives
 │   │   │
 │   │   ├── actions/                  # 36 server action files — ALL backend logic
 │   │   │   ├── horse.ts              # Core CRUD — create, update, soft-delete horses
@@ -79,19 +81,25 @@ model-horse-hub/
 │   │   │   ├── activity.ts           # Activity feed generation
 │   │   │   └── *.ts                  # 24 more domain-specific action files
 │   │   │
-│   │   ├── api/                      # 10 API routes (non-action endpoints)
+│   │   ├── api/                      # 15 API routes (non-action endpoints)
 │   │   │   ├── auth/callback/        # Supabase PKCE code exchange
 │   │   │   ├── auth/me/              # Current user session check
-│   │   │   ├── checkout/             # Stripe Checkout Session creation
+│   │   │   ├── checkout/             # Stripe Checkout Session creation (Pro subscription)
+│   │   │   ├── checkout/promote/     # Stripe: Promoted listing purchase
+│   │   │   ├── checkout/boost-iso/   # Stripe: ISO feed bounty purchase
+│   │   │   ├── checkout/insurance-report/ # Stripe: A-la-carte insurance report
+│   │   │   ├── checkout/studio-pro/  # Stripe: Studio Pro artist tier
 │   │   │   ├── webhooks/stripe/      # Stripe webhook (subscription events)
 │   │   │   ├── cron/refresh-market/  # Daily materialized view refresh
 │   │   │   ├── cron/stablemaster-agent/ # Monthly AI collection analysis
-│   │   │   ├── export/[horseId]/     # CoA/parked export PDF generation
+│   │   │   ├── cron/transition-shows/ # Auto-transition expired shows (6h)
+│   │   │   ├── export/               # CoA/parked export PDF generation
+│   │   │   ├── export/show-tags/     # Show tag PDF generation (Pro)
 │   │   │   ├── insurance-report/     # Insurance report PDF generation
 │   │   │   ├── identify-mold/        # AI mold identification
 │   │   │   └── reference-dictionary/ # Reference data for search
 │   │   │
-│   │   └── [route folders]/          # 35 route groups → 60 page.tsx files
+│   │   └── [route folders]/          # 35 route groups → 61 page.tsx files
 │   │       ├── dashboard/            # Private authenticated dashboard
 │   │       ├── stable/[id]/          # Private horse passport (Scrapbook layout)
 │   │       ├── community/            # Public Show Ring + public passport
@@ -108,16 +116,18 @@ model-horse-hub/
 │   │       ├── upgrade/              # Pro tier pricing + Stripe checkout
 │   │       └── ...                   # auth, contact, about, faq, etc.
 │   │
-│   ├── components/                   # 107 client components
-│   │   ├── ui/                       # 8 shadcn/ui primitives
+│   ├── components/                   # 112 client components
+│   │   ├── ui/                       # 10 shadcn/ui primitives
 │   │   │   ├── button.tsx            # Button variants (default, outline, ghost, destructive)
 │   │   │   ├── input.tsx             # Text input
 │   │   │   ├── select.tsx            # Select dropdown (Radix)
 │   │   │   ├── textarea.tsx          # Textarea
 │   │   │   ├── badge.tsx             # Status/tag badges
+│   │   │   ├── card.tsx              # Card container
 │   │   │   ├── dialog.tsx            # Modal dialog (Radix)
 │   │   │   ├── skeleton.tsx          # Loading skeleton
-│   │   │   └── separator.tsx         # Visual separator
+│   │   │   ├── separator.tsx         # Visual separator
+│   │   │   └── table.tsx             # Data table
 │   │   │
 │   │   ├── layouts/                  # 4 Page Archetype wrappers
 │   │   │   ├── ExplorerLayout.tsx    # Browsing grids (max-w-7xl, sticky filters)
@@ -132,7 +142,10 @@ model-horse-hub/
 │   │   ├── ShowStringManager.tsx     # Show string planning (largest component)
 │   │   ├── EmptyState.tsx            # Standardized empty states with icons
 │   │   ├── UpgradeButton.tsx         # Pro tier upgrade CTA
-│   │   └── pdf/                      # PDF generation (insurance, CoA)
+│   │   └── pdf/                      # 3 PDF components (@react-pdf/renderer)
+│   │       ├── ShowTags.tsx           # Show tag PDF with QR codes
+│   │       ├── InsuranceReport.tsx    # Insurance report PDF
+│   │       └── CertificateOfAuthenticity.tsx # CoA/parked export PDF
 │   │
 │   ├── lib/                          # Shared libraries and utilities
 │   │   ├── supabase/

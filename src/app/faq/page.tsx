@@ -3,6 +3,7 @@
 import { useState } from"react";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import AiDataPolicySection from"@/components/AiDataPolicySection";
 
 /* ------------------------------------------------------------------ */
 /* FAQ Data */
@@ -223,6 +224,9 @@ export default function FaqPage() {
  );
  })}
  </div>
+
+ {/* AI, Data Collection, and Copyright Policy — full section */}
+ <AiDataPolicySection />
 
  {/* CTA */}
  <div className="bg-white border-stone-200 mt-12 rounded-lg border text-center">

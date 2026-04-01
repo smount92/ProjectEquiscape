@@ -45,6 +45,7 @@ interface ShowEntryDisplay {
     placing: string | null;
     className: string | null;
     divisionName: string | null;
+    classId: string | null;
     caption: string | null;
 }
 
@@ -242,6 +243,7 @@ export async function getShowEntries(showId: string): Promise<{
             placing: e.placing,
             className: e.class_id ? (classMap.get(e.class_id)?.className || null) : null,
             divisionName: e.class_id ? (classMap.get(e.class_id)?.divisionName || null) : null,
+            classId: e.class_id || null,
             caption: e.caption || null,
         };
     });
@@ -427,6 +429,7 @@ export async function createPhotoShow(data: {
     description?: string;
     theme?: string;
     endAt?: string;
+    templateId?: string;
 }): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -436,7 +439,7 @@ export async function createPhotoShow(data: {
 
     const admin = getAdminClient();
 
-    const { error } = await admin.from("events").insert({
+    const { data: inserted, error } = await admin.from("events").insert({
         name: data.title.trim(),
         description: data.description?.trim() || null,
         event_type: "photo_show",
@@ -446,9 +449,40 @@ export async function createPhotoShow(data: {
         ends_at: data.endAt || null,
         is_virtual: true,
         created_by: user.id,
-    });
+    }).select("id").single();
 
-    if (error) return { success: false, error: error.message };
+    if (error || !inserted) return { success: false, error: error?.message || "Failed to create show." };
+
+    // Template injection
+    if (data.templateId) {
+        try {
+            const { SHOW_TEMPLATES } = await import("@/lib/constants/showTemplates");
+            const template = SHOW_TEMPLATES.find(t => t.key === data.templateId);
+            if (template) {
+                for (const div of template.divisions) {
+                    const { data: divRow } = await admin.from("event_divisions").insert({
+                        event_id: inserted.id,
+                        name: div.name,
+                        sort_order: 0,
+                    }).select("id").single();
+                    if (divRow) {
+                        for (const cls of div.classes) {
+                            await admin.from("event_classes").insert({
+                                division_id: divRow.id,
+                                name: cls.name,
+                                class_number: cls.classNumber ?? null,
+                                allowed_scales: null,
+                                is_nan_qualifying: cls.isNanQualifying ?? false,
+                            });
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            logger.warn("Template injection failed for admin show", "createPhotoShow");
+        }
+    }
+
     revalidatePath("/shows");
     revalidatePath("/community/events");
     revalidateTag("shows", "max");
@@ -605,7 +639,7 @@ export async function withdrawEntry(
 }
 
 /**
- * Batch-record show results from the Show String Planner.
+ * Batch-record show results from the Live Show Packer.
  * Creates show_records entries for each result.
  */
 export async function batchRecordResults(records: {

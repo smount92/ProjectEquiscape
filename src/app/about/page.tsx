@@ -1,6 +1,7 @@
 import Link from"next/link";
 import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import AiDataPolicySection from"@/components/AiDataPolicySection";
 
 export const metadata: Metadata = {
  title:"About — Model Horse Hub",
@@ -171,6 +172,9 @@ export default function AboutPage() {
  </div>
  </div>
  </section>
+
+ {/* AI, Data Collection, and Copyright Policy */}
+ <AiDataPolicySection />
 
  {/* CTA */}
  <div className="bg-white border-stone-200 rounded-lg border text-center">

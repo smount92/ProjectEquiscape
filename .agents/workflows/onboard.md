@@ -17,8 +17,8 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | Database | Supabase (PostgreSQL + Row Level Security) |
 | Auth | Supabase Auth (PKCE flow, cookie-based SSR) |
 | Hosting | Vercel (serverless) |
-| CSS | Tailwind CSS v4 (`@theme` tokens) + `globals.css` (~2,220 lines for primitives) |
-| UI Components | shadcn/ui (Radix UI primitives — Button, Input, Select, Textarea, Badge, Dialog, Skeleton, Separator) |
+| CSS | Tailwind CSS v4 (`@theme` tokens) + `globals.css` (~1,750 lines for primitives) |
+| UI Components | shadcn/ui (Radix UI primitives — Button, Input, Select, Textarea, Badge, Card, Dialog, Skeleton, Separator, Table) |
 | Animations | Framer Motion (spring physics, staggered reveals) |
 | Payments | Stripe (Checkout Sessions + webhooks for subscription billing) |
 | AI | Google Gemini (Stablemaster collection analysis) |
@@ -26,7 +26,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **60 page routes**, **107+ client components** (incl. 10 shadcn/ui primitives), **36 server action files**, **10 API routes**, and **98 database migrations** (001–102).
+The platform has **61 page routes**, **112+ client components** (incl. 10 shadcn/ui primitives + 3 PDF components), **36 server action files**, **15 API routes**, and **100 database migrations** (001–104).
 
 ### ⚠️ Development Environment: Windows + PowerShell
 
@@ -92,18 +92,20 @@ View file: .agents\docs\Grand_Unification_Plan.md
 src/
 ├── app/
 │   ├── layout.tsx          # Root layout — Inter + Playfair Display, GA, SimpleModeProvider, Header
-│   ├── globals.css         # ~2,220 lines — Tailwind v4 @theme tokens + shared component styles
+│   ├── globals.css         # ~1,750 lines — Tailwind v4 @theme tokens + shared component styles
 │   ├── actions/            # 36 "use server" action files — ALL backend logic
-│   ├── api/                # 10 API routes (auth, cron, checkout, webhooks, export, identify-mold)
-│   └── [route folders]/    # 60 page.tsx files across ~35 route groups
-├── components/             # 107+ client components
+│   ├── api/                # 15 API routes (auth, cron, checkout ×5, webhooks, export ×2, identify-mold, insurance-report, reference-dictionary)
+│   └── [route folders]/    # 61 page.tsx files across ~35 route groups
+├── components/             # 112+ client components
 │   ├── ui/                 # 10 shadcn/ui primitives (badge, button, card, dialog, input, select, separator, skeleton, table, textarea)
 │   ├── layouts/            # 4 Page Archetype wrappers (Explorer, Scrapbook, CommandCenter, Focus)
+│   ├── pdf/                # 3 @react-pdf/renderer components (ShowTags, InsuranceReport, CertificateOfAuthenticity)
 │   ├── EmptyState.tsx      # Standardized empty state component
 │   └── *.tsx               # Domain-specific components
 └── lib/
     ├── supabase/           # admin.ts (service role), client.ts (browser), server.ts (SSR)
     ├── types/              # database.ts (generated types), csv-import.ts
+    ├── constants/          # events.ts, groups.ts — shared constant definitions
     ├── utils/              # imageCompression, imageUrl, mentions, rateLimit, storage, validation, cn
     ├── utils.ts            # cn() utility (clsx + tailwind-merge)
     └── context/            # SimpleModeContext.tsx (accessibility)
@@ -150,7 +152,7 @@ src/
 - NEVER create custom `max-w-[var(--max-width)] mx-auto px-6` wrapper divs on pages
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 102)
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 104)
 - Universal Catalog (`catalog_items`) — 10,500+ entries for molds, releases, artist resins, tack
 - Universal Ledger — `v_horse_hoofprint` regular view (UNION ALL across 6 source tables) with `security_invoker = true`
 - Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
@@ -168,7 +170,9 @@ src/
 - Freemium tier system (Free vs Pro) — JWT `app_metadata.tier`
 - Stripe Checkout Sessions via `/api/checkout`
 - Stripe Webhook handler at `/api/webhooks/stripe`
-- Pro features: Photo Suite+ (30 extra photos), Blue Book PRO charts, Smart Insurance Reports, Stablemaster AI
+- Pro features: Photo Suite+ (30 extra photos), Blue Book PRO charts, Smart Insurance Reports, Stablemaster AI, Show Tags PDF
+- A-la-carte monetization: Promoted Listings (`is_promoted_until`), ISO Feed Bounties (`is_boosted_until`), Purchased Reports (`purchased_reports` table)
+- Checkout sub-routes: `/api/checkout` (Pro subscription), `/api/checkout/promote`, `/api/checkout/boost-iso`, `/api/checkout/insurance-report`, `/api/checkout/studio-pro`
 
 **Privacy Rules:**
 - `financial_vault` is NEVER queried on public routes (only owner via RLS)
@@ -185,7 +189,7 @@ src/
 - Rate limiting via `checkRateLimit()` from `src/lib/utils/rateLimit.ts`
 - `RISKY_PAYMENT_REGEX` in ChatThread warns about off-platform payment mentions
 - Tombstone deletion (soft delete) for data integrity
-- `after()` wraps in: `posts.ts`, `groups.ts`, `events.ts`, `activity.ts`
+- `after()` wraps in: `posts.ts`, `groups.ts`, `events.ts`, `activity.ts`, `shows.ts`
 - Cryptographic PIN generation using `crypto.randomInt()` (not `Math.random()`)
 - Tier gating: JWT `app_metadata.tier` checked server-side
 
@@ -206,6 +210,8 @@ Key entry points for understanding the code:
 | Feed | `src/app/feed/page.tsx` + `src/app/actions/activity.ts` |
 | Header Nav | `src/components/Header.tsx` |
 | Stripe Checkout | `src/app/api/checkout/route.ts` + `src/app/upgrade/page.tsx` |
+| Show Tags PDF | `src/components/pdf/ShowTags.tsx` + `src/app/api/export/show-tags/route.ts` |
+| Insurance Report PDF | `src/components/pdf/InsuranceReport.tsx` + `src/app/api/insurance-report/route.ts` |
 | Design Tokens | `src/app/globals.css` lines 1–47 (`@theme` block) |
 | shadcn Components | `src/components/ui/` |
 | Layout Archetypes | `src/components/layouts/` |

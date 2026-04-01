@@ -1,8 +1,8 @@
 # Model Horse Hub — Complete Project Report
 
-> **Report Date:** March 28, 2026  
+> **Report Date:** March 31, 2026  
 > **Repository:** `smount92/ProjectEquiscape` (GitHub, private)  
-> **Total Commits:** 384 (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
+> **Total Commits:** 384+ (first commit: March 14, 2026 — repo migrated from prior local development starting ~March 6)  
 > **Status:** Open beta with active testers — Freemium tier live with Stripe billing
 
 ---
@@ -18,12 +18,12 @@ The platform was built from scratch in ~18 days using AI-assisted pair programmi
 | Metric | Value |
 |--------|-------|
 | **TypeScript/TSX source lines** | ~54,400 |
-| **CSS** | Tailwind CSS v4 + globals.css (2,211 lines for shared primitives) |
+| **CSS** | Tailwind CSS v4 + globals.css (~1,750 lines for shared primitives) |
 | **Total source size** | 1.94 MB |
 | **Page routes** | 61 |
-| **Client components** | 114 |
-| **Server action files** | 42 |
-| **Database migrations** | 98 (001–102) |
+| **Client components** | 112+ (incl. 10 shadcn/ui + 3 PDF components) |
+| **Server action files** | 36 |
+| **Database migrations** | 100 (001–104) |
 | **SQL migration lines** | ~9,600 |
 | **Unit/component tests** | 245 (across 23 test files) |
 | **E2E test specs** | 7 (Playwright) |
@@ -48,7 +48,7 @@ The platform was built from scratch in ~18 days using AI-assisted pair programmi
 | **CSS** | Tailwind CSS v4 | — | Utility-first classes + globals.css shared primitives |
 | **Testing** | Vitest + Playwright | 4.x / 1.58 | Unit + component (RTL) + E2E scaffolding |
 | **Email** | Resend | 6.9.3 | Transactional notifications |
-| **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, CoA exports |
+| **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, CoA exports, Show Tags |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching |
 | **Payments** | Stripe | 18.x | Checkout Sessions + webhooks for subscription billing |
 | **AI** | Google Gemini | 2.x | AI-powered collection analysis (Stablemaster) |
@@ -62,7 +62,7 @@ The platform was built from scratch in ~18 days using AI-assisted pair programmi
 
 - **Next.js App Router** — Server Components reduce client JS bundle; server actions eliminate the need for a separate API layer. The entire backend is co-located with the frontend.
 - **Supabase** — PostgreSQL with RLS provides row-level security without application middleware. Signed URLs for private storage. Real-time subscriptions for future features.
-- **Tailwind CSS v4** — Migrated from vanilla CSS in March 2026. The original `globals.css` monolith (~12,000 lines) went through a CSS Modules extraction (V20), then a full Tailwind CSS v4 migration. Design tokens are mapped in the Tailwind `@theme` block. Shared primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`) remain in `globals.css` (2,211 lines). All new components use Tailwind utility classes directly in JSX.
+- **Tailwind CSS v4** — Migrated from vanilla CSS in March 2026. The original `globals.css` monolith (~12,000 lines) went through a CSS Modules extraction (V20), then a full Tailwind CSS v4 migration. Design tokens are mapped in the Tailwind `@theme` block. Shared primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`) remain in `globals.css` (~1,750 lines). All new components use Tailwind utility classes directly in JSX.
 - **No ORM** — Direct Supabase client calls with PostgREST joins. Auto-generated TypeScript types via `npm run gen-types` ensure compile-time safety. No `as unknown as` casts in production code.
 - **Vitest** — Lightweight, fast unit testing with good TypeScript support. 245 tests across 23 files cover server action logic, utility functions, and 6 UI components via React Testing Library. 7 Playwright E2E specs for critical flows. GitHub Actions CI runs all tests on every push.
 
@@ -87,20 +87,20 @@ model-horse-hub/
 │   └── routes/              # Page route documentation
 ├── scripts/                 # 7 data scraping/seeding scripts
 ├── supabase/
-│   └── migrations/          # 93 SQL migration files (001–097)
+│   └── migrations/          # 100 SQL migration files (001–104)
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx       # Root layout (Inter font, GA, SimpleModeProvider, Header)
-│   │   ├── globals.css      # ~2,211 lines — Tailwind imports + shared primitives
+│   │   ├── globals.css      # ~1,750 lines — Tailwind imports + shared primitives
 │   │   ├── actions/         # 36 server action files (ALL backend logic)
 │   │   │   └── __tests__/   # 6 test files
-│   │   ├── api/             # 7 API routes
+│   │   ├── api/             # 15 API routes
 │   │   └── [59 route dirs]  # Page routes
-│   ├── components/          # 107 client components
+│   ├── components/          # 112 client components
 │   │   ├── __tests__/       # 6 component test files
 │   │   ├── layouts/         # 4 Page Archetype wrappers (ExplorerLayout, ScrapbookLayout, CommandCenterLayout, FocusLayout)
-│   │   ├── pdf/             # PDF generation components
-│   │   └── ui/              # 8 shadcn/ui primitives (Button, Input, Select, Textarea, Badge, Dialog, Skeleton, Separator)
+│   │   ├── pdf/             # 3 PDF components (ShowTags, InsuranceReport, CertificateOfAuthenticity)
+│   │   └── ui/              # 10 shadcn/ui primitives (Button, Input, Select, Textarea, Badge, Card, Dialog, Skeleton, Separator, Table)
 │   └── lib/
 │       ├── supabase/        # admin.ts, client.ts, server.ts (all typed with Database generic)
 │       ├── types/           # database.generated.ts (auto-gen), database.ts (supplementary), supabase.ts, csv-import.ts
@@ -165,7 +165,7 @@ graph TD
 
 ## 4. Database Schema
 
-### 4.1 Schema Evolution (98 migrations, 001–102)
+### 4.1 Schema Evolution (100 migrations, 001–104)
 
 The database went through a **Grand Unification** (documented in `Grand_Unification_Plan.md`) across phases V6–V11 that consolidated legacy tables into universal, polymorphic structures:
 
@@ -359,6 +359,8 @@ The database went through a **Grand Unification** (documented in `Grand_Unificat
 | Event Management | ✅ Complete | `/community/events/[id]/manage` |
 | Show Entry Form | ✅ Complete | Class-linked entries |
 | Show String Manager | ✅ Complete | `/shows/planner` |
+| Show Tags PDF (Pro) | ✅ Complete | Show detail page → Print Tags |
+| Exhibitor Number System | ✅ Complete | Settings → exhibitor number |
 | NAN Tracker | ✅ Complete | NAN-qualifying class marking |
 | Show Records (auto-gen) | ✅ Complete | Expert placings → horse records |
 | Event Comments/Photos/RSVP | ✅ Complete | Full event enrichment |
@@ -461,9 +463,9 @@ The CSS layer evolved through several phases:
 
 1. **V1–V15:** Everything in `globals.css` (grew to ~12,000 lines)
 2. **V20 (CSS Maturity Sprint):** Extracted 19 CSS Modules, reducing globals by 28%
-3. **Tailwind CSS v4 migration:** Full migration from vanilla CSS to Tailwind CSS v4 utility-first framework. All CSS Modules and extracted page CSS files were replaced with inline Tailwind classes. `globals.css` reduced to ~2,211 lines containing Tailwind imports, `@theme` design tokens, and shared component primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`).
+3. **Tailwind CSS v4 migration:** Full migration from vanilla CSS to Tailwind CSS v4 utility-first framework. All CSS Modules and extracted page CSS files were replaced with inline Tailwind classes. `globals.css` reduced to ~1,750 lines containing Tailwind imports, `@theme` design tokens, and shared component primitives (`.btn-*`, `.card`, `.form-*`, `.modal-*`).
 
-**Current state:** Single `globals.css` file (2,211 lines). New components use Tailwind utility classes directly in JSX. Design tokens are defined in the `@theme` block and accessed via semantic class names (e.g., `text-forest`, `bg-card`, `border-edge`). All 55+ pages use standardized Layout Archetype components (see §6.4).
+**Current state:** Single `globals.css` file (~1,750 lines). New components use Tailwind utility classes directly in JSX. Design tokens are defined in the `@theme` block and accessed via semantic class names (e.g., `text-forest`, `bg-card`, `border-edge`). All 55+ pages use standardized Layout Archetype components (see §6.4).
 
 **Convention:** New components use **Tailwind utility classes** — do not create new CSS Module files. Legacy CSS Modules are tolerated but not for new work. Use Tailwind theme tokens instead of hard-coded colors. New pages MUST use one of the 4 Layout Archetypes — custom container `div`s are forbidden.
 
@@ -621,11 +623,17 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` or `qua
 |-------|---------|
 | `/api/auth/callback` | Supabase PKCE code exchange + session setup |
 | `/api/auth/me` | Current user session check |
-| `/api/checkout` | Stripe Checkout Session creation (subscription) |
+| `/api/checkout` | Stripe Checkout Session creation (Pro subscription) |
+| `/api/checkout/promote` | Stripe: Promoted listing purchase |
+| `/api/checkout/boost-iso` | Stripe: ISO feed bounty |
+| `/api/checkout/insurance-report` | Stripe: A-la-carte insurance report |
+| `/api/checkout/studio-pro` | Stripe: Studio Pro artist tier |
 | `/api/webhooks/stripe` | Stripe webhook handler — updates `app_metadata.tier` on subscription events |
 | `/api/cron/refresh-market` | Daily materialized view refresh (Vercel cron) |
 | `/api/cron/stablemaster-agent` | Monthly AI collection analysis + email (Vercel cron, 1st of month) |
-| `/api/export/[horseId]` | CoA/parked export PDF generation |
+| `/api/cron/transition-shows` | Auto-transition expired shows from open→judging (every 6h) |
+| `/api/export` | CoA/parked export PDF generation |
+| `/api/export/show-tags` | Show tag PDF with QR codes (Pro tier) |
 | `/api/insurance-report` | Insurance report PDF generation |
 | `/api/identify-mold` | AI-powered mold identification (image analysis) |
 | `/api/reference-dictionary` | Reference data dictionary for search |
@@ -634,7 +642,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push to `main` or `qua
 
 ## 9. Client Components
 
-105 client components power the interactive UI. Major categories:
+112+ client components power the interactive UI. Major categories:
 
 ### 9.1 Core UI Components
 
@@ -800,12 +808,13 @@ All 36 server action files have JSDoc comments on exported functions, documentin
 | **V37** | Documentation Sprint | 31 doc pages, JSDoc on all exports, architecture diagrams |
 | **V38** | Photo Upload Fixes | Lightbox portal, angle_profile enum fix, upload error visibility |
 | **V39** | Production Hardening | Edge security (8 public routes), perf (removed 35 force-dynamic, Suspense streaming), type safety (generated Supabase types, removed 242 lines of unsafe casts from 20 files), pedigree validation (6 new tests) |
-| **V40** | Tailwind v4 Migration | Full migration from vanilla CSS to Tailwind, CSS Modules eliminated, globals.css reduced from ~12,000 to 2,211 lines |
+| **V40** | Tailwind v4 Migration | Full migration from vanilla CSS to Tailwind, CSS Modules eliminated, globals.css reduced from ~12,000 to ~1,750 lines |
 | **V41** | Notification & Open Beta | Deep links (`link_url`), atomic commerce RPCs, fuzzy search, trusted sellers |
 | **V42** | Show Rules & Realism | Entry preview, smart class browser, results podium, personalized notifications, show history widget, expert judging, cron auto-transition, host override, enriched show records, judge notes |
 | **V43** | Layout & UI Overhaul | shadcn/ui primitives, Framer Motion interactions, createPortal → Dialog migration, Design System docs, 4 Page Archetypes built, 55+ pages migrated from custom containers |
 | **V44** | Warm Parchment Aesthetic | Complete override of standard Tailwind cold stone palette; custom `@theme` mapped to warm espresso, leather, and cream tokens; WCAG contrast fixes on inputs and footers; pure CSS Grid photo gallery restoration |
 | **V45** | Pro Asset Pipeline | Tier-gated image compression (free/pro/studio), client-side 400px WebP thumbnail generation, dual-upload in add/edit flows, grid components serve thumbnails with fallback |
+| **V46** | Show Tags & Monetization | ShowTags.tsx PDF component, `/api/export/show-tags` route, exhibitor numbering (migration 103-104), Stripe checkout sub-routes (promote, boost-iso, insurance-report, studio-pro), purchased_reports table |
 
 ### 12.2 Key Architectural Decisions Log
 
@@ -887,6 +896,7 @@ GEMINI_API_KEY=...
 | Schedule | Endpoint | Purpose |
 |----------|----------|---------|
 | Daily 6 AM UTC | `/api/cron/refresh-market` | Refresh `mv_market_prices` materialized view |
+| Every 6 hours | `/api/cron/transition-shows` | Auto-transition expired shows from open→judging |
 | 1st of month, 9 AM UTC | `/api/cron/stablemaster-agent` | AI portfolio analysis + branded email to Pro users |
 
 ---
@@ -899,7 +909,7 @@ The platform is feature-complete for closed beta. All core inventory, social, co
 
 ### 15.2 Migration Status
 
-All 93 migrations (001–097) have been deployed to production Supabase. Key recent migrations:
+All 100 migrations (001–104) have been deployed to production Supabase. Key recent migrations:
 
 | Migration | Purpose |
 |-----------|---------|
@@ -913,6 +923,8 @@ All 93 migrations (001–097) have been deployed to production Supabase. Key rec
 | 100 | Fuzzy search RPC (`search_catalog_fuzzy` with `pg_trgm`) |
 | 101 | Trusted seller materialized view (`mv_trusted_sellers`) |
 | 102 | Pro tier RLS functions (`get_user_tier`, `get_photo_limit`, `get_extra_photo_count`) |
+| 103 | Core monetization (promoted listings, ISO bounties, purchased reports) |
+| 104 | Exhibitor number on users for show tag numbering |
 
 ### 15.3 Recent Work (V39+)
 
@@ -920,11 +932,12 @@ All 93 migrations (001–097) have been deployed to production Supabase. Key rec
 |--------|------------------|
 | **V39: Production Hardening** | Edge security on 8 public routes, removed 35 `force-dynamic` in favor of Suspense streaming, type safety audit (removed unsafe casts from 20 files), 6 new pedigree validation tests |
 | **Type Safety Cleanup** | Generated Supabase types injected into all clients, removed `as unknown as` from 20 files, removed redundant manual interfaces, coerced nullable DB fields with defaults |
-| **Tailwind CSS v4 Migration** | Full CSS architecture migration, eliminated all CSS Modules and extracted page CSS, reduced globals.css from ~12,000 to 2,211 lines |
+| **Tailwind CSS v4 Migration** | Full CSS architecture migration, eliminated all CSS Modules and extracted page CSS, reduced globals.css from ~12,000 to ~1,750 lines |
 | **Notification Deep-Links** | All notifications now click through to referenced item instead of actor profile |
 | **Beta Feedback Hotfixes** | Photo show filter fix, art studio specialty expansion, inline style cleanup |
 | **V40: Monetization Sprint** | Stripe integration (checkout + webhook), freemium tier system (JWT-based), upgrade page with pricing comparison, Stablemaster AI cron (Gemini + Resend), Blue Book PRO charts, Photo Suite+ gating (5 LSQ free / 30 extra Pro), Smart Insurance Reports (Pro), double-subscription prevention, admin user count fix |
 | **V45: Pro Asset Pipeline** | Tier-gated image compression (`imageCompression.ts`), `generateThumbnail()` for 400px WebP, `imageUrl.ts` helper, dual-upload in add/edit horse, StableGrid + ShowRingGrid serve thumbnails with `onError` fallback |
+| **V46: Show Tags & Monetization** | ShowTags.tsx @react-pdf/renderer component with QR codes, `/api/export/show-tags` route, exhibitor numbering system (migration 103-104), 4 new Stripe checkout sub-routes for a-la-carte monetization, `purchased_reports` table |
 
 ### 15.4 Recommended Next Steps
 
@@ -938,4 +951,4 @@ All 93 migrations (001–097) have been deployed to production Supabase. Key rec
 
 ---
 
-*This report covers the complete Model Horse Hub project as of commit `57a78a3` (March 28, 2026). Total development time: ~22 days from first commit to current state.*
+*This report covers the complete Model Horse Hub project as of March 31, 2026. Total development time: ~25 days from first commit to current state.*

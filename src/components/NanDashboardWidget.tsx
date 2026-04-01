@@ -65,7 +65,7 @@ export default async function NanDashboardWidget() {
                 href="/shows/planner"
                 className="mt-4 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-50"
             >
-                📋 View Full NAN Planner
+                🧳 Live Show Packer
             </Link>
         </details>
     );

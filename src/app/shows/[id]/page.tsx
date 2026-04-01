@@ -5,14 +5,14 @@ import { getEventJudges } from"@/app/actions/events";
 import { getEventDivisions } from"@/app/actions/competition";
 import { getPosts } from"@/app/actions/posts";
 import Link from"next/link";
-import VoteButton from"@/components/VoteButton";
 import ShowEntryForm from"@/components/ShowEntryForm";
-import WithdrawButton from"@/components/WithdrawButton";
+import ShowResultsView from"@/components/ShowResultsView";
 import UniversalFeed from"@/components/UniversalFeed";
 import CloseShowButton from"@/components/CloseShowButton";
 import ExpertJudgingPanel from"@/components/ExpertJudgingPanel";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { getUserTier } from"@/lib/auth";
+import { getPublicImageUrl } from"@/lib/utils/storage";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
@@ -43,10 +43,26 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  .eq("owner_id", user.id)
  .eq("is_public", true);
 
- const horseOptions = (userHorses ?? []).map((h: { id: string; custom_name: string }) => ({
- id: h.id,
- name: h.custom_name,
- }));
+  const horseIds = (userHorses ?? []).map((h: { id: string }) => h.id);
+  let thumbMap = new Map<string, string>();
+  if (horseIds.length > 0) {
+    const { data: horseThumbs } = await supabase
+      .from("horse_images")
+      .select("horse_id, image_url, angle_profile")
+      .in("horse_id", horseIds);
+    for (const hId of horseIds) {
+      const imgs = (horseThumbs ?? []).filter((r: { horse_id: string }) => r.horse_id === hId);
+      const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
+      const url = (primary ?? imgs[0])?.image_url;
+      if (url) thumbMap.set(hId, getPublicImageUrl(url as string));
+    }
+  }
+
+  const horseOptions = (userHorses ?? []).map((h: { id: string; custom_name: string }) => ({
+    id: h.id,
+    name: h.custom_name,
+    thumbnailUrl: thumbMap.get(h.id) || null,
+  }));
 
  const isOpen = show.status ==="open";
  const isCreator = show.createdBy === user.id;
@@ -237,227 +253,30 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <Link href="/shows">← All Shows</Link>
  </nav>
 
- {/* Winner Podium for closed shows */}
- {show.status ==="closed" &&
- entries.length > 0 &&
- (() => {
- const RIBBON_MAP: Record<string, string> = {
-"1st":"blue",
-"2nd":"red",
-"3rd":"yellow",
-"4th":"white",
-"5th":"pink",
-"6th":"green",
- HM:"green",
- Champion:"blue",
-"Reserve Champion":"red",
-"Grand Champion":"blue",
-"Reserve Grand Champion":"red",
- };
- const MEDAL_MAP: Record<string, string> = {
-"1st":"🥇",
-"2nd":"🥈",
-"3rd":"🥉",
- HM:"🎗️",
- Champion:"🏆",
-"Reserve Champion":"🥈",
-"Grand Champion":"🏆",
-"Reserve Grand Champion":"🥈",
- };
- const RIBBON_BORDER_MAP: Record<string, string> = {
- "1st":"border-blue-500",
- "2nd":"border-red-500",
- "3rd":"border-yellow-500",
- "4th":"border-stone-200",
- "5th":"border-pink-500",
- "6th":"border-green-500",
-  HM:"border-green-500",
-  Champion:"border-blue-600",
- "Reserve Champion":"border-red-600",
- "Grand Champion":"border-blue-700",
- "Reserve Grand Champion":"border-red-700",
- };
- const PLACE_ORDER: Record<string, number> = {
-"Grand Champion": 0,
-"Reserve Grand Champion": 1,
- Champion: 2,
-"Reserve Champion": 3,
-"1st": 4,
-"2nd": 5,
-"3rd": 6,
-"4th": 7,
-"5th": 8,
-"6th": 9,
- HM: 10,
- };
-
- // Champions first
- const champions = sortedEntries.filter(
- (e) =>
- e.placing &&
- ["Champion","Reserve Champion","Grand Champion","Reserve Grand Champion"].includes(
- e.placing,
- ),
- );
- // Top placed
- const topPlaced = isExpertJudged
- ? sortedEntries
- .filter(
- (e) =>
- e.placing &&
- ![
-"Champion",
-"Reserve Champion",
-"Grand Champion",
-"Reserve Grand Champion",
- ].includes(e.placing),
- )
- .sort((a, b) => (PLACE_ORDER[a.placing!] ?? 99) - (PLACE_ORDER[b.placing!] ?? 99))
- .slice(0, 6)
- : sortedEntries.slice(0, 3);
- const podiumEntries = topPlaced.slice(0, 3);
-
- return (
- <div
- className="animate-fade-in-up rounded-xl border border-stone-200 bg-white p-8 mb-6 shadow-sm"
- >
- <h2 className="mb-2 text-xl text-center">
- 🏆 <span className="text-forest">Results</span>
- </h2>
-
- {/* Champion Banners */}
- {champions.map((entry) => (
- <div key={entry.id} className="animate-fade-in-up mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-center">
- <div className="mb-2 text-xl font-extrabold">
- {MEDAL_MAP[entry.placing!] ||"🏆"} {entry.placing}
- </div>
- <div className="flex items-center justify-center gap-4">
- {entry.thumbnailUrl && (
- <div className="h-[60px] w-[60px] shrink-0 overflow-hidden rounded-md">
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img
- src={entry.thumbnailUrl}
- alt={entry.horseName}
- className="h-full w-full object-cover"
- />
- </div>
- )}
- <div>
- <Link
- href={`/community/${entry.horseId}`}
- className="text-base font-bold"
- >
- 🐴 {entry.horseName}
- </Link>
- <div className="text-stone-500 text-sm">
- by{""}
- <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
- @{entry.ownerAlias}
- </Link>
- </div>
- </div>
- </div>
- </div>
- ))}
-
- {/* Podium */}
- <div className="flex flex-wrap items-end justify-center gap-8 px-0 py-8">
- {podiumEntries.map((entry, i) => {
- const placing = isExpertJudged ? entry.placing! : ["1st","2nd","3rd"][i];
- const ribbon = RIBBON_MAP[placing] ||"blue";
- const medal = MEDAL_MAP[placing] ||"🏅";
- return (
- <div
- key={entry.id}
- className={`max-w-[220px] min-w-[160px] overflow-hidden rounded-lg text-center shadow-lg transition-transform ${i === 0 ? "scale-105" : ""}`}
- >
- <div className="h-1 w-full bg-amber-400" />
- {entry.thumbnailUrl && (
- // eslint-disable-next-line @next/next/no-img-element
- <img
- src={entry.thumbnailUrl}
- alt={entry.horseName}
- className="aspect-[4/3] w-full object-cover"
- />
- )}
- <div className="bg-white max-w-[220px] min-w-[160px] overflow-hidden rounded-lg p-4 text-center shadow-lg">
- <div className="mb-1 text-[2rem]">{medal}</div>
- <Link
- href={`/community/${entry.horseId}`}
- className="text-ink block text-sm font-bold no-underline hover:underline"
- >
- {entry.horseName}
- </Link>
- <div className="text-stone-500 mt-[2px] text-xs">
- by{""}
- <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
- @{entry.ownerAlias}
- </Link>
- {!isExpertJudged &&
- ` · ${entry.votes} vote${entry.votes !== 1 ?"s" :""}`}
- </div>
- <div className="text-[var(--color-accent, #f59e0b)] mt-1 text-sm font-extrabold">
- {placing}
- </div>
- {entry.caption && (
- <div className="text-ink-light mt-1 text-xs leading-snug italic">
- &ldquo;{entry.caption}&rdquo;
- </div>
- )}
- </div>
- </div>
- );
- })}
- </div>
-
- {/* Remaining placed entries below podium */}
- {topPlaced.length > 3 && (
- <div className="mt-4">
- <h3 className="text-ink-light mb-2 text-sm">
- Also Placed
- </h3>
- {topPlaced.slice(3).map((entry) => {
- const placing = entry.placing!;
- const ribbon = RIBBON_MAP[placing] ||"green";
- return (
- <div
- key={entry.id}
- className={`mb-1 flex items-center gap-4 px-4 py-2 border-l-[3px] ${RIBBON_BORDER_MAP[placing] || "border-green-500"}`}
- >
- {entry.thumbnailUrl && (
- <div
- className="h-[36] w-[36] shrink-0 overflow-hidden rounded-sm"
- >
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img
- src={entry.thumbnailUrl}
- alt={entry.horseName}
- className="h-full w-full object-cover"
- />
- </div>
- )}
- <div className="flex-1">
- <Link
- href={`/community/${entry.horseId}`}
- className="font-semibold"
- >
- {entry.horseName}
- </Link>
- <span className="text-stone-500 ml-1 text-xs">
- by @{entry.ownerAlias}
- </span>
- </div>
- <span className="text-[var(--color-accent, #f59e0b)] text-sm font-bold">
- {MEDAL_MAP[placing] ||"🏅"} {placing}
- </span>
- </div>
- );
- })}
- </div>
- )}
- </div>
- );
- })()}
+ {/* Results + Entries — unified client component with class filter */}
+ <ShowResultsView
+  entries={sortedEntries.map(e => ({
+  id: e.id,
+  horseId: e.horseId,
+  horseName: e.horseName,
+  ownerAlias: e.ownerAlias,
+  ownerId: e.ownerId,
+  thumbnailUrl: e.thumbnailUrl,
+  caption: e.caption,
+  votes: e.votes,
+  hasVoted: e.hasVoted,
+  placing: e.placing,
+  finishType: e.finishType,
+  className: e.className,
+  divisionName: e.divisionName,
+  classId: e.classId,
+  }))}
+  classes={classOptions.map(c => ({ id: c.id, name: c.name, divisionName: c.divisionName }))}
+  showStatus={show.status}
+  isExpertJudged={isExpertJudged}
+  isJudging={isJudging}
+  currentUserId={user.id}
+  />
 
  {/* Judging Banner */}
  {isJudging && (
@@ -480,13 +299,14 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {isExpertJudged && isJudging && (isCreator || isJudge) && (
  <ExpertJudgingPanel
  showId={showId}
+ classes={classOptions.map(c => ({ id: c.id, name: c.name, divisionName: c.divisionName }))}
  entries={entries.map((e) => ({
  id: e.id,
  horseName: e.horseName,
  ownerAlias: e.ownerAlias,
  thumbnailUrl: e.thumbnailUrl,
  placing: e.placing,
- classId: null,
+ classId: e.classId || null,
  }))}
  />
  )}
@@ -494,100 +314,28 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Close Show Button — creator/admin only, when expired */}
  {canClose && <CloseShowButton showId={showId} />}
 
- {/* Host Override Panel — creator can adjust placings on closed shows */}
+ {/* Host Override Panel — collapsed by default, only shown to creator */}
  {isCreator && show.status ==="closed" && (
+ <details className="mb-6">
+ <summary className="cursor-pointer rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-stone-500 shadow-sm transition-colors hover:bg-stone-50">
+ 🔧 Override Final Placings (Host Only)
+ </summary>
+ <div className="mt-2">
  <ExpertJudgingPanel
  showId={showId}
  overrideMode
+ classes={classOptions.map(c => ({ id: c.id, name: c.name, divisionName: c.divisionName }))}
  entries={entries.map((e) => ({
  id: e.id,
  horseName: e.horseName,
  ownerAlias: e.ownerAlias,
  thumbnailUrl: e.thumbnailUrl,
  placing: e.placing,
- classId: null,
+ classId: e.classId || null,
  }))}
  />
- )}
-
- {/* Entries Grid */}
- {entries.length === 0 ? (
- <div className="animate-fade-in-up rounded-xl border border-stone-200 bg-white px-8 py-12 text-center shadow-sm">
- <div className="mb-4 text-5xl">📸</div>
- <h2>No Entries Yet</h2>
- <p>Be the first to enter this show!</p>
  </div>
- ) : (
- <div className="animate-fade-in-up flex flex-col gap-0 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
- {sortedEntries.map((entry, index) => (
- <div
- key={entry.id}
- className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-stone-50"
- >
- <div className="text-stone-500 min-w-[32px] text-center text-lg font-bold">
- {isExpertJudged && show.status ==="closed" && entry.placing
- ? entry.placing
- : `#${index + 1}`}
- </div>
- {entry.thumbnailUrl && (
- <div className="h-[64px] w-[64px] shrink-0 overflow-hidden rounded-md">
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
- </div>
- )}
- <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
- <Link
- href={`/community/${entry.horseId}`}
- className="hover:text-forest text-base font-semibold text-inherit no-underline"
- >
- 🐴 {entry.horseName}
- </Link>
- <span className="text-forest no-underline">
- by{""}
- <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
- @{entry.ownerAlias}
- </Link>
- {" ·"}
- {entry.finishType}
- {entry.className && (
- <span className="text-forest ml-1">
- · {entry.divisionName && `${entry.divisionName} / `}
- {entry.className}
- </span>
- )}
- </span>
- {entry.caption && (
- <p className="mt-1 text-xs italic leading-tight text-stone-500">
- &ldquo;{entry.caption}&rdquo;
- </p>
- )}
- </div>
- <div className="flex items-center gap-1">
- {isExpertJudged ? (
- entry.placing && show.status ==="closed" ? (
- <span className="rounded-sm bg-amber-500/15 px-2 py-1 text-sm font-semibold text-amber-500">
- {entry.placing}
- </span>
- ) : isJudging ? (
- <span className="text-stone-500 text-xs">
- 🏅 Expert judging
- </span>
- ) : null
- ) : (
- <VoteButton
- entryId={entry.id}
- initialVotes={entry.votes}
- initialHasVoted={entry.hasVoted}
- disabled={show.status !=="open"}
- />
- )}
- {entry.ownerId === user.id && show.status ==="open" && (
- <WithdrawButton entryId={entry.id} />
- )}
- </div>
- </div>
- ))}
- </div>
+ </details>
  )}
 
  {/* Show Discussion */}

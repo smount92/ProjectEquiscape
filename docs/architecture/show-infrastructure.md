@@ -1,8 +1,8 @@
 # Show Infrastructure — Complete Technical Report
 
-> **Date:** March 19, 2026  
-> **Scope:** Virtual Photo Shows, Expert Judging, Community Voting, Show Records, Achievements  
-> **Stack:** Next.js 15 (App Router) · Supabase (PostgreSQL + RLS) · Server Actions  
+> **Date:** March 31, 2026  
+> **Scope:** Virtual Photo Shows, Expert Judging, Community Voting, Show Records, Achievements, Show Tags PDF  
+> **Stack:** Next.js 16.1.6 (App Router) · Supabase (PostgreSQL + RLS) · Server Actions  
 
 ---
 
@@ -810,12 +810,12 @@ Potential badges: "First Show Entry", "Show Regular" (5 entries), "Show Addict" 
 
 ### Entry Photo Preview Modal
 
-The `ShowEntryForm` component now includes a **"👁 Preview"** button that opens a portal-rendered modal showing the entry exactly as judges/voters will see it:
+The `ShowEntryForm` component now includes a **"👁 Preview"** button that opens a `shadcn/ui` `<Dialog>` showing the entry exactly as judges/voters will see it:
 
 - Photo rendered at 4:3 aspect ratio matching the entries grid
 - Caption, horse name, and class displayed
 - Two CTAs: "✅ Looks Good — Submit Entry" and "← Choose Different Photo"
-- Uses `createPortal(overlay, document.body)` per project convention
+- Uses `<Dialog>` from `@/components/ui/dialog`
 
 ### Smart Class Browser
 
@@ -946,18 +946,59 @@ Playwright config loads `.env.local` for test user credentials (`TEST_USER_A_EMA
 
 ---
 
+## Show Tags PDF (Migration 103–104)
+
+### Overview
+
+Pro-tier feature that generates professional-grade printable show tags for physical model horse shows. Tags follow the standard 1¾" × 1³⁄₃₂" folded hand tag format used at NAMHSA and BreyerFest events.
+
+### Components
+
+| File | Purpose |
+|------|---------|
+| `src/components/pdf/ShowTags.tsx` | @react-pdf/renderer Document — generates tag layout |
+| `src/app/api/export/show-tags/route.ts` | API route — fetches entries, generates QR codes, renders PDF |
+
+### Tag Layout
+
+- **Unfolded size:** 3½" × 1³⁄₃₂" (252pt × 79pt)
+- **Front side:** Horse number (XXX-YYY format), breed, sex, make (OF/CM/AR), class name
+- **Back side:** Horse name, mold name, owner alias, QR code linking to public passport
+- **Page layout:** Left-aligned tags with `flex-wrap`, ~16 tags per letter page
+
+### Exhibitor Number System (Migration 104)
+
+- `users.exhibitor_number` TEXT column — regional exhibitor number (e.g., "042")
+- Horse tags use `XXX-YYY` format where `XXX` = exhibitor number, `YYY` = sequential horse number within the show
+- Configurable in user settings
+
+### Access Control
+
+- **Show host:** Can print tags for ALL entries (`?showId=xxx&all=true`)
+- **Individual entrant:** Can print tags for their own entries only (`?showId=xxx`)
+- **Tier gate:** Pro feature only — Free tier users see upgrade prompt
+- UI buttons appear on show detail page (`shows/[id]/page.tsx`)
+
+### QR Code Generation
+
+QR codes are generated server-side using the `qrcode` library, converted to a boolean matrix, and rendered as SVG `<Rect>` elements via `@react-pdf/renderer`'s `<Svg>` component (no raster images).
+
+---
+
 ## File Index
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| [shows.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/shows.ts) | ~960 | All show server actions (entries, votes, create, close, expert judging, override, history) |
+| [shows.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/shows.ts) | ~965 | All show server actions (entries, votes, create, close, expert judging, override, history) |
 | [events.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/events.ts) | 853 | Event CRUD, judge management, comments |
 | [competition.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/competition.ts) | 898 | Divisions, classes, NAN tracking, show strings |
 | [notifications.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/notifications.ts) | ~165 | Notification CRUD with linkUrl deep-link support |
 | [shows/page.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/app/shows/page.tsx) | 128 | Show list page with judge badges |
-| [shows/[id]/page.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/app/shows/%5Bid%5D/page.tsx) | ~500 | Show detail with all conditional panels |
-| [ExpertJudgingPanel.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ExpertJudgingPanel.tsx) | ~290 | Placing UI with judge notes + override mode |
-| [ShowEntryForm.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ShowEntryForm.tsx) | ~470 | Smart class browser + entry preview modal |
+| [shows/[id]/page.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/app/shows/%5Bid%5D/page.tsx) | ~605 | Show detail with all conditional panels + tag PDF links |
+| [ExpertJudgingPanel.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ExpertJudgingPanel.tsx) | ~269 | Placing UI with judge notes + override mode |
+| [ShowEntryForm.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ShowEntryForm.tsx) | ~466 | Smart class browser + entry preview dialog |
+| [ShowTags.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/pdf/ShowTags.tsx) | ~237 | @react-pdf/renderer show tag generator |
+| [show-tags/route.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/api/export/show-tags/route.ts) | ~160 | API route for show tag PDF export |
 | [ShowHistoryWidget.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/ShowHistoryWidget.tsx) | ~120 | Dashboard ribbon summary widget |
 | [NotificationList.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/NotificationList.tsx) | ~155 | Notification list with deep-link routing |
 | [VoteButton.tsx](file:///c:/Project%20Equispace/model-horse-hub/src/components/VoteButton.tsx) | 65 | Optimistic vote toggle |
@@ -968,6 +1009,8 @@ Playwright config loads `.env.local` for test user credentials (`TEST_USER_A_EMA
 | [094_judge_entry_update_policy.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/094_judge_entry_update_policy.sql) | 40 | Judge RLS fix |
 | [095_show_polish.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/095_show_polish.sql) | 129 | V34: Expert judging precedence fix + enriched show_records |
 | [096_notification_deep_links.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/096_notification_deep_links.sql) | 11 | Add link_url column to notifications |
+| [103_core_monetization.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/103_core_monetization.sql) | 42 | Promoted listings, ISO bounties, purchased reports |
+| [104_exhibitor_number.sql](file:///c:/Project%20Equispace/model-horse-hub/supabase/migrations/104_exhibitor_number.sql) | 10 | Exhibitor number on users for show tags |
 | [shows.test.ts](file:///c:/Project%20Equispace/model-horse-hub/src/app/actions/__tests__/shows.test.ts) | ~200 | Vitest: entry validation, auth, overrides, history |
 | [show-entry.spec.ts](file:///c:/Project%20Equispace/model-horse-hub/e2e/show-entry.spec.ts) | ~460 | Playwright E2E: 16 show system tests |
 | [playwright.config.ts](file:///c:/Project%20Equispace/model-horse-hub/playwright.config.ts) | 36 | Playwright config with .env.local loading |

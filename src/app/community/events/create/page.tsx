@@ -5,8 +5,16 @@ import { useRouter } from"next/navigation";
 import { createEvent } from"@/app/actions/events";
 
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
+import { SHOW_TEMPLATES } from"@/lib/constants/showTemplates";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import FocusLayout from"@/components/layouts/FocusLayout";
 
 export default function CreateEventPage() {
@@ -25,6 +33,10 @@ export default function CreateEventPage() {
  const [saving, setSaving] = useState(false);
  const [error, setError] = useState("");
  const [judgingMethod, setJudgingMethod] = useState<"community_vote" |"expert_judge">("community_vote");
+ const [templateId, setTemplateId] = useState("");
+
+ const isShowType = eventType === "photo_show" || eventType === "live_show";
+ const selectedTemplate = SHOW_TEMPLATES.find((t) => t.key === templateId);
 
  async function handleSubmit(e: React.FormEvent) {
  e.preventDefault();
@@ -48,6 +60,7 @@ export default function CreateEventPage() {
   region: region.trim() || undefined,
   virtualUrl: virtualUrl.trim() || undefined,
   judgingMethod,
+  templateId: templateId || undefined,
  });
 
  if (result.success && result.eventId) {
@@ -82,7 +95,32 @@ export default function CreateEventPage() {
     </option>
    ))}
    </select>
-  </div>
+   </div>
+
+   {/* NAMHSA Template Selector — only for show types */}
+   {isShowType && (
+   <div className="mb-6">
+    <label className="text-stone-900 mb-1 block text-sm font-semibold">
+    Starting Template (optional)
+    </label>
+    <Select value={templateId} onValueChange={setTemplateId}>
+    <SelectTrigger>
+     <SelectValue placeholder="No template — blank show" />
+    </SelectTrigger>
+    <SelectContent>
+     <SelectItem value="none">No template — blank show</SelectItem>
+     {SHOW_TEMPLATES.map((t) => (
+     <SelectItem key={t.key} value={t.key}>
+      {t.label}
+     </SelectItem>
+     ))}
+    </SelectContent>
+    </Select>
+    {selectedTemplate && (
+    <p className="mt-1 text-xs text-stone-500">{selectedTemplate.description}</p>
+    )}
+   </div>
+   )}
 
   <div className="mb-6">
    <label className="text-stone-900 mb-1 block text-sm font-semibold">Judging Method</label>

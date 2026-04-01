@@ -7,7 +7,7 @@ graph TD
     subgraph Vercel["Vercel (Hosting)"]
         subgraph Next["Next.js 16 (App Router)"]
             SC["Server Components (pages)"]
-            CC["Client Components (107)"]
+            CC["Client Components (112)"]
             SA["Server Actions (36 files)"]
         end
         Cron["Vercel Cron (daily 6AM + monthly 1st)"]
@@ -53,12 +53,12 @@ graph TD
 | **Storage** | Supabase Storage | — | Private `horse-images` bucket with signed URLs |
 | **Hosting** | Vercel | Serverless | Hobby tier, auto-deploy on push to `main` |
 | **CSS** | Tailwind CSS v4 | — | Utility-first classes + `@theme` design tokens in globals.css |
-| **UI Components** | shadcn/ui (Radix) | — | Button, Input, Select, Textarea, Badge, Dialog, Skeleton, Separator |
+| **UI Components** | shadcn/ui (Radix) | — | Button, Input, Select, Textarea, Badge, Card, Dialog, Skeleton, Separator, Table |
 | **Animations** | Framer Motion | — | Spring physics, staggered grid reveals, tactile micro-interactions |
 | **Payments** | Stripe | — | Checkout Sessions + Webhooks for Pro tier subscriptions |
 | **AI** | Google Gemini | — | Stablemaster collection analysis (monthly cron) |
 | **Email** | Resend | 6.9.3 | Transactional notifications (offers, comments, follows) |
-| **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, Certificate of Authenticity exports |
+| **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, Certificate of Authenticity, Show Tags |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching for reference catalog |
 | **CSV** | PapaParse | 5.5.3 | Batch import parsing |
 | **Testing** | Vitest + Playwright | — | Unit/integration + component (RTL) + E2E |
@@ -74,14 +74,20 @@ This means:
 - Backend and frontend are co-located
 - Type safety is end-to-end (TypeScript on both sides)
 
-**Exception:** 10 API routes exist for concerns that can't be server actions:
+**Exception:** 15 API routes exist for concerns that can't be server actions:
 - `/api/auth/callback` — PKCE code exchange (must be a GET endpoint)
 - `/api/auth/me` — Session check (GET endpoint)
-- `/api/checkout` — Stripe Checkout Session creation
+- `/api/checkout` — Stripe Checkout Session creation (Pro subscription)
+- `/api/checkout/promote` — Stripe: Promoted listing purchase
+- `/api/checkout/boost-iso` — Stripe: ISO feed bounty purchase
+- `/api/checkout/insurance-report` — Stripe: A-la-carte insurance report
+- `/api/checkout/studio-pro` — Stripe: Studio Pro artist tier
 - `/api/webhooks/stripe` — Stripe webhook handler
 - `/api/cron/refresh-market` — Vercel cron trigger (daily)
 - `/api/cron/stablemaster-agent` — Stablemaster AI cron (monthly)
-- `/api/export/[horseId]` — PDF generation (streaming response)
+- `/api/cron/transition-shows` — Auto-transition expired shows (6h)
+- `/api/export` — PDF generation (CoA/parked export)
+- `/api/export/show-tags` — Show tag PDF generation (Pro tier)
 - `/api/insurance-report` — Insurance PDF (streaming response)
 - `/api/identify-mold` — AI image analysis
 - `/api/reference-dictionary` — Reference data for search
@@ -127,15 +133,15 @@ Horse provenance is assembled from **immutable source tables** via a regular vie
 
 The materialized view UNION ALLs these into a single chronological timeline.
 
-## Scale (as of March 26, 2026)
+## Scale (as of March 31, 2026)
 
 | Metric | Count |
 |--------|-------|
-| Page routes | 60 across 35 route groups |
-| Client components | 107 (incl. 8 shadcn/ui primitives) |
+| Page routes | 61 across 35 route groups |
+| Client components | 112 (incl. 10 shadcn/ui + 3 PDF components) |
 | Server action files | 36 |
-| API routes | 10 |
-| Database migrations | 98 files (001–102, some skipped) |
+| API routes | 15 |
+| Database migrations | 100 files (001–104, some numbers skipped) |
 | CSS architecture | Tailwind CSS v4 + shadcn/ui + Framer Motion |
 | Reference catalog entries | 10,500+ |
 | Unit/component tests | 245 (across 23 test files) |

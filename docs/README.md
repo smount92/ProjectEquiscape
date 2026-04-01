@@ -1,6 +1,6 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** March 28, 2026
+> **Last Updated:** March 31, 2026
 > **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference.
 
 ---
@@ -53,17 +53,18 @@ docs/
 │       ├── 005-soft-delete-tombstone.md
 │       ├── 006-private-storage-signed-urls.md
 │       └── 007-polymorphic-catalog.md
+│   └── show-infrastructure.md         # Complete show system technical report
 ├── database/
 │   ├── schema-overview.md             # Visual ERD + table groups
 │   ├── rls-policies.md                # Row Level Security inventory
 │   ├── materialized-views.md          # Computed views and refresh schedules
-│   ├── migrations.md                  # Migration index (001—102)
+│   ├── migrations.md                  # Migration index (001—104)
 │   └── seed-data.md                   # Reference catalog seeding
 ├── api/
 │   ├── server-actions.md              # Index of all 36 server action files
-│   └── routes.md                      # API route reference (10 routes)
+│   └── routes.md                      # API route reference (15 routes)
 ├── components/
-│   ├── catalog.md                     # 107-component index by domain
+│   ├── catalog.md                     # 112-component index by domain
 │   ├── patterns.md                    # 8 common component patterns
 │   └── design-system.md              # Tokens, colors, typography, primitives
 ├── guides/
@@ -75,7 +76,7 @@ docs/
 │   ├── catalog-curation.md            # Catalog curation guide (V32)
 │   └── deployment.md                  # Vercel + Supabase deployment
 └── routes/
-    └── route-map.md                   # Complete URL → page mapping (60 routes)
+    └── route-map.md                   # Complete URL → page mapping (61 routes)
 ```
 
 

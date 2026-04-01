@@ -1,6 +1,6 @@
 # Component Catalog
 
-All 107 client components live in `src/components/`. Every component is a `"use client"` React component.
+All 112+ client components live in `src/components/`. Every component is a `"use client"` React component.
 
 ## Component Index by Domain
 

@@ -229,7 +229,7 @@ export async function verifyShowRecord(
     return { success: true };
 }
 
-// ── Show String Planner ──
+// ── Live Show Packer ──
 
 /** Get all user's show strings */
 export async function getShowStrings(): Promise<ShowString[]> {

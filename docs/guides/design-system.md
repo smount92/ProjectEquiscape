@@ -18,7 +18,7 @@ MHH should feel warm, tactile, physical, and hobby-focused. Think of a beautiful
 
 ## Color Palette
 
-> **Restoration complete (2026-03-28):** After moving to Tailwind, we implemented the **Warm Parchment Restoration**. The project officially uses custom `@theme` variables mapped in `globals.css` to ensure the app looks like a physical scrapbook, not a cold SaaS tool.
+> **Restoration complete (2026-03-28), updated 2026-03-31:** After moving to Tailwind, we implemented the **Warm Parchment Restoration**. The project officially uses custom `@theme` variables mapped in `globals.css` (~1,750 lines) to ensure the app looks like a physical scrapbook, not a cold SaaS tool. PDF components (`src/components/pdf/`) use inline `StyleSheet.create()` (required by @react-pdf/renderer) but must use the same hex values from this palette.
 
 | Semantic Token / Class | Hex code | Usage |
 |------------------------|----------|-------|

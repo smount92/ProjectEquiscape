@@ -7,7 +7,7 @@ import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
 
 
 export const metadata = {
- title:"Show String Planner — Model Horse Hub",
+ title:"Live Show Packer — Model Horse Hub",
  description:"Plan your show entries, track class assignments, and convert results into records.",
 };
 
@@ -34,8 +34,8 @@ export default async function ShowPlannerPage() {
 
  return (
  <CommandCenterLayout
-  title="📋 Show String Planner"
-  description="Plan your entries, detect conflicts, and convert results into records."
+  title="🧳 Live Show Packer"
+  description="Pack your string of horses for real-world live shows. Detect ring time conflicts and convert results into ribbons when you get home."
   headerActions={
   <Link
    href="/shows"

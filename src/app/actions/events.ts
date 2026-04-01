@@ -86,6 +86,7 @@ export async function createEvent(data: {
     virtualUrl?: string;
     groupId?: string;
     judgingMethod?: "community_vote" | "expert_judge";
+    templateId?: string;
 }): Promise<{ success: boolean; eventId?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -124,6 +125,45 @@ export async function createEvent(data: {
         user_id: user.id,
         status: "going",
     });
+
+    // Template injection: auto-populate divisions & classes for show-type events
+    if (data.templateId && data.templateId !== "none") {
+        try {
+            const { SHOW_TEMPLATES } = await import("@/lib/constants/showTemplates");
+            const template = SHOW_TEMPLATES.find(t => t.key === data.templateId);
+
+            if (template) {
+                for (let di = 0; di < template.divisions.length; di++) {
+                    const div = template.divisions[di];
+
+                    const { data: newDiv } = await supabase.from("event_divisions").insert({
+                        event_id: eventId,
+                        name: div.name,
+                        sort_order: di,
+                    }).select("id").single();
+
+                    if (newDiv) {
+                        const classInserts = div.classes.map((cls, ci) => ({
+                            division_id: (newDiv as { id: string }).id,
+                            name: cls.name,
+                            class_number: cls.classNumber || null,
+                            is_nan_qualifying: cls.isNanQualifying || false,
+                            sort_order: ci,
+                        }));
+
+                        await supabase.from("event_classes").insert(classInserts);
+                    }
+                }
+            }
+        } catch (err) {
+            logger.error("Events", "Template injection failed", err);
+        }
+    }
+
+    // Set show_status to 'open' for photo_show and live_show types
+    if (data.eventType === "photo_show" || data.eventType === "live_show") {
+        await supabase.from("events").update({ show_status: "open" }).eq("id", eventId);
+    }
 
     revalidatePath("/community/events");
     revalidateTag("events", "max");

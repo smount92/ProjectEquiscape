@@ -127,6 +127,10 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  return (
  <div>
+ <p className="text-sm text-stone-500 mb-4">
+    Pack your string of horses for real-world shows. Detect ring time conflicts
+    and convert results to ribbons when you get home.
+  </p>
  {error && (
  <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {error}

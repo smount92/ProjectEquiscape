@@ -1960,6 +1960,29 @@ p {
     background: linear-gradient(135deg, var(--color-bg-elevated), rgba(245, 158, 11, 0.03));
 }
 
+.class-browser-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: background 0.15s ease;
+    gap: 8px;
+}
+
+.class-browser-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.class-browser-item:last-child {
+    border-bottom: none;
+}
+
 .class-browser-item.selected {
     background: rgba(var(--color-accent-rgb, 44, 85, 69), 0.12);
     border-left: 3px solid var(--color-accent-primary, #2C5545);

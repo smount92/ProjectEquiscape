@@ -16,6 +16,7 @@ import WithdrawButton from"@/components/WithdrawButton";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
+import { getPublicImageUrl } from"@/lib/utils/storage";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -65,16 +66,33 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  const isShowOpen = showStatus ==="open";
 
  // Fetch user's public horses for show entry form
- let horseOptions: { id: string; name: string }[] = [];
+ let horseOptions: { id: string; name: string; thumbnailUrl: string | null }[] = [];
  if (isShowEvent && isShowOpen) {
  const { data: userHorses } = await supabase
  .from("user_horses")
  .select("id, custom_name")
  .eq("owner_id", user.id)
  .eq("is_public", true);
+
+ const horseIds = (userHorses ?? []).map((h: { id: string }) => h.id);
+ const thumbMap = new Map<string, string>();
+ if (horseIds.length > 0) {
+   const { data: horseThumbs } = await supabase
+     .from("horse_images")
+     .select("horse_id, image_url, angle_profile")
+     .in("horse_id", horseIds);
+   for (const hId of horseIds) {
+     const imgs = (horseThumbs ?? []).filter((r: { horse_id: string }) => r.horse_id === hId);
+     const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
+     const url = (primary ?? imgs[0])?.image_url;
+     if (url) thumbMap.set(hId, getPublicImageUrl(url as string));
+   }
+ }
+
  horseOptions = (userHorses ?? []).map((h: { id: string; custom_name: string }) => ({
  id: h.id,
  name: h.custom_name,
+ thumbnailUrl: thumbMap.get(h.id) || null,
  }));
  }
 
@@ -307,9 +325,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  </Link>
  <span className="text-forest no-underline">
  by{""}
+ {entry.ownerId === "hidden" ? (
+ <span className="text-muted">@{entry.ownerAlias}</span>
+ ) : (
  <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
  @{entry.ownerAlias}
  </Link>
+ )}
  {" ·"}
  {entry.finishType}
  {entry.className && (

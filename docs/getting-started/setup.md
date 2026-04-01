@@ -99,7 +99,7 @@ See [Testing Guide](../guides/testing.md) for detailed test strategy.
 
 ### Applying Migrations
 
-Migrations live in `supabase/migrations/` and are numbered sequentially (001–102, 98 files). To apply migrations to your Supabase project:
+Migrations live in `supabase/migrations/` and are numbered sequentially (001–104, 100 files). To apply migrations to your Supabase project:
 
 **Option A: Supabase CLI**
 ```bash

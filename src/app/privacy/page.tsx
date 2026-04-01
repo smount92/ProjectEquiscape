@@ -1,6 +1,7 @@
 import Link from"next/link";
 import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import AiDataPolicySection from"@/components/AiDataPolicySection";
 
 export const metadata: Metadata = {
  title:"Privacy Policy — Model Horse Hub",
@@ -224,6 +225,9 @@ export default function PrivacyPage() {
  <Link href="/contact">contact us</Link> and we will promptly delete the account.
  </p>
  </section>
+
+ {/* AI, Data Collection, and Copyright Policy */}
+ <AiDataPolicySection />
 
  {/* Changes */}
  <section className="mb-12">

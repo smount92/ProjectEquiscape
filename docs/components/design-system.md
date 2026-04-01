@@ -114,7 +114,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 ```
 src/app/
-├── globals.css          ← @theme design tokens + shared primitives (~2,220 lines)
+├── globals.css          ← @theme design tokens + shared primitives (~1,750 lines)
 ├── [page]/page.tsx      ← Styling via Tailwind utility classes in className
 └── layout.tsx           ← Imports globals.css
 

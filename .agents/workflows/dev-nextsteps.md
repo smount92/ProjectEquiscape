@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-03-28
+> **Last Updated:** 2026-03-31
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 
 // turbo-all
@@ -74,6 +74,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 ## ✅ Layout Unification Part 2 — 55+ pages migrated to layout archetypes, only root landing page + chat excluded (intentional) — DONE
 ## ✅ Cozy Scrapbook Token Migration — 143+ legacy RGBA/semantic tokens purged across 80+ files, 4 batch regex passes, all `bg-card`/`border-edge`/`text-ink`/`text-muted` replaced with `stone` palette — DONE (2026-03-28)
 ## ✅ Bug Tracker Sprint — Financial Vault navigation (step dots clickable), CSV export filename fix, contrast regression, live/photo show entry differentiation, ShowEntryForm garbled classNames — DONE (2026-03-28)
+## ✅ Show Tags PDF Sprint — ShowTags.tsx @react-pdf/renderer component, /api/export/show-tags route, exhibitor numbering system (migration 103-104), QR code generation, Pro tier gating, host vs entrant tag printing — DONE (2026-03-31)
 
 ---
 
@@ -120,9 +121,21 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🟢 Priority: Nice-to-Have
 
+## Task N-0: Digital County Fair UX Epic (5 phases)
+
+**Workflows:**
+- `.agents/workflows/v35-county-fair-phase1.md` — Fairness & Entry Limits (3-per-class, blind voting)
+- `.agents/workflows/v35-county-fair-phase2.md` — 1-Click NAMHSA Show Templates
+- `.agents/workflows/v35-county-fair-phase3.md` — Class-First Reverse Entry Flow
+- `.agents/workflows/v35-county-fair-phase4.md` — Visual Judging Interface (ribbon stamping)
+- `.agents/workflows/v35-county-fair-phase5.md` — Live Show Packer Rebrand
+**Status:** Not started — 5 phases with human verification gates between each
+
+---
+
 ## Task N-1: globals.css Continued Cleanup
 
-**Why:** `globals.css` is ~2,220 lines. Many class-based styles (`.show-record-*`, `.settings-toggle`, `.filter-*`, `.profile-hero`, `.collection-hero`) could be replaced with Tailwind utility classes as their consuming components are touched.
+**Why:** `globals.css` is ~1,750 lines. Many class-based styles (`.show-record-*`, `.settings-toggle`, `.filter-*`, `.profile-hero`, `.collection-hero`) could be replaced with Tailwind utility classes as their consuming components are touched.
 **Approach:** Remove classes organically as layout unification converts pages. Verify each class has zero consumers before deletion.
 
 ---

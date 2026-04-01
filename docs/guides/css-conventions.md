@@ -129,7 +129,7 @@ Shadows use warm brown tint (defined in theme):
 
 ```
 src/app/
-├── globals.css              # @theme tokens + shared primitives (~2,220 lines)
+├── globals.css              # @theme tokens + shared primitives (~1,750 lines)
 ├── layout.tsx               # Imports globals.css
 └── [page]/page.tsx          # Styling via Tailwind className
 

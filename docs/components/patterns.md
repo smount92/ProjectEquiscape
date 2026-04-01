@@ -1,6 +1,6 @@
 # Component Patterns
 
-Recurring patterns used across the 107 client components.
+Recurring patterns used across the 112+ client components.
 
 ---
 
