@@ -120,9 +120,9 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task M-2: Landing Page Refresh
-
-**Why:** The landing page (`src/app/page.tsx`) needs updated imagery and value proposition now that the platform has grown to include Stripe billing, AI features, and 10,500+ catalog items.
+## ~~Task M-2: Landing Page Refresh~~ ✅ DONE
+ 
+**Status:** ✅ COMPLETE — replaced stale "Coming Soon" with "Already Live" (Groups, PWA, AI Stablemaster), added Pro tier teaser with feature grid, transparency banner with honest data-gathering disclosure, updated show copy for NAMHSA/ribbon judging, upgraded CTAs — **DONE (2026-04-01)**
 
 ---
 
