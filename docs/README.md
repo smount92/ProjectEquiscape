@@ -1,6 +1,6 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** March 31, 2026
+> **Last Updated:** April 1, 2026
 > **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference.
 
 ---
@@ -58,13 +58,13 @@ docs/
 │   ├── schema-overview.md             # Visual ERD + table groups
 │   ├── rls-policies.md                # Row Level Security inventory
 │   ├── materialized-views.md          # Computed views and refresh schedules
-│   ├── migrations.md                  # Migration index (001—104)
+│   ├── migrations.md                   # Migration index (001—105)
 │   └── seed-data.md                   # Reference catalog seeding
 ├── api/
-│   ├── server-actions.md              # Index of all 36 server action files
+│   ├── server-actions.md              # Index of all 37 server action files
 │   └── routes.md                      # API route reference (15 routes)
 ├── components/
-│   ├── catalog.md                     # 112-component index by domain
+│   ├── catalog.md                     # 121-component index by domain
 │   ├── patterns.md                    # 8 common component patterns
 │   └── design-system.md              # Tokens, colors, typography, primitives
 ├── guides/
@@ -87,7 +87,7 @@ docs/
 | Document | Location | Purpose |
 |---|---|---|
 | `CONTRIBUTING.md` | Project root | Code style, commit conventions, PR process |
-| `Model Horse Hub Complete Report.md` | Project root | Comprehensive project report (updated March 25, 2026) |
+| `Model Horse Hub Complete Report.md` | Project root | Comprehensive project report (updated April 1, 2026) |
 | `.agents/workflows/onboard.md` | `.agents/` | AI agent onboarding workflow |
 | `.agents/workflows/dev-nextsteps.md` | `.agents/` | Living development task queue |
 | `.agents/docs/` | `.agents/` | Strategic planning documents and research briefs |

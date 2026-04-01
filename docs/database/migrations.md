@@ -100,13 +100,16 @@ All SQL migrations are located in `supabase/migrations/` and are applied sequent
 | 100 | `100_fuzzy_search_rpc.sql` | `pg_trgm` fuzzy search RPC for catalog and user search |
 | 101 | `101_trusted_sellers.sql` | Trusted seller materialized view + seller verification |
 | 102 | `102_pro_rls.sql` | Pro tier RLS functions for freemium feature gating |
+| 103 | `103_core_monetization.sql` | Core monetization: promoted listings, ISO bounties, purchased reports, Studio Pro tables |
+| 104 | `104_exhibitor_number.sql` | Exhibitor number on users, show tag numbering system |
+| 105 | `105_multi_class_entry.sql` | Multi-class entry support for shows, per-class entry caps |
 
 > **Note:** Migration numbers 045, 047, 049, 051, 090 are intentionally skipped (consolidated into adjacent migrations during development).
 
 ## Adding New Migrations
 
 1. Create a new file: `supabase/migrations/NNN_description.sql`
-2. Use the next sequential number (currently: **103**)
+2. Use the next sequential number (currently: **106**)
 3. Always include RLS policies for new tables
 4. Add foreign key indexes for new FK columns
 5. Test by running the SQL in Supabase Dashboard → SQL Editor

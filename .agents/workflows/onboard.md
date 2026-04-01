@@ -18,7 +18,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | Auth | Supabase Auth (PKCE flow, cookie-based SSR) |
 | Hosting | Vercel (serverless) |
 | CSS | Tailwind CSS v4 (`@theme` tokens) + `globals.css` (~1,750 lines for primitives) |
-| UI Components | shadcn/ui (Radix UI primitives — Button, Input, Select, Textarea, Badge, Card, Dialog, Skeleton, Separator, Table) |
+| UI Components | shadcn/ui (Radix UI primitives — Button, Input, Select, Textarea, Badge, Card, Dialog, Popover, Skeleton, Separator, Table) |
 | Animations | Framer Motion (spring physics, staggered reveals) |
 | Payments | Stripe (Checkout Sessions + webhooks for subscription billing) |
 | AI | Google Gemini (Stablemaster collection analysis) |
@@ -26,7 +26,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **61 page routes**, **112+ client components** (incl. 10 shadcn/ui primitives + 3 PDF components), **36 server action files**, **15 API routes**, and **100 database migrations** (001–104).
+The platform has **61 page routes**, **121+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **37 server action files**, **15 API routes**, and **101 database migrations** (001–105).
 
 ### ⚠️ Development Environment: Windows + PowerShell
 
@@ -93,11 +93,11 @@ src/
 ├── app/
 │   ├── layout.tsx          # Root layout — Inter + Playfair Display, GA, SimpleModeProvider, Header
 │   ├── globals.css         # ~1,750 lines — Tailwind v4 @theme tokens + shared component styles
-│   ├── actions/            # 36 "use server" action files — ALL backend logic
+│   ├── actions/            # 37 "use server" action files — ALL backend logic
 │   ├── api/                # 15 API routes (auth, cron, checkout ×5, webhooks, export ×2, identify-mold, insurance-report, reference-dictionary)
 │   └── [route folders]/    # 61 page.tsx files across ~35 route groups
-├── components/             # 112+ client components
-│   ├── ui/                 # 10 shadcn/ui primitives (badge, button, card, dialog, input, select, separator, skeleton, table, textarea)
+├── components/             # 121+ client components
+│   ├── ui/                 # 11 shadcn/ui primitives (badge, button, card, dialog, input, popover, select, separator, skeleton, table, textarea)
 │   ├── layouts/            # 4 Page Archetype wrappers (Explorer, Scrapbook, CommandCenter, Focus)
 │   ├── pdf/                # 3 @react-pdf/renderer components (ShowTags, InsuranceReport, CertificateOfAuthenticity)
 │   ├── EmptyState.tsx      # Standardized empty state component
@@ -105,7 +105,7 @@ src/
 └── lib/
     ├── supabase/           # admin.ts (service role), client.ts (browser), server.ts (SSR)
     ├── types/              # database.ts (generated types), csv-import.ts
-    ├── constants/          # events.ts, groups.ts — shared constant definitions
+    ├── constants/          # events.ts, groups.ts, showTemplates.ts — shared constant definitions
     ├── utils/              # imageCompression, imageUrl, mentions, rateLimit, storage, validation, cn
     ├── utils.ts            # cn() utility (clsx + tailwind-merge)
     └── context/            # SimpleModeContext.tsx (accessibility)
@@ -152,7 +152,7 @@ src/
 - NEVER create custom `max-w-[var(--max-width)] mx-auto px-6` wrapper divs on pages
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 104)
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 105)
 - Universal Catalog (`catalog_items`) — 10,500+ entries for molds, releases, artist resins, tack
 - Universal Ledger — `v_horse_hoofprint` regular view (UNION ALL across 6 source tables) with `security_invoker = true`
 - Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)

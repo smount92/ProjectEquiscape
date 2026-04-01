@@ -1,6 +1,6 @@
 # Component Catalog
 
-All 112+ client components live in `src/components/`. Every component is a `"use client"` React component.
+All 121+ client components live in `src/components/`. Every component is a `"use client"` React component.
 
 ## Component Index by Domain
 
@@ -107,6 +107,9 @@ All 112+ client components live in `src/components/`. Every component is a `"use
 | `VoteButton` | `VoteButton.tsx` | Vote for an entry |
 | `WithdrawButton` | `WithdrawButton.tsx` | Withdraw entry from show |
 | `NanDashboardWidget` | `NanDashboardWidget.tsx` | NAN qualifying progress dashboard |
+| `ShowHistoryWidget` | `ShowHistoryWidget.tsx` | Horse show history summary widget |
+| `ShowEntryGrid` | `ShowEntryGrid.tsx` | Entry grid with photo lightbox (used in show results) |
+| `ShowResultsView` | `ShowResultsView.tsx` | Unified results + entries view with class-based filtering |
 
 ### 🏘️ Community
 
@@ -141,6 +144,11 @@ All 112+ client components live in `src/components/`. Every component is a `"use
 | `TrophyCase` | `TrophyCase.tsx` | Badge/achievement display |
 | `FeaturedHorseCard` | `FeaturedHorseCard.tsx` | Featured horse card |
 | `FeatureHorseForm` | `FeatureHorseForm.tsx` | Admin: feature a horse |
+| `OfflineIndicator` | `OfflineIndicator.tsx` | PWA offline status indicator |
+| `StudioProButton` | `StudioProButton.tsx` | Studio Pro upgrade CTA button |
+| `TrustedBadge` | `TrustedBadge.tsx` | Verified trusted seller badge |
+| `BlueBookProCharts` | `BlueBookProCharts.tsx` | PRO tier market price charts |
+| `AiDataPolicySection` | `AiDataPolicySection.tsx` | AI/Data/Copyright transparency policy section |
 
 ### 🎨 shadcn/ui Primitives
 
@@ -154,6 +162,7 @@ All 112+ client components live in `src/components/`. Every component is a `"use
 | `Dialog` | `ui/dialog.tsx` | Modal dialog (Radix) |
 | `Skeleton` | `ui/skeleton.tsx` | Loading skeleton |
 | `Separator` | `ui/separator.tsx` | Visual divider |
+| `Popover` | `ui/popover.tsx` | Contextual popovers (Radix) |
 
 ### 📌 Page Layout Archetypes
 
@@ -195,7 +204,7 @@ All 112+ client components live in `src/components/`. Every component is a `"use
 | `WishlistSearch` | `WishlistSearch.tsx` | Search wishlist items |
 | `EditBioButton` | `EditBioButton.tsx` | Inline bio editing button |
 
-## Total Component Count: 107
+## Total Component Count: 121
 
 ---
 

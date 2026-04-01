@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-03-31
+> **Last Updated:** 2026-04-01
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 
 // turbo-all
@@ -75,6 +75,8 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 ## ✅ Cozy Scrapbook Token Migration — 143+ legacy RGBA/semantic tokens purged across 80+ files, 4 batch regex passes, all `bg-card`/`border-edge`/`text-ink`/`text-muted` replaced with `stone` palette — DONE (2026-03-28)
 ## ✅ Bug Tracker Sprint — Financial Vault navigation (step dots clickable), CSV export filename fix, contrast regression, live/photo show entry differentiation, ShowEntryForm garbled classNames — DONE (2026-03-28)
 ## ✅ Show Tags PDF Sprint — ShowTags.tsx @react-pdf/renderer component, /api/export/show-tags route, exhibitor numbering system (migration 103-104), QR code generation, Pro tier gating, host vs entrant tag printing — DONE (2026-03-31)
+## ✅ Digital County Fair Epic (5 Phases) — per-class entry caps, blind voting, NAMHSA templates, class-first entry flow, visual judging (ribbon stamping), ShowResultsView unified component, Live Show Packer rebrand — DONE (2026-04-01)
+## ✅ AI/Data/Copyright Policy — AiDataPolicySection.tsx component added to /about, /privacy, /faq pages. Full transparency on no AI training, ethical data gathering, where AI is used — DONE (2026-04-01)
 
 ---
 
@@ -124,12 +126,12 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 ## Task N-0: Digital County Fair UX Epic (5 phases)
 
 **Workflows:**
-- `.agents/workflows/v35-county-fair-phase1.md` — Fairness & Entry Limits (3-per-class, blind voting)
-- `.agents/workflows/v35-county-fair-phase2.md` — 1-Click NAMHSA Show Templates
-- `.agents/workflows/v35-county-fair-phase3.md` — Class-First Reverse Entry Flow
-- `.agents/workflows/v35-county-fair-phase4.md` — Visual Judging Interface (ribbon stamping)
-- `.agents/workflows/v35-county-fair-phase5.md` — Live Show Packer Rebrand
-**Status:** Not started — 5 phases with human verification gates between each
+- ✅ `.agents/workflows/v35-county-fair-phase1.md` — Fairness & Entry Limits (3-per-class, blind voting) — **DONE (2026-04-01)**
+- ✅ `.agents/workflows/v35-county-fair-phase2.md` — 1-Click NAMHSA Show Templates — **DONE (2026-04-01)**
+- ✅ `.agents/workflows/v35-county-fair-phase3.md` — Class-First Reverse Entry Flow — **DONE (2026-04-01)**
+- ✅ `.agents/workflows/v35-county-fair-phase4.md` — Visual Judging Interface (ribbon stamping) — **DONE (2026-04-01)**
+- ✅ `.agents/workflows/v35-county-fair-phase5.md` — Live Show Packer Rebrand — **DONE (2026-04-01)**
+**Status:** 5/5 complete — 🎉 N-0 MILESTONE COMPLETE
 
 ---
 

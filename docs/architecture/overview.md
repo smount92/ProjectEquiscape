@@ -7,8 +7,8 @@ graph TD
     subgraph Vercel["Vercel (Hosting)"]
         subgraph Next["Next.js 16 (App Router)"]
             SC["Server Components (pages)"]
-            CC["Client Components (112)"]
-            SA["Server Actions (36 files)"]
+            CC["Client Components (121)"]
+            SA["Server Actions (37 files)"]
         end
         Cron["Vercel Cron (daily 6AM + monthly 1st)"]
         Stripe["Stripe (Payments)"]
@@ -53,7 +53,7 @@ graph TD
 | **Storage** | Supabase Storage | — | Private `horse-images` bucket with signed URLs |
 | **Hosting** | Vercel | Serverless | Hobby tier, auto-deploy on push to `main` |
 | **CSS** | Tailwind CSS v4 | — | Utility-first classes + `@theme` design tokens in globals.css |
-| **UI Components** | shadcn/ui (Radix) | — | Button, Input, Select, Textarea, Badge, Card, Dialog, Skeleton, Separator, Table |
+| **UI Components** | shadcn/ui (Radix) | — | Button, Input, Select, Textarea, Badge, Card, Dialog, Popover, Skeleton, Separator, Table |
 | **Animations** | Framer Motion | — | Spring physics, staggered grid reveals, tactile micro-interactions |
 | **Payments** | Stripe | — | Checkout Sessions + Webhooks for Pro tier subscriptions |
 | **AI** | Google Gemini | — | Stablemaster collection analysis (monthly cron) |
@@ -67,7 +67,7 @@ graph TD
 
 ### 1. Server Actions as the Backend
 
-There is **no separate API layer**. All backend logic lives in 36 `"use server"` files under `src/app/actions/`. Client components import server action functions directly — Next.js handles serialization.
+There is **no separate API layer**. All backend logic lives in 37 `"use server"` files under `src/app/actions/`. Client components import server action functions directly — Next.js handles serialization.
 
 This means:
 - No REST controllers, no API route boilerplate
@@ -133,15 +133,15 @@ Horse provenance is assembled from **immutable source tables** via a regular vie
 
 The materialized view UNION ALLs these into a single chronological timeline.
 
-## Scale (as of March 31, 2026)
+## Scale (as of April 1, 2026)
 
 | Metric | Count |
 |--------|-------|
 | Page routes | 61 across 35 route groups |
-| Client components | 112 (incl. 10 shadcn/ui + 3 PDF components) |
-| Server action files | 36 |
+| Client components | 121 (incl. 11 shadcn/ui + 4 layouts + 3 PDF components) |
+| Server action files | 37 |
 | API routes | 15 |
-| Database migrations | 100 files (001–104, some numbers skipped) |
+| Database migrations | 101 files (001–105, some numbers skipped) |
 | CSS architecture | Tailwind CSS v4 + shadcn/ui + Framer Motion |
 | Reference catalog entries | 10,500+ |
 | Unit/component tests | 245 (across 23 test files) |

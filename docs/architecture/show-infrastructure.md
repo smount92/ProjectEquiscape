@@ -1,7 +1,7 @@
 # Show Infrastructure — Complete Technical Report
 
-> **Date:** March 31, 2026  
-> **Scope:** Virtual Photo Shows, Expert Judging, Community Voting, Show Records, Achievements, Show Tags PDF  
+> **Date:** April 1, 2026  
+> **Scope:** Virtual Photo Shows, Expert Judging, Visual Ribbon Stamping, Community Voting, Show Records, NAMHSA Templates, Live Show Packer, Achievements, Show Tags PDF  
 > **Stack:** Next.js 16.1.6 (App Router) · Supabase (PostgreSQL + RLS) · Server Actions  
 
 ---
@@ -21,7 +21,7 @@
 11. [Component Architecture](#component-architecture)
 12. [Route Map](#route-map)
 13. [Engineering Decisions](#engineering-decisions)
-14. [Show String Planner](#show-string-planner)
+14. [Live Show Packer](#live-show-packer)
 15. [Achievements Integration](#achievements-integration)
 
 ---
@@ -699,7 +699,7 @@ graph TD
 | `/shows/[id]` | RSC | Show detail: entries grid, voting, judging panel, discussion |
 | `/community/events/create` | RSC | Create a new event (show) |
 | `/community/events/[id]/manage` | RSC | Manage divisions, classes, judges |
-| `/shows/planner` | RSC | Show String Planner (physical show prep) |
+| `/shows/planner` | RSC | Live Show Packer (physical show prep) |
 
 ---
 
@@ -763,9 +763,9 @@ graph TD
 
 ---
 
-## Show String Planner
+## Live Show Packer
 
-The Show String Planner is a **physical show preparation tool** (separate from virtual photo shows):
+The Live Show Packer (formerly "Show String Planner") is a **physical show preparation tool** (separate from virtual photo shows):
 
 ```mermaid
 graph TD
