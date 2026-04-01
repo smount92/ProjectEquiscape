@@ -251,7 +251,7 @@ export default function SettingsPage() {
  type="button"
  className={defaultHorsePublic ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => setDefaultHorsePublic(!defaultHorsePublic)}
- aria-pressed={defaultHorsePublic}
+ aria-pressed={defaultHorsePublic ? "true" : "false"}
  aria-label="Toggle default new horses to public"
  title="Toggle default horse visibility"
  />
@@ -271,7 +271,7 @@ export default function SettingsPage() {
  type="button"
  className={watermarkPhotos ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => setWatermarkPhotos(!watermarkPhotos)}
- aria-pressed={watermarkPhotos}
+ aria-pressed={watermarkPhotos ? "true" : "false"}
  aria-label="Toggle photo watermarking"
  title="Toggle photo watermarking"
  />
