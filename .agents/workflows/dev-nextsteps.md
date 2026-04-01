@@ -86,11 +86,11 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
-## Task C-1: Warm Parchment Aesthetic Restoration
+## ~~Task C-1: Warm Parchment Aesthetic Restoration~~ ✅ DONE
 
 **Workflow:** `.agents/workflows/warm-parchment-restoration.md`
-**Status:** Not started
-**Scope:** Restore warm parchment color tokens, shadows, typography, header/footer styling. Pure color/font changes — no DOM restructuring.
+**Status:** ✅ COMPLETE — warm tokens (#F4EFE6, #FEFCF8, #2D2318, #E0D5C1) deployed in globals.css @theme + :root + shadcn variables
+**Verified:** Color tokens, shadows, typography, header/footer all warm parchment
 
 # 🟡 Priority: Medium
 
@@ -107,11 +107,16 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task M-1: Open Beta Hardening (Remaining)
+## ~~Task M-1: Open Beta Hardening~~ ✅ DONE
 
 **Workflow:** `.agents/workflows/open-beta-hardening.md`
-**Status:** Phase 1 substantially complete; some items remain (visibility-aware polling, payment disclaimers)
-**Scope:** NotificationBell polling optimization, liability UX, remaining observability gaps
+**Status:** ✅ ALL 6 TASKS COMPLETE
+- ✅ Task 1: Tombstone soft-delete (migration 098)
+- ✅ Task 2: Atomic commerce RPCs (migration 099)
+- ✅ Task 3: Visibility-aware polling (NotificationBell)
+- ✅ Task 4: Server-side fuzzy search (migration 100)
+- ✅ Task 5: Escrow liability UX — disclaimer checkbox + "External Payment" labels
+- ✅ Task 6: Silent catch block audit — all replaced with logger.error()
 
 ---
 
