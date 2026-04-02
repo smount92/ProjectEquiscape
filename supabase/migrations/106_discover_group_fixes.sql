@@ -1,13 +1,15 @@
 -- ============================================================
 -- Migration 106: Discover + Group Member Count Fixes
 -- 1. Add total_horse_count to discover_users_view
--- 2. Replace denormalized member_count with actual count from group_memberships
+-- 2. Fix public_horse_count to exclude soft-deleted horses
 -- ============================================================
 
--- 1. Recreate discover_users_view with total_horse_count
-DROP VIEW IF EXISTS discover_users_view;
+-- Uses CREATE OR REPLACE VIEW instead of DROP+CREATE.
+-- This is non-destructive: no view downtime, no GRANT re-issue needed.
+-- Only adds a new column (total_horse_count) and modifies the subquery
+-- for public_horse_count — both are safe operations for REPLACE.
 
-CREATE VIEW discover_users_view
+CREATE OR REPLACE VIEW discover_users_view
 WITH (security_invoker = true) AS
 SELECT
     u.id,
@@ -23,5 +25,3 @@ SELECT
 FROM users u
 WHERE u.account_status = 'active'
   AND u.is_test_account = false;
-
-GRANT SELECT ON discover_users_view TO anon, authenticated;
