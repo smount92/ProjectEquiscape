@@ -287,11 +287,14 @@ export default function Header() {
  {/* ── Hamburger Button (mobile only) ── */}
  {user && (
  <button
- className="hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent text-stone-500 transition-all"
+ className="relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent text-stone-500 transition-all"
  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
  aria-expanded={mobileMenuOpen}
  >
+ {unreadCount > 0 && !mobileMenuOpen && (
+ <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>
+ )}
  {mobileMenuOpen ? (
  <svg
  width="20"

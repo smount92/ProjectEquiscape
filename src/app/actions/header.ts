@@ -25,7 +25,15 @@ export async function getHeaderData() {
         .single();
 
     const aliasName = profile?.alias_name ?? null;
-    const avatarUrl = profile?.avatar_url ?? null;
+    let avatarUrl = profile?.avatar_url ?? null;
+
+    // Resolve storage path to signed URL (avatar_url is a storage path, not a URL)
+    if (avatarUrl && !avatarUrl.startsWith("http")) {
+        const { data: signedAvatar } = await supabase.storage
+            .from("avatars")
+            .createSignedUrl(avatarUrl, 3600);
+        avatarUrl = signedAvatar?.signedUrl || null;
+    }
 
     // Fetch unread count
     const { data: convos } = await supabase
