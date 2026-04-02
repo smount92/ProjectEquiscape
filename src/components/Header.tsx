@@ -120,6 +120,9 @@ export default function Header() {
  } = supabase.auth.onAuthStateChange(async (_event, session) => {
  if (session?.user) {
  setUser({ id: session.user.id, email: session.user.email ?? undefined });
+ // Force Next.js to re-run server components so the
+ // server-side cookie is read by getHeaderData()
+ router.refresh();
  fetchHeaderInfo();
  } else {
  setUser(null);
@@ -132,7 +135,7 @@ export default function Header() {
  });
 
  return () => subscription.unsubscribe();
- }, [supabase, fetchHeaderInfo]);
+ }, [supabase, fetchHeaderInfo, router]);
 
  // Realtime inbox push + visibility-only refresh (replaces 30s polling)
  useEffect(() => {
@@ -277,7 +280,8 @@ export default function Header() {
  <span className="text-[1.5em]" aria-hidden="true">
  🐴
  </span>
- <span>Model Horse Hub</span>
+ <span className="hidden md:inline">Model Horse Hub</span>
+ <span className="md:hidden">MHH</span>
  </Link>
 
  {/* ── Hamburger Button (mobile only) ── */}
@@ -325,7 +329,7 @@ export default function Header() {
  {/* DESKTOP NAVIGATION — Priority+ progressive collapse */}
  {/* ═══════════════════════════════════════════════════════════ */}
  {user && (
- <div className="flex min-w-0 flex-1 items-center justify-end gap-4">
+ <div className="hidden md:flex min-w-0 flex-1 items-center justify-end gap-4">
  {/* Primary text links — measured by ResizeObserver */}
  <nav
  className="relative flex min-w-0 flex-1 items-center gap-[2px] overflow-hidden"
@@ -424,13 +428,16 @@ export default function Header() {
  aria-expanded={userMenuOpen}
  aria-label="User menu"
  >
- <span className="inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245 245 244)] font-bold text-stone-500">
+ <span className="inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-stone-500">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
  src={avatarUrl}
  alt={aliasName ||"User"}
- className="h-full w-full rounded-full object-cover"
+ width={32}
+ height={32}
+ className="h-[32px] w-[32px] rounded-full object-cover"
+ referrerPolicy="no-referrer"
  />
  ) : aliasName ? (
  aliasName.charAt(0).toUpperCase()

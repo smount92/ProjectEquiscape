@@ -194,6 +194,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
   const horses = rawHorses ?? [];
 
+ // Total horse count (all non-deleted, regardless of visibility)
+ const { count: totalHorseCount } = await supabase
+ .from("user_horses")
+ .select("id", { count: "exact", head: true })
+ .eq("owner_id", profileUser.id)
+ .is("deleted_at", null);
+
  // Generate signed URLs for thumbnails
  const thumbnailUrls: string[] = [];
  horses.forEach((horse) => {
@@ -307,7 +314,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  )}
  <div className="flex flex-wrap gap-6">
  <span className="text-sm text-stone-500">
- 🐴 {profileCards.length} public model{profileCards.length !== 1 ?"s" :""}
+ 🐴 {(totalHorseCount ?? 0)} model{(totalHorseCount ?? 0) !== 1 ?"s" :""}{profileCards.length !== (totalHorseCount ?? 0) && ` (${profileCards.length} public)`}
  </span>
  <span className="text-sm text-stone-500">
  📅 Member since {memberSince}
