@@ -26,7 +26,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **61 page routes**, **121+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **37 server action files**, **15 API routes**, and **105 database migrations** (001–105).
+The platform has **61 page routes**, **121+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **37 server action files**, **15 API routes**, and **109 database migrations** (001–109).
 
 ### ⚠️ Development Environment: Windows + PowerShell
 
@@ -162,7 +162,7 @@ src/
 - NEVER create custom `max-w-[var(--max-width)] mx-auto px-6` wrapper divs on pages
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 105)
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 109)
 - Universal Catalog (`catalog_items`) — 10,500+ entries for molds, releases, artist resins, tack
 - Universal Ledger — `v_horse_hoofprint` regular view (UNION ALL across 6 source tables) with `security_invoker = true`
 - Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
@@ -175,6 +175,8 @@ src/
 - All SECURITY DEFINER functions use `SET search_path = ''` with fully qualified `public.table_name` references
 - `pg_trgm` extension lives in the `extensions` schema (not `public`)
 - All RLS policies use `(SELECT auth.uid())` (InitPlan pattern) for performance
+- **Visibility Sync Trigger:** `trg_sync_visibility` on `user_horses` keeps `is_public` boolean and `visibility` string in sync bidirectionally. `visibility` is authoritative. (Migration 109)
+- **RLS-Safe Counting:** `count_user_horses_total()` and `count_user_horses_public()` are `SECURITY DEFINER` functions that bypass RLS for accurate horse counts in views and profile pages. (Migration 108)
 
 **Monetization:**
 - Freemium tier system (Free vs Pro) — JWT `app_metadata.tier`
@@ -190,9 +192,11 @@ src/
 - Watermark opt-in (`watermark_photos` boolean on users)
 - Block system prevents interaction between blocked users
 
-### Header Navigation
 - **Priority+ pattern** — items progressively collapse into a "More" dropdown as viewport shrinks
 - Uses `ResizeObserver` to detect overflow and move items to hamburger menu
+- **Mobile:** Desktop nav hidden below `md` breakpoint; hamburger menu shows all links with notification badge (unread count dot)
+- **Avatar:** `getHeaderData()` resolves Supabase storage paths to signed URLs (1hr expiry)
+- **Auth refresh:** `onAuthStateChange` calls `router.refresh()` to force server component re-evaluation after login
 - Order: Stable, Show Ring, Feed, Discover, Shows, Art Studio → More (Market, Events, Groups, About, FAQ, etc.)
 
 ### Security

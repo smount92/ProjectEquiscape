@@ -1,6 +1,6 @@
 # Model Horse Hub — Project State & Strategic Research Brief
 
-> **Date:** March 8, 2026  
+> **Date:** April 2, 2026  
 > **Domain:** [modelhorsehub.com](https://modelhorsehub.com)  
 > **Purpose:** Comprehensive state-of-the-project report designed for input to a research agent. Identifies what has been built, what the platform's goals are, and where expansion or focus opportunities exist — all framed through the lens of the model horse collecting hobby.
 >
@@ -71,7 +71,7 @@ The hobby currently relies on:
 |---|---|
 | Server Actions | 20 files (~122 KB) |
 | Client Components | 49 files (~254 KB) |
-| Database Migrations | 22 SQL files (~103 KB) |
+| Database Migrations | 109 SQL files |
 | Reference Data | 7,000+ Breyer/Stone releases + 3,500+ Artist Resins |
 | Git Commits | 40+ (project started early March 2026) |
 
@@ -192,6 +192,8 @@ All of the following have been implemented, committed, and tested:
 16. **Playwright E2E Test Suite** — 16 show system tests (listing, detail, entry form, podium, override panel, mobile viewport, auth guard), Playwright config with .env.local loading
 17. **Judge Notes Wiring** — Connected judge notes textarea to `show_records.judge_notes` (was collected in UI but never persisted)
 18. **Notification Deep-Links** — Added `link_url` column to notifications (migration 096); all notifications click through to the referenced item (show, feed, studio, profile) instead of falling back to the actor's profile
+19. **Data Integrity Sprint (V41)** — `discover_users_view` total horse counts, SECURITY DEFINER counting functions (bypass RLS for accurate cross-user counts), `is_public`/`visibility` drift sync trigger, RLS policy migrated to `visibility = 'public'`, group member counts computed from `group_memberships` (eliminated stale denormalized counts)
+20. **Header UX Hardening** — Avatar signed URL resolution in `getHeaderData()`, `router.refresh()` on auth state change, mobile-first responsive nav (desktop nav hidden below `md`, "MHH" abbreviated logo, hamburger notification badge with unread count)
 
 ### What's Planned But Not Yet Built
 

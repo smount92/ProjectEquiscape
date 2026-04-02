@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-04-01
+> **Last Updated:** 2026-04-02
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 
 // turbo-all
@@ -149,6 +149,25 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 - ✅ `.agents/workflows/074-mobile-components-touch.md` — Dialog 90dvh containment, flex-wrap (12 fixes), word-break, WCAG 44px touch targets — **DONE (2026-04-02)**
 **Status:** 4/4 complete — 🎉 N-0.5 MILESTONE COMPLETE
 **Metrics:** 60/60 device tests pass (Desktop Chrome, Mobile Safari, Mobile Chrome, iPad), 245 unit tests pass, zero bare grid-cols-2 or 100vh remaining
+
+---
+
+## ✅ Task N-0.6: Data Integrity & Header UX Sprint — DONE (2026-04-02)
+
+**Migrations:**
+- ✅ Migration 106: `discover_users_view` — added `total_horse_count` column for all non-deleted horses
+- ✅ Migration 107: Fixed `public_horse_count` to use `visibility = 'public'` instead of stale `is_public` boolean
+- ✅ Migration 108: `SECURITY DEFINER` counting functions (`count_user_horses_total`, `count_user_horses_public`) — bypass RLS for accurate Discover/Profile counts
+- ✅ Migration 109: Visibility drift sync — `UPDATE` existing rows, `trg_sync_visibility` trigger keeps `is_public` and `visibility` in sync bidirectionally, RLS policy switched to `visibility = 'public'`
+
+**Code Changes:**
+- ✅ Discover page — shows total stable count, sorting by total, Discover grid updated
+- ✅ Profile page — total horse count via `getAdminClient()` (bypasses RLS), shows "X models (Y public)"
+- ✅ Groups — member count computed from `group_memberships` (was using stale denormalized `member_count` column)
+- ✅ Header avatar — `getHeaderData()` now resolves Supabase storage paths to signed URLs
+- ✅ Header auth — `onAuthStateChange` calls `router.refresh()` to force server component re-evaluation
+- ✅ Header mobile — desktop nav hidden below `md`, logo shortened to "MHH", hamburger shows notification badge
+- ✅ Main layout — `min-h-[calc(100dvh-var(--header-height))]` on `<main>`
 
 ---
 
