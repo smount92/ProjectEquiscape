@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { redirect, notFound } from"next/navigation";
 import Link from"next/link";
 import { getPublicImageUrls } from"@/lib/utils/storage";
+import { getAdminClient } from"@/lib/supabase/admin";
 import ShareButton from"@/components/ShareButton";
 import MessageSellerButton from"@/components/MessageSellerButton";
 import RatingBadge from"@/components/RatingBadge";
@@ -195,7 +196,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
   const horses = rawHorses ?? [];
 
  // Total horse count (all non-deleted, regardless of visibility)
- const { count: totalHorseCount } = await supabase
+ // Must bypass RLS — the regular client can only see own + public horses
+ const adminClient = getAdminClient();
+ const { count: totalHorseCount } = await adminClient
  .from("user_horses")
  .select("id", { count: "exact", head: true })
  .eq("owner_id", profileUser.id)
