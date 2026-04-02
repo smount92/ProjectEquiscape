@@ -155,6 +155,12 @@ export async function getGroup(slug: string): Promise<Group | null> {
         }
     }
 
+    // Get actual member count from group_memberships
+    const { count: actualMemberCount } = await supabase
+        .from("group_memberships")
+        .select("*", { count: "exact", head: true })
+        .eq("group_id", g.id as string);
+
     return {
         id: g.id as string,
         name: g.name as string,
@@ -165,7 +171,7 @@ export async function getGroup(slug: string): Promise<Group | null> {
         visibility: g.visibility as string,
         bannerUrl: g.banner_url as string | null,
         iconUrl: g.icon_url as string | null,
-        memberCount: g.member_count as number,
+        memberCount: actualMemberCount ?? (g.member_count as number) ?? 0,
         createdBy: g.created_by as string,
         createdAt: g.created_at as string,
         creatorAlias: (creator as { alias_name: string } | null)?.alias_name || "Unknown",
@@ -202,12 +208,22 @@ export async function getGroups(filters?: {
     const { data } = await query;
     if (!data || data.length === 0) return [];
 
-
+    // Compute actual member counts from group_memberships
+    const groupIds = (data as { id: string }[]).map(g => g.id);
+    const memberCountMap = new Map<string, number>();
+    if (groupIds.length > 0) {
+        const { data: countRows } = await supabase
+            .from("group_memberships")
+            .select("group_id")
+            .in("group_id", groupIds);
+        for (const row of (countRows || []) as { group_id: string }[]) {
+            memberCountMap.set(row.group_id, (memberCountMap.get(row.group_id) || 0) + 1);
+        }
+    }
 
     // Check memberships
     let membershipMap = new Map<string, string>();
     if (user) {
-        const groupIds = (data as { id: string }[]).map(g => g.id);
         const { data: memberships } = await supabase
             .from("group_memberships")
             .select("group_id, role")
@@ -229,7 +245,7 @@ export async function getGroups(filters?: {
         visibility: g.visibility as string,
         bannerUrl: g.banner_url as string | null,
         iconUrl: g.icon_url as string | null,
-        memberCount: g.member_count as number,
+        memberCount: memberCountMap.get(g.id as string) || (g.member_count as number) || 0,
         createdBy: g.created_by as string,
         createdAt: g.created_at as string,
         creatorAlias: (g as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
@@ -326,6 +342,18 @@ export async function getMyGroups(): Promise<Group[]> {
 
     if (!groups || groups.length === 0) return [];
 
+    // Compute actual member counts
+    const memberCountMap2 = new Map<string, number>();
+    if (groupIds.length > 0) {
+        const { data: countRows } = await supabase
+            .from("group_memberships")
+            .select("group_id")
+            .in("group_id", groupIds);
+        for (const row of (countRows || []) as { group_id: string }[]) {
+            memberCountMap2.set(row.group_id, (memberCountMap2.get(row.group_id) || 0) + 1);
+        }
+    }
+
     return (groups as Record<string, unknown>[]).map(g => ({
         id: g.id as string,
         name: g.name as string,
@@ -336,7 +364,7 @@ export async function getMyGroups(): Promise<Group[]> {
         visibility: g.visibility as string,
         bannerUrl: g.banner_url as string | null,
         iconUrl: g.icon_url as string | null,
-        memberCount: g.member_count as number,
+        memberCount: memberCountMap2.get(g.id as string) || (g.member_count as number) || 0,
         createdBy: g.created_by as string,
         createdAt: g.created_at as string,
         creatorAlias: "",

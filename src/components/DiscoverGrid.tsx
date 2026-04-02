@@ -14,6 +14,7 @@ interface DiscoverUser {
  avatar_url: string | null;
  bio: string | null;
  public_horse_count: number;
+ total_horse_count: number;
  avg_rating: number;
  rating_count: number;
  has_studio: boolean;
@@ -84,8 +85,8 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  break;
  case"big_stables":
  result = result
- .filter((u) => u.public_horse_count >= 5)
- .sort((a, b) => b.public_horse_count - a.public_horse_count);
+ .filter((u) => u.total_horse_count >= 5)
+ .sort((a, b) => b.total_horse_count - a.total_horse_count);
  break;
  }
 
@@ -107,7 +108,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  art_studio: users.filter((u) => u.has_studio).length,
  top_rated: users.filter((u) => u.rating_count > 0).length,
  new_members: users.filter((u) => Date.now() - new Date(u.created_at).getTime() < THIRTY_DAYS_MS).length,
- big_stables: users.filter((u) => u.public_horse_count >= 5).length,
+ big_stables: users.filter((u) => u.total_horse_count >= 5).length,
  }),
  [users],
  );
@@ -168,7 +169,6 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  ) : (
  <div className="animate-fade-in-up grid grid-cols-1 gap-6 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] 2xl:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
  {filteredUsers.map((u) => {
- const publicCount = u.public_horse_count;
  const isMe = u.id === currentUserId;
 
  return (
@@ -204,7 +204,10 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  )}
  <div className="text-stone-600 flex gap-4 text-xs">
  <span>
- 🐴 {publicCount} model{publicCount !== 1 ?"s" :""}
+ 🐴 {u.total_horse_count} model{u.total_horse_count !== 1 ?"s" :""}
+ {u.public_horse_count > 0 && u.public_horse_count < u.total_horse_count && (
+ <span className="text-stone-500"> ({u.public_horse_count} public)</span>
+ )}
  </span>
  <span>📅 {memberSince(u.created_at)}</span>
  </div>

@@ -30,6 +30,7 @@ export default async function DiscoverPage() {
  avatar_url: string | null;
  bio: string | null;
  public_horse_count: number;
+ total_horse_count: number;
  avg_rating: number;
  rating_count: number;
  has_studio: boolean;
