@@ -34,27 +34,27 @@ function sanitizeSearchQuery(raw: string): string {
 export async function searchCatalogAction(query: string): Promise<CatalogItem[]> {
     const supabase = await createClient();
     const q = sanitizeSearchQuery(query);
-    if (!q) return [];
+    if (!q || q.length < 2) return [];
 
-    const words = q.split(/\s+/).filter(w => w.length > 0);
+    // Use pg_trgm trigram search — leverages GIN index from Migration 100
+    const { data, error } = await supabase.rpc("search_catalog_fuzzy", {
+        search_term: q,
+        max_results: 50,
+    });
 
-    // Build a query where ALL words must appear across title, maker, or model_number
-    let queryBuilder = supabase
-        .from("catalog_items")
-        .select("id, item_type, parent_id, title, maker, scale, attributes");
+    if (error || !data) return [];
 
-    for (const word of words) {
-        queryBuilder = queryBuilder.or(
-            `title.ilike.%${word}%,maker.ilike.%${word}%,attributes->>model_number.ilike.%${word}%`
-        );
-    }
-
-    const { data } = await queryBuilder
-        .order("item_type")
-        .order("title")
-        .limit(50);
-
-    return (data ?? []).map(mapCatalogRow);
+    // Map RPC result rows to CatalogItem shape
+    // Cast through unknown — generated types may lag behind migration 110
+    return (data as unknown as Array<{
+        id: string;
+        item_type: string;
+        parent_id: string | null;
+        title: string;
+        maker: string;
+        scale: string | null;
+        attributes: Record<string, unknown>;
+    }>).map(mapCatalogRow);
 }
 
 /**
