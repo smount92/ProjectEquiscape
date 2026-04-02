@@ -26,7 +26,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **61 page routes**, **121+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **37 server action files**, **15 API routes**, and **101 database migrations** (001–105).
+The platform has **61 page routes**, **121+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **37 server action files**, **15 API routes**, and **105 database migrations** (001–105).
 
 ### ⚠️ Development Environment: Windows + PowerShell
 
@@ -144,6 +144,16 @@ src/
 - Typography: `font-serif` (Playfair Display) for headings, `font-sans` (Inter) for UI text
 - Design System Guide: `docs/guides/design-system.md`
 
+**Mobile UX Hardening (Last Updated: 2026-04-02):**
+- **Viewport:** `overflow-x: hidden` on `html`, `100dvh` (not `100vh`), iOS Safari 16px zoom prevention
+- **Grids:** All `grid-cols-2` use responsive `grid-cols-1 sm:grid-cols-2` — zero bare `grid-cols-2` in codebase
+- **Tables:** `StableLedger`, `CatalogBrowser`, `ShowStringManager` have horizontal scroll wrappers (`overflow-x-auto`)
+- **Dialogs:** `DialogContent` uses `w-[95vw] max-h-[90dvh] overflow-y-auto` — scrollable, never cut off
+- **Flex-between:** All header/action bars use `flex-wrap gap-2` to prevent overlap at 390px
+- **Word break:** Global `overflow-wrap: break-word` on headings, `break-words` on RichText
+- **Touch targets:** WCAG 2.5.8 — `min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0` on VoteButton, LikeToggle, SuggestionVoteButtons, Dialog close
+- **Device test suite:** `e2e/device-layout.spec.ts` — 60 tests across 4 devices (Desktop Chrome, Mobile Safari, Mobile Chrome, iPad)
+
 **Page Layouts — Use Archetypes:**
 - **ExplorerLayout** — browsing grids with sticky filters (Show Ring, Market, Catalog...)
 - **ScrapbookLayout** — split-view details (Horse Passport, Studio Profile...)
@@ -235,10 +245,11 @@ This project follows a **"test with each feature"** convention:
 
 **Commands:**
 ```bash
-npm run test:unit          # Vitest unit/integration tests
+npm run test:unit          # Vitest unit/integration tests (245 tests)
 npm run test:unit:watch    # Watch mode during development
 npm run test:unit:coverage # Coverage report
 npm run test:e2e           # Playwright E2E (needs dev server)
+npx playwright test e2e/device-layout.spec.ts  # Mobile overflow matrix (60 tests, 4 devices)
 ```
 
 ## Step 7 — You're Ready

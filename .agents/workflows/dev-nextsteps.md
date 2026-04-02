@@ -140,14 +140,15 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task N-0.5: Mobile UX "Smart Path" Epic (4 phases)
+## ✅ Task N-0.5: Mobile UX "Smart Path" Epic (4 phases) — DONE (2026-04-02)
 
 **Workflows:**
-- `.agents/workflows/071-mobile-qa-automation.md` — Playwright iPhone 12 overflow detection baseline
-- `.agents/workflows/072-mobile-viewport-globals.md` — Root overflow-x-hidden, dvh units, iOS Safari 16px zoom fix
-- `.agents/workflows/073-mobile-macro-layouts.md` — Layout padding, grid collapse, table scroll containment
-- `.agents/workflows/074-mobile-components-touch.md` — Dialog widths, flex stacking, word-break, WCAG 44px touch targets
-**Status:** Not started — execute in order (071 → 072 → 073 → 074), human verification gate after each phase
+- ✅ `.agents/workflows/071-mobile-qa-automation.md` — Playwright 4-device overflow matrix (60 tests) — **DONE (2026-04-02)**
+- ✅ `.agents/workflows/072-mobile-viewport-globals.md` — overflow-x-hidden, dvh units, iOS Safari zoom fix — **DONE (2026-04-02)**
+- ✅ `.agents/workflows/073-mobile-macro-layouts.md` — 22 grid collapses, 3 table scroll wrappers — **DONE (2026-04-02)**
+- ✅ `.agents/workflows/074-mobile-components-touch.md` — Dialog 90dvh containment, flex-wrap (12 fixes), word-break, WCAG 44px touch targets — **DONE (2026-04-02)**
+**Status:** 4/4 complete — 🎉 N-0.5 MILESTONE COMPLETE
+**Metrics:** 60/60 device tests pass (Desktop Chrome, Mobile Safari, Mobile Chrome, iPad), 245 unit tests pass, zero bare grid-cols-2 or 100vh remaining
 
 ---
 
