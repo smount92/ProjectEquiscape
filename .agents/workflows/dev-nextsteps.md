@@ -171,6 +171,17 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
+## Task N-0.7: Open Beta Hardening & Scale Refactor (3 epics)
+
+**Workflows:**
+- `.agents/workflows/075-realtime-audit.md` — Consolidate 3 Realtime channel subscriptions into global NotificationProvider, kill remount loops
+- `.agents/workflows/076-search-rpc-enforcement.md` — Replace PostgREST .or(ilike) scans with `search_catalog_fuzzy` RPC (pg_trgm GIN index)
+- `.agents/workflows/077-rsc-pagination.md` — Profile page .range(0,23), loadMoreProfileHorses server action, group post reply cap
+**Status:** Not started — execute in order (075 → 076 → 077), human verification gate after each phase
+**Rationale:** pg_stat_statements shows 2.8M+ realtime.list_changes calls, 517ms catalog ilike scans, and 2300ms/400MB profile RSC payloads
+
+---
+
 ## Task N-1: globals.css Continued Cleanup
 
 **Why:** `globals.css` is ~1,750 lines. Many class-based styles (`.show-record-*`, `.settings-toggle`, `.filter-*`, `.profile-hero`, `.collection-hero`) could be replaced with Tailwind utility classes as their consuming components are touched.

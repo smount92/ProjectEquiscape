@@ -5,6 +5,7 @@ import"./globals.css";
 
 import { SimpleModeProvider } from"@/lib/context/SimpleModeContext";
 import { ToastProvider } from"@/lib/context/ToastContext";
+import { NotificationProvider } from"@/lib/context/NotificationProvider";
 import Header from"@/components/Header";
 import Footer from"@/components/Footer";
 import BackToTop from"@/components/BackToTop";
@@ -88,12 +89,14 @@ export default function RootLayout({
  <SerwistProvider swUrl="/serwist/sw.js">
  <SimpleModeProvider>
  <ToastProvider>
+ <NotificationProvider>
  <Header />
  <main className="min-h-[calc(100dvh-var(--header-height))]">{children}</main>
  <Footer />
  <BackToTop />
  <CookieConsent />
  <OfflineIndicator />
+ </NotificationProvider>
  </ToastProvider>
  </SimpleModeProvider>
  </SerwistProvider>

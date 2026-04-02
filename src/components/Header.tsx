@@ -7,6 +7,7 @@ import { useRouter, usePathname } from"next/navigation";
 import { useEffect, useState, useCallback, useRef } from"react";
 import NotificationBell from"@/components/NotificationBell";
 import { getHeaderData } from"@/app/actions/header";
+import { useNotifications } from "@/lib/context/NotificationProvider";
 import {
  Home,
  Trophy,
@@ -72,7 +73,7 @@ export default function Header() {
  }
  return null;
  });
- const [unreadCount, setUnreadCount] = useState(0);
+ const { unreadMessages } = useNotifications();
  const [aliasName, setAliasName] = useState<string | null>(null);
  const [isAdmin, setIsAdmin] = useState(false);
  const [artistSlug, setArtistSlug] = useState<string | null>(null);
@@ -95,7 +96,6 @@ export default function Header() {
  setUser(data.user);
  setAliasName(data.aliasName);
  setAvatarUrl(data.avatarUrl ?? null);
- setUnreadCount(data.unreadCount);
  setIsAdmin(data.isAdmin ?? false);
  setArtistSlug(data.artistStudioSlug ?? null);
  } catch {
@@ -128,7 +128,6 @@ export default function Header() {
  setUser(null);
  setAliasName(null);
  setAvatarUrl(null);
- setUnreadCount(0);
  setIsAdmin(false);
  setArtistSlug(null);
  }
@@ -137,43 +136,7 @@ export default function Header() {
  return () => subscription.unsubscribe();
  }, [supabase, fetchHeaderInfo, router]);
 
- // Realtime inbox push + visibility-only refresh (replaces 30s polling)
- useEffect(() => {
- if (!user) return;
 
- // Subscribe to incoming messages for instant inbox badge updates
- const messageChannel = supabase
-  .channel("inbox-unread")
-  .on(
-   "postgres_changes",
-   {
-    event: "INSERT",
-    schema: "public",
-    table: "messages",
-   },
-   (payload) => {
-    const msg = payload.new as { sender_id: string };
-    // Only bump if message is FROM someone else
-    if (msg.sender_id !== user.id) {
-     setUnreadCount((prev) => prev + 1);
-    }
-   }
-  )
-  .subscribe();
-
- // Re-fetch header data on tab visibility (catches cross-device changes)
- const handleVisibility = () => {
-  if (document.visibilityState === "visible") {
-   fetchHeaderInfo();
-  }
- };
- document.addEventListener("visibilitychange", handleVisibility);
-
- return () => {
-  supabase.removeChannel(messageChannel);
-  document.removeEventListener("visibilitychange", handleVisibility);
- };
- }, [user, supabase, fetchHeaderInfo]);
 
  const handleSignOut = () => {
  supabase.auth.signOut().catch(() => {});
@@ -292,8 +255,8 @@ export default function Header() {
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
  aria-expanded={mobileMenuOpen}
  >
- {unreadCount > 0 && !mobileMenuOpen && (
- <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadCount > 9 ? "9+" : unreadCount}</span>
+ {unreadMessages > 0 && !mobileMenuOpen && (
+ <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadMessages > 9 ? "9+" : unreadMessages}</span>
  )}
  {mobileMenuOpen ? (
  <svg
@@ -409,8 +372,8 @@ export default function Header() {
  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
  <polyline points="22,6 12,13 2,6" />
  </svg>
- {unreadCount > 0 && (
- <span className="inbox-unread-badge">{unreadCount > 9 ?"9+" : unreadCount}</span>
+ {unreadMessages > 0 && (
+ <span className="inbox-unread-badge">{unreadMessages > 9 ?"9+" : unreadMessages}</span>
  )}
  </Link>
  <Link
@@ -679,8 +642,8 @@ export default function Header() {
  >
  <Mail size={16} strokeWidth={1.5} />
  Inbox
- {unreadCount > 0 && (
- <span className="inbox-unread-badge">{unreadCount > 9 ?"9+" : unreadCount}</span>
+ {unreadMessages > 0 && (
+ <span className="inbox-unread-badge">{unreadMessages > 9 ?"9+" : unreadMessages}</span>
  )}
  </Link>
  <NotificationBell />

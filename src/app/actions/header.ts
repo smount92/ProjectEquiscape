@@ -35,24 +35,8 @@ export async function getHeaderData() {
         avatarUrl = signedAvatar?.signedUrl || null;
     }
 
-    // Fetch unread count
-    const { data: convos } = await supabase
-        .from("conversations")
-        .select("id")
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
-
-    let unreadCount = 0;
-    if (convos && convos.length > 0) {
-        const convoIds = convos.map((c: { id: string }) => c.id);
-        const { count } = await supabase
-            .from("messages")
-            .select("id", { count: "exact", head: true })
-            .in("conversation_id", convoIds)
-            .neq("sender_id", user.id)
-            .eq("is_read", false);
-
-        unreadCount = count ?? 0;
-    }
+    // Unread count is now handled client-side by NotificationProvider
+    const unreadCount = 0; // kept for backwards compatibility
 
     // Check admin status server-side (never expose admin email to client)
     const isAdmin = !!user.email && !!process.env.ADMIN_EMAIL &&
