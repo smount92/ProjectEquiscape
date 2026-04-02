@@ -164,7 +164,7 @@ export default function SuggestNewEntryForm() {
  </div>
 
  {/* Two-column row: Scale + Color */}
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-scale">
  Scale
@@ -200,7 +200,7 @@ export default function SuggestNewEntryForm() {
  </div>
 
  {/* Two-column row: Mold + Year */}
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-mold">
  Mold Name

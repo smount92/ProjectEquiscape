@@ -325,7 +325,7 @@ export default function StudioSetupPage() {
     </div>
    </div>
 
-   <div className="grid grid-cols-2 gap-4">
+   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div className="mb-6">
     <label className="text-stone-900 mb-1 block text-sm font-semibold">
      Max Commission Slots
@@ -348,7 +348,7 @@ export default function StudioSetupPage() {
     <div />
    </div>
 
-   <div className="grid grid-cols-2 gap-4">
+   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div className="mb-6">
     <label className="text-stone-900 mb-1 block text-sm font-semibold">
      Turnaround (min days)
@@ -375,7 +375,7 @@ export default function StudioSetupPage() {
     </div>
    </div>
 
-   <div className="grid grid-cols-2 gap-4">
+   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div className="mb-6">
     <label className="text-stone-900 mb-1 block text-sm font-semibold">Price Range (min $)</label>
     <Input

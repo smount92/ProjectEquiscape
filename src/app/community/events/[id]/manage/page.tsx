@@ -495,7 +495,7 @@ export default function ManageEventPage() {
  />
  </div>
 
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Starts At</label>
  <Input
@@ -520,7 +520,7 @@ export default function ManageEventPage() {
  </div>
  </div>
 
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Region</label>
  <Input
@@ -577,7 +577,7 @@ export default function ManageEventPage() {
  </div>
 
  {!eventData.isVirtual && (
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">
  Location Name

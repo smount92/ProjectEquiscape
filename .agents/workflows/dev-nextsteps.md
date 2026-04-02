@@ -140,6 +140,17 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
+## Task N-0.5: Mobile UX "Smart Path" Epic (4 phases)
+
+**Workflows:**
+- `.agents/workflows/071-mobile-qa-automation.md` — Playwright iPhone 12 overflow detection baseline
+- `.agents/workflows/072-mobile-viewport-globals.md` — Root overflow-x-hidden, dvh units, iOS Safari 16px zoom fix
+- `.agents/workflows/073-mobile-macro-layouts.md` — Layout padding, grid collapse, table scroll containment
+- `.agents/workflows/074-mobile-components-touch.md` — Dialog widths, flex stacking, word-break, WCAG 44px touch targets
+**Status:** Not started — execute in order (071 → 072 → 073 → 074), human verification gate after each phase
+
+---
+
 ## Task N-1: globals.css Continued Cleanup
 
 **Why:** `globals.css` is ~1,750 lines. Many class-based styles (`.show-record-*`, `.settings-toggle`, `.filter-*`, `.profile-hero`, `.collection-hero`) could be replaced with Tailwind utility classes as their consuming components are touched.

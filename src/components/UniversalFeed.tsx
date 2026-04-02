@@ -225,7 +225,7 @@ export default function UniversalFeed({
  ))}
  </div>
  )}
- <div className="flex items-center justify-between">
+ <div className="flex flex-wrap items-center justify-between gap-2">
  <div className="flex items-center gap-2">
  <button
  type="button"
@@ -357,10 +357,10 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  return (
  <div className="border-b border-stone-200 pb-2">
  {/* Header */}
- <div className="flex items-center justify-between">
+ <div className="flex flex-wrap items-center justify-between gap-1">
  <Link
  href={`/profile/${encodeURIComponent(post.authorAlias)}`}
- className="text-sm font-semibold"
+ className="truncate text-sm font-semibold max-w-[200px]"
  >
  @{post.authorAlias}
  </Link>

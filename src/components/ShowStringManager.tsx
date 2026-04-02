@@ -148,7 +148,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  ) : (
  <div className="bg-white border-stone-200 mb-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">Create Show String</h3>
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Show Name *</label>
  <Input
@@ -333,7 +333,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {/* Add Entry Form */}
  <div className="border-stone-200 mt-6 border-t pt-6">
  <h4>Add Entry</h4>
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">
  Horse *
@@ -364,7 +364,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  />
  </div>
  </div>
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">
  Division
@@ -428,7 +428,8 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  Tab through to enter placing and ribbon for each entry.
  Results will be saved as show records.
  </p>
- <table className="sticky top-0 bg-[var(--color-surface-secondary)] font-semibold">
+ <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+ <table className="sticky top-0 min-w-[560px] bg-[var(--color-surface-secondary)] font-semibold">
  <thead>
  <tr>
  <th>Horse</th>
@@ -513,6 +514,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  ))}
  </tbody>
  </table>
+ </div>
 
  {/* NAN Rollup Summary */}
  {(() => {

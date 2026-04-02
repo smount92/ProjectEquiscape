@@ -1,4 +1,4 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/test";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 
@@ -24,10 +24,39 @@ export default defineConfig({
     testDir: "./e2e",
     timeout: 30000,
     retries: 0,
-    use: {
-        baseURL: "http://localhost:3000",
-        headless: true,
-    },
+    projects: [
+        {
+            name: "Desktop Chrome",
+            use: {
+                baseURL: "http://localhost:3000",
+                headless: true,
+            },
+        },
+        {
+            name: "Mobile Safari",
+            use: {
+                ...devices["iPhone 12"],
+                baseURL: "http://localhost:3000",
+                headless: true,
+            },
+        },
+        {
+            name: "Mobile Chrome",
+            use: {
+                ...devices["Pixel 5"],
+                baseURL: "http://localhost:3000",
+                headless: true,
+            },
+        },
+        {
+            name: "Tablet",
+            use: {
+                ...devices["iPad (gen 7)"],
+                baseURL: "http://localhost:3000",
+                headless: true,
+            },
+        },
+    ],
     webServer: {
         command: "npm run dev",
         port: 3000,

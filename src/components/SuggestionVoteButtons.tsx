@@ -47,7 +47,7 @@ export default function SuggestionVoteButtons({
  return (
  <div className="flex flex-col items-center gap-[4px]">
  <button
- className={`ref-vote-btn ref-vote-up ${currentVote ==="up" ?"ref-vote-active" :""}`}
+ className={`ref-vote-btn ref-vote-up min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 ${currentVote ==="up" ?"ref-vote-active" :""}`}
  onClick={() => handleVote("up")}
  disabled={isPending}
  title="Upvote — I agree with this suggestion"
@@ -58,7 +58,7 @@ export default function SuggestionVoteButtons({
  {upvotes - downvotes}
  </span>
  <button
- className={`ref-vote-btn ref-vote-down ${currentVote ==="down" ?"ref-vote-active" :""}`}
+ className={`ref-vote-btn ref-vote-down min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 ${currentVote ==="down" ?"ref-vote-active" :""}`}
  onClick={() => handleVote("down")}
  disabled={isPending}
  title="Downvote — I disagree with this suggestion"

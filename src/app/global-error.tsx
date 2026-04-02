@@ -17,7 +17,7 @@ export default function GlobalError({
     return (
         <html>
             <body>
-                <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 bg-[#F4EFE6]">
+                <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-8 bg-[#F4EFE6]">
                     <h2 className="text-2xl font-bold text-ink">Something went wrong</h2>
                     <p className="text-muted">We&apos;ve been notified and are looking into it.</p>
                     <button onClick={reset} className="btn btn-primary">

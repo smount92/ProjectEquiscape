@@ -1451,7 +1451,7 @@ export default function AddHorsePage() {
  </p>
  </div>
 
- <div className="grid grid-cols-2 gap-6">
+ <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
  <label htmlFor="purchase-price" className="text-stone-900 mb-1 block text-sm font-semibold">
  Purchase Price
@@ -1500,7 +1500,7 @@ export default function AddHorsePage() {
  </small>
  </div>
 
- <div className="grid grid-cols-2 gap-6">
+ <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
  <label htmlFor="estimated-value" className="text-stone-900 mb-1 block text-sm font-semibold">
  Estimated Current Value

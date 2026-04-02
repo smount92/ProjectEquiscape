@@ -197,7 +197,7 @@ export default function CommissionTimeline({
  return (
  <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border p-6 shadow-md transition-all">
  {/* ── Header ── */}
- <div className="mb-6 flex items-center justify-between">
+ <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
  <h2 className="m-0 text-lg">📋 Timeline</h2>
  {(isArtist || isClient) && !isTerminal && !showForm && (
  <button

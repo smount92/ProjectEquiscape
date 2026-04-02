@@ -192,7 +192,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm transition-all"
  id="pedigree-card"
  >
- <div className="mb-4 flex items-center justify-between">
+ <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
  <h3 className="m-0 flex items-center gap-2 text-lg">
  <span aria-hidden="true">🧬</span> {pedigree ?"Edit Pedigree" :"Add Pedigree"}
  </h3>
@@ -368,7 +368,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm transition-all"
  id="pedigree-card"
  >
- <div className="mb-4 flex items-center justify-between">
+ <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
  <h3 className="m-0 flex items-center gap-2 text-lg">
  <span aria-hidden="true">🧬</span> Pedigree
  </h3>

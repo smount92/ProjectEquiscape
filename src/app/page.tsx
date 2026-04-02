@@ -30,7 +30,7 @@ export default function LandingPage() {
     <div className="overflow-x-hidden">
       {/* ─── Hero Section ─── */}
       <section
-        className="flex min-h-[calc(100vh-var(--header-height))] items-center justify-center px-6 py-12"
+        className="flex min-h-[calc(100dvh-var(--header-height))] items-center justify-center px-6 py-12"
         id="hero"
       >
         <div className="absolute inset-0 rounded-full bg-forest/10 blur-3xl" aria-hidden="true" />

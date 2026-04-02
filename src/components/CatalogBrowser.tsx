@@ -215,7 +215,8 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
             </div>
 
             {/* Table */}
-            <Table>
+            <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <Table className="min-w-[640px]">
                 <TableHeader>
                     <TableRow className="hover:bg-transparent">
                         <TableHead
@@ -278,6 +279,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                     )}
                 </TableBody>
             </Table>
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (

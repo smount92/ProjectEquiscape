@@ -34,7 +34,7 @@ export default function VoteButton({ entryId, initialVotes, initialHasVoted, dis
  return (
  <div className="flex flex-col items-center gap-[2px]">
  <button
- className={`vote-button ${hasVoted ?"vote-button-voted" :""} ${disabled ?"cursor-not-allowed opacity-50" :""}`}
+ className={`vote-button min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 ${hasVoted ?"vote-button-voted" :""} ${disabled ?"cursor-not-allowed opacity-50" :""}`}
  onClick={handleVote}
  disabled={loading || disabled}
  title={disabled ?"Voting is closed" : undefined}

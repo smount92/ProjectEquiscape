@@ -13,6 +13,10 @@
     "test:unit:coverage": "vitest run --coverage",
     "test:components": "vitest run src/components/__tests__",
     "test:e2e": "npx playwright test",
+    "test:devices": "npx playwright test e2e/device-layout.spec.ts",
+    "test:iphone": "npx playwright test e2e/device-layout.spec.ts --project=\"Mobile Safari\"",
+    "test:pixel": "npx playwright test e2e/device-layout.spec.ts --project=\"Mobile Chrome\"",
+    "test:ipad": "npx playwright test e2e/device-layout.spec.ts --project=\"Tablet\"",
     "gen-types": "npx supabase gen types typescript --project-id bdmwubihwinsxfykjqfe > src/lib/types/database.generated.ts",
     "prepare": "husky"
   },

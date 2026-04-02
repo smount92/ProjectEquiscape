@@ -201,7 +201,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  );
 
  return (
- <div className="mx-auto flex h-[calc(100vh-var(--header-height))] max-w-6xl flex-col overflow-hidden px-4 md:px-8">
+ <div className="mx-auto flex h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col overflow-hidden px-4 md:px-8">
  {/* Header */}
  <div className="bg-stone-50 border-stone-200 animate-fade-in-up mb-4 flex shrink-0 items-center gap-4 rounded-lg border px-6 py-4">
  <Link

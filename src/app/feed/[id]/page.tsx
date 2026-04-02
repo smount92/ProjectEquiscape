@@ -80,8 +80,8 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  </Link>
 
  <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
- <div className="flex items-center justify-between">
- <Link href={`/profile/${encodeURIComponent(actorAlias)}`} className="font-semibold">
+ <div className="flex flex-wrap items-center justify-between gap-1">
+ <Link href={`/profile/${encodeURIComponent(actorAlias)}`} className="truncate font-semibold max-w-[200px]">
  @{actorAlias}
  </Link>
  <span className="text-stone-500 text-sm">

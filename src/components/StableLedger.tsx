@@ -171,7 +171,8 @@ export default function StableLedger({
                 </div>
             ) : filteredCards.length > 0 ? (
                 <div className="w-full overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
-                    <Table>
+                    <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                    <Table className="min-w-[640px]">
                         <TableHeader>
                             <TableRow className="hover:bg-transparent">
                                 {selectMode && <TableHead className="w-[36px]">☑</TableHead>}
@@ -296,6 +297,7 @@ export default function StableLedger({
                             ))}
                         </TableBody>
                     </Table>
+                    </div>
                 </div>
             ) : null}
         </>

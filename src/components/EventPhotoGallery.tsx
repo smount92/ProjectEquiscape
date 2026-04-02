@@ -105,7 +105,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
 
  return (
  <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
- <div className="mb-4 flex items-center justify-between">
+ <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
  <h3>📸 Event Photos ({photos.length})</h3>
  <label
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"

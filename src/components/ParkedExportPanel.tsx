@@ -114,7 +114,7 @@ export default function ParkedExportPanel({
 
  return (
  <div className="bg-white border-stone-200 animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
- <div className="mb-6 flex items-center justify-between">
+ <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
  <h3>{isParked ?"🔒 Horse is Parked" :"📤 Sell Off-Platform"}</h3>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"

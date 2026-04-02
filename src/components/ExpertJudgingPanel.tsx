@@ -376,7 +376,7 @@ export default function ExpertJudgingPanel({
       )}
 
       {/* Save Button + Summary */}
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm text-stone-500">
           {placedCount} of {filteredEntries.length} entries placed
         </span>

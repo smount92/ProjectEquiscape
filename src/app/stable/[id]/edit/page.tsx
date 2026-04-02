@@ -701,7 +701,7 @@ export default function EditHorsePage() {
  Upload up to 4 standardized angles. The primary photo is used as the thumbnail everywhere.
  </p>
 
- <div className="grid grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  {PHOTO_STUDIO_SLOTS.map((slot) => {
  const preview = previews[slot.angle];
  const hasNew = !!newFiles[slot.angle];
@@ -1157,7 +1157,7 @@ export default function EditHorsePage() {
 
  {/* Finish Type & Condition — model only */}
  {isModel && (
- <div className="grid grid-cols-2 gap-6">
+ <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
  <label htmlFor="edit-finish" className="text-stone-900 mb-1 block text-sm font-semibold">
  Finish Type *
@@ -1411,7 +1411,7 @@ export default function EditHorsePage() {
  </p>
  </div>
 
- <div className="grid grid-cols-2 gap-6">
+ <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
  <label htmlFor="edit-price" className="text-stone-900 mb-1 block text-sm font-semibold">
  Purchase Price
@@ -1457,7 +1457,7 @@ export default function EditHorsePage() {
  </small>
  </div>
 
- <div className="grid grid-cols-2 gap-6">
+ <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
  <label htmlFor="edit-value" className="text-stone-900 mb-1 block text-sm font-semibold">
  Estimated Current Value

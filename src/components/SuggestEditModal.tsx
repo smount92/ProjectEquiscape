@@ -124,7 +124,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  </button>
 
  <Dialog open={isOpen} onOpenChange={setIsOpen}>
- <DialogContent className="sm:max-w-[580px] max-h-[85vh] overflow-y-auto">
+ <DialogContent className="sm:max-w-[580px] max-h-[85dvh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle>✏️ Suggest Edit</DialogTitle>
  <DialogDescription>
