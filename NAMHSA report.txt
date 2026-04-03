@@ -1,0 +1,158 @@
+Domain Logic Report: North American Model Horse Showers Association (NAMHSA)
+
+1. Organizational Identity and Governance Structure
+
+Core Identity and Mission NAMHSA is incorporated as a 501(c)4 non-profit organization. Under this legal designation, the association operates as a social and community entity dedicated to the development and administration of competitive membership events. Its primary functional objective is the systematic oversight of the model horse showing ecosystem in North America.
+
+Board of Directors (BOD) and Administrative Roles The association is governed by a central Board of Directors and supported by specialized volunteer staff. Leadership roles are delineated by specific operational jurisdictions.
+
+Role	Primary Jurisdictional Responsibilities
+President	Executive oversight and organizational leadership.
+Vice-President	Strategic support and secondary executive leadership.
+Treasurer	Financial management, dues processing, and PayPal account administration.
+Recording Secretary	Management of official organizational records and meeting minutes.
+Membership Secretary	Administration of biennial dues and general member status (Current: Carrie Richmond).
+Show Membership Secretary	Administration of show applications, results processing, and show status (Current: Lindsay Diamond).
+Regional Representatives	Geographic liaisons (11 regions) elected by the regional membership.
+Merit Awards Coordinator	Administration of the Merit Award Program and associated applications.
+Parliamentarian	Enforcement of bylaws and procedural protocols.
+Technical Support	Management of web infrastructure and database subsystems.
+Public Relations	Administration of external communications and membership outreach.
+
+Intellectual Property (IP) and Logo Protocols The NAMHSA logo is the protected intellectual property of the association. Use is restricted to two authorized exceptions:
+
+* Showholders: Upon official approval by the Show Membership Secretary, hosts may utilize the original, unaltered logo on websites and print media to identify the event as a member show. Use on merchandise, awards, or banners is prohibited.
+* Donors: Authorized donors to the NAN Auction, Raffle, or Sponsorship programs may utilize the logo in advertisements specifically detailing their contribution, provided the donation has been formally accepted by the relevant Chair.
+* Regional Constraint: While Regions are encouraged to develop independent logos, these assets may not include or modify the NAMHSA logo in any form.
+
+2. Regional Architecture
+
+Geographic Distribution Subsystem NAMHSA operations are divided into 11 distinct regions. Membership and governance eligibility are dictated by the following geographic boundaries:
+
+Region	Geographic Jurisdiction
+Region 1	WA, AK, OR, ID, MT, WY
+Region 2	CA, HI, NV, and Mexico
+Region 3	UT, AZ, CO, NM
+Region 4	IA, WI, MN, ND, SD, NE
+Region 5	KS, OK, TX, AR, LA
+Region 6	MS, AL, GA, FL, NC, SC
+Region 7	OH, KY, TN
+Region 8	MI, IL, IN, MO
+Region 9	WV, VA, MD, DE, D.C., PA, NJ
+Region 10	ME, VT, NH, MA, CT, RI, NY
+Region 11	Canada (All Provinces)
+International	All territories outside the defined North American Regions
+
+Regional Governance Each region is managed by an elected Regional Representative. Members maintain the right to nominate and vote for representatives within their assigned geographic jurisdiction, ensuring a localized feedback loop to the central BOD.
+
+3. Membership Logic and Benefits
+
+Membership Tiers and Financial Requirements
+
+* Standard Dues: $30.00 for a two-year biennial cycle.
+* New/Expired Logic: Any lapsed or initial membership requires the standard $30.00 fee.
+* Renewal Logic: Memberships expiring on December 31 of the current year are eligible for renewal at the $30.00 rate.
+
+Membership-Only Functional Workflows Active membership status provides privileged access to the following organizational subsystems:
+
+* Voting Rights: One vote per person on all issues submitted by the BOD, including Bylaw amendments.
+* Governance: Eligibility to nominate and vote for Regional Representatives.
+* Event Administration: The privilege to host NAN-Qualifying shows.
+* Financial Incentives: Discounted entry rates for the North American Nationals (NAN).
+
+Temporal Logic and Alignment The association operates on two distinct timelines that must be synchronized for eligibility:
+
+* Show Year: May 1 to April 30. This window dictates the earns of model qualifications.
+* Membership Year: A biennial calendar cycle expiring on December 31.
+* Eligibility Constraint: While qualifications are earned during the Show Year, a member must maintain an active membership on a calendar basis to utilize showholder privileges or receive NAN discounts. For NAN 2026, members must be active prior to April 30, 2026.
+
+4. NAN-Qualifying Show Mechanics
+
+Host Requirements and Compliance To achieve NAN-Qualifying status, a showholder must be an active NAMHSA member. The application must include a comprehensive draft packet:
+
+* Logistics: Confirmed show date and location.
+* Class Architecture: A final, non-draft class list.
+* Regulations: Complete show rules and entry limits.
+* Host of Record: Contact details for the individual or entity responsible for rule enforcement.
+* Advertising Plan: A list of intended public venues (Social Media, websites, newsletters).
+* Open Entry Mandate: Shows cannot be "by invitation." Entry must be impartial, typically managed via a first-come, first-serve queue.
+
+Administrative Procedures and Financial Penalties
+
+* Application Window: Minimum 60 days prior to show date; 90 days recommended.
+* Late Modification Fee: A $10.00 penalty is applied to class list additions made within 60 days of the show.
+* Data Submission: Searchable results must be submitted within 30 days of the event.
+* Voluntary Resignation: A 60% refund of show fees is available if written notice is provided at least 60 days prior to the event.
+
+The "Separate Entity" Rule Every instance of a show is treated as a distinct administrative entity requiring separate fees and applications. Critically, holding multiple shows does not increase a member's voting weight; the "one vote per person" constraint remains absolute.
+
+5. Qualification Mechanics: The NAN Card System
+
+Qualification Logic The system utilizes a "Top Two" rule. In "Open" classes—defined as competition not restricted by the entrant's age or skill level—the first and second-place models earn qualification for the national championship.
+
+Qualification Persistence (Validation Window) NAN cards remain valid for a four-year duration. For the 2026 NAN event, the validation window includes cards marked with the following year ranges:
+
+* 2023–2026
+* 2024–2027
+* 2025–2028
+* 2026–2029
+
+Ticket Distribution Protocols Showholders are contractually obligated to physically place qualification tickets with the first and second-place ribbons immediately following the judging of each qualifying class.
+
+6. The Merit Award Program
+
+The Merit Award Program is a specialized recognition subsystem within NAMHSA. Participation is not automatic with membership; it requires a dedicated application and is overseen by a volunteer coordinator who tracks specific hobby achievements.
+
+7. North American Nationals (NAN) Event Architecture
+
+Tentative 2026 Schedule
+
+* Day 1: OF Plastic Breed Halter; CM/AR/OS Performance.
+* Day 2: CM Breed Halter; AR/OS Breed Halter; OF Plastic/China Performance; CM Workmanship; AR/OS Workmanship; Medallions.
+* Day 3: OF Plastic Collectibility; OF China/Resin Breed Halter and Collectibility; CM Glaze China Breed Halter and Workmanship.
+
+Structural Update: Stone Horses Sponsorship For the 2026 event, Stone Horses has sponsored the entire Stone Horses division. This architectural guarantee ensures that every Stone class on the schedule will be held regardless of entry volume.
+
+Entry Fee Matrix The following matrix details the tiered costs for the 2026 event. Note that current members receive a $30.00 credit against the standard base fee.
+
+Fee Type	Current Member	New/Renewing Member	Non-Member
+Base Entry Fee	$35.00	$65.00*	$75.00
+Class Fee (Current Card)	$4.00	$4.00	$6.00
+Class Fee (Expired Card)	$8.00	$8.00	$12.00
+Class Fee (Buy-In)	$12.00	$12.00	$18.00
+
+*Includes the $30.00 biennial membership fee.
+
+The "Buy-In" Mechanism The Buy-In option allows for the participation of models without valid qualification cards. This subsystem generates additional revenue for the event while permitting members to exhibit new acquisitions or models that lacked access to qualifying shows.
+
+Volunteer Incentive Program
+
+* Judges: $100.00 daily stipend, NAN shirt, volunteer medallion, show program, and lunch (or $10.00 allowance).
+* General Volunteers: NAN shirt, volunteer medallion, show program, and lunch (or $10.00 allowance).
+
+8. Judging Standards and Competitive Criteria
+
+Discipline Definitions
+
+* Halter: Evaluates anatomical correctness, biomechanics, conformation, and adherence to breed standards (including historic documentation where applicable).
+* Workmanship: Evaluates the technical execution of finish work, the realism of customization, prep quality, and color application.
+* Collectibility: Evaluates rarity, age, condition, and desirability.
+  * Mandatory Requirement: Documentation is required for all collectibility entries.
+  * Stone Specifics: "Design a Horse" models are evaluated with the understanding that while the specific color/body combo may be unique, the body/color logic remains repeatable.
+* Performance: Evaluates the safe and correct execution of a maneuver, tack fit, and the technical accuracy of documentation and props.
+
+Essential Fairness and Conflict of Interest Judges are prohibited from scoring any model they have owned within the previous six months, worked on/collaborated on, or that is owned by a co-owner or a Relative.
+
+* Definition of Relative: Grandparents, parents, step-parents, aunts/uncles (blood or marriage), spouse, significant other, children, step-children, siblings, in-laws, nieces/nephews, first cousins, or any individual residing with the judge.
+
+9. Financial and Archive Subsystems
+
+Financial Reporting Cycles
+
+* Monthly: Disclosures via the NAMHSA Highlights newsletter.
+* Quarterly: Detailed fiscal reports for each quarter.
+* Annually: Comprehensive year-end reports.
+
+Archival Data Management The NAN Archives maintain historical records including past results, show programs, approximate entrant/model counts, and records of auctions and raffles.
+
+* Trophy Contest Subsystem: The NAN Trophy Contest is conducted biennially (every other NAN year). Each trophy design is utilized for two consecutive events before a new contest is initiated.

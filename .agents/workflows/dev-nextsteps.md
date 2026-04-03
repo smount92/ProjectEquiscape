@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-04-03
+> **Last Updated:** 2026-04-03 (V42 NAMHSA sprint added)
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 
 // turbo-all
@@ -85,6 +85,21 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 # ═══════════════════════════════════════
 
 # 🔴 Priority: Critical
+
+## 🚨 Task C-0.5: V42 NAMHSA Partnership Sprint — FEATURE FREEZE on unrelated work
+
+**Planning Doc:** `.agents/docs/v41_master-doc-consolidation.md` (section: NAMHSA Readiness)
+**Audit:** `.agents/docs/namhsa-alignment-audit.md` (Task 1 output — 19 ✅, 4 polish, 6 gaps)
+**Pitch Deck:** `.agents/docs/namhsa-pitch-deck-summary.md` (VP meeting one-pager)
+**Workflows (execute in order):**
+1. ✅ `.agents/workflows/v42-namhsa-audit.md` — Gap analysis complete (2026-04-03)
+2. ✅ `.agents/workflows/v42-namhsa-features.md` — 5 feature epics + pitch summary planned (2026-04-03)
+**Epic execution order:** Public Results → Platform-Verified Records → NAN Card Polish → Regions → Judge COI
+**Status:** ✅ Planning complete. Ready to begin Epic 2 (Public Results Page)
+**Constraint:** 🔒 FEATURE FREEZE on unrelated features until pitch-ready
+**Deadline:** 6 weeks from 2026-04-03 (NAMHSA VP meeting)
+
+---
 
 ## ✅ Task C-0: V41 Master Documentation Consolidation — DONE (2026-04-03)
 

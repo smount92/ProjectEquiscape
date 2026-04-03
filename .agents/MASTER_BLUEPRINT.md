@@ -140,3 +140,13 @@ Every new workflow MUST include this at the top:
 - [ ] Ring conflict detection and resolution UI
 - [ ] Multi-judge scoring aggregation
 - [ ] Public show results page (shareable URL)
+
+### V42 Sprint (In Progress — 6-week deadline):
+- [ ] Public shareable show results page (`/shows/[eventId]/results`)
+- [ ] Results CSV export in NAMHSA-compatible format
+- [ ] NAN card 4-year expiry validation
+- [ ] NAN card CSV export for collectors
+- [ ] NAMHSA region constants (11 regions) on Discover + Groups
+- [ ] `sanctioning_body` column on `events` table + "NAMHSA Sanctioned" badge
+- [ ] Judge COI checker (own horse, past ownership, is-host)
+- [ ] Pitch deck summary doc for VP meeting
