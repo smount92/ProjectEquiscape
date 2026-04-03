@@ -996,3 +996,222 @@ export async function getShowHistory(): Promise<{
         totalRibbons: data.length,
     };
 }
+
+// ============================================================
+// PUBLIC SHOW RESULTS — No Auth Required
+// ============================================================
+
+interface PublicResultEntry {
+    placement: string;
+    horseName: string;
+    ownerAlias: string;
+    thumbnailUrl: string | null;
+}
+
+interface PublicResultClass {
+    name: string;
+    classNumber: string | null;
+    results: PublicResultEntry[];
+}
+
+interface PublicResultDivision {
+    name: string;
+    classes: PublicResultClass[];
+}
+
+export interface PublicShowResults {
+    event: {
+        id: string;
+        name: string;
+        date: string;
+        host: string;
+        type: string;
+        isSanctioned: boolean;
+        sanctioningBody: string | null;
+        status: string;
+    };
+    divisions: PublicResultDivision[];
+    totalEntries: number;
+    totalClasses: number;
+}
+
+/**
+ * Get show results for a public-facing page.
+ * NO AUTH REQUIRED — this is a public page for social sharing.
+ * Only returns data for closed shows (results must be finalized).
+ */
+export async function getPublicShowResults(eventId: string): Promise<PublicShowResults | null> {
+    const admin = getAdminClient();
+
+    // Fetch event details
+    const { data: eventData } = await admin
+        .from("events")
+        .select("id, name, event_type, show_status, starts_at, ends_at, created_by, sanctioning_body, users!created_by(alias_name)")
+        .eq("id", eventId)
+        .single();
+
+    if (!eventData) return null;
+
+    const ev = eventData as {
+        id: string; name: string; event_type: string;
+        show_status: string; starts_at: string; ends_at: string | null;
+        created_by: string; sanctioning_body: string | null;
+        users: { alias_name: string } | { alias_name: string }[] | null;
+    };
+
+    // Only show results for closed shows
+    if (ev.show_status !== "closed") return null;
+
+    const hostAlias = Array.isArray(ev.users) ? ev.users[0]?.alias_name : ev.users?.alias_name;
+
+    // Fetch divisions
+    const { data: divRows } = await admin
+        .from("event_divisions")
+        .select("id, name, sort_order")
+        .eq("event_id", eventId)
+        .order("sort_order");
+
+    const divisions: PublicResultDivision[] = [];
+    let totalClasses = 0;
+
+    if (divRows && divRows.length > 0) {
+        for (const div of divRows as { id: string; name: string }[]) {
+            // Fetch classes for this division
+            const { data: classRows } = await admin
+                .from("event_classes")
+                .select("id, name, class_number, sort_order")
+                .eq("division_id", div.id)
+                .order("sort_order");
+
+            const classes: PublicResultClass[] = [];
+
+            for (const cls of (classRows ?? []) as { id: string; name: string; class_number: string | null }[]) {
+                totalClasses++;
+
+                // Fetch placed entries for this class
+                const { data: entryRows } = await admin
+                    .from("event_entries")
+                    .select("id, horse_id, user_id, placing, users!user_id(alias_name)")
+                    .eq("event_id", eventId)
+                    .eq("class_id", cls.id)
+                    .eq("entry_type", "entered")
+                    .not("placing", "is", null)
+                    .order("placing");
+
+                if (!entryRows || entryRows.length === 0) {
+                    classes.push({ name: cls.name, classNumber: cls.class_number, results: [] });
+                    continue;
+                }
+
+                // Batch-fetch horse names
+                const horseIds = [...new Set((entryRows as { horse_id: string }[]).map(e => e.horse_id))];
+                const { data: horses } = await admin
+                    .from("user_horses")
+                    .select("id, custom_name")
+                    .in("id", horseIds);
+                const horseNameMap = new Map<string, string>();
+                (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
+
+                // Batch-fetch thumbnails
+                const { data: thumbRows } = await admin
+                    .from("horse_images")
+                    .select("horse_id, image_url, angle_profile")
+                    .in("horse_id", horseIds);
+
+                const thumbMap = new Map<string, string>();
+                for (const hId of horseIds) {
+                    const imgs = (thumbRows ?? []).filter((r: { horse_id: string }) => r.horse_id === hId);
+                    const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
+                    const url = (primary ?? imgs[0])?.image_url;
+                    if (url) thumbMap.set(hId, url);
+                }
+                const signedUrls = getPublicImageUrls(Array.from(thumbMap.values()));
+
+                // Sort by placing
+                const PLACE_ORDER: Record<string, number> = {
+                    "Grand Champion": 0, "Reserve Grand Champion": 1,
+                    Champion: 2, "Reserve Champion": 3,
+                    "1st": 4, "2nd": 5, "3rd": 6,
+                    "4th": 7, "5th": 8, "6th": 9, HM: 10,
+                };
+
+                const sortedResults = (entryRows as { horse_id: string; placing: string; users: { alias_name: string } | { alias_name: string }[] | null }[])
+                    .sort((a, b) => (PLACE_ORDER[a.placing] ?? 99) - (PLACE_ORDER[b.placing] ?? 99))
+                    .map(e => {
+                        const rawUrl = thumbMap.get(e.horse_id);
+                        return {
+                            placement: e.placing,
+                            horseName: horseNameMap.get(e.horse_id) || "Unknown",
+                            ownerAlias: Array.isArray(e.users) ? (e.users[0]?.alias_name || "Unknown") : (e.users?.alias_name || "Unknown"),
+                            thumbnailUrl: rawUrl ? (signedUrls.get(rawUrl) ?? null) : null,
+                        };
+                    });
+
+                classes.push({ name: cls.name, classNumber: cls.class_number, results: sortedResults });
+            }
+
+            divisions.push({ name: div.name, classes });
+        }
+    } else {
+        // No divisions — fetch all placed entries directly
+        const { data: allEntries } = await admin
+            .from("event_entries")
+            .select("id, horse_id, user_id, placing, users!user_id(alias_name)")
+            .eq("event_id", eventId)
+            .eq("entry_type", "entered")
+            .not("placing", "is", null);
+
+        if (allEntries && allEntries.length > 0) {
+            const horseIds = [...new Set((allEntries as { horse_id: string }[]).map(e => e.horse_id))];
+            const { data: horses } = await admin
+                .from("user_horses")
+                .select("id, custom_name")
+                .in("id", horseIds);
+            const horseNameMap = new Map<string, string>();
+            (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
+
+            const PLACE_ORDER: Record<string, number> = {
+                "Grand Champion": 0, "Reserve Grand Champion": 1, Champion: 2, "Reserve Champion": 3,
+                "1st": 4, "2nd": 5, "3rd": 6, "4th": 7, "5th": 8, "6th": 9, HM: 10,
+            };
+
+            const results = (allEntries as { horse_id: string; placing: string; users: { alias_name: string } | { alias_name: string }[] | null }[])
+                .sort((a, b) => (PLACE_ORDER[a.placing] ?? 99) - (PLACE_ORDER[b.placing] ?? 99))
+                .map(e => ({
+                    placement: e.placing,
+                    horseName: horseNameMap.get(e.horse_id) || "Unknown",
+                    ownerAlias: Array.isArray(e.users) ? (e.users[0]?.alias_name || "Unknown") : (e.users?.alias_name || "Unknown"),
+                    thumbnailUrl: null,
+                }));
+
+            totalClasses = 1;
+            divisions.push({
+                name: "General",
+                classes: [{ name: "Overall", classNumber: null, results }],
+            });
+        }
+    }
+
+    // Count total entries
+    const { count: totalEntries } = await admin
+        .from("event_entries")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", eventId)
+        .eq("entry_type", "entered");
+
+    return {
+        event: {
+            id: ev.id,
+            name: ev.name,
+            date: ev.starts_at ? new Date(ev.starts_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "",
+            host: hostAlias || "Unknown",
+            type: ev.event_type,
+            isSanctioned: ev.sanctioning_body === "namhsa",
+            sanctioningBody: ev.sanctioning_body,
+            status: ev.show_status,
+        },
+        divisions,
+        totalEntries: totalEntries ?? 0,
+        totalClasses,
+    };
+}

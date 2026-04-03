@@ -249,8 +249,25 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  )}
 
  {/* Breadcrumb */}
- <nav className="text-stone-500 animate-fade-in-up mb-6 flex items-center gap-2 text-sm">
+ <nav className="text-stone-500 animate-fade-in-up mb-6 flex flex-wrap items-center gap-2 text-sm">
  <Link href="/shows">← All Shows</Link>
+ {show.status ==="closed" && (
+  <>
+  <span className="text-stone-300">·</span>
+  <Link
+   href={`/shows/${showId}/results`}
+   className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 no-underline transition-colors hover:bg-amber-100"
+  >
+   📊 Share Public Results
+  </Link>
+  <a
+   href={`/api/export/show-results/${showId}`}
+   className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600 no-underline transition-colors hover:bg-stone-200"
+  >
+   📥 CSV
+  </a>
+  </>
+ )}
  </nav>
 
  {/* Results + Entries — unified client component with class filter */}
