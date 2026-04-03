@@ -187,6 +187,7 @@ export async function addShowRecord(data: {
         nan_card_type: data.isNanQualifying ? (data.nanCardType || null) : null,
         nan_year: data.isNanQualifying ? (data.nanYear || new Date().getFullYear()) : null,
         notes: data.notes || null,
+        verification_tier: "self_reported",
     });
 
     if (error) return { success: false, error: error.message };
@@ -451,6 +452,7 @@ export async function convertShowStringToResults(
                 is_nan_qualifying: r.isNanQualifying || false,
                 nan_card_type: r.isNanQualifying ? (r.nanCardType || null) : null,
                 nan_year: r.isNanQualifying ? nanYear : null,
+                verification_tier: "platform_generated",
             };
         });
 

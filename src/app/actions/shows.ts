@@ -678,6 +678,7 @@ export async function batchRecordResults(records: {
         division: r.division,
         placing: r.placing,
         ribbon_color: r.ribbonColor,
+        verification_tier: "self_reported",
     }));
 
     const { error } = await supabase.from("show_records").insert(inserts);
@@ -798,6 +799,7 @@ export async function saveExpertPlacings(
                         notes: "Auto-generated from expert judging",
                         judge_user_id: user.id,
                         judge_notes: judgeNote || null,
+                        verification_tier: "platform_generated",
                     });
                 } else {
                     // Update judge_notes if provided
