@@ -16,6 +16,7 @@ import RatingForm from"@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import TrophyCase from"@/components/TrophyCase";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import ProfileLoadMore from"@/components/ProfileLoadMore";
 
 
 function getFinishBadgeClass(finish: string): string {
@@ -179,7 +180,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  // PROFILE QUERY: Only public horses for this user
  // 🔒 financial_vault is NEVER queried here.
  // ================================================================
- const { data: rawHorses } = await supabase
+ const PROFILE_PAGE_SIZE = 24;
+
+ const { data: rawHorses, count: publicHorseCount } = await supabase
  .from("user_horses")
  .select(
  `
@@ -187,11 +190,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  user_collections(name),
  catalog_items:catalog_id(title, maker, item_type),
  horse_images(image_url, angle_profile)
- `,
+ `, { count: "exact" },
  )
  .eq("owner_id", profileUser.id)
  .eq("visibility","public")
- .order("created_at", { ascending: false });
+ .order("created_at", { ascending: false })
+ .range(0, PROFILE_PAGE_SIZE - 1);
 
   const horses = rawHorses ?? [];
 
@@ -252,6 +256,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  const forSaleCount = profileCards.filter(
  (h) => h.tradeStatus ==="For Sale" || h.tradeStatus ==="Open to Offers",
  ).length;
+
+ const hasMoreHorses = (publicHorseCount ?? 0) > PROFILE_PAGE_SIZE;
 
  return (
  <ExplorerLayout
@@ -527,6 +533,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </Link>
  ))}
  </div>
+ )}
+ {hasMoreHorses && (
+ <ProfileLoadMore
+ userId={profileUser.id}
+ initialOffset={PROFILE_PAGE_SIZE}
+ totalCount={publicHorseCount ?? 0}
+ />
  )}
 
  {/* Reviews Section */}

@@ -403,7 +403,8 @@ export async function getPosts(context: {
             .from("posts")
             .select("id, author_id, content, parent_id, likes_count, created_at, users!posts_author_id_fkey(alias_name)")
             .in("parent_id", postIds)
-            .order("created_at", { ascending: true });
+            .order("created_at", { ascending: true })
+            .limit(100); // Global cap: ~5 replies × 20 posts = 100 max
 
         for (const r of (replies ?? []) as Record<string, unknown>[]) {
             const parentKey = r.parent_id as string;
