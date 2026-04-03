@@ -4,7 +4,9 @@
 -- Switch from SECURITY DEFINER to SECURITY INVOKER
 -- ═══════════════════════════════════════
 
--- Drop and recreate with expanded return type
+-- Drop old function first (return type changed — PG requires DROP before recreate)
+DROP FUNCTION IF EXISTS search_catalog_fuzzy(TEXT, INT);
+
 CREATE OR REPLACE FUNCTION search_catalog_fuzzy(
     search_term TEXT,
     max_results INT DEFAULT 20
