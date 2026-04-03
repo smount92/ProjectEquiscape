@@ -6,6 +6,14 @@ description: Onboard to the Model Horse Hub project — read architecture, conve
 
 Run this workflow before starting ANY work on the project. It loads the full context into your session.
 
+## Step 0 — Read the Master Documents First
+
+> **MANDATORY:** Before reading anything below, read these two Single-Source-of-Truth files:
+> - `.agents/MASTER_BLUEPRINT.md` — Iron Laws, guardrails, agent protocol (timeless rules)
+> - `.agents/MASTER_SUPABASE.md` — Schema reference, RLS, RPCs, Mermaid ER diagram
+>
+> If those files don't exist yet, the V41 documentation sprint has not been completed. Proceed with this file as the primary onboarding doc.
+
 ## Step 1 — Understand the Platform
 
 Model Horse Hub is a **privacy-first digital stable and social platform** for model horse collectors. It runs on:
@@ -64,19 +72,7 @@ For strategic planning documents:
 
 ```
 View files in: .agents\docs\
-Key docs: Open_Beta_Plan.md, UI_Update_Plan.md, Layout_Unification.md
-```
-
-For upcoming Scale & Revenue features:
-
-```
-View files:
-  .agents\workflows\065-pro-asset-pipeline.md
-  .agents\workflows\066-sentry-observability.md
-  .agents\workflows\067-pwa-offline-stable.md
-  .agents\workflows\068-realtime-engine.md
-  .agents\workflows\069-monetization-core.md
-  .agents\workflows\070-monetization-expansion.md
+Key docs: Open_Beta_Plan.md, Ecosystem_Expansion_Plan.md
 ```
 
 For historical context on the schema unification that shaped the database:
@@ -84,6 +80,8 @@ For historical context on the schema unification that shaped the database:
 ```
 View file: .agents\docs\Grand_Unification_Plan.md
 ```
+
+> **Note:** Scale & Revenue workflows (065–070) are complete and archived in `.agents/archive/2026-Q1/workflows/`.
 
 ## Step 4 — Understand Key Conventions
 
@@ -162,8 +160,8 @@ src/
 - NEVER create custom `max-w-[var(--max-width)] mx-auto px-6` wrapper divs on pages
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 109)
-- Universal Catalog (`catalog_items`) — 10,500+ entries for molds, releases, artist resins, tack
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 110)
+- Universal Catalog (`catalog_items`) — 10,964 entries for molds, releases, artist resins, tack
 - Universal Ledger — `v_horse_hoofprint` regular view (UNION ALL across 6 source tables) with `security_invoker = true`
 - Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
 - Market Price Guide — `mv_market_prices` materialized view refreshed by cron (`authenticated` only, no `anon`)

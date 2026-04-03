@@ -43,3 +43,11 @@ next-env.d.ts
 # Serwist generated service worker  
 public/sw.js  
 public/sw.js.map 
+
+# Archived agent docs (V41 consolidation - safe to delete after NAMHSA pitch)
+.agents/archive/**
+!.agents/archive/README.md
+
+# Supabase CLI temp files
+supabase/.temp/
+supabase_schema_dump.sql

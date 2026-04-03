@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-04-02
+> **Last Updated:** 2026-04-03
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 
 // turbo-all
@@ -85,6 +85,18 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 # ═══════════════════════════════════════
 
 # 🔴 Priority: Critical
+
+## ✅ Task C-0: V41 Master Documentation Consolidation — DONE (2026-04-03)
+
+**Planning Doc:** `.agents/docs/v41_master-doc-consolidation.md`
+**Results:**
+1. ✅ `MASTER_BLUEPRINT.md` — Iron Laws, guardrails, tech decisions, agent protocol, NAMHSA checklist — **DONE**
+2. ✅ `MASTER_SUPABASE.md` — 61 tables, 30+ RPCs, RLS patterns, Mermaid ER, live metrics from Supabase CLI — **DONE**
+3. ✅ Archive strategy — 81 completed workflows + 9 docs moved to `.agents/archive/2026-Q1/` (91→10 workflows, 20→11 docs) — **DONE**
+**Constraint:** 🔒 NO CODE CHANGES — only `.md` files modified
+**Post-sprint state:** `.agents/` now has 2 MASTER files + 10 active workflows + 11 active docs
+
+---
 
 ## ~~Task C-1: Warm Parchment Aesthetic Restoration~~ ✅ DONE
 
