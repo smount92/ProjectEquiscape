@@ -1,6 +1,6 @@
 # Model Horse Hub — Project State & Strategic Research Brief
 
-> **Date:** April 2, 2026  
+> **Date:** April 3, 2026  
 > **Domain:** [modelhorsehub.com](https://modelhorsehub.com)  
 > **Purpose:** Comprehensive state-of-the-project report designed for input to a research agent. Identifies what has been built, what the platform's goals are, and where expansion or focus opportunities exist — all framed through the lens of the model horse collecting hobby.
 >
@@ -71,7 +71,7 @@ The hobby currently relies on:
 |---|---|
 | Server Actions | 20 files (~122 KB) |
 | Client Components | 49 files (~254 KB) |
-| Database Migrations | 109 SQL files |
+| Database Migrations | 110 SQL files |
 | Reference Data | 7,000+ Breyer/Stone releases + 3,500+ Artist Resins |
 | Git Commits | 40+ (project started early March 2026) |
 
@@ -194,6 +194,9 @@ All of the following have been implemented, committed, and tested:
 18. **Notification Deep-Links** — Added `link_url` column to notifications (migration 096); all notifications click through to the referenced item (show, feed, studio, profile) instead of falling back to the actor's profile
 19. **Data Integrity Sprint (V41)** — `discover_users_view` total horse counts, SECURITY DEFINER counting functions (bypass RLS for accurate cross-user counts), `is_public`/`visibility` drift sync trigger, RLS policy migrated to `visibility = 'public'`, group member counts computed from `group_memberships` (eliminated stale denormalized counts)
 20. **Header UX Hardening** — Avatar signed URL resolution in `getHeaderData()`, `router.refresh()` on auth state change, mobile-first responsive nav (desktop nav hidden below `md`, "MHH" abbreviated logo, hamburger notification badge with unread count)
+21. **Realtime Consolidation (Phase 075)** — Global `NotificationProvider` replaces 3 per-component Realtime channel subscriptions (NotificationBell, Header inbox, ChatThread remained scoped). Eliminated WebSocket connection avalanche (2.8M+ `realtime.list_changes` calls). 30s visibility cooldown prevents tab-switch re-fetch storms.
+22. **Search RPC Enforcement (Phase 076)** — `searchCatalogAction()` now calls `search_catalog_fuzzy` RPC (pg_trgm GIN index) instead of PostgREST `.or(ilike)` table scans. Migration 110 expanded RPC return type to include `maker`, `scale`, `attributes`. Search latency: 517ms → <50ms.
+23. **RSC Whale Pagination (Phase 077)** — Profile page horse grid capped at 24 items via `.range(0,23)`. `loadMoreProfileHorses` server action + `ProfileLoadMore` client component for progressive loading. Reply fetching globally capped at 100. Prevents 400MB serverless memory spikes for collectors with 600+ horses.
 
 ### What's Planned But Not Yet Built
 

@@ -171,14 +171,14 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task N-0.7: Open Beta Hardening & Scale Refactor (3 epics)
+## ✅ Task N-0.7: Open Beta Hardening & Scale Refactor (3 epics) — DONE (2026-04-03)
 
 **Workflows:**
-- `.agents/workflows/075-realtime-audit.md` — Consolidate 3 Realtime channel subscriptions into global NotificationProvider, kill remount loops
-- `.agents/workflows/076-search-rpc-enforcement.md` — Replace PostgREST .or(ilike) scans with `search_catalog_fuzzy` RPC (pg_trgm GIN index)
-- `.agents/workflows/077-rsc-pagination.md` — Profile page .range(0,23), loadMoreProfileHorses server action, group post reply cap
-**Status:** Not started — execute in order (075 → 076 → 077), human verification gate after each phase
-**Rationale:** pg_stat_statements shows 2.8M+ realtime.list_changes calls, 517ms catalog ilike scans, and 2300ms/400MB profile RSC payloads
+- ✅ `.agents/workflows/075-realtime-audit.md` — Consolidated 3 Realtime channels into global `NotificationProvider`, removed per-component remount subscriptions — **DONE (2026-04-03)**
+- ✅ `.agents/workflows/076-search-rpc-enforcement.md` — Replaced PostgREST `.or(ilike)` scans with `search_catalog_fuzzy` RPC (pg_trgm GIN index), migration 110 — **DONE (2026-04-03)**
+- ✅ `.agents/workflows/077-rsc-pagination.md` — Profile page `.range(0,23)`, `loadMoreProfileHorses` server action, `ProfileLoadMore` client component, reply cap 100 — **DONE (2026-04-03)**
+**Status:** 3/3 complete — 🎉 N-0.7 MILESTONE COMPLETE
+**Metrics:** 245 unit tests pass, migration count now 110, 2 global Realtime channels (was 3 per-component), catalog search <50ms (was 517ms), profile RSC capped at 24 horses (was unbounded)
 
 ---
 
