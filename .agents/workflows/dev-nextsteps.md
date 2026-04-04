@@ -86,7 +86,7 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
-## 🚨 Task C-0.5: V42 NAMHSA Partnership Sprint — FEATURE FREEZE on unrelated work
+## ✅ Task C-0.5: V42 NAMHSA Partnership Sprint — ALL EPICS COMPLETE (2026-04-03)
 
 **Planning Doc:** `.agents/docs/v41_master-doc-consolidation.md` (section: NAMHSA Readiness)
 **Audit:** `.agents/docs/namhsa-alignment-audit.md` (Task 1 output — 19 ✅, 4 polish, 6 gaps)
@@ -94,9 +94,9 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 **Workflows (execute in order):**
 1. ✅ `.agents/workflows/v42-namhsa-audit.md` — Gap analysis complete (2026-04-03)
 2. ✅ `.agents/workflows/v42-namhsa-features.md` — 5 feature epics + pitch summary planned (2026-04-03)
-**Epic execution order:** ✅ Public Results → ✅ Platform-Verified Records → NAN Card Polish → Regions → Judge COI
-**Status:** 🔨 Epic 2 + 5 COMPLETE. Next: Epic 1 (NAN Card Polish)
-**Constraint:** 🔒 FEATURE FREEZE on unrelated features until pitch-ready
+**Epic execution order:** ✅ Public Results → ✅ Platform-Verified Records → ✅ NAN Card Polish → ✅ Regions → ✅ Judge COI
+**Status:** ✅ ALL 5 EPICS COMPLETE. Feature freeze lifted. Ready for NAMHSA VP pitch.
+**Constraint:** ~~🔒 FEATURE FREEZE~~ → Lifted (2026-04-03)
 **Deadline:** 6 weeks from 2026-04-03 (NAMHSA VP meeting)
 
 ---
