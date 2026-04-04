@@ -16,7 +16,7 @@ function linkifyMentions(text: string): React.ReactNode[] {
  <Link
  key={i}
  href={`/profile/${encodeURIComponent(alias)}`}
- className="font-semibold text-[var(--color-accent)] no-underline hover:underline"
+ className="font-semibold text-forest no-underline hover:underline"
  >
  @{alias}
  </Link>
@@ -28,7 +28,7 @@ function linkifyMentions(text: string): React.ReactNode[] {
 
 export default function RichText({ content }: { content: string }) {
  return (
- <div className="text-forest underline break-words">
+ <div className="text-ink-light break-words">
  <ReactMarkdown
  remarkPlugins={[remarkGfm]}
  components={{

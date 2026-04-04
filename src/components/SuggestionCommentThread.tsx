@@ -1,120 +1,89 @@
 "use client";
 
-import { useState, useTransition } from"react";
-import { addSuggestionComment, deleteSuggestionComment } from"@/app/actions/catalog-suggestions";
-import { useRouter } from"next/navigation";
+import { useState, useTransition } from "react";
+import { addSuggestionComment, deleteSuggestionComment } from "@/app/actions/catalog-suggestions";
+import { useRouter } from "next/navigation";
+import { PostHeader, ReplyComposer } from "@/components/social";
 
 interface Comment {
- id: string;
- user_id: string;
- user_alias: string;
- body: string;
- created_at: string;
+    id: string;
+    user_id: string;
+    user_alias: string;
+    body: string;
+    created_at: string;
 }
 
 interface Props {
- suggestionId: string;
- comments: Comment[];
- currentUserId: string | null;
+    suggestionId: string;
+    comments: Comment[];
+    currentUserId: string | null;
+    currentUserAlias?: string;
 }
 
-export default function SuggestionCommentThread({ suggestionId, comments: initialComments, currentUserId }: Props) {
- const router = useRouter();
- const [isPending, startTransition] = useTransition();
- const [newComment, setNewComment] = useState("");
- const [error, setError] = useState("");
+export default function SuggestionCommentThread({ suggestionId, comments: initialComments, currentUserId, currentUserAlias = "You" }: Props) {
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
 
- const handleSubmit = () => {
- if (!newComment.trim()) return;
- if (!currentUserId) return;
+    const handleSubmit = async (content: string) => {
+        if (!currentUserId) return;
+        startTransition(async () => {
+            const result = await addSuggestionComment(suggestionId, content);
+            if (result.success) {
+                router.refresh();
+            }
+        });
+    };
 
- setError("");
- startTransition(async () => {
- const result = await addSuggestionComment(suggestionId, newComment.trim());
- if (result.success) {
- setNewComment("");
- router.refresh();
- } else {
- setError(result.error ??"Failed to post comment.");
- }
- });
- };
+    const handleDelete = (commentId: string) => {
+        startTransition(async () => {
+            await deleteSuggestionComment(commentId);
+            router.refresh();
+        });
+    };
 
- const handleDelete = (commentId: string) => {
- startTransition(async () => {
- await deleteSuggestionComment(commentId);
- router.refresh();
- });
- };
+    return (
+        <div className="mt-4">
+            {/* Comment List */}
+            {initialComments.length === 0 && (
+                <p className="mt-4 text-sm text-muted">No comments yet. Be the first to discuss this suggestion.</p>
+            )}
+            {initialComments.map((comment) => (
+                <div key={comment.id} className="border-b border-edge py-3">
+                    <PostHeader
+                        avatarUrl={null}
+                        alias={comment.user_alias}
+                        createdAt={comment.created_at}
+                        avatarSize="xs"
+                        actions={currentUserId === comment.user_id ? (
+                            <button
+                                className="inline-flex min-h-0 cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs text-muted no-underline transition-all hover:bg-parchment"
+                                onClick={() => handleDelete(comment.id)}
+                                disabled={isPending}
+                                title="Delete comment"
+                            >
+                                🗑
+                            </button>
+                        ) : undefined}
+                    />
+                    <p className="mt-1 pl-8 text-sm leading-relaxed text-ink-light">{comment.body}</p>
+                </div>
+            ))}
 
- const timeAgo = (dateStr: string) => {
- const diff = Date.now() - new Date(dateStr).getTime();
- const mins = Math.floor(diff / 60000);
- if (mins < 60) return `${mins}m ago`;
- const hours = Math.floor(mins / 60);
- if (hours < 24) return `${hours}h ago`;
- const days = Math.floor(hours / 24);
- return `${days}d ago`;
- };
-
- return (
- <div className="mt-4">
- {/* Comment List */}
- {initialComments.length === 0 && (
- <p className="mt-4-empty">No comments yet. Be the first to discuss this suggestion.</p>
- )}
- {initialComments.map((comment) => (
- <div key={comment.id} className="border-stone-200 border-b px-0 py-2">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
- <span className="border-stone-200-author border-b px-0 py-2">@{comment.user_alias}</span>
- <span className="border-stone-200-time border-b px-0 py-2">{timeAgo(comment.created_at)}</span>
- {currentUserId === comment.user_id && (
- <button
- className="border-stone-200-delete border-b px-0 py-2"
- onClick={() => handleDelete(comment.id)}
- disabled={isPending}
- title="Delete comment"
- >
- 🗑
- </button>
- )}
- </div>
- <p className="border-stone-200-body border-b px-0 py-2">{comment.body}</p>
- </div>
- ))}
-
- {/* Add Comment */}
- {currentUserId ? (
- <div className="border-stone-200-form border-b px-0 py-2">
- <textarea
- className="input border-stone-200-textarea border-b px-0 py-2"
- placeholder="Share evidence, discuss this change…"
- value={newComment}
- onChange={(e) => setNewComment(e.target.value)}
- rows={2}
- maxLength={2000}
- />
- {error && (
- <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
- {error}
- </p>
- )}
- <div className="border-stone-200-form-actions border-b px-0 py-2">
- <span className="border-stone-200-charcount border-b px-0 py-2">{newComment.length}/2000</span>
- <button
- className="inline-flex min-h-[32px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-4 py-1 text-xs font-semibold text-white no-underline shadow-sm transition-all"
- onClick={handleSubmit}
- disabled={isPending || !newComment.trim()}
- >
- {isPending ?"Posting…" :"Post Comment"}
- </button>
- </div>
- </div>
- ) : (
- <p className="mt-4-login">
- <a href="/login">Log in</a> to join the discussion.
- </p>
- )}
- </div>
- );
+            {/* Add Comment */}
+            {currentUserId ? (
+                <ReplyComposer
+                    currentUserAvatar={null}
+                    currentUserAlias={currentUserAlias}
+                    onSubmit={handleSubmit}
+                    placeholder="Share evidence, discuss this change…"
+                    maxLength={2000}
+                    isPending={isPending}
+                />
+            ) : (
+                <p className="mt-4 text-sm text-muted">
+                    <a href="/login" className="text-forest font-semibold hover:underline">Log in</a> to join the discussion.
+                </p>
+            )}
+        </div>
+    );
 }
