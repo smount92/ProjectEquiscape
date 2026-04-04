@@ -2,14 +2,12 @@
 
 import { useState, useRef, useTransition, useCallback, useEffect } from"react";
 import { useRouter } from"next/navigation";
-import Link from"next/link";
 import { createPost, replyToPost, deletePost, updatePost, togglePostLike, getPosts } from"@/app/actions/posts";
 import type { Post } from"@/app/actions/posts";
 import { createClient } from"@/lib/supabase/client";
 import RichText from"@/components/RichText";
-import LikeToggle from"@/components/LikeToggle";
 import { safeUUID } from"@/lib/utils/uuid";
-import { Input } from "@/components/ui/input";
+import { PostHeader, HorseEmbedCard, ReactionBar, ReplyComposer } from"@/components/social";
 
 // ============================================================
 // UNIVERSAL FEED — renders posts for ANY context
@@ -21,6 +19,8 @@ interface UniversalFeedProps {
  initialPosts: Post[];
  context: { horseId?: string; groupId?: string; eventId?: string; globalFeed?: boolean };
  currentUserId: string;
+ currentUserAlias?: string;
+ currentUserAvatar?: string | null;
  showComposer?: boolean;
  composerPlaceholder?: string;
  /** Label override — e.g."Comments" vs"Posts" vs"Discussion" */
@@ -43,6 +43,8 @@ export default function UniversalFeed({
  initialPosts,
  context,
  currentUserId,
+ currentUserAlias = "You",
+ currentUserAvatar = null,
  showComposer = true,
  composerPlaceholder ="Share an update…",
  label ="Posts",
@@ -155,6 +157,7 @@ export default function UniversalFeed({
  id: result.postId || safeUUID(),
  authorId: currentUserId,
  authorAlias:"You",
+ authorAvatarUrl: null,
  content: composerText.trim(),
  parentId: null,
  horseId: context.horseId || null,
@@ -187,7 +190,7 @@ export default function UniversalFeed({
  };
 
  return (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="mt-6 rounded-lg border border-edge bg-card p-6 shadow-md transition-all">
  <h3 className="mb-4">
  💬 {label} ({posts.length}
  {hasMore ?"+" :""})
@@ -195,9 +198,9 @@ export default function UniversalFeed({
 
  {/* ── Composer ── */}
  {showComposer && (
- <div className="border-stone-200 mb-6 rounded-lg border bg-stone-50 p-4">
+ <div className="mb-6 rounded-lg border border-edge bg-parchment p-4">
  <textarea
- className="w-full min-h-[100px] resize-y rounded-md border border-stone-200 bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
+ className="w-full min-h-[100px] resize-y rounded-md border border-edge bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
  placeholder={composerPlaceholder}
  value={composerText}
  onChange={(e) => setComposerText(e.target.value)}
@@ -229,7 +232,7 @@ export default function UniversalFeed({
  <div className="flex items-center gap-2">
  <button
  type="button"
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-2 py-1 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-1 text-sm font-semibold text-muted no-underline transition-all"
  onClick={() => fileInputRef.current?.click()}
  disabled={imageFiles.length >= 4}
  title="Attach images (up to 4)"
@@ -245,7 +248,7 @@ export default function UniversalFeed({
  className="hidden"
  aria-label="Upload images"
  />
- <span className="text-stone-600 font-medium text-xs">{composerText.length}/2000</span>
+ <span className="text-muted font-medium text-xs">{composerText.length}/2000</span>
  </div>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
@@ -265,11 +268,11 @@ export default function UniversalFeed({
 
  {/* ── Post List ── */}
  {posts.length === 0 ? (
- <p className="text-stone-600 font-medium my-4">No {label.toLowerCase()} yet — be the first!</p>
+ <p className="text-muted font-medium my-4">No {label.toLowerCase()} yet — be the first!</p>
  ) : (
  <div className="flex flex-col gap-4">
  {posts.map((post) => (
- <PostCard key={post.id} post={post} currentUserId={currentUserId} />
+ <PostCard key={post.id} post={post} currentUserId={currentUserId} currentUserAlias={currentUserAlias} currentUserAvatar={currentUserAvatar} />
  ))}
  </div>
  )}
@@ -277,7 +280,7 @@ export default function UniversalFeed({
  {/* ── Load More Sentinel ── */}
  {hasMore && <div ref={sentinelRef} className="h-[1]" />}
  {isLoadingMore && (
- <p className="text-stone-500 mt-4 text-center">
+ <p className="text-muted mt-4 text-center">
  Loading more…
  </p>
  )}
@@ -289,29 +292,29 @@ export default function UniversalFeed({
 // POST CARD — renders a single post + replies
 // ============================================================
 
-function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }) {
+function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: { post: Post; currentUserId: string; currentUserAlias: string; currentUserAvatar: string | null }) {
  const router = useRouter();
  const [showReplies, setShowReplies] = useState(false);
+ const [showAllReplies, setShowAllReplies] = useState(false);
  const [replies, setReplies] = useState(post.replies);
- const [replyText, setReplyText] = useState("");
  const [isPending, startTransition] = useTransition();
  const [isEditing, setIsEditing] = useState(false);
  const [editText, setEditText] = useState(post.content);
  const [displayContent, setDisplayContent] = useState(post.content);
  const [wasEdited, setWasEdited] = useState(!!post.updatedAt && post.updatedAt !== post.createdAt);
 
- const handleReply = () => {
- if (!replyText.trim()) return;
+ const handleReply = async (content: string) => {
  startTransition(async () => {
- const result = await replyToPost(post.id, replyText.trim());
+ const result = await replyToPost(post.id, content);
  if (result.success) {
  setReplies((prev) => [
  ...prev,
  {
  id: safeUUID(),
  authorId: currentUserId,
- authorAlias:"You",
- content: replyText.trim(),
+ authorAlias: currentUserAlias,
+ authorAvatarUrl: currentUserAvatar,
+ content,
  parentId: post.id,
  horseId: null,
  groupId: null,
@@ -328,7 +331,6 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  replies: [],
  },
  ]);
- setReplyText("");
  router.refresh();
  }
  });
@@ -354,29 +356,30 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  });
  };
 
+ // Extract horse UUID from post content for rich embed card
+ const horseMatch = post.content.match(/\/community\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+ const embedHorseId = horseMatch ? horseMatch[1] : null;
+
+ // Reply collapse: show first 2 if >3 replies
+ const visibleReplies = replies.length > 3 && !showAllReplies ? replies.slice(0, 2) : replies;
+ const hiddenCount = replies.length - 2;
+
  return (
- <div className="border-b border-stone-200 pb-2">
- {/* Header */}
- <div className="flex flex-wrap items-center justify-between gap-1">
- <Link
- href={`/profile/${encodeURIComponent(post.authorAlias)}`}
- className="truncate text-sm font-semibold max-w-[200px]"
- >
- @{post.authorAlias}
- </Link>
- <div className="flex items-center gap-2">
- <Link href={`/feed/${post.id}`} className="text-stone-500 text-xs no-underline hover:underline">
- {timeAgo(post.createdAt)}
- {wasEdited && (
- <span title="This post was edited" className="opacity-60">
- {" "}(edited)
- </span>
+ <div className={`border-b border-edge pb-3 ${post.isPinned ? "border-l-4 border-l-amber-400 bg-amber-50/30 pl-4" : ""}`}>
+ {post.isPinned && (
+ <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-amber-600">📌 Pinned</span>
  )}
- </Link>
- {post.authorId === currentUserId && (
+ {/* Header with avatar */}
+ <PostHeader
+ avatarUrl={post.authorAvatarUrl}
+ alias={post.authorAlias}
+ createdAt={post.createdAt}
+ isEdited={wasEdited}
+ permalink={`/feed/${post.id}`}
+ actions={post.authorId === currentUserId ? (
  <>
  <button
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-1.5 py-0.5 text-xs font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted no-underline transition-all hover:bg-parchment"
  onClick={() => {
  setIsEditing(!isEditing);
  setEditText(displayContent);
@@ -386,23 +389,22 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  ✏️
  </button>
  <button
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-1.5 py-0.5 text-xs font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted no-underline transition-all hover:bg-parchment"
  onClick={handleDelete}
  disabled={isPending}
  >
  🗑️
  </button>
  </>
- )}
- </div>
- </div>
+ ) : undefined}
+ />
 
  {/* Content */}
- <div className="mt-[4]">
+ <div className="mt-1 pl-10">
  {isEditing ? (
  <div className="flex flex-col gap-1">
  <textarea
- className="min-h-[36px] w-full resize-y rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm no-underline transition-all"
+ className="min-h-[36px] w-full resize-y rounded-md border border-edge bg-transparent px-4 py-2 text-sm no-underline transition-all"
  value={editText}
  onChange={(e) => setEditText(e.target.value)}
  rows={3}
@@ -418,7 +420,7 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  {isPending ?"Saving…" :"Save"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
  onClick={() => setIsEditing(false)}
  >
  Cancel
@@ -428,35 +430,15 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  ) : (
  <RichText content={displayContent} />
  )}
- {/* Rich embed for /community/ horse links */}
- {/\/community\/[0-9a-f]{8}-/.test(post.content) &&
- (() => {
- const match = post.content.match(
- /\/community\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
- );
- if (!match) return null;
- const horseId = match[1];
- return (
- <Link
- href={`/community/${horseId}`}
- className="mt-2 block rounded-lg border border-stone-200 bg-white p-4 no-underline shadow-sm transition-all hover:shadow-md"
- >
- <div className="flex items-center gap-2 font-semibold text-stone-900">
- 🐴 View Horse Passport
- </div>
- <p className="mt-1 text-sm text-stone-500">Click to view this model on Model Horse Hub</p>
- <span className="mt-1 block text-xs text-stone-500">
- modelhorsehub.com/community/{horseId.slice(0, 8)}…
- </span>
- </Link>
- );
- })()}
+
+ {/* Rich horse embed card */}
+ {embedHorseId && <HorseEmbedCard horseId={embedHorseId} />}
  </div>
 
  {/* Media Collage */}
  {post.media.length > 0 && (
  <div
- className="mt-2 grid gap-[4px] overflow-hidden rounded-md"
+ className="mt-2 grid gap-[4px] overflow-hidden rounded-md pl-10"
  data-count={Math.min(post.media.length, 4)}
  >
  {post.media.slice(0, 4).map((m, i) => (
@@ -467,42 +449,30 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  )}
 
  {/* Actions: Like + Reply toggle */}
- <div className="flex items-center gap-3 mt-1">
- <LikeToggle
- initialLiked={post.isLikedByMe}
- initialCount={post.likesCount}
+ <div className="pl-10">
+ <ReactionBar
+ isLiked={post.isLikedByMe}
+ likeCount={post.likesCount}
  onToggle={() => togglePostLike(post.id)}
+ replyCount={post.repliesCount}
+ onReplyToggle={() => setShowReplies(!showReplies)}
+ isReplyOpen={showReplies}
  />
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
- onClick={() => setShowReplies(!showReplies)}
- >
- 💬 {post.repliesCount > 0 ? post.repliesCount :""} {showReplies ?"▲" :"▼"}
- </button>
  </div>
 
  {/* Replies */}
  {showReplies && (
- <div className="mt-2 ml-6 border-l-2 border-stone-200 pl-4">
- {replies.map((r) => (
- <div key={r.id} className="mb-2 flex items-start justify-between">
- <div className="flex-1">
- <Link
- href={`/profile/${encodeURIComponent(r.authorAlias)}`}
- className="text-sm font-semibold"
- >
- @{r.authorAlias}
- </Link>
- <span className="text-stone-500 ml-1 text-xs">
- {timeAgo(r.createdAt)}
- </span>
- <div className="mt-[2]">
- <RichText content={r.content} />
- </div>
- </div>
- {r.authorId === currentUserId && (
+ <div className="mt-2 ml-10 border-l-2 border-edge pl-4">
+ {visibleReplies.map((r) => (
+ <div key={r.id} className="mb-3">
+ <PostHeader
+ avatarUrl={r.authorAvatarUrl}
+ alias={r.authorAlias}
+ createdAt={r.createdAt}
+ avatarSize="xs"
+ actions={r.authorId === currentUserId ? (
  <button
- className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-muted no-underline transition-all hover:bg-parchment"
  onClick={() => {
  if (!confirm("Delete this reply?")) return;
  startTransition(async () => {
@@ -515,26 +485,28 @@ function PostCard({ post, currentUserId }: { post: Post; currentUserId: string }
  >
  🗑️
  </button>
- )}
+ ) : undefined}
+ />
+ <div className="mt-0.5 pl-8">
+ <RichText content={r.content} />
+ </div>
  </div>
  ))}
- {/* Reply composer */}
- <div className="mt-2 flex gap-2">
- <Input
- className="flex-1 text-sm"
- placeholder="Reply…"
- value={replyText}
- onChange={(e) => setReplyText(e.target.value)}
- maxLength={500}
- />
+ {replies.length > 3 && !showAllReplies && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
- onClick={handleReply}
- disabled={isPending || !replyText.trim()}
+ className="mb-2 cursor-pointer text-sm font-medium text-forest hover:underline"
+ onClick={() => setShowAllReplies(true)}
  >
- {isPending ?"…" :"Reply"}
+ Show {hiddenCount} more {hiddenCount === 1 ? "reply" : "replies"}
  </button>
- </div>
+ )}
+ {/* Reply composer */}
+ <ReplyComposer
+ currentUserAvatar={currentUserAvatar}
+ currentUserAlias={currentUserAlias}
+ onSubmit={handleReply}
+ isPending={isPending}
+ />
  </div>
  )}
  </div>

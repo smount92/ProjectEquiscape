@@ -18,6 +18,7 @@ export interface Post {
     id: string;
     authorId: string;
     authorAlias: string;
+    authorAvatarUrl: string | null;
     content: string;
     parentId: string | null;
     horseId: string | null;
@@ -348,7 +349,7 @@ export async function getPosts(context: {
 
     let query = supabase
         .from("posts")
-        .select("id, author_id, content, parent_id, horse_id, group_id, event_id, likes_count, replies_count, is_pinned, created_at, updated_at, users!posts_author_id_fkey(alias_name)")
+        .select("id, author_id, content, parent_id, horse_id, group_id, event_id, likes_count, replies_count, is_pinned, created_at, updated_at, users!posts_author_id_fkey(alias_name, avatar_url)")
         .is("parent_id", null)
         .order("created_at", { ascending: false })
         .limit(options?.limit || 25);
@@ -401,7 +402,7 @@ export async function getPosts(context: {
     if (options?.includeReplies) {
         const { data: replies } = await supabase
             .from("posts")
-            .select("id, author_id, content, parent_id, likes_count, created_at, users!posts_author_id_fkey(alias_name)")
+            .select("id, author_id, content, parent_id, likes_count, created_at, users!posts_author_id_fkey(alias_name, avatar_url)")
             .in("parent_id", postIds)
             .order("created_at", { ascending: true })
             .limit(100); // Global cap: ~5 replies × 20 posts = 100 max
@@ -409,10 +410,12 @@ export async function getPosts(context: {
         for (const r of (replies ?? []) as Record<string, unknown>[]) {
             const parentKey = r.parent_id as string;
             if (!repliesMap.has(parentKey)) repliesMap.set(parentKey, []);
+            const replyUser = r.users as { alias_name: string; avatar_url: string | null } | null;
             repliesMap.get(parentKey)!.push({
                 id: r.id as string,
                 authorId: r.author_id as string,
-                authorAlias: (r.users as { alias_name: string } | null)?.alias_name ?? "Unknown",
+                authorAlias: replyUser?.alias_name ?? "Unknown",
+                authorAvatarUrl: replyUser?.avatar_url ?? null,
                 content: r.content as string,
                 parentId: r.parent_id as string,
                 horseId: null, groupId: null, eventId: null, studioId: null, helpRequestId: null,
@@ -428,32 +431,36 @@ export async function getPosts(context: {
         }
     }
 
-    return (posts as Record<string, unknown>[]).map(p => ({
-        id: p.id as string,
-        authorId: p.author_id as string,
-        authorAlias: (p.users as { alias_name: string } | null)?.alias_name ?? "Unknown",
-        content: p.content as string,
-        parentId: null,
-        horseId: p.horse_id as string | null,
-        groupId: p.group_id as string | null,
-        eventId: p.event_id as string | null,
-        studioId: null,
-        helpRequestId: null,
-        likesCount: (p.likes_count as number) || 0,
-        repliesCount: (p.replies_count as number) || 0,
-        isPinned: (p.is_pinned as boolean) || false,
-        createdAt: p.created_at as string,
-        updatedAt: (p.updated_at as string | null) || null,
-        media: (media ?? [])
-            .filter((m: { post_id: string }) => m.post_id === p.id)
-            .map((m: { id: string; storage_path: string; caption: string | null }) => ({
-                id: m.id,
-                imageUrl: urlMap.get(m.storage_path) || "",
-                caption: m.caption,
-            })),
-        isLikedByMe: likedSet.has(p.id as string),
-        replies: repliesMap.get(p.id as string) || [],
-    } as Post));
+    return (posts as Record<string, unknown>[]).map(p => {
+        const postUser = p.users as { alias_name: string; avatar_url: string | null } | null;
+        return {
+            id: p.id as string,
+            authorId: p.author_id as string,
+            authorAlias: postUser?.alias_name ?? "Unknown",
+            authorAvatarUrl: postUser?.avatar_url ?? null,
+            content: p.content as string,
+            parentId: null,
+            horseId: p.horse_id as string | null,
+            groupId: p.group_id as string | null,
+            eventId: p.event_id as string | null,
+            studioId: null,
+            helpRequestId: null,
+            likesCount: (p.likes_count as number) || 0,
+            repliesCount: (p.replies_count as number) || 0,
+            isPinned: (p.is_pinned as boolean) || false,
+            createdAt: p.created_at as string,
+            updatedAt: (p.updated_at as string | null) || null,
+            media: (media ?? [])
+                .filter((m: { post_id: string }) => m.post_id === p.id)
+                .map((m: { id: string; storage_path: string; caption: string | null }) => ({
+                    id: m.id,
+                    imageUrl: urlMap.get(m.storage_path) || "",
+                    caption: m.caption,
+                })),
+            isLikedByMe: likedSet.has(p.id as string),
+            replies: repliesMap.get(p.id as string) || [],
+        } as Post;
+    });
 }
 
 // ── Get event media (replaces getEventPhotos) ──
@@ -542,4 +549,63 @@ export async function deleteEventMedia(
     if (error) return { success: false, error: error.message };
     revalidatePath("/community/events");
     return { success: true };
+}
+
+// ── Get horse embed data for rich previews ──
+/**
+ * Fetch minimal horse data for rich embed cards in post content.
+ * Returns public horse info only — no private data.
+ * @param horseId - UUID of the horse to look up
+ */
+export async function getHorseEmbedData(horseId: string): Promise<{
+    name: string;
+    refName: string | null;
+    thumbnailUrl: string | null;
+    tradeStatus: string;
+} | null> {
+    const supabase = await createClient();
+
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("id, custom_name, trade_status, visibility, catalog_id, catalog_items(title, maker)")
+        .eq("id", horseId)
+        .is("deleted_at", null)
+        .maybeSingle();
+
+    if (!horse) return null;
+
+    const h = horse as {
+        id: string;
+        custom_name: string;
+        trade_status: string;
+        visibility: string;
+        catalog_id: string | null;
+        catalog_items: { title: string; maker: string } | null;
+    };
+
+    // Only show public horses in embeds
+    if (h.visibility !== "public") return null;
+
+    // Get primary thumbnail
+    const { data: primaryImage } = await supabase
+        .from("horse_images")
+        .select("image_url")
+        .eq("horse_id", horseId)
+        .eq("angle_profile", "Primary_Thumbnail")
+        .maybeSingle();
+
+    let thumbnailUrl: string | null = null;
+    if (primaryImage) {
+        const pi = primaryImage as { image_url: string };
+        thumbnailUrl = pi.image_url;
+    }
+
+    const refName = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : null;
+
+    return {
+        name: h.custom_name,
+        refName,
+        thumbnailUrl,
+        tradeStatus: h.trade_status,
+    };
 }

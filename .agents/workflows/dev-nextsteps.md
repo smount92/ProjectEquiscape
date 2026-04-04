@@ -86,6 +86,29 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
+## 🚨 Task C-1: V43 Community Experience Deep Dive
+
+**Audit:** `.agents/docs/community-commenting-audit.md` (Task 1 output)
+**Workflows (execute in order):**
+1. `.agents/workflows/v43-community-audit.md` — Systematic audit of all 10 commenting surfaces
+2. `.agents/workflows/v43-community-implementation.md` — Shared primitives + surface upgrades (5 phases)
+**Architecture:** 5 shared primitives in `src/components/social/`:
+- `UserAvatar` — consistent avatar circle with hash-based fallback color
+- `PostHeader` — avatar + alias + timestamp + badge + actions slot
+- `HorseEmbedCard` — rich horse preview (name + thumbnail + trade status)
+- `ReactionBar` — like + reply toggle (warm palette)
+- `ReplyComposer` — inline reply with avatar + "replying to" context
+**Key constraint:** Domain boundaries respected:
+- `UniversalFeed` → imports ALL 5 primitives (fixes Groups, Feed, Events, Passports, Profiles)
+- `CommissionTimeline` → imports `UserAvatar` + `PostHeader` only (keeps `commission_updates` table)
+- `ChatThread` → imports `UserAvatar` only (keeps `messages` table)
+- `SuggestionCommentThread` → imports `PostHeader` + `ReplyComposer`
+- `HoofprintTimeline` → NOT a comment system, no changes
+**Status:** ✅ Audit COMPLETE (2026-04-04) — `.agents/docs/community-commenting-audit.md` — awaiting human review before implementation
+**Estimated effort:** ~7 days (Phase 1: 2d, Phase 2: 2d, Phase 3: 1.5d, Phase 4: 1d, Phase 5: 0.5d)
+
+---
+
 ## ✅ Task C-0.5: V42 NAMHSA Partnership Sprint — ALL EPICS COMPLETE (2026-04-03)
 
 **Planning Doc:** `.agents/docs/v41_master-doc-consolidation.md` (section: NAMHSA Readiness)
