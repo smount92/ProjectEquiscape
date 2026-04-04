@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
 import DiscoverGrid from"@/components/DiscoverGrid";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { resolveAvatarUrls } from"@/lib/utils/avatars.server";
 
 export const metadata = {
  title:"Discover Collectors — Model Horse Hub",
@@ -36,11 +37,11 @@ export default async function DiscoverPage() {
  has_studio: boolean;
  }[];
 
- // Resolve avatar storage paths to signed URLs
+ // Resolve avatar storage paths to signed URLs (batch)
+ const avatarUrlMap = await resolveAvatarUrls(activeUsers.map(u => u.avatar_url));
  for (const u of activeUsers) {
- if (u.avatar_url && !u.avatar_url.startsWith("http")) {
- const { data: signedAvatar } = await supabase.storage.from("avatars").createSignedUrl(u.avatar_url, 3600);
- u.avatar_url = signedAvatar?.signedUrl || null;
+ if (u.avatar_url) {
+ u.avatar_url = avatarUrlMap.get(u.avatar_url) || u.avatar_url;
  }
  }
 

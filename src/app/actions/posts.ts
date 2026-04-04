@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { getPublicImageUrls } from "@/lib/utils/storage";
+import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
 import { sanitizeText } from "@/lib/utils/validation";
 
 // ============================================================
@@ -431,7 +432,7 @@ export async function getPosts(context: {
         }
     }
 
-    return (posts as Record<string, unknown>[]).map(p => {
+    const mapped = (posts as Record<string, unknown>[]).map(p => {
         const postUser = p.users as { alias_name: string; avatar_url: string | null } | null;
         return {
             id: p.id as string,
@@ -461,6 +462,28 @@ export async function getPosts(context: {
             replies: repliesMap.get(p.id as string) || [],
         } as Post;
     });
+
+    // Batch-resolve avatar storage paths → signed URLs
+    const allAvatarPaths: (string | null)[] = [];
+    for (const post of mapped) {
+        allAvatarPaths.push(post.authorAvatarUrl);
+        for (const reply of post.replies) {
+            allAvatarPaths.push(reply.authorAvatarUrl);
+        }
+    }
+    const avatarUrlMap = await resolveAvatarUrls(allAvatarPaths);
+    for (const post of mapped) {
+        if (post.authorAvatarUrl) {
+            post.authorAvatarUrl = avatarUrlMap.get(post.authorAvatarUrl) || post.authorAvatarUrl;
+        }
+        for (const reply of post.replies) {
+            if (reply.authorAvatarUrl) {
+                reply.authorAvatarUrl = avatarUrlMap.get(reply.authorAvatarUrl) || reply.authorAvatarUrl;
+            }
+        }
+    }
+
+    return mapped;
 }
 
 // ── Get event media (replaces getEventPhotos) ──

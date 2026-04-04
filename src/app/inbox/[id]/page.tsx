@@ -9,6 +9,7 @@ import BlockButton from"@/components/BlockButton";
 import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import { getTransactionByConversation } from"@/app/actions/transactions";
 import { getPublicImageUrls } from"@/lib/utils/storage";
+import { resolveAvatarUrl } from"@/lib/utils/avatars.server";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
@@ -63,7 +64,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  .single<{ alias_name: string; avatar_url: string | null }>();
 
  const otherAlias = otherUser?.alias_name ??"Unknown";
- const otherAvatarUrl = otherUser?.avatar_url ?? null;
+ const otherAvatarUrl = await resolveAvatarUrl(otherUser?.avatar_url ?? null);
 
  // Fetch current user avatar
  const { data: currentUserData } = await supabase
@@ -71,7 +72,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  .select("avatar_url")
  .eq("id", user.id)
  .single<{ avatar_url: string | null }>();
- const currentUserAvatar = currentUserData?.avatar_url ?? null;
+ const currentUserAvatar = await resolveAvatarUrl(currentUserData?.avatar_url ?? null);
 
  // Check block status for this conversation partner
  const isBlockedUser = await checkIsBlocked(otherId);

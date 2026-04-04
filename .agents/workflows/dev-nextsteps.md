@@ -86,6 +86,37 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
+## 🚨 Task H-1: Fix Insurance Report Bugs (Beta Feedback)
+
+**Workflow:** `.agents/workflows/fix-insurance-report-bugs.md`
+**Source:** Beta user DM (2026-04-04) — blank photos + deleted horses in report + stale counts
+**3 confirmed issues:**
+1. 🔴 **Deleted horses appear in Insurance Report** — `getInsuranceReportData()` and `InsuranceReportButton` count both MISSING `.is("deleted_at", null)`. Trivial fix.
+2. 🔴 **Photos blank in Insurance Report PDF** — `@react-pdf/renderer` <Image> fails on cross-origin Supabase URLs. Fix: convert to base64 server-side before PDF generation. Also: add fallback to any photo angle (not just `Primary_Thumbnail`).
+3. 🟡 **Collection count mismatch (13 vs 23)** — Likely stale ISR cache on dashboard. Fix: add `export const dynamic = "force-dynamic"` to authenticated dashboard page.
+**Files to modify:** `insurance-report.ts`, `InsuranceReportButton.tsx`, `route.ts` (API), `dashboard/page.tsx`
+**Status:** Workflow ready — execution pending
+**Estimated effort:** ~45 minutes
+
+---
+
+## 🚨 Task DM-1: DM Photo Attachments (Beta Feedback)
+
+**Workflow:** `.agents/workflows/dm-photo-attachments.md`
+**Source:** Beta user DM (2026-04-04) — "I also wanted to send you 2 screenshots, but I'm not sure I can figure out how to do it"
+**Good news:** `media_attachments` table already has `message_id` FK → schema is ready, zero migrations needed
+**Implementation plan:**
+1. Create `chat-attachments` storage bucket (private, signed URLs, 5MB limit)
+2. Expand `sendMessage()` server action to accept optional `attachments[]` parameter
+3. Add `getConversationAttachments()` for loading signed URLs (verifies conversation membership)
+4. ChatThread UI: attach button (📎), preview strip, inline photo rendering in bubbles
+5. Signed URL access control: conversation participants only
+**Files to modify:** `messaging.ts`, `ChatThread.tsx`, `inbox/[id]/page.tsx`
+**Status:** Workflow ready — execution pending
+**Estimated effort:** ~1.5 hours
+
+---
+
 ## ✅ Task C-1.5: V43.5 Visual Polish & Full-Site Consistency — DONE (2026-04-04)
 
 **Workflow:** `.agents/workflows/v43.5-visual-polish.md`

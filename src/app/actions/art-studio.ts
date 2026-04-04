@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
 import { revalidatePath } from "next/cache";
 
 // ============================================================
@@ -667,7 +668,7 @@ export async function getCommissionUpdates(commissionId: string): Promise<Commis
 
     if (!rawUpdates || rawUpdates.length === 0) return [];
 
-    return (rawUpdates as Record<string, unknown>[]).map(u => ({
+    const mapped = (rawUpdates as Record<string, unknown>[]).map(u => ({
         id: u.id as string,
         commissionId: u.commission_id as string,
         authorId: u.author_id as string,
@@ -683,6 +684,16 @@ export async function getCommissionUpdates(commissionId: string): Promise<Commis
         isVisibleToClient: u.is_visible_to_client as boolean,
         createdAt: u.created_at as string,
     }));
+
+    // Batch-resolve avatar storage paths → signed URLs
+    const avatarUrlMap = await resolveAvatarUrls(mapped.map((u) => u.authorAvatarUrl).filter((url): url is string => !!url));
+    for (const update of mapped) {
+        if (update.authorAvatarUrl) {
+            update.authorAvatarUrl = avatarUrlMap.get(update.authorAvatarUrl) || update.authorAvatarUrl;
+        }
+    }
+
+    return mapped;
 }
 
 /** Get a single commission by ID */
