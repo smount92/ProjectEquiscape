@@ -19,6 +19,7 @@ export default function CreateShowForm() {
   const [description, setDescription] = useState("");
   const [endAt, setEndAt] = useState("");
   const [templateId, setTemplateId] = useState("");
+  const [isNamhsaSanctioned, setIsNamhsaSanctioned] = useState(false);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -35,6 +36,7 @@ export default function CreateShowForm() {
       description: description.trim() || undefined,
       endAt: endAt || undefined,
       templateId: templateId || undefined,
+      sanctioningBody: isNamhsaSanctioned ? "namhsa" : undefined,
     });
 
     if (result.success) {
@@ -44,6 +46,7 @@ export default function CreateShowForm() {
       setDescription("");
       setEndAt("");
       setTemplateId("");
+      setIsNamhsaSanctioned(false);
       setTimeout(() => setStatus("idle"), 3000);
     } else {
       setErrorMsg(result.error || "Failed to create show.");
@@ -121,6 +124,24 @@ export default function CreateShowForm() {
         />
         <p className="text-stone-500 mt-[4px] text-xs">
           Leave blank for no deadline. Show stays open until manually closed.
+        </p>
+      </div>
+
+      {/* NAMHSA Sanctioned */}
+      <div className="mb-6">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isNamhsaSanctioned}
+            onChange={(e) => setIsNamhsaSanctioned(e.target.checked)}
+            className="h-4 w-4 rounded border-stone-300 text-forest accent-forest"
+          />
+          <span className="text-sm font-semibold text-stone-900">
+            🏛️ NAMHSA Sanctioned Show
+          </span>
+        </label>
+        <p className="mt-1 ml-7 text-xs text-stone-500">
+          Mark this show as sanctioned by the North American Model Horse Shows Association.
         </p>
       </div>
 

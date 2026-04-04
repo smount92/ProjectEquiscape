@@ -84,6 +84,11 @@ export default async function ShowsPage() {
      🏅 Judge
     </span>
     )}
+    {show.sanctioningBody === "namhsa" && (
+    <span className="whitespace-nowrap rounded-sm border border-amber-200 bg-amber-50 px-2 py-0.5 text-[0.7rem] font-semibold text-amber-700">
+     🏛️ NAMHSA
+    </span>
+    )}
     <span className={`show-status-badge ${badge.className}`}>{badge.label}</span>
     </div>
     </div>

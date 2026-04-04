@@ -29,6 +29,7 @@ interface ShowDisplay {
     createdBy?: string;
     judgingMethod?: string;
     creatorAlias?: string;
+    sanctioningBody?: string | null;
 }
 
 interface ShowEntryDisplay {
@@ -58,7 +59,7 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
 
     const { data: shows } = await supabase
         .from("events")
-        .select("id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at, created_by, users!created_by(alias_name)")
+        .select("id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at, created_by, sanctioning_body, users!created_by(alias_name)")
         .eq("event_type", "photo_show")
         .order("created_at", { ascending: false });
 
@@ -68,7 +69,8 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
         id: string; name: string; description: string | null;
         show_status: string; show_theme: string | null;
         starts_at: string; ends_at: string | null; created_at: string;
-        created_by: string; users: { alias_name: string } | { alias_name: string }[] | null;
+        created_by: string; sanctioning_body: string | null;
+        users: { alias_name: string } | { alias_name: string }[] | null;
     };
 
     // Count entries per show
@@ -102,6 +104,7 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
             endAt: s.ends_at,
             createdBy: s.created_by,
             creatorAlias: (Array.isArray(s.users) ? s.users[0]?.alias_name : s.users?.alias_name) || "Unknown",
+            sanctioningBody: s.sanctioning_body,
         };
     });
 }
@@ -430,6 +433,7 @@ export async function createPhotoShow(data: {
     theme?: string;
     endAt?: string;
     templateId?: string;
+    sanctioningBody?: string;
 }): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -449,6 +453,7 @@ export async function createPhotoShow(data: {
         ends_at: data.endAt || null,
         is_virtual: true,
         created_by: user.id,
+        sanctioning_body: data.sanctioningBody || null,
     }).select("id").single();
 
     if (error || !inserted) return { success: false, error: error?.message || "Failed to create show." };
