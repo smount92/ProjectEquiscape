@@ -256,9 +256,12 @@ export async function getConversationAttachments(
 
     if (!rawAttachments || rawAttachments.length === 0) return {};
 
-    // Batch-sign all attachment URLs
+    // Batch-sign all attachment URLs using admin client
+    // (user-scoped client can only read own folder; admin bypasses storage RLS
+    //  — safe because we already verified conversation membership above)
     const storagePaths = (rawAttachments as { storage_path: string }[]).map(a => a.storage_path);
-    const { data: signedUrls } = await supabase.storage
+    const supabaseAdmin = getAdminClient();
+    const { data: signedUrls } = await supabaseAdmin.storage
         .from("chat-attachments")
         .createSignedUrls(storagePaths, 3600);
 

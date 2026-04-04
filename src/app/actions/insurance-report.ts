@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { extractStoragePath } from "@/lib/utils/storage";
 
 // ============================================================
@@ -103,8 +104,9 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
         let totalValue = 0;
         const reportHorses: HorseReportData[] = [];
 
-        // ── Convert photos to base64 using Supabase SDK (bypasses URL/CORS issues) ──
+        // ── Convert photos to base64 using admin SDK (bypasses storage RLS) ──
         const base64Map = new Map<string, string>();
+        const adminStorage = getAdminClient().storage.from("horse-images");
         for (const horse of horses) {
             const thumb = horse.horse_images?.find(
                 (img) => img.angle_profile === "Primary_Thumbnail"
@@ -113,20 +115,20 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
             if (!imageUrl) continue;
 
             try {
-                // Extract the storage path and download directly via SDK
                 const path = extractStoragePath(imageUrl);
-                const { data: blob, error: dlError } = await supabase.storage
-                    .from("horse-images")
-                    .download(path);
+                const { data: blob, error: dlError } = await adminStorage.download(path);
 
-                if (dlError || !blob) continue;
+                if (dlError || !blob) {
+                    console.error(`[InsuranceReport] Download failed for ${horse.custom_name}:`, dlError?.message, { path, imageUrl });
+                    continue;
+                }
 
                 const buffer = await blob.arrayBuffer();
                 const base64 = Buffer.from(buffer).toString("base64");
                 const contentType = blob.type || "image/jpeg";
                 base64Map.set(horse.id, `data:${contentType};base64,${base64}`);
-            } catch {
-                // Skip this photo silently — the report still generates without it
+            } catch (err) {
+                console.error(`[InsuranceReport] Exception for ${horse.custom_name}:`, err);
                 continue;
             }
         }
