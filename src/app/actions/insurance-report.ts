@@ -66,13 +66,6 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
             .is("deleted_at", null)
             .order("custom_name");
 
-        // Filter by collection if provided (OOM prevention for large herds)
-        if (collectionId) {
-            horseQuery = horseQuery.eq("collection_id", collectionId);
-        }
-
-        const { data: rawHorses } = await horseQuery;
-
         interface HorseRow {
             id: string;
             custom_name: string;
@@ -82,7 +75,48 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
             horse_images: { image_url: string; angle_profile: string }[];
         }
 
-        const horses = rawHorses ?? [];
+        // Filter by collection if provided (OOM prevention for large herds)
+        // Must check BOTH legacy FK (user_horses.collection_id) AND junction table (horse_collections)
+        let horses: HorseRow[];
+        if (collectionId) {
+            // Get horse IDs from junction table
+            const { data: junctionRows } = await supabase
+                .from("horse_collections")
+                .select("horse_id")
+                .eq("collection_id", collectionId);
+            const junctionHorseIds = (junctionRows ?? []).map((r: { horse_id: string }) => r.horse_id);
+
+            // Query legacy FK horses
+            horseQuery = horseQuery.eq("collection_id", collectionId);
+            const { data: legacyHorses } = await horseQuery;
+
+            // If there are junction-only horses, fetch them separately and merge
+            const legacyIds = new Set((legacyHorses ?? []).map((h) => h.id));
+            const extraIds = junctionHorseIds.filter((id: string) => !legacyIds.has(id));
+
+            let mergedHorses = (legacyHorses ?? []) as HorseRow[];
+            if (extraIds.length > 0) {
+                const { data: extraHorses } = await supabase
+                    .from("user_horses")
+                    .select(
+                        `id, custom_name, finish_type, condition_grade,
+                 catalog_items:catalog_id(title, maker, item_type),
+                 horse_images(image_url, angle_profile)`
+                    )
+                    .in("id", extraIds)
+                    .eq("owner_id", user.id)
+                    .is("deleted_at", null)
+                    .order("custom_name");
+                mergedHorses = [...mergedHorses, ...((extraHorses ?? []) as HorseRow[])];
+            }
+
+            // Sort merged results by custom_name
+            mergedHorses.sort((a, b) => (a.custom_name || "").localeCompare(b.custom_name || ""));
+            horses = mergedHorses;
+        } else {
+            const { data: rawHorses } = await horseQuery;
+            horses = (rawHorses ?? []) as HorseRow[];
+        }
 
         // Fetch vault data (private — owner only via RLS)
         const horseIds = horses.map((h) => h.id);
