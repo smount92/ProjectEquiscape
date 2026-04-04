@@ -270,7 +270,7 @@ export default function UniversalFeed({
  {posts.length === 0 ? (
  <p className="text-muted font-medium my-4">No {label.toLowerCase()} yet — be the first!</p>
  ) : (
- <div className="flex flex-col gap-4">
+ <div className="flex flex-col gap-5">
  {posts.map((post) => (
  <PostCard key={post.id} post={post} currentUserId={currentUserId} currentUserAlias={currentUserAlias} currentUserAvatar={currentUserAvatar} />
  ))}
@@ -373,6 +373,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  <PostHeader
  avatarUrl={post.authorAvatarUrl}
  alias={post.authorAlias}
+ avatarSize="md"
  createdAt={post.createdAt}
  isEdited={wasEdited}
  permalink={`/feed/${post.id}`}
@@ -462,7 +463,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
 
  {/* Replies */}
  {showReplies && (
- <div className="mt-2 ml-10 border-l-2 border-edge pl-4">
+ <div className="mt-3 ml-10 border-l-2 border-[#E0D5C1]/60 pl-4">
  {visibleReplies.map((r) => (
  <div key={r.id} className="mb-3">
  <PostHeader

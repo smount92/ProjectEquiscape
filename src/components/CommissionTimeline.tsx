@@ -7,6 +7,7 @@ import { addCommissionUpdate, updateCommissionStatus } from"@/app/actions/art-st
 import type { CommissionUpdate } from"@/app/actions/art-studio";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { UserAvatar } from "@/components/social";
 
 const UPDATE_ICONS: Record<string, string> = {
  wip_photo:"📸",
@@ -195,7 +196,7 @@ export default function CommissionTimeline({
  const isTerminal = ["delivered","declined","cancelled"].includes(commissionStatus);
 
  return (
- <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-edge animate-fade-in-up rounded-lg border p-6 shadow-md transition-all">
  {/* ── Header ── */}
  <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
  <h2 className="m-0 text-lg">📋 Timeline</h2>
@@ -212,9 +213,9 @@ export default function CommissionTimeline({
  {/* ── Artist Status Actions ── */}
  {isArtist && artistActions.length > 0 && (
  <div
- className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-white)] p-4"
+ className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-edge bg-parchment p-4"
  >
- <div className="text-stone-500 mb-2 text-sm font-semibold">
+ <div className="text-muted mb-2 text-sm font-semibold">
  🎨 Actions — {STATUS_LABELS[commissionStatus] || commissionStatus}
  </div>
  <div className="flex flex-wrap items-center gap-2">
@@ -265,7 +266,7 @@ export default function CommissionTimeline({
  ✅ Approve
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
  onClick={() => handleClientAction("revision_request")}
  disabled={acting}
  >
@@ -279,12 +280,12 @@ export default function CommissionTimeline({
  {showForm && (
  <form
  onSubmit={handleAddUpdate}
- className="bg-white border-stone-200 bg-white mb-6 rounded-lg border p-4 shadow-md transition-all"
+ className="bg-card border-edge mb-6 rounded-lg border p-4 shadow-md transition-all"
  >
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Update Type</label>
+ <label className="text-ink mb-1 block text-sm font-semibold">Update Type</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-edge bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={updateType}
  onChange={(e) => setUpdateType(e.target.value)}
  title="Update type"
@@ -296,7 +297,7 @@ export default function CommissionTimeline({
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Title (optional)</label>
+ <label className="text-ink mb-1 block text-sm font-semibold">Title (optional)</label>
  <Input
  type="text"
  
@@ -307,7 +308,7 @@ export default function CommissionTimeline({
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Details</label>
+ <label className="text-ink mb-1 block text-sm font-semibold">Details</label>
  <Textarea
  
  value={body}
@@ -332,7 +333,7 @@ export default function CommissionTimeline({
  title="Attach photo"
  />
  {attachFile && (
- <p className="text-stone-500 mt-[4] text-xs">
+ <p className="text-muted mt-[4] text-xs">
  📎 {attachFile.name} ({(attachFile.size / 1024).toFixed(0)} KB)
  </p>
  )}
@@ -366,7 +367,7 @@ export default function CommissionTimeline({
  </button>
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
  onClick={() => {
  setShowForm(false);
  setUploadError(null);
@@ -380,7 +381,7 @@ export default function CommissionTimeline({
 
  {/* ── Timeline Events ── */}
  {updates.length === 0 ? (
- <p className="text-stone-500 p-6 text-center">
+ <p className="text-muted p-6 text-center">
  No updates yet.
  </p>
  ) : (
@@ -390,13 +391,20 @@ export default function CommissionTimeline({
  <div className="gap-4-dot grid">{UPDATE_ICONS[update.updateType] ||"📋"}</div>
  <div className="gap-4-content grid">
  <div className="flex items-start justify-between">
+ <div className="flex items-start gap-2.5">
+ <UserAvatar
+ src={update.authorAvatarUrl}
+ alias={update.authorAlias}
+ size="sm"
+ href={`/profile/${encodeURIComponent(update.authorAlias)}`}
+ />
  <div>
  {update.title && (
- <div className="text-sm font-bold">
+ <div className="text-sm font-bold text-ink">
  {update.title}
  </div>
  )}
- <div className="text-stone-500 mt-[2] text-xs">
+ <div className="text-muted mt-[2] text-xs">
  @{update.authorAlias} ·{""}
  {new Date(update.createdAt).toLocaleDateString("en-US", {
  month:"short",
@@ -407,6 +415,7 @@ export default function CommissionTimeline({
  {!update.isVisibleToClient && isArtist && (
  <span className="ml-[6] opacity-[0.5]">🔒 Private</span>
  )}
+ </div>
  </div>
  </div>
  {update.requiresPayment && (
@@ -431,7 +440,7 @@ export default function CommissionTimeline({
  href={url}
  target="_blank"
  rel="noopener noreferrer"
- className="block max-w-[280px] overflow-hidden rounded-md border border-[var(--color-border)]"
+ className="block max-w-[280px] overflow-hidden rounded-md border border-edge"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img
@@ -444,7 +453,7 @@ export default function CommissionTimeline({
  </div>
  )}
  {update.oldStatus && update.newStatus && (
- <div className="text-stone-500 mt-1 text-sm">
+ <div className="text-muted mt-1 text-sm">
  {STATUS_LABELS[update.oldStatus] || update.oldStatus} →{""}
  <strong>{STATUS_LABELS[update.newStatus] || update.newStatus}</strong>
  </div>

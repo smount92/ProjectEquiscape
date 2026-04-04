@@ -86,6 +86,20 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
+## ✅ Task C-1.5: V43.5 Visual Polish & Full-Site Consistency — DONE (2026-04-04)
+
+**Workflow:** `.agents/workflows/v43.5-visual-polish.md`
+**Scope:** Completed deferred V43 surfaces + avatar prominence + warm palette finalization
+**Phases completed:**
+1. ✅ Avatar fidelity — ring-1 ring-[#E0D5C1] shadow-sm hover:ring-[#C8B89A], root post avatars bumped to `md` (40px)
+2. ✅ CommissionTimeline — `UserAvatar` imported, `authorAvatarUrl` added to `CommissionUpdate` type + query, all cold palette replaced
+3. ✅ ChatThread — complete rewrite with `UserAvatar` on bubbles (consecutive-sender grouping), `currentUserAvatar`/`otherAvatarUrl` props, warm palette, fixed sending spinner
+4. ✅ Spacing & visual delight — post gap `gap-5`, thread connector `border-[#E0D5C1]/60` softened
+5. ✅ Inbox page — 11 cold palette violations migrated, avatar URLs fetched and passed to ChatThread
+**Status:** ✅ COMPLETE — 0 errors, 245 tests pass
+
+---
+
 ## ✅ Task C-1: V43 Community Experience Deep Dive — DONE (2026-04-04)
 
 **Audit:** `.agents/docs/community-commenting-audit.md` (Task 1 output)

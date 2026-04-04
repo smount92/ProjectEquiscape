@@ -90,6 +90,7 @@ export interface CommissionUpdate {
     commissionId: string;
     authorId: string;
     authorAlias: string;
+    authorAvatarUrl: string | null;
     updateType: string;
     title: string | null;
     body: string | null;
@@ -660,7 +661,7 @@ export async function getCommissionUpdates(commissionId: string): Promise<Commis
 
     const { data: rawUpdates } = await supabase
         .from("commission_updates")
-        .select("*, author:users!author_id(alias_name)")
+        .select("*, author:users!author_id(alias_name, avatar_url)")
         .eq("commission_id", commissionId)
         .order("created_at", { ascending: true });
 
@@ -670,7 +671,8 @@ export async function getCommissionUpdates(commissionId: string): Promise<Commis
         id: u.id as string,
         commissionId: u.commission_id as string,
         authorId: u.author_id as string,
-        authorAlias: ((u.author as { alias_name: string } | null)?.alias_name) || "Unknown",
+        authorAlias: ((u.author as { alias_name: string; avatar_url: string | null } | null)?.alias_name) || "Unknown",
+        authorAvatarUrl: ((u.author as { alias_name: string; avatar_url: string | null } | null)?.avatar_url) || null,
         updateType: u.update_type as string,
         title: u.title as string | null,
         body: u.body as string | null,

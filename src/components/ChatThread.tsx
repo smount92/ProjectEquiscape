@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from"react";
 import { sendMessage } from"@/app/actions/messaging";
 import { createClient } from"@/lib/supabase/client";
 import { useRouter } from"next/navigation";
+import { UserAvatar } from "@/components/social";
 
 interface ChatMessage {
  id: string;
@@ -16,13 +17,15 @@ interface ChatMessage {
 interface ChatThreadProps {
  conversationId: string;
  currentUserId: string;
+ currentUserAvatar?: string | null;
  otherAlias: string;
+ otherAvatarUrl?: string | null;
  initialMessages: ChatMessage[];
 }
 
 import { RISKY_PAYMENT_REGEX } from"@/lib/safety";
 
-export default function ChatThread({ conversationId, currentUserId, otherAlias, initialMessages }: ChatThreadProps) {
+export default function ChatThread({ conversationId, currentUserId, currentUserAvatar = null, otherAlias, otherAvatarUrl = null, initialMessages }: ChatThreadProps) {
  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
  const [newMessage, setNewMessage] = useState("");
  const [sending, setSending] = useState(false);
@@ -151,9 +154,9 @@ export default function ChatThread({ conversationId, currentUserId, otherAlias, 
  return (
  <>
  {/* Message area */}
- <div className="bg-stone-50 border-stone-200 mb-4 flex flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
+ <div className="bg-parchment border-edge mb-4 flex flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
  {messages.length === 0 ? (
- <div className="text-stone-500 flex flex-1 flex-col items-center justify-center gap-2 text-center">
+ <div className="text-muted flex flex-1 flex-col items-center justify-center gap-2 text-center">
  <div className="text-5xl opacity-50">💬</div>
  <p>
  Start the conversation! Say hello to <strong>@{otherAlias}</strong>.
@@ -167,10 +170,13 @@ export default function ChatThread({ conversationId, currentUserId, otherAlias, 
  new Date(msg.createdAt).toDateString() !==
  new Date(messages[i - 1].createdAt).toDateString();
 
+ // Show avatar only on first message in consecutive group from same sender
+ const showAvatar = i === 0 || messages[i - 1].senderId !== msg.senderId;
+
  return (
  <div key={msg.id}>
  {showDate && (
- <div className="text-stone-500 py-2 text-center text-xs font-medium">
+ <div className="text-muted py-2 text-center text-xs font-medium">
  {new Date(msg.createdAt).toLocaleDateString("en-US", {
  weekday:"short",
  month:"short",
@@ -178,17 +184,40 @@ export default function ChatThread({ conversationId, currentUserId, otherAlias, 
  })}
  </div>
  )}
- <div className={`flex ${msg.isMe ?"justify-end" :"justify-start"}`}>
+ <div className={`flex items-end gap-2 ${msg.isMe ? "flex-row-reverse" : ""}`}>
+ {!msg.isMe && (
+ showAvatar ? (
+ <UserAvatar
+ src={otherAvatarUrl}
+ alias={otherAlias}
+ size="xs"
+ href={`/profile/${encodeURIComponent(otherAlias)}`}
+ />
+ ) : (
+ <div className="h-6 w-6 shrink-0" />
+ )
+ )}
  <div
- className={`text-stone-900 max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed max-md:max-w-[85%] ${msg.isMe ?"rounded-br-[4px] border border-emerald-300 bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))]" :"border-stone-200 rounded-bl-[4px] border bg-black/[0.05]"}`}
+ className={`text-ink max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] border border-emerald-300 bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))]" : "border-edge rounded-bl-[4px] border bg-parchment"}`}
  >
  <div className="break-words whitespace-pre-wrap">{msg.content}</div>
  <div
- className={`text-stone-500 mt-1 text-[0.6rem] ${msg.isMe ?"text-right" :""}`}
+ className={`text-muted mt-1 text-[0.6rem] ${msg.isMe ? "text-right" : ""}`}
  >
  {formatTime(msg.createdAt)}
  </div>
  </div>
+ {msg.isMe && (
+ showAvatar ? (
+ <UserAvatar
+ src={currentUserAvatar}
+ alias="You"
+ size="xs"
+ />
+ ) : (
+ <div className="h-6 w-6 shrink-0" />
+ )
+ )}
  </div>
  </div>
  );
@@ -213,11 +242,11 @@ export default function ChatThread({ conversationId, currentUserId, otherAlias, 
  )}
 
  {/* Input area */}
- <div className="bg-stone-50 border-stone-200 shrink-0 rounded-lg border p-4">
+ <div className="bg-parchment border-edge shrink-0 rounded-lg border p-4">
  <div className="flex items-end gap-2">
  <textarea
  ref={inputRef}
- className="border-stone-200 text-stone-900 font-inherit placeholder:text-stone-500 max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-black/[0.05] px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
+ className="border-edge text-ink font-inherit placeholder:text-muted max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
  value={newMessage}
  onChange={(e) => setNewMessage(e.target.value)}
  onKeyDown={handleKeyDown}
@@ -236,7 +265,7 @@ export default function ChatThread({ conversationId, currentUserId, otherAlias, 
  >
  {sending ? (
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
  aria-hidden="true"
  />
  ) : (
@@ -257,7 +286,7 @@ export default function ChatThread({ conversationId, currentUserId, otherAlias, 
  )}
  </button>
  </div>
- <div className="text-stone-500 mt-1.5 text-center text-[0.6rem]">
+ <div className="text-muted mt-1.5 text-center text-[0.6rem]">
  Press Enter to send · Shift+Enter for new line
  </div>
  </div>

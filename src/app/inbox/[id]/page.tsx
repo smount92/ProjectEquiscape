@@ -58,11 +58,20 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
 
  const { data: otherUser } = await supabase
  .from("users")
- .select("alias_name")
+ .select("alias_name, avatar_url")
  .eq("id", otherId)
- .single<{ alias_name: string }>();
+ .single<{ alias_name: string; avatar_url: string | null }>();
 
  const otherAlias = otherUser?.alias_name ??"Unknown";
+ const otherAvatarUrl = otherUser?.avatar_url ?? null;
+
+ // Fetch current user avatar
+ const { data: currentUserData } = await supabase
+ .from("users")
+ .select("avatar_url")
+ .eq("id", user.id)
+ .single<{ avatar_url: string | null }>();
+ const currentUserAvatar = currentUserData?.avatar_url ?? null;
 
  // Check block status for this conversation partner
  const isBlockedUser = await checkIsBlocked(otherId);
@@ -203,10 +212,10 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  return (
  <div className="mx-auto flex h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col overflow-hidden px-4 md:px-8">
  {/* Header */}
- <div className="bg-stone-50 border-stone-200 animate-fade-in-up mb-4 flex shrink-0 items-center gap-4 rounded-lg border px-6 py-4">
+ <div className="bg-parchment border-edge animate-fade-in-up mb-4 flex shrink-0 items-center gap-4 rounded-lg border px-6 py-4">
  <Link
  href="/inbox"
- className="bg-black/5 text-stone-500 flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full no-underline transition-all"
+ className="bg-black/5 text-muted flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full no-underline transition-all"
  aria-label="Back to inbox"
  >
  <svg
@@ -231,9 +240,9 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  </span>
  </div>
  {horseContext ? (
- <span className="text-stone-500 mt-0.5 text-xs">🐴 Re: {horseContext.name}</span>
+ <span className="text-muted mt-0.5 text-xs">🐴 Re: {horseContext.name}</span>
  ) : (
- <span className="text-stone-500 mt-0.5 text-xs opacity-70">💬 Direct Message</span>
+ <span className="text-muted mt-0.5 text-xs opacity-70">💬 Direct Message</span>
  )}
  </div>
 
@@ -241,28 +250,28 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <div className="mt-0.5 flex flex-wrap gap-1">
  {memberSince && (
  <span
- className="border-stone-200 text-stone-500 inline-flex items-center gap-[3px] rounded-sm border bg-white px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Account age"
  >
  📅 Member since {memberSince}
  </span>
  )}
  <span
- className="border-stone-200 text-stone-500 inline-flex items-center gap-[3px] rounded-sm border bg-white px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Completed Hoofprint transfers"
  >
  📦 {transferCount || 0} transfer{transferCount !== 1 ?"s" :""}
  </span>
  {avgRating !== null && (
  <span
- className="border-stone-200 text-stone-500 inline-flex items-center gap-[3px] rounded-sm border bg-white px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Average user rating"
  >
  ⭐ {avgRating} ({ratingsArr.length})
  </span>
  )}
  </div>
- <div className="inline-flex items-center gap-1 text-xs text-stone-500">
+ <div className="inline-flex items-center gap-1 text-xs text-muted">
  <svg
  width="12"
  height="12"
@@ -286,7 +295,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  {horseContext && (
  <Link
  href={`/community/${horseContext.id}`}
- className="group animate-fade-in-up mb-4 flex items-center gap-4 rounded-xl border border-stone-200 bg-white p-4 text-stone-900 no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md"
+ className="group animate-fade-in-up mb-4 flex items-center gap-4 rounded-xl border border-edge bg-card p-4 text-ink no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md"
  id="chat-horse-link"
  >
  {horseContext.thumbnailUrl ? (
@@ -297,7 +306,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  className="h-14 w-14 shrink-0 rounded-md object-cover"
  />
  ) : (
- <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-stone-100 object-cover text-2xl">
+ <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-parchment object-cover text-2xl">
  🐴
  </div>
  )}
@@ -306,7 +315,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  {horseContext.name}
  </span>
  {horseContext.refLine && (
- <span className="overflow-hidden text-xs text-stone-500 text-ellipsis whitespace-nowrap">
+ <span className="overflow-hidden text-xs text-muted text-ellipsis whitespace-nowrap">
  {horseContext.refLine}
  </span>
  )}
@@ -325,7 +334,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  </span>
  )}
  </div>
- <span className="shrink-0 text-[1.1rem] text-stone-400 transition-transform group-hover:text-forest group-hover:translate-x-[3px]">
+ <span className="shrink-0 text-[1.1rem] text-muted transition-transform group-hover:text-forest group-hover:translate-x-[3px]">
  →
  </span>
  </Link>
@@ -338,7 +347,9 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <ChatThread
  conversationId={conversationId}
  currentUserId={user.id}
+ currentUserAvatar={currentUserAvatar}
  otherAlias={otherAlias}
+ otherAvatarUrl={otherAvatarUrl}
  initialMessages={messages.map((m) => ({
  id: m.id,
  senderId: m.sender_id,
