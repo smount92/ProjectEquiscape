@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { extractStoragePath } from "@/lib/utils/storage";
+import sharp from "sharp";
 
 // ============================================================
 // Insurance Report Data — Server Action
@@ -123,9 +124,22 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
                     continue;
                 }
 
-                const buffer = await blob.arrayBuffer();
-                const base64 = Buffer.from(buffer).toString("base64");
-                const contentType = blob.type || "image/jpeg";
+                const rawBuffer = Buffer.from(await blob.arrayBuffer());
+
+                // @react-pdf/renderer only supports JPEG and PNG — convert WebP
+                const isWebP = imageUrl.endsWith(".webp") || blob.type === "image/webp";
+                let finalBuffer: Buffer;
+                let contentType: string;
+
+                if (isWebP) {
+                    finalBuffer = await sharp(rawBuffer).png({ quality: 85 }).toBuffer();
+                    contentType = "image/png";
+                } else {
+                    finalBuffer = rawBuffer;
+                    contentType = blob.type || "image/jpeg";
+                }
+
+                const base64 = finalBuffer.toString("base64");
                 base64Map.set(horse.id, `data:${contentType};base64,${base64}`);
             } catch (err) {
                 console.error(`[InsuranceReport] Exception for ${horse.custom_name}:`, err);
