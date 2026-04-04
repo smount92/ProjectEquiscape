@@ -41,8 +41,11 @@ export default function UserAvatar({ src, alias, size = "sm", href }: UserAvatar
 
     const avatar = (
         <div
-            className={`${container} inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-[#E0D5C1] shadow-sm font-semibold text-white transition-shadow hover:ring-[#C8B89A]`}
-            style={!src ? { backgroundColor: fallbackColor } : undefined}
+            className={`${container} inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-[#E0D5C1] shadow-sm font-semibold text-white transition-shadow hover:ring-[#C8B89A] ${!src ? "avatar-fallback" : ""}`}
+            {...(!src ? { "data-bg": fallbackColor } : {})}
+            ref={(el) => {
+                if (el && !src) el.style.setProperty("background-color", fallbackColor);
+            }}
         >
             {src ? (
                 // eslint-disable-next-line @next/next/no-img-element
