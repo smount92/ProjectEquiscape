@@ -99,20 +99,20 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## 🚨 Task DM-1: DM Photo Attachments (Beta Feedback)
+## ✅ Task DM-1: DM Photo Attachments — DONE (2026-04-04)
 
 **Workflow:** `.agents/workflows/dm-photo-attachments.md`
-**Source:** Beta user DM (2026-04-04) — "I also wanted to send you 2 screenshots, but I'm not sure I can figure out how to do it"
-**Good news:** `media_attachments` table already has `message_id` FK → schema is ready, zero migrations needed
-**Implementation plan:**
-1. Create `chat-attachments` storage bucket (private, signed URLs, 5MB limit)
-2. Expand `sendMessage()` server action to accept optional `attachments[]` parameter
-3. Add `getConversationAttachments()` for loading signed URLs (verifies conversation membership)
-4. ChatThread UI: attach button (📎), preview strip, inline photo rendering in bubbles
-5. Signed URL access control: conversation participants only
-**Files to modify:** `messaging.ts`, `ChatThread.tsx`, `inbox/[id]/page.tsx`
-**Status:** Workflow ready — execution pending
-**Estimated effort:** ~1.5 hours
+**Source:** Beta user feedback — needed to send screenshots in conversations
+**Implementation:**
+1. ✅ `sendMessage()` expanded with optional `attachments[]` parameter (max 5 per message)
+2. ✅ `getConversationAttachments()` — batch-signed URLs for all attachments in a conversation
+3. ✅ ChatThread UI: 📎 attach button, preview strip with remove (✕), inline photo grid in bubbles
+4. ✅ Upload flow: client uploads to `chat-attachments` bucket → server links to `media_attachments` table
+5. ✅ Signed URLs for recipient (conversation membership verified server-side)
+6. ✅ Photo-only messages show "📷 Sent a photo" text fallback
+7. ✅ Upload progress indicator + file validation (5MB max, image types only)
+**⚠️ Requires:** `chat-attachments` Supabase storage bucket (private, 5MB limit) — create via Dashboard
+**Status:** ✅ COMPLETE — 0 errors, build clean
 
 ---
 

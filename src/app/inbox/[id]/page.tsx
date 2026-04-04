@@ -8,6 +8,7 @@ import OfferCard from"@/components/OfferCard";
 import BlockButton from"@/components/BlockButton";
 import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import { getTransactionByConversation } from"@/app/actions/transactions";
+import { getConversationAttachments } from"@/app/actions/messaging";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import { resolveAvatarUrl } from"@/lib/utils/avatars.server";
 
@@ -173,6 +174,9 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  if (unreadIds.length > 0) {
  await supabase.from("messages").update({ is_read: true }).in("id", unreadIds);
  }
+
+ // Fetch photo attachments for this conversation
+ const attachmentMap = await getConversationAttachments(conversationId);
 
  const isBuyer = conversation.buyer_id === user.id;
 
@@ -357,6 +361,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  content: m.content,
  createdAt: m.created_at,
  isMe: m.sender_id === user.id,
+ attachments: attachmentMap[m.id] || undefined,
  }))}
  />
 

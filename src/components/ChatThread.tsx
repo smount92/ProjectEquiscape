@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from"react";
-import { sendMessage } from"@/app/actions/messaging";
-import { createClient } from"@/lib/supabase/client";
-import { useRouter } from"next/navigation";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { sendMessage } from "@/app/actions/messaging";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import { UserAvatar } from "@/components/social";
 
 interface ChatMessage {
@@ -12,6 +12,7 @@ interface ChatMessage {
  content: string;
  createdAt: string;
  isMe: boolean;
+ attachments?: { url: string; caption: string | null }[];
 }
 
 interface ChatThreadProps {
@@ -23,14 +24,17 @@ interface ChatThreadProps {
  initialMessages: ChatMessage[];
 }
 
-import { RISKY_PAYMENT_REGEX } from"@/lib/safety";
+import { RISKY_PAYMENT_REGEX } from "@/lib/safety";
 
 export default function ChatThread({ conversationId, currentUserId, currentUserAvatar = null, otherAlias, otherAvatarUrl = null, initialMessages }: ChatThreadProps) {
  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
  const [newMessage, setNewMessage] = useState("");
  const [sending, setSending] = useState(false);
+ const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+ const [uploadProgress, setUploadProgress] = useState(false);
  const messagesEndRef = useRef<HTMLDivElement>(null);
  const inputRef = useRef<HTMLTextAreaElement>(null);
+ const fileInputRef = useRef<HTMLInputElement>(null);
  const router = useRouter();
 
  // Risky payment detection
@@ -38,7 +42,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
 
  // Scroll to bottom on mount and new messages
  useEffect(() => {
- messagesEndRef.current?.scrollIntoView({ behavior:"smooth" });
+ messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
  }, [messages]);
 
  // Auto-focus input
@@ -52,11 +56,11 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  const channel = supabase
  .channel(`chat-${conversationId}`)
  .on(
-"postgres_changes",
+ "postgres_changes",
  {
- event:"INSERT",
- schema:"public",
- table:"messages",
+ event: "INSERT",
+ schema: "public",
+ table: "messages",
  filter: `conversation_id=eq.${conversationId}`,
  },
  (payload) => {
@@ -76,8 +80,11 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  content: newMsg.content,
  createdAt: newMsg.created_at,
  isMe: false,
+ // Attachments will appear after refresh
  },
  ]);
+ // Refresh to get full server data (including attachment signed URLs)
+ router.refresh();
  }
  },
  )
@@ -86,34 +93,89 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  return () => {
  supabase.removeChannel(channel);
  };
- }, [conversationId, currentUserId]);
+ }, [conversationId, currentUserId, router]);
 
+ // ── File selection handler ──
+ const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const files = Array.from(e.target.files || []);
+ if (files.length === 0) return;
+
+ if (files.length + pendingFiles.length > 5) {
+ alert("Maximum 5 images per message.");
+ return;
+ }
+
+ // Validate size (5MB max each)
+ const oversized = files.find(f => f.size > 5 * 1024 * 1024);
+ if (oversized) {
+ alert(`${oversized.name} is too large (max 5MB).`);
+ return;
+ }
+
+ setPendingFiles(prev => [...prev, ...files]);
+ inputRef.current?.focus();
+
+ // Reset file input so user can select the same file again
+ if (fileInputRef.current) fileInputRef.current.value = "";
+ };
+
+ // ── Send handler (with optional uploads) ──
  const handleSend = async () => {
- if (!newMessage.trim() || sending) return;
+ if ((!newMessage.trim() && pendingFiles.length === 0) || sending) return;
 
  const content = newMessage.trim();
  setSending(true);
  setNewMessage("");
 
+ let attachments: { storagePath: string; caption?: string }[] | undefined;
+
+ // Upload pending files if any
+ if (pendingFiles.length > 0) {
+ setUploadProgress(true);
+ const supabase = createClient();
+ attachments = [];
+
+ for (const file of pendingFiles) {
+ const ext = file.name.split(".").pop() || "jpg";
+ const path = `${currentUserId}/${conversationId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+ const { error: uploadError } = await supabase.storage
+ .from("chat-attachments")
+ .upload(path, file, {
+ contentType: file.type,
+ upsert: false,
+ });
+
+ if (!uploadError) {
+ attachments.push({ storagePath: path });
+ }
+ }
+
+ setPendingFiles([]);
+ setUploadProgress(false);
+ }
+
  // Optimistic update
  const optimisticMsg: ChatMessage = {
  id: `temp-${Date.now()}`,
  senderId: currentUserId,
- content,
+ content: content || "📷 Sent a photo",
  createdAt: new Date().toISOString(),
  isMe: true,
  };
  setMessages((prev) => [...prev, optimisticMsg]);
 
- const result = await sendMessage(conversationId, content);
+ const result = await sendMessage(
+ conversationId,
+ content,
+ attachments && attachments.length > 0 ? attachments : undefined
+ );
 
  if (!result.success) {
- // Remove optimistic message on failure
  setMessages((prev) => prev.filter((m) => m.id !== optimisticMsg.id));
- setNewMessage(content); // Restore the message
+ setNewMessage(content);
  } else {
- // Refresh to get real server data
- router.refresh();
+ router.refresh(); // Refresh to get real server data with signed URLs
  }
 
  setSending(false);
@@ -121,7 +183,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  };
 
  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
- if (e.key ==="Enter" && !e.shiftKey) {
+ if (e.key === "Enter" && !e.shiftKey) {
  e.preventDefault();
  handleSend();
  }
@@ -136,16 +198,16 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  date.getFullYear() === now.getFullYear();
 
  const time = date.toLocaleTimeString("en-US", {
- hour:"numeric",
- minute:"2-digit",
+ hour: "numeric",
+ minute: "2-digit",
  hour12: true,
  });
 
  if (isToday) return time;
 
  const dateLabel = date.toLocaleDateString("en-US", {
- month:"short",
- day:"numeric",
+ month: "short",
+ day: "numeric",
  });
 
  return `${dateLabel}, ${time}`;
@@ -164,13 +226,11 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  </div>
  ) : (
  messages.map((msg, i) => {
- // Show date separator if different day from previous
  const showDate =
  i === 0 ||
  new Date(msg.createdAt).toDateString() !==
  new Date(messages[i - 1].createdAt).toDateString();
 
- // Show avatar only on first message in consecutive group from same sender
  const showAvatar = i === 0 || messages[i - 1].senderId !== msg.senderId;
 
  return (
@@ -178,9 +238,9 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  {showDate && (
  <div className="text-muted py-2 text-center text-xs font-medium">
  {new Date(msg.createdAt).toLocaleDateString("en-US", {
- weekday:"short",
- month:"short",
- day:"numeric",
+ weekday: "short",
+ month: "short",
+ day: "numeric",
  })}
  </div>
  )}
@@ -201,6 +261,30 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  className={`text-ink max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] border border-emerald-300 bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))]" : "border-edge rounded-bl-[4px] border bg-parchment"}`}
  >
  <div className="break-words whitespace-pre-wrap">{msg.content}</div>
+
+ {/* Inline photo attachments */}
+ {msg.attachments && msg.attachments.length > 0 && (
+ <div className={`mt-2 grid gap-1.5 ${msg.attachments.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+ {msg.attachments.map((att, idx) => (
+ <a
+ key={idx}
+ href={att.url}
+ target="_blank"
+ rel="noopener noreferrer"
+ className="block overflow-hidden rounded-lg"
+ >
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+ <img
+ src={att.url}
+ alt={att.caption || `Photo ${idx + 1}`}
+ className="max-h-[200px] w-full object-cover transition-transform hover:scale-105"
+ loading="lazy"
+ />
+ </a>
+ ))}
+ </div>
+ )}
+
  <div
  className={`text-muted mt-1 text-[0.6rem] ${msg.isMe ? "text-right" : ""}`}
  >
@@ -241,16 +325,73 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  </div>
  )}
 
+ {/* Pending file preview strip */}
+ {pendingFiles.length > 0 && (
+ <div className="mx-4 mb-2 flex items-center gap-2 overflow-x-auto rounded-lg border border-[#E0D5C1] bg-[#F4EFE6] p-2">
+ {pendingFiles.map((file, i) => (
+ <div key={i} className="relative shrink-0">
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+ <img
+ src={URL.createObjectURL(file)}
+ alt={file.name}
+ className="h-16 w-16 rounded-md object-cover"
+ />
+ <button
+ onClick={() => setPendingFiles(prev => prev.filter((_, j) => j !== i))}
+ className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white hover:bg-red-600"
+ aria-label={`Remove ${file.name}`}
+ >
+ ✕
+ </button>
+ </div>
+ ))}
+ <span className="self-center text-xs text-muted">
+ {pendingFiles.length} photo{pendingFiles.length > 1 ? "s" : ""}
+ </span>
+ </div>
+ )}
+
+ {/* Upload progress indicator */}
+ {uploadProgress && (
+ <div className="mx-4 mb-2 flex items-center gap-2 text-xs text-muted">
+ <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-forest border-t-transparent" />
+ Uploading photos…
+ </div>
+ )}
+
  {/* Input area */}
  <div className="bg-parchment border-edge shrink-0 rounded-lg border p-4">
  <div className="flex items-end gap-2">
+ {/* Attach photo button */}
+ <label
+ className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#E0D5C1] bg-[#FEFCF8] text-muted transition-all hover:bg-[#F4EFE6] hover:text-ink"
+ title="Attach photo"
+ >
+ <input
+ ref={fileInputRef}
+ type="file"
+ accept="image/jpeg,image/png,image/webp,image/gif"
+ multiple
+ className="hidden"
+ onChange={handleFileSelect}
+ disabled={sending}
+ id="chat-file-input"
+ title="Select photos to attach"
+ />
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+ stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+ strokeLinejoin="round" aria-hidden="true">
+ <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+ </svg>
+ </label>
+
  <textarea
  ref={inputRef}
  className="border-edge text-ink font-inherit placeholder:text-muted max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
  value={newMessage}
  onChange={(e) => setNewMessage(e.target.value)}
  onKeyDown={handleKeyDown}
- placeholder="Type a message…"
+ placeholder={pendingFiles.length > 0 ? "Add a caption (optional)…" : "Type a message…"}
  rows={1}
  maxLength={2000}
  disabled={sending}
@@ -259,7 +400,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  <button
  className="bg-forest flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none text-white transition-all hover:enabled:scale-105 hover:enabled:shadow-[0_4px_16px_rgba(44,85,69,0.4)] disabled:cursor-not-allowed disabled:opacity-40"
  onClick={handleSend}
- disabled={!newMessage.trim() || sending}
+ disabled={(!newMessage.trim() && pendingFiles.length === 0) || sending}
  aria-label="Send message"
  id="chat-send-button"
  >
@@ -287,7 +428,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  </button>
  </div>
  <div className="text-muted mt-1.5 text-center text-[0.6rem]">
- Press Enter to send · Shift+Enter for new line
+ Press Enter to send · Shift+Enter for new line · 📎 for photos
  </div>
  </div>
  </>

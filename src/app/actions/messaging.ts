@@ -1,7 +1,6 @@
 "use server";
 
 import { logger } from "@/lib/logger";
-
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sendNewMessageNotification } from "@/lib/email";
@@ -100,29 +99,59 @@ export async function createOrFindConversation(
 }
 
 /**
- * Send a message in a conversation.
- * After insertion, triggers an email notification to the recipient.
+ * Send a message in a conversation, optionally with image attachments.
+ * Images should already be uploaded to `chat-attachments` bucket by the client.
  */
 export async function sendMessage(
     conversationId: string,
-    content: string
-): Promise<{ success: boolean; error?: string }> {
+    content: string,
+    attachments?: { storagePath: string; caption?: string }[]
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const supabase = await createClient();
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) return { success: false, error: "You must be logged in." };
-    if (!content.trim()) return { success: false, error: "Message cannot be empty." };
+    if (!content.trim() && (!attachments || attachments.length === 0)) {
+        return { success: false, error: "Message cannot be empty." };
+    }
+
+    // Guard: max 5 attachments per message
+    if (attachments && attachments.length > 5) {
+        return { success: false, error: "Maximum 5 images per message." };
+    }
 
     // Insert message
-    const { error } = await supabase.from("messages").insert({
-        conversation_id: conversationId,
-        sender_id: user.id,
-        content: sanitizeText(content),
-    });
+    const { data: message, error } = await supabase
+        .from("messages")
+        .insert({
+            conversation_id: conversationId,
+            sender_id: user.id,
+            content: sanitizeText(content || "📷 Sent a photo"),
+        })
+        .select("id")
+        .single<{ id: string }>();
 
-    if (error) return { success: false, error: error.message };
+    if (error || !message) return { success: false, error: error?.message || "Failed to send." };
+
+    // Insert media attachments if any
+    if (attachments && attachments.length > 0) {
+        const mediaInserts = attachments.map((att) => ({
+            message_id: message.id,
+            uploader_id: user.id,
+            storage_path: att.storagePath,
+            caption: att.caption || null,
+        }));
+
+        const { error: mediaError } = await supabase
+            .from("media_attachments")
+            .insert(mediaInserts);
+
+        if (mediaError) {
+            logger.error("Messaging", "Failed to insert media attachments", mediaError);
+        }
+    }
 
     // Update conversation's updated_at
     await supabase
@@ -130,12 +159,10 @@ export async function sendMessage(
         .update({ updated_at: new Date().toISOString() })
         .eq("id", conversationId);
 
-    // --- Email notification (fire-and-forget, never blocks the response) ---
+    // --- Email notification (fire-and-forget) ---
     try {
-        // Use service role to bypass RLS and look up recipient details
         const supabaseAdmin = getAdminClient();
 
-        // Get conversation details to find the other participant
         const { data: convo } = await supabaseAdmin
             .from("conversations")
             .select("buyer_id, seller_id, horse_id")
@@ -146,7 +173,6 @@ export async function sendMessage(
             const recipientId =
                 convo.buyer_id === user.id ? convo.seller_id : convo.buyer_id;
 
-            // Fetch recipient's email + alias, sender's alias, and horse name in parallel
             const [recipientAuth, senderProfile, horseData] = await Promise.all([
                 supabaseAdmin.auth.admin.getUserById(recipientId),
                 supabaseAdmin
@@ -164,7 +190,6 @@ export async function sendMessage(
             ]);
 
             const recipientEmail = recipientAuth.data?.user?.email;
-            // Also get recipient alias
             const { data: recipientProfile } = await supabaseAdmin
                 .from("users")
                 .select("alias_name")
@@ -177,17 +202,86 @@ export async function sendMessage(
                     recipientName: recipientProfile?.alias_name || "Collector",
                     senderName: senderProfile?.data?.alias_name || "Someone",
                     horseName: horseData?.data?.custom_name || null,
-                    messageSnippet: content.trim(),
+                    messageSnippet: content.trim() || "📷 Sent a photo",
                     conversationId,
                 });
             }
         }
     } catch (emailErr) {
-        // Log but never crash — the in-app message was already delivered
         logger.error("Messaging", "Email notification failed (non-blocking)", emailErr);
     }
 
-    return { success: true };
+    return { success: true, messageId: message.id };
+}
+
+/**
+ * Fetch all media attachments for messages in a conversation.
+ * Returns a record of messageId → attachment signed URLs.
+ * Verifies the requesting user is a conversation participant.
+ */
+export async function getConversationAttachments(
+    conversationId: string
+): Promise<Record<string, { url: string; caption: string | null }[]>> {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return {};
+
+    // Verify participant
+    const { data: convo } = await supabase
+        .from("conversations")
+        .select("buyer_id, seller_id")
+        .eq("id", conversationId)
+        .single();
+
+    if (!convo) return {};
+    const c = convo as { buyer_id: string; seller_id: string };
+    if (c.buyer_id !== user.id && c.seller_id !== user.id) return {};
+
+    // Get all message IDs
+    const { data: msgs } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("conversation_id", conversationId);
+
+    if (!msgs || msgs.length === 0) return {};
+    const messageIds = msgs.map((m: { id: string }) => m.id);
+
+    // Fetch attachments
+    const { data: rawAttachments } = await supabase
+        .from("media_attachments")
+        .select("message_id, storage_path, caption")
+        .in("message_id", messageIds);
+
+    if (!rawAttachments || rawAttachments.length === 0) return {};
+
+    // Batch-sign all attachment URLs
+    const storagePaths = (rawAttachments as { storage_path: string }[]).map(a => a.storage_path);
+    const { data: signedUrls } = await supabase.storage
+        .from("chat-attachments")
+        .createSignedUrls(storagePaths, 3600);
+
+    const signedUrlMap = new Map<string, string>();
+    if (signedUrls) {
+        for (const item of signedUrls) {
+            if (item.signedUrl && item.path) {
+                signedUrlMap.set(item.path, item.signedUrl);
+            }
+        }
+    }
+
+    // Build result grouped by message_id
+    const result: Record<string, { url: string; caption: string | null }[]> = {};
+    for (const att of rawAttachments as { message_id: string; storage_path: string; caption: string | null }[]) {
+        const signedUrl = signedUrlMap.get(att.storage_path);
+        if (signedUrl) {
+            if (!result[att.message_id]) result[att.message_id] = [];
+            result[att.message_id].push({ url: signedUrl, caption: att.caption });
+        }
+    }
+
+    return result;
 }
 
 /**
@@ -293,4 +387,3 @@ export async function markTransactionComplete(
 
     return { success: true };
 }
-
