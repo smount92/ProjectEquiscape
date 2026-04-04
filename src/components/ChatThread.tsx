@@ -134,6 +134,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  setUploadProgress(true);
  const supabase = createClient();
  attachments = [];
+ const uploadErrors: string[] = [];
 
  for (const file of pendingFiles) {
  const ext = file.name.split(".").pop() || "jpg";
@@ -146,13 +147,24 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  upsert: false,
  });
 
- if (!uploadError) {
+ if (uploadError) {
+ console.error("[ChatThread] Upload failed:", uploadError.message, { path, fileSize: file.size, fileType: file.type });
+ uploadErrors.push(`${file.name}: ${uploadError.message}`);
+ } else {
  attachments.push({ storagePath: path });
  }
  }
 
  setPendingFiles([]);
  setUploadProgress(false);
+
+ // If ALL uploads failed, abort send and show error
+ if (attachments.length === 0 && uploadErrors.length > 0) {
+ setSending(false);
+ setNewMessage(content);
+ alert(`Photo upload failed:\n${uploadErrors.join("\n")}\n\nPlease try again.`);
+ return;
+ }
  }
 
  // Optimistic update
