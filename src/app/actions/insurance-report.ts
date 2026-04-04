@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getPublicImageUrl } from "@/lib/utils/storage";
+import { extractStoragePath } from "@/lib/utils/storage";
 
 // ============================================================
 // Insurance Report Data — Server Action
@@ -103,47 +103,31 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
         let totalValue = 0;
         const reportHorses: HorseReportData[] = [];
 
-        // ── Generate public URLs for images (sync, no API) ──
-        const photoUrlMap = new Map<string, string>();
+        // ── Convert photos to base64 using Supabase SDK (bypasses URL/CORS issues) ──
+        const base64Map = new Map<string, string>();
         for (const horse of horses) {
             const thumb = horse.horse_images?.find(
                 (img) => img.angle_profile === "Primary_Thumbnail"
             );
             const imageUrl = thumb?.image_url || horse.horse_images?.[0]?.image_url;
-            if (imageUrl) {
-                photoUrlMap.set(horse.id, getPublicImageUrl(imageUrl));
-            }
-        }
+            if (!imageUrl) continue;
 
-        // ── Convert photos to base64 to bypass CORS in @react-pdf/renderer ──
-        const base64Map = new Map<string, string>();
-        const photoEntries = Array.from(photoUrlMap.entries());
-        for (let i = 0; i < photoEntries.length; i += 10) {
-            const batch = photoEntries.slice(i, i + 10);
-            const results = await Promise.allSettled(
-                batch.map(async ([horseId, publicUrl]) => {
-                    const controller = new AbortController();
-                    const timeout = setTimeout(() => controller.abort(), 3000);
-                    try {
-                        const response = await fetch(publicUrl, { signal: controller.signal });
-                        clearTimeout(timeout);
-                        if (response.ok) {
-                            const buffer = await response.arrayBuffer();
-                            const base64 = Buffer.from(buffer).toString("base64");
-                            const contentType = response.headers.get("content-type") || "image/jpeg";
-                            return { horseId, data: `data:${contentType};base64,${base64}` };
-                        }
-                        return null;
-                    } catch {
-                        clearTimeout(timeout);
-                        return null;
-                    }
-                })
-            );
-            for (const result of results) {
-                if (result.status === "fulfilled" && result.value) {
-                    base64Map.set(result.value.horseId, result.value.data);
-                }
+            try {
+                // Extract the storage path and download directly via SDK
+                const path = extractStoragePath(imageUrl);
+                const { data: blob, error: dlError } = await supabase.storage
+                    .from("horse-images")
+                    .download(path);
+
+                if (dlError || !blob) continue;
+
+                const buffer = await blob.arrayBuffer();
+                const base64 = Buffer.from(buffer).toString("base64");
+                const contentType = blob.type || "image/jpeg";
+                base64Map.set(horse.id, `data:${contentType};base64,${base64}`);
+            } catch {
+                // Skip this photo silently — the report still generates without it
+                continue;
             }
         }
 

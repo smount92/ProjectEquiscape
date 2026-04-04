@@ -140,7 +140,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  if (thumb) thumbnailUrls.push(thumb.image_url);
  });
 
- const [vaultsResult, unreadResult, signedUrlMap] = await Promise.all([
+ const [vaultsResult, unreadResult, signedUrlMap, junctionResult] = await Promise.all([
  allHorseIds.length > 0
  ? supabase
  .from("financial_vault")
@@ -162,6 +162,11 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  .in("conversation_id", convoIds)
  : Promise.resolve({ count: 0 }),
  getPublicImageUrls(thumbnailUrls),
+ // Fetch junction table for all horse↔collection mappings
+ supabase
+ .from("horse_collections")
+ .select("horse_id, collection_id")
+ .in("horse_id", allHorseIds.length > 0 ? allHorseIds : ["__none__"]),
  ]);
 
  const vaults =
@@ -178,24 +183,45 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  totalVaultValue += v.estimated_current_value ?? v.purchase_price ?? 0;
  });
 
- // Count horses per collection and compute vault value per collection
- const collectionCounts = new Map<string, number>();
+ // Count horses per collection — merge legacy FK + junction table
+ const collectionCounts = new Map<string, Set<string>>(); // collection_id → Set of horse_ids
  const collectionValues = new Map<string, number>();
+
+ // Source 1: Legacy FK (user_horses.collection_id)
  allHorsesSummary.forEach((h) => {
  if (h.collection_id) {
- collectionCounts.set(h.collection_id, (collectionCounts.get(h.collection_id) || 0) + 1);
+ if (!collectionCounts.has(h.collection_id)) collectionCounts.set(h.collection_id, new Set());
+ collectionCounts.get(h.collection_id)!.add(h.id);
  }
  });
- const horseCollectionMap = new Map<string, string>();
+
+ // Source 2: Junction table (horse_collections)
+ const junctionRows = (junctionResult.data ?? []) as { horse_id: string; collection_id: string }[];
+ junctionRows.forEach((row) => {
+ if (!collectionCounts.has(row.collection_id)) collectionCounts.set(row.collection_id, new Set());
+ collectionCounts.get(row.collection_id)!.add(row.horse_id);
+ });
+
+ // Build horse→collection map for vault value assignment (using both sources)
+ const horseCollectionMap = new Map<string, string[]>();
  allHorsesSummary.forEach((h) => {
- if (h.collection_id) horseCollectionMap.set(h.id, h.collection_id);
- });
- vaults.forEach((v) => {
- const colId = horseCollectionMap.get(v.horse_id);
- if (colId) {
- const val = v.estimated_current_value ?? v.purchase_price ?? 0;
- collectionValues.set(colId, (collectionValues.get(colId) || 0) + val);
+ if (h.collection_id) {
+ if (!horseCollectionMap.has(h.id)) horseCollectionMap.set(h.id, []);
+ horseCollectionMap.get(h.id)!.push(h.collection_id);
  }
+ });
+ junctionRows.forEach((row) => {
+ if (!horseCollectionMap.has(row.horse_id)) horseCollectionMap.set(row.horse_id, []);
+ const cols = horseCollectionMap.get(row.horse_id)!;
+ if (!cols.includes(row.collection_id)) cols.push(row.collection_id);
+ });
+
+ vaults.forEach((v) => {
+ const colIds = horseCollectionMap.get(v.horse_id) || [];
+ const val = v.estimated_current_value ?? v.purchase_price ?? 0;
+ colIds.forEach((colId) => {
+ collectionValues.set(colId, (collectionValues.get(colId) || 0) + val);
+ });
  });
 
  const collectionNameMap = new Map<string, string>();
@@ -413,7 +439,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   >
   <span>{col.name}</span>
   <span className="text-stone-600 text-xs whitespace-nowrap">
-  {collectionCounts.get(col.id) || 0}
+   {collectionCounts.get(col.id)?.size || 0}
   {(collectionValues.get(col.id) || 0) > 0 && (
   <>
   · $
