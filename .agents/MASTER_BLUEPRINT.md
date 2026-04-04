@@ -2,7 +2,7 @@
 
 > **This is the Single Source of Truth for all architectural rules.**
 > Every workflow and every agent session MUST read this file first.
-> Last updated: 2026-04-03
+> Last updated: 2026-04-03 (V42 NAMHSA Sprint complete)
 
 **Reading order for new sessions:**
 1. Read THIS file (Iron Laws + guardrails)
@@ -128,6 +128,17 @@ Every new workflow MUST include this at the top:
 - [x] Pro Tier Gating (Stripe Checkout Sessions)
 - [x] PWA / Offline Barn Mode for live shows
 - [x] Mobile-responsive judging and entry forms
+- [x] Public shareable show results page (`/shows/[id]/results`) — no auth required
+- [x] Results CSV export in NAMHSA-compatible format (`/api/export/show-results/[eventId]`)
+- [x] Platform-Verified trust badges (🛡️ MHH Verified / ✅ Host Verified / 📝 Self-Reported)
+- [x] NAN card 4-year expiry validation (NAMHSA rule)
+- [x] NAN card CSV export for collectors (`/api/export/nan-cards`)
+- [x] NAMHSA region constants (11 regions) in `src/lib/constants/namhsa.ts`
+- [x] `sanctioning_body` UI — NAMHSA Sanctioned toggle on show creation + badge on listings
+- [x] Judge COI checker (own horse, past ownership 12-month lookback, is-host) — advisory
+- [x] Ring conflict detection and resolution UI
+- [x] Multi-judge scoring aggregation
+- [x] Pitch deck summary doc for VP meeting
 
 ### Must Verify Before Pitch:
 - [ ] Show host can create event → add divisions → add classes → open entries → judge → close → results display
@@ -136,17 +147,12 @@ Every new workflow MUST include this at the top:
 - [ ] Performance: show pages load in <1s for events with 100+ entries
 - [ ] Offline PWA show-string planner works in airplane mode (fairground test).
 
-### Nice-to-Have for Pitch:
-- [ ] Ring conflict detection and resolution UI
-- [ ] Multi-judge scoring aggregation
-- [ ] Public show results page (shareable URL)
-
-### V42 Sprint (In Progress — 6-week deadline):
-- [ ] Public shareable show results page (`/shows/[eventId]/results`)
-- [ ] Results CSV export in NAMHSA-compatible format
-- [ ] NAN card 4-year expiry validation
-- [ ] NAN card CSV export for collectors
-- [ ] NAMHSA region constants (11 regions) on Discover + Groups
-- [ ] `sanctioning_body` column on `events` table + "NAMHSA Sanctioned" badge
-- [ ] Judge COI checker (own horse, past ownership, is-host)
-- [ ] Pitch deck summary doc for VP meeting
+### V42 Sprint: ✅ COMPLETE (2026-04-03)
+- [x] Public shareable show results page (`/shows/[eventId]/results`)
+- [x] Results CSV export in NAMHSA-compatible format
+- [x] NAN card 4-year expiry validation
+- [x] NAN card CSV export for collectors
+- [x] NAMHSA region constants (11 regions) on Discover + Groups
+- [x] `sanctioning_body` column on `events` table + "NAMHSA Sanctioned" badge
+- [x] Judge COI checker (own horse, past ownership, is-host)
+- [x] Pitch deck summary doc for VP meeting

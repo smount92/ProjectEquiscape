@@ -34,7 +34,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **61 page routes**, **121+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **37 server action files**, **15 API routes**, and **110 database migrations** (001–110).
+The platform has **61 page routes**, **121+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **37 server action files**, **17 API routes**, and **110 database migrations** (001–110).
 
 ### ⚠️ Development Environment: Windows + PowerShell
 
@@ -103,7 +103,7 @@ src/
 └── lib/
     ├── supabase/           # admin.ts (service role), client.ts (browser), server.ts (SSR)
     ├── types/              # database.ts (generated types), csv-import.ts
-    ├── constants/          # events.ts, groups.ts, showTemplates.ts — shared constant definitions
+    ├── constants/          # events.ts, groups.ts, showTemplates.ts, namhsa.ts — shared constant definitions
     ├── utils/              # imageCompression, imageUrl, mentions, rateLimit, storage, validation, cn
     ├── utils.ts            # cn() utility (clsx + tailwind-merge)
     └── context/            # SimpleModeContext.tsx (accessibility)
@@ -224,6 +224,12 @@ Key entry points for understanding the code:
 | Stripe Checkout | `src/app/api/checkout/route.ts` + `src/app/upgrade/page.tsx` |
 | Show Tags PDF | `src/components/pdf/ShowTags.tsx` + `src/app/api/export/show-tags/route.ts` |
 | Insurance Report PDF | `src/components/pdf/InsuranceReport.tsx` + `src/app/api/insurance-report/route.ts` |
+| Public Show Results | `src/app/shows/[id]/results/page.tsx` — no-auth public page |
+| Show Results CSV | `src/app/api/export/show-results/[eventId]/route.ts` |
+| NAN Cards CSV | `src/app/api/export/nan-cards/route.ts` |
+| Trust Badges | `src/components/ShowRecordTimeline.tsx` — verification_tier display |
+| NAMHSA Regions | `src/lib/constants/namhsa.ts` — 11 regions + sanctioning bodies |
+| Judge COI Checker | `src/app/actions/competition.ts` → `checkJudgeCOI()` |
 | Design Tokens | `src/app/globals.css` lines 1–47 (`@theme` block) |
 | shadcn Components | `src/components/ui/` |
 | Layout Archetypes | `src/components/layouts/` |

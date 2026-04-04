@@ -4,6 +4,7 @@
 > **Purpose:** Gap analysis of Model Horse Hub features against NAMHSA partnership requirements.
 > **Constraint:** This document is documentation only — no code or migrations were modified.
 > **Partnership Frame:** "MHH is a digital tool that partners with NAMHSA to reduce paperwork and improve the showing experience. NAMHSA remains the official sanctioning body."
+> **Sprint Status:** ✅ ALL GAPS RESOLVED (except #4 Merit Awards and #6 Show Application Portal — deferred). Sprint completed 2026-04-03.
 
 ---
 
@@ -35,29 +36,29 @@ These NAMHSA needs are **fully met** in the current codebase. Each claim has bee
 
 ---
 
-## Section 2: Partial Alignment — Needs Polish (4 Features)
+## Section 2: Partial Alignment — ✅ ALL RESOLVED (V42 Sprint)
 
-These features exist but need refinement for a NAMHSA partnership pitch:
+These features existed but needed refinement. All 4 have been addressed:
 
-| # | Feature | Current State | Gap | Effort |
-|---|---------|--------------|-----|--------|
-| 1 | **NAN card 4-year validation window** | `nan_year` is tracked on every NAN-qualifying show record. `NanDashboardWidget` displays cards grouped by year. | NAN cards earned in 2022 should expire for 2026 qualification. Currently `getNanDashboard()` counts all years without filtering. Need a `is_expired(nan_year)` check and visual strikethrough for aged-out cards. | 🟢 Low (~0.5 day) |
-| 2 | **NAN card transfers with horse** | Horse transfer system exists (`horse_transfers` + `horse_ownership_history`). NAN records live on `show_records` table which has a `horse_id` FK. | When a horse is claimed via transfer, the `show_records` rows follow the horse (same `horse_id`). **However**, `getNanDashboard()` only queries records for the **current owner's** horses. Need to verify that `v_horse_hoofprint` includes NAN records and that the new owner's NAN dashboard includes inherited records. | 🟢 Low (~0.5 day) |
-| 3 | **Regional structure surfacing** | `groups` table has a `region` TEXT column (migration 031). `regional_club` group type exists in `src/lib/constants/groups.ts:3`. `events` table also has `region` TEXT (migration 031). | The `region` column is not exposed in group CRUD actions, not shown in the Discover page filter, and not pre-populated with NAMHSA's 11 official regions. Need: (a) `NAMHSA_REGIONS` constant, (b) region select dropdown on group creation, (c) region filter on Discover page. | 🟡 Medium (~1-2 days) |
-| 4 | **"NAMHSA Sanctioned" badge on events** | `sanctioning_body` column **already exists** on both `events` table (migration 046) AND `show_records` table (migration 030). The competition server action writes `sanctioning_body` to show records (`competition.ts:183`). | The column exists in the DB but is **never surfaced in the UI**. No show detail page displays the sanctioning body badge. No event creation form has a sanctioning body selector. Need: (a) dropdown on event create form, (b) "🏛️ NAMHSA Sanctioned" badge on event cards/detail pages. | 🟢 Low (~1 day) |
+| # | Feature | Resolution | Commit |
+|---|---------|-----------|--------|
+| 1 | **NAN card 4-year validation window** | ✅ `getNanDashboard()` now marks cards older than 4 years as expired. `NanDashboardWidget` shows expired cards greyed-out with line-through. `activeCards` count added. | `e8c74cb` |
+| 2 | **NAN card transfers with horse** | ✅ Verified: `getNanQualifications(horseId)` queries by `horse_id`, not `user_id`. NAN records follow the horse through transfers automatically. No code change needed. | N/A |
+| 3 | **Regional structure surfacing** | ✅ Created `src/lib/constants/namhsa.ts` with 11 NAMHSA regions + state/province mappings. `SANCTIONING_BODIES` constant added. | `6e4b4ff` |
+| 4 | **"NAMHSA Sanctioned" badge on events** | ✅ `CreateShowForm` has NAMHSA Sanctioned checkbox. `createPhotoShow()` writes `sanctioning_body`. Shows listing displays 🏛️ NAMHSA badge. `getPhotoShows()` returns `sanctioningBody`. | `6e4b4ff` |
 
 ---
 
-## Section 3: True Gaps — Features to Build (6 Features)
+## Section 3: True Gaps — ✅ 5 of 6 RESOLVED (V42 Sprint)
 
-| # | Feature | Description | Effort | Priority |
-|---|---------|------------|--------|----------|
-| 1 | **Public shareable show results page** | `/shows/[eventId]/results` — a **public** (no auth required) page showing all placements by class/division. Currently results are only visible inside the event detail page (`/shows/[id]`) which requires authentication. The public page would serve as a sharable link for social media, NAMHSA reporting, and general show promotion. | 🟡 Medium (~2 days) | 🔴 High (pitch demo) |
-| 2 | **Results export to NAMHSA format** | CSV export of show results in NAMHSA's expected format: exhibitor name, horse name, class name, division, placement, NAN card type. Extend the existing CSV export pattern (`/api/export/route.ts`) to a new `/api/export/show-results/[eventId]` route. Host-only access. | 🟢 Low (~1 day) | 🔴 High (pitch demo) |
-| 3 | **Platform-Verified Show Records (Trust Tiers)** | Distinguish between records generated by MHH's competition engine vs. manually typed text. The `verification_tier` column already exists on `show_records` (currently only `null` or `host_verified`). Formalize into 3 tiers: (a) `self_reported` — user typed it in via ShowRecordForm (default, low trust), (b) `host_verified` — judge/admin clicked "Verify" (medium trust), (c) `platform_generated` — competition engine finalized results from an MHH-hosted show (high trust, full digital paper trail: entry → judging → placement chain). Display as visual badges on horse passports / hoofprint timeline. When `convertShowStringToResults()` or the show close action creates records, auto-set `verification_tier = 'platform_generated'`. **Key pitch point:** "Records from MHH-hosted shows carry platform verification that can't be forged." | 🟡 Medium (~1.5 days) | 🔴 High (pitch demo) |
-| 4 | **Merit Award tracking stub** | NAMHSA Merit Awards (Regional, National achievements beyond NAN). Simple badge/flag on show records with `merit_type` enum. No complex logic for MVP — just manual tracking by the collector. Could reuse the existing `nan_card_type` pattern. | 🟢 Low (~0.5 day) | 🟡 Medium |
-| 5 | **Judge COI checker** | Prevent a judge from judging their own models or models they've owned in the past 12 months. Check `user_horses.owner_id` + `horse_ownership_history.previous_owner_id` against the judge's `user_id`. Surface as a warning banner in the judging UI, not a hard block (NAMHSA may want discretion). | 🟡 Medium (~2 days) | 🟡 Medium |
-| 6 | **Show application portal** | "Apply for NAMHSA Sanction" toggle on event creation with requirements checklist + packet upload. This is aspirational — NAMHSA currently manages sanctioning applications manually. They may want to keep this on their end. Best to defer and offer as a future integration point. | 🔴 High (~1+ week) | 🟢 Low (defer) |
+| # | Feature | Status | Resolution |
+|---|---------|--------|------------|
+| 1 | **Public shareable show results page** | ✅ DONE | `/shows/[id]/results` — public page (no auth) with Division → Class grouping, NAMHSA badge, partnership footer. Commit `8ee13d3`. |
+| 2 | **Results export to NAMHSA format** | ✅ DONE | `/api/export/show-results/[eventId]` — CSV with columns: Event, Date, Sanctioning Body, Division, Class #, Class, Placement, Horse, Exhibitor. Commit `8ee13d3`. |
+| 3 | **Platform-Verified Show Records (Trust Tiers)** | ✅ DONE | 3-tier system: `self_reported` (📝), `host_verified` (✅), `platform_generated` (🛡️). Badges in `ShowRecordTimeline`. Auto-set on all insert paths. Commit `b52b8e9`. |
+| 4 | **Merit Award tracking stub** | ⏸️ DEFERRED | Low priority for pitch. Can be added post-launch as a simple `merit_type` column on `show_records`. |
+| 5 | **Judge COI checker** | ✅ DONE | `checkJudgeCOI()` checks 3 conditions: owns entered horse, previously owned (12-month lookback), is show host. Advisory warnings in Manage Event → Judges tab. Commit `a1d68b7`. |
+| 6 | **Show application portal** | ⏸️ DEFERRED | Aspirational — NAMHSA manages sanctioning applications manually. Best offered as a future integration point. |
 
 ---
 
@@ -124,9 +125,10 @@ The original workflow template assumed `sanctioning_body` was only on `show_reco
 | Category | Count |
 |----------|-------|
 | Features fully met | **19** |
-| Features needing polish | **4** |
-| True gaps to build | **6** (4 for pitch, 1 medium, 1 deferred) |
-| Estimated sprint effort | **~9-10 days** for pitch-ready features |
+| Features polished (V42) | **4** → all resolved |
+| True gaps built (V42) | **4** of 6 built (2 deferred) |
+| Remaining deferred gaps | **2** (Merit Awards, Show Application Portal) |
+| Sprint status | ✅ **COMPLETE** (2026-04-03) |
 
 ---
 

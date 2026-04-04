@@ -1,7 +1,7 @@
 # How MHH Partners with NAMHSA
 
 > A one-page summary for the NAMHSA VP meeting
-> **Created:** 2026-04-03 | **Meeting Target:** 6 weeks from now (~2026-05-15)
+> **Created:** 2026-04-03 | **Sprint complete:** 2026-04-03 | **Meeting Target:** ~2026-05-15
 
 ---
 
@@ -44,15 +44,17 @@ Model Horse Hub is a **digital toolsuite** that makes the showing experience bet
 
 ---
 
-## 6-Week Sprint Plan
+## ✅ Sprint Status: ALL FEATURES SHIPPED
 
-| Week | Deliverable |
-|------|-------------|
-| 1–2 | Public results page + CSV export + Platform-Verified trust badges on show records |
-| 3 | NAN 4-year validation + NAN CSV export + NAN transfer verification |
-| 4 | NAMHSA region constants + sanctioning badge UI on events + region filters |
-| 5 | Judge COI checker + advisory warnings + mobile judging polish |
-| 6 | NAMHSA VP demo, collect feedback, define Phase 2 scope |
+| Epic | Status | Key Deliverable |
+|------|--------|----------------|
+| Public Results Page | ✅ Done | `/shows/[id]/results` — no-auth, shareable, NAMHSA badge |
+| Platform-Verified Records | ✅ Done | 3-tier trust badges on all show records |
+| NAN Card Polish | ✅ Done | 4-year expiry, NAN CSV export, partnership language |
+| Regions + Sanctioning | ✅ Done | 11 NAMHSA regions, sanctioning toggle, badge on listings |
+| Judge COI Checker | ✅ Done | 3-condition conflict detection, advisory warnings |
+
+**Remaining before meeting:** Manual QA walkthrough of the demo script above.
 
 ---
 

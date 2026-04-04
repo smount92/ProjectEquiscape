@@ -123,7 +123,7 @@
 
 ### 🏇 Provenance & History
 
-- **`show_records`** — Competition placings per horse. FK `horse_id → user_horses(id)`, `user_id → users(id)`. Columns: `show_name`, `show_date`, `class_name`, `placing`, `judge_name`, `judge_notes`, `show_type` (live/photo/virtual). Fed into `v_horse_hoofprint` view for timeline display.
+- **`show_records`** — Competition placings per horse. FK `horse_id → user_horses(id)`, `user_id → users(id)`. Columns: `show_name`, `show_date`, `class_name`, `placing`, `judge_name`, `judge_notes`, `show_type` (live/photo/virtual), `verification_tier` (3-tier trust: `self_reported` / `host_verified` / `platform_generated` — V42). `nan_card_type`, `nan_year` for NAN tracking with 4-year expiry rule. Fed into `v_horse_hoofprint` view for timeline display. Trust badges displayed in `ShowRecordTimeline.tsx`.
 
 - **`horse_ownership_history`** — Transfer chain. FK `horse_id → user_horses(id)`. Records `previous_owner_id`, `new_owner_id`, `transferred_at`. Created automatically on claim.
 
@@ -137,7 +137,7 @@
 
 ### 🏆 Competition Engine
 
-- **`events`** — All events (shows, meetups, sales). FK `organizer_id → users(id)`. `event_type` enum differentiates. `is_virtual_show` boolean for photo shows. `status` (draft/open/judging/closed/cancelled). `judging_type` (community/expert). `show_template` for NAMHSA presets. Contains `entry_limit_per_class`, `entries_per_class_per_user`.
+- **`events`** — All events (shows, meetups, sales). FK `organizer_id → users(id)`. `event_type` enum differentiates. `is_virtual_show` boolean for photo shows. `status` (draft/open/judging/closed/cancelled). `judging_type` (community/expert). `show_template` for NAMHSA presets. `sanctioning_body` (nullable TEXT — `'namhsa'` for NAMHSA-sanctioned shows, set via CreateShowForm toggle — V42). Contains `entry_limit_per_class`, `entries_per_class_per_user`. Judge COI check runs on `addEventJudge()` — advisory only.
 
 - **`event_divisions`** — Show divisions within an event. FK `event_id → events(id)`. `name`, `description`, `display_order`. Part of the Live Show Relational Tree (migration 054).
 
