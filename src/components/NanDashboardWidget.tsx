@@ -6,8 +6,8 @@ export default async function NanDashboardWidget() {
 
     // Only show horses with at least one card, plus a summary
     const qualified = horses.filter((h) => h.totalCards > 0);
-    const totalQualified = qualified.length;
-    const totalDivisions = qualified.reduce((sum, h) => sum + h.qualifications.length, 0);
+    const totalQualifiedHorses = qualified.length;
+    const totalActiveCards = qualified.reduce((sum, h) => sum + h.activeCards, 0);
 
     if (horses.length === 0) return null;
 
@@ -17,17 +17,22 @@ export default async function NanDashboardWidget() {
         <details className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm" id="nan-dashboard" open>
             <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold tracking-widest text-stone-700 uppercase select-none [&::-webkit-details-marker]:hidden">
                 🏆 NAN {currentYear} Qualification Status
-                {totalQualified > 0 && (
+                {totalQualifiedHorses > 0 && (
                     <span className="ml-auto text-xs font-normal normal-case tracking-normal text-stone-500">
-                        {totalQualified} horse{totalQualified !== 1 ? "s" : ""} across {totalDivisions} division
-                        {totalDivisions !== 1 ? "s" : ""}
+                        {totalQualifiedHorses} horse{totalQualifiedHorses !== 1 ? "s" : ""} · {totalActiveCards} active card{totalActiveCards !== 1 ? "s" : ""}
                     </span>
                 )}
             </summary>
-            <div className="mt-4 flex flex-col gap-1">
+
+            {/* Partnership disclosure */}
+            <p className="mt-3 mb-1 text-xs text-stone-400 italic">
+                Track your NAN progress digitally — official NAN cards are issued by NAMHSA.
+            </p>
+
+            <div className="mt-2 flex flex-col gap-1">
                 {horses.slice(0, 10).map((h) => {
                     const currentYearCards = h.qualifications.filter((q) => q.year === currentYear);
-                    const status = h.totalCards >= 3 ? "full" : h.totalCards > 0 ? "partial" : "none";
+                    const status = h.activeCards >= 3 ? "full" : h.activeCards > 0 ? "partial" : "none";
 
                     return (
                         <div
@@ -40,12 +45,21 @@ export default async function NanDashboardWidget() {
                             <Link href={`/community/${h.horseId}`} className="truncate text-sm font-semibold text-stone-900 no-underline hover:text-forest">
                                 {h.horseName}
                             </Link>
-                            <span className="ml-auto flex shrink-0 gap-1 text-xs">
-                                {currentYearCards.length > 0 ? (
-                                    currentYearCards.map((q, i) => (
-                                        <span key={i} className="rounded-full bg-stone-100 px-1.5 py-0.5 text-stone-600">
+                            <span className="ml-auto flex shrink-0 flex-wrap gap-1 text-xs">
+                                {h.qualifications.length > 0 ? (
+                                    h.qualifications.map((q, i) => (
+                                        <span
+                                            key={i}
+                                            className={`rounded-full px-1.5 py-0.5 ${
+                                                q.isExpired
+                                                    ? "bg-stone-50 text-stone-300 line-through"
+                                                    : "bg-stone-100 text-stone-600"
+                                            }`}
+                                            title={q.isExpired ? `Expired (${q.year})` : `${q.year} ${q.cardType}`}
+                                        >
                                             {q.cardType === "green" ? "🟢" : q.cardType === "yellow" ? "🟡" : "🩷"}
                                             {q.count > 1 ? ` ×${q.count}` : ""}
+                                            {q.isExpired && <span className="ml-0.5 text-[10px]">expired</span>}
                                         </span>
                                     ))
                                 ) : (
@@ -61,12 +75,22 @@ export default async function NanDashboardWidget() {
                     </p>
                 )}
             </div>
-            <Link
-                href="/shows/planner"
-                className="mt-4 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-50"
-            >
-                🧳 Live Show Packer
-            </Link>
+            <div className="mt-4 flex flex-wrap gap-2">
+                <Link
+                    href="/shows/planner"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-50"
+                >
+                    🧳 Live Show Packer
+                </Link>
+                {totalQualifiedHorses > 0 && (
+                    <a
+                        href="/api/export/nan-cards"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-50"
+                    >
+                        📥 Export NAN Cards
+                    </a>
+                )}
+            </div>
         </details>
     );
 }

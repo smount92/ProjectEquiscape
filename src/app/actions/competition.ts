@@ -26,8 +26,9 @@ export interface NanQualification {
 export interface NanHorseSummary {
     horseId: string;
     horseName: string;
-    qualifications: { year: number; cardType: string; count: number }[];
+    qualifications: { year: number; cardType: string; count: number; isExpired: boolean }[];
     totalCards: number;
+    activeCards: number;
 }
 
 export interface ShowString {
@@ -126,22 +127,81 @@ export async function getNanDashboard(): Promise<NanHorseSummary[]> {
     }
 
     // Return all horses (even those with no cards)
+    // NAMHSA 4-year expiry rule: cards older than 4 years are expired but still shown
+    const currentYear = new Date().getFullYear();
     return (horses as { id: string; custom_name: string }[]).map(h => {
         const s = summaryMap.get(h.id);
-        const qualifications: { year: number; cardType: string; count: number }[] = [];
+        const qualifications: { year: number; cardType: string; count: number; isExpired: boolean }[] = [];
+        let activeCards = 0;
         if (s) {
             for (const [key, count] of s.qualifications) {
                 const [yearStr, cardType] = key.split("-");
-                qualifications.push({ year: parseInt(yearStr), cardType, count });
+                const year = parseInt(yearStr);
+                const isExpired = currentYear - year > 3;
+                qualifications.push({ year, cardType, count, isExpired });
+                if (!isExpired) activeCards += count;
             }
         }
+        // Sort: active first (newest year), then expired
+        qualifications.sort((a, b) => {
+            if (a.isExpired !== b.isExpired) return a.isExpired ? 1 : -1;
+            return b.year - a.year;
+        });
         return {
             horseId: h.id,
             horseName: h.custom_name,
             qualifications,
             totalCards: s?.totalCards || 0,
+            activeCards,
         };
     });
+}
+
+/** Export all NAN cards for the current user as structured data (for CSV route) */
+export async function exportNanCards(): Promise<{
+    records: { horseName: string; nanYear: number; cardType: string; showName: string; placement: string; className: string | null; isExpired: boolean }[];
+}> {
+    const { supabase, user } = await requireAuth();
+
+    const { data: horses } = await supabase
+        .from("user_horses")
+        .select("id, custom_name")
+        .eq("owner_id", user.id);
+
+    if (!horses || horses.length === 0) return { records: [] };
+
+    const horseIds = (horses as { id: string }[]).map(h => h.id);
+    const horseNameMap = new Map<string, string>();
+    (horses as { id: string; custom_name: string }[]).forEach(h => horseNameMap.set(h.id, h.custom_name));
+
+    const { data: nanRecords } = await supabase
+        .from("show_records")
+        .select("horse_id, show_name, placing, class_name, nan_card_type, nan_year")
+        .in("horse_id", horseIds)
+        .eq("is_nan_qualifying", true)
+        .order("nan_year", { ascending: false });
+
+    if (!nanRecords || nanRecords.length === 0) return { records: [] };
+
+    const currentYear = new Date().getFullYear();
+
+    const records = (nanRecords as { horse_id: string; show_name: string; placing: string; class_name: string | null; nan_card_type: string; nan_year: number }[]).map(r => ({
+        horseName: horseNameMap.get(r.horse_id) || "Unknown",
+        nanYear: r.nan_year,
+        cardType: r.nan_card_type,
+        showName: r.show_name,
+        placement: r.placing,
+        className: r.class_name,
+        isExpired: currentYear - r.nan_year > 3,
+    }));
+
+    // Sort by year DESC, then horse name
+    records.sort((a, b) => {
+        if (a.nanYear !== b.nanYear) return b.nanYear - a.nanYear;
+        return a.horseName.localeCompare(b.horseName);
+    });
+
+    return { records };
 }
 
 // ── Enhanced Show Records ──
