@@ -204,6 +204,78 @@ export async function exportNanCards(): Promise<{
     return { records };
 }
 
+// ── Judge Conflict of Interest ──
+
+/**
+ * Check if a judge has a conflict of interest with an event.
+ * Advisory only — does not block assignment. Per NAMHSA guidelines, hosts make final decisions.
+ */
+export async function checkJudgeCOI(
+    judgeUserId: string,
+    eventId: string
+): Promise<{ hasConflict: boolean; conflicts: string[] }> {
+    const supabase = await createClient();
+    const conflicts: string[] = [];
+
+    // 1. Check: judge owns a horse entered in this event
+    const { data: ownEntries } = await supabase
+        .from("event_entries")
+        .select("id, user_horses!inner(custom_name)")
+        .eq("event_id", eventId)
+        .eq("user_id", judgeUserId)
+        .eq("entry_type", "entered")
+        .limit(5);
+
+    if (ownEntries && ownEntries.length > 0) {
+        const names = (ownEntries as { user_horses: { custom_name: string } }[])
+            .map(e => e.user_horses?.custom_name || "a horse")
+            .slice(0, 3);
+        conflicts.push(`Judge owns ${names.length} entered horse${names.length > 1 ? "s" : ""}: ${names.join(", ")}`);
+    }
+
+    // 2. Check: judge previously owned a horse entered in this event (12-month lookback)
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+
+    const { data: entries } = await supabase
+        .from("event_entries")
+        .select("horse_id")
+        .eq("event_id", eventId)
+        .eq("entry_type", "entered");
+
+    if (entries && entries.length > 0) {
+        const horseIds = [...new Set((entries as { horse_id: string }[]).map(e => e.horse_id))];
+
+        const { data: priorOwnership } = await supabase
+            .from("horse_ownership_history")
+            .select("horse_id, horse_name")
+            .eq("owner_id", judgeUserId)
+            .in("horse_id", horseIds)
+            .gte("released_at", twelveMonthsAgo.toISOString())
+            .limit(5);
+
+        if (priorOwnership && priorOwnership.length > 0) {
+            const names = (priorOwnership as { horse_name: string | null }[])
+                .map(h => h.horse_name || "a horse")
+                .slice(0, 3);
+            conflicts.push(`Judge previously owned ${names.length} entered horse${names.length > 1 ? "s" : ""} (within 12 months): ${names.join(", ")}`);
+        }
+    }
+
+    // 3. Check: judge is the show host
+    const { data: event } = await supabase
+        .from("events")
+        .select("created_by")
+        .eq("id", eventId)
+        .single();
+
+    if (event && (event as { created_by: string }).created_by === judgeUserId) {
+        conflicts.push("Judge is the show host/creator");
+    }
+
+    return { hasConflict: conflicts.length > 0, conflicts };
+}
+
 // ── Enhanced Show Records ──
 
 /** Add a show record with NAN fields */

@@ -588,7 +588,7 @@ export async function getEventJudges(eventId: string): Promise<{
 export async function addEventJudge(
     eventId: string,
     userAlias: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; coiWarnings?: string[] }> {
     const { supabase, user } = await requireAuth();
 
     // Verify ownership
@@ -611,12 +611,18 @@ export async function addEventJudge(
 
     if (!judgeUser) return { success: false, error: `User "${userAlias}" not found. Try searching below.` };
 
+    const judgeId = (judgeUser as { id: string }).id;
+
+    // COI check — advisory only, per NAMHSA fairness guidelines
+    const { checkJudgeCOI } = await import("@/app/actions/competition");
+    const coiResult = await checkJudgeCOI(judgeId, eventId);
+
     // Insert
     const { error } = await supabase
         .from("event_judges")
         .insert({
             event_id: eventId,
-            user_id: (judgeUser as { id: string }).id,
+            user_id: judgeId,
         });
 
     if (error) {
@@ -647,7 +653,7 @@ export async function addEventJudge(
         } catch (err) { logger.error("Events", "Background task failed", err); }
     });
 
-    return { success: true };
+    return { success: true, coiWarnings: coiResult.hasConflict ? coiResult.conflicts : undefined };
 }
 
 /**

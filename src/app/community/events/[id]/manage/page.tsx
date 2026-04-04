@@ -88,6 +88,7 @@ export default function ManageEventPage() {
  const [newJudgeAlias, setNewJudgeAlias] = useState("");
  const [judgeError, setJudgeError] = useState("");
  const [judgeSuccess, setJudgeSuccess] = useState("");
+ const [coiWarnings, setCoiWarnings] = useState<string[]>([]);
  const [userSuggestions, setUserSuggestions] = useState<
  { id: string; aliasName: string; avatarUrl: string | null }[]
  >([]);
@@ -215,11 +216,15 @@ export default function ManageEventPage() {
  if (!newJudgeAlias.trim()) return;
  setJudgeError("");
  setJudgeSuccess("");
+ setCoiWarnings([]);
  const result = await addEventJudge(eventId, newJudgeAlias.trim());
  if (result.success) {
  setNewJudgeAlias("");
  setJudgeSuccess("Judge added!");
- setTimeout(() => setJudgeSuccess(""), 3000);
+ if (result.coiWarnings && result.coiWarnings.length > 0) {
+ setCoiWarnings(result.coiWarnings);
+ }
+ setTimeout(() => setJudgeSuccess(""), 5000);
  const judgeList = await getEventJudges(eventId);
  setJudges(judgeList);
  } else {
@@ -1036,6 +1041,18 @@ export default function ManageEventPage() {
 
  {judgeError && <div className="mt-2 text-sm text-red-700 mb-4">{judgeError}</div>}
  {judgeSuccess && <div className="mb-4 text-sm text-[#22c55e]">✅ {judgeSuccess}</div>}
+
+ {coiWarnings.length > 0 && (
+ <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+ <strong>⚠️ Potential Conflict of Interest:</strong>
+ <ul className="mt-1 mb-0 list-disc pl-5">
+ {coiWarnings.map((c, i) => <li key={i}>{c}</li>)}
+ </ul>
+ <p className="mt-2 mb-0 text-xs text-amber-600">
+ This is a warning only — the host can still proceed. Helping maintain show fairness per NAMHSA guidelines.
+ </p>
+ </div>
+ )}
 
  {/* Judge List */}
  {judges.length === 0 ? (
