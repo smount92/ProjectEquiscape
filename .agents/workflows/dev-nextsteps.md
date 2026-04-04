@@ -86,17 +86,16 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
-## 🚨 Task H-1: Fix Insurance Report Bugs (Beta Feedback)
+## ✅ Task H-1: Insurance Report Bug Fixes — DONE (2026-04-04)
 
 **Workflow:** `.agents/workflows/fix-insurance-report-bugs.md`
-**Source:** Beta user DM (2026-04-04) — blank photos + deleted horses in report + stale counts
-**3 confirmed issues:**
-1. 🔴 **Deleted horses appear in Insurance Report** — `getInsuranceReportData()` and `InsuranceReportButton` count both MISSING `.is("deleted_at", null)`. Trivial fix.
-2. 🔴 **Photos blank in Insurance Report PDF** — `@react-pdf/renderer` <Image> fails on cross-origin Supabase URLs. Fix: convert to base64 server-side before PDF generation. Also: add fallback to any photo angle (not just `Primary_Thumbnail`).
-3. 🟡 **Collection count mismatch (13 vs 23)** — Likely stale ISR cache on dashboard. Fix: add `export const dynamic = "force-dynamic"` to authenticated dashboard page.
-**Files to modify:** `insurance-report.ts`, `InsuranceReportButton.tsx`, `route.ts` (API), `dashboard/page.tsx`
-**Status:** Workflow ready — execution pending
-**Estimated effort:** ~45 minutes
+**Source:** Beta user DM — 3 confirmed/suspected issues
+**Fixes applied:**
+1. ✅ **Deleted horses filtered** — `.is("deleted_at", null)` added to `getInsuranceReportData()` + `InsuranceReportButton` count query
+2. ✅ **Photos now render** — base64 conversion server-side (batch parallel, 10-at-a-time, 3s timeout) bypasses CORS in `@react-pdf/renderer`
+3. ✅ **API route photo fallback** — any angle accepted (not only `Primary_Thumbnail`), prefers thumbnail when available
+4. ✅ **Dashboard force-dynamic** — `export const dynamic = "force-dynamic"` prevents stale collection counts
+**Status:** ✅ COMPLETE — 0 errors, build clean
 
 ---
 

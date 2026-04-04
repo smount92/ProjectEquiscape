@@ -61,6 +61,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
          horse_images(image_url, angle_profile)`
             )
             .eq("owner_id", user.id)
+            .is("deleted_at", null)
             .order("custom_name");
 
         // Filter by collection if provided (OOM prevention for large herds)
@@ -102,15 +103,47 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
         let totalValue = 0;
         const reportHorses: HorseReportData[] = [];
 
-        // ── Generate public URLs for images (1 sync call, no API) ──
-        const signedUrlMap = new Map<string, string>();
+        // ── Generate public URLs for images (sync, no API) ──
+        const photoUrlMap = new Map<string, string>();
         for (const horse of horses) {
             const thumb = horse.horse_images?.find(
                 (img) => img.angle_profile === "Primary_Thumbnail"
             );
             const imageUrl = thumb?.image_url || horse.horse_images?.[0]?.image_url;
             if (imageUrl) {
-                signedUrlMap.set(horse.id, getPublicImageUrl(imageUrl));
+                photoUrlMap.set(horse.id, getPublicImageUrl(imageUrl));
+            }
+        }
+
+        // ── Convert photos to base64 to bypass CORS in @react-pdf/renderer ──
+        const base64Map = new Map<string, string>();
+        const photoEntries = Array.from(photoUrlMap.entries());
+        for (let i = 0; i < photoEntries.length; i += 10) {
+            const batch = photoEntries.slice(i, i + 10);
+            const results = await Promise.allSettled(
+                batch.map(async ([horseId, publicUrl]) => {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 3000);
+                    try {
+                        const response = await fetch(publicUrl, { signal: controller.signal });
+                        clearTimeout(timeout);
+                        if (response.ok) {
+                            const buffer = await response.arrayBuffer();
+                            const base64 = Buffer.from(buffer).toString("base64");
+                            const contentType = response.headers.get("content-type") || "image/jpeg";
+                            return { horseId, data: `data:${contentType};base64,${base64}` };
+                        }
+                        return null;
+                    } catch {
+                        clearTimeout(timeout);
+                        return null;
+                    }
+                })
+            );
+            for (const result of results) {
+                if (result.status === "fulfilled" && result.value) {
+                    base64Map.set(result.value.horseId, result.value.data);
+                }
             }
         }
 
@@ -134,7 +167,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
                 finish: horse.finish_type ?? "OF",
                 purchasePrice: vault?.purchase_price ?? null,
                 estimatedValue: vault?.estimated_current_value ?? null,
-                photoUrl: signedUrlMap.get(horse.id) || null,
+                photoUrl: base64Map.get(horse.id) || null,
             });
         }
 

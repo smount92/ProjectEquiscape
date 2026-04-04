@@ -36,6 +36,7 @@ export default function InsuranceReportButton() {
  .from("user_horses")
  .select("id", { count:"exact", head: true })
  .eq("owner_id", user.id)
+ .is("deleted_at", null)
  .then(({ count }) => setHorseCount(count ?? 0));
  }
  });

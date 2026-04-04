@@ -31,17 +31,19 @@ export async function GET() {
             .eq("id", user.id)
             .single();
 
-        // Fetch primary thumbnail URLs for each horse
+        // Fetch image URLs for each horse (prefer Primary_Thumbnail, fall back to any angle)
         const horseIds = (horses || []).map((h: { id: string }) => h.id);
         const { data: images } = await supabase
             .from("horse_images")
-            .select("horse_id, image_url")
-            .in("horse_id", horseIds.length > 0 ? horseIds : ["__none__"])
-            .eq("angle_profile", "Primary_Thumbnail");
+            .select("horse_id, image_url, angle_profile")
+            .in("horse_id", horseIds.length > 0 ? horseIds : ["__none__"]);
 
         const thumbnailMap = new Map<string, string>();
-        (images || []).forEach((img: { horse_id: string; image_url: string }) => {
-            thumbnailMap.set(img.horse_id, img.image_url);
+        (images || []).forEach((img: { horse_id: string; image_url: string; angle_profile: string }) => {
+            // Only set if no entry yet, or if this is the preferred Primary_Thumbnail
+            if (!thumbnailMap.has(img.horse_id) || img.angle_profile === "Primary_Thumbnail") {
+                thumbnailMap.set(img.horse_id, img.image_url);
+            }
         });
 
         // Pro users: fetch market replacement values from mv_market_prices
