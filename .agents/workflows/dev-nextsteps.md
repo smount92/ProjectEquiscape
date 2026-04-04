@@ -86,26 +86,31 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
-## 🚨 Task C-1: V43 Community Experience Deep Dive
+## ✅ Task C-1: V43 Community Experience Deep Dive — DONE (2026-04-04)
 
 **Audit:** `.agents/docs/community-commenting-audit.md` (Task 1 output)
 **Workflows (execute in order):**
-1. `.agents/workflows/v43-community-audit.md` — Systematic audit of all 10 commenting surfaces
-2. `.agents/workflows/v43-community-implementation.md` — Shared primitives + surface upgrades (5 phases)
+1. ✅ `.agents/workflows/v43-community-audit.md` — Systematic audit of all 10 commenting surfaces — **DONE (2026-04-04)**
+2. ✅ `.agents/workflows/v43-community-implementation.md` — Shared primitives + surface upgrades — **DONE (2026-04-04)**
 **Architecture:** 5 shared primitives in `src/components/social/`:
-- `UserAvatar` — consistent avatar circle with hash-based fallback color
-- `PostHeader` — avatar + alias + timestamp + badge + actions slot
-- `HorseEmbedCard` — rich horse preview (name + thumbnail + trade status)
-- `ReactionBar` — like + reply toggle (warm palette)
-- `ReplyComposer` — inline reply with avatar + "replying to" context
+- ✅ `UserAvatar` — consistent avatar circle with hash-based fallback color
+- ✅ `PostHeader` — avatar + alias + timestamp + badge + actions slot
+- ✅ `HorseEmbedCard` — rich horse preview (name + thumbnail + trade status)
+- ✅ `ReactionBar` — like + reply toggle (warm palette, optimistic updates)
+- ✅ `ReplyComposer` — inline reply with avatar + "replying to" context
 **Key constraint:** Domain boundaries respected:
-- `UniversalFeed` → imports ALL 5 primitives (fixes Groups, Feed, Events, Passports, Profiles)
-- `CommissionTimeline` → imports `UserAvatar` + `PostHeader` only (keeps `commission_updates` table)
-- `ChatThread` → imports `UserAvatar` only (keeps `messages` table)
-- `SuggestionCommentThread` → imports `PostHeader` + `ReplyComposer`
-- `HoofprintTimeline` → NOT a comment system, no changes
-**Status:** ✅ Audit COMPLETE (2026-04-04) — `.agents/docs/community-commenting-audit.md` — awaiting human review before implementation
-**Estimated effort:** ~7 days (Phase 1: 2d, Phase 2: 2d, Phase 3: 1.5d, Phase 4: 1d, Phase 5: 0.5d)
+- ✅ `UniversalFeed` → imports ALL 5 primitives (fixes Groups, Feed, Events, Passports, Profiles)
+- ✅ `SuggestionCommentThread` → rewritten with `PostHeader` + `ReplyComposer`
+- ✅ `HelpIdDetailClient` → added `UserAvatar` + warm palette migration
+- ✅ `RichText` → fixed global underline bug, removed legacy CSS variable
+- ✅ `LikeToggle` → migrated to warm palette tokens
+- `CommissionTimeline` → deferred (needs targeted polish only)
+- `ChatThread` → deferred (needs targeted polish only)
+- `HoofprintTimeline` → NOT a comment system, no changes needed
+**Data model:** `authorAvatarUrl` added to `Post` type + query layer via `users.avatar_url`
+**New server action:** `getHorseEmbedData` for rich horse embed cards
+**Post type updated:** `authorAvatarUrl` added throughout `getPosts()` response chain
+**Status:** ✅ IMPLEMENTATION COMPLETE (2026-04-04) — 2 commits, 0 errors, 245 tests pass
 
 ---
 
