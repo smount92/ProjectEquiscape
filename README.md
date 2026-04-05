@@ -71,23 +71,26 @@ Comprehensive developer documentation lives in the [`docs/`](docs/) directory:
 ## 🧪 Testing
 
 ```bash
-npm run test               # Vitest unit/integration + component tests
+npm run test               # Vitest unit/integration + component tests (~5s)
 npm run test:unit:watch    # Watch mode for development
 npm run test:unit:coverage # Coverage report (HTML at coverage/)
 npm run test:components    # Component tests only (React Testing Library)
 npm run test:e2e           # Playwright E2E (requires dev server running)
+npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 ```
 
-**194 tests across 20 test files:**
+**266 tests across 24 test files:**
 - Utility functions at 100% coverage (mentions, validation, storage, rateLimit)
-- Server action integration tests (transactions, horse, provenance, collections, hoofprint)
+- Server action integration tests (transactions, horse, provenance, collections, hoofprint, shows, catalog-suggestions)
 - API route tests (auth, export, cron, reference-dictionary, identify-mold)
-- Component tests (PhotoLightbox, TrophyCase, MarketFilters, MakeOfferModal, HoofprintTimeline) — 58 React Testing Library tests
-- 7 E2E specs: smoke, auth, inventory, safe-trade, hoofprint-transfer, show-entry, accessibility
+- Component tests (PhotoLightbox, TrophyCase, MarketFilters, MakeOfferModal, HoofprintTimeline, SuggestionVoteButtons) — 64 React Testing Library tests
+- 8 E2E specs: smoke, auth, inventory, safe-trade, hoofprint-transfer, show-entry, accessibility (axe-core WCAG 2.0 AA), device-layout (60 viewport tests)
+
+**Test Accounts (E2E):** Two test accounts configured in `.env.local` (TestBotA/TestBotB).
 
 **CI:** GitHub Actions runs build + tests on every push (`.github/workflows/ci.yml`).
 
-**Pre-commit:** Husky runs unit tests on every commit.
+**Pre-commit:** Husky runs unit tests before every commit — blocks if tests fail.
 
 ## 📊 Codebase Scale
 
@@ -96,11 +99,12 @@ npm run test:e2e           # Playwright E2E (requires dev server running)
 | Page routes | 28+ route groups |
 | Client components | 110 |
 | Server action files | 35 |
-| Database migrations | 85 (001–089) |
+| Database migrations | 111 (001–111) |
 | Reference catalog entries | 10,500+ |
 | CSS files | 49 (19 Modules + 30 extracted) |
-| Unit/component tests | 194 (20 test files) |
-| CI | GitHub Actions |
+| Unit/integration/component tests | 266 (24 test files) |
+| E2E specs | 8 (Playwright + axe-core) |
+| CI | GitHub Actions + Husky pre-commit |
 
 ## 🚀 Deployment
 
