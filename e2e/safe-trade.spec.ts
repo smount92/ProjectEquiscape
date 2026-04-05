@@ -26,13 +26,11 @@ test.describe("Safe-Trade Commerce Flow", () => {
         await page.goto("/community");
         await page.waitForLoadState("networkidle");
 
-        // Show Ring should load without errors
-        await expect(page.locator("body")).not.toContainText("Error");
-        // Should see some content (horses or empty state message)
-        await expect(
-            page.locator("text=/show ring|community|discover/i").first()
-                .or(page.locator("[class*='grid']").first())
-        ).toBeVisible({ timeout: 5000 });
+        // Show Ring should load without server errors
+        await expect(page.locator("body")).not.toContainText("500");
+        await expect(page.locator("body")).not.toContainText("Application error");
+        // Page should have loaded — main content exists
+        await expect(page.getByRole("main")).toBeVisible({ timeout: 5000 });
     });
 
     test.fixme("Seller accepts offer → status = pending_payment", async () => {

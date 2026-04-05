@@ -1,0 +1,418 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "Model Horse Hub — Home" [ref=e3] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=e4]: 🐴
+      - generic [ref=e5]: MHH
+    - button "Open menu" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - heading "Digital Stableuser_5ae5879d's Herd" [level=1] [ref=e12]:
+          - text: Digital Stable
+          - generic [ref=e13]: user_5ae5879d's Herd
+        - generic [ref=e14]:
+          - link "Batch Import" [ref=e15] [cursor=pointer]:
+            - /url: /stable/import
+            - img [ref=e16]
+            - text: Batch Import
+          - link "Quick Add" [ref=e19] [cursor=pointer]:
+            - /url: /add-horse/quick
+            - img [ref=e20]
+            - text: Quick Add
+          - link "Add to Stable" [ref=e22] [cursor=pointer]:
+            - /url: /add-horse
+            - img [ref=e23]
+            - text: Add to Stable
+      - main [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]: 18 models
+          - button "Export CSV" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - text: Export CSV
+          - button "📄 Insurance Report" [ref=e33] [cursor=pointer]
+        - generic [ref=e34]:
+          - main [ref=e35]:
+            - generic [ref=e36]:
+              - generic [ref=e37]:
+                - button "🖼️ Gallery" [ref=e38] [cursor=pointer]
+                - button "📋 Ledger" [ref=e39] [cursor=pointer]
+              - button "☑ Select" [ref=e40] [cursor=pointer]
+            - generic [ref=e41]:
+              - generic [ref=e43]:
+                - img [ref=e44]
+                - textbox "Search horses" [ref=e47]:
+                  - /placeholder: Search your stable by name, mold, release, or sculptor…
+                - generic [ref=e48]: /
+              - combobox "Sort your stable" [ref=e49]:
+                - option "🕐 Newest First" [selected]
+                - option "🕐 Oldest First"
+                - option "🔤 Name A→Z"
+                - option "🔤 Name Z→A"
+                - option "⭐ By Condition"
+            - generic [ref=e50]:
+              - link "🐴 No photo E2E Test Horse 1775433073871 Unlisted Mold OF Mint Apr 5, 2026" [ref=e52] [cursor=pointer]:
+                - /url: /stable/467e2ceb-15c5-4ba9-b4cc-30e064cc9171
+                - generic [ref=e54]:
+                  - generic [ref=e55]: 🐴
+                  - generic [ref=e56]: No photo
+                - generic [ref=e57]:
+                  - heading "E2E Test Horse 1775433073871" [level=3] [ref=e58]
+                  - paragraph [ref=e59]: Unlisted Mold
+                  - generic [ref=e60]:
+                    - generic [ref=e61]: OF
+                    - generic [ref=e62]: Mint
+                  - generic [ref=e64]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775433053999 Unlisted Mold OF Mint Apr 5, 2026" [ref=e66] [cursor=pointer]:
+                - /url: /stable/6e2d6e92-4d7f-4c3b-8e43-c568c46c8256
+                - generic [ref=e68]:
+                  - generic [ref=e69]: 🐴
+                  - generic [ref=e70]: No photo
+                - generic [ref=e71]:
+                  - heading "E2E Test Horse 1775433053999" [level=3] [ref=e72]
+                  - paragraph [ref=e73]: Unlisted Mold
+                  - generic [ref=e74]:
+                    - generic [ref=e75]: OF
+                    - generic [ref=e76]: Mint
+                  - generic [ref=e78]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775433009747 Unlisted Mold OF Mint Apr 5, 2026" [ref=e80] [cursor=pointer]:
+                - /url: /stable/f574f19c-6c97-4d44-85d0-44b79bc60f93
+                - generic [ref=e82]:
+                  - generic [ref=e83]: 🐴
+                  - generic [ref=e84]: No photo
+                - generic [ref=e85]:
+                  - heading "E2E Test Horse 1775433009747" [level=3] [ref=e86]
+                  - paragraph [ref=e87]: Unlisted Mold
+                  - generic [ref=e88]:
+                    - generic [ref=e89]: OF
+                    - generic [ref=e90]: Mint
+                  - generic [ref=e92]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775433009742 Unlisted Mold OF Mint Apr 5, 2026" [ref=e94] [cursor=pointer]:
+                - /url: /stable/47b2b26a-0a2e-441f-82b5-abf8ba3df0c1
+                - generic [ref=e96]:
+                  - generic [ref=e97]: 🐴
+                  - generic [ref=e98]: No photo
+                - generic [ref=e99]:
+                  - heading "E2E Test Horse 1775433009742" [level=3] [ref=e100]
+                  - paragraph [ref=e101]: Unlisted Mold
+                  - generic [ref=e102]:
+                    - generic [ref=e103]: OF
+                    - generic [ref=e104]: Mint
+                  - generic [ref=e106]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775433009666 Unlisted Mold OF Mint Apr 5, 2026" [ref=e108] [cursor=pointer]:
+                - /url: /stable/0056cea6-1986-4892-96fb-da13f31fad18
+                - generic [ref=e110]:
+                  - generic [ref=e111]: 🐴
+                  - generic [ref=e112]: No photo
+                - generic [ref=e113]:
+                  - heading "E2E Test Horse 1775433009666" [level=3] [ref=e114]
+                  - paragraph [ref=e115]: Unlisted Mold
+                  - generic [ref=e116]:
+                    - generic [ref=e117]: OF
+                    - generic [ref=e118]: Mint
+                  - generic [ref=e120]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775433009720 Unlisted Mold OF Mint Apr 5, 2026" [ref=e122] [cursor=pointer]:
+                - /url: /stable/e0930b5e-b3c2-4119-bc92-f307f4bbb19d
+                - generic [ref=e124]:
+                  - generic [ref=e125]: 🐴
+                  - generic [ref=e126]: No photo
+                - generic [ref=e127]:
+                  - heading "E2E Test Horse 1775433009720" [level=3] [ref=e128]
+                  - paragraph [ref=e129]: Unlisted Mold
+                  - generic [ref=e130]:
+                    - generic [ref=e131]: OF
+                    - generic [ref=e132]: Mint
+                  - generic [ref=e134]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775431245733 Unlisted Mold OF Mint Apr 5, 2026" [ref=e136] [cursor=pointer]:
+                - /url: /stable/b688ca52-9b99-410f-96c0-e19368cceb69
+                - generic [ref=e138]:
+                  - generic [ref=e139]: 🐴
+                  - generic [ref=e140]: No photo
+                - generic [ref=e141]:
+                  - heading "E2E Test Horse 1775431245733" [level=3] [ref=e142]
+                  - paragraph [ref=e143]: Unlisted Mold
+                  - generic [ref=e144]:
+                    - generic [ref=e145]: OF
+                    - generic [ref=e146]: Mint
+                  - generic [ref=e148]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775431245747 Unlisted Mold OF Mint Apr 5, 2026" [ref=e150] [cursor=pointer]:
+                - /url: /stable/58ad7f54-b60a-42d2-a8b6-a0aef42e36ce
+                - generic [ref=e152]:
+                  - generic [ref=e153]: 🐴
+                  - generic [ref=e154]: No photo
+                - generic [ref=e155]:
+                  - heading "E2E Test Horse 1775431245747" [level=3] [ref=e156]
+                  - paragraph [ref=e157]: Unlisted Mold
+                  - generic [ref=e158]:
+                    - generic [ref=e159]: OF
+                    - generic [ref=e160]: Mint
+                  - generic [ref=e162]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775431245716 Unlisted Mold OF Mint Apr 5, 2026" [ref=e164] [cursor=pointer]:
+                - /url: /stable/b09e302e-b77c-43f6-8754-2421cf5b49fe
+                - generic [ref=e166]:
+                  - generic [ref=e167]: 🐴
+                  - generic [ref=e168]: No photo
+                - generic [ref=e169]:
+                  - heading "E2E Test Horse 1775431245716" [level=3] [ref=e170]
+                  - paragraph [ref=e171]: Unlisted Mold
+                  - generic [ref=e172]:
+                    - generic [ref=e173]: OF
+                    - generic [ref=e174]: Mint
+                  - generic [ref=e176]: Apr 5, 2026
+              - link "🐴 No photo E2E Test Horse 1775431245746 Unlisted Mold OF Mint Apr 5, 2026" [ref=e178] [cursor=pointer]:
+                - /url: /stable/276fbf8e-6b46-4e69-a89d-cc47ed02449d
+                - generic [ref=e180]:
+                  - generic [ref=e181]: 🐴
+                  - generic [ref=e182]: No photo
+                - generic [ref=e183]:
+                  - heading "E2E Test Horse 1775431245746" [level=3] [ref=e184]
+                  - paragraph [ref=e185]: Unlisted Mold
+                  - generic [ref=e186]:
+                    - generic [ref=e187]: OF
+                    - generic [ref=e188]: Mint
+                  - generic [ref=e190]: Apr 5, 2026
+              - link "🐴 No photo Test Horse 1 Unlisted Mold OF Mint Mar 24, 2026" [ref=e192] [cursor=pointer]:
+                - /url: /stable/470bfe6d-ea0e-4435-bf6c-fd7edfa5c040
+                - generic [ref=e194]:
+                  - generic [ref=e195]: 🐴
+                  - generic [ref=e196]: No photo
+                - generic [ref=e197]:
+                  - heading "Test Horse 1" [level=3] [ref=e198]
+                  - paragraph [ref=e199]: Unlisted Mold
+                  - generic [ref=e200]:
+                    - generic [ref=e201]: OF
+                    - generic [ref=e202]: Mint
+                  - generic [ref=e204]: Mar 24, 2026
+              - link "🐴 No photo Test Horse 1 Unlisted Mold OF Mint Mar 24, 2026" [ref=e206] [cursor=pointer]:
+                - /url: /stable/0ffe809f-e90c-4ef7-9ee9-5e79a0dde183
+                - generic [ref=e208]:
+                  - generic [ref=e209]: 🐴
+                  - generic [ref=e210]: No photo
+                - generic [ref=e211]:
+                  - heading "Test Horse 1" [level=3] [ref=e212]
+                  - paragraph [ref=e213]: Unlisted Mold
+                  - generic [ref=e214]:
+                    - generic [ref=e215]: OF
+                    - generic [ref=e216]: Mint
+                  - generic [ref=e218]: Mar 24, 2026
+              - link "🐴 No photo Test Horse 1 Unlisted Mold OF Mint Mar 24, 2026" [ref=e220] [cursor=pointer]:
+                - /url: /stable/b58cf3d6-92a7-472f-bc91-052a78ce84f7
+                - generic [ref=e222]:
+                  - generic [ref=e223]: 🐴
+                  - generic [ref=e224]: No photo
+                - generic [ref=e225]:
+                  - heading "Test Horse 1" [level=3] [ref=e226]
+                  - paragraph [ref=e227]: Unlisted Mold
+                  - generic [ref=e228]:
+                    - generic [ref=e229]: OF
+                    - generic [ref=e230]: Mint
+                  - generic [ref=e232]: Mar 24, 2026
+              - link "🐴 No photo Test Horse 1 Unlisted Mold OF Mint Mar 24, 2026" [ref=e234] [cursor=pointer]:
+                - /url: /stable/00385e5d-b8d0-4ed1-8829-5afafffb4c18
+                - generic [ref=e236]:
+                  - generic [ref=e237]: 🐴
+                  - generic [ref=e238]: No photo
+                - generic [ref=e239]:
+                  - heading "Test Horse 1" [level=3] [ref=e240]
+                  - paragraph [ref=e241]: Unlisted Mold
+                  - generic [ref=e242]:
+                    - generic [ref=e243]: OF
+                    - generic [ref=e244]: Mint
+                  - generic [ref=e246]: Mar 24, 2026
+              - link "🐴 No photo Test Horse 1 Unlisted Mold OF Mint Mar 24, 2026" [ref=e248] [cursor=pointer]:
+                - /url: /stable/aebfbe56-c960-40c9-b91e-62061f9081a3
+                - generic [ref=e250]:
+                  - generic [ref=e251]: 🐴
+                  - generic [ref=e252]: No photo
+                - generic [ref=e253]:
+                  - heading "Test Horse 1" [level=3] [ref=e254]
+                  - paragraph [ref=e255]: Unlisted Mold
+                  - generic [ref=e256]:
+                    - generic [ref=e257]: OF
+                    - generic [ref=e258]: Mint
+                  - generic [ref=e260]: Mar 24, 2026
+              - link "🐴 No photo Test Horse 1 Unlisted Mold OF Mint Mar 24, 2026" [ref=e262] [cursor=pointer]:
+                - /url: /stable/a1684abd-ece8-4987-afdc-239af30aff5e
+                - generic [ref=e264]:
+                  - generic [ref=e265]: 🐴
+                  - generic [ref=e266]: No photo
+                - generic [ref=e267]:
+                  - heading "Test Horse 1" [level=3] [ref=e268]
+                  - paragraph [ref=e269]: Unlisted Mold
+                  - generic [ref=e270]:
+                    - generic [ref=e271]: OF
+                    - generic [ref=e272]: Mint
+                  - generic [ref=e274]: Mar 24, 2026
+              - link "🐴 No photo Test Horse 1 Unlisted Mold OF Mint Mar 24, 2026" [ref=e276] [cursor=pointer]:
+                - /url: /stable/888c4cf8-f1d2-43d7-828f-f965b735698d
+                - generic [ref=e278]:
+                  - generic [ref=e279]: 🐴
+                  - generic [ref=e280]: No photo
+                - generic [ref=e281]:
+                  - heading "Test Horse 1" [level=3] [ref=e282]
+                  - paragraph [ref=e283]: Unlisted Mold
+                  - generic [ref=e284]:
+                    - generic [ref=e285]: OF
+                    - generic [ref=e286]: Mint
+                  - generic [ref=e288]: Mar 24, 2026
+              - link "🐴 No photo Test Horse 1 Unlisted Mold OF Mint Mar 24, 2026" [ref=e290] [cursor=pointer]:
+                - /url: /stable/5fb74f30-b900-4a17-9500-d1553e3e95ab
+                - generic [ref=e292]:
+                  - generic [ref=e293]: 🐴
+                  - generic [ref=e294]: No photo
+                - generic [ref=e295]:
+                  - heading "Test Horse 1" [level=3] [ref=e296]
+                  - paragraph [ref=e297]: Unlisted Mold
+                  - generic [ref=e298]:
+                    - generic [ref=e299]: OF
+                    - generic [ref=e300]: Mint
+                  - generic [ref=e302]: Mar 24, 2026
+          - complementary [ref=e303]:
+            - generic [ref=e304]:
+              - heading "Stable Overview" [level=3] [ref=e305]:
+                - img [ref=e306]
+                - text: Stable Overview
+              - generic [ref=e308]:
+                - generic [ref=e309]:
+                  - generic [ref=e310]:
+                    - img [ref=e311]
+                    - text: Total Models
+                  - generic [ref=e312]: "18"
+                - generic [ref=e313]:
+                  - generic [ref=e314]:
+                    - img [ref=e315]
+                    - text: Collections
+                  - generic [ref=e317]: "0"
+                - generic [ref=e318]:
+                  - generic [ref=e319]:
+                    - img [ref=e320]
+                    - text: Vault Value
+                  - generic [ref=e322]: —
+                - generic [ref=e323]:
+                  - generic [ref=e324]:
+                    - img [ref=e325]
+                    - text: Show Placings
+                  - generic [ref=e328]: "0"
+            - group [ref=e329]:
+              - generic "🏆 NAN 2026 Qualification Status" [ref=e330] [cursor=pointer]
+              - paragraph [ref=e331]: Track your NAN progress digitally — official NAN cards are issued by NAMHSA.
+              - generic [ref=e332]:
+                - generic [ref=e333]:
+                  - generic [ref=e334]: 🔴
+                  - link "Test Horse 1" [ref=e335] [cursor=pointer]:
+                    - /url: /community/5fb74f30-b900-4a17-9500-d1553e3e95ab
+                  - generic [ref=e337]: No cards yet
+                - generic [ref=e338]:
+                  - generic [ref=e339]: 🔴
+                  - link "Test Horse 1" [ref=e340] [cursor=pointer]:
+                    - /url: /community/a1684abd-ece8-4987-afdc-239af30aff5e
+                  - generic [ref=e342]: No cards yet
+                - generic [ref=e343]:
+                  - generic [ref=e344]: 🔴
+                  - link "Test Horse 1" [ref=e345] [cursor=pointer]:
+                    - /url: /community/aebfbe56-c960-40c9-b91e-62061f9081a3
+                  - generic [ref=e347]: No cards yet
+                - generic [ref=e348]:
+                  - generic [ref=e349]: 🔴
+                  - link "Test Horse 1" [ref=e350] [cursor=pointer]:
+                    - /url: /community/00385e5d-b8d0-4ed1-8829-5afafffb4c18
+                  - generic [ref=e352]: No cards yet
+                - generic [ref=e353]:
+                  - generic [ref=e354]: 🔴
+                  - link "Test Horse 1" [ref=e355] [cursor=pointer]:
+                    - /url: /community/b58cf3d6-92a7-472f-bc91-052a78ce84f7
+                  - generic [ref=e357]: No cards yet
+                - generic [ref=e358]:
+                  - generic [ref=e359]: 🔴
+                  - link "Test Horse 1" [ref=e360] [cursor=pointer]:
+                    - /url: /community/0ffe809f-e90c-4ef7-9ee9-5e79a0dde183
+                  - generic [ref=e362]: No cards yet
+                - generic [ref=e363]:
+                  - generic [ref=e364]: 🔴
+                  - link "Test Horse 1" [ref=e365] [cursor=pointer]:
+                    - /url: /community/888c4cf8-f1d2-43d7-828f-f965b735698d
+                  - generic [ref=e367]: No cards yet
+                - generic [ref=e368]:
+                  - generic [ref=e369]: 🔴
+                  - link "Test Horse 1" [ref=e370] [cursor=pointer]:
+                    - /url: /community/470bfe6d-ea0e-4435-bf6c-fd7edfa5c040
+                  - generic [ref=e372]: No cards yet
+                - generic [ref=e373]:
+                  - generic [ref=e374]: 🔴
+                  - link "E2E Test Horse 1775431245746" [ref=e375] [cursor=pointer]:
+                    - /url: /community/276fbf8e-6b46-4e69-a89d-cc47ed02449d
+                  - generic [ref=e377]: No cards yet
+                - generic [ref=e378]:
+                  - generic [ref=e379]: 🔴
+                  - link "E2E Test Horse 1775431245716" [ref=e380] [cursor=pointer]:
+                    - /url: /community/b09e302e-b77c-43f6-8754-2421cf5b49fe
+                  - generic [ref=e382]: No cards yet
+                - paragraph [ref=e383]: + 8 more horses
+              - link "🧳 Live Show Packer" [ref=e385] [cursor=pointer]:
+                - /url: /shows/planner
+  - contentinfo [ref=e386]:
+    - generic [ref=e387]:
+      - generic [ref=e388]:
+        - link "🐴 Model Horse Hub" [ref=e389] [cursor=pointer]:
+          - /url: /
+        - paragraph [ref=e390]: Built by collectors, for collectors.
+      - generic [ref=e391]:
+        - generic [ref=e392]:
+          - heading "Platform" [level=4] [ref=e393]
+          - link "Show Ring" [ref=e394] [cursor=pointer]:
+            - /url: /discover
+          - link "Price Guide" [ref=e395] [cursor=pointer]:
+            - /url: /market
+          - link "Art Studio" [ref=e396] [cursor=pointer]:
+            - /url: /studio
+          - link "Photo Shows" [ref=e397] [cursor=pointer]:
+            - /url: /shows
+        - generic [ref=e398]:
+          - heading "Community" [level=4] [ref=e399]
+          - link "Groups" [ref=e400] [cursor=pointer]:
+            - /url: /community/groups
+          - link "Events" [ref=e401] [cursor=pointer]:
+            - /url: /community/events
+          - link "Activity Feed" [ref=e402] [cursor=pointer]:
+            - /url: /feed
+          - link "Help ID" [ref=e403] [cursor=pointer]:
+            - /url: /community/help-id
+        - generic [ref=e404]:
+          - heading "Company" [level=4] [ref=e405]
+          - link "About Us" [ref=e406] [cursor=pointer]:
+            - /url: /about
+          - link "Contact Us" [ref=e407] [cursor=pointer]:
+            - /url: /contact
+          - link "FAQ" [ref=e408] [cursor=pointer]:
+            - /url: /faq
+          - link "Getting Started" [ref=e409] [cursor=pointer]:
+            - /url: /getting-started
+    - generic [ref=e410]:
+      - generic [ref=e411]: © 2026 Model Horse Hub. All rights reserved.
+      - generic [ref=e412]:
+        - link "Privacy" [ref=e413] [cursor=pointer]:
+          - /url: /privacy
+        - generic [ref=e414]: ·
+        - link "Terms" [ref=e415] [cursor=pointer]:
+          - /url: /terms
+  - button "Open Next.js Dev Tools" [ref=e421] [cursor=pointer]:
+    - img [ref=e422]
+  - alert [ref=e425]
+  - dialog "Cookie consent" [ref=e426]:
+    - generic [ref=e427]:
+      - generic [ref=e428]:
+        - paragraph [ref=e429]:
+          - strong [ref=e430]: 🍪 Cookies & Privacy
+        - paragraph [ref=e431]:
+          - text: We use essential cookies for authentication and Google Analytics to understand how the site is used. No advertising or tracking cookies. See our
+          - link "Privacy Policy" [ref=e432] [cursor=pointer]:
+            - /url: /privacy
+          - text: for details.
+      - generic [ref=e433]:
+        - button "Accept" [ref=e434] [cursor=pointer]
+        - button "Decline Analytics" [ref=e435] [cursor=pointer]
+```
