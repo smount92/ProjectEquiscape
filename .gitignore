@@ -51,3 +51,5 @@ public/sw.js.map
 # Supabase CLI temp files
 supabase/.temp/
 supabase_schema_dump.sql
+test-results/  
+playwright-report/  
