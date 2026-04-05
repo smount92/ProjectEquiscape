@@ -5,6 +5,8 @@ import { loginAs, USER_A } from "./helpers/auth";
 test.describe("Accessibility Audit", () => {
     test("landing page has no critical a11y violations", async ({ page }) => {
         await page.goto("/");
+        await page.waitForLoadState("networkidle");
+
         const results = await new AxeBuilder({ page })
             .withTags(["wcag2a", "wcag2aa"])
             .disableRules(["color-contrast"]) // Dark theme causes false positives
@@ -15,13 +17,27 @@ test.describe("Accessibility Audit", () => {
         );
 
         if (critical.length > 0) {
-            console.log("Critical a11y violations:", JSON.stringify(critical, null, 2));
+            console.log(
+                "Critical a11y violations on landing:",
+                JSON.stringify(
+                    critical.map((v) => ({
+                        id: v.id,
+                        impact: v.impact,
+                        description: v.description,
+                        nodes: v.nodes.length,
+                    })),
+                    null,
+                    2
+                )
+            );
         }
         expect(critical).toHaveLength(0);
     });
 
     test("login page has no critical a11y violations", async ({ page }) => {
         await page.goto("/login");
+        await page.waitForLoadState("networkidle");
+
         const results = await new AxeBuilder({ page })
             .withTags(["wcag2a", "wcag2aa"])
             .disableRules(["color-contrast"])
@@ -30,6 +46,17 @@ test.describe("Accessibility Audit", () => {
         const critical = results.violations.filter(
             (v) => v.impact === "critical" || v.impact === "serious"
         );
+
+        if (critical.length > 0) {
+            console.log(
+                "Critical a11y violations on login:",
+                JSON.stringify(
+                    critical.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
+                    null,
+                    2
+                )
+            );
+        }
         expect(critical).toHaveLength(0);
     });
 
@@ -46,11 +73,24 @@ test.describe("Accessibility Audit", () => {
         const critical = results.violations.filter(
             (v) => v.impact === "critical" || v.impact === "serious"
         );
+
+        if (critical.length > 0) {
+            console.log(
+                "Critical a11y violations on dashboard:",
+                JSON.stringify(
+                    critical.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
+                    null,
+                    2
+                )
+            );
+        }
         expect(critical).toHaveLength(0);
     });
 
-    test("Show Ring (public) has no critical a11y violations", async ({ page }) => {
+    test("Show Ring has no critical a11y violations", async ({ page }) => {
         await page.goto("/community");
+        await page.waitForLoadState("networkidle");
+
         const results = await new AxeBuilder({ page })
             .withTags(["wcag2a", "wcag2aa"])
             .disableRules(["color-contrast"])
@@ -59,6 +99,17 @@ test.describe("Accessibility Audit", () => {
         const critical = results.violations.filter(
             (v) => v.impact === "critical" || v.impact === "serious"
         );
+
+        if (critical.length > 0) {
+            console.log(
+                "Critical a11y violations on Show Ring:",
+                JSON.stringify(
+                    critical.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
+                    null,
+                    2
+                )
+            );
+        }
         expect(critical).toHaveLength(0);
     });
 });
