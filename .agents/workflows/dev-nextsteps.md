@@ -92,9 +92,10 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 **Source:** Beta user DM — 3 confirmed/suspected issues
 **Fixes applied:**
 1. ✅ **Deleted horses filtered** — `.is("deleted_at", null)` added to `getInsuranceReportData()` + `InsuranceReportButton` count query
-2. ✅ **Photos now render** — base64 conversion server-side (batch parallel, 10-at-a-time, 3s timeout) bypasses CORS in `@react-pdf/renderer`
-3. ✅ **API route photo fallback** — any angle accepted (not only `Primary_Thumbnail`), prefers thumbnail when available
-4. ✅ **Dashboard force-dynamic** — `export const dynamic = "force-dynamic"` prevents stale collection counts
+2. ✅ **Photos now render** — Root cause: `@react-pdf/renderer` does NOT support WebP (only JPEG/PNG). All horse images are `.webp`. Fixed with `sharp` WebP→PNG conversion server-side. Also switched to admin client for storage downloads.
+3. ✅ **Collection filter fixed** — Insurance report only queried legacy `collection_id` FK, missing `horse_collections` junction table entries (13 vs 23 mismatch). Now merges both sources.
+4. ✅ **Dashboard collection counts** — Same junction table merge applied to dashboard (uses `Set<string>` dedup)
+5. ✅ **Dashboard force-dynamic** — `export const dynamic = "force-dynamic"` prevents stale counts
 **Status:** ✅ COMPLETE — 0 errors, build clean
 
 ---
