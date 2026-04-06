@@ -4,8 +4,22 @@ import { NextRequest } from "next/server";
 vi.stubEnv("CRON_SECRET", "test-cron-secret");
 
 const mockRpc = vi.fn().mockResolvedValue({ data: null, error: null });
+
+// Chainable query builder that evaluateComplexBadges expects from admin.from()
+const mockQueryBuilder = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    gt: vi.fn().mockReturnThis(),
+    not: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    insert: vi.fn().mockResolvedValue({ data: null, error: null }),
+    then: vi.fn((resolve: (v: { data: null; error: null }) => void) => resolve({ data: null, error: null })),
+};
+const mockFrom = vi.fn(() => mockQueryBuilder);
+
 vi.mock("@/lib/supabase/admin", () => ({
-    getAdminClient: vi.fn(() => ({ rpc: mockRpc })),
+    getAdminClient: vi.fn(() => ({ rpc: mockRpc, from: mockFrom })),
 }));
 
 import { GET } from "@/app/api/cron/refresh-market/route";
