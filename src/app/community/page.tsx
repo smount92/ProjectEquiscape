@@ -60,6 +60,7 @@ async function ShowRingContent({
  catalog_items:catalog_id(title, maker, scale, item_type),
  horse_images(image_url, angle_profile)
  `,
+ { count: "exact" }
  )
  .eq("visibility","public");
 
@@ -81,7 +82,8 @@ async function ShowRingContent({
  query = query.order("created_at", { ascending: false });
  }
 
- const { data: rawHorses } = await query.limit(60);
+ const PAGE_SIZE = 24;
+ const { data: rawHorses, count: totalCount } = await query.range(0, PAGE_SIZE - 1);
 
  // Filter out blocked users
  const { data: myBlocks } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", userId);
@@ -237,7 +239,7 @@ async function ShowRingContent({
   {/* Stats + Help ID link */}
   <div className="mt-6 flex items-center gap-6">
   <div className="flex items-baseline gap-2">
-  <span className="text-2xl font-bold text-forest">{communityCards.length}</span>
+  <span className="text-2xl font-bold text-forest">{totalCount ?? communityCards.length}</span>
   <span className="text-sm font-medium text-ink-light">Models Showcased</span>
   </div>
   <Link
@@ -253,7 +255,12 @@ async function ShowRingContent({
   {featuredHorse && <FeaturedHorseCard {...featuredHorse} />}
 
   {/* Grid with Search */}
-  <ShowRingGrid communityCards={communityCards} />
+  <ShowRingGrid
+   communityCards={communityCards}
+   totalCount={totalCount ?? communityCards.length}
+   initialHasMore={(totalCount ?? 0) > PAGE_SIZE}
+   currentFilters={searchParams}
+  />
  </>
  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -11,6 +11,8 @@ import FavoriteButton from "@/components/FavoriteButton";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getThumbUrl } from "@/lib/utils/imageUrl";
+import { loadMoreShowRing } from "@/app/actions/community";
+import type { ShowRingCard } from "@/app/actions/community";
 
 interface CommunityCardData {
  id: string;
@@ -81,9 +83,22 @@ function formatPrice(price: number | null): string | null {
  return `$${price.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }
 
-export default function ShowRingGrid({ communityCards }: { communityCards: CommunityCardData[] }) {
+export default function ShowRingGrid({
+ communityCards,
+ totalCount,
+ initialHasMore,
+ currentFilters,
+}: {
+ communityCards: CommunityCardData[];
+ totalCount: number;
+ initialHasMore: boolean;
+ currentFilters?: { q?: string; finishType?: string; tradeStatus?: string; sortBy?: string };
+}) {
  const router = useRouter();
  const currentParams = useSearchParams();
+ const [allCards, setAllCards] = useState<CommunityCardData[]>(communityCards);
+ const [hasMore, setHasMore] = useState(initialHasMore);
+ const [loadingMore, setLoadingMore] = useState(false);
 
  // Read current URL state for search bar local display
  const [searchInput, setSearchInput] = useState(currentParams.get("q") || "");
@@ -152,6 +167,28 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
 
  const isFiltering = currentParams.get("q") || currentParams.get("finishType") || currentParams.get("tradeStatus");
 
+ // Reset when server re-renders with new data (filter/search change)
+ useEffect(() => {
+  setAllCards(communityCards);
+  setHasMore(initialHasMore);
+ }, [communityCards, initialHasMore]);
+
+ const handleLoadMore = useCallback(async () => {
+  setLoadingMore(true);
+  try {
+   const result = await loadMoreShowRing(allCards.length, {
+    q: currentParams.get("q") || undefined,
+    finishType: currentParams.get("finishType") || undefined,
+    tradeStatus: currentParams.get("tradeStatus") || undefined,
+    sortBy: currentParams.get("sortBy") || undefined,
+   });
+   setAllCards((prev) => [...prev, ...(result.cards as unknown as CommunityCardData[])]);
+   setHasMore(result.hasMore);
+  } finally {
+   setLoadingMore(false);
+  }
+ }, [allCards.length, currentParams]);
+
  return (
   <>
    {communityCards.length > 0 && (
@@ -212,7 +249,7 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
      initial="hidden"
      animate="visible"
     >
-     {communityCards.map((horse) => {
+     {allCards.map((horse, index) => {
       const priceLabel = formatPrice(horse.listingPrice);
       const isListed = horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers";
       const isNew = Date.now() - new Date(horse.createdAt).getTime() < 48 * 60 * 60 * 1000;
@@ -332,6 +369,36 @@ export default function ShowRingGrid({ communityCards }: { communityCards: Commu
       );
      })}
     </motion.div>
+   )}
+
+   {/* Load More */}
+   {allCards.length > 0 && hasMore && (
+    <div className="mt-10 flex flex-col items-center gap-3">
+     <p className="text-sm text-stone-500">
+      Showing {allCards.length} of {totalCount} models
+     </p>
+     <button
+      onClick={handleLoadMore}
+      disabled={loadingMore}
+      className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-10 py-3 text-sm font-semibold text-stone-700 shadow-sm transition-all hover:border-stone-300 hover:bg-stone-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+      id="showring-load-more"
+     >
+      {loadingMore ? (
+       <>
+        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-stone-300 border-t-forest" />
+        Loading…
+       </>
+      ) : (
+       <>🐴 Show More Models</>
+      )}
+     </button>
+    </div>
+   )}
+
+   {allCards.length > 0 && !hasMore && allCards.length > 24 && (
+    <p className="mt-8 text-center text-sm text-stone-400">
+     You&apos;ve seen all {totalCount} models in the Show Ring 🏆
+    </p>
    )}
   </>
  );
