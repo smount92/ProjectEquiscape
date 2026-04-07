@@ -117,21 +117,22 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## 🚨 Task P-1: Friendly Photo URLs & Social Preview Cards
+## ✅ Task P-1: Friendly Photo URLs & Social Preview Cards — DONE (2026-04-07)
 
 **Workflow:** `.agents/workflows/photo-friendly-urls.md`
 **Source:** Open beta feedback — collectors want shareable photo links for Blab, Facebook, Instagram
 **Scope:** Short permanent URLs (`/photo/abc12xyz`) with full OG/Twitter preview cards
-**Implementation plan:**
+**Implementation:**
 1. Migration 112: `short_slug` column on `horse_images` + unique index + auto-assign trigger
 2. Backfill RPC for all existing rows (8-char URL-safe slugs)
 3. New `/photo/[slug]` server route with `generateMetadata` for rich social previews
 4. `PhotoShareView` client component with copy/share buttons
-5. Extend `ShareButton` with `url` prop, add share button to `PhotoLightbox`
-6. Wire `short_slug` through `PassportGallery`, stable page, community page
-**Files:** 10 files (3 new, 7 modified) — zero changes to existing upload/storage/delete flows
-**Status:** Workflow ready — execution pending
-**Estimated effort:** ~1.5 hours
+5. Extended `ShareButton` with `url` prop, added share button to `PhotoLightbox`
+6. Wired `short_slug` through `PassportGallery`, stable page, community page
+7. Updated `database.generated.ts` types for `short_slug`
+**Files:** 10 files (4 new, 7 modified)
+**Status:** ✅ COMPLETE — 0 TS errors, 266/266 tests pass, build clean (68 pages)
+**⚠️ Deploy step:** Run migration 112 in Supabase SQL editor, then `SELECT backfill_photo_short_slugs()` to populate existing images
 
 ---
 

@@ -1,6 +1,6 @@
 # Model Horse Hub — Project State & Strategic Research Brief
 
-> **Date:** April 3, 2026  
+> **Date:** April 7, 2026  
 > **Domain:** [modelhorsehub.com](https://modelhorsehub.com)  
 > **Purpose:** Comprehensive state-of-the-project report designed for input to a research agent. Identifies what has been built, what the platform's goals are, and where expansion or focus opportunities exist — all framed through the lens of the model horse collecting hobby.
 >
@@ -59,21 +59,22 @@ The hobby currently relies on:
 | **Design Language** | The Warm Parchment Restoration (Tactile, physical scrapbook aesthetics, strict custom semantic tailwind tokens: `bg-parchment`, `text-ink`, `border-edge`). Inline styles are strictly forbidden. |
 | **Backend / Database** | Supabase (PostgreSQL) with strict Row Level Security (RLS) |
 | **Auth** | Supabase Auth with PKCE (code exchange), password recovery flows |
-| **Storage** | Supabase Storage — private `horse-images` bucket with signed URLs |
+| **Storage** | Supabase Storage — public `horse-images` bucket (CDN-cacheable, no signed URLs), private `chat-attachments` bucket (signed URLs for DM photos) |
 | **Email** | Resend (transactional notifications) |
 | **Hosting** | Vercel |
 | **Data Engineering** | Custom Node.js/Cheerio web scraper with Levenshtein fuzzy-matching, plus Server-Side Catalog Search via `search_catalog_fuzzy` RPC |
 | **Testing** | Vitest (smoke tests) |
 
-### Codebase Scale (as of March 8, 2026)
+### Codebase Scale (as of April 7, 2026)
 
 | Metric | Count |
 |---|---|
-| Server Actions | 20 files (~122 KB) |
-| Client Components | 49 files (~254 KB) |
-| Database Migrations | 110 SQL files |
-| Reference Data | 7,000+ Breyer/Stone releases + 3,500+ Artist Resins |
-| Git Commits | 40+ (project started early March 2026) |
+| Server Actions | 21 files (~130 KB) |
+| Client Components | 55+ files (~280 KB) |
+| Database Migrations | 111 SQL files |
+| Reference Data | 10,964 catalog items (Breyer/Stone/ERD combined) |
+| Shared Social Primitives | 5 (`UserAvatar`, `PostHeader`, `HorseEmbedCard`, `ReactionBar`, `ReplyComposer`) |
+| Git Commits | 60+ (project started early March 2026) |
 
 ### Database Schema (Key Tables)
 
@@ -84,10 +85,10 @@ The hobby currently relies on:
 | `artist_resins` | ERD-sourced resin catalog (~3,500+ rows) |
 | `user_horses` | Core inventory — each horse a collector owns |
 | `financial_vault` | Strictly private: purchase price, estimated value, receipt status |
-| `horse_images` | LSQ Photo Suite — 5 standard angles + unlimited extras |
+| `horse_images` | LSQ Photo Suite — 5 standard angles + unlimited extras. Public bucket (CDN-cacheable URLs). Pending: `short_slug` for friendly share URLs |
 | `user_collections` | Personal folders for organizing inventory |
 | `user_wishlists` | "Grail hunting" targets linked to reference data |
-| `conversations` / `messages` | Native inbox for buyer-seller communication |
+| `conversations` / `messages` / `media_attachments` | Native inbox with DM photo attachments (up to 5 per message) |
 | `horse_favorites` / `horse_comments` | Social interactions on public horses |
 | `user_ratings` | 5-star marketplace trust ratings |
 | `user_follows` | Follow system between collectors |
@@ -138,7 +139,7 @@ The authenticated collector's home base:
 - **For-Sale Listings:** Mark horses with trade status, set listing prices, add marketplace notes
 - **Wishlist and Grail Hunting:** Search 10,500+ reference database entries to add to a personal wishlist
 - **Matchmaker Engine:** Automatically matches wishlist items to other users' for-sale horses, shows match badges with seller ratings
-- **Native Inbox** (`/inbox`): Threaded DMs between buyer and seller, linked to specific horses, with email notifications via Resend
+- **Native Inbox** (`/inbox`): Threaded DMs between buyer and seller, linked to specific horses, with email notifications via Resend. **Photo attachments** (up to 5 per message) with inline photo grid rendering and secure signed-URL access for conversation participants.
 - **Transaction Flow:** Mark conversations as complete, then rate the transaction
 - **User-to-User Ratings:** 5-star system with one-rating-per-conversation constraint, aggregate badges on profiles
 - **"Message Seller" / "View and Contact" CTAs:** Prominent buttons on for-sale listings
@@ -165,6 +166,19 @@ The authenticated collector's home base:
 - **Accessibility Hardening:** Full WCAG compliance enforced via Next.js `jsx-a11y` linter. ARIA attributes, ID uniqueness rules, and form bindings strictly follow literal boolean schemas.
 - **Settings Page** (`/settings`): Account management with profile editing, email/password changes, and avatar upload
 - **Native Web Sharing:** iOS/Android-native share + clipboard fallback with toast notifications
+- **Insurance PDF Report:** One-click professional insurance document with cover page, per-model detail pages (photos, values, condition grades), summary totals, and date stamps. Server-side WebP→PNG conversion via `sharp` for reliable PDF photo rendering.
+
+### 3F. Community Social Primitives (V43/V43.5)
+
+- **5 Shared Social Primitives** (`src/components/social/`): Consistent commenting/interaction UI across all 10 surfaces:
+  - `UserAvatar` — ring-decorated avatar circles with hash-based fallback colors, real uploaded profile pictures
+  - `PostHeader` — avatar + alias + timestamp + badge + actions slot
+  - `HorseEmbedCard` — rich horse preview card (name + thumbnail + trade status)
+  - `ReactionBar` — like + reply toggle with warm palette, optimistic updates
+  - `ReplyComposer` — inline reply box with avatar + "replying to" context
+- **Full Warm Parchment Migration:** All commenting/social surfaces migrated from cold stone palette to warm parchment tokens (`bg-card`, `border-edge`, `text-ink`, `text-muted`, `bg-parchment`)
+- **Avatar Prominence:** Real uploaded profile pictures displayed prominently across feed, groups, events, passports, DMs, commissions, and profiles
+- **Domain Boundaries Respected:** Each surface (UniversalFeed, SuggestionCommentThread, HelpId, CommissionTimeline, ChatThread) imports only the primitives it needs without cross-domain coupling
 
 ---
 
@@ -197,6 +211,11 @@ All of the following have been implemented, committed, and tested:
 21. **Realtime Consolidation (Phase 075)** — Global `NotificationProvider` replaces 3 per-component Realtime channel subscriptions (NotificationBell, Header inbox, ChatThread remained scoped). Eliminated WebSocket connection avalanche (2.8M+ `realtime.list_changes` calls). 30s visibility cooldown prevents tab-switch re-fetch storms.
 22. **Search RPC Enforcement (Phase 076)** — `searchCatalogAction()` now calls `search_catalog_fuzzy` RPC (pg_trgm GIN index) instead of PostgREST `.or(ilike)` table scans. Migration 110 expanded RPC return type to include `maker`, `scale`, `attributes`. Search latency: 517ms → <50ms.
 23. **RSC Whale Pagination (Phase 077)** — Profile page horse grid capped at 24 items via `.range(0,23)`. `loadMoreProfileHorses` server action + `ProfileLoadMore` client component for progressive loading. Reply fetching globally capped at 100. Prevents 400MB serverless memory spikes for collectors with 600+ horses.
+24. **V43 Community Experience Deep Dive** — Community commenting audit across all 10 surfaces. 5 shared social primitives (`UserAvatar`, `PostHeader`, `HorseEmbedCard`, `ReactionBar`, `ReplyComposer`) deployed to UniversalFeed, SuggestionCommentThread, HelpIdDetailClient, CommissionTimeline, and ChatThread. Full warm parchment migration replacing cold stone palette.
+25. **V43.5 Visual Polish & Full-Site Consistency** — Avatar prominence (ring-1, shadow-sm, hover:ring), CommissionTimeline + ChatThread rewritten with `UserAvatar` on bubbles (consecutive-sender grouping), warm palette finalization, inbox cold-palette migration (11 violations fixed).
+26. **Insurance Report Bug Fixes (H-1)** — Deleted horses excluded via `deleted_at IS NULL` filter. WebP→PNG server-side conversion via `sharp` (fixes `@react-pdf/renderer` WebP incompatibility). Collection counts merged from legacy FK + junction table. Dashboard `force-dynamic` to prevent stale ISR caching.
+27. **DM Photo Attachments (DM-1)** — `sendMessage()` expanded with `attachments[]` (max 5). `chat-attachments` private bucket with RLS. ChatThread UI: 📎 attach button, preview strip, inline photo grid in bubbles. Signed URLs for recipients (conversation membership verified server-side).
+28. **Friendly Photo URLs Workflow (P-1)** — Architecture complete, workflow created. Migration 112: `short_slug` column on `horse_images` + auto-assign trigger. `/photo/[slug]` route with OG/Twitter metadata for social preview cards. RLS widened for anon access (social crawlers). 15 files (4 new, 11 modified). **Awaiting execution.**
 
 ### What's Planned But Not Yet Built
 
@@ -204,7 +223,7 @@ All of the following have been implemented, committed, and tested:
 |---|---|---|
 | **Market Price Guide ("Blue Book")** | Shelved | No platform shows aggregated model horse prices. Would be a "first in the hobby." Needs user volume for credible data. |
 | **AI Model Identification** | Shelved | Code exists but hidden. Needs training data (10,000+ labeled images) and API budget. |
-| **Insurance PDF Report** | **Fully Shipped** | One-click professional document for insurance. Now actively generated via `src/lib/pdf/InsuranceReport.tsx`. |
+| **Insurance PDF Report** | **Fully Shipped & Bug-Fixed** | One-click professional document for insurance. Server-side WebP→PNG conversion fixes. Deleted horse exclusion. Collection count accuracy. |
 | **Batch CSV Import** | In Progress | Server-side fuzzy matching (`matchCsvRowsBatch`) foundation is completed. UI pending completion. |
 | **eBay Sold Listing Integration** | Research | Would feed data into Market Price Guide. Requires eBay API access + fuzzy matching. |
 | **Mobile App (PWA/Native)** | Research | Camera integration for show photography, offline access, push notifications. |
@@ -435,9 +454,12 @@ Several features would drive engagement without requiring massive engineering:
 | **Social Features** | Full | Full | Minimal | None |
 | **Trust / Ratings** | Per-transaction | None | Seller rating | None |
 | **Show Management** | Virtual only | None | None | None |
-| **Artist Tools** | Not yet | DMs | None | None |
-| **Price Discovery** | Not yet | Informal | Sold listings | None |
-| **Mobile UX** | Responsive web | Native app | Native app | Desktop-only |
+| **Artist Tools** | Commission Tracker + WIP Portal | DMs | None | None |
+| **Price Discovery** | Blue Book (shelved) | Informal | Sold listings | None |
+| **Mobile UX** | Responsive web + PWA | Native app | Native app | Desktop-only |
+| **Social Primitives** | 5 shared components | None | None | None |
+| **Photo Sharing** | Friendly URLs (pending) | None | eBay URLs | None |
+| **DM Attachments** | Photo attachments | Messenger | eBay messages | None |
 
 ### 5E. Implementation Roadmap (From Architecture Deep Dive)
 

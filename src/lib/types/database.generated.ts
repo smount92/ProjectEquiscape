@@ -3590,6 +3590,7 @@ export type Database = {
           id: string | null
           public_horse_count: number | null
           rating_count: number | null
+          total_horse_count: number | null
         }
         Insert: {
           alias_name?: string | null
@@ -3601,6 +3602,7 @@ export type Database = {
           id?: string | null
           public_horse_count?: never
           rating_count?: never
+          total_horse_count?: never
         }
         Update: {
           alias_name?: string | null
@@ -3612,6 +3614,7 @@ export type Database = {
           id?: string | null
           public_horse_count?: never
           rating_count?: never
+          total_horse_count?: never
         }
         Relationships: []
       }
@@ -3678,6 +3681,7 @@ export type Database = {
         Returns: string
       }
       auto_unpark_expired_transfers: { Args: never; Returns: undefined }
+      backfill_photo_short_slugs: { Args: never; Returns: number }
       batch_import_horses: {
         Args: { p_horses: Json; p_user_id: string }
         Returns: Json
@@ -3705,6 +3709,8 @@ export type Database = {
         Args: { p_event_id: string; p_user_id: string }
         Returns: Json
       }
+      count_user_horses_public: { Args: { p_user_id: string }; Returns: number }
+      count_user_horses_total: { Args: { p_user_id: string }; Returns: number }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
       get_photo_limit: { Args: never; Returns: number }
       get_user_tier: { Args: never; Returns: string }
@@ -3738,10 +3744,13 @@ export type Database = {
       search_catalog_fuzzy: {
         Args: { max_results?: number; search_term: string }
         Returns: {
+          attributes: Json
           id: string
           item_type: string
+          maker: string
           parent_id: string
           parent_title: string
+          scale: string
           similarity: number
           title: string
         }[]

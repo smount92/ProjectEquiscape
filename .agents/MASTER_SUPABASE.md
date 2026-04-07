@@ -2,7 +2,7 @@
 
 > **Single Source of Truth for all database schema, RLS policies, and RPCs.**
 > Update this file whenever a new migration is deployed.
-> Last updated: 2026-04-03 | Migration count: 110 (001–110) | SQL files: 106
+> Last updated: 2026-04-07 | Migration count: 111 (001–111) | SQL files: 107
 > Source: Live production data via `npx supabase inspect db table-sizes --linked`
 
 **Environment:** Supabase Pro (PostgreSQL 15, East US / North Virginia) | Project ref: `bdmwubihwinsxfykjqfe` | Extensions: `pg_trgm` (in `extensions` schema), `uuid-ossp`
@@ -69,7 +69,7 @@
 
 - **`user_horses`** *(903 rows, 584 kB)* — Model horse inventory. FK `owner_id → users(id)`, FK `catalog_id → catalog_items(id)`. Soft delete via `deleted_at` timestamp (never hard-deleted — preserves provenance). `visibility` column (`public`/`private`/`unlisted`) is authoritative; `is_public` boolean is kept in sync via `trg_sync_visibility` trigger (migration 109). Key columns: `custom_name`, `life_stage`, `horse_condition`, `trade_status`, `scale`, `medium`, `body_quality_grade`, `is_promoted_until`, `purchase_date_fuzzy`.
 
-- **`horse_images`** *(234 rows, 160 kB)* — Photo storage references per horse. FK `horse_id → user_horses(id)`. `angle_profile` enum differentiates `Primary_Thumbnail` vs detail angles (`Left_Side`, `Right_Side`, `Front`, `Back`, `Top`, `Extra_Detail`). Private `horse-images` bucket — all access via signed URLs. `display_order` for user-controlled photo ordering.
+- **`horse_images`** *(234 rows, 160 kB)* — Photo storage references per horse. FK `horse_id → user_horses(id)`. `angle_profile` enum differentiates `Primary_Thumbnail` vs detail angles (`Left_Side`, `Right_Side`, `Front`, `Back`, `Top`, `Extra_Detail`). **Public** `horse-images` bucket — CDN-cacheable URLs via `getPublicImageUrl()` (no signed URLs needed). `display_order` for user-controlled photo ordering. **Pending Migration 112:** `short_slug` (unique, 8-char URL-safe, auto-assigned via `trg_horse_images_auto_slug` trigger) for friendly share URLs (`/photo/[slug]`).
 
 - **`financial_vault`** *(179 rows, 88 kB)* — Private financial data. FK `horse_id → user_horses(id)`. Columns: `purchase_price`, `estimated_current_value`, `purchased_from`, `purchase_date`, `insurance_policy_number`. **NEVER exposed on public routes** — owner-only via RLS. One row per horse.
 
@@ -97,7 +97,7 @@
 
 - **`posts`** — Universal text content replacing legacy comment/post tables. Exclusive arc FKs: `horse_id`, `group_id`, `event_id`, `studio_id`, `help_request_id` with `CHECK (num_nonnulls(...) <= 1)`. `parent_id` for 1-level threading. Atomic counters: `likes_count`, `replies_count`. `content` supports `@mentions`. `is_pinned` for group pinned posts.
 
-- **`media_attachments`** — File references for casual uploads (feed photos, event photos). Exclusive arc FKs: `post_id`, `event_id`. Storage path to `horse-images` bucket. FK `uploader_id → users(id)`.
+- **`media_attachments`** — File references for casual uploads (feed photos, event photos, **DM chat photos**). Exclusive arc FKs: `post_id`, `event_id`, `message_id`. Storage paths to `horse-images` bucket (public) or `chat-attachments` bucket (private, signed URLs). FK `uploader_id → users(id)`. DM attachments added via Migration 111.
 
 - **`likes`** — Post likes. `UNIQUE(user_id, post_id)`. Managed atomically via `toggle_post_like()` RPC.
 
@@ -231,9 +231,9 @@
 
 | Table | Pattern |
 |-------|---------|
-| `user_horses` SELECT | Owner sees all. Others see only `visibility = 'public'` |
+| `user_horses` SELECT | Owner sees all. Others see only `visibility = 'public'`. **Pending Migration 112:** Policy will be widened to `TO authenticated, anon` (adds anon support for social crawlers on public horses) |
 | `financial_vault` | Owner-only (all CRUD). No public access ever |
-| `horse_images` | Owner sees all. Others see images for public horses only |
+| `horse_images` | Owner sees all. Others see images for public horses only. **Pending Migration 112:** Policy will be widened to `TO authenticated, anon` (adds anon support for OG preview crawlers) |
 | `messages` | Both conversation participants can read/write |
 | `notifications` | User can only see/update their own |
 | `transactions` | Both `party_a` and `party_b` can read. Status transitions restricted |
@@ -389,7 +389,7 @@ erDiagram
 ## Migration Policy
 
 1. **CLI-only** — Migrations are created via `supabase migration new <name>` or manually in `supabase/migrations/`
-2. **Sequential numbering** — Files named `NNN_description.sql` (currently at 110, 106 files — some numbers skipped during Grand Unification)
+2. **Sequential numbering** — Files named `NNN_description.sql` (currently at 111, 107 files — some numbers skipped during Grand Unification)
 3. **Dry-run required** — Review SQL output before pushing
 4. **Human approval** — AI must NEVER run `supabase db push` or `supabase migration up` directly
 5. **Rollback plan** — Destructive changes (`DROP`, `ALTER ... DROP COLUMN`) must include a rollback script or `IF EXISTS` guards
