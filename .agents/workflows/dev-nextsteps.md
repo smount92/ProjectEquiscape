@@ -117,6 +117,24 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
+## 🚨 Task P-1: Friendly Photo URLs & Social Preview Cards
+
+**Workflow:** `.agents/workflows/photo-friendly-urls.md`
+**Source:** Open beta feedback — collectors want shareable photo links for Blab, Facebook, Instagram
+**Scope:** Short permanent URLs (`/photo/abc12xyz`) with full OG/Twitter preview cards
+**Implementation plan:**
+1. Migration 112: `short_slug` column on `horse_images` + unique index + auto-assign trigger
+2. Backfill RPC for all existing rows (8-char URL-safe slugs)
+3. New `/photo/[slug]` server route with `generateMetadata` for rich social previews
+4. `PhotoShareView` client component with copy/share buttons
+5. Extend `ShareButton` with `url` prop, add share button to `PhotoLightbox`
+6. Wire `short_slug` through `PassportGallery`, stable page, community page
+**Files:** 10 files (3 new, 7 modified) — zero changes to existing upload/storage/delete flows
+**Status:** Workflow ready — execution pending
+**Estimated effort:** ~1.5 hours
+
+---
+
 ## ✅ Task C-1.5: V43.5 Visual Polish & Full-Site Consistency — DONE (2026-04-04)
 
 **Workflow:** `.agents/workflows/v43.5-visual-polish.md`

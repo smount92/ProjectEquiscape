@@ -11,14 +11,16 @@ interface ShareButtonProps {
  label?: string;
  /** CSS class variant:"icon" (default compact) or"full" (styled button) */
  variant?:"icon" |"full";
+ /** Override the URL to share (default: current page URL) */
+ url?: string;
 }
 
-export default function ShareButton({ title, text, label, variant ="icon" }: ShareButtonProps) {
+export default function ShareButton({ title, text, label, variant ="icon", url: customUrl }: ShareButtonProps) {
  const [showToast, setShowToast] = useState(false);
  const [toastMessage, setToastMessage] = useState("");
 
  const handleShare = useCallback(async () => {
- const url = window.location.href;
+ const url = customUrl || window.location.href;
 
  // Try native Web Share API first (iOS/Android)
  if (typeof navigator !=="undefined" && navigator.share) {
@@ -55,7 +57,7 @@ export default function ShareButton({ title, text, label, variant ="icon" }: Sha
 
  setShowToast(true);
  setTimeout(() => setShowToast(false), 2500);
- }, [title, text]);
+ }, [title, text, customUrl]);
 
  const shareIcon = (
  <svg

@@ -1888,6 +1888,7 @@ export type Database = {
           horse_id: string
           id: string
           image_url: string
+          short_slug: string | null
           sort_order: number
           uploaded_at: string
         }
@@ -1896,6 +1897,7 @@ export type Database = {
           horse_id: string
           id?: string
           image_url: string
+          short_slug?: string | null
           sort_order?: number
           uploaded_at?: string
         }
@@ -1904,6 +1906,7 @@ export type Database = {
           horse_id?: string
           id?: string
           image_url?: string
+          short_slug?: string | null
           sort_order?: number
           uploaded_at?: string
         }

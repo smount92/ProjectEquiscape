@@ -43,3 +43,17 @@ export function getPublicImageUrls(imageUrls: string[]): Map<string, string> {
   }
   return urlMap;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Friendly Photo URL Helpers
+// ═══════════════════════════════════════════════════════════════
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
+
+/**
+ * Generate a short, permanent, preview-rich share URL for a horse photo.
+ * Example: https://modelhorsehub.com/photo/AbC12xyz
+ */
+export function getFriendlyPhotoUrl(shortSlug: string): string {
+  return `${APP_URL}/photo/${shortSlug}`;
+}

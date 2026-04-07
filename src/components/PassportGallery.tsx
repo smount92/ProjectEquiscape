@@ -6,6 +6,7 @@ import PhotoLightbox from"@/components/PhotoLightbox";
 interface GalleryImage {
  signedUrl: string;
  angle_profile: string;
+ shortSlug?: string | null;
 }
 
 interface PassportGalleryProps {
@@ -55,6 +56,7 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
  const lightboxImages = images.map((img) => ({
  url: img.signedUrl,
  label: ANGLE_LABELS[img.angle_profile] || img.angle_profile,
+ shareSlug: img.shortSlug || undefined,
  }));
 
  return (

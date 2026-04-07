@@ -107,7 +107,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  // Fetch all images
  const { data: rawImages } = await supabase
  .from("horse_images")
- .select("id, image_url, angle_profile, uploaded_at")
+ .select("id, image_url, angle_profile, uploaded_at, short_slug")
  .eq("horse_id", horseId)
  .order("uploaded_at");
 
@@ -128,6 +128,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  signedUrl: signedUrlMap.get(img.image_url) || img.image_url,
  angle_profile: img.angle_profile,
  label: ANGLE_LABELS[img.angle_profile] || img.angle_profile,
+ shortSlug: img.short_slug || null,
  }));
 
  // Fetch financial vault (owner-only via RLS)

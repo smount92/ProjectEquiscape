@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from"react";
 import { createPortal } from"react-dom";
+import { getFriendlyPhotoUrl } from "@/lib/utils/storage";
 
 interface PhotoLightboxProps {
- images: { url: string; label?: string }[];
+ images: { url: string; label?: string; shareSlug?: string }[];
  initialIndex: number;
  onClose: () => void;
 }
@@ -111,7 +112,36 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
  {currentIndex + 1} of {images.length}
  </div>
  )}
+
+ {/* Share button */}
+ {current.shareSlug && (
+  <ShareLightboxButton slug={current.shareSlug} />
+ )}
  </div>,
  document.body,
+ );
+}
+
+/** Inline share button for the lightbox — handles clipboard + visual feedback */
+function ShareLightboxButton({ slug }: { slug: string }) {
+ const [copied, setCopied] = useState(false);
+ const url = getFriendlyPhotoUrl(slug);
+
+ return (
+  <button
+   className="fixed bottom-4 right-4 z-[1001] flex items-center gap-2
+              rounded-full bg-white/20 px-4 py-2 text-sm text-white
+              backdrop-blur transition-colors hover:bg-white/30 cursor-pointer"
+   onClick={(e) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(url).then(() => {
+     setCopied(true);
+     setTimeout(() => setCopied(false), 2000);
+    });
+   }}
+   aria-label="Copy share link"
+  >
+   {copied ? "✅ Copied!" : "🔗 Share"}
+  </button>
  );
 }
