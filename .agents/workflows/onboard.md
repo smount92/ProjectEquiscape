@@ -34,7 +34,7 @@ Model Horse Hub is a **privacy-first digital stable and social platform** for mo
 | PDF | @react-pdf/renderer |
 | Analytics | Google Analytics |
 
-The platform has **61 page routes**, **121+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **37 server action files**, **17 API routes**, and **110 database migrations** (001–110).
+The platform has **68 page routes**, **122+ client components** (incl. 11 shadcn/ui primitives + 4 layout archetypes + 3 PDF components), **38 server action files**, **17 API routes**, and **112 database migrations** (001–112).
 
 ### ⚠️ Development Environment: Windows + PowerShell
 
@@ -160,7 +160,7 @@ src/
 - NEVER create custom `max-w-[var(--max-width)] mx-auto px-6` wrapper divs on pages
 
 **Database:**
-- Migrations in `supabase/migrations/` — sequential numbering (currently at 110)
+- Migrations in `supabase/migrations/` — sequential numbering (currently at 112)
 - Universal Catalog (`catalog_items`) — 10,964 entries for molds, releases, artist resins, tack
 - Universal Ledger — `v_horse_hoofprint` regular view (UNION ALL across 6 source tables) with `security_invoker = true`
 - Commerce State Machine — `transactions.status`: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`)
@@ -186,7 +186,8 @@ src/
 
 **Privacy Rules:**
 - `financial_vault` is NEVER queried on public routes (only owner via RLS)
-- Horse images in private `horse-images` bucket — use `getSignedImageUrl()` for rendering
+- Horse images in public `horse-images` bucket — use `getPublicImageUrl()` for rendering
+- Friendly photo share URLs via `short_slug` column — `/photo/[slug]` route with OG/Twitter preview cards
 - Watermark opt-in (`watermark_photos` boolean on users)
 - Block system prevents interaction between blocked users
 
@@ -253,7 +254,7 @@ This project follows a **"test with each feature"** convention:
 
 **Commands:**
 ```bash
-npm run test:unit          # Vitest unit/integration tests (245 tests)
+npm run test:unit          # Vitest unit/integration tests (266 tests)
 npm run test:unit:watch    # Watch mode during development
 npm run test:unit:coverage # Coverage report
 npm run test:e2e           # Playwright E2E (needs dev server)

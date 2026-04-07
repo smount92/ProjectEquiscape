@@ -2,7 +2,7 @@
 
 > **This is the Single Source of Truth for all architectural rules.**
 > Every workflow and every agent session MUST read this file first.
-> Last updated: 2026-04-07 (V43.5 + Friendly Photo URLs workflow)
+> Last updated: 2026-04-07 (V43.5 + Friendly Photo URLs deployed — Migration 112)
 
 **Reading order for new sessions:**
 1. Read THIS file (Iron Laws + guardrails)
@@ -14,7 +14,7 @@
 
 ## 🏛️ Project Iron Laws
 
-These are the **non-negotiable architectural principles** that govern every database migration, server action, and UI component. They were forged during the Grand Unification (V6–V10) and hardened through 111 production migrations.
+These are the **non-negotiable architectural principles** that govern every database migration, server action, and UI component. They were forged during the Grand Unification (V6–V10) and hardened through 112 production migrations.
 
 1. **Zero Data Loss Migrations** — Every schema change MUST include a robust PL/pgSQL data migration script. We move existing production data *before* we drop old tables.
 
@@ -59,7 +59,7 @@ These are the **non-negotiable architectural principles** that govern every data
 - `financial_vault` — purchase prices, estimated values (PRIVATE)
 - `show_records` — competition history, provenance
 - `transactions` — commerce state machine (offers, payments)
-- `horse_images` — Supabase Storage — public `horse-images` bucket (CDN-cacheable, no signed URLs), private `chat-attachments` bucket (signed URLs for DM photos)
+- `horse_images` — Supabase Storage — public `horse-images` bucket (CDN-cacheable, no signed URLs), private `chat-attachments` bucket (signed URLs for DM photos). `short_slug` column (Migration 112) for friendly `/photo/[slug]` share URLs
 - `events` / `event_entries` — competition engine
 - `users` — profiles, auth, tier metadata
 - `horse_ownership_history` — transfer provenance chain
@@ -164,4 +164,4 @@ Every new workflow MUST include this at the top:
 - [x] Avatar prominence + real uploaded profile pictures in all comment surfaces
 - [x] Insurance Report bug fixes: deleted horse filter, WebP→PNG conversion, collection count merge
 - [x] DM Photo Attachments: `chat-attachments` bucket, inline photo grid, 📎 upload
-- [x] Friendly Photo URLs workflow created — awaiting execution (Migration 112 + `/photo/[slug]` route)
+- [x] Friendly Photo URLs — Migration 112 deployed, `/photo/[slug]` route live with OG/Twitter preview cards, share integration in lightbox

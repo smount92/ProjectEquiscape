@@ -2,7 +2,7 @@
 
 > **Single Source of Truth for all database schema, RLS policies, and RPCs.**
 > Update this file whenever a new migration is deployed.
-> Last updated: 2026-04-07 | Migration count: 111 (001–111) | SQL files: 107
+> Last updated: 2026-04-07 | Migration count: 112 (001–112) | SQL files: 108
 > Source: Live production data via `npx supabase inspect db table-sizes --linked`
 
 **Environment:** Supabase Pro (PostgreSQL 15, East US / North Virginia) | Project ref: `bdmwubihwinsxfykjqfe` | Extensions: `pg_trgm` (in `extensions` schema), `uuid-ossp`
@@ -69,7 +69,7 @@
 
 - **`user_horses`** *(903 rows, 584 kB)* — Model horse inventory. FK `owner_id → users(id)`, FK `catalog_id → catalog_items(id)`. Soft delete via `deleted_at` timestamp (never hard-deleted — preserves provenance). `visibility` column (`public`/`private`/`unlisted`) is authoritative; `is_public` boolean is kept in sync via `trg_sync_visibility` trigger (migration 109). Key columns: `custom_name`, `life_stage`, `horse_condition`, `trade_status`, `scale`, `medium`, `body_quality_grade`, `is_promoted_until`, `purchase_date_fuzzy`.
 
-- **`horse_images`** *(234 rows, 160 kB)* — Photo storage references per horse. FK `horse_id → user_horses(id)`. `angle_profile` enum differentiates `Primary_Thumbnail` vs detail angles (`Left_Side`, `Right_Side`, `Front`, `Back`, `Top`, `Extra_Detail`). **Public** `horse-images` bucket — CDN-cacheable URLs via `getPublicImageUrl()` (no signed URLs needed). `display_order` for user-controlled photo ordering. **Pending Migration 112:** `short_slug` (unique, 8-char URL-safe, auto-assigned via `trg_horse_images_auto_slug` trigger) for friendly share URLs (`/photo/[slug]`).
+- **`horse_images`** *(234 rows, 160 kB)* — Photo storage references per horse. FK `horse_id → user_horses(id)`. `angle_profile` enum differentiates `Primary_Thumbnail` vs detail angles (`Left_Side`, `Right_Side`, `Front`, `Back`, `Top`, `Extra_Detail`). **Public** `horse-images` bucket — CDN-cacheable URLs via `getPublicImageUrl()` (no signed URLs needed). `display_order` for user-controlled photo ordering. `short_slug` (unique, 8-char URL-safe, auto-assigned via `trg_horse_images_auto_slug` trigger, Migration 112) for friendly share URLs (`/photo/[slug]`). Backfill RPC: `backfill_photo_short_slugs()`.
 
 - **`financial_vault`** *(179 rows, 88 kB)* — Private financial data. FK `horse_id → user_horses(id)`. Columns: `purchase_price`, `estimated_current_value`, `purchased_from`, `purchase_date`, `insurance_policy_number`. **NEVER exposed on public routes** — owner-only via RLS. One row per horse.
 
@@ -231,9 +231,9 @@
 
 | Table | Pattern |
 |-------|---------|
-| `user_horses` SELECT | Owner sees all. Others see only `visibility = 'public'`. **Pending Migration 112:** Policy will be widened to `TO authenticated, anon` (adds anon support for social crawlers on public horses) |
+| `user_horses` SELECT | Owner sees all. Others see only `visibility = 'public'` AND `deleted_at IS NULL`. Policy grants `TO authenticated, anon` (Migration 112 — anon support for social crawlers on public horses) |
 | `financial_vault` | Owner-only (all CRUD). No public access ever |
-| `horse_images` | Owner sees all. Others see images for public horses only. **Pending Migration 112:** Policy will be widened to `TO authenticated, anon` (adds anon support for OG preview crawlers) |
+| `horse_images` | Owner sees all. Others see images for public, non-deleted horses only. Policy grants `TO authenticated, anon` (Migration 112 — anon support for OG preview crawlers) |
 | `messages` | Both conversation participants can read/write |
 | `notifications` | User can only see/update their own |
 | `transactions` | Both `party_a` and `party_b` can read. Status transitions restricted |
@@ -311,12 +311,14 @@
 | `refresh_mv_trusted_sellers()` | Refresh `mv_trusted_sellers` materialized view | SECURITY DEFINER |
 | `count_user_horses_total(user_id)` | Accurate total horse count bypassing RLS | SECURITY DEFINER |
 | `count_user_horses_public(user_id)` | Public horse count bypassing RLS | SECURITY DEFINER |
+| `backfill_photo_short_slugs()` | Backfill `short_slug` for all existing `horse_images` rows (Migration 112) | PL/pgSQL |
 
 ### Triggers
 | Function | Fires On | Purpose |
 |----------|----------|---------|
 | `sync_is_public_from_visibility()` | `user_horses` INSERT/UPDATE | Keeps `is_public` ↔ `visibility` in sync bidirectionally |
 | `log_condition_change()` | `user_horses` UPDATE (condition changes) | Auto-inserts `condition_history` row |
+| `trg_horse_images_slug()` | `horse_images` BEFORE INSERT | Auto-assigns 8-char URL-safe `short_slug` if null (Migration 112) |
 
 ---
 
@@ -389,7 +391,7 @@ erDiagram
 ## Migration Policy
 
 1. **CLI-only** — Migrations are created via `supabase migration new <name>` or manually in `supabase/migrations/`
-2. **Sequential numbering** — Files named `NNN_description.sql` (currently at 111, 107 files — some numbers skipped during Grand Unification)
+2. **Sequential numbering** — Files named `NNN_description.sql` (currently at 112, 108 files — some numbers skipped during Grand Unification)
 3. **Dry-run required** — Review SQL output before pushing
 4. **Human approval** — AI must NEVER run `supabase db push` or `supabase migration up` directly
 5. **Rollback plan** — Destructive changes (`DROP`, `ALTER ... DROP COLUMN`) must include a rollback script or `IF EXISTS` guards
