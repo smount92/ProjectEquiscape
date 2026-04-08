@@ -253,7 +253,7 @@ export default function Header() {
  className="relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent text-stone-500 transition-all"
  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
- aria-expanded={mobileMenuOpen}
+ aria-expanded={mobileMenuOpen ? "true" : "false"}
  >
  {unreadMessages > 0 && !mobileMenuOpen && (
  <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadMessages > 9 ? "9+" : unreadMessages}</span>
@@ -326,7 +326,7 @@ export default function Header() {
  <button
  className="flex cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 py-1 font-[inherit] text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
  onClick={() => setMoreMenuOpen(!moreMenuOpen)}
- aria-expanded={moreMenuOpen}
+ aria-expanded={moreMenuOpen ? "true" : "false"}
  aria-label="More navigation links"
  >
  <MoreHorizontal size={16} strokeWidth={1.5} /> More
@@ -391,7 +391,7 @@ export default function Header() {
  <button
  className="flex cursor-pointer items-center gap-1 rounded-full border-0 bg-transparent p-1 transition-all"
  onClick={() => setUserMenuOpen(!userMenuOpen)}
- aria-expanded={userMenuOpen}
+ aria-expanded={userMenuOpen ? "true" : "false"}
  aria-label="User menu"
  >
  <span className="inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-stone-500">
@@ -679,7 +679,7 @@ export default function Header() {
  <button
  className="border-edge bg-[#FEFCF8] relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-stone-500 transition-all"
  onClick={() => toggleSimpleMode()}
- aria-pressed={isSimpleMode}
+ aria-pressed={isSimpleMode ? "true" : "false"}
  >
  {isSimpleMode ? (
  <>
@@ -738,7 +738,7 @@ export default function Header() {
  <button
  className="border-edge bg-[#FEFCF8] relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-stone-500 transition-all"
  onClick={toggleSimpleMode}
- aria-pressed={isSimpleMode}
+ aria-pressed={isSimpleMode ? "true" : "false"}
  aria-label={
  isSimpleMode
  ?"Disable Simple Mode (high contrast and large text)"
