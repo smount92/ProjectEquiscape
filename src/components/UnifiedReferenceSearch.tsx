@@ -231,7 +231,7 @@ export default function UnifiedReferenceSearch({
 
  {/* Dropdown Results */}
  {showDropdown && (
- <div className="animate-fade-in-up w-full">
+ <div className="animate-fade-in-up mt-1 flex max-h-[400px] w-full flex-col overflow-y-auto overflow-hidden rounded-lg border border-edge bg-[#FEFCF8] shadow-md">
  {isSearching ? (
  <div className="text-stone-500 px-4 py-6 text-center text-sm">Searching…</div>
  ) : (
@@ -239,13 +239,13 @@ export default function UnifiedReferenceSearch({
  {/* Molds */}
  {molds.length > 0 && (
  <>
- <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
+ <div className="sticky top-0 z-40 border-b border-stone-200 bg-stone-100 px-4 py-2 text-xs font-semibold text-stone-500">
  🏭 Base Molds
  </div>
  {molds.map((item) => (
  <button
  key={item.id}
- className="border-b-0"
+ className="flex w-full cursor-pointer items-center gap-2 border-b border-stone-100 bg-transparent px-4 py-3 text-left transition-colors hover:bg-stone-50"
  onClick={() => handleMoldClick(item)}
  >
  <div className="min-w-0 flex-1">
@@ -253,7 +253,7 @@ export default function UnifiedReferenceSearch({
  <span className="text-stone-500 text-xs">
  {""}
  · {item.maker}
- {item.scale ? ` · ${item.scale}` :""}
+ {item.scale ? ` · ${item.scale}` : ""}
  </span>
  </div>
  <span className="text-forest shrink-0 pl-2 text-xs font-semibold whitespace-nowrap">
@@ -267,13 +267,13 @@ export default function UnifiedReferenceSearch({
  {/* Releases */}
  {releaseResults.length > 0 && (
  <>
- <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
+ <div className="sticky top-0 z-40 border-b border-stone-200 bg-stone-100 px-4 py-2 text-xs font-semibold text-stone-500">
  📦 Releases
  </div>
  {releaseResults.map((item) => (
  <button
  key={item.id}
- className="border-b-0"
+ className="flex w-full cursor-pointer items-center gap-2 border-b border-stone-100 bg-transparent px-4 py-3 text-left transition-colors hover:bg-stone-50"
  onClick={() => handleSelect(item)}
  >
  <div className="min-w-0 flex-1">
@@ -297,13 +297,13 @@ export default function UnifiedReferenceSearch({
  {/* Resins */}
  {resins.length > 0 && (
  <>
- <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
+ <div className="sticky top-0 z-40 border-b border-stone-200 bg-stone-100 px-4 py-2 text-xs font-semibold text-stone-500">
  🎨 Artist Resins
  </div>
  {resins.map((item) => (
  <button
  key={item.id}
- className="border-b-0"
+ className="flex w-full cursor-pointer items-center gap-2 border-b border-stone-100 bg-transparent px-4 py-3 text-left transition-colors hover:bg-stone-50"
  onClick={() => handleSelect(item)}
  >
  <div className="min-w-0 flex-1">
@@ -311,7 +311,7 @@ export default function UnifiedReferenceSearch({
  <span className="text-stone-500 text-xs">
  {""}
  · {item.maker}
- {item.scale ? ` · ${item.scale}` :""}
+ {item.scale ? ` · ${item.scale}` : ""}
  </span>
  </div>
  <span className="text-forest shrink-0 pl-2 text-xs font-semibold whitespace-nowrap">
