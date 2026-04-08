@@ -231,7 +231,7 @@ export default function UnifiedReferenceSearch({
 
  {/* Dropdown Results */}
  {showDropdown && (
- <div className="animate-fade-in-up w-[6px]">
+ <div className="animate-fade-in-up w-full">
  {isSearching ? (
  <div className="text-stone-500 px-4 py-6 text-center text-sm">Searching…</div>
  ) : (
