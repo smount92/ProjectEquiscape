@@ -608,15 +608,34 @@ async function applyApprovedSuggestion(
             .join(", ");
         changeSummary = `🔧 Correction: ${changes}`;
     } else if (s.suggestion_type === "addition") {
-        const { data: newItem } = await admin
+        // Map field_changes to catalog_items columns
+        const fc = s.field_changes as Record<string, unknown>;
+        const itemType = fc.item_type === "resin" ? "artist_resin"
+            : fc.item_type === "release" ? "plastic_release"
+            : "plastic_mold";
+        const insertPayload: CatalogItemInsert = {
+            item_type: itemType,
+            title: (fc.title ?? fc.mold_name ?? "Untitled") as string,
+            maker: (fc.maker ?? "Unknown") as string,
+            scale: (fc.scale as string) || null,
+            attributes: JSON.parse(JSON.stringify({
+                ...(fc.year ? { release_year_start: fc.year } : {}),
+                ...(fc.color ? { color_description: fc.color } : {}),
+                ...(fc.model_number ? { model_number: fc.model_number } : {}),
+            })),
+        };
+        const { data: newItem, error: insertError } = await admin
             .from("catalog_items")
-            .insert(s.field_changes as unknown as CatalogItemInsert)
+            .insert(insertPayload)
             .select("id")
             .single();
+        if (insertError) {
+            console.error("Failed to insert catalog addition:", insertError.message);
+        }
         catalogItemId = newItem
             ? (newItem as { id: string }).id
             : null;
-        changeSummary = `📗 New entry added: ${(s.field_changes as { title?: string }).title ?? "Untitled"}`;
+        changeSummary = `📗 New entry added: ${insertPayload.title}`;
     } else if (s.suggestion_type === "photo") {
         changeSummary = "📸 Reference photo added";
     } else if (s.suggestion_type === "removal") {
