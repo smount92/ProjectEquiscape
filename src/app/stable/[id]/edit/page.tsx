@@ -607,7 +607,7 @@ export default function EditHorsePage() {
  toastParam ="photos_updated";
  }
  router.push(
- `/dashboard?toast=${toastParam}&name=${encodeURIComponent(customName.trim())}&photos=${uploadCount}&expected=${hadNewPhotos ? Object.keys(newFiles).length + newExtraFiles.length : 0}`,
+ `/stable/${horseId}?toast=${toastParam}&name=${encodeURIComponent(customName.trim())}&photos=${uploadCount}&expected=${hadNewPhotos ? Object.keys(newFiles).length + newExtraFiles.length : 0}`,
  );
  } catch (err) {
  setSaveError(err instanceof Error ? err.message :"Failed to save changes.");

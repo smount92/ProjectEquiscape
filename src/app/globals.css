@@ -566,6 +566,10 @@ p {
   }
 }
 
+.animate-shake {
+  animation: shake 0.5s ease;
+}
+
 @media (max-width: 480px) {
   .passport-actions {
     flex-direction: column;

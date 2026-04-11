@@ -69,25 +69,38 @@ export async function reviewSuggestion(
 
     if (status === "approved") {
         // Execute the actual database insertion based on suggestion_type
-        try {
-            const details = (s.details as string) || "";
-            if (s.suggestion_type === "mold") {
-                await admin.from("catalog_items").insert({
-                    item_type: "plastic_mold",
-                    title: s.name as string,
-                    maker: details || "Unknown",
-                });
-            } else if (s.suggestion_type === "release") {
-                return { success: false, error: "Releases require a specific parent_id. Please insert this release manually via the Supabase Dashboard, then mark as Approved." };
-            } else if (s.suggestion_type === "resin") {
-                await admin.from("catalog_items").insert({
-                    item_type: "artist_resin",
-                    title: s.name as string,
-                    maker: details || "Unknown",
-                });
+        const details = (s.details as string) || "";
+        // Try to extract maker from details (first line or first segment before comma)
+        const makerGuess = details.split(/[,\n]/)[0]?.trim() || "Unknown";
+
+        if (s.suggestion_type === "mold") {
+            const { error: insertError } = await admin.from("catalog_items").insert({
+                item_type: "plastic_mold",
+                title: s.name as string,
+                maker: makerGuess,
+            });
+            if (insertError) {
+                return { success: false, error: `Failed to insert mold: ${insertError.message}` };
             }
-        } catch (insertError) {
-            return { success: false, error: `Failed to insert: ${insertError}` };
+        } else if (s.suggestion_type === "release") {
+            // Releases need a parent_id — try inserting without one (admin can fix later)
+            const { error: insertError } = await admin.from("catalog_items").insert({
+                item_type: "plastic_release",
+                title: s.name as string,
+                maker: makerGuess,
+            });
+            if (insertError) {
+                return { success: false, error: `Failed to insert release: ${insertError.message}. You may need to set the parent_id manually.` };
+            }
+        } else if (s.suggestion_type === "resin") {
+            const { error: insertError } = await admin.from("catalog_items").insert({
+                item_type: "artist_resin",
+                title: s.name as string,
+                maker: makerGuess,
+            });
+            if (insertError) {
+                return { success: false, error: `Failed to insert resin: ${insertError.message}` };
+            }
         }
     }
 

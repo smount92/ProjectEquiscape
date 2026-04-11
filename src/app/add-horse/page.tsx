@@ -89,6 +89,10 @@ export default function AddHorsePage() {
  const [showSuccess, setShowSuccess] = useState(false);
  const [savedHorseName, setSavedHorseName] = useState("");
 
+ // Validation feedback
+ const [validationErrors, setValidationErrors] = useState<string[]>([]);
+ const [shakeFields, setShakeFields] = useState(false);
+
  // Step 1 (index 0): Gallery
  const [imageSlots, setImageSlots] = useState<Partial<Record<AngleProfile, ImageSlot>>>({});
  const [extraFiles, setExtraFiles] = useState<{ file: File; previewUrl: string }[]>([]);
@@ -363,12 +367,34 @@ export default function AddHorsePage() {
  }
  };
 
- const goNext = () => {
- if (currentStep < STEPS.length - 1 && canProceedStep(currentStep)) {
- setCurrentStep(currentStep + 1);
- window.scrollTo({ top: 0, behavior:"smooth" });
- }
- };
+  const goNext = () => {
+    if (currentStep < STEPS.length - 1) {
+      if (canProceedStep(currentStep)) {
+        setValidationErrors([]);
+        setCurrentStep(currentStep + 1);
+        window.scrollTo({ top: 0, behavior:"smooth" });
+      } else {
+        // Show which fields are missing
+        const errors: string[] = [];
+        if (currentStep === 2) {
+          if (!customName.trim()) errors.push("Custom Name");
+          if (isModel && !finishType) errors.push("Finish Type");
+          if (isModel && !conditionGrade) errors.push("Condition Grade");
+        }
+        setValidationErrors(errors);
+        setShakeFields(true);
+        setTimeout(() => setShakeFields(false), 600);
+        // Scroll to first missing field
+        if (!customName.trim()) {
+          document.getElementById("custom-name")?.focus();
+        } else if (isModel && !finishType) {
+          document.getElementById("finish-type")?.focus();
+        } else if (isModel && !conditionGrade) {
+          document.getElementById("condition-grade")?.focus();
+        }
+      }
+    }
+  };
 
  const goBack = () => {
  if (currentStep > 0) {
@@ -598,7 +624,27 @@ export default function AddHorsePage() {
  type="button"
  key={step.label}
  className="w-1/3 relative flex cursor-pointer flex-col items-center bg-transparent border-0 p-0"
- onClick={() => { if (i <= currentStep || canProceedStep(i - 1)) setCurrentStep(i); }}
+  onClick={() => {
+    if (i <= currentStep || canProceedStep(i - 1)) {
+      setValidationErrors([]);
+      setCurrentStep(i);
+    } else {
+      // Show validation errors if trying to skip ahead past Identity
+      const blockingStep = i - 1; // the step that blocks
+      if (blockingStep === 2) {
+        const errors: string[] = [];
+        if (!customName.trim()) errors.push("Custom Name");
+        if (isModel && !finishType) errors.push("Finish Type");
+        if (isModel && !conditionGrade) errors.push("Condition Grade");
+        setValidationErrors(errors);
+        setShakeFields(true);
+        setTimeout(() => setShakeFields(false), 600);
+        // Navigate to the blocking step so user can see the fields
+        setCurrentStep(blockingStep);
+        window.scrollTo({ top: 0, behavior:"smooth" });
+      }
+    }
+  }}
   aria-label={`Go to step ${i + 1}: ${step.label}`}
  >
  {/* Connecting line (before the dot) */}
@@ -1031,13 +1077,19 @@ export default function AddHorsePage() {
  <Input
  id="custom-name"
  type="text"
- 
+ className={`${validationErrors.includes("Custom Name") ? "ring-2 ring-red-400 border-red-400" : ""} ${shakeFields && validationErrors.includes("Custom Name") ? "animate-shake" : ""}`}
  placeholder="e.g. Midnight Star, Patches, Stormy…"
  value={customName}
- onChange={(e) => setCustomName(e.target.value)}
+ onChange={(e) => {
+ setCustomName(e.target.value);
+ if (validationErrors.length > 0) setValidationErrors((prev) => prev.filter((f) => f !== "Custom Name"));
+ }}
  autoFocus
  maxLength={100}
  />
+ {validationErrors.includes("Custom Name") && (
+ <span className="mt-1 block text-xs font-medium text-red-500">⚠ Required — give your model a name</span>
+ )}
  <span className="text-stone-500 mt-1 block text-xs">
  What do you call this model? This can be a show name, pet name, or whatever you like.
  </span>
@@ -1115,10 +1167,15 @@ export default function AddHorsePage() {
  </label>
  <select
  id="finish-type"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
+ validationErrors.includes("Finish Type")
+ ? "border-red-400 ring-2 ring-red-400 bg-red-50/30"
+ : "border-stone-200 bg-white"
+ } ${shakeFields && validationErrors.includes("Finish Type") ? "animate-shake" : ""}`}
  value={finishType}
  onChange={(e) => {
  setFinishType(e.target.value as FinishType);
+ if (validationErrors.length > 0) setValidationErrors((prev) => prev.filter((f) => f !== "Finish Type"));
  }}
  >
  <option value="">Select finish type…</option>
@@ -1126,6 +1183,9 @@ export default function AddHorsePage() {
  <option value="Custom">Custom (Repaint / Body Mod)</option>
  <option value="Artist Resin">Artist Resin</option>
  </select>
+ {validationErrors.includes("Finish Type") && (
+ <span className="mt-1 block text-xs font-medium text-red-500">⚠ Required — select a finish type</span>
+ )}
  </div>
  )}
 
@@ -1243,9 +1303,16 @@ export default function AddHorsePage() {
  </label>
  <select
  id="condition-grade"
- className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className={`flex h-9 w-full rounded-md border px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
+ validationErrors.includes("Condition Grade")
+ ? "border-red-400 ring-2 ring-red-400 bg-red-50/30"
+ : "border-edge bg-[#FEFCF8]"
+ } ${shakeFields && validationErrors.includes("Condition Grade") ? "animate-shake" : ""}`}
  value={conditionGrade}
- onChange={(e) => setConditionGrade(e.target.value)}
+ onChange={(e) => {
+ setConditionGrade(e.target.value);
+ if (validationErrors.length > 0) setValidationErrors((prev) => prev.filter((f) => f !== "Condition Grade"));
+ }}
  >
  <option value="">Select condition…</option>
  {CONDITION_GRADES.map((grade) => (
