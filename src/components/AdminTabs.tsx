@@ -184,7 +184,7 @@ export default function AdminTabs({
  return (
  <>
  {/* Tab bar */}
- <div className="mb-6 flex gap-1 border-b border-stone-200">
+ <div className="mb-6 flex gap-1 overflow-x-auto border-b border-[#E0D5C1] [-webkit-overflow-scrolling:touch] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
  {TABS.map((tab) => {
  const badge = getBadge(tab.key);
  return (

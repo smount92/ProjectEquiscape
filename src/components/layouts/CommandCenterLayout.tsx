@@ -30,7 +30,7 @@ export default function CommandCenterLayout({
                         <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">{description}</p>
                     )}
                 </div>
-                {headerActions && <div className="flex gap-3">{headerActions}</div>}
+                {headerActions && <div className="flex flex-wrap gap-3">{headerActions}</div>}
             </div>
 
             {/* Dashboard grid — only use 2-col when sidebar exists */}

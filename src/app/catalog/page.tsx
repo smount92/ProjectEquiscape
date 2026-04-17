@@ -76,7 +76,7 @@ export default async function ReferencePage() {
   </div>
   </div>
 
-  <div className="grid-cols-[1fr_280px] grid gap-8">
+  <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
   {/* Main Content */}
   <div className="space-y-6">
    <CatalogBrowser

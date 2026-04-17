@@ -86,6 +86,21 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 # 🔴 Priority: Critical
 
+## ✅ Task MO-1: Mobile Overflow Fixes — DONE (2026-04-17)
+
+**Workflow:** `.agents/workflows/fix-mobile-overflow.md`
+**Source:** Mobile responsiveness audit — 6 surfaces with content clipped by global `overflow-x: hidden`
+**Fixes applied:**
+1. ✅ **Catalog page** — Fixed grid now responsive (`grid-cols-1 lg:grid-cols-[1fr_280px]`)
+2. ✅ **Admin tabs** — Horizontal scroll with hidden scrollbar for 5-tab overflow
+3. ✅ **Suggestion diff table** — Vote panel stacks on mobile, diff table has scroll wrapper
+4. ✅ **CommandCenterLayout** — Header actions now `flex-wrap` to prevent overflow
+5. ✅ **Manage Event tabs** — Horizontal scroll matching Admin tabs pattern
+6. ✅ **Chat header** — `flex-wrap` + responsive padding for trust signals
+**Status:** ✅ COMPLETE — 0 errors, build clean
+
+---
+
 ## ✅ Task H-1: Insurance Report Bug Fixes — DONE (2026-04-04)
 
 **Workflow:** `.agents/workflows/fix-insurance-report-bugs.md`

@@ -443,7 +443,7 @@ export default function ManageEventPage() {
  </div>
 
  {/* Tab Bar */}
- <div className="flex gap-[var(--space-xs)] mb-[var(--space-xl)] border-b border-stone-200 pb-0">
+ <div className="flex gap-[var(--space-xs)] mb-[var(--space-xl)] overflow-x-auto border-b border-[#E0D5C1] pb-0 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
  {tabs
  .filter((t) => !t.hidden)
  .map((tab) => (
