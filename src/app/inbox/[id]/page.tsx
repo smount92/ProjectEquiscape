@@ -216,8 +216,8 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
 
  return (
  <div className="mx-auto flex h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col overflow-hidden px-4 md:px-8">
- {/* Header */}
- <div className="bg-parchment border-edge animate-fade-in-up mb-4 flex shrink-0 flex-wrap items-center gap-4 rounded-lg border px-4 py-4 sm:px-6">
+ {/* Header — compact on mobile */}
+ <div className="bg-parchment border-edge animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border px-4 py-3 sm:mb-4 sm:gap-4 sm:py-4 sm:px-6">
  <Link
  href="/inbox"
  className="bg-black/5 text-muted flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full no-underline transition-all"
@@ -251,8 +251,8 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  )}
  </div>
 
- {/* Trust Signals */}
- <div className="mt-0.5 flex flex-wrap gap-1">
+ {/* Trust Signals — hidden on mobile to save space */}
+ <div className="mt-0.5 hidden flex-wrap gap-1 sm:flex">
  {memberSince && (
  <span
  className="border-edge text-muted inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
@@ -276,7 +276,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  </span>
  )}
  </div>
- <div className="inline-flex items-center gap-1 text-xs text-muted">
+ <div className="hidden items-center gap-1 text-xs text-muted sm:inline-flex">
  <svg
  width="12"
  height="12"
@@ -296,11 +296,14 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <BlockButton targetId={otherId} targetAlias={otherAlias} initialBlocked={isBlockedUser} />
  </div>
 
+ {/* Scrollable content area — everything below the header scrolls together */}
+ <div className="flex min-h-0 flex-1 flex-col">
+
  {/* Horse Context Card — visual banner for horse-linked conversations */}
  {horseContext && (
  <Link
  href={`/community/${horseContext.id}`}
- className="group animate-fade-in-up mb-4 flex items-center gap-4 rounded-xl border border-edge bg-card p-4 text-ink no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md"
+ className="group animate-fade-in-up mb-2 flex shrink-0 items-center gap-4 rounded-xl border border-edge bg-card p-3 text-ink no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md sm:mb-4 sm:p-4"
  id="chat-horse-link"
  >
  {horseContext.thumbnailUrl ? (
@@ -308,10 +311,10 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <img
  src={horseContext.thumbnailUrl}
  alt={horseContext.name}
- className="h-14 w-14 shrink-0 rounded-md object-cover"
+ className="h-10 w-10 shrink-0 rounded-md object-cover sm:h-14 sm:w-14"
  />
  ) : (
- <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-parchment object-cover text-2xl">
+ <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-parchment text-xl sm:h-14 sm:w-14 sm:text-2xl">
  🐴
  </div>
  )}
@@ -345,10 +348,14 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  </Link>
  )}
 
- {/* Offer Card — Commerce State Machine (show for ALL transaction states) */}
- {txn && <OfferCard transaction={txn} currentUserId={user.id} />}
+ {/* Offer Card — Commerce State Machine (scrolls with content) */}
+ {txn && (
+ <div className="mb-2 shrink-0 sm:mb-4">
+ <OfferCard transaction={txn} currentUserId={user.id} />
+ </div>
+ )}
 
- {/* Chat Thread (Client Component) */}
+ {/* Chat Thread (Client Component) — takes remaining space */}
  <ChatThread
  conversationId={conversationId}
  currentUserId={user.id}
@@ -367,15 +374,18 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
 
  {/* Transaction Actions — only show legacy flow if NO Safe-Trade transaction exists */}
  {!hasCommerceTransaction && (
+ <div className="shrink-0">
  <TransactionActions
  conversationId={conversationId}
  initialStatus={conversation.transaction_status ||"open"}
  hasRating={!!existingRating}
  />
+ </div>
  )}
 
  {/* Rating Form — only show if a transaction exists (conversation marked complete) */}
  {transactionId && (
+ <div className="shrink-0">
  <RatingForm
  transactionId={transactionId}
  targetId={otherId}
@@ -383,7 +393,9 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  existingRating={existingRating}
  hasVerifiedTransfer={(mutualTransfers || 0) > 0}
  />
+ </div>
  )}
+ </div>
  </div>
  );
 }
