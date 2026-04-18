@@ -215,7 +215,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  );
 
  return (
- <div className="mx-auto flex h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col overflow-hidden px-4 md:px-8">
+ <div className="mx-auto flex min-h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col px-4 md:px-8">
  {/* Header — compact on mobile */}
  <div className="bg-parchment border-edge animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border px-4 py-3 sm:mb-4 sm:gap-4 sm:py-4 sm:px-6">
  <Link
@@ -355,6 +355,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  </div>
  )}
 
+ <div className="min-h-[60dvh]">
  {/* Chat Thread (Client Component) — takes remaining space */}
  <ChatThread
  conversationId={conversationId}
@@ -371,6 +372,8 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  attachments: attachmentMap[m.id] || undefined,
  }))}
  />
+
+ </div>
 
  {/* Transaction Actions — only show legacy flow if NO Safe-Trade transaction exists */}
  {!hasCommerceTransaction && (
