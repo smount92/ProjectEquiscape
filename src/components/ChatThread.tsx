@@ -270,7 +270,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  )
  )}
  <div
- className={`text-ink max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] border border-emerald-300 bg-[linear-gradient(135deg,rgba(44,85,69,0.3),rgba(139,92,246,0.3))]" : "border-edge rounded-bl-[4px] border bg-parchment"}`}
+ className={`max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] bg-[#2C5545] text-white" : "border-edge rounded-bl-[4px] border bg-card text-ink"}`}
  >
  <div className="break-words whitespace-pre-wrap">{msg.content}</div>
 
@@ -298,7 +298,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  )}
 
  <div
- className={`text-muted mt-1 text-[0.6rem] ${msg.isMe ? "text-right" : ""}`}
+ className={`mt-1 text-[0.6rem] ${msg.isMe ? "text-right text-white/60" : "text-muted"}`}
  >
  {formatTime(msg.createdAt)}
  </div>
