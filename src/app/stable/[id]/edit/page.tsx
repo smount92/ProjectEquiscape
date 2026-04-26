@@ -691,7 +691,7 @@ export default function EditHorsePage() {
  className="mx-auto max-w-[680px] px-0 py-12 text-center"
  >
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 border-t-[color:var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[color:var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  />
  <p>Loading horse details…</p>
  </div>
@@ -702,7 +702,7 @@ export default function EditHorsePage() {
  if (error) {
  return (
  <FocusLayout title="Edit Horse" description="Update your horse details.">
- <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🚫</div>
  <h1>Access Denied</h1>
  <p>{error}</p>
@@ -758,8 +758,8 @@ export default function EditHorsePage() {
  )}
 
  {/* ===== Photo Studio ===== */}
- <div className="bg-white border-stone-200 mb-8 rounded-lg border shadow-md transition-all">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100 px-6 py-4">
+ <div className="bg-card border-input mb-8 rounded-lg border shadow-md transition-all">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-stone-100 px-6 py-4">
  <div className="mb-1 text-2xl">📸</div>
  <h2>Photo Studio</h2>
  </div>
@@ -882,7 +882,7 @@ export default function EditHorsePage() {
  </div>
 
  {/* Extra Details Multi-Upload Zone */}
- <div className="border-stone-200 mt-6 border-t pt-6">
+ <div className="border-input mt-6 border-t pt-6">
  <div className="text-stone-900 mb-1 flex items-center gap-1 text-sm font-semibold">
  Extra Details & Flaws
  <span className="text-stone-500 text-xs font-normal">
@@ -1002,7 +1002,7 @@ export default function EditHorsePage() {
  {newExtraFiles.map((ef, i) => (
  <div
  key={`new-${i}`}
- className="border-stone-200 relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ className="border-input relative h-[100px] w-[100px] overflow-hidden rounded-md border"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={ef.previewUrl} alt={`New extra ${i + 1}`} />
@@ -1038,9 +1038,9 @@ export default function EditHorsePage() {
  </div>
 
  {/* ===== Section 1: Identity ===== */}
- <div className="bg-white border-stone-200 mb-8 rounded-lg border shadow-md transition-all">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
- <div className="section-icon rounded-lg border border-stone-200 bg-white shadow-md transition-all">
+ <div className="bg-card border-input mb-8 rounded-lg border shadow-md transition-all">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-stone-100">
+ <div className="section-icon rounded-lg border border-input bg-card shadow-md transition-all">
  🏷️
  </div>
  <h2>{activeConfig.label === "Model Horse" ? "Model Identity" : `${activeConfig.label} Details`}</h2>
@@ -1121,7 +1121,7 @@ export default function EditHorsePage() {
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Public Notes</label>
  <Textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  value={publicNotes}
  onChange={(e) => setPublicNotes(e.target.value)}
  placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
@@ -1168,7 +1168,7 @@ export default function EditHorsePage() {
  <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={assignedGender}
  onChange={(e) => setAssignedGender(e.target.value)}
  id="edit-assigned-gender"
@@ -1222,7 +1222,7 @@ export default function EditHorsePage() {
  </label>
  <select
  id="edit-finish"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={finishType}
  onChange={(e) => setFinishType(e.target.value as FinishType)}
  >
@@ -1239,7 +1239,7 @@ export default function EditHorsePage() {
  </label>
  <select
  id="edit-condition"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  >
@@ -1282,7 +1282,7 @@ export default function EditHorsePage() {
  </label>
  <select
  id="edit-life-stage"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={lifeStage}
  onChange={(e) => {
  setLifeStage(e.target.value);
@@ -1322,7 +1322,7 @@ export default function EditHorsePage() {
  </label>
  <select
  id="edit-trade-status"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={tradeStatus}
  onChange={(e) => setTradeStatus(e.target.value)}
  >
@@ -1366,7 +1366,7 @@ export default function EditHorsePage() {
  </label>
  <Textarea
  id="edit-marketplace-notes"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  rows={3}
  maxLength={500}
  placeholder="e.g. Will ship anywhere, Trades welcome..."
@@ -1408,7 +1408,7 @@ export default function EditHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-surface-primary font-inherit text-stone-900 hover:border-emerald-700 hover:bg-surface-secondary flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-emerald-50" :"border-stone-200"}`}
+ className={`bg-surface-primary font-inherit text-stone-900 hover:border-emerald-700 hover:bg-surface-secondary flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-emerald-50" :"border-input"}`}
  onClick={() => setVisibility(opt.value)}
  id={`edit-visibility-${opt.value}`}
  >
@@ -1422,9 +1422,9 @@ export default function EditHorsePage() {
  </div>
 
  {/* ===== Section 2: Reference Link (Unified Search) ===== */}
- <div className="bg-white border-stone-200 mb-8 rounded-lg border shadow-md transition-all">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-stone-200 bg-stone-100">
- <div className="section-icon rounded-lg border border-stone-200 bg-white shadow-md transition-all">
+ <div className="bg-card border-input mb-8 rounded-lg border shadow-md transition-all">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-stone-100">
+ <div className="section-icon rounded-lg border border-input bg-card shadow-md transition-all">
  🔗
  </div>
  <h2>Reference Link</h2>
@@ -1449,7 +1449,7 @@ export default function EditHorsePage() {
  </div>
 
  {/* ===== Section 3: Financial Vault ===== */}
- <div className="bg-white border-stone-200 relative mb-8 overflow-hidden rounded-lg border shadow-md transition-all">
+ <div className="bg-card border-input relative mb-8 overflow-hidden rounded-lg border shadow-md transition-all">
  <div className="border-orange-200 mb-8 flex items-center gap-4 border-b pb-6">
  <div className="vault-icon">🔒</div>
  <div>
@@ -1551,7 +1551,7 @@ export default function EditHorsePage() {
  <div className="flex justify-end gap-4">
  <Link
  href={`/stable/${horseId}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  id="edit-cancel"
  >
  Cancel
@@ -1565,7 +1565,7 @@ export default function EditHorsePage() {
  {isSaving ? (
  <>
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  {Object.keys(newFiles).length > 0 ?"Uploading…" :"Saving…"}

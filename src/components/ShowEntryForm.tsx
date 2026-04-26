@@ -295,10 +295,10 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
             value={classSearch}
             onChange={(e) => setClassSearch(e.target.value)}
           />
-          <div className="max-h-[320px] overflow-y-auto rounded-md border border-stone-200 bg-stone-50">
+          <div className="max-h-[320px] overflow-y-auto rounded-md border border-input bg-muted">
             {Array.from(divisionGroups.entries()).map(([divName, items]) => (
               <div key={divName}>
-                <div className="border-b border-stone-200 bg-stone-100 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-stone-500">
+                <div className="border-b border-input bg-stone-100 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-stone-500">
                   {divName}
                 </div>
                 {items.map((c) => (
@@ -395,7 +395,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                     <button
                       key={h.id}
                       type="button"
-                      className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-stone-200 bg-white p-2 transition-all hover:ring-2 hover:ring-forest"
+                      className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-input bg-card p-2 transition-all hover:ring-2 hover:ring-forest"
                       onClick={() => handleHorseSelect(h.id)}
                     >
                       {h.thumbnailUrl ? (
@@ -496,7 +496,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                 {/* Selected photo preview + Crop button */}
                 {selectedPhotoObj && (
                   <div>
-                    <div className="overflow-hidden rounded-md border border-stone-200">
+                    <div className="overflow-hidden rounded-md border border-input">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={croppedPreviewUrl || selectedPhotoObj.publicUrl}
@@ -507,7 +507,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                     <div className="mt-2 flex items-center gap-2">
                       <button
                         type="button"
-                        className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-stone-200 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 transition-all hover:bg-stone-50"
+                        className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-3 py-1.5 text-xs font-semibold text-stone-700 transition-all hover:bg-muted"
                         onClick={handleCropClick}
                         disabled={uploadingCrop}
                       >
@@ -528,7 +528,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                   </label>
                   <textarea
                     id="entry-caption"
-                    className="w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-forest"
+                    className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-forest"
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     maxLength={280}

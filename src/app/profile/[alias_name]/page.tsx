@@ -316,7 +316,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {studioSlug && (
  <Link
  href={`/studio/${studioSlug}`}
- className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  🎨 {isOwnProfile ?"My Studio" : `Visit ${studioName ||"Studio"}`}
  </Link>
@@ -427,7 +427,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
  {/* Grid */}
  {profileCards.length === 0 ? (
- <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🔒</div>
  <h2>
  {isOwnProfile
@@ -454,7 +454,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <Link
  key={horse.id}
  href={`/community/${horse.id}`}
- className="border-stone-200 text-stone-900 flex flex-col overflow-hidden rounded-lg border bg-stone-50 no-underline transition-all"
+ className="border-input text-stone-900 flex flex-col overflow-hidden rounded-lg border bg-muted no-underline transition-all"
  id={`profile-card-${horse.id}`}
  >
  <div className="relative">
@@ -545,14 +545,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Reviews Section */}
  {ratingSummary.count > 0 && (
  <div
- className="bg-white border border-stone-200 animate-fade-in-up mt-8 rounded-lg border p-6 shadow-md"
+ className="bg-card border border-input animate-fade-in-up mt-8 rounded-lg border p-6 shadow-md"
  id="reviews"
  >
  <div className="mb-6 flex items-center gap-2">
  <h2 className="m-0 text-lg">⭐ Reviews ({ratingSummary.count})</h2>
  </div>
  {ratingSummary.ratings.map((r) => (
- <div key={r.id} className="border-stone-200 border-b py-4 last:border-b-0">
+ <div key={r.id} className="border-input border-b py-4 last:border-b-0">
  <div className="mb-1 flex items-center justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
  <span className="text-sm text-stone-600">
  @{r.reviewerAlias} — {"★".repeat(r.stars)}

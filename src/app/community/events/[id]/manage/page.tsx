@@ -384,10 +384,10 @@ export default function ManageEventPage() {
  return (
  <ExplorerLayout title="Manage Event" description="Manage your event details, divisions, and classes.">
  <div
- className="bg-white border-stone-200 rounded-lg border p-12 text-center shadow-md transition-all"
+ className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 border-t-[var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  />
  <p>Loading event…</p>
  </div>
@@ -399,12 +399,12 @@ export default function ManageEventPage() {
  return (
  <ExplorerLayout title="Manage Event" description="Manage your event details, divisions, and classes.">
  <div
- className="bg-white border-stone-200 rounded-lg border p-12 text-center shadow-md transition-all"
+ className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <p className="text-red-700">{error}</p>
  <Link
  href="/community/events"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  ← Back to Events
  </Link>
@@ -477,7 +477,7 @@ export default function ManageEventPage() {
  {/* TAB: Edit Details */}
  {/* ═══════════════════════════════════════ */}
  {activeTab ==="details" && (
- <div className="bg-white border-stone-200 rounded-lg border p-8 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
  <div className="flex flex-col gap-6">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Event Name</label>
@@ -538,7 +538,7 @@ export default function ManageEventPage() {
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Timezone</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={eventData.timezone}
  onChange={(e) =>
  setEventData((prev) => ({ ...prev, timezone: e.target.value }))
@@ -685,13 +685,13 @@ export default function ManageEventPage() {
  {divisions.map((div, divIndex) => (
  <div
  key={div.id}
- className="bg-white border-stone-200 overflow-hidden rounded-lg border shadow-md transition-all"
+ className="bg-card border-input overflow-hidden rounded-lg border shadow-md transition-all"
  >
  {/* Division Header */}
- <div className="bg-stone-50 border-stone-200 flex flex-wrap items-center gap-2 border-b px-6 py-4">
+ <div className="bg-muted border-input flex flex-wrap items-center gap-2 border-b px-6 py-4">
  <div className="division-reorder max-sm:hidden">
  <button
- className="border-stone-200 text-stone-500 hover:border-emerald-700 hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-stone-500 hover:border-emerald-700 hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveDivision(divIndex, -1)}
  disabled={divIndex === 0}
  title="Move up"
@@ -699,7 +699,7 @@ export default function ManageEventPage() {
  ▲
  </button>
  <button
- className="border-stone-200 text-stone-500 hover:border-emerald-700 hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-stone-500 hover:border-emerald-700 hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveDivision(divIndex, 1)}
  disabled={divIndex === divisions.length - 1}
  title="Move down"
@@ -726,7 +726,7 @@ export default function ManageEventPage() {
  Save
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setEditingDivision(null)}
  >
  Cancel
@@ -759,7 +759,7 @@ export default function ManageEventPage() {
  🗑️
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setAddingClassToDivision(div.id);
  setNewClassName("");
@@ -779,14 +779,14 @@ export default function ManageEventPage() {
  <div key={cls.id} className="border-b-0">
  <div className="flex flex-col gap-[2px]">
  <button
- className="border-stone-200 text-stone-500 hover:border-emerald-700 hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-stone-500 hover:border-emerald-700 hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveClass(div.id, clsIndex, -1)}
  disabled={clsIndex === 0}
  >
  ▲
  </button>
  <button
- className="border-stone-200 text-stone-500 hover:border-emerald-700 hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-stone-500 hover:border-emerald-700 hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveClass(div.id, clsIndex, 1)}
  disabled={clsIndex === div.classes.length - 1}
  >
@@ -820,7 +820,7 @@ export default function ManageEventPage() {
  Save
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setEditingClass(null)}
  >
  Cancel
@@ -884,7 +884,7 @@ export default function ManageEventPage() {
 
  {/* Add class inline form */}
  {addingClassToDivision === div.id && (
- <div className="bg-stone-50 animate-fade-in-up border-b-0">
+ <div className="bg-muted animate-fade-in-up border-b-0">
  <Input
  className="w-[60px]"
  value={newClassNumber}
@@ -907,7 +907,7 @@ export default function ManageEventPage() {
  Add
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setAddingClassToDivision(null)}
  >
  Cancel
@@ -926,7 +926,7 @@ export default function ManageEventPage() {
  </div>
 
  {/* Add Division */}
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div className="flex items-center gap-2">
  <Input
  className="flex-1"
@@ -948,7 +948,7 @@ export default function ManageEventPage() {
  {/* Quick Actions */}
  <div className="mt-6 flex flex-wrap gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={loadUserEvents}
  disabled={isSaving}
  >
@@ -962,7 +962,7 @@ export default function ManageEventPage() {
  {/* TAB: Judges */}
  {/* ═══════════════════════════════════════ */}
  {activeTab ==="judges" && (
- <div className="bg-white border-stone-200 rounded-lg border p-8 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
  <h3 className="mb-4">
  🧑‍⚖️ <span className="text-forest">Assigned Judges</span>
  </h3>
@@ -989,7 +989,7 @@ export default function ManageEventPage() {
  {/* Autocomplete dropdown */}
  {userSuggestions.length > 0 && newJudgeAlias.trim().length >= 2 && (
  <div
- className="absolute top-full left-0 right-0 z-50 mt-1 max-h-[240px] overflow-auto rounded-md border border-stone-200 bg-white shadow-lg"
+ className="absolute top-full left-0 right-0 z-50 mt-1 max-h-[240px] overflow-auto rounded-md border border-input bg-card shadow-lg"
  >
  {userSuggestions.map((u) => (
  <button
@@ -999,7 +999,7 @@ export default function ManageEventPage() {
  setNewJudgeAlias(u.aliasName);
  setUserSuggestions([]);
  }}
- className="flex w-full cursor-pointer items-center gap-[var(--space-sm)] border-0 border-b border-stone-200 bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-left text-sm text-stone-900 hover:bg-[rgb(250 250 249)]"
+ className="flex w-full cursor-pointer items-center gap-[var(--space-sm)] border-0 border-b border-input bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-left text-sm text-stone-900 hover:bg-[rgb(250 250 249)]"
  >
  <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent-primary-glow)] text-xs">
  {u.avatarUrl ? (
@@ -1082,7 +1082,7 @@ export default function ManageEventPage() {
  <div className="text-sm font-semibold">@{judge.aliasName}</div>
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-xs font-semibold text-red-700 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-red-700 no-underline transition-all"
  onClick={() => handleRemoveJudge(judge.id)}
  >
  Remove
@@ -1108,7 +1108,7 @@ export default function ManageEventPage() {
  ) : (
  <>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4"
  value={selectedSourceEvent}
  onChange={(e) => setSelectedSourceEvent(e.target.value)}
  title="Source event"
@@ -1122,7 +1122,7 @@ export default function ManageEventPage() {
  </select>
  <div className="flex justify-end gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowCopyModal(false)}
  >
  Cancel

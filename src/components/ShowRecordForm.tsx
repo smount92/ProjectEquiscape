@@ -119,7 +119,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  };
 
  return (
- <div className="rounded-lg border border-stone-200 bg-white p-6 shadow-md transition-all">
+ <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all">
  <div className="mb-4 text-base font-semibold">
  {isEdit ?"✏️ Edit Show Record" :"🏅 Add Show Record"}
  </div>
@@ -212,7 +212,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <label htmlFor="show-record-ribbon" className="text-stone-900 mb-1 block text-sm font-semibold">Ribbon Color</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={ribbonColor}
  onChange={(e) => setRibbonColor(e.target.value)}
  id="show-record-ribbon"
@@ -254,7 +254,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Notes</label>
  <textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  value={notes}
  onChange={(e) => setNotes(e.target.value)}
  placeholder="Additional notes (optional)"
@@ -268,7 +268,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <button
  type="button"
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowAdvanced(!showAdvanced)}
  id="show-record-advanced-toggle"
  >
@@ -307,7 +307,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <label htmlFor="show-record-award-category" className="text-stone-900 mb-1 block text-sm font-semibold">Award Category</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={awardCategory}
  onChange={(e) => setAwardCategory(e.target.value)}
  id="show-record-award-category"
@@ -324,7 +324,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <label htmlFor="show-record-competition-level" className="text-stone-900 mb-1 block text-sm font-semibold">Competition Level</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={competitionLevel}
  onChange={(e) => setCompetitionLevel(e.target.value)}
  id="show-record-competition-level"
@@ -345,7 +345,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mt-6 flex justify-end gap-2">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={onCancel}
  >
  Cancel

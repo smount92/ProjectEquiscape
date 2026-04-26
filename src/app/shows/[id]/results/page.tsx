@@ -59,7 +59,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
         <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="mb-8 text-center animate-fade-in-up">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-1.5 text-sm font-medium text-stone-600 shadow-sm">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-input bg-card px-4 py-1.5 text-sm font-medium text-stone-600 shadow-sm">
                     📸 Show Results
                     {event.isSanctioned && (
                         <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
@@ -96,7 +96,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
             <div className="mb-8 flex justify-center animate-fade-in-up">
                 <a
                     href={`/api/export/show-results/${event.id}`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-5 py-2.5 text-sm font-medium text-stone-700 shadow-sm transition-all hover:bg-stone-50 hover:shadow-md no-underline"
+                    className="inline-flex items-center gap-2 rounded-lg border border-input bg-card px-5 py-2.5 text-sm font-medium text-stone-700 shadow-sm transition-all hover:bg-muted hover:shadow-md no-underline"
                 >
                     📥 Download Results CSV
                 </a>
@@ -105,9 +105,9 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
             {/* Results by Division → Class */}
             <div className="space-y-8 animate-fade-in-up">
                 {divisions.map((division) => (
-                    <div key={division.name} className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+                    <div key={division.name} className="overflow-hidden rounded-xl border border-input bg-card shadow-sm">
                         {/* Division Header */}
-                        <div className="border-b border-stone-100 bg-stone-50 px-6 py-3">
+                        <div className="border-b border-stone-100 bg-muted px-6 py-3">
                             <h2 className="text-lg font-semibold text-stone-800">
                                 📂 {division.name}
                             </h2>
@@ -180,7 +180,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
 
             {/* Empty State */}
             {divisions.length === 0 && (
-                <div className="rounded-xl border border-stone-200 bg-white px-8 py-16 text-center shadow-sm">
+                <div className="rounded-xl border border-input bg-card px-8 py-16 text-center shadow-sm">
                     <div className="mb-4 text-5xl">📋</div>
                     <h2 className="text-xl font-semibold text-stone-800">No Results Available</h2>
                     <p className="mt-2 text-stone-500">This show hasn&apos;t announced results yet, or no entries were placed.</p>
@@ -188,7 +188,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
             )}
 
             {/* Footer */}
-            <footer className="mt-12 border-t border-stone-200 pt-6 text-center">
+            <footer className="mt-12 border-t border-input pt-6 text-center">
                 <p className="text-sm text-stone-400">
                     Show results managed by{" "}
                     <Link href="/" className="font-medium text-stone-600 hover:text-stone-800">

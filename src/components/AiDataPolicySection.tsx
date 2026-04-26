@@ -10,7 +10,7 @@ export default function AiDataPolicySection() {
 
  <div className="flex flex-col gap-6">
   {/* Q1 */}
-  <div className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+  <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
   <h3 className="mb-2 text-base font-bold text-stone-900">
    1. Are my photos used to train AI?
   </h3>
@@ -23,7 +23,7 @@ export default function AiDataPolicySection() {
   </div>
 
   {/* Q2 */}
-  <div className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+  <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
   <h3 className="mb-2 text-base font-bold text-stone-900">
    2. Did you use AI to scrape other hobby websites?
   </h3>
@@ -34,7 +34,7 @@ export default function AiDataPolicySection() {
   </div>
 
   {/* Q3 */}
-  <div className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+  <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
   <h3 className="mb-2 text-base font-bold text-stone-900">
    3. How did you gather the reference data ethically?
   </h3>
@@ -74,7 +74,7 @@ export default function AiDataPolicySection() {
   </div>
 
   {/* Q4 */}
-  <div className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+  <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
   <h3 className="mb-2 text-base font-bold text-stone-900">
    4. Where is AI actually used on the platform?
   </h3>

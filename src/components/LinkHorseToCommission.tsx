@@ -53,14 +53,14 @@ export default function LinkHorseToCommission({ commissionId }: { commissionId: 
  }
 
  return (
- <div className="bg-white border-stone-200 mb-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mb-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-2">🔗 Link a Horse from Your Stable</h3>
  <p className="text-stone-500 mb-4 text-sm">
  Link a horse so WIP photos are added to its Hoofprint™ when this commission is delivered.
  </p>
  <div className="flex items-center gap-2">
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex-1"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 flex-1"
  value={selectedHorseId}
  onChange={(e) => setSelectedHorseId(e.target.value)}
  title="Select a horse to link"

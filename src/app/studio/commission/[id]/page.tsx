@@ -128,8 +128,8 @@ export default async function CommissionDetailPage({
   }
  >
   {/* Header Card */}
-  <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
-  <div className="bg-white rounded-md p-4">
+  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-card rounded-md p-4">
    <h3 className="text-stone-600 mb-1 text-sm">Description</h3>
    <p className="text-sm leading-[1.6] whitespace-pre-wrap">
    {commission.description}
@@ -209,7 +209,7 @@ export default async function CommissionDetailPage({
   {isArtist && (
    <Link
    href="/studio/dashboard"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    >
    ← Dashboard
    </Link>
@@ -217,7 +217,7 @@ export default async function CommissionDetailPage({
   {isClient && (
    <Link
    href="/studio/my-commissions"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    >
    ← My Commissions
    </Link>

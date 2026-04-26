@@ -198,11 +198,11 @@ export default function GettingStartedPage() {
  </section>
 
  {/* CTA */}
- <div className="bg-white border-stone-200 rounded-lg border text-center">
+ <div className="bg-white border-input rounded-lg border text-center">
  <p>Ready to start?</p>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  id="getting-started-cta"
  >
  Go to Your Digital Stable →

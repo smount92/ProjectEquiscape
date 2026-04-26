@@ -22,7 +22,7 @@ export default function AuthCodeErrorPage() {
                     </Link>
                     <Link
                         href="/login"
-                        className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-8 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-stone-50 hover:text-stone-900"
+                        className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border border-input bg-card px-8 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-muted hover:text-stone-900"
                         id="go-to-login"
                     >
                         Back to Sign In

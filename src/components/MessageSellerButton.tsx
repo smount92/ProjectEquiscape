@@ -62,7 +62,7 @@ export default function MessageSellerButton({
  >
  {loading ? (
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  ) : isOfferable ? (
@@ -99,14 +99,14 @@ export default function MessageSellerButton({
  return (
  <>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={handleClick}
  disabled={loading}
  >
  {loading ? (
  <>
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  {isOfferable ?"Opening…" :"Opening…"}

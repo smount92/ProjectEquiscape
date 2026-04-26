@@ -49,7 +49,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  return (
  <div>
  {/* Search */}
- <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-white border-stone-200 z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
+ <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-input z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
  <Input
  type="text"
  
@@ -78,7 +78,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
 
  {/* Events List */}
  {filtered.length === 0 ? (
- <div className="flex flex-col items-center justify-center rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-input bg-card p-8 text-center shadow-sm">
  <p>No upcoming events found.</p>
  </div>
  ) : (
@@ -91,9 +91,9 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  return (
  <div
  key={e.id}
- className="bg-stone-50 border-stone-200 flex items-center gap-6 rounded-lg border p-6 transition-colors"
+ className="bg-muted border-input flex items-center gap-6 rounded-lg border p-6 transition-colors"
  >
- <div className="bg-stone-50 border-stone-200 transition-colors-date flex items-center gap-6 rounded-lg border p-6">
+ <div className="bg-muted border-input transition-colors-date flex items-center gap-6 rounded-lg border p-6">
  <span className="text-xs font-bold tracking-[0.05em] text-[#2C5545] uppercase">
  {month}
  </span>
@@ -101,25 +101,25 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  {day}
  </span>
  </div>
- <div className="bg-stone-50 border-stone-200 transition-colors-body flex items-center gap-6 rounded-lg border p-6">
+ <div className="bg-muted border-input transition-colors-body flex items-center gap-6 rounded-lg border p-6">
  <Link
  href={`/community/events/${e.id}`}
- className="bg-stone-50 border-stone-200 transition-colors-name flex items-center gap-6 rounded-lg border p-6"
+ className="bg-muted border-input transition-colors-name flex items-center gap-6 rounded-lg border p-6"
  >
  {TYPE_ICONS[e.eventType] ||"📌"} {e.name}
  </Link>
- <div className="bg-stone-50 border-stone-200 transition-colors-meta flex items-center gap-6 rounded-lg border p-6">
+ <div className="bg-muted border-input transition-colors-meta flex items-center gap-6 rounded-lg border p-6">
  {e.isVirtual ?"🌐 Virtual" : e.locationName ||"Location TBD"}
  {e.groupName && <> · 🏛️ {e.groupName}</>}
  </div>
- <div className="bg-stone-50 border-stone-200 transition-colors-meta flex items-center gap-6 rounded-lg border p-6">
+ <div className="bg-muted border-input transition-colors-meta flex items-center gap-6 rounded-lg border p-6">
  {e.isAllDay
  ?"All Day"
  : date.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" })}
  {" ·"}👥 {e.rsvpCount} attending
  </div>
  </div>
- <div className="bg-stone-50 border-stone-200 transition-colors-actions flex items-center gap-6 rounded-lg border p-6">
+ <div className="bg-muted border-input transition-colors-actions flex items-center gap-6 rounded-lg border p-6">
  {e.userRsvp ==="going" ? (
  <span
  className="inline-flex items-center rounded-full border border-emerald-300 bg-emerald-100/70 px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-[#22c55e]"
@@ -142,7 +142,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  Going
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => handleRsvp(e.id,"interested")}
  disabled={rsvping === e.id}
  >

@@ -118,7 +118,7 @@ export default function WishlistSearch() {
  )}
 
  {/* Search input */}
- <div className="bg-stone-50 border-stone-200 flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors">
+ <div className="bg-muted border-input flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors">
  <svg
  className="text-stone-500 shrink-0"
  width="18"
@@ -171,7 +171,7 @@ export default function WishlistSearch() {
  {/* Molds */}
  {molds.length > 0 && (
  <>
- <div className="text-stone-600 border-stone-200 bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-stone-600 border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  🏭 Base Molds
  </div>
  {molds.map((item) => (
@@ -202,7 +202,7 @@ export default function WishlistSearch() {
  {/* Releases */}
  {releases.length > 0 && (
  <>
- <div className="text-stone-600 border-stone-200 bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-stone-600 border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  📦 Releases
  </div>
  {releases.map((item) => (
@@ -238,7 +238,7 @@ export default function WishlistSearch() {
  {/* Resins */}
  {resins.length > 0 && (
  <>
- <div className="text-stone-600 border-stone-200 bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-stone-600 border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  🎨 Artist Resins
  </div>
  {resins.map((item) => (
@@ -271,7 +271,7 @@ export default function WishlistSearch() {
  <div className="text-stone-500 px-4 py-6 text-center text-sm">
  <p>No references match &ldquo;{query}&rdquo;</p>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  onClick={handleCustomAdd}
  disabled={adding}
  >

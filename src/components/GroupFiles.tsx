@@ -125,7 +125,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
 
  {/* File List */}
  {files.length === 0 ? (
- <div className="flex flex-col items-center justify-center rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-input bg-card p-8 text-center shadow-sm">
  <p>No files uploaded yet.</p>
  </div>
  ) : (
@@ -133,7 +133,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  {files.map((f) => (
  <div
  key={f.id}
- className="border-stone-200 flex items-center gap-4 rounded-md border bg-black/[0.02] p-4 transition-colors hover:bg-black/[0.05]"
+ className="border-input flex items-center gap-4 rounded-md border bg-black/[0.02] p-4 transition-colors hover:bg-black/[0.05]"
  >
  <div className="shrink-0 text-2xl">{fileIcon(f.fileType)}</div>
  <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
@@ -149,7 +149,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  <div className="flex gap-1">
  {canDelete && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => handleDelete(f.id)}
  title="Delete file"
  >

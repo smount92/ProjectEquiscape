@@ -28,7 +28,7 @@ export default function ShowRingFilters({ filters, onFilterChange, manufacturers
  id="showring-filters"
  >
  {/* Finish Type Pills */}
- <div className="flex gap-[4px] rounded-lg border border-[rgb(245 245 244)] bg-stone-50 p-[3px]">
+ <div className="flex gap-[4px] rounded-lg border border-[rgb(245 245 244)] bg-muted p-[3px]">
  <button
  className={`filter-pill ${filters.finishType === null ?"filter-pill-active" :""}`}
  onClick={() => setFilter("finishType", null)}

@@ -174,7 +174,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div className="animate-fade-in-up mb-4 flex justify-end gap-2">
  <Link
  href={`/community/events/${showId}/manage`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
  >
  ⚙️ Manage Classes
  </Link>
@@ -216,7 +216,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Judge Assignment Banner — always visible to assigned judges */}
  {isJudge && !isCreator && (
  <div
- className="animate-fade-in-up mb-6 rounded-xl border border-stone-200 bg-white p-6 text-center shadow-sm"
+ className="animate-fade-in-up mb-6 rounded-xl border border-input bg-card p-6 text-center shadow-sm"
  >
  <div className="mb-2 text-[2rem]">🏅</div>
  <h3 className="mb-2">You Are an Assigned Judge</h3>
@@ -238,7 +238,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
 
  {/* Entry Form */}
  {isOpen && (
- <div className="animate-fade-in-up mb-8 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+ <div className="animate-fade-in-up mb-8 rounded-xl border border-input bg-card p-6 shadow-sm">
  <h2 className="mb-4 text-lg">Enter Your Horse</h2>
  <ShowEntryForm
  showId={showId}
@@ -298,7 +298,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Judging Banner */}
  {isJudging && (
  <div
- className="animate-fade-in-up mb-6 rounded-xl border border-stone-200 bg-white p-8 text-center shadow-sm"
+ className="animate-fade-in-up mb-6 rounded-xl border border-input bg-card p-8 text-center shadow-sm"
  >
  <div className="text-[2rem]">🟡</div>
  <h3>Judging in Progress</h3>
@@ -334,7 +334,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Host Override Panel — collapsed by default, only shown to creator */}
  {isCreator && show.status ==="closed" && (
  <details className="mb-6">
- <summary className="cursor-pointer rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm font-medium text-stone-500 shadow-sm transition-colors hover:bg-stone-50">
+ <summary className="cursor-pointer rounded-lg border border-input bg-card px-4 py-3 text-sm font-medium text-stone-500 shadow-sm transition-colors hover:bg-muted">
  🔧 Override Final Placings (Host Only)
  </summary>
  <div className="mt-2">

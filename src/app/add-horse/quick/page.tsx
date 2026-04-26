@@ -123,13 +123,13 @@ export default function QuickAddPage() {
  </h1>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  ← Back
  </Link>
  </div>
 
- <div className="bg-white border-stone-200 rounded-lg border p-8 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
  {/* Catalog Search */}
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">🔍 Search Catalog</label>
@@ -241,7 +241,7 @@ export default function QuickAddPage() {
  </button>
  {selectedCatalog && recentAdds.length > 0 && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleDuplicate}
  id="quick-duplicate"
  >
@@ -261,12 +261,12 @@ export default function QuickAddPage() {
 
  {/* Recent Adds */}
  {recentAdds.length > 0 && (
- <div className="border-stone-200 mt-8 rounded-lg border bg-white p-6">
+ <div className="border-input mt-8 rounded-lg border bg-card p-6">
  <h3 className="mb-2 text-base">Recently Added</h3>
  {recentAdds.map((item) => (
  <div
  key={item.id}
- className="border-stone-200 rounded-lg-item mt-8 border bg-white p-6"
+ className="border-input rounded-lg-item mt-8 border bg-card p-6"
  >
  <span>✅ {item.name}</span>
  <span className="text-stone-500">
@@ -274,14 +274,14 @@ export default function QuickAddPage() {
  </span>
  <Link
  href={`/stable/${item.id}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-1 text-xs font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-1 text-xs font-semibold text-stone-600 no-underline transition-all"
  >
  View →
  </Link>
  </div>
  ))}
  <button
- className="inline-flex min-h-[36px] mt-4 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] mt-4 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => router.push("/dashboard")}
  >
  ← Back to Dashboard ({recentAdds.length} added)

@@ -81,7 +81,7 @@ export default function LandingPage() {
             From your shelf to the Show Ring in under 5 minutes.
           </p>
           <div className="mt-12 flex items-start justify-center gap-6 max-md:flex-col max-md:items-center">
-            <div className="max-w-[320px] flex-1 rounded-xl border border-stone-200 bg-stone-50 px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
+            <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-stone-900 shadow-sm">
                 1
               </div>
@@ -101,7 +101,7 @@ export default function LandingPage() {
             >
               →
             </div>
-            <div className="max-w-[320px] flex-1 rounded-xl border border-stone-200 bg-stone-50 px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
+            <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-stone-900 shadow-sm">
                 2
               </div>
@@ -121,7 +121,7 @@ export default function LandingPage() {
             >
               →
             </div>
-            <div className="max-w-[320px] flex-1 rounded-xl border border-stone-200 bg-stone-50 px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
+            <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-stone-900 shadow-sm">
                 3
               </div>
@@ -152,7 +152,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-8">
             {/* Feature 1 — Reference Database */}
             <div
-              className="relative overflow-hidden rounded-xl border border-stone-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-reference"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-forest/10 text-forest">
@@ -170,7 +170,7 @@ export default function LandingPage() {
 
             {/* Feature 2 — Financial Vault */}
             <div
-              className="relative overflow-hidden rounded-xl border border-stone-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-vault"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
@@ -188,7 +188,7 @@ export default function LandingPage() {
 
             {/* Feature 3 — Virtual Photo Shows */}
             <div
-              className="relative overflow-hidden rounded-xl border border-stone-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-shows"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -206,7 +206,7 @@ export default function LandingPage() {
 
             {/* Feature 4 — Blue Book Market Guide */}
             <div
-              className="relative overflow-hidden rounded-xl border border-stone-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-bluebook"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
@@ -224,7 +224,7 @@ export default function LandingPage() {
 
             {/* Feature 5 — Art Studio */}
             <div
-              className="relative overflow-hidden rounded-xl border border-stone-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-studio"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
@@ -242,7 +242,7 @@ export default function LandingPage() {
 
             {/* Feature 6 — Trusted Marketplace */}
             <div
-              className="relative overflow-hidden rounded-xl border border-stone-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-marketplace"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
@@ -313,7 +313,7 @@ export default function LandingPage() {
             Built for <span className="text-forest">Every Part of the Hobby</span>
           </h2>
           <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
-            <div className="[&_p]:text-stone-600 rounded-xl border border-stone-200 bg-stone-50 p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Home size={32} strokeWidth={1.5} />
               </div>
@@ -323,7 +323,7 @@ export default function LandingPage() {
                 and a private vault. Import your entire spreadsheet in minutes with CSV batch import.
               </p>
             </div>
-            <div className="[&_p]:text-stone-600 rounded-xl border border-stone-200 bg-stone-50 p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Palette size={32} strokeWidth={1.5} />
               </div>
@@ -334,7 +334,7 @@ export default function LandingPage() {
                 Hoofprint&trade; — forever.
               </p>
             </div>
-            <div className="[&_p]:text-stone-600 rounded-xl border border-stone-200 bg-stone-50 p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Trophy size={32} strokeWidth={1.5} />
               </div>
@@ -351,7 +351,7 @@ export default function LandingPage() {
 
       {/* ─── Social Proof / Stats ─── */}
       <section
-        className="border-stone-200 border-t border-b bg-stone-50 px-8 py-12"
+        className="border-input border-t border-b bg-muted px-8 py-12"
         id="stats"
       >
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-12 max-sm:gap-8">
@@ -391,7 +391,7 @@ export default function LandingPage() {
             These aren&apos;t promises — they&apos;re features you can use right now.
           </p>
           <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
-            <div className="[&_p]:text-stone-600 rounded-xl border border-stone-200 bg-stone-50 p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Users size={32} strokeWidth={1.5} />
               </div>
@@ -401,7 +401,7 @@ export default function LandingPage() {
                 Dedicated spaces for breed circles, regional clubs, or trading networks.
               </p>
             </div>
-            <div className="[&_p]:text-stone-600 rounded-xl border border-stone-200 bg-stone-50 p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Smartphone size={32} strokeWidth={1.5} />
               </div>
@@ -411,7 +411,7 @@ export default function LandingPage() {
                 you can access your stable and show string without cell service.
               </p>
             </div>
-            <div className="[&_p]:text-stone-600 rounded-xl border border-stone-200 bg-stone-50 p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Bot size={32} strokeWidth={1.5} />
               </div>
@@ -440,28 +440,28 @@ export default function LandingPage() {
             unlocks the premium tools — but never locks you out of the basics.
           </p>
           <div className="mt-8 grid grid-cols-2 gap-4 text-left max-sm:grid-cols-1">
-            <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-white p-4">
+            <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
                 <p className="text-sm font-semibold text-stone-900">Photo Suite+</p>
                 <p className="text-xs text-stone-500">30 extra photos per horse</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-white p-4">
+            <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
                 <p className="text-sm font-semibold text-stone-900">Blue Book PRO Charts</p>
                 <p className="text-xs text-stone-500">Historical price trends &amp; analytics</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-white p-4">
+            <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
                 <p className="text-sm font-semibold text-stone-900">AI Stablemaster</p>
                 <p className="text-xs text-stone-500">Monthly collection analysis</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-white p-4">
+            <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
                 <p className="text-sm font-semibold text-stone-900">Show Tags PDF</p>
@@ -480,7 +480,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Transparency Banner ─── */}
-      <section className="border-stone-200 border-t bg-stone-50 px-8 py-10" id="transparency">
+      <section className="border-input border-t bg-muted px-8 py-10" id="transparency">
         <div className="mx-auto flex max-w-[720px] items-start gap-4 max-sm:flex-col">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-forest/10 text-forest">
             <Shield size={24} strokeWidth={1.5} />

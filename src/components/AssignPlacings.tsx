@@ -55,7 +55,7 @@ export default function AssignPlacings({
  if (entries.length === 0) return null;
 
  return (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">🏅 Assign Placings</h3>
  <p className="text-stone-500 mb-4 text-sm">As the event host, assign placings to each entry below.</p>
  <div className="flex flex-col gap-2">
@@ -66,7 +66,7 @@ export default function AssignPlacings({
  <span className="text-stone-500 ml-1">by @{entry.ownerAlias}</span>
  </span>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[140px]"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[140px]"
  value={placings[entry.id] ||""}
  onChange={(e) => setPlacings((prev) => ({ ...prev, [entry.id]: e.target.value }))}
  title={`Placing for ${entry.horseName}`}

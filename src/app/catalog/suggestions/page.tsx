@@ -161,7 +161,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  <Link
  key={s.id}
  href={`/catalog/suggestions/${s.id}`}
- className="bg-white border-stone-200 block rounded-lg border p-4 text-stone-900 no-underline shadow-md transition-all transition-transform"
+ className="bg-white border-input block rounded-lg border p-4 text-stone-900 no-underline shadow-md transition-all transition-transform"
  >
  <div className="mb-1 flex items-center justify-between">
  <span className="text-[1.2rem]">{typeIcon}</span>
@@ -197,7 +197,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  })}
 
  {(suggestions ?? []).length === 0 && (
- <div className="bg-white border-stone-200 text-stone-500 rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-input text-stone-500 rounded-lg border p-8 text-center shadow-md transition-all">
  <p>No suggestions yet. Be the first to contribute!</p>
  <Link
  href="/catalog"

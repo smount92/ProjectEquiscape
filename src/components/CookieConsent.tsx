@@ -44,7 +44,7 @@ export default function CookieConsent() {
 
  return (
  <div
- className="border-stone-200 animate-fade-in-up fixed right-0 bottom-0 left-0 z-[9999] border-t bg-black/90 px-8 py-4 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]"
+ className="border-input animate-fade-in-up fixed right-0 bottom-0 left-0 z-[9999] border-t bg-black/90 px-8 py-4 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]"
  role="dialog"
  aria-label="Cookie consent"
  >
@@ -68,7 +68,7 @@ export default function CookieConsent() {
  Accept
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleDecline}
  id="cookie-decline"
  >

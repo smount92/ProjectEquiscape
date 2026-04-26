@@ -58,24 +58,24 @@ export default function PhotoShareView({ photo }: PhotoShareViewProps) {
       </nav>
 
       {/* Main Photo Card */}
-      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-lg">
+      <div className="overflow-hidden rounded-2xl border border-input bg-card shadow-lg">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={photo.imageUrl}
           alt={`${photo.horseName} — ${photo.angleProfile}`}
-          className="w-full object-contain bg-stone-50"
+          className="w-full object-contain bg-muted"
           style={{ maxHeight: "70vh" }}
         />
 
         {/* Info bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-stone-200 px-6 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-input px-6 py-4">
           <div>
             <h1 className="text-lg font-bold text-stone-900">{photo.horseName}</h1>
             {photo.catalogRef && (
               <p className="text-sm text-stone-500">{photo.catalogRef}</p>
             )}
             {photo.finishType && (
-              <span className="mt-1 inline-block rounded-full border border-stone-200 bg-stone-50 px-2.5 py-0.5 text-xs font-medium text-stone-600">
+              <span className="mt-1 inline-block rounded-full border border-input bg-muted px-2.5 py-0.5 text-xs font-medium text-stone-600">
                 {photo.finishType}
               </span>
             )}
@@ -88,8 +88,8 @@ export default function PhotoShareView({ photo }: PhotoShareViewProps) {
             <button
               onClick={handleNativeShare}
               className="inline-flex min-h-[36px] cursor-pointer items-center gap-2 rounded-lg
-                         border border-stone-200 bg-white px-4 py-2 text-sm font-semibold
-                         text-stone-700 shadow-sm transition-all hover:bg-stone-50"
+                         border border-input bg-card px-4 py-2 text-sm font-semibold
+                         text-stone-700 shadow-sm transition-all hover:bg-muted"
               title="Share this photo"
             >
               📤 Share
@@ -97,8 +97,8 @@ export default function PhotoShareView({ photo }: PhotoShareViewProps) {
             <button
               onClick={handleCopyLink}
               className="inline-flex min-h-[36px] cursor-pointer items-center gap-2 rounded-lg
-                         border border-stone-200 bg-white px-4 py-2 text-sm font-semibold
-                         text-stone-700 shadow-sm transition-all hover:bg-stone-50"
+                         border border-input bg-card px-4 py-2 text-sm font-semibold
+                         text-stone-700 shadow-sm transition-all hover:bg-muted"
               title="Copy link"
             >
               {copied ? "✅ Copied!" : "🔗 Copy Link"}

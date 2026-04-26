@@ -134,7 +134,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  </Link>
  <Link
  href="/studio/setup"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  ✏️ Edit Studio
  </Link>
@@ -154,7 +154,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {/* Left: Details */}
  <div>
  {/* Pricing & Turnaround */}
- <div className="bg-white border-stone-200 mb-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mb-6 rounded-lg border p-6 shadow-md transition-all">
  <h2 className="mb-4 text-lg">💰 Pricing & Timeline</h2>
  <div className="grid gap-2">
  {(profile.priceRangeMin || profile.priceRangeMax) && (
@@ -236,7 +236,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
 
  {/* Terms */}
  {profile.termsText && (
- <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
  <h2 className="mb-4 text-lg">📄 Terms & Conditions</h2>
  <p className="text-stone-600 text-sm leading-[1.6] whitespace-pre-wrap">
  {profile.termsText}
@@ -247,7 +247,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
 
  {/* Right: Commission Queue */}
  <div>
- <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
  <h2 className="mb-4 text-lg">📋 Commission Queue</h2>
  {queue.length === 0 ? (
  <p className="text-stone-500 text-sm">
@@ -263,7 +263,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  return (
  <div
  key={item.id}
- className="flex items-center gap-2 rounded-md bg-stone-50 px-4 py-2"
+ className="flex items-center gap-2 rounded-md bg-muted px-4 py-2"
  >
  <span className="text-forest min-w-[50px] text-xs font-bold">
  Slot {item.slot_number || i + 1}
@@ -285,7 +285,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
 
  {/* Accepting */}
  {profile.acceptingTypes.length > 0 && (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h2 className="mb-4 text-lg">✅ Currently Accepting</h2>
  <div className="grid gap-1">
  {profile.acceptingTypes.map((t) => (

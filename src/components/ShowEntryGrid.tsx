@@ -59,11 +59,11 @@ export default function ShowEntryGrid({
 
   return (
     <>
-      <div className="animate-fade-in-up flex flex-col gap-0 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+      <div className="animate-fade-in-up flex flex-col gap-0 overflow-hidden rounded-xl border border-input bg-card shadow-sm">
         {entries.map((entry, index) => (
           <div
             key={entry.id}
-            className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-stone-50"
+            className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-muted"
           >
             <div className="min-w-[32px] text-center text-lg font-bold text-stone-500">
               {isExpertJudged && showStatus === "closed" && entry.placing

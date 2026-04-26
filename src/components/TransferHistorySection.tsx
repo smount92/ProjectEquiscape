@@ -18,7 +18,7 @@ export default async function TransferHistorySection() {
  <Link
  key={item.id}
  href={`/community/${item.horseId}`}
- className="bg-white border-stone-200 rounded-lg border shadow-md transition-all hover:opacity-[0.85]"
+ className="bg-card border-input rounded-lg border shadow-md transition-all hover:opacity-[0.85]"
  >
  {item.horseThumbnail ? (
  <img

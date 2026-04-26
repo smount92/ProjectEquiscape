@@ -88,7 +88,7 @@ export default function CreateEventPage() {
 
   <div className="mb-6">
    <label className="text-stone-900 mb-1 block text-sm font-semibold">Event Type *</label>
-   <select className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" value={eventType} onChange={(e) => setEventType(e.target.value)} title="Event type">
+   <select className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" value={eventType} onChange={(e) => setEventType(e.target.value)} title="Event type">
    {Object.entries(EVENT_TYPE_LABELS).map(([key, label]) => (
     <option key={key} value={key}>
     {label}
@@ -255,7 +255,7 @@ export default function CreateEventPage() {
    </button>
    <button
    type="button"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    onClick={() => router.push("/community/events")}
    >
    Cancel

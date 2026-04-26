@@ -14,7 +14,7 @@ export default async function NanDashboardWidget() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <details className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm" id="nan-dashboard" open>
+        <details className="rounded-xl border border-input bg-card p-6 shadow-sm" id="nan-dashboard" open>
             <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold tracking-widest text-stone-700 uppercase select-none [&::-webkit-details-marker]:hidden">
                 🏆 NAN {currentYear} Qualification Status
                 {totalQualifiedHorses > 0 && (
@@ -37,7 +37,7 @@ export default async function NanDashboardWidget() {
                     return (
                         <div
                             key={h.horseId}
-                            className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-stone-50"
+                            className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted"
                         >
                             <span className="shrink-0 text-xs">
                                 {status === "full" ? "🟢" : status === "partial" ? "🟡" : "🔴"}
@@ -52,7 +52,7 @@ export default async function NanDashboardWidget() {
                                             key={i}
                                             className={`rounded-full px-1.5 py-0.5 ${
                                                 q.isExpired
-                                                    ? "bg-stone-50 text-stone-300 line-through"
+                                                    ? "bg-muted text-stone-300 line-through"
                                                     : "bg-stone-100 text-stone-600"
                                             }`}
                                             title={q.isExpired ? `Expired (${q.year})` : `${q.year} ${q.cardType}`}
@@ -78,14 +78,14 @@ export default async function NanDashboardWidget() {
             <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                     href="/shows/planner"
-                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-50"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-muted"
                 >
                     🧳 Live Show Packer
                 </Link>
                 {totalQualifiedHorses > 0 && (
                     <a
                         href="/api/export/nan-cards"
-                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-50"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-muted"
                     >
                         📥 Export NAN Cards
                     </a>

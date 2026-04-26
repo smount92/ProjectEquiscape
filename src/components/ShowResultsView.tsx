@@ -49,7 +49,7 @@ const RIBBON_BORDER_MAP: Record<string, string> = {
   "1st": "border-blue-500",
   "2nd": "border-red-500",
   "3rd": "border-yellow-500",
-  "4th": "border-stone-200",
+  "4th": "border-input",
   "5th": "border-pink-500",
   "6th": "border-green-500",
   HM: "border-green-500",
@@ -152,7 +152,7 @@ export default function ShowResultsView({
     <>
       {/* Class Selector */}
       {hasClasses && (
-        <div className="animate-fade-in-up mb-6 rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
+        <div className="animate-fade-in-up mb-6 rounded-xl border border-input bg-card p-4 shadow-sm">
           <h3 className="mb-3 text-sm font-semibold text-stone-500">
             {isClosed ? "📋 View Results by Class" : "📋 Browse by Class"}
           </h3>
@@ -162,7 +162,7 @@ export default function ShowResultsView({
               className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                 selectedClassId === "all"
                   ? "border-forest bg-forest/10 text-forest ring-1 ring-forest"
-                  : "border-stone-200 text-stone-600 hover:border-stone-300 hover:shadow-sm"
+                  : "border-input text-stone-600 hover:border-stone-300 hover:shadow-sm"
               }`}
               onClick={() => setSelectedClassId("all")}
             >
@@ -181,7 +181,7 @@ export default function ShowResultsView({
                       className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
                           ? "border-forest bg-forest/10 text-forest ring-1 ring-forest"
-                          : "border-stone-200 text-stone-600 hover:border-stone-300 hover:shadow-sm"
+                          : "border-input text-stone-600 hover:border-stone-300 hover:shadow-sm"
                       }`}
                       onClick={() => setSelectedClassId(c.id)}
                     >
@@ -203,7 +203,7 @@ export default function ShowResultsView({
 
       {/* Results Podium — only for closed shows with placed entries */}
       {isClosed && filteredEntries.length > 0 && (topPlaced.length > 0 || champions.length > 0) && (
-        <div className="animate-fade-in-up mb-6 rounded-xl border border-stone-200 bg-white p-8 shadow-sm">
+        <div className="animate-fade-in-up mb-6 rounded-xl border border-input bg-card p-8 shadow-sm">
           <h2 className="mb-2 text-center text-xl">
             🏆 <span className="text-forest">
               {selectedClass ? `${selectedClass.name} — Results` : "Results"}
@@ -255,7 +255,7 @@ export default function ShowResultsView({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={entry.thumbnailUrl} alt={entry.horseName} className="aspect-[4/3] w-full object-contain bg-stone-100" />
                   )}
-                  <div className="max-w-[220px] min-w-[160px] overflow-hidden rounded-lg bg-white p-4 text-center shadow-lg">
+                  <div className="max-w-[220px] min-w-[160px] overflow-hidden rounded-lg bg-card p-4 text-center shadow-lg">
                     <div className="mb-1 text-[2rem]">{medal}</div>
                     <Link href={`/community/${entry.horseId}`} className="block text-sm font-bold text-inherit no-underline hover:underline">
                       {entry.horseName}
@@ -319,17 +319,17 @@ export default function ShowResultsView({
 
       {/* Entries Grid */}
       {filteredEntries.length === 0 ? (
-        <div className="animate-fade-in-up rounded-xl border border-stone-200 bg-white px-8 py-12 text-center shadow-sm">
+        <div className="animate-fade-in-up rounded-xl border border-input bg-card px-8 py-12 text-center shadow-sm">
           <div className="mb-4 text-5xl">📸</div>
           <h2>{hasClasses && selectedClassId !== "all" ? "No Entries in This Class" : "No Entries Yet"}</h2>
           <p>{hasClasses && selectedClassId !== "all" ? "Try selecting a different class." : "Be the first to enter this show!"}</p>
         </div>
       ) : (
-        <div className="animate-fade-in-up flex flex-col gap-0 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+        <div className="animate-fade-in-up flex flex-col gap-0 overflow-hidden rounded-xl border border-input bg-card shadow-sm">
           {sortedEntries.map((entry, index) => (
             <div
               key={entry.id}
-              className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-stone-50"
+              className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-muted"
             >
               <div className="min-w-[32px] text-center text-lg font-bold text-stone-500">
                 {isExpertJudged && isClosed && entry.placing

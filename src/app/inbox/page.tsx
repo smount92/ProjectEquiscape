@@ -192,7 +192,7 @@ export default async function InboxPage() {
   }
  >
   {inboxItems.length === 0 ? (
-  <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+  <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
    <div className="mb-4 text-5xl">✉️</div>
    <h2>Your Inbox is Empty</h2>
    <p>Browse the Show Ring and message sellers about models you&apos;re interested in!</p>
@@ -204,12 +204,12 @@ export default async function InboxPage() {
    </Link>
   </div>
   ) : (
-  <div className="bg-white/80 backdrop-blur-md border-stone-200 animate-fade-in-up flex flex-col gap-[2px] overflow-hidden rounded-lg border">
+  <div className="bg-white/80 backdrop-blur-md border-input animate-fade-in-up flex flex-col gap-[2px] overflow-hidden rounded-lg border">
    {inboxItems.map((item) => (
    <Link
     key={item.id}
     href={`/inbox/${item.id}`}
-    className={`text-stone-900 border-stone-200 flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ?"bg-emerald-50/50 hover:bg-emerald-50" :"hover:bg-black/[0.03]"}`}
+    className={`text-stone-900 border-input flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ?"bg-emerald-50/50 hover:bg-emerald-50" :"hover:bg-black/[0.03]"}`}
     id={`inbox-item-${item.id}`}
    >
     <div className="text-forest flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100/50 max-md:h-9 max-md:w-9">

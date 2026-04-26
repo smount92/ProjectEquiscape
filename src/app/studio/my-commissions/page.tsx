@@ -49,7 +49,7 @@ export default async function MyCommissionsPage() {
    <Link
     key={c.id}
     href={`/studio/commission/${c.id}`}
-    className="border-stone-200 flex flex-col rounded-lg border bg-stone-50 p-6 text-inherit no-underline transition-all hover:-translate-y-[1px] hover:border-purple-300"
+    className="border-input flex flex-col rounded-lg border bg-muted p-6 text-inherit no-underline transition-all hover:-translate-y-[1px] hover:border-purple-300"
    >
     <div className="mb-2 flex items-center justify-between gap-2">
     <span className="text-base font-bold">
@@ -91,7 +91,7 @@ export default async function MyCommissionsPage() {
  >
   {commissions.length === 0 ? (
   <div
-   className="bg-white border-stone-200 animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
+   className="bg-white border-input animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
   >
    <p className="mb-4 text-[2rem]">🎨</p>
    <p className="text-stone-500">You haven&apos;t requested any commissions yet.</p>

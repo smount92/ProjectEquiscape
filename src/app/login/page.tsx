@@ -20,7 +20,7 @@ export default function LoginPage() {
   title={<>Welcome <span className="text-forest">Back</span></>}
   description="Sign in to your Digital Stable"
  >
-  <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg">
+  <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
   {/* Body */}
   <div className="px-8 pb-8 pt-6">
    {state.error && (
@@ -47,7 +47,7 @@ export default function LoginPage() {
     id="login-email"
     name="email"
     type="email"
-    className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+    className="w-full rounded-lg border border-input bg-card px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
     placeholder="you@example.com"
     required
     autoComplete="email"
@@ -64,7 +64,7 @@ export default function LoginPage() {
      id="login-password"
      name="password"
      type={showPassword ?"text" :"password"}
-     className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+     className="w-full rounded-lg border border-input bg-card px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
      placeholder="Enter your password"
      required
      autoComplete="current-password"
@@ -110,7 +110,7 @@ export default function LoginPage() {
    </Link>
    </div>
 
-   <div className="mt-6 border-t border-stone-200 pt-5 text-center text-sm text-stone-500">
+   <div className="mt-6 border-t border-input pt-5 text-center text-sm text-stone-500">
    <p>
     Don&apos;t have an account?{" "}
     <Link href="/signup" className="font-semibold text-forest hover:underline" id="go-to-signup">

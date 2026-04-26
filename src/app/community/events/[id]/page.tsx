@@ -115,7 +115,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <div className="mx-auto max-w-6xl px-6 max-w-[720]">
  <Link
  href="/community/events"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  ← All Events
  </Link>
@@ -222,7 +222,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  {/* Description */}
  {event.description && (
- <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-2">About</h3>
  <p className="leading-[1.7] whitespace-pre-line">
  {event.description}
@@ -235,7 +235,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <div className="mt-6 flex flex-wrap justify-end gap-2">
  <Link
  href={`/community/events/${event.id}/manage`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  ⚙️ Manage Classes
  </Link>
@@ -245,7 +245,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  {/* Division / Class Tree */}
  {divisions.length > 0 && (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">
  📋 Class List ({divisions.reduce((s, d) => s + d.classes.length, 0)} classes)
  </h3>
@@ -280,7 +280,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {/* Show Entry Section (live_show / photo_show) */}
  {/* ══════════════════════════════════════ */}
  {isShowEvent && isShowOpen && (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-2">{event.eventType === "live_show" ? "🐴 Register Your Horse" : "🐴 Enter Your Horse"}</h3>
  <p className="text-stone-500 mb-4 text-sm">
  Select a public horse to enter. Your horse&apos;s passport photo will be used as the entry
@@ -297,13 +297,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  {/* Show Entries Grid */}
  {isShowEvent && showEntries.length > 0 && (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">📸 Entries ({showEntries.length})</h3>
- <div className="border border-stone-200 flex flex-col gap-0 overflow-hidden rounded-lg border">
+ <div className="border border-input flex flex-col gap-0 overflow-hidden rounded-lg border">
  {showEntries.map((entry, index) => (
  <div
  key={entry.id}
- className="border border-stone-200 flex items-center gap-4 border-b px-6 py-4 transition-colors"
+ className="border border-input flex items-center gap-4 border-b px-6 py-4 transition-colors"
  >
  <div className="text-stone-500 min-w-[32px] text-center text-lg font-bold">
  {isExpertJudged && showStatus ==="closed" && entry.placing
@@ -371,7 +371,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  {isShowEvent && showEntries.length === 0 && !isShowOpen && (
  <div
- className="bg-white border-stone-200 mt-6 rounded-lg border p-6 text-center shadow-md transition-all"
+ className="bg-card border-input mt-6 rounded-lg border p-6 text-center shadow-md transition-all"
  >
  <p className="text-stone-500">No entries were submitted for this show.</p>
  </div>
@@ -384,7 +384,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  {/* Attendees */}
  {attendees.length > 0 && (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-2">
  👥 Who&apos;s Going ({attendees.filter((a) => a.status ==="going").length})
  </h3>

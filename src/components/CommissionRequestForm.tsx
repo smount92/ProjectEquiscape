@@ -80,7 +80,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Commission Type *</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={commissionType}
  onChange={(e) => setCommissionType(e.target.value)}
  required
@@ -98,7 +98,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Link a Horse (optional)</label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={selectedHorseId}
  onChange={(e) => setSelectedHorseId(e.target.value)}
  title="Link a horse"

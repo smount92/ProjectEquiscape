@@ -51,7 +51,7 @@ function DashboardSkeleton() {
   <main className="min-w-0">
    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
     {Array.from({ length: 12 }).map((_, i) => (
-     <div key={i} className="bg-white border-stone-200 animate-pulse rounded-lg border shadow-sm">
+     <div key={i} className="bg-card border-input animate-pulse rounded-lg border shadow-sm">
       <div className="aspect-square rounded-t-lg bg-stone-200" />
       <div className="space-y-2 p-3">
        <div className="h-4 w-3/4 rounded bg-stone-200" />
@@ -64,7 +64,7 @@ function DashboardSkeleton() {
 
   {/* Sidebar Skeleton — Stat Cards */}
   <aside className="space-y-6">
-   <div className="bg-white border-stone-200 animate-pulse rounded-lg border p-6 shadow-md">
+   <div className="bg-card border-input animate-pulse rounded-lg border p-6 shadow-md">
     <div className="mb-4 h-4 w-1/2 rounded bg-stone-200" />
     <div className="space-y-3">
      {Array.from({ length: 4 }).map((_, i) => (
@@ -75,7 +75,7 @@ function DashboardSkeleton() {
      ))}
     </div>
    </div>
-   <div className="bg-white border-stone-200 animate-pulse rounded-lg border p-6 shadow-md">
+   <div className="bg-card border-input animate-pulse rounded-lg border p-6 shadow-md">
     <div className="mb-4 h-4 w-1/3 rounded bg-stone-200" />
     <div className="space-y-2">
      {Array.from({ length: 3 }).map((_, i) => (
@@ -269,7 +269,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  <>
   {/* Welcome Card for new users — FULL WIDTH */}
   {horseCards.length === 0 && (
-  <div className="bg-white border-stone-200 animate-fade-in-up mb-8 rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-indigo-50 px-8 py-16 text-center shadow-md transition-all">
+  <div className="bg-card border-input animate-fade-in-up mb-8 rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-indigo-50 px-8 py-16 text-center shadow-md transition-all">
   <h2>Welcome to Model Horse Hub!</h2>
   <p>Let&apos;s get started by adding your first model to your digital stable.</p>
   <div className="mx-auto mb-8 flex max-w-[360px] flex-col gap-4 text-left">
@@ -300,7 +300,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   </div>
   <Link
   href="/add-horse"
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
   >
   <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
   </Link>
@@ -329,17 +329,17 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
 
   {/* Pagination */}
   {totalPages > 1 && (
-  <div className="border-stone-200 mt-6 mt-8 flex flex-wrap items-center justify-between gap-2 border-t pt-6">
+  <div className="border-input mt-6 mt-8 flex flex-wrap items-center justify-between gap-2 border-t pt-6">
   {page > 1 ? (
   <Link
   href={`/dashboard?page=${page - 1}`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
   >
   ← Previous
   </Link>
   ) : (
   <button
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
   disabled
   >
   ← Previous
@@ -351,13 +351,13 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {page < totalPages ? (
   <Link
   href={`/dashboard?page=${page + 1}`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
   >
   Next →
   </Link>
   ) : (
   <button
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
   disabled
   >
   Next →
@@ -371,7 +371,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   <aside className="space-y-6">
   {/* Analytics — Compact stat rows */}
   {totalHorseCount > 0 && (
-  <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
                <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-600 uppercase">
                  <BarChart3 size={14} strokeWidth={1.5} /> Stable Overview
   </h3>
@@ -425,7 +425,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
 
   {/* Collections — Vertical list */}
   {collections.length > 0 && (
-  <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
                <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-600 uppercase">
                  <FolderOpen size={14} strokeWidth={1.5} /> Collections
   </h3>
@@ -434,7 +434,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   <Link
   key={col.id}
   href={`/stable/collection/${col.id}`}
-  className="text-stone-900 hover:border-stone-200 flex items-center justify-between rounded-md border border-transparent bg-black/[0.02] px-4 py-2 text-sm no-underline transition-all hover:bg-black/[0.06] hover:no-underline"
+  className="text-stone-900 hover:border-input flex items-center justify-between rounded-md border border-transparent bg-black/[0.02] px-4 py-2 text-sm no-underline transition-all hover:bg-black/[0.06] hover:no-underline"
   id={`collection-${col.id}`}
   >
   <span>{col.name}</span>
@@ -502,14 +502,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   <>
    <Link
    href="/stable/import"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    id="batch-import-button"
    >
    <FileText size={16} strokeWidth={1.5} /> Batch Import
    </Link>
    <Link
    href="/add-horse/quick"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    id="quick-add-button"
    >
    <Zap size={16} strokeWidth={1.5} /> Quick Add

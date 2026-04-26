@@ -114,7 +114,7 @@ export default function HoofprintTimeline({
  {isOwner && (
  <>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[140px] text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[140px] text-sm"
  value={lifeStage}
  onChange={(e) => handleStageChange(e.target.value)}
  disabled={stageUpdating}
@@ -127,7 +127,7 @@ export default function HoofprintTimeline({
  <option value="for_sale">💲 For Sale</option>
  </select>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowForm(!showForm)}
  >
  {showForm ?"Cancel" :"📝 Add Note"}
@@ -139,7 +139,7 @@ export default function HoofprintTimeline({
 
  {/* Ownership Chain */}
  {ownershipChain.length > 0 && (
- <div className="bg-stone-50 border-[rgb(245 245 244)] mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
+ <div className="bg-muted border-[rgb(245 245 244)] mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
  <span className="text-stone-500 mr-1 text-xs">Chain of Custody:</span>
  {ownershipChain.map((owner, i) => (
  <span key={owner.id} className="inline-flex items-center gap-1">
@@ -166,7 +166,7 @@ export default function HoofprintTimeline({
  {showForm && (
  <form
  onSubmit={handleAddEvent}
- className="bg-stone-50 border-[rgb(245 245 244)] mb-6 rounded-lg border p-4"
+ className="bg-muted border-[rgb(245 245 244)] mb-6 rounded-lg border p-4"
  >
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Title</label>

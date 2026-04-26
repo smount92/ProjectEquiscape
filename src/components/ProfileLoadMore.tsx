@@ -57,7 +57,7 @@ export default function ProfileLoadMore({ userId, initialOffset, totalCount }: P
                         <Link
                             key={horse.id}
                             href={`/community/${horse.id}`}
-                            className="border-stone-200 text-stone-900 flex flex-col overflow-hidden rounded-lg border bg-stone-50 no-underline transition-all"
+                            className="border-input text-stone-900 flex flex-col overflow-hidden rounded-lg border bg-muted no-underline transition-all"
                             id={`profile-card-${horse.id}`}
                         >
                             <div className="relative">
@@ -116,7 +116,7 @@ export default function ProfileLoadMore({ userId, initialOffset, totalCount }: P
                     <button
                         onClick={loadMore}
                         disabled={isPending}
-                        className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-100 disabled:opacity-50"
+                        className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-100 disabled:opacity-50"
                         id="profile-load-more"
                     >
                         {isPending ? "Loading..." : `Load More (${remaining} remaining)`}

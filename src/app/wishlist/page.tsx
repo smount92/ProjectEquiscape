@@ -136,7 +136,7 @@ export default async function WishlistPage() {
 
   {/* Wishlist Grid */}
   {items.length === 0 ? (
-  <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+  <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
    <div className="mb-4 text-5xl">❤️</div>
    <h2>Your Wishlist is Empty</h2>
    <p>Browse the Show Ring and tap the heart icon on models you love to start your hunt!</p>
@@ -165,7 +165,7 @@ export default async function WishlistPage() {
    return (
     <div
     key={item.id}
-    className="group/bg-white border-stone-200 hover:border-emerald-700 relative flex gap-4 rounded-lg border bg-stone-50/80 backdrop-blur-sm p-6 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)]"
+    className="group/bg-card border-input hover:border-emerald-700 relative flex gap-4 rounded-lg border bg-muted/80 backdrop-blur-sm p-6 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)]"
     id={`wishlist-${item.id}`}
     >
     <div className="mt-[2px] shrink-0 text-[2rem] leading-none">🐴</div>

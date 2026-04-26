@@ -54,7 +54,7 @@ export default function AdminReplyForm({
  if (!isOpen) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setIsOpen(true)}
  >
  <svg
@@ -93,11 +93,11 @@ export default function AdminReplyForm({
  ✕
  </button>
  </div>
- <div className="bg-stone-50 border-emerald-400 rounded-r-md mb-2 border-l-[3px] px-[14px] py-[10px]">
- <div className="bg-stone-50 border-emerald-400 rounded-r-md-label mb-2 border-l-[3px] px-[14px] py-[10px]">
+ <div className="bg-muted border-emerald-400 rounded-r-md mb-2 border-l-[3px] px-[14px] py-[10px]">
+ <div className="bg-muted border-emerald-400 rounded-r-md-label mb-2 border-l-[3px] px-[14px] py-[10px]">
  {originalSubject ? `Re: ${originalSubject}` :"Original message"}
  </div>
- <div className="bg-stone-50 border-emerald-400 rounded-r-md-body mb-2 border-l-[3px] px-[14px] py-[10px]">
+ <div className="bg-muted border-emerald-400 rounded-r-md-body mb-2 border-l-[3px] px-[14px] py-[10px]">
  {originalMessage}
  </div>
  </div>
@@ -123,7 +123,7 @@ export default function AdminReplyForm({
  {sending ? (
  <>
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  Sending…
@@ -149,7 +149,7 @@ export default function AdminReplyForm({
  )}
  </button>
  <button
- className="border-stone-200 text-stone-500 hover:0.05)] hover:text-stone-900 cursor-pointer rounded-full border bg-transparent px-[14px] py-[7px] font-[inherit] text-xs font-medium transition-all"
+ className="border-input text-stone-500 hover:0.05)] hover:text-stone-900 cursor-pointer rounded-full border bg-transparent px-[14px] py-[7px] font-[inherit] text-xs font-medium transition-all"
  onClick={() => {
  setIsOpen(false);
  setStatus(null);

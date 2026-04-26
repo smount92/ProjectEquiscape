@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { searchCatalogAction, getReleasesForMold, getCatalogItem, type CatalogItem } from "@/app/actions/reference";
@@ -164,7 +164,7 @@ export default function UnifiedReferenceSearch({
               <MarketValueBadge catalogId={selectedCatalogId} compact />
             </div>
             <button
-              className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+              className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
               onClick={handleClear}
               aria-label="Clear selection"
             >
@@ -225,7 +225,7 @@ export default function UnifiedReferenceSearch({
             <div className="animate-fade-in-up mt-1 flex max-h-[420px] w-full flex-col overflow-y-auto rounded-lg border border-edge bg-[#FEFCF8] shadow-lg">
               {isSearching ? (
                 <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-stone-400">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-stone-200 border-t-forest" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-input border-t-forest" />
                   Searching catalog...
                 </div>
               ) : (
@@ -233,7 +233,7 @@ export default function UnifiedReferenceSearch({
                   {/* Molds */}
                   {molds.length > 0 && (
                     <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-stone-200 bg-stone-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
+                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
                         <span>{"\u{1F3ED}"}</span> Base Molds
                       </div>
                       {molds.map((item) => (
@@ -259,7 +259,7 @@ export default function UnifiedReferenceSearch({
                   {/* Releases */}
                   {releaseResults.length > 0 && (
                     <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-stone-200 bg-stone-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
+                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
                         <span>{"\u{1F4E6}"}</span> Releases
                       </div>
                       {releaseResults.map((item) => (
@@ -290,7 +290,7 @@ export default function UnifiedReferenceSearch({
                   {/* Resins */}
                   {resins.length > 0 && (
                     <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-stone-200 bg-stone-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
+                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
                         <span>{"\u{1F3A8}"}</span> Artist Resins
                       </div>
                       {resins.map((item) => (
@@ -343,12 +343,12 @@ export default function UnifiedReferenceSearch({
           {/* Expanded Releases (when a mold is clicked) */}
           {releases.length > 0 && selectedItem && selectedItem.itemType === "plastic_mold" && (
             <div className="animate-fade-in-up mt-4 flex flex-col overflow-hidden rounded-lg border border-edge bg-[#FEFCF8] shadow-md transition-all">
-              <div className="flex items-center justify-between border-b border-stone-200 bg-emerald-50/60 px-4 py-2.5">
+              <div className="flex items-center justify-between border-b border-input bg-emerald-50/60 px-4 py-2.5">
                 <span className="text-sm text-stone-600">
                   Releases for <strong className="text-stone-800">{selectedItem.title}</strong>
                 </span>
                 <button
-                  className="cursor-pointer rounded-md border border-stone-200 bg-transparent px-3 py-1 text-xs font-medium text-stone-500 transition-colors hover:border-red-300 hover:text-red-600"
+                  className="cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-xs font-medium text-stone-500 transition-colors hover:border-red-300 hover:text-red-600"
                   onClick={handleClear}
                 >
                   {"\u2715"} Clear
@@ -358,7 +358,7 @@ export default function UnifiedReferenceSearch({
               <div className="max-h-[360px] overflow-y-auto">
                 {/* Option: Select mold directly */}
                 <button
-                  className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-stone-200 bg-emerald-50/30 px-4 py-3 text-left transition-colors hover:bg-emerald-50/60"
+                  className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-emerald-50/30 px-4 py-3 text-left transition-colors hover:bg-emerald-50/60"
                   onClick={() => handleSelect(selectedItem)}
                 >
                   <div className="min-w-0 flex-1">
@@ -374,7 +374,7 @@ export default function UnifiedReferenceSearch({
 
                 {loadingReleases ? (
                   <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-stone-400">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-stone-200 border-t-forest" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-input border-t-forest" />
                     Loading releases...
                   </div>
                 ) : (

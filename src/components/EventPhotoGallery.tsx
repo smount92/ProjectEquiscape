@@ -104,7 +104,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  }
 
  return (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
  <h3>📸 Event Photos ({photos.length})</h3>
  <label
@@ -138,7 +138,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  <button
  onClick={() => handleDelete(p.id)}
  disabled={isPending}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  style={{
  position:"absolute",
  top: 4,

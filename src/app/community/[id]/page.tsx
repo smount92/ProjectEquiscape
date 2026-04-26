@@ -310,7 +310,7 @@ editionSize: rawPedigree.edition_size,
  </div>
 
  {/* Right: The Ledger Card */}
- <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-stone-200 bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
+ <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
  {/* Stolen/Missing Banner */}
  {horse.trade_status ==="Stolen/Missing" && (
  <div
@@ -347,9 +347,9 @@ editionSize: rawPedigree.edition_size,
  {/* Owner Pill */}
  <Link
  href={`/profile/${encodeURIComponent(ownerAlias)}`}
- className="p-[6px 14px 6px 6px] bg-white border-stone-200 text-stone-900 inline-flex w-fit items-center gap-1 rounded-full rounded-lg border text-sm font-semibold no-underline shadow-md transition-all"
+ className="p-[6px 14px 6px 6px] bg-card border-input text-stone-900 inline-flex w-fit items-center gap-1 rounded-full rounded-lg border text-sm font-semibold no-underline shadow-md transition-all"
  >
- <span className="bg-stone-50 border-stone-200 text-stone-500 flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border">
+ <span className="bg-muted border-input text-stone-500 flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border">
  <svg
  width="14"
  height="14"
@@ -385,7 +385,7 @@ editionSize: rawPedigree.edition_size,
  )}
 
  {/* Model Details Card */}
- <div className="bg-white/40 p-4 border-stone-200 rounded-lg border shadow-md transition-all">
+ <div className="bg-white/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">📋</span>{""}
  {(horse.asset_category ||"model") ==="model"
@@ -589,7 +589,7 @@ editionSize: rawPedigree.edition_size,
 
  {/* Finish Details */}
  {horse.finish_details && (
- <div className="bg-white/40 p-4 border-stone-200 rounded-lg border shadow-md transition-all">
+ <div className="bg-white/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">✨</span> Finish
  </h3>
@@ -606,7 +606,7 @@ editionSize: rawPedigree.edition_size,
 
   {/* Show Bio — model only */}
   {assetConfig.showShowBio && (horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
- <div className="bg-white/40 p-4 border-stone-200 rounded-lg border shadow-md transition-all">
+ <div className="bg-white/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">🏅</span> Show Identity
  </h3>
@@ -655,7 +655,7 @@ editionSize: rawPedigree.edition_size,
 
  {/* Public Notes */}
  {horse.public_notes && (
- <div className="bg-white/40 p-4 border-stone-200 rounded-lg border shadow-md transition-all">
+ <div className="bg-white/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">📝</span> Notes
  </h3>
@@ -706,7 +706,7 @@ editionSize: rawPedigree.edition_size,
   {assetConfig.showHoofprint && (
   <Link
   href={`/community/${horseId}/hoofprint`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
   >
   🐾 View Hoofprint
   </Link>

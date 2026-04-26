@@ -102,7 +102,7 @@ export default function ParkedExportPanel({
  if (!isOpen) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setIsOpen(true)}
  id="park-export-btn"
  title="Sell off-platform with a Certificate of Authenticity"
@@ -113,11 +113,11 @@ export default function ParkedExportPanel({
  }
 
  return (
- <div className="bg-white border-stone-200 animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
+ <div className="bg-card border-input animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
  <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
  <h3>{isParked ?"🔒 Horse is Parked" :"📤 Sell Off-Platform"}</h3>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setIsOpen(false)}
  >
  ✕
@@ -164,11 +164,11 @@ export default function ParkedExportPanel({
  </div>
 
  {/* PIN Display */}
- <div className="bg-stone-50 border-forest mb-6 flex items-center gap-4 rounded-lg border-[2px] p-6">
+ <div className="bg-muted border-forest mb-6 flex items-center gap-4 rounded-lg border-[2px] p-6">
  <span className="text-stone-500 text-sm font-semibold">Claim PIN</span>
  <span className="parked-export-pin">{pin}</span>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleCopyPin}
  >
  {copied ?"✅ Copied!" :"📋 Copy"}
@@ -177,7 +177,7 @@ export default function ParkedExportPanel({
 
  {/* QR Code (visible) */}
  {pin && (
- <div className="bg-stone-50 border-stone-200 mb-6 flex flex-col items-center rounded-lg border p-6">
+ <div className="bg-muted border-input mb-6 flex flex-col items-center rounded-lg border p-6">
  <QRCodeSVG value={claimUrl} size={180} level="M" bgColor="transparent" fgColor="#e0e0e0" />
  <p className="text-stone-500 mt-2 text-xs">Scan to claim at modelhorsehub.com</p>
  </div>
@@ -211,7 +211,7 @@ export default function ParkedExportPanel({
  )}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={handleUnpark}
  disabled={status ==="unparking"}
  id="unpark-btn"

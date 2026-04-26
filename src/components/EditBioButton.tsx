@@ -32,7 +32,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  if (!isEditing) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-xs font-semibold text-stone-600 no-underline opacity-70 transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-stone-600 no-underline opacity-70 transition-all"
  onClick={() => setIsEditing(true)}
  id="edit-bio-btn"
  title="Edit bio"
@@ -61,7 +61,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  </span>
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setBio(currentBio ||"");
  setIsEditing(false);

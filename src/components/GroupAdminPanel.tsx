@@ -68,7 +68,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  };
 
  return (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div
  className="flex cursor-pointer items-center justify-between"
  onClick={() => setExpanded(!expanded)}
@@ -100,7 +100,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  <div className="flex items-center gap-1">
  {isOwner && (
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-xs min-h-0 py-1 pl-2 pr-7"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-xs min-h-0 py-1 pl-2 pr-7"
  value={m.role}
  onChange={(e) =>
  handleRoleChange(
@@ -117,7 +117,7 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  </select>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={() => handleRemove(m.userId, m.alias)}
  disabled={isPending}
  title="Remove member"
@@ -151,7 +151,7 @@ export function PinPostButton({ postId, isPinned }: { postId: string; isPinned: 
 
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-xs font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-stone-600 no-underline transition-all"
  onClick={handleToggle}
  disabled={isPending}
  title={pinned ?"Unpin post" :"Pin post"}

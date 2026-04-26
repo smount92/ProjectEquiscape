@@ -45,7 +45,7 @@ function getTierClasses(tier: number): string {
  case 5:
  return"border-forest bg-stone-100/80 hover:shadow-[0_0_24px_rgba(212,165,116,0.5)]";
  default:
- return"border-stone-200";
+ return"border-input";
  }
 }
 
@@ -84,7 +84,7 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
  {grouped.get(category)!.map((badge) => (
  <div
  key={badge.id}
- className={`bg-stone-50 relative cursor-default rounded-lg border p-4 text-center transition-transform hover:-translate-y-0.5 max-[480px]:p-2 ${getTierClasses(badge.tier)}`}
+ className={`bg-muted relative cursor-default rounded-lg border p-4 text-center transition-transform hover:-translate-y-0.5 max-[480px]:p-2 ${getTierClasses(badge.tier)}`}
  onMouseEnter={() => setHoveredBadge(badge.id)}
  onMouseLeave={() => setHoveredBadge(null)}
  >
@@ -96,7 +96,7 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
  {formatDate(badge.earnedAt)}
  </span>
  {hoveredBadge === badge.id && (
- <div className="border-stone-200 [&_p]:text-stone-600 [&>span]:text-stone-500 pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border bg-[var(--color-bg-stone-50)] px-4 py-2 text-left shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
+ <div className="border-input [&_p]:text-stone-600 [&>span]:text-stone-500 pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border bg-[var(--color-bg-muted)] px-4 py-2 text-left shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
  <strong>{badge.name}</strong>
  <p>{badge.description}</p>
  <span>Earned {formatDate(badge.earnedAt)}</span>

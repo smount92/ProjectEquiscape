@@ -40,7 +40,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  {shows.map((show) => (
  <div
  key={show.id}
- className="flex flex-wrap items-center gap-2 border-b border-stone-200 py-4 last:border-b-0"
+ className="flex flex-wrap items-center gap-2 border-b border-input py-4 last:border-b-0"
  >
  <div className="min-w-[200px] flex-1">
  <div className="font-semibold">{show.title}</div>
@@ -52,7 +52,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  <select
  value={show.status}
  onChange={(e) => handleStatusChange(show.id, e.target.value)}
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[120px]"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[120px]"
  disabled={busy === show.id}
  title={`Status for ${show.title}`}
  >
@@ -61,7 +61,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  <option value="closed">🔴 Closed</option>
  </select>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={() => handleDelete(show.id, show.title)}
  disabled={busy === show.id}
  >

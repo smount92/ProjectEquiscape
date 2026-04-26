@@ -184,14 +184,14 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
   {/* 🔒 Collection Stats — PRIVATE analytics */}
   {horseCards.length > 0 && (
   <div className="grid-cols-[repeat(3,1fr)] animate-fade-in-up mb-8 grid gap-4">
-   <div className="bg-white border-stone-200 relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
+   <div className="bg-card border-input relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
    <div className="text-2xl leading-none">🐴</div>
    <div className="analytics-value max-[400px]:text-xl">
     {horseCards.length}
    </div>
    <div className="text-stone-500 text-xs font-medium tracking-[0.05em] uppercase">Models</div>
    </div>
-   <div className="bg-white border-stone-200 relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
+   <div className="bg-card border-input relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
    <div className="text-2xl leading-none">💰</div>
    <div className="analytics-value max-[400px]:text-xl">
     {collectionVaultValue > 0
@@ -202,7 +202,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
     Collection Value
    </div>
    </div>
-   <div className="bg-white border-stone-200 relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
+   <div className="bg-card border-input relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
    <div className="text-2xl leading-none">📊</div>
    <div className="analytics-value max-[400px]:text-xl">
     {avgValue > 0
@@ -216,7 +216,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
 
   {/* Grid */}
   {horseCards.length === 0 ? (
-  <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+  <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
    <div className="mb-4 text-5xl">📂</div>
    <h2>This collection is empty</h2>
    <p>
@@ -236,10 +236,10 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
    <Link
     key={horse.id}
     href={`/stable/${horse.id}`}
-    className="group overflow-hidden rounded-lg border border-stone-200 bg-white shadow-md transition-all hover:shadow-lg"
+    className="group overflow-hidden rounded-lg border border-input bg-card shadow-md transition-all hover:shadow-lg"
     id={`collection-horse-${horse.id}`}
    >
-    <div className="relative aspect-square overflow-hidden bg-stone-50">
+    <div className="relative aspect-square overflow-hidden bg-muted">
     {horse.thumbnailUrl ? (
      // eslint-disable-next-line @next/next/no-img-element
      <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
@@ -275,7 +275,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
      🎨 {horse.releaseLine}
      </div>
     )}
-    <div className="border-stone-200 text-stone-500 mt-2 flex items-center justify-between border-t pt-2 text-xs">
+    <div className="border-input text-stone-500 mt-2 flex items-center justify-between border-t pt-2 text-xs">
      <span>{horse.conditionGrade}</span>
      <span>{formatDate(horse.createdAt)}</span>
     </div>

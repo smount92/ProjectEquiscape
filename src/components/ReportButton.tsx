@@ -59,9 +59,9 @@ export default function ReportButton({
  }
 
  return (
- <div className="bg-white border-stone-200 mt-2 rounded-lg border p-4 shadow-md transition-all">
+ <div className="bg-card border-input mt-2 rounded-lg border p-4 shadow-md transition-all">
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-2 text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-2 text-sm"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
  title="Report reason"
@@ -74,7 +74,7 @@ export default function ReportButton({
  ))}
  </select>
  <textarea
- className="inline-flex min-h-[36px] w-full rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm no-underline transition-all mb-2"
+ className="inline-flex min-h-[36px] w-full rounded-md border border-input bg-transparent px-4 py-2 text-sm no-underline transition-all mb-2"
  placeholder="Additional details (optional)"
  value={details}
  onChange={(e) => setDetails(e.target.value)}
@@ -91,7 +91,7 @@ export default function ReportButton({
  {saving ?"…" :"Submit Report"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowForm(false)}
  >
  Cancel

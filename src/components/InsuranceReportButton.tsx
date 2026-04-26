@@ -103,7 +103,7 @@ export default function InsuranceReportButton() {
  return (
  <div className="insurance-report-wrapper">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleClick}
  disabled={status ==="loading"}
  id="insurance-report-btn"
@@ -123,7 +123,7 @@ export default function InsuranceReportButton() {
  {status ==="picking" && (
  <div className="modal-backdrop" onClick={handleCancel}>
  <div
- className="bg-white border-stone-200 max-w-[400] rounded-lg border shadow-md transition-all"
+ className="bg-card border-input max-w-[400] rounded-lg border shadow-md transition-all"
  onClick={(e) => e.stopPropagation()}
  >
  <h3 className="mb-4">📄 Insurance Report Scope</h3>
@@ -132,7 +132,7 @@ export default function InsuranceReportButton() {
  </p>
 
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4 w-full"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4 w-full"
  value={selectedCollection}
  onChange={(e) => setSelectedCollection(e.target.value)}
  id="insurance-collection-select"
@@ -155,7 +155,7 @@ export default function InsuranceReportButton() {
 
  <div className="flex justify-end gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleCancel}
  >
  Cancel

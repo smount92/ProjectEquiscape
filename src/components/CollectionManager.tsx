@@ -59,7 +59,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  return (
  <>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowModal(true)}
  >
  ⚙️ Manage Collection
@@ -77,7 +77,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Description</label>
  <textarea
- className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-input bg-transparent px-4 py-2 text-sm no-underline transition-all"
  rows={3}
  value={description}
  onChange={(e) => setDescription(e.target.value)}
@@ -91,7 +91,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  )}
  <div className="mt-6 flex justify-between">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={handleDelete}
  disabled={saving}
  >
@@ -99,7 +99,7 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  </button>
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowModal(false)}
  >
  Cancel

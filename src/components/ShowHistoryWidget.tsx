@@ -54,7 +54,7 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
 
  return (
  <details
- className="mt-6 rounded-xl border border-stone-200 bg-white p-4 shadow-sm"
+ className="mt-6 rounded-xl border border-input bg-card p-4 shadow-sm"
  open
  >
  <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-base font-bold text-stone-900 select-none [&::-webkit-details-marker]:hidden">
@@ -69,7 +69,7 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  <div key={year} className="mb-1">
  <button
  type="button"
- className={`text-stone-900 flex w-full cursor-pointer items-center gap-2 rounded-sm border-none bg-transparent px-2 py-2 text-sm font-semibold transition-colors hover:bg-stone-50 ${expandedYear === year ?"bg-stone-50" :""}`}
+ className={`text-stone-900 flex w-full cursor-pointer items-center gap-2 rounded-sm border-none bg-transparent px-2 py-2 text-sm font-semibold transition-colors hover:bg-muted ${expandedYear === year ?"bg-muted" :""}`}
  onClick={() => setExpandedYear(expandedYear === year ? null : year)}
  >
  <span className="flex items-center gap-1">

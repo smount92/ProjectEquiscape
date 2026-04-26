@@ -146,7 +146,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  + New Show String
  </button>
  ) : (
- <div className="bg-white border-stone-200 mb-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mb-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">Create Show String</h3>
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
@@ -178,7 +178,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {saving ?"Creating..." :"Create"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setCreating(false)}
  >
  Cancel
@@ -189,7 +189,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  {/* Show Strings List */}
  {showStrings.length === 0 ? (
- <div className="flex flex-col items-center justify-center rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-input bg-card p-8 text-center shadow-sm">
  <p>No show strings yet. Create one to start planning!</p>
  </div>
  ) : (
@@ -214,11 +214,11 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  )}
  </div>
  <div className="flex items-center gap-2">
- <span className="flex cursor-pointer items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-xs text-stone-500 transition-all">
+ <span className="flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-2 py-1 text-xs text-stone-500 transition-all">
  {ss.entryCount}
  </span>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={async (e) => {
  e.stopPropagation();
  setSaving(true);
@@ -232,7 +232,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  📋
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={(e) => {
  e.stopPropagation();
  handleDeleteString(ss.id);
@@ -246,7 +246,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  {/* Expanded: entries + add form */}
  {activeStringId === ss.id && (
- <div className="px-4 pb-4 border-stone-200 border-t">
+ <div className="px-4 pb-4 border-input border-t">
  {loadingEntries ? (
  <p className="text-stone-500">Loading entries...</p>
  ) : (
@@ -298,7 +298,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {entries.map((entry) => (
  <div
  key={entry.id}
- className="flex items-center gap-2 rounded-md bg-stone-50 px-4 py-2 text-sm"
+ className="flex items-center gap-2 rounded-md bg-muted px-4 py-2 text-sm"
  >
  <span className="min-w-[140px] font-bold">
  🐴 {entry.horseName}
@@ -315,7 +315,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </span>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => handleRemoveEntry(entry.id)}
  title="Remove"
  >
@@ -331,7 +331,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  )}
 
  {/* Add Entry Form */}
- <div className="border-stone-200 mt-6 border-t pt-6">
+ <div className="border-input mt-6 border-t pt-6">
  <h4>Add Entry</h4>
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
@@ -339,7 +339,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  Horse *
  </label>
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={entryHorseId}
  onChange={(e) => setEntryHorseId(e.target.value)}
  title="Select horse"
@@ -400,11 +400,11 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  {/* ── Batch Results Section ── */}
  {entries.length > 0 && (
  <div
- className="mt-6 border-t border-stone-200 pt-4"
+ className="mt-6 border-t border-input pt-4"
  >
  {!showResults ? (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setShowResults(true);
  setResultsSaved(false);
@@ -605,7 +605,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  : `💾 Save ${Object.values(results).filter((r) => r.placing || r.ribbon).length} Results`}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowResults(false)}
  >
  Cancel

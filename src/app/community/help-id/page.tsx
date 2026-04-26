@@ -93,7 +93,7 @@ export default async function HelpIdPage() {
   headerActions={
   <Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
   >
    ← Back to Show Ring
   </Link>
@@ -111,7 +111,7 @@ export default async function HelpIdPage() {
    <Link
     key={req.id}
     href={`/community/help-id/${req.id}`}
-    className="bg-white border-stone-200 flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
+    className="bg-white border-input flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
     <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
@@ -163,7 +163,7 @@ export default async function HelpIdPage() {
    <Link
     key={req.id}
     href={`/community/help-id/${req.id}`}
-    className="bg-white border-stone-200 flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
+    className="bg-white border-input flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
     <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
@@ -203,7 +203,7 @@ export default async function HelpIdPage() {
 
   {openRequests.length === 0 && resolvedRequests.length === 0 && (
   <div
-   className="bg-white border-stone-200 mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
+   className="bg-white border-input mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
   >
    <p className="mb-4 text-[2rem]">🔍</p>
    <p className="text-stone-600">No ID requests yet. Be the first to submit one!</p>

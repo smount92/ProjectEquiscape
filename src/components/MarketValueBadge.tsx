@@ -67,7 +67,7 @@ export default function MarketValueBadge({ catalogId, compact = false }: MarketV
  }
 
  return (
- <div className="bg-stone-50 border-stone-200 mt-6 rounded-lg border p-6">
+ <div className="bg-muted border-input mt-6 rounded-lg border p-6">
  <h4 className="mb-2 flex items-center gap-1 text-sm font-semibold text-stone-500">
  <span aria-hidden="true">📈</span> Market Value
  </h4>

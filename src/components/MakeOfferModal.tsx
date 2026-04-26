@@ -97,7 +97,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  value={message}
  onChange={(e) => setMessage(e.target.value)}
  placeholder="Tell the seller about your interest…"
- className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm transition-all"
+ className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-input bg-transparent px-4 py-2 text-sm transition-all"
  rows={3}
  maxLength={500}
  />
@@ -128,7 +128,7 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  <div className="mt-6 flex gap-3 max-sm:flex-col">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={onClose}
  disabled={saving}
  >

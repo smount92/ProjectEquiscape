@@ -32,7 +32,7 @@ export default function SearchBar({
 
     return (
         <div
-            className={`flex items-center gap-2 rounded-xl border bg-white px-4 py-2.5 transition-all ${isFocused ? "border-forest ring-2 ring-forest/20" : "border-stone-200"}`}
+            className={`flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 transition-all ${isFocused ? "border-forest ring-2 ring-forest/20" : "border-input"}`}
             id={id}
         >
             {/* Search icon */}
@@ -67,7 +67,7 @@ export default function SearchBar({
             {/* Keyboard hint or clear button */}
             {value ? (
                 <button
-                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-stone-200 bg-stone-100 text-stone-500 transition-all hover:bg-stone-200"
+                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-input bg-stone-100 text-stone-500 transition-all hover:bg-stone-200"
                     onClick={() => {
                         onChange("");
                         inputRef.current?.focus();
@@ -90,7 +90,7 @@ export default function SearchBar({
                     </svg>
                 </button>
             ) : (
-                <kbd className="flex h-6 items-center rounded border border-stone-200 bg-stone-50 px-1.5 text-xs text-stone-400">
+                <kbd className="flex h-6 items-center rounded border border-input bg-muted px-1.5 text-xs text-stone-400">
                     /
                 </kbd>
             )}

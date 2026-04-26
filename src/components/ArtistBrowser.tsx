@@ -30,7 +30,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  return (
  <div className="animate-fade-in-up">
  {/* Search */}
- <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-white border-stone-200 z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
+ <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-input z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
  <Input
  type="text"
  
@@ -62,7 +62,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  </div>
  {allSpecialties.length > 0 && (
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
  value={specialtyFilter}
  onChange={(e) => setSpecialtyFilter(e.target.value)}
  aria-label="Filter by specialty"
@@ -79,7 +79,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
 
  {/* Results */}
  {filtered.length === 0 ? (
- <div className="flex flex-col items-center justify-center rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-input bg-card p-8 text-center shadow-sm">
  <p>No studios match your search.</p>
  </div>
  ) : (
@@ -88,7 +88,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  <Link
  key={a.userId}
  href={`/studio/${a.studioSlug}`}
- className="rounded-lg border border-stone-200 bg-white no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+ className="rounded-lg border border-input bg-card no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
  >
  <div className="p-5">
  <div className="mb-2 text-base font-semibold text-stone-900">
@@ -105,7 +105,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  {a.specialties.slice(0, 3).map((s) => (
  <span
  key={s}
- className="rounded-full border border-stone-200 bg-stone-100 px-2.5 py-0.5 text-xs text-stone-500"
+ className="rounded-full border border-input bg-stone-100 px-2.5 py-0.5 text-xs text-stone-500"
  >
  {s}
  </span>

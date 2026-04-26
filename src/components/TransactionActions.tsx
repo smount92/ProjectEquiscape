@@ -49,7 +49,7 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
 
  return (
  <div
- className="bg-white border border-stone-200 mt-4 rounded-lg border px-6 py-4 shadow-md"
+ className="bg-card border border-input mt-4 rounded-lg border px-6 py-4 shadow-md"
  id="transaction-status"
  >
  <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">

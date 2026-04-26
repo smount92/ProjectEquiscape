@@ -97,7 +97,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  const router = useRouter();
  if (items.length === 0) {
  return (
- <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📰</div>
  <h2>No Activity Yet</h2>
  <p>{emptyMessage ||"Follow some collectors to see their activity here!"}</p>
@@ -106,7 +106,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  }
 
  return (
- <div className="border-stone-200 animate-fade-in-up flex flex-col overflow-hidden rounded-lg border">
+ <div className="border-input animate-fade-in-up flex flex-col overflow-hidden rounded-lg border">
  {items.map((item) => {
  const link = item.horseId
  ? `/community/${item.horseId}`
@@ -118,7 +118,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  <div key={item.id} className="activity-feed-item-wrapper">
  <Link
  href={link}
- className="border-stone-200 flex items-center gap-4 border-b px-6 py-4 text-inherit no-underline transition-colors last:border-b-0 hover:bg-black/[0.03]"
+ className="border-input flex items-center gap-4 border-b px-6 py-4 text-inherit no-underline transition-colors last:border-b-0 hover:bg-black/[0.03]"
  >
  {item.thumbnailUrl ? (
  <div className="h-[48px] w-[48px] shrink-0 overflow-hidden rounded-md">
@@ -178,7 +178,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  )}
  {currentUserId && currentUserId === item.actorId && item.eventType ==="text_post" && (
  <button
- className="cursor-pointer rounded-md border border-stone-200 bg-transparent px-1.5 py-0.5 text-xs text-stone-600 no-underline transition-all"
+ className="cursor-pointer rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs text-stone-600 no-underline transition-all"
  onClick={() => {
  if (confirm("Delete post?")) {
  deleteTextPost(item.id).then(() => router.refresh());

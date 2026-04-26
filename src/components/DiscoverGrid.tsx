@@ -116,7 +116,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  return (
  <>
  {/* Search Bar */}
- <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-white border-stone-200 shadow-md z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-0">
+ <div className="sticky top-[calc(var(--header-height)+0.75rem)] bg-card border-input shadow-md z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 transition-all max-sm:py-0">
  <Input
  type="text"
  value={searchQuery}
@@ -132,7 +132,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  {TAGS.map((tag) => (
  <button
  key={tag.key}
- className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${activeTag === tag.key ?"bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :"border-stone-200 text-stone-600 hover:border-emerald-700 hover:text-stone-900 bg-stone-50"}`}
+ className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${activeTag === tag.key ?"bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :"border-input text-stone-600 hover:border-emerald-700 hover:text-stone-900 bg-muted"}`}
  onClick={() => setActiveTag(tag.key)}
  >
  <span>{tag.emoji}</span>
@@ -155,13 +155,13 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
 
  {/* Grid */}
  {filteredUsers.length === 0 && !searchQuery.trim() && activeTag ==="all" ? (
- <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">👥</div>
  <h2>No Active Collectors Yet</h2>
  <p>Be the first to make your models public!</p>
  </div>
  ) : filteredUsers.length === 0 ? (
- <div className="bg-white border-stone-200 animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🔍</div>
  <h2>No Results</h2>
  <p>Try a different search or filter.</p>
@@ -175,7 +175,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  <Link
  key={u.id}
  href={`/profile/${encodeURIComponent(u.alias_name)}`}
- className="bg-white border-stone-200 hover:border-emerald-700 flex items-start gap-4 rounded-lg border p-6 text-inherit no-underline shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)]"
+ className="bg-card border-input hover:border-emerald-700 flex items-start gap-4 rounded-lg border p-6 text-inherit no-underline shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(129,140,248,0.12)]"
  id={`discover-${u.id}`}
  >
  <div className="text-forest flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,rgba(129,140,248,0.2),rgba(167,139,250,0.1))]">

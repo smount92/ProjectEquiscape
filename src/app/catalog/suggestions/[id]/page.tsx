@@ -165,7 +165,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {/* Main Content */}
  <div className="flex flex-col gap-4">
  {/* Header */}
- <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
  <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
  <div>
  <span className={`ref-status-badge ${st.className}`}>
@@ -278,7 +278,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {/* Reason */}
  <div className="my-3">
  <h3>Reason</h3>
- <blockquote className="border-forest bg-stone-50 rounded-r-md border-l-[3px] px-4 py-2 text-stone-900 italic">
+ <blockquote className="border-forest bg-muted rounded-r-md border-l-[3px] px-4 py-2 text-stone-900 italic">
  {s.reason}
  </blockquote>
  </div>
@@ -293,7 +293,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  </div>
 
  {/* Discussion Thread */}
- <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
  <h3>💬 Discussion ({(comments ?? []).length})</h3>
  <SuggestionCommentThread
  suggestionId={s.id}
@@ -312,7 +312,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Admin Actions */}
  {isAdmin && s.status ==="pending" && (
- <div className="bg-white border-stone-200 rounded-lg border border-[#ffc107] p-6 shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border border-[#ffc107] p-6 shadow-md transition-all">
  <h3>🛡️ Admin Actions</h3>
  <SuggestionAdminActions suggestionId={s.id} />
  </div>

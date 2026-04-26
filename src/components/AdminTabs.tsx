@@ -120,7 +120,7 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
  {deleting ?"…" :"Confirm"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setConfirming(false)}
  disabled={deleting}
  >
@@ -233,7 +233,7 @@ export default function AdminTabs({
 function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  if (messages.length === 0) {
  return (
- <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📬</div>
  <h2>No Messages Yet</h2>
  <p>Contact form submissions will appear here.</p>
@@ -246,7 +246,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  {messages.map((msg) => (
  <div
  key={msg.id}
- className={`rounded-lg border border-stone-200 p-4 transition-all ${msg.is_read ? "bg-white opacity-75" : "bg-white shadow-md"}`}
+ className={`rounded-lg border border-input p-4 transition-all ${msg.is_read ? "bg-card opacity-75" : "bg-card shadow-md"}`}
  >
  <div className="mb-2 flex items-center justify-between">
  <div className="flex items-center gap-2">
@@ -273,7 +273,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  <div className="mb-3 text-sm leading-relaxed text-stone-600 whitespace-pre-wrap">
  {msg.message}
  </div>
- <div className="flex flex-wrap items-center gap-2 border-t border-stone-200 pt-3">
+ <div className="flex flex-wrap items-center gap-2 border-t border-input pt-3">
  <AdminReplyForm
  messageId={msg.id}
  recipientEmail={msg.email}
@@ -336,7 +336,7 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
 function ReportsTab({ reports }: { reports: Report[] }) {
  if (reports.length === 0) {
  return (
- <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">🎉</div>
  <h2>All Clear</h2>
  <p>No open reports to review.</p>
@@ -347,7 +347,7 @@ function ReportsTab({ reports }: { reports: Report[] }) {
  return (
  <div className="flex flex-col gap-2">
  {reports.map((report) => (
- <div key={report.id} className="bg-white border-stone-200 rounded-lg border px-6 py-4 transition-all">
+ <div key={report.id} className="bg-card border-input rounded-lg border px-6 py-4 transition-all">
  <div className="mb-1 flex justify-between">
  <strong>{report.reason}</strong>
  <span className="text-stone-500 text-xs">
@@ -371,7 +371,7 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
  if (suggestions.length === 0) {
  return (
- <div className="bg-white border-stone-200 rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="bg-card border-input rounded-lg border px-8 py-12 text-center shadow-md transition-all">
  <div className="mb-4 text-5xl">📚</div>
  <h2>No Pending Catalog Suggestions</h2>
  <p>Community suggestions will appear here for review.</p>
@@ -416,7 +416,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  }
 
  return (
- <div key={s.id} className="bg-white border-stone-200 rounded-lg border px-6 py-4 transition-all">
+ <div key={s.id} className="bg-card border-input rounded-lg border px-6 py-4 transition-all">
  <div className="mb-1 flex justify-between">
  <strong>
  {typeIcon}{""}
@@ -430,7 +430,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  By: {curatorIcon} @{s.author_alias}
  </p>
  {changeText && (
- <p className="bg-white mb-1 rounded-sm p-1 font-mono text-sm">
+ <p className="bg-card mb-1 rounded-sm p-1 font-mono text-sm">
  {changeText}
  </p>
  )}

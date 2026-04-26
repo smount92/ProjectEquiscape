@@ -106,7 +106,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  return (
  <div
- className="show-record-timeline rounded-lg border border-stone-200 bg-white p-4 shadow-sm transition-all"
+ className="show-record-timeline rounded-lg border border-input bg-card p-4 shadow-sm transition-all"
  id="show-records"
  >
  <div className="mb-6 flex flex-wrap items-center justify-between gap-2">

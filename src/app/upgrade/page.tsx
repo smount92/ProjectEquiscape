@@ -135,7 +135,7 @@ export default async function UpgradePage({
             {/* Pricing cards — 3 columns */}
             <div className="animate-fade-in-up mx-auto grid max-w-[1100px] gap-6 md:grid-cols-3">
                 {/* Free tier */}
-                <div className="rounded-xl border border-stone-200 bg-white p-8 shadow-md">
+                <div className="rounded-xl border border-input bg-card p-8 shadow-md">
                     <div className="mb-4">
                         <span className="text-sm font-semibold uppercase tracking-wider text-stone-500">Free</span>
                         <div className="mt-2 flex items-baseline gap-1">
@@ -227,25 +227,25 @@ export default async function UpgradePage({
             <div className="animate-fade-in-up mx-auto mt-16 max-w-[600px]">
                 <h2 className="mb-6 text-center text-lg font-bold">Frequently Asked Questions</h2>
                 <div className="space-y-4">
-                    <div className="rounded-lg border border-stone-200 bg-white p-4">
+                    <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">Can I cancel anytime?</h3>
                         <p className="mt-1 text-sm text-stone-600">
                             Yes! Cancel from your Stripe billing portal anytime. Your Pro features stay active until the end of the billing period.
                         </p>
                     </div>
-                    <div className="rounded-lg border border-stone-200 bg-white p-4">
+                    <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">Will I lose my data if I downgrade?</h3>
                         <p className="mt-1 text-sm text-stone-600">
                             Never. All your horses, photos, and provenance data are safe. Extra detail photos become view-only until you re-subscribe.
                         </p>
                     </div>
-                    <div className="rounded-lg border border-stone-200 bg-white p-4">
+                    <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">What&apos;s the difference between Pro and Studio Pro?</h3>
                         <p className="mt-1 text-sm text-stone-600">
                             Pro is for collectors — analytics, extra photos, insurance reports, and AI insights. Studio Pro adds artist tools: commission management, WIP portals, and permanent Hoofprint credit on every custom you create.
                         </p>
                     </div>
-                    <div className="rounded-lg border border-stone-200 bg-white p-4">
+                    <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">Do you offer beta tester discounts?</h3>
                         <p className="mt-1 text-sm text-stone-600">
                             Yes! Early supporters receive a promo code for 6 months free. Enter it at checkout to apply the discount automatically.

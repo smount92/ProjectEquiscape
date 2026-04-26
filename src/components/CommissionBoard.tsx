@@ -55,7 +55,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  >
  {tab.label}
  {count > 0 && (
- <span className="flex cursor-pointer items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-xs text-stone-500 transition-all">
+ <span className="flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-2 py-1 text-xs text-stone-500 transition-all">
  {count}
  </span>
  )}
@@ -67,7 +67,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  {/* Commission Cards */}
  {filteredCommissions.length === 0 ? (
  <div
- className="bg-white border-stone-200 rounded-lg border text-center shadow-md transition-all"
+ className="bg-card border-input rounded-lg border text-center shadow-md transition-all"
  >
  <p className="text-stone-500 text-sm">No commissions in this category.</p>
  </div>
@@ -76,7 +76,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  {filteredCommissions.map((c) => (
  <div
  key={c.id}
- className="border-stone-200 flex flex-col rounded-lg border bg-[var(--color-bg-stone-50)] p-6 transition-all hover:-translate-y-[1px] hover:border-purple-300"
+ className="border-input flex flex-col rounded-lg border bg-[var(--color-bg-muted)] p-6 transition-all hover:-translate-y-[1px] hover:border-purple-300"
  >
  <div className="mb-2 flex items-center justify-between gap-2">
  <span className="text-sm font-bold">
@@ -104,7 +104,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  {c.description.length > 120 ? c.description.substring(0, 120) +"…" : c.description}
  </p>
 
- <div className="border-stone-200 mt-auto flex items-center justify-between border-t pt-2">
+ <div className="border-input mt-auto flex items-center justify-between border-t pt-2">
  <span className="text-stone-500 text-xs">
  {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
  month:"short",
@@ -115,7 +115,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  <div className="flex flex-wrap gap-1">
  <Link
  href={`/studio/commission/${c.id}`}
- className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-2 py-1 text-xs font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-xs font-semibold text-stone-600 no-underline transition-all"
  >
  View
  </Link>
@@ -131,7 +131,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  ✅ Accept
  </button>
  <button
- className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-2 py-1 text-xs font-semibold text-red-700 no-underline transition-all"
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-xs font-semibold text-red-700 no-underline transition-all"
  onClick={() => handleStatusChange(c.id,"declined")}
  disabled={acting === c.id}
  >

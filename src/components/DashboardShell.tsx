@@ -150,7 +150,7 @@ export default function DashboardShell({
  {selectMode && horseCards.length > 0 && (
  <div className="bg-stone-100 mb-4 flex items-center gap-4 rounded-md px-3 py-1.5">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={selectAll}
  >
  Select All ({horseCards.length})
@@ -178,7 +178,7 @@ export default function DashboardShell({
 
  {/* Floating Bulk Action Bar */}
  {selectMode && selectedIds.size > 0 && (
- <div className="bg-stone-50 border-stone-200 fixed bottom-6 left-1/2 z-[100] flex max-w-[90vw] -translate-x-1/2 flex-wrap items-center justify-center gap-4 rounded-xl border px-5 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
+ <div className="bg-muted border-input fixed bottom-6 left-1/2 z-[100] flex max-w-[90vw] -translate-x-1/2 flex-wrap items-center justify-center gap-4 rounded-xl border px-5 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
  <span className="text-forest text-sm font-semibold whitespace-nowrap">
  ✅ {selectedIds.size} selected
  </span>
@@ -186,7 +186,7 @@ export default function DashboardShell({
  <div className="flex flex-wrap items-center gap-2">
  {/* Move to Collection */}
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-stone-200 bg-stone-100 text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-stone-100 text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
  value=""
  onChange={(e) => {
  const val = e.target.value;
@@ -207,7 +207,7 @@ export default function DashboardShell({
 
  {/* Trade Status */}
  <select
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-stone-200 bg-stone-100 text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-stone-100 text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
  value=""
  onChange={(e) => {
  if (e.target.value) handleBulkTradeStatus(e.target.value);
@@ -224,7 +224,7 @@ export default function DashboardShell({
 
  {/* Delete */}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setShowDeleteConfirm(true)}
  disabled={isProcessing}
  >
@@ -233,7 +233,7 @@ export default function DashboardShell({
  </div>
 
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={clearSelection}
  >
  Cancel
@@ -255,13 +255,13 @@ export default function DashboardShell({
  </p>
  <div className="flex justify-end gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowDeleteConfirm(false)}
  >
  Cancel
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={handleBulkDelete}
  disabled={isProcessing}
  >

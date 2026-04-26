@@ -565,7 +565,7 @@ export default function AddHorsePage() {
  if (showSuccess) {
  return (
  <div className="success-overlay">
-          <div className="animate-fade-in-up max-w-[480px] rounded-xl border border-stone-200 bg-white p-12 text-center shadow-lg">
+          <div className="animate-fade-in-up max-w-[480px] rounded-xl border border-input bg-card p-12 text-center shadow-lg">
  <div className="success-icon">🎉</div>
  <h2>
  <span className="text-forest">{savedHorseName}</span> Added!
@@ -584,7 +584,7 @@ export default function AddHorsePage() {
  </Link>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  View Stable
  </Link>
@@ -620,7 +620,7 @@ export default function AddHorsePage() {
  <button
  key={cat.value}
  type="button"
-              className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/5 shadow-sm" : "border-stone-200 bg-white hover:border-stone-300"}`}
+              className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/5 shadow-sm" : "border-input bg-card hover:border-stone-300"}`}
  onClick={() => setAssetCategory(cat.value)}
  >
  <span className="text-2xl">{cat.icon}</span>
@@ -674,7 +674,7 @@ export default function AddHorsePage() {
  ? "border-forest bg-forest text-white"
  : i < currentStep
  ? "border-forest bg-forest text-white"
- : "border-gray-300 bg-white text-stone-500"
+ : "border-gray-300 bg-card text-stone-500"
  }`}
  aria-current={i === currentStep ?"step" : undefined}
  >
@@ -712,7 +712,7 @@ export default function AddHorsePage() {
  ================================================================ */}
  {currentStep === 0 && (
  <div className="step-content" key="step-0">
- <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+ <div className="relative overflow-visible rounded-xl border border-input bg-card p-6 shadow-sm">
  <div className="mb-6 flex items-center gap-3">
  <div className="text-2xl">
  📸
@@ -894,7 +894,7 @@ export default function AddHorsePage() {
  {extraFiles.map((ef, i) => (
  <div
  key={i}
- className="border-stone-200 relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ className="border-input relative h-[100px] w-[100px] overflow-hidden rounded-md border"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={ef.previewUrl} alt={`Extra detail ${i + 1}`} />
@@ -1036,7 +1036,7 @@ export default function AddHorsePage() {
 
  <div className="mt-8 flex items-center justify-between gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={goBack}
  id="step-2-back"
  >
@@ -1058,10 +1058,10 @@ export default function AddHorsePage() {
  ================================================================ */}
  {currentStep === identityStepIdx && (
  <div className="step-content" key="step-2">
- <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+ <div className="relative overflow-visible rounded-xl border border-input bg-card p-6 shadow-sm">
  {/* Reference summary badge */}
  {selectedCatalogItem && (
- <div className="mt-4 mb-6 rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 text-sm leading-relaxed">
+ <div className="mt-4 mb-6 rounded-lg border border-input bg-muted px-6 py-4 text-sm leading-relaxed">
  🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
  </div>
  )}
@@ -1164,7 +1164,7 @@ export default function AddHorsePage() {
  className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
  validationErrors.includes("Finish Type")
  ? "border-red-400 ring-2 ring-red-400 bg-red-50/30"
- : "border-stone-200 bg-white"
+ : "border-input bg-card"
  } ${shakeFields && validationErrors.includes("Finish Type") ? "animate-shake" : ""}`}
  value={finishType}
  onChange={(e) => {
@@ -1408,7 +1408,7 @@ export default function AddHorsePage() {
  </label>
  <Textarea
  id="marketplace-notes"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  rows={3}
  maxLength={500}
  placeholder="e.g. Will ship anywhere, Trades welcome, Smoke-free home..."
@@ -1422,7 +1422,7 @@ export default function AddHorsePage() {
 
  <div className="mt-8 flex items-center justify-between gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={goBack}
  id="step-3-back"
  >
@@ -1439,7 +1439,7 @@ export default function AddHorsePage() {
  </div>
 
  {/* Community visibility selector */}
- <div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 px-6 py-4">
+ <div className="mt-6 rounded-lg border border-input bg-muted px-6 py-4">
  <div
  className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
  >
@@ -1470,7 +1470,7 @@ export default function AddHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-[#FEFCF8] font-inherit text-stone-900 hover:border-emerald-700 hover:bg-stone-50 flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-edge"}`}
+ className={`bg-[#FEFCF8] font-inherit text-stone-900 hover:border-emerald-700 hover:bg-muted flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-edge"}`}
  onClick={() => setVisibility(opt.value)}
  id={`visibility-${opt.value}`}
  >
@@ -1492,12 +1492,12 @@ export default function AddHorsePage() {
  <div className="step-content" key="step-3">
  {/* Reference summary badge */}
  {selectedCatalogItem && (
- <div className="mt-4 mb-6 rounded-lg border border-stone-200 bg-stone-50 px-6 py-4 text-sm leading-relaxed">
+ <div className="mt-4 mb-6 rounded-lg border border-input bg-muted px-6 py-4 text-sm leading-relaxed">
  🔗 Linked to: <strong>{selectedCatalogItem.title}</strong> · {selectedCatalogItem.maker}
  </div>
  )}
 
- <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+ <div className="relative overflow-visible rounded-xl border border-input bg-card p-6 shadow-sm">
  {/* Vault Header */}
  <div className="border-orange-200 mb-8 flex items-center gap-4 border-b pb-6">
  <div className="vault-icon">🔒</div>
@@ -1603,7 +1603,7 @@ export default function AddHorsePage() {
  </div>
  </div>
 
- <div className="border-stone-200 mt-6 border-t pt-6 text-center">
+ <div className="border-input mt-6 border-t pt-6 text-center">
  <p>
  💡 All fields are optional. You can always add or update financial details later from
  your Horse Passport view.
@@ -1613,7 +1613,7 @@ export default function AddHorsePage() {
 
  <div className="mt-8 flex items-center justify-between gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={goBack}
  id="step-4-back"
  >
@@ -1628,7 +1628,7 @@ export default function AddHorsePage() {
  {isSubmitting ? (
  <>
  <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  aria-hidden="true"
  />
  Saving to Stable…

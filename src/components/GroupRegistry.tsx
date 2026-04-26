@@ -43,7 +43,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  });
 
  return (
- <div className="bg-white border-stone-200 mt-6 rounded-lg border p-6 shadow-md transition-all">
+ <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <div
  className="flex cursor-pointer items-center justify-between"
  onClick={() => setExpanded(!expanded)}
@@ -77,7 +77,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  {Array.from(byOwner.entries()).map(([ownerAlias, horses]) => (
  <div
  key={ownerAlias}
- className="bg-surface-secondary border-stone-200 hover:border-emerald-700 rounded-lg border p-6 transition-all hover:-translate-y-0.5"
+ className="bg-surface-secondary border-input hover:border-emerald-700 rounded-lg border p-6 transition-all hover:-translate-y-0.5"
  >
  <div className="mb-2 flex items-center gap-2">
  <Link
@@ -95,7 +95,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  <Link
  key={h.horseId}
  href={`/community/${h.horseId}`}
- className="border-stone-200 text-stone-900 hover:text-forest flex items-center gap-2 border-b py-1.5 text-sm no-underline last:border-b-0"
+ className="border-input text-stone-900 hover:text-forest flex items-center gap-2 border-b py-1.5 text-sm no-underline last:border-b-0"
  >
  <span>🐴 {h.horseName}</span>
  <span className="text-stone-600 ml-auto text-xs">

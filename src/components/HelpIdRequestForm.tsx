@@ -78,7 +78,7 @@ export default function HelpIdRequestForm() {
  }
 
  return (
- <div className="help-id-form-bg-white border-stone-200 card animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
+ <div className="help-id-form-bg-card border-input card animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
  <h3 className="mb-4">📸 Submit a Mystery Model</h3>
 
  {status ==="success" ? (
@@ -92,7 +92,7 @@ export default function HelpIdRequestForm() {
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Photo of the model *</label>
  <div
- className="border-stone-200 bg-white flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-12 text-center transition-all"
+ className="border-input bg-card flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-12 text-center transition-all"
  onClick={() => fileInputRef.current?.click()}
  >
  {preview ? (
@@ -104,7 +104,7 @@ export default function HelpIdRequestForm() {
  ) : (
  <>
  <div className="mb-4 text-[3rem] opacity-[0.7]">📷</div>
- <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-stone-200 bg-white p-8 text-center transition-all">
+ <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-input bg-card p-8 text-center transition-all">
  Click to upload a photo
  <br />
  <span className="text-forest text-sm underline">
@@ -163,7 +163,7 @@ export default function HelpIdRequestForm() {
  <div className="mt-6 flex gap-4">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setIsOpen(false);
  setPreview(null);

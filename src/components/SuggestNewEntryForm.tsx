@@ -84,7 +84,7 @@ export default function SuggestNewEntryForm() {
  View All Suggestions
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => {
  setSuccess(false);
  setTitle("");
@@ -122,7 +122,7 @@ export default function SuggestNewEntryForm() {
  </label>
  <select
  id="new-entry-type"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={itemType}
  onChange={(e) => setItemType(e.target.value)}
  >
@@ -141,7 +141,7 @@ export default function SuggestNewEntryForm() {
  </label>
  <select
  id="new-entry-maker"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={maker}
  onChange={(e) => setMaker(e.target.value)}
  >
@@ -171,7 +171,7 @@ export default function SuggestNewEntryForm() {
  </label>
  <select
  id="new-entry-scale"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={scale}
  onChange={(e) => setScale(e.target.value)}
  >
@@ -238,7 +238,7 @@ export default function SuggestNewEntryForm() {
  </label>
  <textarea
  id="new-entry-reason"
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all resize-y"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all resize-y"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
  rows={3}
@@ -261,7 +261,7 @@ export default function SuggestNewEntryForm() {
  {/* Actions */}
  <div className="flex justify-end gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => router.back()}
  disabled={isPending}
  >

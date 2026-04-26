@@ -172,7 +172,7 @@ export default function FaqPage() {
  {categories.map((cat) => (
  <button
  key={cat}
- className={`border-stone-200 cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat ?"bg-forest !border-forest text-white" :"text-stone-500 hover:text-stone-900 hover:border-emerald-700 bg-white"}`}
+ className={`border-input cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat ?"bg-forest !border-forest text-white" :"text-stone-500 hover:text-stone-900 hover:border-emerald-700 bg-white"}`}
  onClick={() => {
  setActiveCategory(cat);
  setOpenIndex(null);
@@ -190,7 +190,7 @@ export default function FaqPage() {
  return (
  <div
  key={`${item.category}-${idx}`}
- className={`overflow-hidden rounded-lg border transition-colors ${isOpen ?"border-forest/30" :"border-stone-200"}`}
+ className={`overflow-hidden rounded-lg border transition-colors ${isOpen ?"border-forest/30" :"border-input"}`}
  >
  <button
  className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-white px-6 py-5 text-left text-base font-semibold text-stone-900 transition-colors hover:bg-[var(--color-bg-white-hover)]"
@@ -229,11 +229,11 @@ export default function FaqPage() {
  <AiDataPolicySection />
 
  {/* CTA */}
- <div className="bg-white border-stone-200 mt-12 rounded-lg border text-center">
+ <div className="bg-white border-input mt-12 rounded-lg border text-center">
  <p>Still have questions?</p>
  <Link
  href="/contact"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  id="faq-cta-contact"
  >
  Contact Us

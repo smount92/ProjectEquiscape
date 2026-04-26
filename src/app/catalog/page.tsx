@@ -90,12 +90,12 @@ export default async function ReferencePage() {
   {/* Sidebar */}
   <aside className="flex flex-col gap-4">
    {/* Quick Links */}
-   <div className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+   <div className="flex flex-col gap-3 rounded-lg border border-input bg-card p-5 shadow-sm">
    <h3 className="text-sm font-bold uppercase tracking-wider text-stone-600">📋 Community</h3>
    <div className="flex flex-col gap-2">
     <a
     href="/catalog/suggestions"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
     >
     View Suggestions
     {(pendingSuggestions ?? 0) > 0 && (
@@ -112,7 +112,7 @@ export default async function ReferencePage() {
     </a>
     <a
     href="/catalog/changelog"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
     >
     📋 View Changelog
     </a>
@@ -121,7 +121,7 @@ export default async function ReferencePage() {
 
    {/* Top Curators */}
    {(curators ?? []).length > 0 && (
-   <div className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-5 shadow-sm">
+   <div className="flex flex-col gap-3 rounded-lg border border-input bg-card p-5 shadow-sm">
     <h3 className="text-sm font-bold uppercase tracking-wider text-stone-600">🏆 Top Curators</h3>
     <ul className="m-0 list-none p-0">
     {(

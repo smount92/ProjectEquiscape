@@ -29,8 +29,8 @@ export default function SignupPage() {
  if (success) {
  return (
   <FocusLayout title="Check Your Email">
-  <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg">
-   <div className="border-b border-stone-200 bg-gradient-to-b from-stone-50 to-card px-8 pb-6 pt-8 text-center">
+  <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
+   <div className="border-b border-input bg-gradient-to-b from-stone-50 to-card px-8 pb-6 pt-8 text-center">
    <div className="mb-3 text-4xl" aria-hidden="true">✉️</div>
    <p className="mt-2 text-sm leading-relaxed text-stone-600">
     We&apos;ve sent a confirmation link to your email address. Click the link to activate your
@@ -56,7 +56,7 @@ export default function SignupPage() {
   title={<>Join the <span className="text-forest">Stable</span></>}
   description="Create your account and start cataloging your collection"
  >
-  <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg">
+  <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
   {/* Body */}
   <div className="px-8 pb-8 pt-6">
    {error && (
@@ -96,7 +96,7 @@ export default function SignupPage() {
     id="signup-alias"
     name="aliasName"
     type="text"
-    className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+    className="w-full rounded-lg border border-input bg-card px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
     placeholder="e.g. StableQueen42"
     required
     minLength={3}
@@ -117,7 +117,7 @@ export default function SignupPage() {
     id="signup-email"
     name="email"
     type="email"
-    className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+    className="w-full rounded-lg border border-input bg-card px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
     placeholder="you@example.com"
     required
     autoComplete="email"
@@ -136,7 +136,7 @@ export default function SignupPage() {
      id="signup-password"
      name="password"
      type={showPassword ?"text" :"password"}
-     className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+     className="w-full rounded-lg border border-input bg-card px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
      placeholder="At least 6 characters"
      required
      minLength={6}
@@ -171,7 +171,7 @@ export default function SignupPage() {
     id="signup-confirm-password"
     name="confirmPassword"
     type={showPassword ?"text" :"password"}
-    className="w-full rounded-lg border border-stone-200 bg-white px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
+    className="w-full rounded-lg border border-input bg-card px-4 py-3 text-sm transition-colors focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/20"
     placeholder="Re-enter your password"
     required
     autoComplete="new-password"
@@ -188,7 +188,7 @@ export default function SignupPage() {
    </button>
    </form>
 
-   <div className="mt-6 border-t border-stone-200 pt-5 text-center text-sm text-stone-500">
+   <div className="mt-6 border-t border-input pt-5 text-center text-sm text-stone-500">
    <p>
     Already have an account?{" "}
     <Link href="/login" className="font-semibold text-forest hover:underline" id="go-to-login">

@@ -82,7 +82,7 @@ export default function RatingForm({
  // Already rated — show the existing rating
  if (rating) {
  return (
- <div className="border-stone-200 mt-6 rounded-lg border bg-stone-100 p-6" id="rating-section">
+ <div className="border-input mt-6 rounded-lg border bg-stone-100 p-6" id="rating-section">
  <div className="mb-4 flex items-center gap-2 text-base font-semibold">
  <span>⭐ Your Rating for @{targetAlias}</span>
  </div>
@@ -92,7 +92,7 @@ export default function RatingForm({
  <p className="text-stone-500 mt-4 text-sm italic">&ldquo;{rating.reviewText}&rdquo;</p>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleRetract}
  disabled={status ==="retracting"}
  >
@@ -106,7 +106,7 @@ export default function RatingForm({
 
  // Rating form
  return (
- <div className="border-stone-200 mt-6 rounded-lg border bg-stone-100 p-6" id="rating-section">
+ <div className="border-input mt-6 rounded-lg border bg-stone-100 p-6" id="rating-section">
  <div className="mb-4 flex items-center gap-2 text-base font-semibold">
  <span>⭐ Rate your experience with @{targetAlias}</span>
  </div>
@@ -118,7 +118,7 @@ export default function RatingForm({
  alignItems:"center",
  gap:"var(--space-xs)",
  padding:"var(--space-xs) var(--space-sm)",
- background:"var(--color-bg-stone-50)",
+ background:"var(--color-bg-muted)",
  borderRadius:"var(--radius-sm)",
  fontSize: "0.75rem",
  color:"var(--color-text-stone-500)",

@@ -35,7 +35,7 @@ export default async function ChangelogPage() {
    const timeAgo = getTimeAgo(entry.created_at);
 
    return (
-   <div key={entry.id} className="border-stone-200 flex gap-4 border-b px-0 py-4">
+   <div key={entry.id} className="border-input flex gap-4 border-b px-0 py-4">
     <span className="min-w-[28px] text-[1.3rem]">
     {entry.change_type ==="correction"
     ?"🔧"
@@ -72,7 +72,7 @@ export default async function ChangelogPage() {
   })}
 
   {(entries ?? []).length === 0 && (
-   <div className="bg-white border-stone-200 text-stone-500 rounded-lg border p-8 text-center shadow-md transition-all">
+   <div className="bg-card border-input text-stone-500 rounded-lg border p-8 text-center shadow-md transition-all">
    <p>No changes yet. The catalog awaits your contributions!</p>
    <Link
     href="/catalog"

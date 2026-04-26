@@ -147,7 +147,7 @@ export default function SettingsPage() {
  <FocusLayout title="Settings" description="Manage your profile, notifications, and account.">
  <div className="p-12 text-center">
  <div
- className="mx-auto mb-6 h-9 w-9 animate-spin rounded-full border-3 border-stone-200 border-t-forest"
+ className="mx-auto mb-6 h-9 w-9 animate-spin rounded-full border-3 border-input border-t-forest"
  />
  <p>Loading settings…</p>
  </div>
@@ -175,9 +175,9 @@ export default function SettingsPage() {
  <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  👤 Profile
  </h2>
- <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  {/* Avatar */}
-            <div className="mb-8 flex items-center gap-6 border-b border-stone-200 pb-6 max-sm:gap-4">
+            <div className="mb-8 flex items-center gap-6 border-b border-input pb-6 max-sm:gap-4">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-stone-300 bg-gradient-to-br from-forest/5 to-amber-800/5 text-[2rem] transition-colors hover:border-emerald-700 [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
@@ -232,7 +232,7 @@ export default function SettingsPage() {
  </label>
  <Textarea
  id="settings-bio"
- className="w-full resize-y rounded-lg border border-stone-300 bg-white px-4 py-3 text-sm text-stone-800 transition-colors focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
+ className="w-full resize-y rounded-lg border border-stone-300 bg-card px-4 py-3 text-sm text-stone-800 transition-colors focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
  rows={3}
  maxLength={500}
  placeholder="Tell other collectors about yourself…"
@@ -243,7 +243,7 @@ export default function SettingsPage() {
  </div>
 
  {/* Default horse visibility */}
- <div className="border-stone-200 flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
+ <div className="border-input flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
  <span className="text-stone-900 flex items-center gap-2 text-sm font-medium">
  🏆 Default new horses to public
  </span>
@@ -258,7 +258,7 @@ export default function SettingsPage() {
  </div>
 
  {/* Photo watermarking */}
- <div className="border-stone-200 flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
+ <div className="border-input flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
  <div>
  <span className="text-stone-900 flex items-center gap-2 text-sm font-medium">
  📸 Watermark uploaded photos
@@ -278,7 +278,7 @@ export default function SettingsPage() {
  </div>
 
  {/* Show trophies on profile */}
- <div className="border-stone-200 flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
+ <div className="border-input flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
  <div>
  <span className="text-stone-900 flex items-center gap-2 text-sm font-medium">
  🏆 Show Trophy Case on profile
@@ -304,7 +304,7 @@ export default function SettingsPage() {
  </label>
  <select
  id="settings-currency"
- className="flex h-10 w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 max-w-[200px]"
  title="Select preferred currency"
  value={currencySymbol}
  onChange={(e) => setCurrencySymbol(e.target.value)}
@@ -368,7 +368,7 @@ export default function SettingsPage() {
  <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  🔒 Security
  </h2>
- <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">Email</label>
  <Input
@@ -441,11 +441,11 @@ export default function SettingsPage() {
  <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  🔔 Notifications
  </h2>
- <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  {NOTIF_LABELS.map((n) => (
  <div
  key={n.key}
- className="border-stone-200 flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2"
+ className="border-input flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2"
  >
  <span className="text-stone-900 flex items-center gap-2 text-sm font-medium">
  {n.emoji} {n.label}
@@ -468,13 +468,13 @@ export default function SettingsPage() {
  <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  📊 Data & Reports
  </h2>
- <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  <div className="flex flex-col gap-6">
  {/* CSV Export */}
  <div>
  <a
  href="/api/export"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  download
  >
  📄 Download Collection (CSV)
@@ -506,7 +506,7 @@ export default function SettingsPage() {
  <h2 className="text-stone-900 mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  💎 Subscription
  </h2>
- <div className="bg-white border-stone-200 rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
  <p className="mb-4 text-sm leading-[1.6]">
  Upgrade to <strong>MHH Pro</strong> for advanced analytics, expanded photo storage,
  AI-powered collection reports, and more.
@@ -526,7 +526,7 @@ export default function SettingsPage() {
  ⚠️ Danger Zone
  </h2>
  <div
- className="bg-white rounded-xl border border-[#ef4444] p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6"
+ className="bg-card rounded-xl border border-[#ef4444] p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6"
  >
  <p className="mb-4 leading-[1.6]">
  Permanently delete your account. This action <strong>cannot be undone</strong>.
@@ -552,10 +552,10 @@ export default function SettingsPage() {
  />
  </div>
  <button
- className={`inline-flex min-h-[36px] items-center justify-center gap-2 rounded-md border border-stone-200 px-6 py-2 text-sm font-semibold no-underline transition-all ${
+ className={`inline-flex min-h-[36px] items-center justify-center gap-2 rounded-md border border-input px-6 py-2 text-sm font-semibold no-underline transition-all ${
  deleteConfirm ==="DELETE"
  ? "cursor-pointer bg-[#ef4444] text-white"
- : "cursor-not-allowed bg-stone-50 text-stone-500"
+ : "cursor-not-allowed bg-muted text-stone-500"
  }`}
  disabled={deleteConfirm !=="DELETE" || isDeleting}
  onClick={async () => {

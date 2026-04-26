@@ -50,7 +50,7 @@ export default function MatchmakerMatches({
  {matches.map((match) => (
  <div
  key={match.id}
- className="bg-stone-50 border-stone-200 flex gap-2 rounded-md border p-2 transition-all duration-200 hover:border-orange-300 hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]"
+ className="bg-muted border-input flex gap-2 rounded-md border p-2 transition-all duration-200 hover:border-orange-300 hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]"
  >
  <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-sm bg-black/[0.03]">
  {match.thumbnailUrl ? (

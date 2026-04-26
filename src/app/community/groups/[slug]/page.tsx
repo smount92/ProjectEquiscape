@@ -37,10 +37,10 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  <ExplorerLayout title={group.name} description={<>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}{group.region && <> · 📍 {group.region}</>} · 👥 {group.memberCount} member{group.memberCount !== 1 ?"s" :""}</>}>
  <div className="mx-auto max-w-6xl px-6">
  {/* Group Header */}
- <div className="border-stone-200 mb-6 border-b pb-6">
+ <div className="border-input mb-6 border-b pb-6">
  <Link
  href="/community/groups"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  >
  ← All Groups
  </Link>
@@ -62,7 +62,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  {group.isMember ? (
  <GroupDetailClient group={group} initialPosts={posts} channels={channels} currentUserId={user.id} />
  ) : (
- <div className="flex flex-col items-center justify-center rounded-lg border border-stone-200 bg-white p-8 text-center shadow-sm mt-8">
+ <div className="flex flex-col items-center justify-center rounded-lg border border-input bg-card p-8 text-center shadow-sm mt-8">
  <p>Join this group to see posts and participate.</p>
  </div>
  )}

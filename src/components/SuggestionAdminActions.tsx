@@ -64,7 +64,7 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
  {isPending ?"Applying…" :"✅ Approve"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={() => setShowRejectForm(true)}
  disabled={isPending}
  >
@@ -82,14 +82,14 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
  />
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  onClick={handleReject}
  disabled={isPending || !notes.trim()}
  >
  {isPending ?"Rejecting…" :"Confirm Reject"}
  </button>
  <button
- className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={() => setShowRejectForm(false)}
  >
  Cancel

@@ -35,7 +35,7 @@ export default function RichEmbed({ text, embedData }: RichEmbedProps) {
  return (
  <Link
  href={`/community/${horseId}`}
- className="border-stone-200 bg-surface-secondary hover:border-emerald-700 mt-2 flex gap-4 overflow-hidden rounded-lg border text-inherit no-underline transition-colors"
+ className="border-input bg-surface-secondary hover:border-emerald-700 mt-2 flex gap-4 overflow-hidden rounded-lg border text-inherit no-underline transition-colors"
  id={`embed-${horseId}`}
  >
  {data.thumbnailUrl && (

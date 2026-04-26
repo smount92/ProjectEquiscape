@@ -25,7 +25,7 @@ export default function ReportActions({ reportId }: { reportId: string }) {
  return (
  <div className="mt-1 flex gap-1">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={handleDismiss}
  disabled={saving}
  >

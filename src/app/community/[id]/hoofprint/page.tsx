@@ -60,7 +60,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
   <>
    <Link
    href={`/community/${horseId}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
    >
    ← Back to Passport
    </Link>
@@ -82,13 +82,13 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
   />
 
   {records.length > 0 && (
-  <div className="bg-white border-stone-200 mt-8 rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-card border-input mt-8 rounded-lg border p-6 shadow-md transition-all">
    <h2 className="mb-4 text-lg">🏆 Show Record</h2>
    <div className="grid gap-1">
    {records.map((r, i) => (
     <div
     key={i}
-    className="flex items-center gap-2 rounded-md bg-stone-50/50 border border-stone-100 px-2 py-1 text-[0.8rem]"
+    className="flex items-center gap-2 rounded-md bg-muted/50 border border-stone-100 px-2 py-1 text-[0.8rem]"
     >
     <span className="text-base">
      {r.ribbon_color ==="Blue"

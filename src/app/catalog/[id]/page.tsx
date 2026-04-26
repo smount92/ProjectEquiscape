@@ -89,7 +89,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  >
   <div className="flex flex-col gap-6">
   {/* Main Card */}
-  <div className="bg-white border-stone-200 rounded-lg border p-6 shadow-md transition-all">
+  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
    <div className="mb-6 flex items-start justify-between">
    <div>
     <h2 className="m-0 font-serif text-3xl font-bold text-stone-900">{catalogItem.title}</h2>
@@ -97,7 +97,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     by {catalogItem.maker}
     </p>
    </div>
-   <span className="bg-stone-50 border-stone-200 rounded-lg border px-[12px] py-[4px] text-sm whitespace-nowrap">
+   <span className="bg-muted border-input rounded-lg border px-[12px] py-[4px] text-sm whitespace-nowrap">
     {formatItemType(catalogItem.item_type)}
    </span>
    </div>
@@ -140,7 +140,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
 
   {/* Pending Suggestions */}
   {(suggestionCount ?? 0) > 0 && (
-   <div className="bg-white border-stone-200 rounded-lg border p-4 shadow-md transition-all">
+   <div className="bg-card border-input rounded-lg border p-4 shadow-md transition-all">
    <h3>📝 Pending Suggestions ({suggestionCount})</h3>
    <ul className="my-2 list-none p-0">
     {(

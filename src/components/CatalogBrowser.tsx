@@ -135,9 +135,9 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
     };
 
     return (
-        <Card className="w-full overflow-hidden border-stone-200 bg-white shadow-sm">
+        <Card className="w-full overflow-hidden border-input bg-card shadow-sm">
             {/* Search & Filters */}
-            <div className="border-b border-stone-100 bg-stone-50/50 p-6">
+            <div className="border-b border-stone-100 bg-muted/50 p-6">
                 <div className="relative mb-4">
                     <Input
                         id="catalog-search"
@@ -156,7 +156,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                     <div className="flex flex-wrap items-center gap-[6px]">
                         <span className="text-sm font-semibold text-stone-700">Maker:</span>
                         <button
-                            className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-all ${activeMaker === null ? "border-forest bg-forest text-white" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50"}`}
+                            className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-all ${activeMaker === null ? "border-forest bg-forest text-white" : "border-input bg-card text-stone-600 hover:border-stone-300 hover:bg-muted"}`}
                             onClick={() => handleMakerFilter(null)}
                         >
                             All
@@ -164,7 +164,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                         {makers.slice(0, 10).map((maker) => (
                             <button
                                 key={maker}
-                                className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-all ${activeMaker === maker ? "border-forest bg-forest text-white" : "border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50"}`}
+                                className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-all ${activeMaker === maker ? "border-forest bg-forest text-white" : "border-input bg-card text-stone-600 hover:border-stone-300 hover:bg-muted"}`}
                                 onClick={() => handleMakerFilter(activeMaker === maker ? null : maker)}
                             >
                                 {maker}
@@ -176,7 +176,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                             <span className="text-sm font-semibold text-stone-700">Scale:</span>
                             <select
                                 id="catalog-scale-filter"
-                                className="rounded-md border border-stone-200 bg-white px-3 py-1.5 text-sm text-stone-700"
+                                className="rounded-md border border-input bg-card px-3 py-1.5 text-sm text-stone-700"
                                 title="Filter by scale"
                                 value={activeScale ?? ""}
                                 onChange={(e) => handleScaleFilter(e.target.value || null)}
@@ -246,7 +246,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                     {items.map((item) => (
                         <TableRow
                             key={item.id}
-                            className="cursor-pointer transition-colors hover:bg-stone-50"
+                            className="cursor-pointer transition-colors hover:bg-muted"
                             onClick={() => router.push(`/catalog/${item.id}`)}
                         >
                             <TableCell className="font-semibold text-stone-900">
@@ -285,7 +285,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
             {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-4 border-t border-stone-100 px-6 py-4">
                     <button
-                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-stone-50 disabled:opacity-40"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-muted disabled:opacity-40"
                         disabled={page <= 1}
                         onClick={() => handlePage(page - 1)}
                     >
@@ -295,7 +295,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                         Page {page} of {totalPages}
                     </span>
                     <button
-                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-white px-6 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-stone-50 disabled:opacity-40"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-muted disabled:opacity-40"
                         disabled={page >= totalPages}
                         onClick={() => handlePage(page + 1)}
                     >

@@ -38,7 +38,7 @@ function getFinishBadgeVariant(finishType: string): { className: string } {
         case "Artist Resin":
             return { className: "bg-pink-50 text-pink-600 border-pink-200" };
         default:
-            return { className: "bg-stone-100 text-stone-600 border-stone-200" };
+            return { className: "bg-stone-100 text-stone-600 border-input" };
     }
 }
 
@@ -164,13 +164,13 @@ export default function StableLedger({
             )}
 
             {filteredCards.length === 0 && !searchQuery.trim() ? (
-                <div className="rounded-xl border border-stone-200 bg-white px-8 py-12 text-center shadow-sm">
+                <div className="rounded-xl border border-input bg-card px-8 py-12 text-center shadow-sm">
                     <div className="mb-4 text-5xl">🏠</div>
                     <h2>Your Stable is Empty</h2>
                     <p>Click the button above to add your first horse.</p>
                 </div>
             ) : filteredCards.length > 0 ? (
-                <div className="w-full overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
+                <div className="w-full overflow-hidden rounded-xl border border-input bg-card shadow-sm">
                     <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                     <Table className="min-w-[640px]">
                         <TableHeader>
@@ -231,7 +231,7 @@ export default function StableLedger({
                             {filteredCards.map((horse) => (
                                 <TableRow
                                     key={horse.id}
-                                    className={`transition-colors hover:bg-stone-50 ${selectMode && selectedIds.has(horse.id) ? "bg-forest/5" : ""} ${selectMode ? "cursor-pointer" : ""}`}
+                                    className={`transition-colors hover:bg-muted ${selectMode && selectedIds.has(horse.id) ? "bg-forest/5" : ""} ${selectMode ? "cursor-pointer" : ""}`}
                                     onClick={selectMode ? () => onToggleSelect?.(horse.id) : undefined}
                                 >
                                     {selectMode && (

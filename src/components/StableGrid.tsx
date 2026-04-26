@@ -31,7 +31,7 @@ const FINISH_BADGE_CLASSES: Record<string, string> = {
  "Artist Resin": "bg-rose-50 text-rose-700 border-rose-200",
  "Test Run": "bg-cyan-50 text-cyan-700 border-cyan-200",
  "Decorator": "bg-emerald-50 text-emerald-700 border-emerald-200",
- "default": "bg-stone-100 text-stone-600 border-stone-200",
+ "default": "bg-stone-100 text-stone-600 border-input",
 };
 
 const containerVariants = {
@@ -123,7 +123,7 @@ export default function StableGrid({
      <select
       value={sortBy}
       onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-      className="flex h-10 w-auto min-w-[160px] rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      className="flex h-10 w-auto min-w-[160px] rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       id="stable-sort"
       aria-label="Sort your stable"
      >
@@ -145,7 +145,7 @@ export default function StableGrid({
    )}
 
    {filteredCards.length === 0 && !searchQuery.trim() ? (
-    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-stone-200 bg-stone-50/50 p-16">
+    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
      <span className="mb-4 text-6xl">🏠</span>
      <h2 className="mb-2 font-serif text-xl font-semibold text-stone-900">Your Stable is Empty</h2>
      <p className="mb-6 max-w-sm text-center text-stone-500">You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
@@ -158,7 +158,7 @@ export default function StableGrid({
      </Link>
     </div>
    ) : filteredCards.length === 0 && searchQuery.trim() ? (
-    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-stone-200 bg-stone-50/50 p-16">
+    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
      <span className="mb-4 text-6xl">🔍</span>
      <h2 className="mb-2 font-serif text-xl font-semibold text-stone-900">No Results</h2>
      <p className="max-w-sm text-center text-stone-500">No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
@@ -262,8 +262,8 @@ export default function StableGrid({
         {selectMode ? (
          <div
           onClick={() => onToggleSelect?.(horse.id)}
-          className={`group relative cursor-pointer rounded-2xl border bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
-           isSelected ? "border-[var(--color-accent-primary)] ring-2 ring-forest" : "border-stone-200"
+          className={`group relative cursor-pointer rounded-2xl border bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
+           isSelected ? "border-[var(--color-accent-primary)] ring-2 ring-forest" : "border-input"
           }`}
           id={`horse-card-${horse.id}`}
          >
@@ -272,7 +272,7 @@ export default function StableGrid({
         ) : (
          <Link
           href={`/stable/${horse.id}`}
-          className="group relative block rounded-2xl border border-stone-200 bg-white p-3 no-underline shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+          className="group relative block rounded-2xl border border-input bg-card p-3 no-underline shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
           id={`horse-card-${horse.id}`}
          >
           {cardContent}

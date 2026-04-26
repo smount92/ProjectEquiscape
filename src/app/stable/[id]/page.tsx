@@ -283,7 +283,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
 
  {/* Right: The Ledger Card */}
- <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-stone-200 bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
+ <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
  {/* Title */}
  <div>
  <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-[#2D2318] md:text-5xl">
@@ -627,7 +627,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <div className="flex flex-wrap gap-4">
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  id="back-to-stable"
  >
  ← Back to Stable

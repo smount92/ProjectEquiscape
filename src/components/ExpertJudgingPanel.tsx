@@ -179,7 +179,7 @@ export default function ExpertJudgingPanel({
   return (
     <div
       className={`animate-fade-in-up mb-6 rounded-xl border p-6 shadow-sm ${
-        overrideMode ? "border-red-200 bg-red-50/30" : "border-stone-200 bg-[#FEFCF8]"
+        overrideMode ? "border-red-200 bg-red-50/30" : "border-input bg-[#FEFCF8]"
       }`}
     >
       {/* Header */}
@@ -199,7 +199,7 @@ export default function ExpertJudgingPanel({
       {classes && classes.length > 0 && (
         <div className="mb-4">
           <select
-            className="flex h-10 max-w-[400px] rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            className="flex h-10 max-w-[400px] rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             value={selectedClassId}
             onChange={(e) => setSelectedClassId(e.target.value)}
             title="Filter by class"
@@ -228,7 +228,7 @@ export default function ExpertJudgingPanel({
       )}
 
       {/* ─── Ribbon Palette (Sticky) ─── */}
-      <Card className="sticky top-0 z-20 mb-6 border-stone-200 bg-[#FEFCF8] shadow-sm">
+      <Card className="sticky top-0 z-20 mb-6 border-input bg-[#FEFCF8] shadow-sm">
         <CardContent className="flex flex-wrap gap-2 p-3">
           {RIBBON_OPTIONS.map((ribbon) => {
             const isActive = activeRibbon === ribbon.value;
@@ -239,7 +239,7 @@ export default function ExpertJudgingPanel({
                 className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition-all ${
                   isActive
                     ? `ring-2 ring-forest scale-105 shadow-lg ${ribbon.bg}`
-                    : `border-stone-200 bg-[#FEFCF8] text-stone-600 hover:shadow-md hover:border-stone-300`
+                    : `border-input bg-[#FEFCF8] text-stone-600 hover:shadow-md hover:border-stone-300`
                 }`}
                 onClick={() => setActiveRibbon(isActive ? null : ribbon.value)}
               >
@@ -266,7 +266,7 @@ export default function ExpertJudgingPanel({
           {filteredEntries.map((entry) => (
             <Card
               key={entry.id}
-              className={`overflow-hidden border-stone-200 transition-all ${
+              className={`overflow-hidden border-input transition-all ${
                 placings[entry.id] ? "ring-1 ring-forest/30" : ""
               }`}
             >
