@@ -55,7 +55,7 @@ function DashboardSkeleton() {
       <div className="aspect-square rounded-t-lg bg-stone-200" />
       <div className="space-y-2 p-3">
        <div className="h-4 w-3/4 rounded bg-stone-200" />
-       <div className="h-3 w-1/2 rounded bg-stone-100" />
+       <div className="h-3 w-1/2 rounded bg-muted" />
       </div>
      </div>
     ))}
@@ -69,7 +69,7 @@ function DashboardSkeleton() {
     <div className="space-y-3">
      {Array.from({ length: 4 }).map((_, i) => (
       <div key={i} className="flex justify-between">
-       <div className="h-3 w-24 rounded bg-stone-100" />
+       <div className="h-3 w-24 rounded bg-muted" />
        <div className="h-3 w-12 rounded bg-stone-200" />
       </div>
      ))}
@@ -79,7 +79,7 @@ function DashboardSkeleton() {
     <div className="mb-4 h-4 w-1/3 rounded bg-stone-200" />
     <div className="space-y-2">
      {Array.from({ length: 3 }).map((_, i) => (
-      <div key={i} className="h-8 rounded bg-stone-100" />
+      <div key={i} className="h-8 rounded bg-muted" />
      ))}
     </div>
    </div>

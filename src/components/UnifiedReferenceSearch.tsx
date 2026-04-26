@@ -239,7 +239,7 @@ export default function UnifiedReferenceSearch({
                       {molds.map((item) => (
                         <button
                           key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-stone-100 bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
+                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
                           onClick={() => handleMoldClick(item)}
                         >
                           <div className="min-w-0 flex-1">
@@ -265,7 +265,7 @@ export default function UnifiedReferenceSearch({
                       {releaseResults.map((item) => (
                         <button
                           key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-stone-100 bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
+                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
                           onClick={() => handleSelect(item)}
                         >
                           <div className="min-w-0 flex-1">
@@ -296,7 +296,7 @@ export default function UnifiedReferenceSearch({
                       {resins.map((item) => (
                         <button
                           key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-stone-100 bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
+                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
                           onClick={() => handleSelect(item)}
                         >
                           <div className="min-w-0 flex-1">
@@ -381,7 +381,7 @@ export default function UnifiedReferenceSearch({
                   releases.map((rel) => (
                     <button
                       key={rel.id}
-                      className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-stone-100 bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
+                      className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
                       onClick={() => handleSelect(rel)}
                     >
                       <div className="min-w-0 flex-1">

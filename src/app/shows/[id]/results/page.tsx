@@ -107,7 +107,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                 {divisions.map((division) => (
                     <div key={division.name} className="overflow-hidden rounded-xl border border-input bg-card shadow-sm">
                         {/* Division Header */}
-                        <div className="border-b border-stone-100 bg-muted px-6 py-3">
+                        <div className="border-b border-input bg-muted px-6 py-3">
                             <h2 className="text-lg font-semibold text-stone-800">
                                 📂 {division.name}
                             </h2>
@@ -119,7 +119,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                                 <div key={`${division.name}-${cls.name}`} className="px-6 py-4">
                                     <h3 className="mb-3 text-sm font-bold text-stone-600">
                                         {cls.classNumber && (
-                                            <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-stone-100 text-xs font-bold text-stone-500">
+                                            <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-bold text-stone-500">
                                                 {cls.classNumber}
                                             </span>
                                         )}
@@ -142,7 +142,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
 
                                                     {/* Thumbnail */}
                                                     {result.thumbnailUrl && (
-                                                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-stone-100">
+                                                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
                                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                                             <img
                                                                 src={result.thumbnailUrl}
@@ -164,7 +164,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                                                     </div>
 
                                                     {/* Placing Badge */}
-                                                    <span className="shrink-0 rounded-md bg-stone-100 px-2.5 py-1 text-xs font-bold text-stone-600">
+                                                    <span className="shrink-0 rounded-md bg-muted px-2.5 py-1 text-xs font-bold text-stone-600">
                                                         {result.placement}
                                                     </span>
                                                 </div>

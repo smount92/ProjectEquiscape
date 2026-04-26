@@ -43,7 +43,7 @@ function getTierClasses(tier: number): string {
  case 4:
  return"border-[#b9f2ff] hover:shadow-[0_0_20px_rgba(185,242,255,0.5)]";
  case 5:
- return"border-forest bg-stone-100/80 hover:shadow-[0_0_24px_rgba(212,165,116,0.5)]";
+ return"border-forest bg-muted/80 hover:shadow-[0_0_24px_rgba(212,165,116,0.5)]";
  default:
  return"border-input";
  }

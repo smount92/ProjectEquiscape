@@ -462,7 +462,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  // eslint-disable-next-line @next/next/no-img-element
  <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="w-full object-cover" />
  ) : (
- <div className="flex flex-col items-center justify-center bg-stone-100 px-4 py-8">
+ <div className="flex flex-col items-center justify-center bg-muted px-4 py-8">
  <span className="text-4xl">🐴</span>
  <span className="mt-1 text-sm text-stone-500">No photo</span>
  </div>

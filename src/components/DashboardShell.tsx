@@ -117,7 +117,7 @@ export default function DashboardShell({
  {horseCards.length > 0 && (
  <div className="mb-4 flex justify-end max-md:justify-center">
  <div
- className="bg-stone-100 inline-flex gap-[2px] rounded-full p-[3px]"
+ className="bg-muted inline-flex gap-[2px] rounded-full p-[3px]"
  id="dashboard-view-toggle"
  >
  <button
@@ -148,7 +148,7 @@ export default function DashboardShell({
 
  {/* Select All / Clear */}
  {selectMode && horseCards.length > 0 && (
- <div className="bg-stone-100 mb-4 flex items-center gap-4 rounded-md px-3 py-1.5">
+ <div className="bg-muted mb-4 flex items-center gap-4 rounded-md px-3 py-1.5">
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
  onClick={selectAll}
@@ -186,7 +186,7 @@ export default function DashboardShell({
  <div className="flex flex-wrap items-center gap-2">
  {/* Move to Collection */}
  <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-stone-100 text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-muted text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
  value=""
  onChange={(e) => {
  const val = e.target.value;
@@ -207,7 +207,7 @@ export default function DashboardShell({
 
  {/* Trade Status */}
  <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-stone-100 text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-muted text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
  value=""
  onChange={(e) => {
  if (e.target.value) handleBulkTradeStatus(e.target.value);

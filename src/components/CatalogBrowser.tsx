@@ -137,7 +137,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
     return (
         <Card className="w-full overflow-hidden border-input bg-card shadow-sm">
             {/* Search & Filters */}
-            <div className="border-b border-stone-100 bg-muted/50 p-6">
+            <div className="border-b border-input bg-muted/50 p-6">
                 <div className="relative mb-4">
                     <Input
                         id="catalog-search"
@@ -283,7 +283,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4 border-t border-stone-100 px-6 py-4">
+                <div className="flex items-center justify-center gap-4 border-t border-input px-6 py-4">
                     <button
                         className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-muted disabled:opacity-40"
                         disabled={page <= 1}

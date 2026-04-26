@@ -127,7 +127,7 @@ export default async function UpgradePage({
 
             {/* Current plan badge */}
             <div className="animate-fade-in-up mb-12 text-center">
-                <p className="inline-block rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
+                <p className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-medium text-stone-600">
                     Current plan: <span className={tier === 'pro' ? 'font-bold text-amber-600' : 'font-bold'}>{tierLabel}</span>
                 </p>
             </div>
@@ -152,7 +152,7 @@ export default async function UpgradePage({
                         ))}
                     </ul>
                     {tier === "free" && (
-                        <div className="mt-6 rounded-lg bg-stone-100 py-2 text-center text-sm font-semibold text-stone-600">
+                        <div className="mt-6 rounded-lg bg-muted py-2 text-center text-sm font-semibold text-stone-600">
                             Current Plan
                         </div>
                     )}

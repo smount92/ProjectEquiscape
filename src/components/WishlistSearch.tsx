@@ -149,7 +149,7 @@ export default function WishlistSearch() {
  />
  {query && (
  <button
- className="bg-stone-100 text-stone-500 flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
+ className="bg-muted text-stone-500 flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
  onClick={() => {
  setQuery("");
  setShowDropdown(false);

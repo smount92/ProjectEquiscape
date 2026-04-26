@@ -298,7 +298,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
           <div className="max-h-[320px] overflow-y-auto rounded-md border border-input bg-muted">
             {Array.from(divisionGroups.entries()).map(([divName, items]) => (
               <div key={divName}>
-                <div className="border-b border-input bg-stone-100 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-stone-500">
+                <div className="border-b border-input bg-muted px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-stone-500">
                   {divName}
                 </div>
                 {items.map((c) => (
@@ -407,7 +407,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                           loading="lazy"
                         />
                       ) : (
-                        <div className="flex aspect-square w-full items-center justify-center rounded-md bg-stone-100 text-3xl">
+                        <div className="flex aspect-square w-full items-center justify-center rounded-md bg-muted text-3xl">
                           🐴
                         </div>
                       )}
@@ -501,7 +501,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                       <img
                         src={croppedPreviewUrl || selectedPhotoObj.publicUrl}
                         alt={selectedHorseName}
-                        className="aspect-[4/3] w-full object-contain bg-stone-100"
+                        className="aspect-[4/3] w-full object-contain bg-muted"
                       />
                     </div>
                     <div className="mt-2 flex items-center gap-2">

@@ -53,7 +53,7 @@ export default async function NanDashboardWidget() {
                                             className={`rounded-full px-1.5 py-0.5 ${
                                                 q.isExpired
                                                     ? "bg-muted text-stone-300 line-through"
-                                                    : "bg-stone-100 text-stone-600"
+                                                    : "bg-muted text-stone-600"
                                             }`}
                                             title={q.isExpired ? `Expired (${q.year})` : `${q.year} ${q.cardType}`}
                                         >

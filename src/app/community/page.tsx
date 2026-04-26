@@ -18,7 +18,7 @@ function ShowRingSkeleton() {
  return (
  <div className="space-y-6">
   {/* Search bar skeleton */}
-  <div className="animate-pulse rounded-xl bg-stone-100 p-4">
+  <div className="animate-pulse rounded-xl bg-muted p-4">
    <div className="h-10 rounded-lg bg-stone-200" />
   </div>
   {/* Grid skeleton — 12 card placeholders */}
@@ -28,8 +28,8 @@ function ShowRingSkeleton() {
      <div className="aspect-square rounded-t-lg bg-stone-200" />
      <div className="space-y-2 p-3">
       <div className="h-4 w-3/4 rounded bg-stone-200" />
-      <div className="h-3 w-1/2 rounded bg-stone-100" />
-      <div className="h-3 w-1/3 rounded bg-stone-100" />
+      <div className="h-3 w-1/2 rounded bg-muted" />
+      <div className="h-3 w-1/3 rounded bg-muted" />
      </div>
     </div>
    ))}

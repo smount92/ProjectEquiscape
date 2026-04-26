@@ -38,7 +38,7 @@ function getFinishBadgeVariant(finishType: string): { className: string } {
         case "Artist Resin":
             return { className: "bg-pink-50 text-pink-600 border-pink-200" };
         default:
-            return { className: "bg-stone-100 text-stone-600 border-input" };
+            return { className: "bg-muted text-stone-600 border-input" };
     }
 }
 
@@ -250,7 +250,7 @@ export default function StableLedger({
                                                     loading="lazy"
                                                 />
                                             ) : (
-                                                <span className="flex h-10 w-10 items-center justify-center rounded-sm bg-stone-100 text-xl">
+                                                <span className="flex h-10 w-10 items-center justify-center rounded-sm bg-muted text-xl">
                                                     🐴
                                                 </span>
                                             )}

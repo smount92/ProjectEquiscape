@@ -88,7 +88,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
    {records.map((r, i) => (
     <div
     key={i}
-    className="flex items-center gap-2 rounded-md bg-muted/50 border border-stone-100 px-2 py-1 text-[0.8rem]"
+    className="flex items-center gap-2 rounded-md bg-muted/50 border border-input px-2 py-1 text-[0.8rem]"
     >
     <span className="text-base">
      {r.ribbon_color ==="Blue"

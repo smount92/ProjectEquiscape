@@ -67,7 +67,7 @@ export default function SearchBar({
             {/* Keyboard hint or clear button */}
             {value ? (
                 <button
-                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-input bg-stone-100 text-stone-500 transition-all hover:bg-stone-200"
+                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-input bg-muted text-stone-500 transition-all hover:bg-stone-200"
                     onClick={() => {
                         onChange("");
                         inputRef.current?.focus();

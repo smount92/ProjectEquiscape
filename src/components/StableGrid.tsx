@@ -31,7 +31,7 @@ const FINISH_BADGE_CLASSES: Record<string, string> = {
  "Artist Resin": "bg-rose-50 text-rose-700 border-rose-200",
  "Test Run": "bg-cyan-50 text-cyan-700 border-cyan-200",
  "Decorator": "bg-emerald-50 text-emerald-700 border-emerald-200",
- "default": "bg-stone-100 text-stone-600 border-input",
+ "default": "bg-muted text-stone-600 border-input",
 };
 
 const containerVariants = {
@@ -183,7 +183,7 @@ export default function StableGrid({
         )}
 
         {/* Image container */}
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-stone-100">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
          {horse.thumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

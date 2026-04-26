@@ -65,7 +65,7 @@ export default function ProfileLoadMore({ userId, initialOffset, totalCount }: P
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="w-full object-cover" />
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center bg-stone-100 px-4 py-8">
+                                    <div className="flex flex-col items-center justify-center bg-muted px-4 py-8">
                                         <span className="text-4xl">🐴</span>
                                         <span className="mt-1 text-sm text-stone-500">No photo</span>
                                     </div>
@@ -116,7 +116,7 @@ export default function ProfileLoadMore({ userId, initialOffset, totalCount }: P
                     <button
                         onClick={loadMore}
                         disabled={isPending}
-                        className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-stone-100 disabled:opacity-50"
+                        className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-muted disabled:opacity-50"
                         id="profile-load-more"
                     >
                         {isPending ? "Loading..." : `Load More (${remaining} remaining)`}

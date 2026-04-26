@@ -63,7 +63,7 @@ export default function ShowEntryGrid({
         {entries.map((entry, index) => (
           <div
             key={entry.id}
-            className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-muted"
+            className="flex items-center gap-4 border-b border-input px-6 py-4 transition-colors last:border-b-0 hover:bg-muted"
           >
             <div className="min-w-[32px] text-center text-lg font-bold text-stone-500">
               {isExpertJudged && showStatus === "closed" && entry.placing
@@ -73,7 +73,7 @@ export default function ShowEntryGrid({
             {entry.thumbnailUrl && (
               <button
                 type="button"
-                className="h-[64px] w-[64px] shrink-0 cursor-pointer overflow-hidden rounded-md border-0 bg-stone-100 p-0 transition-transform hover:scale-105 hover:ring-2 hover:ring-forest"
+                className="h-[64px] w-[64px] shrink-0 cursor-pointer overflow-hidden rounded-md border-0 bg-muted p-0 transition-transform hover:scale-105 hover:ring-2 hover:ring-forest"
                 onClick={() => setLightboxIndex(entryToLightboxIndex.get(index) ?? null)}
                 title="Click to view full photo"
               >

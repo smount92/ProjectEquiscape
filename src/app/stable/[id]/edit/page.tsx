@@ -759,7 +759,7 @@ export default function EditHorsePage() {
 
  {/* ===== Photo Studio ===== */}
  <div className="bg-card border-input mb-8 rounded-lg border shadow-md transition-all">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-stone-100 px-6 py-4">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-muted px-6 py-4">
  <div className="mb-1 text-2xl">📸</div>
  <h2>Photo Studio</h2>
  </div>
@@ -1039,7 +1039,7 @@ export default function EditHorsePage() {
 
  {/* ===== Section 1: Identity ===== */}
  <div className="bg-card border-input mb-8 rounded-lg border shadow-md transition-all">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-stone-100">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-muted">
  <div className="section-icon rounded-lg border border-input bg-card shadow-md transition-all">
  🏷️
  </div>
@@ -1423,7 +1423,7 @@ export default function EditHorsePage() {
 
  {/* ===== Section 2: Reference Link (Unified Search) ===== */}
  <div className="bg-card border-input mb-8 rounded-lg border shadow-md transition-all">
- <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-stone-100">
+ <div className="sticky top-[var(--header-height)] z-40 border-b border-input bg-muted">
  <div className="section-icon rounded-lg border border-input bg-card shadow-md transition-all">
  🔗
  </div>

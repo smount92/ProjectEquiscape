@@ -29,9 +29,9 @@ const RIBBON_OPTIONS = [
   { value: "1st", label: "🥇 1st", bg: "bg-amber-100 border-amber-300 text-amber-800" },
   { value: "2nd", label: "🥈 2nd", bg: "bg-stone-200 border-stone-400 text-stone-700" },
   { value: "3rd", label: "🥉 3rd", bg: "bg-orange-100 border-orange-300 text-orange-800" },
-  { value: "4th", label: "4th", bg: "bg-stone-100 border-stone-300 text-stone-600" },
-  { value: "5th", label: "5th", bg: "bg-stone-100 border-stone-300 text-stone-600" },
-  { value: "6th", label: "6th", bg: "bg-stone-100 border-stone-300 text-stone-600" },
+  { value: "4th", label: "4th", bg: "bg-muted border-stone-300 text-stone-600" },
+  { value: "5th", label: "5th", bg: "bg-muted border-stone-300 text-stone-600" },
+  { value: "6th", label: "6th", bg: "bg-muted border-stone-300 text-stone-600" },
   { value: "HM", label: "🎗️ HM", bg: "bg-emerald-50 border-emerald-300 text-emerald-700" },
   { value: "Champion", label: "🏆 Champ", bg: "bg-amber-200 border-amber-400 text-amber-900" },
   { value: "Reserve Champion", label: "🥈 Reserve", bg: "bg-stone-200 border-stone-400 text-stone-700" },
@@ -283,10 +283,10 @@ export default function ExpertJudgingPanel({
                       <img
                         src={entry.thumbnailUrl}
                         alt={entry.horseName}
-                        className="aspect-[4/3] w-full rounded-t-lg object-contain bg-stone-100"
+                        className="aspect-[4/3] w-full rounded-t-lg object-contain bg-muted"
                       />
                     ) : (
-                      <div className="flex aspect-[4/3] w-full items-center justify-center rounded-t-lg bg-stone-100 text-4xl">
+                      <div className="flex aspect-[4/3] w-full items-center justify-center rounded-t-lg bg-muted text-4xl">
                         🐴
                       </div>
                     )}

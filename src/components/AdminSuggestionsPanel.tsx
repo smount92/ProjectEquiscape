@@ -61,7 +61,7 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  key={s.id}
  className="bg-muted border-input admin-message hover:opacity-[1]-unread rounded-lg border px-6 py-4 transition-all"
  >
- <div className="bg-muted border-input sticky top-[var(--header-height)] z-40 border-b border-input bg-stone-100">
+ <div className="bg-muted border-input sticky top-[var(--header-height)] z-40 border-b border-input bg-muted">
  <div className="rounded-lg border border-input bg-muted px-6 py-4 transition-all">
  <span className="rounded-lg border border-input bg-muted px-6 py-4 transition-all">
  {typeEmoji[s.suggestion_type] ||"📝"}{""}

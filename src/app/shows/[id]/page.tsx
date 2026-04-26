@@ -262,7 +262,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
   </Link>
   <a
    href={`/api/export/show-results/${showId}`}
-   className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600 no-underline transition-colors hover:bg-stone-200"
+   className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-stone-600 no-underline transition-colors hover:bg-stone-200"
   >
    📥 CSV
   </a>

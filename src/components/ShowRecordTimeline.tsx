@@ -169,7 +169,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  </span>
  )}
  {(record.verificationTier === "self_reported" || (!record.verificationTier && !record.isNan)) && (
- <span className="inline-flex items-center gap-[2px] rounded-sm bg-stone-100 px-2 py-[1px] text-xs font-medium text-stone-500" title="Self-reported by collector">
+ <span className="inline-flex items-center gap-[2px] rounded-sm bg-muted px-2 py-[1px] text-xs font-medium text-stone-500" title="Self-reported by collector">
  📝 Self-Reported
  </span>
  )}

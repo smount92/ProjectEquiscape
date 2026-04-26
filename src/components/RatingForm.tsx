@@ -82,7 +82,7 @@ export default function RatingForm({
  // Already rated — show the existing rating
  if (rating) {
  return (
- <div className="border-input mt-6 rounded-lg border bg-stone-100 p-6" id="rating-section">
+ <div className="border-input mt-6 rounded-lg border bg-muted p-6" id="rating-section">
  <div className="mb-4 flex items-center gap-2 text-base font-semibold">
  <span>⭐ Your Rating for @{targetAlias}</span>
  </div>
@@ -106,7 +106,7 @@ export default function RatingForm({
 
  // Rating form
  return (
- <div className="border-input mt-6 rounded-lg border bg-stone-100 p-6" id="rating-section">
+ <div className="border-input mt-6 rounded-lg border bg-muted p-6" id="rating-section">
  <div className="mb-4 flex items-center gap-2 text-base font-semibold">
  <span>⭐ Rate your experience with @{targetAlias}</span>
  </div>

@@ -105,7 +105,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  {a.specialties.slice(0, 3).map((s) => (
  <span
  key={s}
- className="rounded-full border border-input bg-stone-100 px-2.5 py-0.5 text-xs text-stone-500"
+ className="rounded-full border border-input bg-muted px-2.5 py-0.5 text-xs text-stone-500"
  >
  {s}
  </span>

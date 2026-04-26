@@ -253,7 +253,7 @@ export default function ShowResultsView({
                   <div className="h-1 w-full bg-amber-400" />
                   {entry.thumbnailUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={entry.thumbnailUrl} alt={entry.horseName} className="aspect-[4/3] w-full object-contain bg-stone-100" />
+                    <img src={entry.thumbnailUrl} alt={entry.horseName} className="aspect-[4/3] w-full object-contain bg-muted" />
                   )}
                   <div className="max-w-[220px] min-w-[160px] overflow-hidden rounded-lg bg-card p-4 text-center shadow-lg">
                     <div className="mb-1 text-[2rem]">{medal}</div>
@@ -329,7 +329,7 @@ export default function ShowResultsView({
           {sortedEntries.map((entry, index) => (
             <div
               key={entry.id}
-              className="flex items-center gap-4 border-b border-stone-100 px-6 py-4 transition-colors last:border-b-0 hover:bg-muted"
+              className="flex items-center gap-4 border-b border-input px-6 py-4 transition-colors last:border-b-0 hover:bg-muted"
             >
               <div className="min-w-[32px] text-center text-lg font-bold text-stone-500">
                 {isExpertJudged && isClosed && entry.placing
@@ -339,7 +339,7 @@ export default function ShowResultsView({
               {entry.thumbnailUrl && (
                 <button
                   type="button"
-                  className="h-[64px] w-[64px] shrink-0 cursor-pointer overflow-hidden rounded-md border-0 bg-stone-100 p-0 transition-transform hover:scale-105 hover:ring-2 hover:ring-forest"
+                  className="h-[64px] w-[64px] shrink-0 cursor-pointer overflow-hidden rounded-md border-0 bg-muted p-0 transition-transform hover:scale-105 hover:ring-2 hover:ring-forest"
                   onClick={() => setLightboxIndex(entryToLightboxIndex.get(index) ?? null)}
                   title="Click to view full photo"
                 >
