@@ -13,6 +13,9 @@ import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import AssetDetailRenderer from"@/components/AssetDetailRenderer";
+import { getAssetConfig } from"@/lib/config/assetFields";
+import type { AssetCategory } from"@/lib/types/database";
 
 
 // Types
@@ -73,8 +76,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  .from("user_horses")
  .select(
  `
- id, owner_id, custom_name, finish_type, condition_grade, asset_category,
- is_for_sale, is_public, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id, trade_status,
+  id, owner_id, custom_name, finish_type, condition_grade, asset_category, attributes,
+  is_for_sale, is_public, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id, trade_status,
  finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id,
  catalog_items:catalog_id(title, maker, scale, item_type, attributes)
  `,
@@ -86,7 +89,11 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  notFound();
  }
 
- const horse = rawHorse;
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ const horse = rawHorse as any;
+ const assetCat = (horse.asset_category as AssetCategory) || "model";
+ const assetConfig = getAssetConfig(assetCat);
+ const horseAttributes = (horse.attributes as Record<string, any>) || {};
 
  // Only the owner can see the full passport for now
  if (horse.owner_id !== user.id) {
@@ -304,17 +311,19 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  : `${(horse.asset_category ||"model").charAt(0).toUpperCase() + (horse.asset_category ||"model").slice(1)} Details`}
  </h3>
 
- {horse.asset_category && horse.asset_category !=="model" && (
+ {horse.asset_category && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
  <span className="text-sm font-medium text-[#59493A]">
  Category
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
- {horse.asset_category ==="tack"
- ?"🏇 Tack & Gear"
- : horse.asset_category ==="prop"
- ?"🌲 Prop"
- :"🎭 Diorama"}
+  {horse.asset_category === "tack"
+  ?"🏇 Tack & Gear"
+  : horse.asset_category === "prop"
+  ?"🌲 Prop"
+  : horse.asset_category === "diorama"
+  ?"🎭 Diorama"
+  : "🐄 Other Model"}
  </span>
  </div>
  )}
@@ -507,6 +516,13 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
  </div>
 
+ {/* Category-Specific Attributes */}
+ {assetCat !== "model" && Object.keys(horseAttributes).length > 0 && (
+ <div className="mt-2">
+ <AssetDetailRenderer category={assetCat} attributes={horseAttributes} />
+ </div>
+ )}
+
  {/* Finish Details */}
  {horse.finish_details && (
  <div className="rounded-lg border border-[#b8a484]/30 bg-white/10 p-5">
@@ -524,8 +540,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
  )}
 
- {/* Show Bio */}
- {(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
+ {/* Show Bio — model only */}
+ {assetConfig.showShowBio && (horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
             <div className="rounded-lg border border-[#b8a484]/30 bg-white/10 p-5">
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-[#59493A] uppercase">
                 <span aria-hidden="true">🏅</span> Show Identity
@@ -592,7 +608,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {/* Pedigree Card */}
  <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={true} />
 
- {/* 🐾 Hoofprint™ Timeline */}
+ {/* 🐾 Hoofprint™ Timeline — model + other_model only */}
+ {assetConfig.showHoofprint && (
  <HoofprintTimeline
  horseId={horseId}
  timeline={timeline}
@@ -601,6 +618,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  isOwner={true}
  currentUserId={user.id}
  />
+ )}
 
  {/* Financial Vault */}
  <VaultReveal vault={vault} currencySymbol={currencySymbol} />

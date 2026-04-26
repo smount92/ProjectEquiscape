@@ -19,6 +19,11 @@ import { getPublicImageUrl } from"@/lib/utils/storage";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { getGallerySlots, getAssetConfig, isFieldVisible, getFieldLabel, validateAttributes } from "@/lib/config/assetFields";
+import TackFormFields from "@/components/forms/TackFormFields";
+import PropFormFields from "@/components/forms/PropFormFields";
+import DioramaFormFields from "@/components/forms/DioramaFormFields";
+import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
 
 // ---- Types ----
 
@@ -87,6 +92,27 @@ export default function EditHorsePage() {
  const [assetCategory, setAssetCategory] = useState<AssetCategory>("model");
 
  const isModel = assetCategory ==="model";
+ const isModelLike = assetCategory === "model" || assetCategory === "other_model";
+ const activeConfig = getAssetConfig(assetCategory);
+ const activeGallerySlots = getGallerySlots(assetCategory);
+
+ // Category-specific attributes (stored in JSONB)
+ const [tackType, setTackType] = useState("");
+ const [discipline, setDiscipline] = useState("");
+ const [attrMaterials, setAttrMaterials] = useState<string[]>([]);
+ const [fitsMolds, setFitsMolds] = useState("");
+ const [workingParts, setWorkingParts] = useState<string[]>([]);
+ const [propCategory, setPropCategory] = useState("");
+ const [dimensions, setDimensions] = useState("");
+ const [terrainSetting, setTerrainSetting] = useState("");
+ const [sceneTheme, setSceneTheme] = useState("");
+ const [dioComponents, setDioComponents] = useState("");
+ const [baseDimensions, setBaseDimensions] = useState("");
+ const [documentationNotes, setDocumentationNotes] = useState("");
+ const [species, setSpecies] = useState("");
+ const [otherBreed, setOtherBreed] = useState("");
+ const [manufacturer, setManufacturer] = useState("");
+ const [modelNumber, setModelNumber] = useState("");
 
  // Reference fields (controlled by UnifiedReferenceSearch)
  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
@@ -155,7 +181,7 @@ export default function EditHorsePage() {
  const { data: horse, error: horseErr } = await supabase
  .from("user_horses")
  .select(
-"id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, visibility, collection_id, catalog_id, trade_status, listing_price, marketplace_notes, life_stage, asset_category, finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id",
+"id, owner_id, custom_name, sculptor, finishing_artist, edition_number, edition_size, finish_type, condition_grade, is_public, visibility, collection_id, catalog_id, trade_status, listing_price, marketplace_notes, life_stage, asset_category, finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id, attributes",
  )
  .eq("id", horseId)
  .single<{
@@ -183,6 +209,7 @@ export default function EditHorsePage() {
  assigned_gender: string | null;
  assigned_age: string | null;
  regional_id: string | null;
+ attributes: Record<string, unknown> | null;
  }>();
 
  if (horseErr || !horse || horse.owner_id !== user.id) {
@@ -226,6 +253,32 @@ export default function EditHorsePage() {
  setAssignedGender(horse.assigned_gender ||"");
  setAssignedAge(horse.assigned_age ||"");
  setRegionalId(horse.regional_id ||"");
+
+ // Populate category-specific attributes from JSONB
+ const a = horse.attributes || {};
+ if (horse.asset_category === "tack") {
+ setTackType((a.tack_type as string) || "");
+ setDiscipline((a.discipline as string) || "");
+ setAttrMaterials(Array.isArray(a.materials) ? a.materials : []);
+ setFitsMolds((a.fits_molds as string) || "");
+ setWorkingParts(Array.isArray(a.working_parts) ? a.working_parts : []);
+ } else if (horse.asset_category === "prop") {
+ setPropCategory((a.prop_category as string) || "");
+ setDimensions((a.dimensions as string) || "");
+ setTerrainSetting((a.terrain_setting as string) || "");
+ setAttrMaterials(Array.isArray(a.materials) ? a.materials : []);
+ } else if (horse.asset_category === "diorama") {
+ setSceneTheme((a.scene_theme as string) || "");
+ setDiscipline((a.discipline as string) || "");
+ setDioComponents((a.components as string) || "");
+ setBaseDimensions((a.base_dimensions as string) || "");
+ setDocumentationNotes((a.documentation_notes as string) || "");
+ } else if (horse.asset_category === "other_model") {
+ setSpecies((a.species as string) || "");
+ setOtherBreed((a.breed as string) || "");
+ setManufacturer((a.manufacturer as string) || "");
+ setModelNumber((a.model_number as string) || "");
+ }
 
  if (horse.catalog_id) {
  setSelectedCatalogId(horse.catalog_id);
@@ -455,6 +508,19 @@ export default function EditHorsePage() {
  regional_id: regionalId.trim() || null,
  };
 
+ // Build category-specific attributes JSONB
+ let rawAttributes: Record<string, unknown> = {};
+ if (assetCategory === "tack") rawAttributes = { tack_type: tackType, discipline, materials: attrMaterials, fits_molds: fitsMolds, working_parts: workingParts };
+ else if (assetCategory === "prop") rawAttributes = { prop_category: propCategory, dimensions, terrain_setting: terrainSetting, materials: attrMaterials };
+ else if (assetCategory === "diorama") rawAttributes = { scene_theme: sceneTheme, discipline, components: dioComponents, base_dimensions: baseDimensions, documentation_notes: documentationNotes };
+ else if (assetCategory === "other_model") rawAttributes = { species, breed: otherBreed, manufacturer, model_number: modelNumber };
+ const { cleaned: attributes } = validateAttributes(assetCategory, rawAttributes);
+ if (Object.keys(attributes).length > 0) {
+ horseUpdate.attributes = attributes;
+ } else {
+ horseUpdate.attributes = {};
+ }
+
  const hasVaultData = purchasePrice || purchaseDate || estimatedValue || insuranceNotes || purchaseDateText;
  const vaultData: Record<string, unknown> | null = hasVaultData
  ? {
@@ -497,8 +563,8 @@ export default function EditHorsePage() {
  const uploadedImages: { path: string; angle: string }[] = [];
  const uploadErrors: string[] = [];
 
- for (const slot of PHOTO_STUDIO_SLOTS) {
- const angle = slot.angle;
+ for (const slot of activeGallerySlots) {
+ const angle = slot.angle as AngleProfile;
  if (newFiles[angle]) {
  const compressed =
  watermarkEnabled && userAlias
@@ -702,10 +768,11 @@ export default function EditHorsePage() {
  </p>
 
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- {PHOTO_STUDIO_SLOTS.map((slot) => {
- const preview = previews[slot.angle];
- const hasNew = !!newFiles[slot.angle];
- const isDrag = draggingAngle === slot.angle;
+ {activeGallerySlots.map((slot) => {
+ const angle = slot.angle as AngleProfile;
+ const preview = previews[angle];
+ const hasNew = !!newFiles[angle];
+ const isDrag = draggingAngle === angle;
 
  return (
  <div key={slot.angle} className="flex flex-col">
@@ -719,26 +786,26 @@ export default function EditHorsePage() {
  </div>
  <div
  className={`image-upload-zone ${isDrag ?"drag-active" :""} ${preview ?"has-preview" :""}`}
- onClick={() => fileInputRefs.current[slot.angle]?.click()}
+ onClick={() => fileInputRefs.current[angle]?.click()}
  onDragOver={(e) => {
  e.preventDefault();
- setDraggingAngle(slot.angle);
+ setDraggingAngle(angle);
  }}
  onDragLeave={() => setDraggingAngle(null)}
- onDrop={(e) => handleSlotDrop(slot.angle, e)}
+ onDrop={(e) => handleSlotDrop(angle, e)}
  role="button"
  tabIndex={0}
  aria-label={`Upload ${slot.label} photo`}
  >
  <Input
  ref={(el) => {
- if (el) fileInputRefs.current[slot.angle] = el;
+ if (el) fileInputRefs.current[angle] = el;
  }}
  type="file"
  accept="image/*"
  onChange={(e) => {
  const f = e.target.files?.[0];
- if (f) handleSlotSelect(slot.angle, f);
+ if (f) handleSlotSelect(angle, f);
  }}
  className="hidden"
  title="Upload photo"
@@ -791,7 +858,7 @@ export default function EditHorsePage() {
  className="hover:0.2)] hover:0.5)] mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-orange-200 bg-orange-50 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#fb923c] transition-all"
  onClick={(e) => {
  e.stopPropagation();
- handleSlotRevert(slot.angle);
+ handleSlotRevert(angle);
  }}
  >
  ↩ Revert
@@ -803,7 +870,7 @@ export default function EditHorsePage() {
  className="mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-red-200 bg-red-50 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#ef4444] transition-all"
  onClick={(e) => {
  e.stopPropagation();
- handleSlotRemove(slot.angle);
+ handleSlotRemove(angle);
  }}
  >
  ✕ Remove
@@ -976,7 +1043,7 @@ export default function EditHorsePage() {
  <div className="section-icon rounded-lg border border-stone-200 bg-white shadow-md transition-all">
  🏷️
  </div>
- <h2>Model Identity</h2>
+ <h2>{activeConfig.label === "Model Horse" ? "Model Identity" : `${activeConfig.label} Details`}</h2>
  </div>
 
  <div className="mb-6">
@@ -993,24 +1060,23 @@ export default function EditHorsePage() {
  />
  </div>
 
+ {isFieldVisible(assetCategory, "sculptor") && (
  <div className="mb-6">
  <label htmlFor="edit-sculptor" className="text-stone-900 mb-1 block text-sm font-semibold">
- Sculptor / Artist
+ {getFieldLabel(assetCategory, "sculptor")}
  </label>
  <Input
  id="edit-sculptor"
  type="text"
- 
  value={sculptor}
  onChange={(e) => setSculptor(e.target.value)}
  maxLength={100}
  placeholder="e.g. Sarah Rose, Brigitte Eberl…"
  />
- <span className="text-stone-500 mt-1 block text-xs">
- Optional — tag the sculptor or artist, especially for Artist Resins or custom work.
- </span>
  </div>
+ )}
 
+ {isFieldVisible(assetCategory, "finishing_artist") && (
  <div className="mb-6">
  <label htmlFor="edit-finishing-artist" className="text-stone-900 mb-1 block text-sm font-semibold">
  🎨 Finishing Artist
@@ -1018,42 +1084,24 @@ export default function EditHorsePage() {
  <Input
  id="edit-finishing-artist"
  type="text"
- 
  value={finishingArtist}
  onChange={(e) => setFinishingArtist(e.target.value)}
  maxLength={100}
  placeholder="Who painted or customized this model?"
  />
- <span className="text-stone-500 mt-1 block text-xs">
- The artist who painted/finished this model (if different from sculptor).
- </span>
  </div>
+ )}
 
+ {isFieldVisible(assetCategory, "edition_info") && (
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">📋 Edition Info</label>
  <div className="flex items-center gap-2">
- <Input
- type="number"
- className="w-[80px]"
- placeholder="#"
- value={editionNumber}
- onChange={(e) => setEditionNumber(e.target.value)}
- min="1"
- />
+ <Input type="number" className="w-[80px]" placeholder="#" value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)} min="1" />
  <span className="text-stone-500">of</span>
- <Input
- type="number"
- className="w-[80px]"
- placeholder="Total"
- value={editionSize}
- onChange={(e) => setEditionSize(e.target.value)}
- min="1"
- />
+ <Input type="number" className="w-[80px]" placeholder="Total" value={editionSize} onChange={(e) => setEditionSize(e.target.value)} min="1" />
  </div>
- <span className="text-stone-500 mt-1 block text-xs">
- e.g., &quot;3 of 50&quot; for limited edition runs.
- </span>
  </div>
+ )}
 
  {/* Finish Details */}
  <div className="mb-6">
@@ -1086,7 +1134,15 @@ export default function EditHorsePage() {
  </small>
  </div>
 
- {/* Show Bio */}
+ {/* Category-specific sub-form fields */}
+ {assetCategory === "tack" && <TackFormFields tackType={tackType} setTackType={setTackType} discipline={discipline} setDiscipline={setDiscipline} materials={attrMaterials} setMaterials={setAttrMaterials} fitsMolds={fitsMolds} setFitsMolds={setFitsMolds} workingParts={workingParts} setWorkingParts={setWorkingParts} />}
+ {assetCategory === "prop" && <PropFormFields propCategory={propCategory} setPropCategory={setPropCategory} dimensions={dimensions} setDimensions={setDimensions} terrainSetting={terrainSetting} setTerrainSetting={setTerrainSetting} materials={attrMaterials} setMaterials={setAttrMaterials} />}
+ {assetCategory === "diorama" && <DioramaFormFields sceneTheme={sceneTheme} setSceneTheme={setSceneTheme} discipline={discipline} setDiscipline={setDiscipline} components={dioComponents} setComponents={setDioComponents} baseDimensions={baseDimensions} setBaseDimensions={setBaseDimensions} documentationNotes={documentationNotes} setDocumentationNotes={setDocumentationNotes} />}
+ {assetCategory === "other_model" && <OtherModelFormFields species={species} setSpecies={setSpecies} breed={otherBreed} setBreed={setOtherBreed} manufacturer={manufacturer} setManufacturer={setManufacturer} modelNumber={modelNumber} setModelNumber={setModelNumber} />}
+
+ {/* Show Bio — model only */}
+ {activeConfig.showShowBio && (
+ <>
  <div className="my-5 text-stone-500 mt-4 mb-3 flex items-center gap-4 text-sm">
  <h4 className="text-stone-600 font-semibold text-[var(--font-size-md)]">
  🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]">(Optional)</span>
@@ -1154,6 +1210,8 @@ export default function EditHorsePage() {
  />
  </div>
  </div>
+ </>
+ )}
 
  {/* Finish Type & Condition — model only */}
  {isModel && (

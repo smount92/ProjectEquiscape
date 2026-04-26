@@ -16,6 +16,9 @@ import ReportButton from"@/components/ReportButton";
 import MessageSellerButton from"@/components/MessageSellerButton";
 import TrustedBadge from"@/components/TrustedBadge";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import AssetDetailRenderer from"@/components/AssetDetailRenderer";
+import { getAssetConfig } from"@/lib/config/assetFields";
+import type { AssetCategory } from"@/lib/types/database";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -125,8 +128,8 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  .from("user_horses")
  .select(
  `
- id, owner_id, custom_name, finish_type, condition_grade, asset_category,
- is_public, created_at, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id,
+  id, owner_id, custom_name, finish_type, condition_grade, asset_category, attributes,
+  is_public, created_at, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id,
  trade_status, listing_price,
  finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id,
  users!inner(alias_name),
@@ -141,7 +144,8 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  notFound();
  }
 
- const horse = rawHorse;
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ const horse = rawHorse as any;
 
  // Fetch all images
  const { data: rawImages } = await supabase
@@ -274,7 +278,10 @@ editionSize: rawPedigree.edition_size,
  : null;
 
  const ownerAlias = horse.users?.alias_name ??"Unknown";
- const isOwnHorse = horse.owner_id === user.id;
+  const isOwnHorse = horse.owner_id === user.id;
+  const assetCat = (horse.asset_category || "model") as AssetCategory;
+  const assetConfig = getAssetConfig(assetCat);
+  const horseAttributes = (horse.attributes ?? {}) as Record<string, unknown>;
 
  // Check if owner is a Community Trusted seller
  const { data: trustedData } = await supabase
@@ -392,11 +399,13 @@ editionSize: rawPedigree.edition_size,
  Category
  </span>
  <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
- {horse.asset_category ==="tack"
- ?"🏇 Tack & Gear"
- : horse.asset_category ==="prop"
- ?"🌲 Prop"
- :"🎭 Diorama"}
+  {horse.asset_category ==="tack"
+  ?"🏇 Tack & Gear"
+  : horse.asset_category ==="prop"
+  ?"🌲 Prop"
+  : horse.asset_category ==="diorama"
+  ?"🎭 Diorama"
+  : "🐄 Other Model"}
  </span>
  </div>
  )}
@@ -571,6 +580,13 @@ editionSize: rawPedigree.edition_size,
  </div>
  </div>
 
+  {/* Category-Specific Attributes */}
+  {assetCat !== "model" && Object.keys(horseAttributes).length > 0 && (
+  <div className="mt-2">
+  <AssetDetailRenderer category={assetCat} attributes={horseAttributes} />
+  </div>
+  )}
+
  {/* Finish Details */}
  {horse.finish_details && (
  <div className="bg-white/40 p-4 border-stone-200 rounded-lg border shadow-md transition-all">
@@ -588,8 +604,8 @@ editionSize: rawPedigree.edition_size,
  </div>
  )}
 
- {/* Show Bio */}
- {(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
+  {/* Show Bio — model only */}
+  {assetConfig.showShowBio && (horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
  <div className="bg-white/40 p-4 border-stone-200 rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">🏅</span> Show Identity
@@ -687,12 +703,14 @@ editionSize: rawPedigree.edition_size,
  </Link>
  )}
  </div>
- <Link
- href={`/community/${horseId}/hoofprint`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
- >
- 🐾 View Hoofprint
- </Link>
+  {assetConfig.showHoofprint && (
+  <Link
+  href={`/community/${horseId}/hoofprint`}
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-200 bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  >
+  🐾 View Hoofprint
+  </Link>
+  )}
  </div>
 
  {/* Back link */}
