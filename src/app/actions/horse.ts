@@ -180,7 +180,7 @@ export async function updateHorseAction(horseId: string, data: {
             'marketplace_notes', 'collection_id', 'catalog_id', 'life_stage',
             'edition_number', 'edition_size', 'asset_category',
             'finish_details', 'public_notes', 'assigned_breed', 'assigned_gender',
-            'assigned_age', 'regional_id',
+            'assigned_age', 'regional_id', 'attributes',
         ];
         const VAULT_ALLOWED = [
             'purchase_price', 'purchase_date', 'estimated_current_value',
@@ -303,6 +303,7 @@ export async function createHorseRecord(data: {
     assignedAge?: string;
     regionalId?: string;
     purchaseDateText?: string;
+    attributes?: Record<string, unknown>;
 }): Promise<{ success: boolean; horseId?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -343,6 +344,9 @@ export async function createHorseRecord(data: {
     if (data.assignedGender) horseInsert.assigned_gender = data.assignedGender.trim();
     if (data.assignedAge) horseInsert.assigned_age = data.assignedAge.trim();
     if (data.regionalId) horseInsert.regional_id = data.regionalId.trim();
+    if (data.attributes && Object.keys(data.attributes).length > 0) {
+        (horseInsert as Record<string, unknown>).attributes = data.attributes;
+    }
 
     if (data.tradeStatus && data.tradeStatus !== "Not for Sale") {
         if (data.listingPrice) horseInsert.listing_price = data.listingPrice;

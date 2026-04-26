@@ -25,7 +25,7 @@ export type TradeStatus = "Not for Sale" | "For Sale" | "Open to Offers" | "Stol
 
 export type CatalogItemType = "plastic_mold" | "plastic_release" | "artist_resin" | "tack" | "medallion" | "micro_mini" | "prop" | "diorama";
 
-export type AssetCategory = "model" | "tack" | "prop" | "diorama";
+export type AssetCategory = "model" | "tack" | "prop" | "diorama" | "other_model";
 
 // --- Table Row Types ---
 

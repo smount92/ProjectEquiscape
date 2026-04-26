@@ -26,6 +26,11 @@ import ImageCropModal from"@/components/ImageCropModal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { getGallerySlots, getSteps, isFieldVisible, getFieldLabel, getAssetConfig, validateAttributes } from "@/lib/config/assetFields";
+import TackFormFields from "@/components/forms/TackFormFields";
+import PropFormFields from "@/components/forms/PropFormFields";
+import DioramaFormFields from "@/components/forms/DioramaFormFields";
+import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -43,13 +48,6 @@ interface AiToast {
 
 // ---- Constants ----
 
-const STEPS = [
- { label:"Gallery", icon:"📸" },
- { label:"Reference", icon:"🔗" },
- { label:"Identity", icon:"🏷️" },
- { label:"Vault", icon:"🔒" },
-];
-
 const CONDITION_GRADES = [
  { value:"Mint", label:"Mint — Flawless, like new" },
  { value:"Near Mint", label:"Near Mint — Minimal handling wear" },
@@ -59,14 +57,6 @@ const CONDITION_GRADES = [
  { value:"Body Quality", label:"Body Quality — Suitable for customizing" },
  { value:"Fair", label:"Fair — Visible flaws, repairs, or damage" },
  { value:"Poor", label:"Poor — Significant damage or missing parts" },
-];
-
-const GALLERY_SLOTS: { angle: AngleProfile; label: string; primary?: boolean }[] = [
- { angle:"Primary_Thumbnail", label:"Near-Side (Required)", primary: true },
- { angle:"Right_Side", label:"Off-Side" },
- { angle:"Front_Chest", label:"Front / Chest" },
- { angle:"Back_Hind", label:"Hindquarters / Tail" },
- { angle:"Belly_Makers_Mark", label:"Belly / Maker's Mark" },
 ];
 
 // ---- Types ----
@@ -133,6 +123,24 @@ export default function AddHorsePage() {
  const [lifeStage, setLifeStage] = useState("completed");
  const [assetCategory, setAssetCategory] = useState<AssetCategory>("model");
 
+ // Category-specific attributes (stored in JSONB)
+ const [tackType, setTackType] = useState("");
+ const [discipline, setDiscipline] = useState("");
+ const [attrMaterials, setAttrMaterials] = useState<string[]>([]);
+ const [fitsMolds, setFitsMolds] = useState("");
+ const [workingParts, setWorkingParts] = useState<string[]>([]);
+ const [propCategory, setPropCategory] = useState("");
+ const [dimensions, setDimensions] = useState("");
+ const [terrainSetting, setTerrainSetting] = useState("");
+ const [sceneTheme, setSceneTheme] = useState("");
+ const [dioComponents, setDioComponents] = useState("");
+ const [baseDimensions, setBaseDimensions] = useState("");
+ const [documentationNotes, setDocumentationNotes] = useState("");
+ const [species, setSpecies] = useState("");
+ const [otherBreed, setOtherBreed] = useState("");
+ const [manufacturer, setManufacturer] = useState("");
+ const [modelNumber, setModelNumber] = useState("");
+
  // Watermark preference
  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
  const [userAlias, setUserAlias] = useState("");
@@ -141,6 +149,12 @@ export default function AddHorsePage() {
  const [userTier, setUserTier] = useState<UserTier>("free");
 
  const isModel = assetCategory ==="model";
+ const isModelLike = assetCategory === "model" || assetCategory === "other_model";
+
+ // Dynamic config from shared assetFields
+ const activeConfig = getAssetConfig(assetCategory);
+ const activeGallerySlots = getGallerySlots(assetCategory);
+ const activeSteps = getSteps(assetCategory);
 
  // Step 4 (index 3): Financial Vault
  const [purchasePrice, setPurchasePrice] = useState("");
@@ -352,55 +366,49 @@ export default function AddHorsePage() {
  });
  };
 
+ // Determine which step index is the "identity/details" step
+ const identityStepIdx = activeConfig.showReferenceStep ? 2 : 1;
+
  const canProceedStep = (step: number): boolean => {
- switch (step) {
- case 0:
- return true; // Gallery is optional (but thumbnail encouraged)
- case 1:
- return true; // Reference is optional — users can use"Custom Entry" escape hatch
- case 2:
- return customName.trim().length > 0 && (isModel ? finishType !=="" && conditionGrade !=="" : true);
- case 3:
- return true; // Financial vault is optional
- default:
- return false;
- }
+  if (step === identityStepIdx) {
+   return customName.trim().length > 0 && (isModel ? finishType !=="" && conditionGrade !=="" : true);
+  }
+  return true; // Gallery, Reference, and Vault are all optional
  };
 
-  const goNext = () => {
-    if (currentStep < STEPS.length - 1) {
-      if (canProceedStep(currentStep)) {
-        setValidationErrors([]);
-        setCurrentStep(currentStep + 1);
-        window.scrollTo({ top: 0, behavior:"smooth" });
-      } else {
-        // Show which fields are missing
-        const errors: string[] = [];
-        if (currentStep === 2) {
-          if (!customName.trim()) errors.push("Custom Name");
-          if (isModel && !finishType) errors.push("Finish Type");
-          if (isModel && !conditionGrade) errors.push("Condition Grade");
-        }
-        setValidationErrors(errors);
-        setShakeFields(true);
-        setTimeout(() => setShakeFields(false), 600);
-        // Scroll to first missing field
-        if (!customName.trim()) {
-          document.getElementById("custom-name")?.focus();
-        } else if (isModel && !finishType) {
-          document.getElementById("finish-type")?.focus();
-        } else if (isModel && !conditionGrade) {
-          document.getElementById("condition-grade")?.focus();
-        }
-      }
-    }
-  };
+   const goNext = () => {
+     if (currentStep < activeSteps.length - 1) {
+       if (canProceedStep(currentStep)) {
+         setValidationErrors([]);
+         setCurrentStep(currentStep + 1);
+         window.scrollTo({ top: 0, behavior:"smooth" });
+       } else {
+         // Show which fields are missing
+         const errors: string[] = [];
+         if (currentStep === identityStepIdx) {
+           if (!customName.trim()) errors.push("Custom Name");
+           if (isModel && !finishType) errors.push("Finish Type");
+           if (isModel && !conditionGrade) errors.push("Condition Grade");
+         }
+         setValidationErrors(errors);
+         setShakeFields(true);
+         setTimeout(() => setShakeFields(false), 600);
+         if (!customName.trim()) {
+           document.getElementById("custom-name")?.focus();
+         } else if (isModel && !finishType) {
+           document.getElementById("finish-type")?.focus();
+         } else if (isModel && !conditionGrade) {
+           document.getElementById("condition-grade")?.focus();
+         }
+       }
+     }
+   };
 
  const goBack = () => {
- if (currentStep > 0) {
- setCurrentStep(currentStep - 1);
- window.scrollTo({ top: 0, behavior:"smooth" });
- }
+  if (currentStep > 0) {
+   setCurrentStep(currentStep - 1);
+   window.scrollTo({ top: 0, behavior:"smooth" });
+  }
  };
 
  // ---- SUBMIT handler ----
@@ -415,6 +423,14 @@ export default function AddHorsePage() {
  data: { user },
  } = await supabase.auth.getUser();
  if (!user) throw new Error("You must be logged in.");
+
+ // Build category-specific attributes JSONB
+ let rawAttributes: Record<string, unknown> = {};
+ if (assetCategory === "tack") rawAttributes = { tack_type: tackType, discipline, materials: attrMaterials, fits_molds: fitsMolds, working_parts: workingParts };
+ else if (assetCategory === "prop") rawAttributes = { prop_category: propCategory, dimensions, terrain_setting: terrainSetting, materials: attrMaterials };
+ else if (assetCategory === "diorama") rawAttributes = { scene_theme: sceneTheme, discipline, components: dioComponents, base_dimensions: baseDimensions, documentation_notes: documentationNotes };
+ else if (assetCategory === "other_model") rawAttributes = { species, breed: otherBreed, manufacturer, model_number: modelNumber };
+ const { cleaned: attributes } = validateAttributes(assetCategory, rawAttributes);
 
  // Step 1: Create DB record (no files through server)
  const result = await createHorseRecord({
@@ -445,6 +461,7 @@ export default function AddHorsePage() {
  assignedAge: assignedAge.trim() || undefined,
  regionalId: regionalId.trim() || undefined,
  purchaseDateText: purchaseDateText.trim() || undefined,
+ attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
  });
 
  if (!result.success || !result.horseId) {
@@ -523,12 +540,14 @@ export default function AddHorsePage() {
  });
  }
 
- // 5. Initialize Hoofprint
+ // 5. Initialize Hoofprint (model + other_model only)
+ if (activeConfig.showHoofprint) {
  initializeHoofprint({
  horseId,
  horseName: customName.trim(),
  lifeStage,
  });
+ }
 
  // 6. Show success!
  setSavedHorseName(customName.trim());
@@ -583,23 +602,20 @@ export default function AddHorsePage() {
             Add to <span className="text-forest">Stable</span>
           </h1>
           <p className="mt-2 text-sm text-stone-600">
- {isModel
+ {activeConfig.label === "Model Horse"
  ?"Catalog a new model horse in your digital collection"
- : assetCategory ==="tack"
- ?"Catalog tack & gear for your collection"
- : assetCategory ==="prop"
- ?"Add a prop to your collection"
- :"Document a diorama setup"}
+ : `Add ${activeConfig.label.toLowerCase()} to your collection`}
  </p>
  </div>
 
  {/* Asset Category Toggle */}
- <div className="animate-fade-in-up mb-8 flex gap-2">
+ <div className="animate-fade-in-up mb-8 flex flex-wrap gap-2">
  {[
  { value:"model" as const, icon:"🐎", label:"Model Horse" },
  { value:"tack" as const, icon:"🏇", label:"Tack & Gear" },
  { value:"prop" as const, icon:"🌲", label:"Prop" },
  { value:"diorama" as const, icon:"🎭", label:"Diorama" },
+ { value:"other_model" as const, icon:"🐄", label:"Other Model" },
  ].map((cat) => (
  <button
  key={cat.value}
@@ -619,19 +635,18 @@ export default function AddHorsePage() {
  role="navigation"
  aria-label="Form progress"
  >
- {STEPS.map((step, i) => (
+ {activeSteps.map((step, i) => (
  <button
  type="button"
  key={step.label}
- className="w-1/3 relative flex cursor-pointer flex-col items-center bg-transparent border-0 p-0"
+ className={`${activeSteps.length <= 3 ? 'w-1/3' : 'w-1/4'} relative flex cursor-pointer flex-col items-center bg-transparent border-0 p-0`}
   onClick={() => {
     if (i <= currentStep || canProceedStep(i - 1)) {
       setValidationErrors([]);
       setCurrentStep(i);
     } else {
-      // Show validation errors if trying to skip ahead past Identity
-      const blockingStep = i - 1; // the step that blocks
-      if (blockingStep === 2) {
+      const blockingStep = i - 1;
+      if (blockingStep === identityStepIdx) {
         const errors: string[] = [];
         if (!customName.trim()) errors.push("Custom Name");
         if (isModel && !finishType) errors.push("Finish Type");
@@ -639,7 +654,6 @@ export default function AddHorsePage() {
         setValidationErrors(errors);
         setShakeFields(true);
         setTimeout(() => setShakeFields(false), 600);
-        // Navigate to the blocking step so user can see the fields
         setCurrentStep(blockingStep);
         window.scrollTo({ top: 0, behavior:"smooth" });
       }
@@ -714,8 +728,8 @@ export default function AddHorsePage() {
  The <strong>Primary Thumbnail</strong> will be shown on your Digital Shelf.
  </p>
  <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
- {GALLERY_SLOTS.map((slot) => {
- const existing = imageSlots[slot.angle];
+ {activeGallerySlots.map((slot) => {
+ const existing = imageSlots[slot.angle as AngleProfile];
  const isPrimary = slot.angle ==="Primary_Thumbnail";
  return (
  <div
@@ -738,7 +752,7 @@ export default function AddHorsePage() {
  className="bg-black/70 absolute top-[6px] right-[6px] z-[2] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.85rem] text-white transition-colors"
  onClick={(e) => {
  e.stopPropagation();
- handleImageRemove(slot.angle);
+ handleImageRemove(slot.angle as AngleProfile);
  }}
  aria-label={`Remove ${slot.label} photo`}
  >
@@ -804,7 +818,7 @@ export default function AddHorsePage() {
  className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
  onChange={(e) => {
  const file = e.target.files?.[0];
- if (file) handleImageSelect(slot.angle, file);
+ if (file) handleImageSelect(slot.angle as AngleProfile, file);
  e.target.value =""; // Reset so same file can be re-selected
  }}
  aria-label={`Upload ${slot.label} photo`}
@@ -944,7 +958,7 @@ export default function AddHorsePage() {
  onClick={goNext}
  id="step-1-next"
  >
- Next: Reference Link →
+ {activeConfig.showReferenceStep ? "Next: Reference Link →" : `Next: ${activeConfig.label} Details →`}
  </button>
  </div>
  </div>
@@ -954,7 +968,7 @@ export default function AddHorsePage() {
  STEP 2 (index 1): Reference Link
  — Use CSS display instead of unmounting to preserve component state
  ================================================================ */}
- <div className={`step-content ${currentStep === 1 ?"block" :"hidden"}`} key="step-1">
+ <div className={`step-content ${activeConfig.showReferenceStep && currentStep === 1 ?"block" :"hidden"}`} key="step-1">
  <div className="relative overflow-visible rounded-xl border border-edge bg-[#FEFCF8] p-6 shadow-sm">
  <div className="mb-6 flex items-center gap-3">
  <div className="text-2xl">
@@ -1040,9 +1054,9 @@ export default function AddHorsePage() {
  </div>
 
  {/* ================================================================
- STEP 3 (index 2): Identity
+ STEP: Identity / Details (index varies by category)
  ================================================================ */}
- {currentStep === 2 && (
+ {currentStep === identityStepIdx && (
  <div className="step-content" key="step-2">
  <div className="relative overflow-visible rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
  {/* Reference summary badge */}
@@ -1095,24 +1109,23 @@ export default function AddHorsePage() {
  </span>
  </div>
 
+ {isFieldVisible(assetCategory, "sculptor") && (
  <div className="mb-6">
  <label htmlFor="sculptor" className="text-stone-900 mb-1 block text-sm font-semibold">
- Sculptor / Artist
+ {getFieldLabel(assetCategory, "sculptor")}
  </label>
  <Input
  id="sculptor"
  type="text"
- 
  placeholder="e.g. Sarah Rose, Brigitte Eberl, Kathleen Moody…"
  value={sculptor}
  onChange={(e) => setSculptor(e.target.value)}
  maxLength={100}
  />
- <span className="text-stone-500 mt-1 block text-xs">
- Optional — tag the sculptor or artist, especially for Artist Resins or custom work.
- </span>
  </div>
+ )}
 
+ {isFieldVisible(assetCategory, "finishing_artist") && (
  <div className="mb-6">
  <label htmlFor="finishing-artist" className="text-stone-900 mb-1 block text-sm font-semibold">
  🎨 Finishing Artist
@@ -1120,44 +1133,25 @@ export default function AddHorsePage() {
  <Input
  id="finishing-artist"
  type="text"
- 
  placeholder="Who painted or customized this model?"
  value={finishingArtist}
  onChange={(e) => setFinishingArtist(e.target.value)}
  maxLength={100}
  />
- <span className="text-stone-500 mt-1 block text-xs">
- The artist who painted/finished this model (if different from sculptor).
- </span>
  </div>
+ )}
 
+ {isFieldVisible(assetCategory, "edition_info") && (
  <div className="mb-6">
  <label className="text-stone-900 mb-1 block text-sm font-semibold">📋 Edition Info</label>
  <div className="flex items-center gap-2">
- <Input
- type="number"
- 
- placeholder="#"
- value={editionNumber}
- onChange={(e) => setEditionNumber(e.target.value)}
- className="w-20"
- min="1"
- />
+ <Input type="number" placeholder="#" value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)} className="w-20" min="1" />
  <span className="text-stone-500">of</span>
- <Input
- type="number"
- 
- placeholder="Total"
- value={editionSize}
- onChange={(e) => setEditionSize(e.target.value)}
- className="w-20"
- min="1"
- />
+ <Input type="number" placeholder="Total" value={editionSize} onChange={(e) => setEditionSize(e.target.value)} className="w-20" min="1" />
  </div>
- <span className="text-stone-500 mt-1 block text-xs">
- e.g., &quot;3 of 50&quot; for limited edition runs.
- </span>
+ <span className="text-stone-500 mt-1 block text-xs">e.g., &quot;3 of 50&quot; for limited edition runs.</span>
  </div>
+ )}
 
  {/* Finish Type — model only */}
  {isModel && (
@@ -1220,7 +1214,15 @@ export default function AddHorsePage() {
  </small>
  </div>
 
- {/* ── Show Bio (Optional) ── */}
+ {/* ── Category-specific sub-form fields ── */}
+ {assetCategory === "tack" && <TackFormFields tackType={tackType} setTackType={setTackType} discipline={discipline} setDiscipline={setDiscipline} materials={attrMaterials} setMaterials={setAttrMaterials} fitsMolds={fitsMolds} setFitsMolds={setFitsMolds} workingParts={workingParts} setWorkingParts={setWorkingParts} />}
+ {assetCategory === "prop" && <PropFormFields propCategory={propCategory} setPropCategory={setPropCategory} dimensions={dimensions} setDimensions={setDimensions} terrainSetting={terrainSetting} setTerrainSetting={setTerrainSetting} materials={attrMaterials} setMaterials={setAttrMaterials} />}
+ {assetCategory === "diorama" && <DioramaFormFields sceneTheme={sceneTheme} setSceneTheme={setSceneTheme} discipline={discipline} setDiscipline={setDiscipline} components={dioComponents} setComponents={setDioComponents} baseDimensions={baseDimensions} setBaseDimensions={setBaseDimensions} documentationNotes={documentationNotes} setDocumentationNotes={setDocumentationNotes} />}
+ {assetCategory === "other_model" && <OtherModelFormFields species={species} setSpecies={setSpecies} breed={otherBreed} setBreed={setOtherBreed} manufacturer={manufacturer} setManufacturer={setManufacturer} modelNumber={modelNumber} setModelNumber={setModelNumber} />}
+
+ {/* ── Show Bio (Optional — model only) ── */}
+ {activeConfig.showShowBio && (
+ <>
  <div className="my-5 text-stone-500 mt-4 mb-3 flex items-center gap-4 text-sm">
  <h4 className="text-stone-600 font-semibold text-[var(--font-size-md)]">
  🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]">(Optional)</span>
@@ -1294,8 +1296,10 @@ export default function AddHorsePage() {
  />
  </div>
  </div>
+ </>
+ )}
 
- {/* Condition Grade — model only */}
+ {/* Condition Grade */}
  {isModel && (
  <div className="mb-6">
  <label htmlFor="condition-grade" className="text-stone-900 mb-1 block text-sm font-semibold">
@@ -1482,9 +1486,9 @@ export default function AddHorsePage() {
  )}
 
  {/* ================================================================
- STEP 4: Financial Vault
+ STEP: Financial Vault (always the last step)
  ================================================================ */}
- {currentStep === 3 && (
+ {currentStep === activeSteps.length - 1 && (
  <div className="step-content" key="step-3">
  {/* Reference summary badge */}
  {selectedCatalogItem && (

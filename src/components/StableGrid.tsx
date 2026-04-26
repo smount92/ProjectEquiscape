@@ -206,7 +206,7 @@ export default function StableGrid({
          {/* Overlay badges */}
          {horse.assetCategory && horse.assetCategory !== "model" && (
           <span className="absolute top-2 right-2 rounded-md bg-black/40 px-2 py-0.5 text-xs font-bold text-white backdrop-blur-sm">
-           {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : "🎭 Diorama"}
+           {horse.assetCategory === "tack" ? "🏇 Tack" : horse.assetCategory === "prop" ? "🌲 Prop" : horse.assetCategory === "diorama" ? "🎭 Diorama" : "🐄 Other Model"}
           </span>
          )}
          {horse.tradeStatus === "For Sale" && (
