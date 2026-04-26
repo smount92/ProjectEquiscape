@@ -19,6 +19,7 @@ interface HorseReportData {
     purchasePrice: number | null;
     estimatedValue: number | null;
     photoUrl: string | null;
+    category: string;
 }
 
 export interface InsuranceReportPayload {
@@ -58,7 +59,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
         let horseQuery = supabase
             .from("user_horses")
             .select(
-                `id, custom_name, finish_type, condition_grade,
+                `id, custom_name, finish_type, condition_grade, asset_category,
          catalog_items:catalog_id(title, maker, item_type),
          horse_images(image_url, angle_profile)`
             )
@@ -71,6 +72,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
             custom_name: string;
             finish_type: string;
             condition_grade: string;
+            asset_category: string | null;
             catalog_items: { title: string; maker: string; item_type: string } | null;
             horse_images: { image_url: string; angle_profile: string }[];
         }
@@ -99,7 +101,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
                 const { data: extraHorses } = await supabase
                     .from("user_horses")
                     .select(
-                        `id, custom_name, finish_type, condition_grade,
+                        `id, custom_name, finish_type, condition_grade, asset_category,
                  catalog_items:catalog_id(title, maker, item_type),
                  horse_images(image_url, angle_profile)`
                     )
@@ -202,6 +204,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
                 purchasePrice: vault?.purchase_price ?? null,
                 estimatedValue: vault?.estimated_current_value ?? null,
                 photoUrl: base64Map.get(horse.id) || null,
+                category: horse.asset_category || "model",
             });
         }
 

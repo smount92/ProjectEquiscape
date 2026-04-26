@@ -222,6 +222,14 @@ function formatCurrency(value: number | null): string {
  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+ model: "Model",
+ tack: "Tack",
+ prop: "Prop",
+ diorama: "Diorama",
+ other_model: "Other",
+};
+
 // ============================================================
 // PDF Document
 // ============================================================
@@ -249,7 +257,7 @@ export default function InsuranceReport({ data }: { data: InsuranceReportPayload
  <View style={styles.coverStats}>
  <View style={styles.coverStat}>
  <Text style={styles.coverStatValue}>{data.totalModels}</Text>
- <Text style={styles.coverStatLabel}>Total Models</Text>
+ <Text style={styles.coverStatLabel}>Total Items</Text>
  </View>
  <View style={styles.coverStat}>
  <Text style={styles.coverStatValue}>{formatCurrency(data.totalValue)}</Text>
@@ -272,7 +280,8 @@ export default function InsuranceReport({ data }: { data: InsuranceReportPayload
  <View style={styles.tableHeader}>
  <Text style={[styles.colNum, styles.headerText]}>#</Text>
  <Text style={[styles.colName, styles.headerText]}>Name</Text>
- <Text style={[styles.colRef, styles.headerText]}>Reference</Text>
+ <Text style={[styles.colRef, styles.headerText, { width: "25%" }]}>Reference</Text>
+ <Text style={[styles.colCondition, styles.headerText, { width: "10%" }]}>Type</Text>
  <Text style={[styles.colCondition, styles.headerText]}>Condition</Text>
  <Text style={[styles.colFinish, styles.headerText]}>Finish</Text>
  <Text style={[styles.colValue, styles.headerText]}>Est. Value</Text>
@@ -283,7 +292,8 @@ export default function InsuranceReport({ data }: { data: InsuranceReportPayload
  <View key={horse.id} style={styles.tableRow}>
  <Text style={styles.colNum}>{i + 1}</Text>
  <Text style={styles.colName}>{horse.name}</Text>
- <Text style={styles.colRef}>{horse.reference}</Text>
+ <Text style={[styles.colRef, { width: "25%" }]}>{horse.reference}</Text>
+ <Text style={[styles.colCondition, { width: "10%" }]}>{CATEGORY_LABELS[horse.category] || horse.category}</Text>
  <Text style={styles.colCondition}>{horse.condition}</Text>
  <Text style={styles.colFinish}>{horse.finish}</Text>
  <Text style={styles.colValue}>
@@ -324,6 +334,9 @@ export default function InsuranceReport({ data }: { data: InsuranceReportPayload
 
  <Text style={styles.detailName}>{horse.name}</Text>
  <Text style={styles.detailRef}>{horse.reference}</Text>
+ {horse.category !== "model" && (
+ <Text style={[styles.detailLabel, { marginBottom: 4, fontWeight: 600, color: "#7c6df0" }]}>{CATEGORY_LABELS[horse.category] || horse.category}</Text>
+ )}
 
  <View style={styles.detailRow}>
  <Text style={styles.detailLabel}>Finish:</Text>

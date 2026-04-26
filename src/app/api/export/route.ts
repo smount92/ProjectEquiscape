@@ -28,7 +28,7 @@ export async function GET() {
         .from("user_horses")
         .select(
             `
-      id, custom_name, finish_type, condition_grade, sculptor, trade_status, listing_price, created_at,
+      id, custom_name, finish_type, condition_grade, sculptor, trade_status, listing_price, created_at, asset_category,
       catalog_items:catalog_id(title, maker, item_type, attributes),
       user_collections(name),
       financial_vault(purchase_price, estimated_current_value, insurance_notes)
@@ -65,6 +65,7 @@ export async function GET() {
         "Estimated Value",
         "Insurance Notes",
         "Date Added",
+        "Category",
     ];
 
     // Build CSV rows
@@ -90,6 +91,7 @@ export async function GET() {
                 : "",
             escapeCSV(vault?.insurance_notes),
             new Date(horse.created_at).toLocaleDateString("en-US"),
+            escapeCSV((horse as Record<string, unknown>).asset_category as string || "model"),
         ].join(",");
     });
 
