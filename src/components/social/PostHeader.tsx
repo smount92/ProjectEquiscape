@@ -76,9 +76,9 @@ export default function PostHeader({
                             {badgeInfo.emoji} {badgeInfo.label}
                         </span>
                     )}
-                    <span className="text-muted text-xs">·</span>
+                    <span className="text-muted-foreground text-xs">·</span>
                     {permalink ? (
-                        <Link href={permalink} className="text-muted text-xs no-underline hover:underline">
+                        <Link href={permalink} className="text-muted-foreground text-xs no-underline hover:underline">
                             {timeAgo(createdAt)}
                             {isEdited && (
                                 <span className="ml-0.5 opacity-60" title="This post was edited">
@@ -87,7 +87,7 @@ export default function PostHeader({
                             )}
                         </Link>
                     ) : (
-                        <span className="text-muted text-xs">
+                        <span className="text-muted-foreground text-xs">
                             {timeAgo(createdAt)}
                             {isEdited && (
                                 <span className="ml-0.5 opacity-60" title="This post was edited">

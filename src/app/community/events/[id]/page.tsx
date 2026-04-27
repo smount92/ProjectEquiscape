@@ -326,7 +326,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <span className="text-forest no-underline">
  by{""}
  {entry.ownerId === "hidden" ? (
- <span className="text-muted">@{entry.ownerAlias}</span>
+ <span className="text-muted-foreground">@{entry.ownerAlias}</span>
  ) : (
  <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
  @{entry.ownerAlias}

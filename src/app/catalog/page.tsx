@@ -123,7 +123,7 @@ export default async function ReferencePage() {
    {(curators ?? []).length > 0 && (
    <div className="flex flex-col gap-3 rounded-lg border border-input bg-card p-5 shadow-sm">
     <h3 className="text-sm font-bold uppercase tracking-wider text-secondary-foreground">🏆 Top Curators</h3>
-    <ul className="m-0 list-none p-0">
+    <ul className="m-0 flex flex-col list-none p-0">
     {(
      curators as {
      id: string;
@@ -132,13 +132,13 @@ export default async function ReferencePage() {
      approved_suggestions_count: number;
      }[]
     ).map((curator, i) => (
-     <li key={curator.id} className="border-b-0">
-     <span className="min-w-[24px]">
+     <li key={curator.id} className="flex items-center gap-2 border-b border-input py-2.5 last:border-b-0">
+     <span className="min-w-[24px] text-center">
       {i === 0 ?"🥇" : i === 1 ?"🥈" : i === 2 ?"🥉" : `#${i + 1}`}
      </span>
      <a
       href={`/profile/${curator.alias_name}`}
-      className="text-forest font-semibold"
+      className="text-forest text-sm font-semibold"
      >
       @{curator.alias_name}
      </a>

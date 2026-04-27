@@ -876,7 +876,7 @@ export default function AddHorsePage() {
  strokeWidth="1.5"
  strokeLinecap="round"
  strokeLinejoin="round"
- className="text-muted"
+ className="text-muted-foreground"
  >
  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
  <circle cx="12" cy="13" r="3" />
@@ -885,7 +885,7 @@ export default function AddHorsePage() {
  <span className="text-ink text-sm font-medium">
  <strong>Additional photos (up to 10)</strong>
  </span>
- <span className="text-muted text-xs">
+ <span className="text-muted-foreground text-xs">
  {extraFiles.length}/10 photos · Click or drag files here
  </span>
  </label>

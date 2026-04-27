@@ -52,7 +52,7 @@ export default function ReactionBar({
     return (
         <div className={`flex items-center ${compact ? "gap-2" : "gap-3"} mt-1`}>
             <button
-                className={`inline-flex min-h-[44px] cursor-pointer items-center gap-1 rounded-sm border-none bg-transparent px-1.5 py-0.5 text-sm transition-colors hover:bg-parchment sm:min-h-0 ${liked ? "text-rose-500" : "text-muted"}`}
+                className={`inline-flex min-h-[44px] cursor-pointer items-center gap-1 rounded-sm border-none bg-transparent px-1.5 py-0.5 text-sm transition-colors hover:bg-parchment sm:min-h-0 ${liked ? "text-rose-500" : "text-muted-foreground"}`}
                 onClick={handleLike}
                 disabled={isPending}
                 aria-label={liked ? "Unlike" : "Like"}
@@ -62,7 +62,7 @@ export default function ReactionBar({
             </button>
             {onReplyToggle && (
                 <button
-                    className={`inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-md border border-edge bg-transparent ${compact ? "px-3 py-1" : "px-4 py-1.5"} text-sm font-medium text-muted no-underline transition-all hover:bg-parchment hover:text-ink sm:min-h-0`}
+                    className={`inline-flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-md border border-edge bg-transparent ${compact ? "px-3 py-1" : "px-4 py-1.5"} text-sm font-medium text-muted-foreground no-underline transition-all hover:bg-parchment hover:text-ink sm:min-h-0`}
                     onClick={onReplyToggle}
                 >
                     💬 {replyCount !== undefined && replyCount > 0 ? replyCount : ""} {isReplyOpen ? "▲" : "▼"}

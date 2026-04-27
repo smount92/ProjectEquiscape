@@ -53,7 +53,7 @@ export default function ReplyComposer({
     return (
         <div className="mt-2">
             {replyingTo && (
-                <div className="mb-1 flex items-center gap-1 text-xs text-muted">
+                <div className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
                     <span>↩ Replying to</span>
                     <span className="font-semibold text-ink">@{replyingTo}</span>
                 </div>
@@ -77,7 +77,7 @@ export default function ReplyComposer({
                 </button>
             </div>
             {text.length > maxLength * 0.8 && (
-                <span className="mt-0.5 block text-right text-[0.65rem] text-muted">
+                <span className="mt-0.5 block text-right text-[0.65rem] text-muted-foreground">
                     {text.length}/{maxLength}
                 </span>
             )}

@@ -89,7 +89,7 @@ export default function HelpIdDetailClient({
  <div
  className="rounded-lg border border-edge bg-card p-8 text-center shadow-md transition-all"
  >
- <p className="text-muted font-medium my-4">No suggestions yet. Be the first to help!</p>
+ <p className="text-muted-foreground font-medium my-4">No suggestions yet. Be the first to help!</p>
  </div>
  ) : (
  <div className="flex flex-col gap-4">
@@ -107,7 +107,7 @@ export default function HelpIdDetailClient({
  ✅ Accepted Answer
  </span>
  )}
- <span className="text-muted ml-auto text-xs">
+ <span className="text-muted-foreground ml-auto text-xs">
  {new Date(s.created_at).toLocaleDateString()}
  </span>
  </div>
@@ -120,7 +120,7 @@ export default function HelpIdDetailClient({
  <p className="text-forest mb-1 text-sm font-semibold">🎨 {s.resinDisplay}</p>
  )}
  {s.free_text && (
- <p className="text-sm leading-[1.6] text-muted">
+ <p className="text-sm leading-[1.6] text-muted-foreground">
  {s.free_text}
  </p>
  )}
@@ -128,7 +128,7 @@ export default function HelpIdDetailClient({
 
  <div className="flex items-center gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => handleUpvote(s.id)}
  title="Upvote this suggestion"
  >
@@ -190,7 +190,7 @@ export default function HelpIdDetailClient({
  </div>
  <div className="flex gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => {
  setShowSuggestForm(false);
  setSuggestText("");

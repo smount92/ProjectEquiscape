@@ -230,7 +230,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  {/* Message area */}
  <div className="bg-parchment border-edge mb-4 flex flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
  {messages.length === 0 ? (
- <div className="text-muted flex flex-1 flex-col items-center justify-center gap-2 text-center">
+ <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 text-center">
  <div className="text-5xl opacity-50">💬</div>
  <p>
  Start the conversation! Say hello to <strong>@{otherAlias}</strong>.
@@ -248,7 +248,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  return (
  <div key={msg.id}>
  {showDate && (
- <div className="text-muted py-2 text-center text-xs font-medium">
+ <div className="text-muted-foreground py-2 text-center text-xs font-medium">
  {new Date(msg.createdAt).toLocaleDateString("en-US", {
  weekday: "short",
  month: "short",
@@ -298,7 +298,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  )}
 
  <div
- className={`mt-1 text-[0.6rem] ${msg.isMe ? "text-right text-white/60" : "text-muted"}`}
+ className={`mt-1 text-[0.6rem] ${msg.isMe ? "text-right text-white/60" : "text-muted-foreground"}`}
  >
  {formatTime(msg.createdAt)}
  </div>
@@ -357,7 +357,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  </button>
  </div>
  ))}
- <span className="self-center text-xs text-muted">
+ <span className="self-center text-xs text-muted-foreground">
  {pendingFiles.length} photo{pendingFiles.length > 1 ? "s" : ""}
  </span>
  </div>
@@ -365,7 +365,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
 
  {/* Upload progress indicator */}
  {uploadProgress && (
- <div className="mx-4 mb-2 flex items-center gap-2 text-xs text-muted">
+ <div className="mx-4 mb-2 flex items-center gap-2 text-xs text-muted-foreground">
  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-forest border-t-transparent" />
  Uploading photos…
  </div>
@@ -376,7 +376,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  <div className="flex items-end gap-2">
  {/* Attach photo button */}
  <label
- className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#E0D5C1] bg-[#FEFCF8] text-muted transition-all hover:bg-[#F4EFE6] hover:text-ink"
+ className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#E0D5C1] bg-[#FEFCF8] text-muted-foreground transition-all hover:bg-[#F4EFE6] hover:text-ink"
  title="Attach photo"
  >
  <input
@@ -399,7 +399,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
 
  <textarea
  ref={inputRef}
- className="border-edge text-ink font-inherit placeholder:text-muted max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
+ className="border-edge text-ink font-inherit placeholder:text-muted-foreground max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
  value={newMessage}
  onChange={(e) => setNewMessage(e.target.value)}
  onKeyDown={handleKeyDown}
@@ -439,7 +439,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  )}
  </button>
  </div>
- <div className="text-muted mt-1.5 text-center text-[0.6rem]">
+ <div className="text-muted-foreground mt-1.5 text-center text-[0.6rem]">
  Press Enter to send · Shift+Enter for new line · 📎 for photos
  </div>
  </div>

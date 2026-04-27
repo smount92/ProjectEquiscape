@@ -45,7 +45,7 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
         <div className="mt-4">
             {/* Comment List */}
             {initialComments.length === 0 && (
-                <p className="mt-4 text-sm text-muted">No comments yet. Be the first to discuss this suggestion.</p>
+                <p className="mt-4 text-sm text-muted-foreground">No comments yet. Be the first to discuss this suggestion.</p>
             )}
             {initialComments.map((comment) => (
                 <div key={comment.id} className="border-b border-edge py-3">
@@ -56,7 +56,7 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
                         avatarSize="xs"
                         actions={currentUserId === comment.user_id ? (
                             <button
-                                className="inline-flex min-h-0 cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs text-muted no-underline transition-all hover:bg-parchment"
+                                className="inline-flex min-h-0 cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs text-muted-foreground no-underline transition-all hover:bg-parchment"
                                 onClick={() => handleDelete(comment.id)}
                                 disabled={isPending}
                                 title="Delete comment"
@@ -80,7 +80,7 @@ export default function SuggestionCommentThread({ suggestionId, comments: initia
                     isPending={isPending}
                 />
             ) : (
-                <p className="mt-4 text-sm text-muted">
+                <p className="mt-4 text-sm text-muted-foreground">
                     <a href="/login" className="text-forest font-semibold hover:underline">Log in</a> to join the discussion.
                 </p>
             )}

@@ -136,7 +136,7 @@ export default function ClaimPage() {
  ← Dashboard
  </Link>
  </div>
- <p className="text-center text-sm text-muted mt-8 border-t border-edge pt-4">
+ <p className="text-center text-sm text-muted-foreground mt-8 border-t border-edge pt-4">
  ⭐ Had a good experience? You can leave a review from the seller&apos;s profile.
  </p>
  </div>
@@ -176,7 +176,7 @@ export default function ClaimPage() {
  <h3 className="mb-1 text-lg font-bold text-ink">
  {preview.name}
  </h3>
- <p className="text-muted text-sm">
+ <p className="text-muted-foreground text-sm">
  {preview.finish} · {preview.condition}
  </p>
  </div>
@@ -186,12 +186,12 @@ export default function ClaimPage() {
  <div className="flex-1 text-center">
  <span className="text-forest text-[1.2rem] font-bold">{preview.timelineCount}</span>
  <br />
- <span className="text-muted text-xs">Hoofprint Events</span>
+ <span className="text-muted-foreground text-xs">Hoofprint Events</span>
  </div>
  <div className="flex-1 text-center">
  <span className="text-forest text-[1.2rem] font-bold">{preview.ownerCount}</span>
  <br />
- <span className="text-muted text-xs">
+ <span className="text-muted-foreground text-xs">
  Previous Owner{preview.ownerCount !== 1 ?"s" :""}
  </span>
  </div>
@@ -252,7 +252,7 @@ export default function ClaimPage() {
  </p>
  )}
 
- <p className="text-muted mt-6 text-xs text-center border-t border-edge pt-4">
+ <p className="text-muted-foreground mt-6 text-xs text-center border-t border-edge pt-4">
  The horse&apos;s full Hoofprint™ history will transfer with it.
  <br />
  Photos, show records, and provenance are preserved forever.

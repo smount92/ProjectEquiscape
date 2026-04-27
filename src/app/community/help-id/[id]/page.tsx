@@ -124,7 +124,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
    </div>
    <Link
    href="/community/help-id"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
    >
    ← Back to Help ID
    </Link>
@@ -148,7 +148,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
   rightContent={
   <div className="rounded-lg border border-edge bg-card p-6 shadow-md transition-all">
    <h2 className="mb-4 text-base font-semibold">Description</h2>
-   <p className="text-muted leading-[1.7]">{req.description ||"No description provided."}</p>
+   <p className="text-muted-foreground leading-[1.7]">{req.description ||"No description provided."}</p>
   </div>
   }
   belowContent={

@@ -76,7 +76,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  {filteredCommissions.map((c) => (
  <div
  key={c.id}
- className="border-input flex flex-col rounded-lg border bg-[var(--color-bg-muted)] p-6 transition-all hover:-translate-y-[1px] hover:border-purple-300"
+ className="border-input flex flex-col rounded-lg border bg-[var(--color-bg-muted)] p-6 transition-all hover:-translate-y-[1px] hover:border-forest/30"
  >
  <div className="mb-2 flex items-center justify-between gap-2">
  <span className="text-sm font-bold">

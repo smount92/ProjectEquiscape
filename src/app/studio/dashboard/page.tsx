@@ -51,7 +51,7 @@ export default async function StudioDashboardPage() {
   mainContent={
   <>
    {/* Stats Bar */}
-   <div className="rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 px-6 py-6">
+   <div className="rounded-lg border border-input bg-muted px-6 py-6">
    <div className="flex flex-wrap gap-6">
     <div className="flex flex-col items-center gap-[2px]">
     <span className="text-forest text-xl font-extrabold">

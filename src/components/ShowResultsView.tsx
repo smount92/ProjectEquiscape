@@ -230,7 +230,7 @@ export default function ShowResultsView({
                   <div className="text-sm text-muted-foreground">
                     by{" "}
                     {entry.ownerId === "hidden" ? (
-                      <span className="text-muted text-sm">@{entry.ownerAlias}</span>
+                      <span className="text-muted-foreground text-sm">@{entry.ownerAlias}</span>
                     ) : (
                       <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>@{entry.ownerAlias}</Link>
                     )}
@@ -263,7 +263,7 @@ export default function ShowResultsView({
                     <div className="mt-[2px] text-xs text-muted-foreground">
                       by{" "}
                       {entry.ownerId === "hidden" ? (
-                        <span className="text-muted text-xs">@{entry.ownerAlias}</span>
+                        <span className="text-muted-foreground text-xs">@{entry.ownerAlias}</span>
                       ) : (
                         <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>@{entry.ownerAlias}</Link>
                       )}
@@ -362,7 +362,7 @@ export default function ShowResultsView({
                 <span className="text-forest no-underline">
                   by{" "}
                   {entry.ownerId === "hidden" ? (
-                    <span className="text-muted">@{entry.ownerAlias}</span>
+                    <span className="text-muted-foreground">@{entry.ownerAlias}</span>
                   ) : (
                     <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
                       @{entry.ownerAlias}

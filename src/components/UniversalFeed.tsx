@@ -232,7 +232,7 @@ export default function UniversalFeed({
  <div className="flex items-center gap-2">
  <button
  type="button"
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-1 text-sm font-semibold text-muted no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-1 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => fileInputRef.current?.click()}
  disabled={imageFiles.length >= 4}
  title="Attach images (up to 4)"
@@ -248,7 +248,7 @@ export default function UniversalFeed({
  className="hidden"
  aria-label="Upload images"
  />
- <span className="text-muted font-medium text-xs">{composerText.length}/2000</span>
+ <span className="text-muted-foreground font-medium text-xs">{composerText.length}/2000</span>
  </div>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
@@ -268,7 +268,7 @@ export default function UniversalFeed({
 
  {/* ── Post List ── */}
  {posts.length === 0 ? (
- <p className="text-muted font-medium my-4">No {label.toLowerCase()} yet — be the first!</p>
+ <p className="text-muted-foreground font-medium my-4">No {label.toLowerCase()} yet — be the first!</p>
  ) : (
  <div className="flex flex-col gap-5">
  {posts.map((post) => (
@@ -280,7 +280,7 @@ export default function UniversalFeed({
  {/* ── Load More Sentinel ── */}
  {hasMore && <div ref={sentinelRef} className="h-[1]" />}
  {isLoadingMore && (
- <p className="text-muted mt-4 text-center">
+ <p className="text-muted-foreground mt-4 text-center">
  Loading more…
  </p>
  )}
@@ -380,7 +380,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  actions={post.authorId === currentUserId ? (
  <>
  <button
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted no-underline transition-all hover:bg-parchment"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-parchment"
  onClick={() => {
  setIsEditing(!isEditing);
  setEditText(displayContent);
@@ -390,7 +390,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  ✏️
  </button>
  <button
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted no-underline transition-all hover:bg-parchment"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-parchment"
  onClick={handleDelete}
  disabled={isPending}
  >
@@ -421,7 +421,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  {isPending ?"Saving…" :"Save"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => setIsEditing(false)}
  >
  Cancel
@@ -473,7 +473,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  avatarSize="xs"
  actions={r.authorId === currentUserId ? (
  <button
- className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-muted no-underline transition-all hover:bg-parchment"
+ className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-muted-foreground no-underline transition-all hover:bg-parchment"
  onClick={() => {
  if (!confirm("Delete this reply?")) return;
  startTransition(async () => {

@@ -78,7 +78,7 @@ export default function CreateShowForm() {
           </SelectContent>
         </Select>
         {selectedTemplate && (
-          <p className="mt-1 text-xs text-muted">{selectedTemplate.description}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{selectedTemplate.description}</p>
         )}
       </div>
 

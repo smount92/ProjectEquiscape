@@ -82,7 +82,7 @@ export default function HorseEmbedCard({ horseId }: HorseEmbedCardProps) {
                     )}
                 </div>
                 {data.refName && (
-                    <p className="mt-0.5 truncate text-xs text-muted">{data.refName}</p>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">{data.refName}</p>
                 )}
             </div>
         </Link>

@@ -215,7 +215,7 @@ export default function CommissionTimeline({
  <div
  className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-edge bg-parchment p-4"
  >
- <div className="text-muted mb-2 text-sm font-semibold">
+ <div className="text-muted-foreground mb-2 text-sm font-semibold">
  🎨 Actions — {STATUS_LABELS[commissionStatus] || commissionStatus}
  </div>
  <div className="flex flex-wrap items-center gap-2">
@@ -245,7 +245,7 @@ export default function CommissionTimeline({
  {/* ── Client Review Actions ── */}
  {isClient && commissionStatus ==="review" && (
  <div
- className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-purple-200 bg-purple-50/50 p-4"
+ className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-input bg-muted p-4"
  >
  <div className="mb-2 text-sm font-semibold">
  🔎 The artist has submitted this for your review
@@ -266,7 +266,7 @@ export default function CommissionTimeline({
  ✅ Approve
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => handleClientAction("revision_request")}
  disabled={acting}
  >
@@ -333,7 +333,7 @@ export default function CommissionTimeline({
  title="Attach photo"
  />
  {attachFile && (
- <p className="text-muted mt-[4] text-xs">
+ <p className="text-muted-foreground mt-[4] text-xs">
  📎 {attachFile.name} ({(attachFile.size / 1024).toFixed(0)} KB)
  </p>
  )}
@@ -367,7 +367,7 @@ export default function CommissionTimeline({
  </button>
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => {
  setShowForm(false);
  setUploadError(null);
@@ -381,7 +381,7 @@ export default function CommissionTimeline({
 
  {/* ── Timeline Events ── */}
  {updates.length === 0 ? (
- <p className="text-muted p-6 text-center">
+ <p className="text-muted-foreground p-6 text-center">
  No updates yet.
  </p>
  ) : (
@@ -404,7 +404,7 @@ export default function CommissionTimeline({
  {update.title}
  </div>
  )}
- <div className="text-muted mt-[2] text-xs">
+ <div className="text-muted-foreground mt-[2] text-xs">
  @{update.authorAlias} ·{""}
  {new Date(update.createdAt).toLocaleDateString("en-US", {
  month:"short",
@@ -453,7 +453,7 @@ export default function CommissionTimeline({
  </div>
  )}
  {update.oldStatus && update.newStatus && (
- <div className="text-muted mt-1 text-sm">
+ <div className="text-muted-foreground mt-1 text-sm">
  {STATUS_LABELS[update.oldStatus] || update.oldStatus} →{""}
  <strong>{STATUS_LABELS[update.newStatus] || update.newStatus}</strong>
  </div>
