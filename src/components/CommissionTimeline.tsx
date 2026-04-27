@@ -320,7 +320,7 @@ export default function CommissionTimeline({
 
  {/* Photo attachment — available for all update types */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label className="text-foreground mb-1 block text-sm font-semibold">
  📎 Attach Photo{""}
  {updateType !=="wip_photo" && <span className="opacity-[0.6]">(optional)</span>}
  </label>

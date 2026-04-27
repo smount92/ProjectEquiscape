@@ -171,7 +171,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  className="rounded-lg border border-input bg-card p-4 shadow-sm transition-all"
  id="pedigree-card"
  >
- <div className="text-stone-500 py-4 text-center">
+ <div className="text-muted-foreground py-4 text-center">
  <p>No pedigree data yet.</p>
  <button
  className="mt-2 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
@@ -201,7 +201,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  {/* Sire with search */}
  <div className="relative mb-6" ref={sireRef}>
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Sire (Father)</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Sire (Father)</label>
  <Input
  
  type="text"
@@ -221,7 +221,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <button
  type="button"
  onClick={clearSireLink}
- className="cursor-pointer border-0 bg-transparent text-xs text-stone-500"
+ className="cursor-pointer border-0 bg-transparent text-xs text-muted-foreground"
  >
  ✕
  </button>
@@ -235,9 +235,9 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  key={h.id}
  type="button"
  onClick={() => selectSire(h)}
- className="block w-full cursor-pointer border-0 bg-transparent px-4 py-2 text-left text-sm text-stone-900 hover:bg-muted"
+ className="block w-full cursor-pointer border-0 bg-transparent px-4 py-2 text-left text-sm text-foreground hover:bg-muted"
  >
- {h.custom_name} <span className="text-stone-500">({h.finish_type})</span>
+ {h.custom_name} <span className="text-muted-foreground">({h.finish_type})</span>
  </button>
  ))}
  </div>
@@ -245,7 +245,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  {/* Dam with search */}
  <div className="relative mb-6" ref={damRef}>
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Dam (Mother)</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Dam (Mother)</label>
  <Input
  
  type="text"
@@ -265,7 +265,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <button
  type="button"
  onClick={clearDamLink}
- className="cursor-pointer border-0 bg-transparent text-xs text-stone-500"
+ className="cursor-pointer border-0 bg-transparent text-xs text-muted-foreground"
  >
  ✕
  </button>
@@ -279,9 +279,9 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  key={h.id}
  type="button"
  onClick={() => selectDam(h)}
- className="block w-full cursor-pointer border-0 bg-transparent px-4 py-2 text-left text-sm text-stone-900 hover:bg-muted"
+ className="block w-full cursor-pointer border-0 bg-transparent px-4 py-2 text-left text-sm text-foreground hover:bg-muted"
  >
- {h.custom_name} <span className="text-stone-500">({h.finish_type})</span>
+ {h.custom_name} <span className="text-muted-foreground">({h.finish_type})</span>
  </button>
  ))}
  </div>
@@ -290,7 +290,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Sculptor / Artist</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Sculptor / Artist</label>
  <Input
  
  type="text"
@@ -303,7 +303,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
 
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Cast Number</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Cast Number</label>
  <Input
  
  type="text"
@@ -314,7 +314,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  />
  </div>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Edition Size</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Edition Size</label>
  <Input
  
  type="text"
@@ -327,7 +327,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Lineage Notes</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Lineage Notes</label>
  <Textarea
  
  value={lineageNotes}
@@ -344,7 +344,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <div className="mt-6 flex justify-end gap-2">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleCancel}
  >
  Cancel
@@ -374,7 +374,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </h3>
  {isOwner && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-1 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-1 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => setIsEditing(true)}
  >
  ✏️ Edit
@@ -384,7 +384,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
 
  {pedigree!.sireName && (
  <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-stone-500 text-sm">Sire</span>
+ <span className="text-muted-foreground text-sm">Sire</span>
  <span className="text-sm font-medium">
  {pedigree!.sireId ? (
  <Link
@@ -401,7 +401,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  )}
  {pedigree!.damName && (
  <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-stone-500 text-sm">Dam</span>
+ <span className="text-muted-foreground text-sm">Dam</span>
  <span className="text-sm font-medium">
  {pedigree!.damId ? (
  <Link
@@ -418,13 +418,13 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  )}
  {pedigree!.sculptor && (
  <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-stone-500 text-sm">Sculptor</span>
+ <span className="text-muted-foreground text-sm">Sculptor</span>
  <span className="text-sm font-medium">{pedigree!.sculptor}</span>
  </div>
  )}
  {(pedigree!.castNumber || pedigree!.editionSize) && (
  <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-stone-500 text-sm">Cast / Edition</span>
+ <span className="text-muted-foreground text-sm">Cast / Edition</span>
  <span className="text-sm font-medium">
  {pedigree!.castNumber && pedigree!.editionSize
  ? `#${pedigree!.castNumber} of ${pedigree!.editionSize}`
@@ -435,7 +435,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  )}
  {pedigree!.lineageNotes && (
- <div className="text-stone-500 mt-4 rounded-md bg-muted px-4 py-2 text-sm whitespace-pre-wrap italic">
+ <div className="text-muted-foreground mt-4 rounded-md bg-muted px-4 py-2 text-sm whitespace-pre-wrap italic">
  {pedigree!.lineageNotes}
  </div>
  )}

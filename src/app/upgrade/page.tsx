@@ -127,7 +127,7 @@ export default async function UpgradePage({
 
             {/* Current plan badge */}
             <div className="animate-fade-in-up mb-12 text-center">
-                <p className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-medium text-stone-600">
+                <p className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-medium text-secondary-foreground">
                     Current plan: <span className={tier === 'pro' ? 'font-bold text-amber-600' : 'font-bold'}>{tierLabel}</span>
                 </p>
             </div>
@@ -137,22 +137,22 @@ export default async function UpgradePage({
                 {/* Free tier */}
                 <div className="rounded-xl border border-input bg-card p-8 shadow-md">
                     <div className="mb-4">
-                        <span className="text-sm font-semibold uppercase tracking-wider text-stone-500">Free</span>
+                        <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Free</span>
                         <div className="mt-2 flex items-baseline gap-1">
                             <span className="text-3xl font-bold">$0</span>
-                            <span className="text-sm text-stone-500">/forever</span>
+                            <span className="text-sm text-muted-foreground">/forever</span>
                         </div>
                     </div>
                     <ul className="space-y-3">
                         {FREE_FEATURES.map((feature) => (
                             <li key={feature} className="flex items-start gap-2 text-sm">
-                                <span className="mt-0.5 text-stone-500">✓</span>
+                                <span className="mt-0.5 text-muted-foreground">✓</span>
                                 <span>{feature}</span>
                             </li>
                         ))}
                     </ul>
                     {tier === "free" && (
-                        <div className="mt-6 rounded-lg bg-muted py-2 text-center text-sm font-semibold text-stone-600">
+                        <div className="mt-6 rounded-lg bg-muted py-2 text-center text-sm font-semibold text-secondary-foreground">
                             Current Plan
                         </div>
                     )}
@@ -166,8 +166,8 @@ export default async function UpgradePage({
                     <div className="mb-4">
                         <span className="text-sm font-semibold uppercase tracking-wider text-amber-600">Pro</span>
                         <div className="mt-2 flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-stone-800">$5</span>
-                            <span className="text-sm text-stone-600">/month</span>
+                            <span className="text-3xl font-bold text-foreground">$5</span>
+                            <span className="text-sm text-secondary-foreground">/month</span>
                         </div>
                     </div>
                     <ul className="space-y-3">
@@ -175,8 +175,8 @@ export default async function UpgradePage({
                             <li key={feature.title} className="flex items-start gap-2 text-sm">
                                 <span className="mt-0.5">{feature.icon}</span>
                                 <div>
-                                    <span className="font-semibold text-stone-800">{feature.title}</span>
-                                    <span className="text-stone-600"> — {feature.description}</span>
+                                    <span className="font-semibold text-foreground">{feature.title}</span>
+                                    <span className="text-secondary-foreground"> — {feature.description}</span>
                                 </div>
                             </li>
                         ))}
@@ -201,8 +201,8 @@ export default async function UpgradePage({
                     <div className="mb-4">
                         <span className="text-sm font-semibold uppercase tracking-wider text-violet-600">Studio Pro</span>
                         <div className="mt-2 flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-stone-800">$10</span>
-                            <span className="text-sm text-stone-600">/month</span>
+                            <span className="text-3xl font-bold text-foreground">$10</span>
+                            <span className="text-sm text-secondary-foreground">/month</span>
                         </div>
                     </div>
                     <ul className="space-y-3">
@@ -210,8 +210,8 @@ export default async function UpgradePage({
                             <li key={feature.title} className="flex items-start gap-2 text-sm">
                                 <span className="mt-0.5">{feature.icon}</span>
                                 <div>
-                                    <span className="font-semibold text-stone-800">{feature.title}</span>
-                                    <span className="text-stone-600"> — {feature.description}</span>
+                                    <span className="font-semibold text-foreground">{feature.title}</span>
+                                    <span className="text-secondary-foreground"> — {feature.description}</span>
                                 </div>
                             </li>
                         ))}
@@ -229,25 +229,25 @@ export default async function UpgradePage({
                 <div className="space-y-4">
                     <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">Can I cancel anytime?</h3>
-                        <p className="mt-1 text-sm text-stone-600">
+                        <p className="mt-1 text-sm text-secondary-foreground">
                             Yes! Cancel from your Stripe billing portal anytime. Your Pro features stay active until the end of the billing period.
                         </p>
                     </div>
                     <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">Will I lose my data if I downgrade?</h3>
-                        <p className="mt-1 text-sm text-stone-600">
+                        <p className="mt-1 text-sm text-secondary-foreground">
                             Never. All your horses, photos, and provenance data are safe. Extra detail photos become view-only until you re-subscribe.
                         </p>
                     </div>
                     <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">What&apos;s the difference between Pro and Studio Pro?</h3>
-                        <p className="mt-1 text-sm text-stone-600">
+                        <p className="mt-1 text-sm text-secondary-foreground">
                             Pro is for collectors — analytics, extra photos, insurance reports, and AI insights. Studio Pro adds artist tools: commission management, WIP portals, and permanent Hoofprint credit on every custom you create.
                         </p>
                     </div>
                     <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">Do you offer beta tester discounts?</h3>
-                        <p className="mt-1 text-sm text-stone-600">
+                        <p className="mt-1 text-sm text-secondary-foreground">
                             Yes! Early supporters receive a promo code for 6 months free. Enter it at checkout to apply the discount automatically.
                         </p>
                     </div>
@@ -256,7 +256,7 @@ export default async function UpgradePage({
 
             {/* Back link */}
             <div className="mt-12 text-center">
-                <Link href="/dashboard" className="text-sm text-stone-500 no-underline hover:text-stone-600">
+                <Link href="/dashboard" className="text-sm text-muted-foreground no-underline hover:text-secondary-foreground">
                     ← Back to Dashboard
                 </Link>
             </div>

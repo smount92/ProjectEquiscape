@@ -10,7 +10,7 @@ import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 
 const STATUS_STYLES: Record<string, string> = {
- requested: "bg-stone-500/20 text-stone-600 border-stone-500/40",
+ requested: "bg-stone-500/20 text-secondary-foreground border-stone-500/40",
  accepted: "bg-blue-500/20 text-blue-600 border-blue-500/40",
  in_progress: "bg-amber-500/20 text-amber-600 border-amber-500/40",
  review: "bg-violet-500/20 text-violet-600 border-violet-500/40",
@@ -121,7 +121,7 @@ export default async function CommissionDetailPage({
   }
   headerActions={
   <span
-   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[commission.status] || "bg-stone-500/20 text-stone-600 border-stone-500/40"}`}
+   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[commission.status] || "bg-stone-500/20 text-secondary-foreground border-stone-500/40"}`}
   >
    {commission.statusLabel}
   </span>
@@ -130,7 +130,7 @@ export default async function CommissionDetailPage({
   {/* Header Card */}
   <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
   <div className="bg-card rounded-md p-4">
-   <h3 className="text-stone-600 mb-1 text-sm">Description</h3>
+   <h3 className="text-secondary-foreground mb-1 text-sm">Description</h3>
    <p className="text-sm leading-[1.6] whitespace-pre-wrap">
    {commission.description}
    </p>
@@ -139,13 +139,13 @@ export default async function CommissionDetailPage({
   <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4">
    {commission.priceQuoted && (
    <div>
-    <span className="text-stone-500 block text-xs">Price Quoted</span>
+    <span className="text-muted-foreground block text-xs">Price Quoted</span>
     <span className="text-base font-bold">${commission.priceQuoted}</span>
    </div>
    )}
    {commission.depositAmount && (
    <div>
-    <span className="text-stone-500 block text-xs">Deposit</span>
+    <span className="text-muted-foreground block text-xs">Deposit</span>
     <span className="font-bold">
     ${commission.depositAmount}
     {commission.depositPaid ?" ✅" :" ⏳"}
@@ -154,7 +154,7 @@ export default async function CommissionDetailPage({
    )}
    {commission.estimatedCompletion && (
    <div>
-    <span className="text-stone-500 block text-xs">Est. Completion</span>
+    <span className="text-muted-foreground block text-xs">Est. Completion</span>
     <span className="font-semibold">
     {new Date(commission.estimatedCompletion).toLocaleDateString("en-US", {
      month:"short",
@@ -166,7 +166,7 @@ export default async function CommissionDetailPage({
    )}
    {commission.slotNumber && (
    <div>
-    <span className="text-stone-500 block text-xs">Slot</span>
+    <span className="text-muted-foreground block text-xs">Slot</span>
     <span className="font-bold">#{commission.slotNumber}</span>
    </div>
    )}
@@ -209,7 +209,7 @@ export default async function CommissionDetailPage({
   {isArtist && (
    <Link
    href="/studio/dashboard"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ← Dashboard
    </Link>
@@ -217,7 +217,7 @@ export default async function CommissionDetailPage({
   {isClient && (
    <Link
    href="/studio/my-commissions"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ← My Commissions
    </Link>

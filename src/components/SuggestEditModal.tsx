@@ -209,7 +209,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
 
    <div className="flex justify-end gap-2 pt-4">
    <button
-    className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-[#E0D5C1] bg-transparent px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+    className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-[#E0D5C1] bg-transparent px-6 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
     onClick={() => setIsOpen(false)}
    >
     Cancel

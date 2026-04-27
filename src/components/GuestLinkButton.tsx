@@ -14,7 +14,7 @@ export default function GuestLinkButton({ commissionId, guestToken }: { commissi
 
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleCopy}
  >
  {copied ?"✅ Link Copied!" :"🔗 Copy Guest Link"}

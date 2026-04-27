@@ -83,7 +83,7 @@ export default function CreateShowForm() {
       </div>
 
       <div className="mb-6">
-        <label className="text-stone-900 mb-1 block text-sm font-semibold">Show Title</label>
+        <label className="text-foreground mb-1 block text-sm font-semibold">Show Title</label>
         <Input
           type="text"
           value={title}
@@ -93,7 +93,7 @@ export default function CreateShowForm() {
         />
       </div>
       <div className="mb-6">
-        <label className="text-stone-900 mb-1 block text-sm font-semibold">Theme (optional)</label>
+        <label className="text-foreground mb-1 block text-sm font-semibold">Theme (optional)</label>
         <Input
           type="text"
           value={theme}
@@ -102,7 +102,7 @@ export default function CreateShowForm() {
         />
       </div>
       <div className="mb-6">
-        <label className="text-stone-900 mb-1 block text-sm font-semibold">
+        <label className="text-foreground mb-1 block text-sm font-semibold">
           Description (optional)
         </label>
         <Textarea
@@ -114,7 +114,7 @@ export default function CreateShowForm() {
       </div>
 
       <div className="mb-6">
-        <label className="text-stone-900 mb-1 block text-sm font-semibold">
+        <label className="text-foreground mb-1 block text-sm font-semibold">
           Entries Close (optional)
         </label>
         <Input
@@ -122,7 +122,7 @@ export default function CreateShowForm() {
           value={endAt}
           onChange={(e) => setEndAt(e.target.value)}
         />
-        <p className="text-stone-500 mt-[4px] text-xs">
+        <p className="text-muted-foreground mt-[4px] text-xs">
           Leave blank for no deadline. Show stays open until manually closed.
         </p>
       </div>
@@ -136,11 +136,11 @@ export default function CreateShowForm() {
             onChange={(e) => setIsNamhsaSanctioned(e.target.checked)}
             className="h-4 w-4 rounded border-stone-300 text-forest accent-forest"
           />
-          <span className="text-sm font-semibold text-stone-900">
+          <span className="text-sm font-semibold text-foreground">
             🏛️ NAMHSA Sanctioned Show
           </span>
         </label>
-        <p className="mt-1 ml-7 text-xs text-stone-500">
+        <p className="mt-1 ml-7 text-xs text-muted-foreground">
           Mark this show as sanctioned by the North American Model Horse Shows Association.
         </p>
       </div>

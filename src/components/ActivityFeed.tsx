@@ -136,7 +136,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  <span className="text-sm font-semibold">
  @{item.actorAlias}
  </span>
- <div className="text-stone-900 py-1 text-base leading-relaxed whitespace-pre-wrap [&_p]:m-0">
+ <div className="text-foreground py-1 text-base leading-relaxed whitespace-pre-wrap [&_p]:m-0">
  <RichText content={(item.metadata as { text?: string })?.text ||""} />
  </div>
  {/* Image collage for casual image posts */}
@@ -151,7 +151,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  ))}
  </div>
  )}
- <span className="text-stone-500 text-xs">
+ <span className="text-muted-foreground text-xs">
  {timeAgo(item.createdAt)}
  </span>
  </>
@@ -160,7 +160,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  <span className="text-sm">
  {getEventText(item)}
  </span>
- <span className="text-stone-500 text-xs">
+ <span className="text-muted-foreground text-xs">
  {timeAgo(item.createdAt)}
  </span>
  </>
@@ -178,7 +178,7 @@ export default function ActivityFeed({ items, emptyMessage, currentUserId }: Act
  )}
  {currentUserId && currentUserId === item.actorId && item.eventType ==="text_post" && (
  <button
- className="cursor-pointer rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs text-stone-600 no-underline transition-all"
+ className="cursor-pointer rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs text-secondary-foreground no-underline transition-all"
  onClick={() => {
  if (confirm("Delete post?")) {
  deleteTextPost(item.id).then(() => router.refresh());

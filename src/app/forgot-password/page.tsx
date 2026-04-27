@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
 
   <form action={formAction} noValidate>
    <div className="mb-6">
-   <label htmlFor="forgot-email" className="text-stone-900 mb-1 block text-sm font-semibold">
+   <label htmlFor="forgot-email" className="text-foreground mb-1 block text-sm font-semibold">
     Email Address
    </label>
    <Input
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
    </button>
   </form>
 
-  <div className="text-stone-500 mt-8 text-center text-sm">
+  <div className="text-muted-foreground mt-8 text-center text-sm">
    <p>
    Remember your password?{""}
    <Link href="/login" id="go-to-login">

@@ -69,7 +69,7 @@ export default function ContactPage() {
    )}
 
    <div className="mb-6">
-    <label htmlFor="contact-name" className="text-stone-900 mb-1 block text-sm font-semibold">
+    <label htmlFor="contact-name" className="text-foreground mb-1 block text-sm font-semibold">
     Your Name
     </label>
     <Input
@@ -84,7 +84,7 @@ export default function ContactPage() {
    </div>
 
    <div className="mb-6">
-    <label htmlFor="contact-email" className="text-stone-900 mb-1 block text-sm font-semibold">
+    <label htmlFor="contact-email" className="text-foreground mb-1 block text-sm font-semibold">
     Email Address
     </label>
     <Input
@@ -98,8 +98,8 @@ export default function ContactPage() {
    </div>
 
    <div className="mb-6">
-    <label htmlFor="contact-subject" className="text-stone-900 mb-1 block text-sm font-semibold">
-    Subject <span className="text-stone-500 font-normal">(optional)</span>
+    <label htmlFor="contact-subject" className="text-foreground mb-1 block text-sm font-semibold">
+    Subject <span className="text-muted-foreground font-normal">(optional)</span>
     </label>
     <Input
     id="contact-subject"
@@ -110,7 +110,7 @@ export default function ContactPage() {
    </div>
 
    <div className="mb-6">
-    <label htmlFor="contact-message" className="text-stone-900 mb-1 block text-sm font-semibold">
+    <label htmlFor="contact-message" className="text-foreground mb-1 block text-sm font-semibold">
     Message
     </label>
     <Textarea

@@ -33,7 +33,7 @@ export default async function TransferHistorySection() {
  <span className="overflow-hidden text-sm font-bold text-ellipsis whitespace-nowrap">
  {item.horseName ||"Unknown Horse"}
  </span>
- <span className="text-stone-500 text-xs">
+ <span className="text-muted-foreground text-xs">
  Transferred{""}
  {new Date(item.releasedAt).toLocaleDateString("en-US", {
  month:"short",

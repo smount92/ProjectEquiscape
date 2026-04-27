@@ -40,7 +40,7 @@ export default function FeatureHorseForm() {
  return (
  <form onSubmit={handleSubmit} className="flex max-w-[500px] flex-col gap-4">
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Horse ID (UUID)</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Horse ID (UUID)</label>
  <Input
  type="text"
  
@@ -51,7 +51,7 @@ export default function FeatureHorseForm() {
  />
  </div>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Title</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Title</label>
  <Input
  type="text"
  
@@ -61,7 +61,7 @@ export default function FeatureHorseForm() {
  />
  </div>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Description (optional)</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Description (optional)</label>
  <Textarea
  
  value={description}

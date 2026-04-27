@@ -132,7 +132,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  {TAGS.map((tag) => (
  <button
  key={tag.key}
- className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${activeTag === tag.key ?"bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :"border-input text-stone-600 hover:border-emerald-700 hover:text-stone-900 bg-muted"}`}
+ className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all ${activeTag === tag.key ?"bg-forest border-forest text-white shadow-[0_2px_8px_rgba(129,140,248,0.25)]" :"border-input text-secondary-foreground hover:border-emerald-700 hover:text-foreground bg-muted"}`}
  onClick={() => setActiveTag(tag.key)}
  >
  <span>{tag.emoji}</span>
@@ -144,7 +144,7 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
 
  {/* Results count */}
  {(searchQuery.trim() || activeTag !=="all") && (
- <div className="text-stone-500 mb-4 mb-6 pl-1 text-sm">
+ <div className="text-muted-foreground mb-4 mb-6 pl-1 text-sm">
  {filteredUsers.length === 0
  ? searchQuery.trim()
  ? `No collectors match"${searchQuery}"`
@@ -198,15 +198,15 @@ export default function DiscoverGrid({ users, currentUserId, followedIds }: Disc
  )}
  </div>
  {u.bio && (
- <div className="text-stone-600 flex gap-4 text-xs italic">
+ <div className="text-secondary-foreground flex gap-4 text-xs italic">
  {u.bio.length > 80 ? `${u.bio.slice(0, 80)}…` : u.bio}
  </div>
  )}
- <div className="text-stone-600 flex gap-4 text-xs">
+ <div className="text-secondary-foreground flex gap-4 text-xs">
  <span>
  🐴 {u.total_horse_count} model{u.total_horse_count !== 1 ?"s" :""}
  {u.public_horse_count > 0 && u.public_horse_count < u.total_horse_count && (
- <span className="text-stone-500"> ({u.public_horse_count} public)</span>
+ <span className="text-muted-foreground"> ({u.public_horse_count} public)</span>
  )}
  </span>
  <span>📅 {memberSince(u.created_at)}</span>

@@ -58,7 +58,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  {/* Tabs */}
  <div className="mb-6 flex gap-1 border-b border-input">
  <button
- className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="browse" ?"border-forest text-forest" :"border-transparent text-stone-600 hover:text-stone-900"}`}
+ className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="browse" ?"border-forest text-forest" :"border-transparent text-secondary-foreground hover:text-foreground"}`}
  onClick={() => setTab("browse")}
  >
  🌐 Browse All
@@ -67,7 +67,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  </span>
  </button>
  <button
- className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="mine" ?"border-forest text-forest" :"border-transparent text-stone-600 hover:text-stone-900"}`}
+ className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab ==="mine" ?"border-forest text-forest" :"border-transparent text-secondary-foreground hover:text-foreground"}`}
  onClick={() => setTab("mine")}
  >
  ⭐ My Groups
@@ -129,21 +129,21 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  >
  {g.name}
  </Link>
- <div className="text-xs text-stone-600">
+ <div className="text-xs text-secondary-foreground">
  {typeLabels[g.groupType] || g.groupType}
  {g.region && <> · {g.region}</>}
  </div>
  </div>
  </div>
  {g.description && (
- <p className="mb-3 text-sm leading-relaxed text-stone-600">
+ <p className="mb-3 text-sm leading-relaxed text-secondary-foreground">
  {g.description.slice(0, 120)}
  {g.description.length > 120 ?"..." :""}
  </p>
  )}
  {/* Card Footer */}
  <div className="mt-auto flex items-center justify-between pt-3 border-t border-input">
- <span className="text-xs text-stone-600">
+ <span className="text-xs text-secondary-foreground">
  👥 {g.memberCount} member{g.memberCount !== 1 ?"s" :""}
  </span>
  {g.isMember ? (
@@ -155,7 +155,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
  </span>
  {g.memberRole !=="owner" && (
  <button
- className="rounded-md border border-input bg-transparent px-3 py-1 text-xs font-medium text-stone-500 transition-colors hover:text-stone-900"
+ className="rounded-md border border-input bg-transparent px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
  onClick={() => handleLeave(g.id)}
  disabled={joining === g.id}
  >

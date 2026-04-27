@@ -80,9 +80,9 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
   title={catalogItem.title}
   description={<>by {catalogItem.maker}</>}
   backLink={
-  <nav className="text-stone-500 flex items-center gap-1 text-sm">
+  <nav className="text-muted-foreground flex items-center gap-1 text-sm">
    <Link href="/catalog">📚 Reference Catalog</Link>
-   <span className="text-stone-500">›</span>
+   <span className="text-muted-foreground">›</span>
    <span>{catalogItem.title}</span>
   </nav>
   }
@@ -92,8 +92,8 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
   <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
    <div className="mb-6 flex items-start justify-between">
    <div>
-    <h2 className="m-0 font-serif text-3xl font-bold text-stone-900">{catalogItem.title}</h2>
-    <p className="text-stone-600 mt-[4px] text-base font-bold text-stone-900 my-1 font-sans">
+    <h2 className="m-0 font-serif text-3xl font-bold text-foreground">{catalogItem.title}</h2>
+    <p className="text-secondary-foreground mt-[4px] text-base font-bold text-foreground my-1 font-sans">
     by {catalogItem.maker}
     </p>
    </div>
@@ -105,10 +105,10 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
    <div className="grid-cols-[repeat(auto-fill,minmax(200px,1fr))] mb-6 grid gap-4">
    {displayFields.map((field) => (
     <div key={field.label} className="flex flex-col gap-[2px]">
-    <span className="text-stone-500 text-xs font-semibold tracking-[0.05em] uppercase">
+    <span className="text-muted-foreground text-xs font-semibold tracking-[0.05em] uppercase">
      {field.label}
     </span>
-    <span className="text-base font-bold text-stone-900 my-1">
+    <span className="text-base font-bold text-foreground my-1">
      {field.value}
     </span>
     </div>
@@ -154,7 +154,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     )?.map((s) => (
     <li
      key={s.id}
-     className="flex items-center gap-2 px-0 py-1 text-stone-900 no-underline"
+     className="flex items-center gap-2 px-0 py-1 text-foreground no-underline"
     >
      <Link href={`/catalog/suggestions/${s.id}`}>
      <span className="text-xs font-semibold uppercase text-forest">
@@ -167,7 +167,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
        :"🗑"}
      </span>
      <span>{formatItemType(s.suggestion_type)} suggestion</span>
-     <span className="text-stone-500 ml-auto text-sm">
+     <span className="text-muted-foreground ml-auto text-sm">
       ▲ {s.upvotes}
      </span>
      </Link>

@@ -59,7 +59,7 @@ export default function CreateGroupPage() {
  >
   <form onSubmit={handleSubmit}>
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Group Name *</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Group Name *</label>
    <Input
    value={name}
    onChange={(e) => autoSlug(e.target.value)}
@@ -69,17 +69,17 @@ export default function CreateGroupPage() {
   </div>
 
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">URL Slug</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">URL Slug</label>
    <Input
    value={slug}
    onChange={(e) => setSlug(e.target.value)}
    placeholder="pnw-collectors"
    />
-   <small className="text-stone-500">modelhorsehub.com/community/groups/{slug ||"your-slug"}</small>
+   <small className="text-muted-foreground">modelhorsehub.com/community/groups/{slug ||"your-slug"}</small>
   </div>
 
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Description</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Description</label>
    <Textarea
    className="w-full resize-y"
    rows={3}
@@ -91,7 +91,7 @@ export default function CreateGroupPage() {
 
   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
    <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Group Type *</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Group Type *</label>
    <select
     className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
     value={groupType}
@@ -106,7 +106,7 @@ export default function CreateGroupPage() {
    </select>
    </div>
    <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Region</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Region</label>
    <Input
     value={region}
     onChange={(e) => setRegion(e.target.value)}
@@ -116,7 +116,7 @@ export default function CreateGroupPage() {
   </div>
 
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Visibility</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Visibility</label>
    <div className="flex gap-2">
    {["public","restricted","private"].map((v) => (
     <button
@@ -147,7 +147,7 @@ export default function CreateGroupPage() {
    </button>
    <button
    type="button"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    onClick={() => router.push("/community/groups")}
    >
    Cancel

@@ -137,7 +137,7 @@ export default function ResetPasswordPage() {
 
   <form onSubmit={handleSubmit} noValidate>
    <div className="mb-6">
-   <label htmlFor="new-password" className="text-stone-900 mb-1 block text-sm font-semibold">
+   <label htmlFor="new-password" className="text-foreground mb-1 block text-sm font-semibold">
     New Password
    </label>
    <Input
@@ -153,7 +153,7 @@ export default function ResetPasswordPage() {
    />
    </div>
    <div className="mb-6">
-   <label htmlFor="confirm-new-password" className="text-stone-900 mb-1 block text-sm font-semibold">
+   <label htmlFor="confirm-new-password" className="text-foreground mb-1 block text-sm font-semibold">
     Confirm New Password
    </label>
    <Input

@@ -30,10 +30,10 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   <FocusLayout title="Commissions Closed">
   <div className="animate-fade-in-up text-center">
    <div className="mb-4 text-[2.5rem]">🔴</div>
-   <p className="text-stone-600 mt-2">{profile.studioName} is not accepting commissions right now.</p>
+   <p className="text-secondary-foreground mt-2">{profile.studioName} is not accepting commissions right now.</p>
    <Link
    href={`/studio/${slug}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ← Back to Studio
    </Link>
@@ -47,7 +47,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   <FocusLayout title="This is your studio!">
   <div className="animate-fade-in-up text-center">
    <div className="mb-4 text-[2.5rem]">🎨</div>
-   <p className="text-stone-600 mt-2">
+   <p className="text-secondary-foreground mt-2">
    You can&apos;t commission yourself. Manage your commissions from the dashboard.
    </p>
    <Link
@@ -68,7 +68,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   backLink={
   <Link
    href={`/studio/${slug}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
    ← Back to Studio
   </Link>

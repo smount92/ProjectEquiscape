@@ -153,7 +153,7 @@ export default function ShowResultsView({
       {/* Class Selector */}
       {hasClasses && (
         <div className="animate-fade-in-up mb-6 rounded-xl border border-input bg-card p-4 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold text-stone-500">
+          <h3 className="mb-3 text-sm font-semibold text-muted-foreground">
             {isClosed ? "📋 View Results by Class" : "📋 Browse by Class"}
           </h3>
           <div className="flex flex-wrap gap-2">
@@ -162,7 +162,7 @@ export default function ShowResultsView({
               className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                 selectedClassId === "all"
                   ? "border-forest bg-forest/10 text-forest ring-1 ring-forest"
-                  : "border-input text-stone-600 hover:border-stone-300 hover:shadow-sm"
+                  : "border-input text-secondary-foreground hover:border-input hover:shadow-sm"
               }`}
               onClick={() => setSelectedClassId("all")}
             >
@@ -170,7 +170,7 @@ export default function ShowResultsView({
             </button>
             {Array.from(divisionGroups.entries()).map(([divName, items]) => (
               <div key={divName} className="flex items-center gap-1">
-                <span className="ml-2 text-xs font-bold text-stone-400">{divName}:</span>
+                <span className="ml-2 text-xs font-bold text-muted-foreground">{divName}:</span>
                 {items.map((c) => {
                   const count = entries.filter((e) => e.classId === c.id).length;
                   const isActive = selectedClassId === c.id;
@@ -181,7 +181,7 @@ export default function ShowResultsView({
                       className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                         isActive
                           ? "border-forest bg-forest/10 text-forest ring-1 ring-forest"
-                          : "border-input text-stone-600 hover:border-stone-300 hover:shadow-sm"
+                          : "border-input text-secondary-foreground hover:border-input hover:shadow-sm"
                       }`}
                       onClick={() => setSelectedClassId(c.id)}
                     >
@@ -193,7 +193,7 @@ export default function ShowResultsView({
             ))}
           </div>
           {selectedClass && (
-            <div className="mt-2 text-sm text-stone-500">
+            <div className="mt-2 text-sm text-muted-foreground">
               Viewing: <strong>{selectedClass.divisionName}</strong> › <strong>{selectedClass.name}</strong>
               {" · "}{filteredEntries.length} {filteredEntries.length === 1 ? "entry" : "entries"}
             </div>
@@ -227,7 +227,7 @@ export default function ShowResultsView({
                   <Link href={`/community/${entry.horseId}`} className="text-base font-bold">
                     🐴 {entry.horseName}
                   </Link>
-                  <div className="text-sm text-stone-500">
+                  <div className="text-sm text-muted-foreground">
                     by{" "}
                     {entry.ownerId === "hidden" ? (
                       <span className="text-muted text-sm">@{entry.ownerAlias}</span>
@@ -260,7 +260,7 @@ export default function ShowResultsView({
                     <Link href={`/community/${entry.horseId}`} className="block text-sm font-bold text-inherit no-underline hover:underline">
                       {entry.horseName}
                     </Link>
-                    <div className="mt-[2px] text-xs text-stone-500">
+                    <div className="mt-[2px] text-xs text-muted-foreground">
                       by{" "}
                       {entry.ownerId === "hidden" ? (
                         <span className="text-muted text-xs">@{entry.ownerAlias}</span>
@@ -273,7 +273,7 @@ export default function ShowResultsView({
                       {placing}
                     </div>
                     {entry.caption && (
-                      <div className="mt-1 text-xs italic leading-snug text-stone-400">
+                      <div className="mt-1 text-xs italic leading-snug text-muted-foreground">
                         &ldquo;{entry.caption}&rdquo;
                       </div>
                     )}
@@ -286,7 +286,7 @@ export default function ShowResultsView({
           {/* Also Placed */}
           {topPlaced.length > 3 && (
             <div className="mt-4">
-              <h3 className="mb-2 text-sm text-stone-400">Also Placed</h3>
+              <h3 className="mb-2 text-sm text-muted-foreground">Also Placed</h3>
               {topPlaced.slice(3).map((entry) => {
                 const placing = entry.placing!;
                 return (
@@ -304,7 +304,7 @@ export default function ShowResultsView({
                       <Link href={`/community/${entry.horseId}`} className="font-semibold">
                         {entry.horseName}
                       </Link>
-                      <span className="ml-1 text-xs text-stone-500">by @{entry.ownerAlias}</span>
+                      <span className="ml-1 text-xs text-muted-foreground">by @{entry.ownerAlias}</span>
                     </div>
                     <span className="text-sm font-bold text-[var(--color-accent,#f59e0b)]">
                       {MEDAL_MAP[placing] || "🏅"} {placing}
@@ -331,7 +331,7 @@ export default function ShowResultsView({
               key={entry.id}
               className="flex items-center gap-4 border-b border-input px-6 py-4 transition-colors last:border-b-0 hover:bg-muted"
             >
-              <div className="min-w-[32px] text-center text-lg font-bold text-stone-500">
+              <div className="min-w-[32px] text-center text-lg font-bold text-muted-foreground">
                 {isExpertJudged && isClosed && entry.placing
                   ? entry.placing
                   : `#${index + 1}`}
@@ -378,7 +378,7 @@ export default function ShowResultsView({
                   )}
                 </span>
                 {entry.caption && (
-                  <p className="mt-1 text-xs italic leading-tight text-stone-500">
+                  <p className="mt-1 text-xs italic leading-tight text-muted-foreground">
                     &ldquo;{entry.caption}&rdquo;
                   </p>
                 )}
@@ -390,7 +390,7 @@ export default function ShowResultsView({
                       {entry.placing}
                     </span>
                   ) : isJudging ? (
-                    <span className="text-xs text-stone-500">🏅 Expert judging</span>
+                    <span className="text-xs text-muted-foreground">🏅 Expert judging</span>
                   ) : null
                 ) : (
                   <VoteButton

@@ -53,7 +53,7 @@ export default async function ShowsPage() {
   <span className="text-2xl font-bold text-forest">
    {shows.filter((s) => s.status ==="open").length}
   </span>
-  <span className="text-sm font-medium text-stone-600">Open Shows</span>
+  <span className="text-sm font-medium text-secondary-foreground">Open Shows</span>
   </div>
 
   {shows.length === 0 ? (
@@ -103,9 +103,9 @@ export default async function ShowsPage() {
     </p>
     )}
     {show.creatorAlias && (
-    <div className="text-stone-500 mt-1 text-xs">Hosted by @{show.creatorAlias}</div>
+    <div className="text-muted-foreground mt-1 text-xs">Hosted by @{show.creatorAlias}</div>
     )}
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-input bg-card p-4 text-sm text-stone-500">
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-input bg-card p-4 text-sm text-muted-foreground">
     <span>
     🐴 {show.entryCount} entr{show.entryCount !== 1 ?"ies" :"y"}
     </span>

@@ -85,13 +85,13 @@ export default function MatchmakerMatches({
  </span>
  <Link
  href={`/profile/${encodeURIComponent(match.ownerAlias)}`}
- className="text-stone-500 hover:text-forest text-xs no-underline hover:underline"
+ className="text-muted-foreground hover:text-forest text-xs no-underline hover:underline"
  >
  @{match.ownerAlias}
  </Link>
  </div>
  {match.marketplace_notes && (
- <div className="text-stone-500 mt-1 text-xs leading-snug italic">
+ <div className="text-muted-foreground mt-1 text-xs leading-snug italic">
  {match.marketplace_notes}
  </div>
  )}

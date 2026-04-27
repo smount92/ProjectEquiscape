@@ -32,7 +32,7 @@ export default function SignupPage() {
   <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
    <div className="border-b border-input bg-gradient-to-b from-stone-50 to-card px-8 pb-6 pt-8 text-center">
    <div className="mb-3 text-4xl" aria-hidden="true">✉️</div>
-   <p className="mt-2 text-sm leading-relaxed text-stone-600">
+   <p className="mt-2 text-sm leading-relaxed text-secondary-foreground">
     We&apos;ve sent a confirmation link to your email address. Click the link to activate your
     account and start building your Digital Stable!
    </p>
@@ -81,15 +81,15 @@ export default function SignupPage() {
    aria-label="Privacy information"
    >
    <span className="mt-0.5 text-lg" aria-hidden="true">🛡️</span>
-   <p className="text-sm leading-relaxed text-stone-600">
-    <strong className="text-stone-900">Your real name is private.</strong> Your alias is how the community will know you. Only
+   <p className="text-sm leading-relaxed text-secondary-foreground">
+    <strong className="text-foreground">Your real name is private.</strong> Your alias is how the community will know you. Only
     you can see your personal details — we take your privacy seriously.
    </p>
    </div>
 
    <form action={handleSubmit} noValidate>
    <div className="mb-5">
-    <label htmlFor="signup-alias" className="mb-1.5 block text-sm font-semibold text-stone-900">
+    <label htmlFor="signup-alias" className="mb-1.5 block text-sm font-semibold text-foreground">
     Choose Your Alias *
     </label>
     <Input
@@ -104,13 +104,13 @@ export default function SignupPage() {
     autoFocus
     autoComplete="username"
     />
-    <span className="mt-1.5 block text-xs text-stone-500">
+    <span className="mt-1.5 block text-xs text-muted-foreground">
     This is your public display name (3–30 characters). Choose wisely!
     </span>
    </div>
 
    <div className="mb-5">
-    <label htmlFor="signup-email" className="mb-1.5 block text-sm font-semibold text-stone-900">
+    <label htmlFor="signup-email" className="mb-1.5 block text-sm font-semibold text-foreground">
     Email Address *
     </label>
     <Input
@@ -122,13 +122,13 @@ export default function SignupPage() {
     required
     autoComplete="email"
     />
-    <span className="mt-1.5 block text-xs text-stone-500">
+    <span className="mt-1.5 block text-xs text-muted-foreground">
     We&apos;ll send a confirmation link. Your email is never shared.
     </span>
    </div>
 
    <div className="mb-5">
-    <label htmlFor="signup-password" className="mb-1.5 block text-sm font-semibold text-stone-900">
+    <label htmlFor="signup-password" className="mb-1.5 block text-sm font-semibold text-foreground">
     Password *
     </label>
     <div className="relative">
@@ -146,7 +146,7 @@ export default function SignupPage() {
      type="button"
      onClick={() => setShowPassword(!showPassword)}
      aria-label={showPassword ?"Hide password" :"Show password"}
-     className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center border-none bg-transparent p-1 text-stone-500 transition-colors hover:text-stone-900"
+     className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center border-none bg-transparent p-1 text-muted-foreground transition-colors hover:text-foreground"
     >
      {showPassword ? (
      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -164,7 +164,7 @@ export default function SignupPage() {
    </div>
 
    <div className="mb-6">
-    <label htmlFor="signup-confirm-password" className="mb-1.5 block text-sm font-semibold text-stone-900">
+    <label htmlFor="signup-confirm-password" className="mb-1.5 block text-sm font-semibold text-foreground">
     Confirm Password *
     </label>
     <Input
@@ -188,7 +188,7 @@ export default function SignupPage() {
    </button>
    </form>
 
-   <div className="mt-6 border-t border-input pt-5 text-center text-sm text-stone-500">
+   <div className="mt-6 border-t border-input pt-5 text-center text-sm text-muted-foreground">
    <p>
     Already have an account?{" "}
     <Link href="/login" className="font-semibold text-forest hover:underline" id="go-to-login">

@@ -54,7 +54,7 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
 
  if (badges.length === 0) {
  return (
- <div className="text-stone-500 py-8 text-center">
+ <div className="text-muted-foreground py-8 text-center">
  <span className="mb-2 block text-[2.5rem]">🏆</span>
  <p>No badges earned yet — keep collecting!</p>
  </div>
@@ -77,7 +77,7 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
  <div className="mt-2">
  {sortedCategories.map((category) => (
  <div key={category}>
- <h4 className="text-stone-500 my-6 mb-2 text-sm font-semibold tracking-[0.05em] uppercase first:mt-0">
+ <h4 className="text-muted-foreground my-6 mb-2 text-sm font-semibold tracking-[0.05em] uppercase first:mt-0">
  {CATEGORY_LABELS[category] || category}
  </h4>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 max-[480px]:grid-cols-[repeat(auto-fill,minmax(90px,1fr))] max-[480px]:gap-2">
@@ -92,11 +92,11 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
  <span className="block text-xs font-semibold">
  {badge.name}
  </span>
- <span className="text-stone-500 mt-0.5 block text-xs">
+ <span className="text-muted-foreground mt-0.5 block text-xs">
  {formatDate(badge.earnedAt)}
  </span>
  {hoveredBadge === badge.id && (
- <div className="border-input [&_p]:text-stone-600 [&>span]:text-stone-500 pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border bg-[var(--color-bg-muted)] px-4 py-2 text-left shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
+ <div className="border-input [&_p]:text-secondary-foreground [&>span]:text-muted-foreground pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border bg-[var(--color-bg-muted)] px-4 py-2 text-left shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
  <strong>{badge.name}</strong>
  <p>{badge.description}</p>
  <span>Earned {formatDate(badge.earnedAt)}</span>

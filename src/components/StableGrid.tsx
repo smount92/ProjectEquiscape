@@ -31,7 +31,7 @@ const FINISH_BADGE_CLASSES: Record<string, string> = {
  "Artist Resin": "bg-rose-50 text-rose-700 border-rose-200",
  "Test Run": "bg-cyan-50 text-cyan-700 border-cyan-200",
  "Decorator": "bg-emerald-50 text-emerald-700 border-emerald-200",
- "default": "bg-muted text-stone-600 border-input",
+ "default": "bg-muted text-secondary-foreground border-input",
 };
 
 const containerVariants = {
@@ -137,7 +137,7 @@ export default function StableGrid({
    )}
 
    {searchQuery.trim() && (
-    <div className="text-stone-500 mb-6 pl-1 text-sm">
+    <div className="text-muted-foreground mb-6 pl-1 text-sm">
      {filteredCards.length === 0
       ? "No models match your search"
       : `Showing ${filteredCards.length} of ${horseCards.length} models`}
@@ -147,8 +147,8 @@ export default function StableGrid({
    {filteredCards.length === 0 && !searchQuery.trim() ? (
     <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
      <span className="mb-4 text-6xl">🏠</span>
-     <h2 className="mb-2 font-serif text-xl font-semibold text-stone-900">Your Stable is Empty</h2>
-     <p className="mb-6 max-w-sm text-center text-stone-500">You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
+     <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">Your Stable is Empty</h2>
+     <p className="mb-6 max-w-sm text-center text-muted-foreground">You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
      <Link
       href="/add-horse"
       className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
@@ -160,8 +160,8 @@ export default function StableGrid({
    ) : filteredCards.length === 0 && searchQuery.trim() ? (
     <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
      <span className="mb-4 text-6xl">🔍</span>
-     <h2 className="mb-2 font-serif text-xl font-semibold text-stone-900">No Results</h2>
-     <p className="max-w-sm text-center text-stone-500">No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
+     <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">No Results</h2>
+     <p className="max-w-sm text-center text-muted-foreground">No models match &ldquo;{searchQuery}&rdquo;. Try a different search term.</p>
     </div>
    ) : (
     <motion.div
@@ -197,7 +197,7 @@ export default function StableGrid({
            className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
           />
          ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-500">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
            <span className="text-4xl opacity-50">🐴</span>
            <span className="text-xs font-medium">No photo</span>
           </div>
@@ -223,10 +223,10 @@ export default function StableGrid({
 
         {/* Content area */}
         <div className="mt-3 px-1">
-         <h3 className="truncate font-serif text-lg font-bold text-stone-800">
+         <h3 className="truncate font-serif text-lg font-bold text-foreground">
           {horse.customName}
          </h3>
-         <p className="mt-0.5 truncate text-sm text-stone-600">{horse.refName}</p>
+         <p className="mt-0.5 truncate text-sm text-secondary-foreground">{horse.refName}</p>
 
          {/* Badge row */}
          <div className="mt-2 flex flex-wrap gap-1.5">
@@ -239,17 +239,17 @@ export default function StableGrid({
          </div>
 
          {/* Metadata */}
-         <div className="mt-2 flex items-center gap-2 text-xs text-stone-600">
+         <div className="mt-2 flex items-center gap-2 text-xs text-secondary-foreground">
           <span>{formatDate(horse.createdAt)}</span>
           {horse.sculptor && <span>· ✂️ {horse.sculptor}</span>}
          </div>
          {horse.releaseLine && (
-          <div className="mt-0.5 truncate text-[0.7rem] text-stone-500">
+          <div className="mt-0.5 truncate text-[0.7rem] text-muted-foreground">
            🎨 {horse.releaseLine}
           </div>
          )}
          {horse.collectionName && (
-          <div className="mt-1 truncate text-[0.7rem] text-stone-500">
+          <div className="mt-1 truncate text-[0.7rem] text-muted-foreground">
            📁 {horse.collectionName}
           </div>
          )}

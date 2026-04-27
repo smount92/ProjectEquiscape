@@ -131,7 +131,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  className={`mt-2 text-sm font-medium ${
  new Date(show.endAt) > new Date()
  ? "text-amber-600"
- : "text-stone-500"
+ : "text-muted-foreground"
  }`}
  >
  ⏰{" "}
@@ -221,17 +221,17 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div className="mb-2 text-[2rem]">🏅</div>
  <h3 className="mb-2">You Are an Assigned Judge</h3>
  {show.status ==="open" ? (
- <p className="text-stone-500 text-sm">
+ <p className="text-muted-foreground text-sm">
  This show is still accepting entries. Once the host transitions it to{""}
  <strong>&quot;Judging&quot;</strong> status, the judging panel will appear here for you to
  assign placings.
  </p>
  ) : show.status ==="judging" ? (
- <p className="text-stone-500 text-sm">
+ <p className="text-muted-foreground text-sm">
  The judging panel is available below. Scroll down to assign placings to each entry.
  </p>
  ) : (
- <p className="text-stone-500 text-sm">Judging is complete. Results are final.</p>
+ <p className="text-muted-foreground text-sm">Judging is complete. Results are final.</p>
  )}
  </div>
  )}
@@ -249,11 +249,11 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  )}
 
  {/* Breadcrumb */}
- <nav className="text-stone-500 animate-fade-in-up mb-6 flex flex-wrap items-center gap-2 text-sm">
+ <nav className="text-muted-foreground animate-fade-in-up mb-6 flex flex-wrap items-center gap-2 text-sm">
  <Link href="/shows">← All Shows</Link>
  {show.status ==="closed" && (
   <>
-  <span className="text-stone-300">·</span>
+  <span className="text-muted-foreground">·</span>
   <Link
    href={`/shows/${showId}/results`}
    className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 no-underline transition-colors hover:bg-amber-100"
@@ -262,7 +262,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
   </Link>
   <a
    href={`/api/export/show-results/${showId}`}
-   className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-stone-600 no-underline transition-colors hover:bg-stone-200"
+   className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-medium text-secondary-foreground no-underline transition-colors hover:bg-muted"
   >
    📥 CSV
   </a>
@@ -302,7 +302,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  >
  <div className="text-[2rem]">🟡</div>
  <h3>Judging in Progress</h3>
- <p className="text-stone-500">
+ <p className="text-muted-foreground">
  {isExpertJudged
  ? isCreator || isJudge
  ?"Use the judging panel below to assign placings."
@@ -334,7 +334,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Host Override Panel — collapsed by default, only shown to creator */}
  {isCreator && show.status ==="closed" && (
  <details className="mb-6">
- <summary className="cursor-pointer rounded-lg border border-input bg-card px-4 py-3 text-sm font-medium text-stone-500 shadow-sm transition-colors hover:bg-muted">
+ <summary className="cursor-pointer rounded-lg border border-input bg-card px-4 py-3 text-sm font-medium text-muted-foreground shadow-sm transition-colors hover:bg-muted">
  🔧 Override Final Placings (Host Only)
  </summary>
  <div className="mt-2">

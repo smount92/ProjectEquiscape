@@ -115,7 +115,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <div className="mx-auto max-w-6xl px-6 max-w-[720]">
  <Link
  href="/community/events"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ← All Events
  </Link>
@@ -125,13 +125,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <span className="text-xs font-bold tracking-wider text-[#2C5545] uppercase">
  {date.toLocaleDateString("en-US", { month:"short" }).toUpperCase()}
  </span>
- <span className="text-stone-900 text-xl leading-none font-extrabold">
+ <span className="text-foreground text-xl leading-none font-extrabold">
  {date.getDate()}
  </span>
  </div>
  <div>
  <h1>{event.name}</h1>
- <div className="text-stone-500 mt-2 flex flex-wrap gap-4">
+ <div className="text-muted-foreground mt-2 flex flex-wrap gap-4">
  <span>{EVENT_TYPE_LABELS[event.eventType] || event.eventType}</span>
  <span>👥 {event.rsvpCount} attending</span>
  {event.isOfficial && <span className="text-[#f59e0b]">⭐ Official</span>}
@@ -150,7 +150,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {/* Details */}
  <div className="mb-6 grid gap-2">
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">📅 Date</span>
+ <span className="text-muted-foreground text-sm">📅 Date</span>
  <span className="text-sm font-bold">
  {event.isAllDay
  ?"All Day"
@@ -177,7 +177,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  </div>
  {!event.isVirtual && event.locationName && (
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">📍 Location</span>
+ <span className="text-muted-foreground text-sm">📍 Location</span>
  <span className="text-sm font-bold">
  {event.locationName}
  {event.locationAddress && (
@@ -191,7 +191,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  )}
  {event.isVirtual && event.virtualUrl && (
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">🌐 Virtual Link</span>
+ <span className="text-muted-foreground text-sm">🌐 Virtual Link</span>
  <a
  href={event.virtualUrl}
  target="_blank"
@@ -204,18 +204,18 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  )}
  {event.region && (
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">🗺️ Region</span>
+ <span className="text-muted-foreground text-sm">🗺️ Region</span>
  <span className="text-sm font-bold">{event.region}</span>
  </div>
  )}
  {event.groupName && (
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">🏛️ Hosted by</span>
+ <span className="text-muted-foreground text-sm">🏛️ Hosted by</span>
  <span className="text-sm font-bold">{event.groupName}</span>
  </div>
  )}
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">Created by</span>
+ <span className="text-muted-foreground text-sm">Created by</span>
  <span className="text-sm font-bold">@{event.creatorAlias}</span>
  </div>
  </div>
@@ -235,7 +235,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <div className="mt-6 flex flex-wrap justify-end gap-2">
  <Link
  href={`/community/events/${event.id}/manage`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ⚙️ Manage Classes
  </Link>
@@ -251,14 +251,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  </h3>
  {divisions.map((div) => (
  <div key={div.id} className="mb-4">
- <div className="text-stone-900 mb-1 font-bold">{div.name}</div>
+ <div className="text-foreground mb-1 font-bold">{div.name}</div>
  <div className="pl-6">
  {div.classes.map((cls) => (
  <div
  key={cls.id}
- className="py-1 text-stone-600 flex items-center gap-2 text-sm"
+ className="py-1 text-secondary-foreground flex items-center gap-2 text-sm"
  >
- <span className="text-stone-500 min-w-[40px]">{cls.classNumber ||"—"}</span>
+ <span className="text-muted-foreground min-w-[40px]">{cls.classNumber ||"—"}</span>
  <span>{cls.name}</span>
  {cls.isNanQualifying && (
  <span title="NAN Qualifying" className="text-[#f59e0b]">
@@ -266,7 +266,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  </span>
  )}
  {(cls.entryCount || 0) > 0 && (
- <span className="text-stone-500 text-xs">({cls.entryCount})</span>
+ <span className="text-muted-foreground text-xs">({cls.entryCount})</span>
  )}
  </div>
  ))}
@@ -282,7 +282,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {isShowEvent && isShowOpen && (
  <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-2">{event.eventType === "live_show" ? "🐴 Register Your Horse" : "🐴 Enter Your Horse"}</h3>
- <p className="text-stone-500 mb-4 text-sm">
+ <p className="text-muted-foreground mb-4 text-sm">
  Select a public horse to enter. Your horse&apos;s passport photo will be used as the entry
  thumbnail.
  {classOptions.length > 0 &&" Choose which class to enter."}
@@ -305,7 +305,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  key={entry.id}
  className="border border-input flex items-center gap-4 border-b px-6 py-4 transition-colors"
  >
- <div className="text-stone-500 min-w-[32px] text-center text-lg font-bold">
+ <div className="text-muted-foreground min-w-[32px] text-center text-lg font-bold">
  {isExpertJudged && showStatus ==="closed" && entry.placing
  ? entry.placing
  : `#${index + 1}`}
@@ -373,7 +373,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <div
  className="bg-card border-input mt-6 rounded-lg border p-6 text-center shadow-md transition-all"
  >
- <p className="text-stone-500">No entries were submitted for this show.</p>
+ <p className="text-muted-foreground">No entries were submitted for this show.</p>
  </div>
  )}
 
@@ -395,7 +395,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <Link
  key={a.userId}
  href={`/profile/${encodeURIComponent(a.alias)}`}
- className="text-stone-900 rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+ className="text-foreground rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
  >
  @{a.alias}
  </Link>
@@ -403,7 +403,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  </div>
  {attendees.filter((a) => a.status ==="interested").length > 0 && (
  <>
- <h4 className="text-stone-500 mt-4">
+ <h4 className="text-muted-foreground mt-4">
  ⭐ Interested ({attendees.filter((a) => a.status ==="interested").length})
  </h4>
  <div className="flex flex-wrap gap-1">
@@ -413,7 +413,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <Link
  key={a.userId}
  href={`/profile/${encodeURIComponent(a.alias)}`}
- className="text-stone-900 rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+ className="text-foreground rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
  >
  @{a.alias}
  </Link>

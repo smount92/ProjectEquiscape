@@ -91,7 +91,7 @@ export default function MarketFilters() {
  {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
  <button
  key={value}
- className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-all ${currentType === value ?"bg-forest border-forest text-white" :"border-input text-stone-600 hover:text-stone-900 hover:border-emerald-700 bg-card"}`}
+ className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-all ${currentType === value ?"bg-forest border-forest text-white" :"border-input text-secondary-foreground hover:text-foreground hover:border-emerald-700 bg-card"}`}
  onClick={() => pushParams({ type: value ==="all" ? null : value })}
  >
  {label}

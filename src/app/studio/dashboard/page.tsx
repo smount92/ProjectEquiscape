@@ -36,13 +36,13 @@ export default async function StudioDashboardPage() {
   <>
    <Link
    href={`/studio/${profile.studioSlug}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    👁️ Public Page
    </Link>
    <Link
    href="/studio/setup"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ✏️ Edit Studio
    </Link>
@@ -57,7 +57,7 @@ export default async function StudioDashboardPage() {
     <span className="text-forest text-xl font-extrabold">
      {activeCommissions.length}/{profile.maxSlots}
     </span>
-    <span className="text-stone-500 text-xs tracking-wider uppercase">
+    <span className="text-muted-foreground text-xs tracking-wider uppercase">
      Slots Filled
     </span>
     </div>
@@ -67,7 +67,7 @@ export default async function StudioDashboardPage() {
     >
      {pendingRequests.length}
     </span>
-    <span className="text-stone-500 text-xs tracking-wider uppercase">
+    <span className="text-muted-foreground text-xs tracking-wider uppercase">
      Pending Requests
     </span>
     </div>
@@ -75,7 +75,7 @@ export default async function StudioDashboardPage() {
     <span className="text-forest text-xl font-extrabold">
      {completedTotal.length}
     </span>
-    <span className="text-stone-500 text-xs tracking-wider uppercase">
+    <span className="text-muted-foreground text-xs tracking-wider uppercase">
      Completed
     </span>
     </div>
@@ -86,7 +86,7 @@ export default async function StudioDashboardPage() {
      {profile.status ==="open" ?"🟢" : profile.status ==="waitlist" ?"🟡" :"🔴"}{""}
      {profile.status.charAt(0).toUpperCase() + profile.status.slice(1)}
     </span>
-    <span className="text-stone-500 text-xs tracking-wider uppercase">
+    <span className="text-muted-foreground text-xs tracking-wider uppercase">
      Status
     </span>
     </div>

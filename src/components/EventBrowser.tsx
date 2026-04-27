@@ -97,7 +97,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  <span className="text-xs font-bold tracking-[0.05em] text-[#2C5545] uppercase">
  {month}
  </span>
- <span className="text-stone-900 text-xl leading-none font-extrabold">
+ <span className="text-foreground text-xl leading-none font-extrabold">
  {day}
  </span>
  </div>
@@ -142,7 +142,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  Going
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => handleRsvp(e.id,"interested")}
  disabled={rsvping === e.id}
  >

@@ -28,7 +28,7 @@ export default function ChipToggle({ label, options, selected, onChange, id }: C
 
   return (
     <div className="mb-4">
-      <span className="text-stone-900 mb-2 block text-sm font-semibold">{label}</span>
+      <span className="text-foreground mb-2 block text-sm font-semibold">{label}</span>
       <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
         {options.map((option) => {
           const isSelected = selected.includes(option);
@@ -43,7 +43,7 @@ export default function ChipToggle({ label, options, selected, onChange, id }: C
               className={`min-h-[44px] min-w-[44px] cursor-pointer rounded-lg border-2 px-3 py-2 text-sm font-medium transition-all sm:min-h-0 sm:min-w-0 ${
                 isSelected
                   ? "border-forest bg-forest/5 font-semibold text-forest"
-                  : "border-[#E0D5C1] bg-[#FEFCF8] text-stone-600 hover:border-stone-400"
+                  : "border-[#E0D5C1] bg-[#FEFCF8] text-secondary-foreground hover:border-stone-400"
               }`}
               onClick={() => toggle(option)}
               onKeyDown={(e) => {

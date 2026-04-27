@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
- requested: "bg-stone-500/20 text-stone-600 border-stone-500/40",
+ requested: "bg-stone-500/20 text-secondary-foreground border-stone-500/40",
  accepted: "bg-blue-500/20 text-blue-600 border-blue-500/40",
  in_progress: "bg-amber-500/20 text-amber-600 border-amber-500/40",
  review: "bg-violet-500/20 text-violet-600 border-violet-500/40",
@@ -56,20 +56,20 @@ export default async function MyCommissionsPage() {
      {c.commissionType}
     </span>
     <span
-     className={`inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[c.status] || "bg-stone-500/20 text-stone-600 border-stone-500/40"}`}
+     className={`inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[c.status] || "bg-stone-500/20 text-secondary-foreground border-stone-500/40"}`}
     >
      {c.statusLabel}
     </span>
     </div>
-    <div className="text-stone-500 mb-2 flex gap-4 text-sm">
+    <div className="text-muted-foreground mb-2 flex gap-4 text-sm">
     <span>🎨 @{c.artistAlias}</span>
     {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
     </div>
-    <p className="text-stone-600 mb-2 text-sm leading-normal">
+    <p className="text-secondary-foreground mb-2 text-sm leading-normal">
     {c.description.length > 100 ? c.description.substring(0, 100) +"…" : c.description}
     </p>
     <div
-    className="text-stone-500 mt-auto pt-2 text-xs"
+    className="text-muted-foreground mt-auto pt-2 text-xs"
     >
     Last updated{" "}
     {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
@@ -94,7 +94,7 @@ export default async function MyCommissionsPage() {
    className="bg-white border-input animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
   >
    <p className="mb-4 text-[2rem]">🎨</p>
-   <p className="text-stone-500">You haven&apos;t requested any commissions yet.</p>
+   <p className="text-muted-foreground">You haven&apos;t requested any commissions yet.</p>
    <Link
    href="/discover"
    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"

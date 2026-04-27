@@ -40,13 +40,13 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  <div className="border-input mb-6 border-b pb-6">
  <Link
  href="/community/groups"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ← All Groups
  </Link>
  <h1>{group.name}</h1>
  <div
- className="text-stone-500 mt-2 flex flex-wrap gap-4 text-sm"
+ className="text-muted-foreground mt-2 flex flex-wrap gap-4 text-sm"
  >
  <span>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}</span>
  {group.region && <span>📍 {group.region}</span>}

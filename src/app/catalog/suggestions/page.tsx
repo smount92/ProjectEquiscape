@@ -77,9 +77,9 @@ export default async function SuggestionsPage({ searchParams }: Props) {
 
  return (
   <ExplorerLayout title="Catalog Suggestions" description="Community proposals to improve the reference catalog.">
- <nav className="text-stone-500 mb-6 flex items-center gap-1 text-sm">
+ <nav className="text-muted-foreground mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-stone-500 mb-6-sep flex items-center gap-1 text-sm">
+ <span className="text-muted-foreground mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <span>Suggestions</span>
@@ -88,7 +88,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  <h1 className="mb-1 font-sans text-2xl">
  📝 <span className="text-forest">Catalog Suggestions</span>
  </h1>
- <p className="text-stone-600 mb-6">
+ <p className="text-secondary-foreground mb-6">
  Community proposals to improve the reference catalog. Vote and discuss to help admins review.
  </p>
 
@@ -106,7 +106,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  </div>
 
  {/* Results */}
- <p className="text-stone-500 mb-2 text-sm">{count ?? 0} suggestions</p>
+ <p className="text-muted-foreground mb-2 text-sm">{count ?? 0} suggestions</p>
 
  <div className="flex flex-col gap-2">
  {(suggestions ?? [])?.map((s) => {
@@ -161,26 +161,26 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  <Link
  key={s.id}
  href={`/catalog/suggestions/${s.id}`}
- className="bg-white border-input block rounded-lg border p-4 text-stone-900 no-underline shadow-md transition-all transition-transform"
+ className="bg-white border-input block rounded-lg border p-4 text-foreground no-underline shadow-md transition-all transition-transform"
  >
  <div className="mb-1 flex items-center justify-between">
  <span className="text-[1.2rem]">{typeIcon}</span>
  <span className={`ref-status-badge ${statusBadge}`}>{s.status.replace(/_/g,"")}</span>
  </div>
 
- <div className="text-sm text-stone-600 leading-relaxed">
+ <div className="text-sm text-secondary-foreground leading-relaxed">
  {changeSummary && (
  <p className="mb-[4px] text-sm font-medium">
  {changeSummary}
  </p>
  )}
- <p className="text-stone-500 text-sm italic">
+ <p className="text-muted-foreground text-sm italic">
  &ldquo;{s.reason.slice(0, 120)}
  {s.reason.length > 120 ?"…" :""}&rdquo;
  </p>
  </div>
 
- <div className="text-stone-500 mt-2 flex items-center gap-4 text-sm">
+ <div className="text-muted-foreground mt-2 flex items-center gap-4 text-sm">
  <span className="font-semibold">
  {curatorIcon} @{userData?.alias_name ??"Unknown"}
  </span>
@@ -188,7 +188,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  ▲ {s.upvotes} ▼ {s.downvotes}
  {(commentCounts[s.id] ?? 0) > 0 && <> · 💬 {commentCounts[s.id]}</>}
  </span>
- <span className="text-xs text-stone-500">
+ <span className="text-xs text-muted-foreground">
  {new Date(s.created_at).toLocaleDateString()}
  </span>
  </div>
@@ -197,7 +197,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  })}
 
  {(suggestions ?? []).length === 0 && (
- <div className="bg-white border-input text-stone-500 rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-white border-input text-muted-foreground rounded-lg border p-8 text-center shadow-md transition-all">
  <p>No suggestions yet. Be the first to contribute!</p>
  <Link
  href="/catalog"

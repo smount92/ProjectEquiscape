@@ -73,7 +73,7 @@ export default function SuggestNewEntryForm() {
  <h2 className="mb-2 font-display">
  Suggestion Submitted!
  </h2>
- <p className="text-stone-500 mb-6">
+ <p className="text-muted-foreground mb-6">
  Your new entry suggestion is now pending review. The community can vote and discuss it.
  </p>
  <div className="flex justify-center gap-4">
@@ -84,7 +84,7 @@ export default function SuggestNewEntryForm() {
  View All Suggestions
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => {
  setSuccess(false);
  setTitle("");
@@ -102,7 +102,7 @@ export default function SuggestNewEntryForm() {
  <div className="flex flex-col gap-4">
  {/* Title */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-title">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-title">
  Title / Name *
  </label>
  <Input
@@ -117,7 +117,7 @@ export default function SuggestNewEntryForm() {
 
  {/* Item Type */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-type">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-type">
  Entry Type
  </label>
  <select
@@ -136,7 +136,7 @@ export default function SuggestNewEntryForm() {
 
  {/* Maker */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-maker">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-maker">
  Maker / Manufacturer
  </label>
  <select
@@ -166,7 +166,7 @@ export default function SuggestNewEntryForm() {
  {/* Two-column row: Scale + Color */}
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-scale">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-scale">
  Scale
  </label>
  <select
@@ -185,7 +185,7 @@ export default function SuggestNewEntryForm() {
  </select>
  </div>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-color">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-color">
  Color
  </label>
  <Input
@@ -202,7 +202,7 @@ export default function SuggestNewEntryForm() {
  {/* Two-column row: Mold + Year */}
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-mold">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-mold">
  Mold Name
  </label>
  <Input
@@ -215,7 +215,7 @@ export default function SuggestNewEntryForm() {
  />
  </div>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-year">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-year">
  Year
  </label>
  <Input
@@ -233,7 +233,7 @@ export default function SuggestNewEntryForm() {
 
  {/* Reason */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="new-entry-reason">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-reason">
  Reason / Evidence *
  </label>
  <textarea
@@ -246,7 +246,7 @@ export default function SuggestNewEntryForm() {
  placeholder="Explain why this entry should be added. Include sources if available (e.g. 'Listed in the 2019 Breyer dealer catalog, page 12')."
  />
  <span
- className="text-stone-500 mt-[4] block text-right text-xs"
+ className="text-muted-foreground mt-[4] block text-right text-xs"
  >
  {reason.length}/2000
  </span>
@@ -261,7 +261,7 @@ export default function SuggestNewEntryForm() {
  {/* Actions */}
  <div className="flex justify-end gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => router.back()}
  disabled={isPending}
  >

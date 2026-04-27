@@ -256,7 +256,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  return (
  <ExplorerLayout title={horse.custom_name} description="Horse passport and provenance.">
  {/* Breadcrumb */}
- <nav className="text-stone-600 animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -595,7 +595,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-[#59493A] uppercase">
                 <span aria-hidden="true">📝</span> Notes
               </h3>
- <p className="text-stone-600 m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
+ <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
  </div>
  )}
 
@@ -627,7 +627,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <div className="flex flex-wrap gap-4">
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  id="back-to-stable"
  >
  ← Back to Stable

@@ -73,17 +73,17 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  className="flex cursor-pointer items-center justify-between"
  onClick={() => setExpanded(!expanded)}
  >
- <h3 className="text-stone-600 m-0 text-xs font-bold tracking-[0.08em] uppercase">⚙️ Admin Panel</h3>
- <span className="text-stone-500 text-sm">{expanded ?"▲" :"▼"}</span>
+ <h3 className="text-secondary-foreground m-0 text-xs font-bold tracking-[0.08em] uppercase">⚙️ Admin Panel</h3>
+ <span className="text-muted-foreground text-sm">{expanded ?"▲" :"▼"}</span>
  </div>
 
  {expanded && (
  <div className="mt-4">
  {loading ? (
- <p className="text-stone-500">Loading members…</p>
+ <p className="text-muted-foreground">Loading members…</p>
  ) : (
  <>
- <div className="text-stone-600 mb-2 text-xs">
+ <div className="text-secondary-foreground mb-2 text-xs">
  👥 {members.length} member{members.length !== 1 ?"s" :""}
  </div>
  <div className="flex flex-col gap-[2px]">
@@ -93,8 +93,8 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]"
  >
  <div className="flex items-center gap-2">
- <span className="text-stone-900 text-sm font-semibold">@{m.alias}</span>
- <span className="text-stone-600 text-xs">{roleBadge(m.role)}</span>
+ <span className="text-foreground text-sm font-semibold">@{m.alias}</span>
+ <span className="text-secondary-foreground text-xs">{roleBadge(m.role)}</span>
  </div>
  {m.userId !== currentUserId && m.role !=="owner" && (
  <div className="flex items-center gap-1">
@@ -151,7 +151,7 @@ export function PinPostButton({ postId, isPinned }: { postId: string; isPinned: 
 
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleToggle}
  disabled={isPending}
  title={pinned ?"Unpin post" :"Pin post"}

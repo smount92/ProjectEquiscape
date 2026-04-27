@@ -23,10 +23,10 @@ export default function PropFormFields({
 }: PropFormFieldsProps) {
   return (
     <div className="mt-4 space-y-4 rounded-lg border border-[#E0D5C1] bg-[#FEFCF8] p-4">
-      <h4 className="text-sm font-semibold text-stone-900">🌲 Prop Details</h4>
+      <h4 className="text-sm font-semibold text-foreground">🌲 Prop Details</h4>
 
       <div>
-        <label htmlFor="prop-category" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="prop-category" className="mb-1 block text-sm font-semibold text-foreground">
           Prop Category
         </label>
         <select
@@ -43,7 +43,7 @@ export default function PropFormFields({
       </div>
 
       <div>
-        <label htmlFor="prop-dimensions" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="prop-dimensions" className="mb-1 block text-sm font-semibold text-foreground">
           Dimensions
         </label>
         <Input
@@ -57,7 +57,7 @@ export default function PropFormFields({
       </div>
 
       <div>
-        <label htmlFor="prop-terrain" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="prop-terrain" className="mb-1 block text-sm font-semibold text-foreground">
           Terrain / Setting
         </label>
         <select

@@ -160,7 +160,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
   description={collection.description || undefined}
  >
   {/* Breadcrumb */}
-  <nav className="text-stone-600 animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+  <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
   <Link href="/dashboard">Digital Stable</Link>
   <span className="separator" aria-hidden="true">
    /
@@ -171,8 +171,8 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
   {/* Collection Header */}
   <div className="collection-hero animate-fade-in-up max-sm:flex-col max-sm:p-6 max-sm:text-center">
   <div className="shrink-0 text-[2.5rem]">📁</div>
-  <div className="text-stone-900 mb-1 text-2xl font-bold">
-   <span className="text-stone-500 text-sm">
+  <div className="text-foreground mb-1 text-2xl font-bold">
+   <span className="text-muted-foreground text-sm">
    {horseCards.length} model{horseCards.length !== 1 ?"s" :""} in this collection
    </span>
    <div className="mt-2">
@@ -189,7 +189,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
    <div className="analytics-value max-[400px]:text-xl">
     {horseCards.length}
    </div>
-   <div className="text-stone-500 text-xs font-medium tracking-[0.05em] uppercase">Models</div>
+   <div className="text-muted-foreground text-xs font-medium tracking-[0.05em] uppercase">Models</div>
    </div>
    <div className="bg-card border-input relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
    <div className="text-2xl leading-none">💰</div>
@@ -198,7 +198,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
     ? `$${collectionVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
     :"—"}
    </div>
-   <div className="text-stone-500 text-xs font-medium tracking-[0.05em] uppercase">
+   <div className="text-muted-foreground text-xs font-medium tracking-[0.05em] uppercase">
     Collection Value
    </div>
    </div>
@@ -209,7 +209,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
     ? `$${avgValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
     :"—"}
    </div>
-   <div className="text-stone-500 text-xs font-medium tracking-[0.05em] uppercase">Avg. Value</div>
+   <div className="text-muted-foreground text-xs font-medium tracking-[0.05em] uppercase">Avg. Value</div>
    </div>
   </div>
   )}
@@ -244,7 +244,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
      // eslint-disable-next-line @next/next/no-img-element
      <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
     ) : (
-     <div className="flex h-full flex-col items-center justify-center gap-2 text-stone-500">
+     <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
      <span className="text-4xl">🐴</span>
      <span className="text-sm">No photo</span>
      </div>
@@ -264,7 +264,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
     )}
     </div>
     <div className="px-4 py-3">
-    <div className="font-semibold text-stone-900">
+    <div className="font-semibold text-foreground">
      {horse.customName}
     </div>
     <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
@@ -275,7 +275,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
      🎨 {horse.releaseLine}
      </div>
     )}
-    <div className="border-input text-stone-500 mt-2 flex items-center justify-between border-t pt-2 text-xs">
+    <div className="border-input text-muted-foreground mt-2 flex items-center justify-between border-t pt-2 text-xs">
      <span>{horse.conditionGrade}</span>
      <span>{formatDate(horse.createdAt)}</span>
     </div>

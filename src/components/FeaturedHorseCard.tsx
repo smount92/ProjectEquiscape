@@ -49,10 +49,10 @@ export default function FeaturedHorseCard({
  </div>
  <div className="flex min-w-0 flex-1 flex-col justify-center">
  <div className="mb-1 text-[1.4rem] font-bold">{horseName}</div>
- <div className="text-stone-500 mb-4 text-sm">
+ <div className="text-muted-foreground mb-4 text-sm">
  by @{ownerAlias} · {finishType}
  </div>
- {description && <p className="text-stone-500 m-0 text-sm leading-relaxed italic">{description}</p>}
+ {description && <p className="text-muted-foreground m-0 text-sm leading-relaxed italic">{description}</p>}
  </div>
  </Link>
  );

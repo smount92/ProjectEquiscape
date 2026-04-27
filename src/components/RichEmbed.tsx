@@ -51,7 +51,7 @@ export default function RichEmbed({ text, embedData }: RichEmbedProps) {
  <div className="overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
  🐴 {data.name}
  </div>
- <div className="text-stone-500 line-clamp-2 text-xs">
+ <div className="text-muted-foreground line-clamp-2 text-xs">
  {data.finish} · {data.maker}
  </div>
  <div className="text-forest text-xs">Model Horse Hub</div>

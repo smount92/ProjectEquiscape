@@ -39,7 +39,7 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
  ✅ Transaction Complete
  </span>
  {!hasRating && (
- <span className="text-stone-500 mt-2 block text-sm">
+ <span className="text-muted-foreground mt-2 block text-sm">
  Leave a rating below to close the loop! ⬇️
  </span>
  )}
@@ -53,7 +53,7 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
  id="transaction-status"
  >
  <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
- <span className="text-stone-500 text-sm">Transaction is open</span>
+ <span className="text-muted-foreground text-sm">Transaction is open</span>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleComplete}

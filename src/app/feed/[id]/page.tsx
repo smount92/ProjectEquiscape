@@ -74,7 +74,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  <div className="mx-auto max-w-6xl px-6 max-w-[640]">
  <Link
  href="/feed"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ← Back to Feed
  </Link>
@@ -84,7 +84,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  <Link href={`/profile/${encodeURIComponent(actorAlias)}`} className="truncate font-semibold max-w-[200px]">
  @{actorAlias}
  </Link>
- <span className="text-stone-500 text-sm">
+ <span className="text-muted-foreground text-sm">
  {new Date(p.created_at as string).toLocaleString()}
  </span>
  </div>

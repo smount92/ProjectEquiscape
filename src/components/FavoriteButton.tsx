@@ -44,7 +44,7 @@ export default function FavoriteButton({ horseId, initialIsFavorited, initialCou
  return (
   <motion.button
    className={`inline-flex cursor-pointer items-center gap-1 rounded-sm border-none bg-transparent px-1.5 py-1 text-xs transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
-    isFavorited ? "text-[#e74c6f]" : "text-stone-500 hover:text-[#e74c6f]"
+    isFavorited ? "text-[#e74c6f]" : "text-muted-foreground hover:text-[#e74c6f]"
    }`}
    onClick={handleClick}
    disabled={status === "saving"}

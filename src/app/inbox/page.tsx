@@ -209,7 +209,7 @@ export default async function InboxPage() {
    <Link
     key={item.id}
     href={`/inbox/${item.id}`}
-    className={`text-stone-900 border-input flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ?"bg-emerald-50/50 hover:bg-emerald-50" :"hover:bg-black/[0.03]"}`}
+    className={`text-foreground border-input flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ?"bg-emerald-50/50 hover:bg-emerald-50" :"hover:bg-black/[0.03]"}`}
     id={`inbox-item-${item.id}`}
    >
     <div className="text-forest flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100/50 max-md:h-9 max-md:w-9">
@@ -231,7 +231,7 @@ export default async function InboxPage() {
     <div className="min-w-0 flex-1">
     <div className="flex items-center justify-between gap-2">
      <span
-     className={`text-sm font-semibold ${item.unreadCount > 0 ?"text-forest" :"text-stone-900"}`}
+     className={`text-sm font-semibold ${item.unreadCount > 0 ?"text-forest" :"text-foreground"}`}
      >
      @{item.otherAlias}
      </span>
@@ -240,10 +240,10 @@ export default async function InboxPage() {
       ⭐ Rated
      </span>
      )}
-     <span className="text-stone-500 shrink-0 text-xs">{timeAgo(item.latestTime)}</span>
+     <span className="text-muted-foreground shrink-0 text-xs">{timeAgo(item.latestTime)}</span>
     </div>
     {item.horseName ? (
-     <div className="text-stone-500 mt-[2px] flex items-center gap-1 text-xs">
+     <div className="text-muted-foreground mt-[2px] flex items-center gap-1 text-xs">
      🐴 Re: {item.horseName}
      {item.horseTradeStatus && item.horseTradeStatus !=="Not for Sale" && (
       <span
@@ -258,22 +258,22 @@ export default async function InboxPage() {
      )}
      </div>
     ) : (
-     <div className="text-stone-500 mt-[2px] flex items-center gap-1 text-xs">
+     <div className="text-muted-foreground mt-[2px] flex items-center gap-1 text-xs">
      💬 Direct Message
      </div>
     )}
-    <div className="text-stone-600 mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+    <div className="text-secondary-foreground mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
      {item.latestMessage ? (
      <>
       {item.latestSenderIsMe && (
-      <span className="text-stone-900 font-semibold">You: </span>
+      <span className="text-foreground font-semibold">You: </span>
       )}
       {item.latestMessage.length > 80
       ? item.latestMessage.slice(0, 80) +"…"
       : item.latestMessage}
      </>
      ) : (
-     <span className="text-stone-500">No messages yet</span>
+     <span className="text-muted-foreground">No messages yet</span>
      )}
     </div>
     </div>

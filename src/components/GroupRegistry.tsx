@@ -49,21 +49,21 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  onClick={() => setExpanded(!expanded)}
  >
  <h3 className="m-0">📋 Group Registry</h3>
- <span className="text-stone-500 text-sm">
+ <span className="text-muted-foreground text-sm">
  {expanded ?"▲" :"▼"} {entries.length > 0 ? `${entries.length} models` :""}
  </span>
  </div>
 
  {expanded && (
  <div className="mt-4">
- <p className="text-stone-500 mb-4 text-sm">
+ <p className="text-muted-foreground mb-4 text-sm">
  Public models from all group members — a shared catalog of the group&apos;s collection.
  </p>
 
  {loading ? (
- <p className="text-stone-500">Loading registry…</p>
+ <p className="text-muted-foreground">Loading registry…</p>
  ) : entries.length === 0 ? (
- <p className="text-stone-500">No public models from group members yet.</p>
+ <p className="text-muted-foreground">No public models from group members yet.</p>
  ) : (
  <>
  <Input
@@ -86,7 +86,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  >
  @{ownerAlias}
  </Link>
- <span className="text-stone-600 text-xs">
+ <span className="text-secondary-foreground text-xs">
  {horses.length} model{horses.length !== 1 ?"s" :""}
  </span>
  </div>
@@ -95,16 +95,16 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
  <Link
  key={h.horseId}
  href={`/community/${h.horseId}`}
- className="border-input text-stone-900 hover:text-forest flex items-center gap-2 border-b py-1.5 text-sm no-underline last:border-b-0"
+ className="border-input text-foreground hover:text-forest flex items-center gap-2 border-b py-1.5 text-sm no-underline last:border-b-0"
  >
  <span>🐴 {h.horseName}</span>
- <span className="text-stone-600 ml-auto text-xs">
+ <span className="text-secondary-foreground ml-auto text-xs">
  {h.finishType}
  </span>
  </Link>
  ))}
  {horses.length > 8 && (
- <p className="text-stone-600 mt-[4] text-xs">+{horses.length - 8} more</p>
+ <p className="text-secondary-foreground mt-[4] text-xs">+{horses.length - 8} more</p>
  )}
  </div>
  </div>

@@ -32,7 +32,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  if (!isEditing) {
  return (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-stone-600 no-underline opacity-70 transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-secondary-foreground no-underline opacity-70 transition-all"
  onClick={() => setIsEditing(true)}
  id="edit-bio-btn"
  title="Edit bio"
@@ -55,13 +55,13 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  />
  <div className="mt-1 flex items-center justify-between gap-2">
  <span
- className={`text-xs ${bio.length > 450 ? "text-red-700" : "text-stone-500"}`}
+ className={`text-xs ${bio.length > 450 ? "text-red-700" : "text-muted-foreground"}`}
  >
  {bio.length}/500
  </span>
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => {
  setBio(currentBio ||"");
  setIsEditing(false);

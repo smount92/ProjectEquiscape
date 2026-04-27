@@ -83,7 +83,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  return (
  <>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => setIsOpen(true)}
  >
  📦 Transfer Ownership
@@ -103,7 +103,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  </DialogHeader>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label className="text-foreground mb-1 block text-sm font-semibold">
  Transfer Type
  </label>
  <select
@@ -123,7 +123,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
 
  {acquisitionType ==="purchase" && (
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label className="text-foreground mb-1 block text-sm font-semibold">
  Sale Price
  </label>
  <Input
@@ -146,7 +146,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  )}
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label className="text-foreground mb-1 block text-sm font-semibold">
  Notes (optional)
  </label>
  <Textarea
@@ -163,7 +163,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
 
  <div className="mt-4 flex justify-end gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleClose}
  >
  Cancel
@@ -187,13 +187,13 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  {generatedCode}
  </div>
  <button
- className="mt-2 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="mt-2 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleCopy}
  >
  {copied ?"✅ Copied!" :"📋 Copy Code"}
  </button>
  </div>
- <p className="text-stone-500 text-center text-sm">
+ <p className="text-muted-foreground text-center text-sm">
  Send this code to the buyer/receiver. They can enter it on
  <strong> /claim</strong> to complete the transfer.
  <br />
@@ -201,7 +201,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  </p>
  <div className="mt-4 flex justify-center gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleCancel}
  >
  Cancel Transfer

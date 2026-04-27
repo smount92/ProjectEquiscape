@@ -90,7 +90,7 @@ export default function HelpIdRequestForm() {
  <form onSubmit={handleSubmit}>
  {/* Photo Upload */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Photo of the model *</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Photo of the model *</label>
  <div
  className="border-input bg-card flex cursor-pointer flex-col items-center justify-center rounded-lg border-[2px] border-dashed px-8 py-12 text-center transition-all"
  onClick={() => fileInputRef.current?.click()}
@@ -128,7 +128,7 @@ export default function HelpIdRequestForm() {
 
  {/* Description */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="help-id-description">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="help-id-description">
  Description
  </label>
  <Textarea
@@ -142,7 +142,7 @@ export default function HelpIdRequestForm() {
 
  {/* Identifying Marks */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold" htmlFor="help-id-marks">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="help-id-marks">
  Any identifying marks?
  </label>
  <Input
@@ -163,7 +163,7 @@ export default function HelpIdRequestForm() {
  <div className="mt-6 flex gap-4">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => {
  setIsOpen(false);
  setPreview(null);

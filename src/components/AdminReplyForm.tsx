@@ -79,11 +79,11 @@ export default function AdminReplyForm({
  return (
  <div className="admin-reply-form">
  <div className="mb-2 flex items-center justify-between">
- <span className="text-stone-500 text-xs">
+ <span className="text-muted-foreground text-xs">
  To: <strong>{recipientName}</strong> &lt;{recipientEmail}&gt;
  </span>
  <button
- className="bg-muted text-stone-500 flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
+ className="bg-muted text-muted-foreground flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
  onClick={() => {
  setIsOpen(false);
  setStatus(null);
@@ -102,7 +102,7 @@ export default function AdminReplyForm({
  </div>
  </div>
  <textarea
- className="text-stone-500"
+ className="text-muted-foreground"
  placeholder={`Write your reply to ${recipientName}…`}
  value={replyText}
  onChange={(e) => setReplyText(e.target.value)}
@@ -149,7 +149,7 @@ export default function AdminReplyForm({
  )}
  </button>
  <button
- className="border-input text-stone-500 hover:0.05)] hover:text-stone-900 cursor-pointer rounded-full border bg-transparent px-[14px] py-[7px] font-[inherit] text-xs font-medium transition-all"
+ className="border-input text-muted-foreground hover:0.05)] hover:text-foreground cursor-pointer rounded-full border bg-transparent px-[14px] py-[7px] font-[inherit] text-xs font-medium transition-all"
  onClick={() => {
  setIsOpen(false);
  setStatus(null);

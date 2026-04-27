@@ -18,7 +18,7 @@ export default function RatingBadge({ average, count }: RatingBadgeProps) {
  >
  <RatingStars rating={Math.round(average)} size="sm" />
  <span className="text-sm font-bold text-[#F59E0B]">{average}</span>
- <span className="text-stone-500 text-sm">({count})</span>
+ <span className="text-muted-foreground text-sm">({count})</span>
  </span>
  );
 }

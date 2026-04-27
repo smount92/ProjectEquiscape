@@ -237,7 +237,7 @@ export default function Header() {
  >
  <Link
  href={user ?"/dashboard" :"/"}
- className="text-stone-900 mr-6 flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-[-0.02em] no-underline"
+ className="text-foreground mr-6 flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-[-0.02em] no-underline"
  aria-label="Model Horse Hub — Home"
  >
  <span className="text-[1.5em]" aria-hidden="true">
@@ -250,7 +250,7 @@ export default function Header() {
  {/* ── Hamburger Button (mobile only) ── */}
  {user && (
  <button
- className="relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent text-stone-500 transition-all"
+ className="relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent text-muted-foreground transition-all"
  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
  aria-expanded={mobileMenuOpen ? "true" : "false"}
@@ -306,7 +306,7 @@ export default function Header() {
  <Link
  key={link.id}
  href={link.href}
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id={link.id}
  data-nav-item="true"
  style={
@@ -324,7 +324,7 @@ export default function Header() {
  {hasOverflow && (
  <div className="relative shrink-0" ref={moreMenuRef}>
  <button
- className="flex cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 py-1 font-[inherit] text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 py-1 font-[inherit] text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setMoreMenuOpen(!moreMenuOpen)}
  aria-expanded={moreMenuOpen ? "true" : "false"}
  aria-label="More navigation links"
@@ -338,7 +338,7 @@ export default function Header() {
  <Link
  key={link.id}
  href={link.href}
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setMoreMenuOpen(false)}
  >
  <link.Icon size={16} strokeWidth={1.5} /> {link.label}
@@ -354,7 +354,7 @@ export default function Header() {
  <NotificationBell />
  <Link
  href="/inbox"
- className="bg-[#FEFCF8] border-edge relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-stone-500 no-underline transition-all"
+ className="bg-[#FEFCF8] border-edge relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
  title="Inbox"
  id="nav-inbox-icon"
  >
@@ -378,7 +378,7 @@ export default function Header() {
  </Link>
  <Link
  href="/wishlist"
- className="bg-[#FEFCF8] border-edge relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-stone-500 no-underline transition-all"
+ className="bg-[#FEFCF8] border-edge relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
  title="Wishlist"
  id="nav-wishlist-icon"
  >
@@ -394,7 +394,7 @@ export default function Header() {
  aria-expanded={userMenuOpen ? "true" : "false"}
  aria-label="User menu"
  >
- <span className="inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-stone-500">
+ <span className="inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-muted-foreground">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
@@ -430,28 +430,28 @@ export default function Header() {
  <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-edge bg-[#FEFCF8] p-1 shadow-lg">
  <Link
  href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` :"/settings"}
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setUserMenuOpen(false)}
  >
  <User size={16} strokeWidth={1.5} /> My Profile
  </Link>
  <Link
  href="/settings"
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setUserMenuOpen(false)}
  >
  <Settings size={16} strokeWidth={1.5} /> Settings
  </Link>
  <Link
  href="/claim"
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setUserMenuOpen(false)}
  >
  <Package size={16} strokeWidth={1.5} /> Claim
  </Link>
  <Link
  href="/studio/my-commissions"
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setUserMenuOpen(false)}
  >
  <Palette size={16} strokeWidth={1.5} /> My Commissions
@@ -459,7 +459,7 @@ export default function Header() {
  {isAdmin && (
  <Link
  href="/admin"
- className="text-forest flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="text-forest flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setUserMenuOpen(false)}
  >
  <Zap size={16} strokeWidth={1.5} /> Admin
@@ -474,7 +474,7 @@ export default function Header() {
  </Link>
  <div className="mx-1 my-1 h-px bg-edge" />
  <button
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => {
  setUserMenuOpen(false);
  toggleSimpleMode();
@@ -491,7 +491,7 @@ export default function Header() {
  )}
  </button>
  <button
- className="text-stone-500 flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="text-muted-foreground flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => {
  setUserMenuOpen(false);
  handleSignOut();
@@ -516,7 +516,7 @@ export default function Header() {
  >
  <Link
  href="/dashboard"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-stable-m"
  onClick={closeMobileMenu}
  >
@@ -524,7 +524,7 @@ export default function Header() {
  </Link>
  <Link
  href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` :"/settings"}
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-profile-m"
  onClick={closeMobileMenu}
  >
@@ -532,7 +532,7 @@ export default function Header() {
  </Link>
  <Link
  href="/community"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-community-m"
  onClick={closeMobileMenu}
  >
@@ -540,7 +540,7 @@ export default function Header() {
  </Link>
  <Link
  href="/discover"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-discover-m"
  onClick={closeMobileMenu}
  >
@@ -548,7 +548,7 @@ export default function Header() {
  </Link>
  <Link
  href="/feed"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-feed-m"
  onClick={closeMobileMenu}
  >
@@ -556,7 +556,7 @@ export default function Header() {
  </Link>
  <Link
  href="/shows"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-shows-m"
  onClick={closeMobileMenu}
  >
@@ -564,7 +564,7 @@ export default function Header() {
  </Link>
  <Link
  href={artistSlug ?"/studio/dashboard" :"/studio/setup"}
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-studio-m"
  onClick={closeMobileMenu}
  >
@@ -572,7 +572,7 @@ export default function Header() {
  </Link>
  <Link
  href="/community/help-id"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-helpid-m"
  onClick={closeMobileMenu}
  >
@@ -580,7 +580,7 @@ export default function Header() {
  </Link>
  <Link
  href="/community/groups"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-groups-m"
  onClick={closeMobileMenu}
  >
@@ -588,7 +588,7 @@ export default function Header() {
  </Link>
  <Link
  href="/community/events"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-events-m"
  onClick={closeMobileMenu}
  >
@@ -596,7 +596,7 @@ export default function Header() {
  </Link>
  <Link
  href="/catalog"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-catalog-m"
  onClick={closeMobileMenu}
  >
@@ -604,7 +604,7 @@ export default function Header() {
  </Link>
  <Link
  href="/market"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-market-m"
  onClick={closeMobileMenu}
  >
@@ -612,7 +612,7 @@ export default function Header() {
  </Link>
  <Link
  href="/wishlist"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-wishlist-m"
  onClick={closeMobileMenu}
  >
@@ -620,7 +620,7 @@ export default function Header() {
  </Link>
  <Link
  href="/claim"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-claim-m"
  onClick={closeMobileMenu}
  >
@@ -628,7 +628,7 @@ export default function Header() {
  </Link>
  <Link
  href="/settings"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-settings-m"
  onClick={closeMobileMenu}
  >
@@ -636,7 +636,7 @@ export default function Header() {
  </Link>
  <Link
  href="/inbox"
- className="relative flex items-center gap-1 gap-[4px] rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="relative flex items-center gap-1 gap-[4px] rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-inbox-m"
  onClick={closeMobileMenu}
  >
@@ -668,7 +668,7 @@ export default function Header() {
   <Gem size={16} strokeWidth={1.5} /> 💎 Upgrade to Pro
  </Link>
  <button
- className="flex w-full cursor-pointer items-center justify-start gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm text-stone-500 transition-all"
+ className="flex w-full cursor-pointer items-center justify-start gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm text-muted-foreground transition-all"
  onClick={() => {
  closeMobileMenu();
  handleSignOut();
@@ -677,7 +677,7 @@ export default function Header() {
  <LogOut size={16} strokeWidth={1.5} /> Sign Out
  </button>
  <button
- className="border-edge bg-[#FEFCF8] relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-stone-500 transition-all"
+ className="border-edge bg-[#FEFCF8] relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-muted-foreground transition-all"
  onClick={() => toggleSimpleMode()}
  aria-pressed={isSimpleMode ? "true" : "false"}
  >
@@ -703,21 +703,21 @@ export default function Header() {
  >
  <Link
  href="/about"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-about"
  >
  About
  </Link>
  <Link
  href="/catalog"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-catalog-public"
  >
  📚 Catalog
  </Link>
  <Link
  href="/contact"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-stone-500 no-underline transition-all"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-contact"
  >
  Contact
@@ -736,7 +736,7 @@ export default function Header() {
  Log In
  </Link>
  <button
- className="border-edge bg-[#FEFCF8] relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-stone-500 transition-all"
+ className="border-edge bg-[#FEFCF8] relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-muted-foreground transition-all"
  onClick={toggleSimpleMode}
  aria-pressed={isSimpleMode ? "true" : "false"}
  aria-label={
@@ -778,7 +778,7 @@ export default function Header() {
  <line x1="1" y1="1" x2="23" y2="23" />
  </svg>
  )}
- <span className="bg-[#FEFCF8] border-edge pointer-events-none absolute right-0 bottom-[-36px] rounded-sm border px-[10px] py-[4px] whitespace-nowrap text-stone-500 text-[var(--font-size-xs)] opacity-0 transition-opacity">
+ <span className="bg-[#FEFCF8] border-edge pointer-events-none absolute right-0 bottom-[-36px] rounded-sm border px-[10px] py-[4px] whitespace-nowrap text-muted-foreground text-[var(--font-size-xs)] opacity-0 transition-opacity">
  {isSimpleMode ?"Simple Mode: ON" :"Simple Mode: OFF"}
  </span>
  </button>

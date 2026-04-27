@@ -52,9 +52,9 @@ function DashboardSkeleton() {
    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
     {Array.from({ length: 12 }).map((_, i) => (
      <div key={i} className="bg-card border-input animate-pulse rounded-lg border shadow-sm">
-      <div className="aspect-square rounded-t-lg bg-stone-200" />
+      <div className="aspect-square rounded-t-lg bg-muted" />
       <div className="space-y-2 p-3">
-       <div className="h-4 w-3/4 rounded bg-stone-200" />
+       <div className="h-4 w-3/4 rounded bg-muted" />
        <div className="h-3 w-1/2 rounded bg-muted" />
       </div>
      </div>
@@ -65,18 +65,18 @@ function DashboardSkeleton() {
   {/* Sidebar Skeleton — Stat Cards */}
   <aside className="space-y-6">
    <div className="bg-card border-input animate-pulse rounded-lg border p-6 shadow-md">
-    <div className="mb-4 h-4 w-1/2 rounded bg-stone-200" />
+    <div className="mb-4 h-4 w-1/2 rounded bg-muted" />
     <div className="space-y-3">
      {Array.from({ length: 4 }).map((_, i) => (
       <div key={i} className="flex justify-between">
        <div className="h-3 w-24 rounded bg-muted" />
-       <div className="h-3 w-12 rounded bg-stone-200" />
+       <div className="h-3 w-12 rounded bg-muted" />
       </div>
      ))}
     </div>
    </div>
    <div className="bg-card border-input animate-pulse rounded-lg border p-6 shadow-md">
-    <div className="mb-4 h-4 w-1/3 rounded bg-stone-200" />
+    <div className="mb-4 h-4 w-1/3 rounded bg-muted" />
     <div className="space-y-2">
      {Array.from({ length: 3 }).map((_, i) => (
       <div key={i} className="h-8 rounded bg-muted" />
@@ -310,7 +310,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {/* Shelf Header — model count + action buttons */}
   <div className="flex flex-wrap items-center gap-4">
   {totalHorseCount > 0 && (
-  <span className="text-stone-600 text-sm">
+  <span className="text-secondary-foreground text-sm">
   {totalHorseCount} model{totalHorseCount === 1 ?"" :"s"}
   </span>
   )}
@@ -333,31 +333,31 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {page > 1 ? (
   <Link
   href={`/dashboard?page=${page - 1}`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
   ← Previous
   </Link>
   ) : (
   <button
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   disabled
   >
   ← Previous
   </button>
   )}
-  <span className="text-stone-500 text-sm">
+  <span className="text-muted-foreground text-sm">
   Page {page} of {totalPages}
   </span>
   {page < totalPages ? (
   <Link
   href={`/dashboard?page=${page + 1}`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
   Next →
   </Link>
   ) : (
   <button
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   disabled
   >
   Next →
@@ -372,37 +372,37 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {/* Analytics — Compact stat rows */}
   {totalHorseCount > 0 && (
   <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
-               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-600 uppercase">
+               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                  <BarChart3 size={14} strokeWidth={1.5} /> Stable Overview
   </h3>
   <div className="flex flex-col gap-[2px]">
   <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
-  <span className="text-stone-600 text-sm">
+  <span className="text-secondary-foreground text-sm">
   <Plus size={14} strokeWidth={1.5} /> Total Models
   </span>
-  <span className="text-stone-900 text-sm font-bold">{totalHorseCount}</span>
+  <span className="text-foreground text-sm font-bold">{totalHorseCount}</span>
   </div>
   <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
-  <span className="text-stone-600 text-sm">
+  <span className="text-secondary-foreground text-sm">
   <FolderOpen size={14} strokeWidth={1.5} /> Collections
   </span>
-  <span className="text-stone-900 text-sm font-bold">{collections.length}</span>
+  <span className="text-foreground text-sm font-bold">{collections.length}</span>
   </div>
   <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
-  <span className="text-stone-600 text-sm">
+  <span className="text-secondary-foreground text-sm">
   <DollarSign size={14} strokeWidth={1.5} /> Vault Value
   </span>
-  <span className="text-stone-900 text-sm font-bold">
+  <span className="text-foreground text-sm font-bold">
   {totalVaultValue > 0
   ? `$${totalVaultValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
   :"—"}
   </span>
   </div>
   <div className="flex items-center justify-between rounded-sm px-1 py-2 transition-colors hover:bg-black/[0.03]">
-  <span className="text-stone-600 text-sm">
+  <span className="text-secondary-foreground text-sm">
   <Award size={14} strokeWidth={1.5} /> Show Placings
   </span>
-  <span className="text-stone-900 text-sm font-bold">{totalShowRecords ?? 0}</span>
+  <span className="text-foreground text-sm font-bold">{totalShowRecords ?? 0}</span>
   </div>
 
   {unreadMsgCount > 0 && (
@@ -411,10 +411,10 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   className="flex items-center justify-between rounded-sm px-1 py-2 no-underline transition-colors hover:bg-black/[0.03]"
   style={{ textDecoration:"none" }}
   >
-  <span className="flex items-center gap-1.5 text-sm text-stone-600">
+  <span className="flex items-center gap-1.5 text-sm text-secondary-foreground">
   <Mail size={14} strokeWidth={1.5} /> Unread Messages
   </span>
-  <span className="text-stone-900 text-forest text-sm font-bold">
+  <span className="text-foreground text-forest text-sm font-bold">
   {unreadMsgCount}
   </span>
   </Link>
@@ -426,7 +426,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {/* Collections — Vertical list */}
   {collections.length > 0 && (
   <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
-               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-stone-600 uppercase">
+               <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                  <FolderOpen size={14} strokeWidth={1.5} /> Collections
   </h3>
   <div className="flex flex-col gap-1">
@@ -434,11 +434,11 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   <Link
   key={col.id}
   href={`/stable/collection/${col.id}`}
-  className="text-stone-900 hover:border-input flex items-center justify-between rounded-md border border-transparent bg-black/[0.02] px-4 py-2 text-sm no-underline transition-all hover:bg-black/[0.06] hover:no-underline"
+  className="text-foreground hover:border-input flex items-center justify-between rounded-md border border-transparent bg-black/[0.02] px-4 py-2 text-sm no-underline transition-all hover:bg-black/[0.06] hover:no-underline"
   id={`collection-${col.id}`}
   >
   <span>{col.name}</span>
-  <span className="text-stone-600 text-xs whitespace-nowrap">
+  <span className="text-secondary-foreground text-xs whitespace-nowrap">
    {collectionCounts.get(col.id)?.size || 0}
   {(collectionValues.get(col.id) || 0) > 0 && (
   <>
@@ -492,7 +492,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   <>
    <span className="text-forest">Digital Stable</span>
    {profile?.alias_name && (
-   <span className="ml-4 text-lg font-normal text-stone-500">
+   <span className="ml-4 text-lg font-normal text-muted-foreground">
     {profile.alias_name}&apos;s Herd
    </span>
    )}
@@ -502,14 +502,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   <>
    <Link
    href="/stable/import"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    id="batch-import-button"
    >
    <FileText size={16} strokeWidth={1.5} /> Batch Import
    </Link>
    <Link
    href="/add-horse/quick"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    id="quick-add-button"
    >
    <Zap size={16} strokeWidth={1.5} /> Quick Add

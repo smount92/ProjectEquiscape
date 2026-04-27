@@ -49,7 +49,7 @@ export default function CookieConsent() {
  aria-label="Cookie consent"
  >
  <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-between gap-8 max-md:flex-col max-md:gap-4 max-md:text-center">
- <div className="[&_p]:text-stone-600 [&_p:first-child]:text-stone-900 [&_a]:text-forest min-w-0 flex-1 [&_p]:m-0 [&_p]:text-sm [&_p]:leading-relaxed [&_p:first-child]:mb-1">
+ <div className="[&_p]:text-secondary-foreground [&_p:first-child]:text-foreground [&_a]:text-forest min-w-0 flex-1 [&_p]:m-0 [&_p]:text-sm [&_p]:leading-relaxed [&_p:first-child]:mb-1">
  <p>
  <strong>🍪 Cookies &amp; Privacy</strong>
  </p>
@@ -68,7 +68,7 @@ export default function CookieConsent() {
  Accept
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleDecline}
  id="cookie-decline"
  >

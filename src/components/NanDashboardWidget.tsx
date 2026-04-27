@@ -15,17 +15,17 @@ export default async function NanDashboardWidget() {
 
     return (
         <details className="rounded-xl border border-input bg-card p-6 shadow-sm" id="nan-dashboard" open>
-            <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold tracking-widest text-stone-700 uppercase select-none [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold tracking-widest text-foreground uppercase select-none [&::-webkit-details-marker]:hidden">
                 🏆 NAN {currentYear} Qualification Status
                 {totalQualifiedHorses > 0 && (
-                    <span className="ml-auto text-xs font-normal normal-case tracking-normal text-stone-500">
+                    <span className="ml-auto text-xs font-normal normal-case tracking-normal text-muted-foreground">
                         {totalQualifiedHorses} horse{totalQualifiedHorses !== 1 ? "s" : ""} · {totalActiveCards} active card{totalActiveCards !== 1 ? "s" : ""}
                     </span>
                 )}
             </summary>
 
             {/* Partnership disclosure */}
-            <p className="mt-3 mb-1 text-xs text-stone-400 italic">
+            <p className="mt-3 mb-1 text-xs text-muted-foreground italic">
                 Track your NAN progress digitally — official NAN cards are issued by NAMHSA.
             </p>
 
@@ -42,7 +42,7 @@ export default async function NanDashboardWidget() {
                             <span className="shrink-0 text-xs">
                                 {status === "full" ? "🟢" : status === "partial" ? "🟡" : "🔴"}
                             </span>
-                            <Link href={`/community/${h.horseId}`} className="truncate text-sm font-semibold text-stone-900 no-underline hover:text-forest">
+                            <Link href={`/community/${h.horseId}`} className="truncate text-sm font-semibold text-foreground no-underline hover:text-forest">
                                 {h.horseName}
                             </Link>
                             <span className="ml-auto flex shrink-0 flex-wrap gap-1 text-xs">
@@ -52,8 +52,8 @@ export default async function NanDashboardWidget() {
                                             key={i}
                                             className={`rounded-full px-1.5 py-0.5 ${
                                                 q.isExpired
-                                                    ? "bg-muted text-stone-300 line-through"
-                                                    : "bg-muted text-stone-600"
+                                                    ? "bg-muted text-muted-foreground line-through"
+                                                    : "bg-muted text-secondary-foreground"
                                             }`}
                                             title={q.isExpired ? `Expired (${q.year})` : `${q.year} ${q.cardType}`}
                                         >
@@ -63,14 +63,14 @@ export default async function NanDashboardWidget() {
                                         </span>
                                     ))
                                 ) : (
-                                    <span className="text-stone-400">No cards yet</span>
+                                    <span className="text-muted-foreground">No cards yet</span>
                                 )}
                             </span>
                         </div>
                     );
                 })}
                 {horses.length > 10 && (
-                    <p className="mt-2 text-sm text-stone-500">
+                    <p className="mt-2 text-sm text-muted-foreground">
                         + {horses.length - 10} more horses
                     </p>
                 )}
@@ -78,14 +78,14 @@ export default async function NanDashboardWidget() {
             <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                     href="/shows/planner"
-                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-muted"
+                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-card px-6 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all hover:bg-muted"
                 >
                     🧳 Live Show Packer
                 </Link>
                 {totalQualifiedHorses > 0 && (
                     <a
                         href="/api/export/nan-cards"
-                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 no-underline transition-all hover:bg-muted"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-card px-6 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all hover:bg-muted"
                     >
                         📥 Export NAN Cards
                     </a>

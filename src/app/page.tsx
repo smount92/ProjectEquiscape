@@ -43,7 +43,7 @@ export default function LandingPage() {
             The Only Platform Built{" "}
             <span className="text-forest">for This Hobby</span>
           </h1>
-          <p className="text-stone-600 mx-auto mb-10 max-w-[620px] text-lg leading-[1.7]">
+          <p className="text-secondary-foreground mx-auto mb-10 max-w-[620px] text-lg leading-[1.7]">
             Catalog your herd with a 10,500+ reference database. Track provenance from blank resin
             to finished custom. Enter virtual photo shows with NAMHSA-style class lists. Sell with
             verified trust signals. All in one place — built by collectors, for collectors.
@@ -58,13 +58,13 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/community"
-              className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-transparent px-8 py-3 text-base font-semibold text-stone-700 no-underline transition-all hover:border-forest hover:text-forest"
+              className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-transparent px-8 py-3 text-base font-semibold text-foreground no-underline transition-all hover:border-forest hover:text-forest"
               id="hero-cta-explore"
             >
               Explore the Show Ring
             </Link>
           </div>
-          <p className="text-stone-500 text-xs tracking-[0.03em]">
+          <p className="text-muted-foreground text-xs tracking-[0.03em]">
             ✦ No credit card required &nbsp;·&nbsp; ✦ Privacy-first &nbsp;·&nbsp; ✦ Free forever
             tier &nbsp;·&nbsp; ✦ Installable as an app
           </p>
@@ -77,59 +77,59 @@ export default function LandingPage() {
           <h2 className="mb-2 font-serif text-2xl font-extrabold tracking-[-0.02em]">
             Get Started in <span className="text-forest">3 Steps</span>
           </h2>
-          <p className="text-stone-600 mx-auto mb-12 max-w-[540px] text-base">
+          <p className="text-secondary-foreground mx-auto mb-12 max-w-[540px] text-base">
             From your shelf to the Show Ring in under 5 minutes.
           </p>
           <div className="mt-12 flex items-start justify-center gap-6 max-md:flex-col max-md:items-center">
             <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-stone-900 shadow-sm">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-foreground shadow-sm">
                 1
               </div>
               <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-forest/10 text-forest">
                 <Camera size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">Add Your Horse</h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <h3 className="mb-2 text-xl font-bold text-foreground">Add Your Horse</h3>
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 Search our 10,500+ reference database to instantly identify your model. Upload
                 multi-angle LSQ photos, set condition grades, and track purchase details in your
                 private financial vault.
               </p>
             </div>
             <div
-              className="flex h-[300px] items-center justify-center text-4xl text-stone-300 max-md:hidden"
+              className="flex h-[300px] items-center justify-center text-4xl text-muted-foreground max-md:hidden"
               aria-hidden="true"
             >
               →
             </div>
             <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-stone-900 shadow-sm">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-foreground shadow-sm">
                 2
               </div>
               <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-forest/10 text-forest">
                 <Trophy size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">Join the Community</h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <h3 className="mb-2 text-xl font-bold text-foreground">Join the Community</h3>
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 Publish your best models to the Show Ring. Enter virtual photo shows with
                 NAMHSA-style class lists, follow other collectors, and build your reputation with
                 verified reviews.
               </p>
             </div>
             <div
-              className="flex h-[300px] items-center justify-center text-4xl text-stone-300 max-md:hidden"
+              className="flex h-[300px] items-center justify-center text-4xl text-muted-foreground max-md:hidden"
               aria-hidden="true"
             >
               →
             </div>
             <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-stone-900 shadow-sm">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-foreground shadow-sm">
                 3
               </div>
               <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-forest/10 text-forest">
                 <PawPrint size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">Build Your Hoofprint</h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <h3 className="mb-2 text-xl font-bold text-foreground">Build Your Hoofprint</h3>
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 Every horse gets a permanent digital identity. Track it from blank resin to finished
                 custom, through ownership changes, with a provenance chain that follows the horse
                 forever.
@@ -145,7 +145,7 @@ export default function LandingPage() {
           <h2 className="mb-2 font-serif text-2xl font-extrabold tracking-[-0.02em]">
             Everything You Need. <span className="text-forest">Nothing You Don&apos;t.</span>
           </h2>
-          <p className="text-stone-600 mx-auto mb-12 max-w-[540px] text-base">
+          <p className="text-secondary-foreground mx-auto mb-12 max-w-[540px] text-base">
             Every feature exists because a real collector said &ldquo;I wish this existed.&rdquo;
           </p>
 
@@ -158,10 +158,10 @@ export default function LandingPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-forest/10 text-forest">
                 <BookOpen size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">
+              <h3 className="mb-2 text-xl font-bold text-foreground">
                 10,500+ Reference Releases
               </h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 Stop Googling &ldquo;Breyer palomino 1995.&rdquo; Our database covers 7,000+ Breyer
                 and Stone releases plus 3,500+ artist resins. Search by mold, sculptor, scale, or
                 year — and identify any model in seconds.
@@ -176,10 +176,10 @@ export default function LandingPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
                 <Shield size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">
+              <h3 className="mb-2 text-xl font-bold text-foreground">
                 Private Financial Vault
               </h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 Know what your collection is really worth — without anyone else seeing. Track
                 purchase prices, estimated values, and insurance notes in a vault that only you can
                 access. Generate insurance PDF reports instantly.
@@ -194,10 +194,10 @@ export default function LandingPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                 <Gavel size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">
+              <h3 className="mb-2 text-xl font-bold text-foreground">
                 Digital County Fair
               </h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 Host and enter virtual photo shows with 1-click NAMHSA-style class templates. Expert
                 judges stamp ribbons with a visual judging interface. Community voting, class-based
                 results, and show records that flow into Hoofprint™.
@@ -212,10 +212,10 @@ export default function LandingPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                 <TrendingUp size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">
+              <h3 className="mb-2 text-xl font-bold text-foreground">
                 Blue Book Market Guide
               </h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 Real sale data from real collectors. Search market values for 10,500+ models based on
                 completed transactions. The definitive price guide for model horses — no more
                 guessing what something is worth.
@@ -230,10 +230,10 @@ export default function LandingPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
                 <Palette size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">
+              <h3 className="mb-2 text-xl font-bold text-foreground">
                 Art Studio &amp; Commissions
               </h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 Artists: manage your commission queue, share WIP progress photos, and build a
                 portfolio. Clients: watch your custom come to life. Every brushstroke becomes part of
                 the horse&apos;s Hoofprint™.
@@ -248,10 +248,10 @@ export default function LandingPage() {
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
                 <Handshake size={28} strokeWidth={1.5} />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-stone-900">
+              <h3 className="mb-2 text-xl font-bold text-foreground">
                 Buy, Sell &amp; Trade with Trust
               </h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
+              <p className="text-secondary-foreground text-sm leading-relaxed">
                 List models for sale with multi-angle photos. Make and receive offers through
                 structured Safe-Trade flows. Verified seller badges, post-transaction reviews, and
                 wishlist matchmaking alerts when your dream horse appears.
@@ -270,12 +270,12 @@ export default function LandingPage() {
           <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] mb-6 font-serif leading-[1.2] font-extrabold">
             Every Horse Has a Story. <span className="text-forest">Hoofprint™ Tells It.</span>
           </h2>
-          <p className="text-stone-600 mb-4 text-base leading-[1.7]">
+          <p className="text-secondary-foreground mb-4 text-base leading-[1.7]">
             Imagine a permanent digital identity for every model horse. From the moment a blank resin
             is cast, through the artist&apos;s brushstrokes, to the collector who treasures it — and
             the next collector after that.
           </p>
-          <p className="text-stone-600 mb-4 text-base leading-[1.7]">
+          <p className="text-secondary-foreground mb-4 text-base leading-[1.7]">
             Hoofprint™ is the first-ever living provenance system for model horses. Photos, ownership
             transfers, customization records, and show results all follow the horse — not the owner.
             Like a passport that never expires.
@@ -313,7 +313,7 @@ export default function LandingPage() {
             Built for <span className="text-forest">Every Part of the Hobby</span>
           </h2>
           <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
-            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Home size={32} strokeWidth={1.5} />
               </div>
@@ -323,7 +323,7 @@ export default function LandingPage() {
                 and a private vault. Import your entire spreadsheet in minutes with CSV batch import.
               </p>
             </div>
-            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Palette size={32} strokeWidth={1.5} />
               </div>
@@ -334,7 +334,7 @@ export default function LandingPage() {
                 Hoofprint&trade; — forever.
               </p>
             </div>
-            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Trophy size={32} strokeWidth={1.5} />
               </div>
@@ -356,27 +356,27 @@ export default function LandingPage() {
       >
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-12 max-sm:gap-8">
           <div className="flex flex-col items-center gap-1">
-            <span className="text-stone-900 text-2xl font-extrabold">10,500+</span>
-            <span className="text-stone-500 text-sm font-medium">Releases &amp; Resins</span>
+            <span className="text-foreground text-2xl font-extrabold">10,500+</span>
+            <span className="text-muted-foreground text-sm font-medium">Releases &amp; Resins</span>
           </div>
-          <div className="bg-stone-200 h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
+          <div className="bg-muted h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
           <div className="flex flex-col items-center gap-1">
-            <span className="text-stone-900 text-2xl font-extrabold">
+            <span className="text-foreground text-2xl font-extrabold">
               <PawPrint size={28} strokeWidth={1.5} />
             </span>
-            <span className="text-stone-500 text-sm font-medium">Hoofprint™ Tracking</span>
+            <span className="text-muted-foreground text-sm font-medium">Hoofprint™ Tracking</span>
           </div>
-          <div className="bg-stone-200 h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
+          <div className="bg-muted h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
           <div className="flex flex-col items-center gap-1">
-            <span className="text-stone-900 text-2xl font-extrabold">
+            <span className="text-foreground text-2xl font-extrabold">
               <Shield size={28} strokeWidth={1.5} />
             </span>
-            <span className="text-stone-500 text-sm font-medium">Privacy-First</span>
+            <span className="text-muted-foreground text-sm font-medium">Privacy-First</span>
           </div>
-          <div className="bg-stone-200 h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
+          <div className="bg-muted h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
           <div className="flex flex-col items-center gap-1">
-            <span className="text-stone-900 text-2xl font-extrabold">100%</span>
-            <span className="text-stone-500 text-sm font-medium">Free to Start</span>
+            <span className="text-foreground text-2xl font-extrabold">100%</span>
+            <span className="text-muted-foreground text-sm font-medium">Free to Start</span>
           </div>
         </div>
       </section>
@@ -387,11 +387,11 @@ export default function LandingPage() {
           <h2 className="mb-2 font-serif text-2xl font-extrabold tracking-[-0.02em]">
             Already <span className="text-forest">Live</span>
           </h2>
-          <p className="text-stone-600 mx-auto mb-12 max-w-[540px] text-base">
+          <p className="text-secondary-foreground mx-auto mb-12 max-w-[540px] text-base">
             These aren&apos;t promises — they&apos;re features you can use right now.
           </p>
           <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
-            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Users size={32} strokeWidth={1.5} />
               </div>
@@ -401,7 +401,7 @@ export default function LandingPage() {
                 Dedicated spaces for breed circles, regional clubs, or trading networks.
               </p>
             </div>
-            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Smartphone size={32} strokeWidth={1.5} />
               </div>
@@ -411,7 +411,7 @@ export default function LandingPage() {
                 you can access your stable and show string without cell service.
               </p>
             </div>
-            <div className="[&_p]:text-stone-600 rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Bot size={32} strokeWidth={1.5} />
               </div>
@@ -435,7 +435,7 @@ export default function LandingPage() {
           <h2 className="font-serif text-2xl font-extrabold tracking-[-0.02em]">
             Go Pro When You&apos;re <span className="text-forest">Ready</span>
           </h2>
-          <p className="text-stone-600 mx-auto mt-4 mb-8 max-w-[540px] text-base leading-[1.7]">
+          <p className="text-secondary-foreground mx-auto mt-4 mb-8 max-w-[540px] text-base leading-[1.7]">
             The free tier has everything you need to catalog and connect. When you want more, Pro
             unlocks the premium tools — but never locks you out of the basics.
           </p>
@@ -443,29 +443,29 @@ export default function LandingPage() {
             <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
-                <p className="text-sm font-semibold text-stone-900">Photo Suite+</p>
-                <p className="text-xs text-stone-500">30 extra photos per horse</p>
+                <p className="text-sm font-semibold text-foreground">Photo Suite+</p>
+                <p className="text-xs text-muted-foreground">30 extra photos per horse</p>
               </div>
             </div>
             <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
-                <p className="text-sm font-semibold text-stone-900">Blue Book PRO Charts</p>
-                <p className="text-xs text-stone-500">Historical price trends &amp; analytics</p>
+                <p className="text-sm font-semibold text-foreground">Blue Book PRO Charts</p>
+                <p className="text-xs text-muted-foreground">Historical price trends &amp; analytics</p>
               </div>
             </div>
             <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
-                <p className="text-sm font-semibold text-stone-900">AI Stablemaster</p>
-                <p className="text-xs text-stone-500">Monthly collection analysis</p>
+                <p className="text-sm font-semibold text-foreground">AI Stablemaster</p>
+                <p className="text-xs text-muted-foreground">Monthly collection analysis</p>
               </div>
             </div>
             <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
-                <p className="text-sm font-semibold text-stone-900">Show Tags PDF</p>
-                <p className="text-xs text-stone-500">Printable show tags with QR codes</p>
+                <p className="text-sm font-semibold text-foreground">Show Tags PDF</p>
+                <p className="text-xs text-muted-foreground">Printable show tags with QR codes</p>
               </div>
             </div>
           </div>
@@ -486,10 +486,10 @@ export default function LandingPage() {
             <Shield size={24} strokeWidth={1.5} />
           </div>
           <div>
-            <h3 className="mb-1 text-base font-bold text-stone-900">
+            <h3 className="mb-1 text-base font-bold text-foreground">
               Your Data &amp; Art Belong to You
             </h3>
-            <p className="text-sm leading-relaxed text-stone-600">
+            <p className="text-sm leading-relaxed text-secondary-foreground">
               We do <strong>not</strong> use your photos to train AI. Our 10,500+ reference catalog
               was built using traditional data-gathering scripts — not AI scrapers — from publicly
               available hobby sources. Read our full{" "}
@@ -508,7 +508,7 @@ export default function LandingPage() {
           <h2 className="font-serif text-2xl font-extrabold">
             Ready to Give Your Herd <span className="text-forest">a Real Home</span>?
           </h2>
-          <p className="mx-auto mt-4 mb-8 max-w-[480px] text-stone-600">
+          <p className="mx-auto mt-4 mb-8 max-w-[480px] text-secondary-foreground">
             Join collectors and artists who catalog, connect, and trade on the only platform built
             for the model horse hobby.
           </p>

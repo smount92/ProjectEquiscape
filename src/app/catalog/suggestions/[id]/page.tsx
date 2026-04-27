@@ -130,13 +130,13 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  return (
   <ExplorerLayout title="Suggestion Detail" description="View, vote on, and discuss a catalog suggestion.">
- <nav className="text-stone-500 mb-6 flex items-center gap-1 text-sm">
+ <nav className="text-muted-foreground mb-6 flex items-center gap-1 text-sm">
  <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-stone-500 mb-6-sep flex items-center gap-1 text-sm">
+ <span className="text-muted-foreground mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <Link href="/catalog/suggestions">Suggestions</Link>
- <span className="text-stone-500 mb-6-sep flex items-center gap-1 text-sm">
+ <span className="text-muted-foreground mb-6-sep flex items-center gap-1 text-sm">
  ›
  </span>
  <span>Detail</span>
@@ -155,7 +155,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  downvotes={s.downvotes}
  />
  ) : (
- <div className="text-stone-500 flex flex-col items-center gap-1">
+ <div className="text-muted-foreground flex flex-col items-center gap-1">
  <span className="font-semibold">▲ {s.upvotes}</span>
  <span className="font-semibold">▼ {s.downvotes}</span>
  </div>
@@ -181,7 +181,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  :"🗑 Removal"}
  </span>
  </div>
- <span className="text-stone-500 text-sm">
+ <span className="text-muted-foreground text-sm">
  {new Date(s.created_at).toLocaleDateString("en-US", {
  year:"numeric",
  month:"long",
@@ -228,7 +228,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  <h3>Changes</h3>
  <div className="overflow-x-auto rounded-xl border border-[#E0D5C1] bg-[#FEFCF8] shadow-sm [-webkit-overflow-scrolling:touch]">
       <div className="min-w-[500px]">
-      <div className="grid grid-cols-[1fr_1fr_40px_1fr] border-b border-[#E0D5C1] bg-[#F4EFE6] p-3 text-xs font-bold tracking-wider text-stone-500 uppercase">
+      <div className="grid grid-cols-[1fr_1fr_40px_1fr] border-b border-[#E0D5C1] bg-[#F4EFE6] p-3 text-xs font-bold tracking-wider text-muted-foreground uppercase">
         <div>Field</div>
         <div>Current</div>
         <div></div>
@@ -239,11 +239,11 @@ export default async function SuggestionDetailPage({ params }: Props) {
           const v = val as { from: string; to: string };
           return (
             <div key={key} className="grid grid-cols-[1fr_1fr_40px_1fr] items-center border-b border-[#E0D5C1]/40 p-3 text-sm last:border-0 hover:bg-[#F4EFE6]/50 transition-colors">
-              <div className="font-semibold text-stone-900">
+              <div className="font-semibold text-foreground">
                 {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
               </div>
-              <div className="font-mono text-stone-500 line-through decoration-red-400/50">{v.from}</div>
-              <div className="text-center text-stone-300">→</div>
+              <div className="font-mono text-muted-foreground line-through decoration-red-400/50">{v.from}</div>
+              <div className="text-center text-muted-foreground">→</div>
               <div className="font-mono font-bold text-emerald-600">{v.to}</div>
             </div>
           );
@@ -263,7 +263,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  .filter(([, v]) => v != null && v !=="")
  .map(([k, v]) => (
  <div key={k} className="flex flex-col gap-[2px]">
- <span className="text-stone-500 text-xs font-semibold tracking-[0.05em] uppercase">
+ <span className="text-muted-foreground text-xs font-semibold tracking-[0.05em] uppercase">
  {k.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
  </span>
  <span className="text-base font-bold text-[#66bb6a]">
@@ -278,7 +278,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {/* Reason */}
  <div className="my-3">
  <h3>Reason</h3>
- <blockquote className="border-forest bg-muted rounded-r-md border-l-[3px] px-4 py-2 text-stone-900 italic">
+ <blockquote className="border-forest bg-muted rounded-r-md border-l-[3px] px-4 py-2 text-foreground italic">
  {s.reason}
  </blockquote>
  </div>

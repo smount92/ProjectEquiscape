@@ -46,13 +46,13 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
   <div className="flex w-fit gap-1 rounded-lg border border-input bg-muted/60 p-1">
    <Link
    href="/feed"
-   className={`rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="global" ?"bg-forest font-semibold text-white shadow-sm" :"text-ink-light hover:bg-card hover:text-stone-700"}`}
+   className={`rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="global" ?"bg-forest font-semibold text-white shadow-sm" :"text-ink-light hover:bg-card hover:text-foreground"}`}
    >
    🌐 Global
    </Link>
    <Link
    href="/feed?tab=following"
-   className={`rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="following" ?"bg-forest font-semibold text-white shadow-sm" :"text-ink-light hover:bg-card hover:text-stone-700"}`}
+   className={`rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="following" ?"bg-forest font-semibold text-white shadow-sm" :"text-ink-light hover:bg-card hover:text-foreground"}`}
    >
    👥 Following
    </Link>

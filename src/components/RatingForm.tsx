@@ -89,10 +89,10 @@ export default function RatingForm({
  <div className="py-4 text-center">
  <RatingStars rating={rating.stars} size="md" />
  {rating.reviewText && (
- <p className="text-stone-500 mt-4 text-sm italic">&ldquo;{rating.reviewText}&rdquo;</p>
+ <p className="text-muted-foreground mt-4 text-sm italic">&ldquo;{rating.reviewText}&rdquo;</p>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleRetract}
  disabled={status ==="retracting"}
  >
@@ -121,7 +121,7 @@ export default function RatingForm({
  background:"var(--color-bg-muted)",
  borderRadius:"var(--radius-sm)",
  fontSize: "0.75rem",
- color:"var(--color-text-stone-500)",
+ color:"var(--color-text-muted-foreground)",
  marginBottom:"var(--space-md)",
  }}
  >
@@ -151,7 +151,7 @@ export default function RatingForm({
  rows={2}
  id="rating-review-text"
  />
- <div className="text-stone-500 mt-1 text-right text-xs">{reviewText.length}/300</div>
+ <div className="text-muted-foreground mt-1 text-right text-xs">{reviewText.length}/300</div>
  </div>
 
  {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}

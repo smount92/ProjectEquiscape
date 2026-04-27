@@ -170,15 +170,15 @@ export default async function WishlistPage() {
     >
     <div className="mt-[2px] shrink-0 text-[2rem] leading-none">🐴</div>
     <div className="min-w-0 flex-1">
-     <div className="text-stone-900 mb-1 text-base font-semibold">
+     <div className="text-foreground mb-1 text-base font-semibold">
      {typeIcon} {title}
      </div>
      {maker && <div className="text-forest mb-1 text-sm">{maker}</div>}
-     {scale && <div className="text-stone-500 mb-[2px] text-sm">📏 {scale}</div>}
+     {scale && <div className="text-muted-foreground mb-[2px] text-sm">📏 {scale}</div>}
      {item.notes && (
-     <div className="text-stone-500 mt-1 text-sm italic">📝 {item.notes}</div>
+     <div className="text-muted-foreground mt-1 text-sm italic">📝 {item.notes}</div>
      )}
-     <div className="text-stone-500 mt-2 text-xs opacity-70">
+     <div className="text-muted-foreground mt-2 text-xs opacity-70">
      Added{" "}
      {new Date(item.created_at).toLocaleDateString("en-US", {
       month:"short",

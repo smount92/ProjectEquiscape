@@ -719,7 +719,7 @@ export default function EditHorsePage() {
 
  return (
  <FocusLayout title="Edit Horse" description="Update your horse details.">
- <nav className="text-stone-600 animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/dashboard">Digital Stable</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -763,7 +763,7 @@ export default function EditHorsePage() {
  <div className="mb-1 text-2xl">📸</div>
  <h2>Photo Studio</h2>
  </div>
- <p className="text-stone-500 mb-4 text-sm">
+ <p className="text-muted-foreground mb-4 text-sm">
  Upload up to 4 standardized angles. The primary photo is used as the thumbnail everywhere.
  </p>
 
@@ -776,7 +776,7 @@ export default function EditHorsePage() {
 
  return (
  <div key={slot.angle} className="flex flex-col">
- <div className="text-stone-900 mb-1 flex items-center gap-1 text-sm font-semibold">
+ <div className="text-foreground mb-1 flex items-center gap-1 text-sm font-semibold">
  {slot.label}
  {slot.primary && (
  <span className="bg-emerald-50 rounded-full px-[8px] py-[2px] text-xs font-bold text-[#2C5545]">
@@ -833,7 +833,7 @@ export default function EditHorsePage() {
  </div>
  </div>
  ) : (
- <div className="text-stone-500 flex flex-col items-center gap-2 p-8">
+ <div className="text-muted-foreground flex flex-col items-center gap-2 p-8">
  <svg
  width="28"
  height="28"
@@ -883,9 +883,9 @@ export default function EditHorsePage() {
 
  {/* Extra Details Multi-Upload Zone */}
  <div className="border-input mt-6 border-t pt-6">
- <div className="text-stone-900 mb-1 flex items-center gap-1 text-sm font-semibold">
+ <div className="text-foreground mb-1 flex items-center gap-1 text-sm font-semibold">
  Extra Details & Flaws
- <span className="text-stone-500 text-xs font-normal">
+ <span className="text-muted-foreground text-xs font-normal">
  {existingExtras.length + newExtraFiles.length}/10
  </span>
  </div>
@@ -1047,7 +1047,7 @@ export default function EditHorsePage() {
  </div>
 
  <div className="mb-6">
- <label htmlFor="edit-name" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-name" className="text-foreground mb-1 block text-sm font-semibold">
  Custom Name *
  </label>
  <Input
@@ -1062,7 +1062,7 @@ export default function EditHorsePage() {
 
  {isFieldVisible(assetCategory, "sculptor") && (
  <div className="mb-6">
- <label htmlFor="edit-sculptor" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-sculptor" className="text-foreground mb-1 block text-sm font-semibold">
  {getFieldLabel(assetCategory, "sculptor")}
  </label>
  <Input
@@ -1078,7 +1078,7 @@ export default function EditHorsePage() {
 
  {isFieldVisible(assetCategory, "finishing_artist") && (
  <div className="mb-6">
- <label htmlFor="edit-finishing-artist" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-finishing-artist" className="text-foreground mb-1 block text-sm font-semibold">
  🎨 Finishing Artist
  </label>
  <Input
@@ -1094,10 +1094,10 @@ export default function EditHorsePage() {
 
  {isFieldVisible(assetCategory, "edition_info") && (
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">📋 Edition Info</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">📋 Edition Info</label>
  <div className="flex items-center gap-2">
  <Input type="number" className="w-[80px]" placeholder="#" value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)} min="1" />
- <span className="text-stone-500">of</span>
+ <span className="text-muted-foreground">of</span>
  <Input type="number" className="w-[80px]" placeholder="Total" value={editionSize} onChange={(e) => setEditionSize(e.target.value)} min="1" />
  </div>
  </div>
@@ -1105,7 +1105,7 @@ export default function EditHorsePage() {
 
  {/* Finish Details */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Finish Details</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Finish Details</label>
  <Input
  
  type="text"
@@ -1119,7 +1119,7 @@ export default function EditHorsePage() {
 
  {/* Public Notes */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Public Notes</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Public Notes</label>
  <Textarea
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  value={publicNotes}
@@ -1129,7 +1129,7 @@ export default function EditHorsePage() {
  rows={2}
  id="edit-public-notes"
  />
- <small className="text-stone-500 text-[var(--font-size-xs)]">
+ <small className="text-muted-foreground text-[var(--font-size-xs)]">
  These notes will be visible to anyone viewing this horse&apos;s passport.
  </small>
  </div>
@@ -1143,18 +1143,18 @@ export default function EditHorsePage() {
  {/* Show Bio — model only */}
  {activeConfig.showShowBio && (
  <>
- <div className="my-5 text-stone-500 mt-4 mb-3 flex items-center gap-4 text-sm">
- <h4 className="text-stone-600 font-semibold text-[var(--font-size-md)]">
+ <div className="my-5 text-muted-foreground mt-4 mb-3 flex items-center gap-4 text-sm">
+ <h4 className="text-secondary-foreground font-semibold text-[var(--font-size-md)]">
  🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]">(Optional)</span>
  </h4>
- <small className="text-stone-500 mt-1 block">
+ <small className="text-muted-foreground mt-1 block">
  The show identity you assign for competition — breed, gender, and age for show ring
  divisions.
  </small>
  </div>
  <div className="flex flex-wrap gap-4">
  <div className="mb-6 min-w-[200px] flex-[1_1_200px]">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Breed</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Assigned Breed</label>
  <Input
  
  type="text"
@@ -1166,7 +1166,7 @@ export default function EditHorsePage() {
  />
  </div>
  <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Gender</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={assignedGender}
@@ -1186,7 +1186,7 @@ export default function EditHorsePage() {
  </div>
  <div className="flex flex-wrap gap-4">
  <div className="mb-6 min-w-[150px] flex-[1_1_150px]">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Age</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Assigned Age</label>
  <Input
  
  type="text"
@@ -1198,7 +1198,7 @@ export default function EditHorsePage() {
  />
  </div>
  <div className="mb-6 min-w-[200px] flex-[1_1_200px]">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Regional Show ID</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Regional Show ID</label>
  <Input
  
  type="text"
@@ -1217,7 +1217,7 @@ export default function EditHorsePage() {
  {isModel && (
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
- <label htmlFor="edit-finish" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-finish" className="text-foreground mb-1 block text-sm font-semibold">
  Finish Type *
  </label>
  <select
@@ -1234,7 +1234,7 @@ export default function EditHorsePage() {
  </div>
 
  <div className="mb-6">
- <label htmlFor="edit-condition" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-condition" className="text-foreground mb-1 block text-sm font-semibold">
  Condition Grade *
  </label>
  <select
@@ -1265,7 +1265,7 @@ export default function EditHorsePage() {
  value={conditionNote}
  onChange={(e) => setConditionNote(e.target.value)}
  />
- <span className="text-stone-500 mt-1 block text-xs">
+ <span className="text-muted-foreground mt-1 block text-xs">
  e.g., &quot;Minor rub discovered on left hip during cleaning&quot;
  </span>
  </div>
@@ -1277,7 +1277,7 @@ export default function EditHorsePage() {
  {/* Life Stage — model only */}
  {isModel && (
  <div className="mb-6">
- <label htmlFor="edit-life-stage" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-life-stage" className="text-foreground mb-1 block text-sm font-semibold">
  🐾 Life Stage
  </label>
  <select
@@ -1304,7 +1304,7 @@ export default function EditHorsePage() {
  <option value="completed">✅ Completed</option>
  <option value="for_sale">💲 For Sale</option>
  </select>
- <span className="text-stone-500 mt-1 block text-xs">
+ <span className="text-muted-foreground mt-1 block text-xs">
  Changing this will add a stage update to the Hoofprint™ timeline.
  </span>
  </div>
@@ -1317,7 +1317,7 @@ export default function EditHorsePage() {
 
  {/* Marketplace Status */}
  <div className="mb-6">
- <label htmlFor="edit-trade-status" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-trade-status" className="text-foreground mb-1 block text-sm font-semibold">
  Marketplace Status
  </label>
  <select
@@ -1339,7 +1339,7 @@ export default function EditHorsePage() {
  <div className="mb-6">
  <label
  htmlFor="edit-listing-price"
- className="text-stone-900 mb-1 block text-sm font-semibold"
+ className="text-foreground mb-1 block text-sm font-semibold"
  >
  💲 Listing Price
  </label>
@@ -1353,14 +1353,14 @@ export default function EditHorsePage() {
  value={listingPrice}
  onChange={(e) => setListingPrice(e.target.value)}
  />
- <span className="text-stone-500 mt-1 block text-xs">
+ <span className="text-muted-foreground mt-1 block text-xs">
  Optional — leave blank for &ldquo;Contact for price&rdquo;
  </span>
  </div>
  <div className="mb-6">
  <label
  htmlFor="edit-marketplace-notes"
- className="text-stone-900 mb-1 block text-sm font-semibold"
+ className="text-foreground mb-1 block text-sm font-semibold"
  >
  📝 Seller Notes
  </label>
@@ -1381,7 +1381,7 @@ export default function EditHorsePage() {
  {/* Community visibility selector */}
  <div className="bg-emerald-50/50 border-emerald-200 mt-6 rounded-lg border px-6 py-4">
  <div className="flex flex-col items-center justify-between gap-6">
- <span className="text-stone-900 text-base font-semibold">
+ <span className="text-foreground text-base font-semibold">
  👁️ Visibility
  </span>
  <div className="flex flex-wrap gap-2">
@@ -1408,13 +1408,13 @@ export default function EditHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-surface-primary font-inherit text-stone-900 hover:border-emerald-700 hover:bg-surface-secondary flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-emerald-50" :"border-input"}`}
+ className={`bg-surface-primary font-inherit text-foreground hover:border-emerald-700 hover:bg-surface-secondary flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-emerald-50" :"border-input"}`}
  onClick={() => setVisibility(opt.value)}
  id={`edit-visibility-${opt.value}`}
  >
  <span className="text-2xl">{opt.icon}</span>
  <span className="text-sm font-semibold">{opt.label}</span>
- <span className="text-stone-500 text-center text-xs">{opt.hint}</span>
+ <span className="text-muted-foreground text-center text-xs">{opt.hint}</span>
  </button>
  ))}
  </div>
@@ -1471,7 +1471,7 @@ export default function EditHorsePage() {
 
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
- <label htmlFor="edit-price" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-price" className="text-foreground mb-1 block text-sm font-semibold">
  Purchase Price
  </label>
  <Input
@@ -1486,7 +1486,7 @@ export default function EditHorsePage() {
  />
  </div>
  <div className="mb-6">
- <label htmlFor="edit-date" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-date" className="text-foreground mb-1 block text-sm font-semibold">
  Purchase Date
  </label>
  <Input
@@ -1501,7 +1501,7 @@ export default function EditHorsePage() {
 
  {/* Fuzzy Purchase Date */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Approximate Purchase Date</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Approximate Purchase Date</label>
  <Input
  
  type="text"
@@ -1510,14 +1510,14 @@ export default function EditHorsePage() {
  placeholder="e.g. BreyerFest 2017, Summer 2015"
  id="edit-purchase-date-text"
  />
- <small className="text-stone-500 text-[var(--font-size-xs)]">
+ <small className="text-muted-foreground text-[var(--font-size-xs)]">
  Use this when you don&apos;t remember the exact date.
  </small>
  </div>
 
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
- <label htmlFor="edit-value" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-value" className="text-foreground mb-1 block text-sm font-semibold">
  Estimated Current Value
  </label>
  <Input
@@ -1532,7 +1532,7 @@ export default function EditHorsePage() {
  />
  </div>
  <div className="mb-6">
- <label htmlFor="edit-insurance" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="edit-insurance" className="text-foreground mb-1 block text-sm font-semibold">
  Insurance Notes
  </label>
  <Input
@@ -1551,7 +1551,7 @@ export default function EditHorsePage() {
  <div className="flex justify-end gap-4">
  <Link
  href={`/stable/${horseId}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  id="edit-cancel"
  >
  Cancel

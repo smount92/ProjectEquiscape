@@ -193,7 +193,7 @@ export default function AdminTabs({
  className={`flex cursor-pointer items-center gap-1.5 border-0 border-b-[3px] bg-transparent px-4 py-2 text-sm font-semibold whitespace-nowrap transition-all ${
  activeTab === tab.key
  ? "border-forest text-forest"
- : "border-transparent text-stone-500 hover:text-stone-900"
+ : "border-transparent text-muted-foreground hover:text-foreground"
  }`}
  onClick={() => handleTabChange(tab.key)}
  >
@@ -250,7 +250,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  >
  <div className="mb-2 flex items-center justify-between">
  <div className="flex items-center gap-2">
- <span className="text-sm font-semibold text-stone-900">
+ <span className="text-sm font-semibold text-foreground">
  {msg.name}
  </span>
  <a
@@ -260,7 +260,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  {msg.email}
  </a>
  </div>
- <span className="text-xs text-stone-500">
+ <span className="text-xs text-muted-foreground">
  {formatDate(msg.created_at)}
  </span>
  </div>
@@ -270,7 +270,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
  {msg.subject}
  </div>
  )}
- <div className="mb-3 text-sm leading-relaxed text-stone-600 whitespace-pre-wrap">
+ <div className="mb-3 text-sm leading-relaxed text-secondary-foreground whitespace-pre-wrap">
  {msg.message}
  </div>
  <div className="flex flex-wrap items-center gap-2 border-t border-input pt-3">
@@ -350,14 +350,14 @@ function ReportsTab({ reports }: { reports: Report[] }) {
  <div key={report.id} className="bg-card border-input rounded-lg border px-6 py-4 transition-all">
  <div className="mb-1 flex justify-between">
  <strong>{report.reason}</strong>
- <span className="text-stone-500 text-xs">
+ <span className="text-muted-foreground text-xs">
  {report.targetType} · {new Date(report.createdAt).toLocaleDateString()}
  </span>
  </div>
  <p className="mb-1 text-sm">
  Reported by: {report.reporterAlias} · Target: {report.targetId.slice(0, 8)}…
  </p>
- {report.details && <p className="text-stone-500 text-sm">{report.details}</p>}
+ {report.details && <p className="text-muted-foreground text-sm">{report.details}</p>}
  <ReportActions reportId={report.id} />
  </div>
  ))}
@@ -422,7 +422,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  {typeIcon}{""}
  {s.suggestion_type.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
  </strong>
- <span className="text-stone-500 text-xs">
+ <span className="text-muted-foreground text-xs">
  ▲{s.upvotes} ▼{s.downvotes} · {new Date(s.created_at).toLocaleDateString()}
  </span>
  </div>
@@ -434,7 +434,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  {changeText}
  </p>
  )}
- <p className="text-stone-500 mb-2 text-sm italic">
+ <p className="text-muted-foreground mb-2 text-sm italic">
  &ldquo;{s.reason.slice(0, 200)}
  {s.reason.length > 200 ?"…" :""}&rdquo;
  </p>

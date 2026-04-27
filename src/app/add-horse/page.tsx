@@ -584,7 +584,7 @@ export default function AddHorsePage() {
  </Link>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  View Stable
  </Link>
@@ -601,7 +601,7 @@ export default function AddHorsePage() {
           <h1 className="text-2xl font-bold tracking-tight">
             Add to <span className="text-forest">Stable</span>
           </h1>
-          <p className="mt-2 text-sm text-stone-600">
+          <p className="mt-2 text-sm text-secondary-foreground">
  {activeConfig.label === "Model Horse"
  ?"Catalog a new model horse in your digital collection"
  : `Add ${activeConfig.label.toLowerCase()} to your collection`}
@@ -620,11 +620,11 @@ export default function AddHorsePage() {
  <button
  key={cat.value}
  type="button"
-              className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/5 shadow-sm" : "border-input bg-card hover:border-stone-300"}`}
+              className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/5 shadow-sm" : "border-input bg-card hover:border-input"}`}
  onClick={() => setAssetCategory(cat.value)}
  >
  <span className="text-2xl">{cat.icon}</span>
-              <span className="text-sm font-semibold text-stone-600">{cat.label}</span>
+              <span className="text-sm font-semibold text-secondary-foreground">{cat.label}</span>
  </button>
  ))}
  </div>
@@ -674,7 +674,7 @@ export default function AddHorsePage() {
  ? "border-forest bg-forest text-white"
  : i < currentStep
  ? "border-forest bg-forest text-white"
- : "border-gray-300 bg-card text-stone-500"
+ : "border-gray-300 bg-card text-muted-foreground"
  }`}
  aria-current={i === currentStep ?"step" : undefined}
  >
@@ -683,7 +683,7 @@ export default function AddHorsePage() {
  {/* Label */}
  <span
  className={`mt-2 text-xs font-medium ${
- i === currentStep ? "text-forest" : i < currentStep ? "text-stone-900" : "text-stone-500"
+ i === currentStep ? "text-forest" : i < currentStep ? "text-foreground" : "text-muted-foreground"
  }`}
  >
  {step.label}
@@ -805,7 +805,7 @@ export default function AddHorsePage() {
  )}
  </>
  ) : (
- <div className="flex w-full flex-col items-center gap-2 p-2 text-center text-stone-500">
+ <div className="flex w-full flex-col items-center gap-2 p-2 text-center text-muted-foreground">
  <span className="text-3xl opacity-50 transition-colors group-hover:opacity-100">
  {isPrimary ? "🖼️" : "📷"}
  </span>
@@ -1036,7 +1036,7 @@ export default function AddHorsePage() {
 
  <div className="mt-8 flex items-center justify-between gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={goBack}
  id="step-2-back"
  >
@@ -1085,7 +1085,7 @@ export default function AddHorsePage() {
  </div>
 
  <div className="mb-6">
- <label htmlFor="custom-name" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="custom-name" className="text-foreground mb-1 block text-sm font-semibold">
  Custom Name *
  </label>
  <Input
@@ -1104,14 +1104,14 @@ export default function AddHorsePage() {
  {validationErrors.includes("Custom Name") && (
  <span className="mt-1 block text-xs font-medium text-red-500">⚠ Required — give your model a name</span>
  )}
- <span className="text-stone-500 mt-1 block text-xs">
+ <span className="text-muted-foreground mt-1 block text-xs">
  What do you call this model? This can be a show name, pet name, or whatever you like.
  </span>
  </div>
 
  {isFieldVisible(assetCategory, "sculptor") && (
  <div className="mb-6">
- <label htmlFor="sculptor" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="sculptor" className="text-foreground mb-1 block text-sm font-semibold">
  {getFieldLabel(assetCategory, "sculptor")}
  </label>
  <Input
@@ -1127,7 +1127,7 @@ export default function AddHorsePage() {
 
  {isFieldVisible(assetCategory, "finishing_artist") && (
  <div className="mb-6">
- <label htmlFor="finishing-artist" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="finishing-artist" className="text-foreground mb-1 block text-sm font-semibold">
  🎨 Finishing Artist
  </label>
  <Input
@@ -1143,20 +1143,20 @@ export default function AddHorsePage() {
 
  {isFieldVisible(assetCategory, "edition_info") && (
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">📋 Edition Info</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">📋 Edition Info</label>
  <div className="flex items-center gap-2">
  <Input type="number" placeholder="#" value={editionNumber} onChange={(e) => setEditionNumber(e.target.value)} className="w-20" min="1" />
- <span className="text-stone-500">of</span>
+ <span className="text-muted-foreground">of</span>
  <Input type="number" placeholder="Total" value={editionSize} onChange={(e) => setEditionSize(e.target.value)} className="w-20" min="1" />
  </div>
- <span className="text-stone-500 mt-1 block text-xs">e.g., &quot;3 of 50&quot; for limited edition runs.</span>
+ <span className="text-muted-foreground mt-1 block text-xs">e.g., &quot;3 of 50&quot; for limited edition runs.</span>
  </div>
  )}
 
  {/* Finish Type — model only */}
  {isModel && (
  <div className="mb-6">
- <label htmlFor="finish-type" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="finish-type" className="text-foreground mb-1 block text-sm font-semibold">
  Finish Type *
  </label>
  <select
@@ -1185,7 +1185,7 @@ export default function AddHorsePage() {
 
  {/* Finish Details */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Finish Details</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Finish Details</label>
  <Input
  
  type="text"
@@ -1199,7 +1199,7 @@ export default function AddHorsePage() {
 
  {/* Public Notes */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Public Notes</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Public Notes</label>
  <Textarea
  
  value={publicNotes}
@@ -1209,7 +1209,7 @@ export default function AddHorsePage() {
  rows={2}
  id="public-notes"
  />
- <small className="text-stone-500 text-[var(--font-size-xs)]">
+ <small className="text-muted-foreground text-[var(--font-size-xs)]">
  These notes will be visible to anyone viewing this horse&apos;s passport.
  </small>
  </div>
@@ -1223,11 +1223,11 @@ export default function AddHorsePage() {
  {/* ── Show Bio (Optional — model only) ── */}
  {activeConfig.showShowBio && (
  <>
- <div className="my-5 text-stone-500 mt-4 mb-3 flex items-center gap-4 text-sm">
- <h4 className="text-stone-600 font-semibold text-[var(--font-size-md)]">
+ <div className="my-5 text-muted-foreground mt-4 mb-3 flex items-center gap-4 text-sm">
+ <h4 className="text-secondary-foreground font-semibold text-[var(--font-size-md)]">
  🏅 Show Bio <span className="font-normal text-[var(--font-size-sm)]">(Optional)</span>
  </h4>
- <small className="mt-1 block text-stone-500">
+ <small className="mt-1 block text-muted-foreground">
  The show identity you assign for competition — breed, gender, and age for show ring
  divisions.
  </small>
@@ -1237,7 +1237,7 @@ export default function AddHorsePage() {
  className="form-row flex flex-wrap gap-4 max-md:flex-col max-md:gap-4"
  >
  <div className="mb-6 min-w-[200px] flex-1">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Breed</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Assigned Breed</label>
  <Input
  
  type="text"
@@ -1272,7 +1272,7 @@ export default function AddHorsePage() {
  className="form-row flex flex-wrap gap-4 max-md:flex-col max-md:gap-4"
  >
  <div className="mb-6 min-w-[150px] flex-1">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Assigned Age</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Assigned Age</label>
  <Input
  
  type="text"
@@ -1284,7 +1284,7 @@ export default function AddHorsePage() {
  />
  </div>
  <div className="mb-6 min-w-[200px] flex-1">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Regional Show ID</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Regional Show ID</label>
  <Input
  
  type="text"
@@ -1302,7 +1302,7 @@ export default function AddHorsePage() {
  {/* Condition Grade */}
  {isModel && (
  <div className="mb-6">
- <label htmlFor="condition-grade" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="condition-grade" className="text-foreground mb-1 block text-sm font-semibold">
  Condition Grade *
  </label>
  <select
@@ -1331,7 +1331,7 @@ export default function AddHorsePage() {
  {/* Life Stage — model only */}
  {isModel && (
  <div className="mb-6">
- <label htmlFor="life-stage" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="life-stage" className="text-foreground mb-1 block text-sm font-semibold">
  🐾 Life Stage
  </label>
  <select
@@ -1346,7 +1346,7 @@ export default function AddHorsePage() {
  <option value="completed">✅ Completed</option>
  <option value="for_sale">💲 For Sale</option>
  </select>
- <span className="text-stone-500 mt-1 block text-xs">
+ <span className="text-muted-foreground mt-1 block text-xs">
  This sets the life stage on your Hoofprint™ timeline.
  </span>
  </div>
@@ -1359,7 +1359,7 @@ export default function AddHorsePage() {
 
  {/* Trade / Marketplace Status */}
  <div className="mb-6">
- <label htmlFor="trade-status" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="trade-status" className="text-foreground mb-1 block text-sm font-semibold">
  Marketplace Status
  </label>
  <select
@@ -1381,7 +1381,7 @@ export default function AddHorsePage() {
  <div className="mb-6">
  <label
  htmlFor="listing-price"
- className="text-stone-900 mb-1 block text-sm font-semibold"
+ className="text-foreground mb-1 block text-sm font-semibold"
  >
  💲 Listing Price
  </label>
@@ -1395,14 +1395,14 @@ export default function AddHorsePage() {
  value={listingPrice}
  onChange={(e) => setListingPrice(e.target.value)}
  />
- <span className="text-stone-500 mt-1 block text-xs">
+ <span className="text-muted-foreground mt-1 block text-xs">
  Optional — leave blank for &ldquo;Contact for price&rdquo;
  </span>
  </div>
  <div className="mb-6">
  <label
  htmlFor="marketplace-notes"
- className="text-stone-900 mb-1 block text-sm font-semibold"
+ className="text-foreground mb-1 block text-sm font-semibold"
  >
  📝 Seller Notes
  </label>
@@ -1422,7 +1422,7 @@ export default function AddHorsePage() {
 
  <div className="mt-8 flex items-center justify-between gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={goBack}
  id="step-3-back"
  >
@@ -1443,7 +1443,7 @@ export default function AddHorsePage() {
  <div
  className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
  >
- <span className="text-stone-900 text-base font-semibold">
+ <span className="text-foreground text-base font-semibold">
  👁️ Visibility
  </span>
  <div className="flex flex-wrap gap-2">
@@ -1470,13 +1470,13 @@ export default function AddHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-[#FEFCF8] font-inherit text-stone-900 hover:border-emerald-700 hover:bg-muted flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-edge"}`}
+ className={`bg-[#FEFCF8] font-inherit text-foreground hover:border-emerald-700 hover:bg-muted flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-edge"}`}
  onClick={() => setVisibility(opt.value)}
  id={`visibility-${opt.value}`}
  >
  <span className="text-2xl">{opt.icon}</span>
  <span className="text-sm font-semibold">{opt.label}</span>
- <span className="text-stone-500 text-center text-xs">{opt.hint}</span>
+ <span className="text-muted-foreground text-center text-xs">{opt.hint}</span>
  </button>
  ))}
  </div>
@@ -1524,7 +1524,7 @@ export default function AddHorsePage() {
 
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
- <label htmlFor="purchase-price" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="purchase-price" className="text-foreground mb-1 block text-sm font-semibold">
  Purchase Price
  </label>
  <Input
@@ -1540,7 +1540,7 @@ export default function AddHorsePage() {
  </div>
 
  <div className="mb-6">
- <label htmlFor="purchase-date" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="purchase-date" className="text-foreground mb-1 block text-sm font-semibold">
  Purchase Date
  </label>
  <Input
@@ -1555,7 +1555,7 @@ export default function AddHorsePage() {
 
  {/* Fuzzy Purchase Date */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label className="text-foreground mb-1 block text-sm font-semibold">
  Approximate Purchase Date
  </label>
  <Input
@@ -1566,14 +1566,14 @@ export default function AddHorsePage() {
  placeholder="e.g. BreyerFest 2017, Summer 2015, Christmas 2020"
  id="purchase-date-text"
  />
- <small className="text-stone-500 text-[var(--font-size-xs)]">
+ <small className="text-muted-foreground text-[var(--font-size-xs)]">
  Use this when you don&apos;t remember the exact date.
  </small>
  </div>
 
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
- <label htmlFor="estimated-value" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="estimated-value" className="text-foreground mb-1 block text-sm font-semibold">
  Estimated Current Value
  </label>
  <Input
@@ -1589,7 +1589,7 @@ export default function AddHorsePage() {
  </div>
 
  <div className="mb-6">
- <label htmlFor="insurance-notes" className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label htmlFor="insurance-notes" className="text-foreground mb-1 block text-sm font-semibold">
  Insurance Notes
  </label>
  <Input
@@ -1613,7 +1613,7 @@ export default function AddHorsePage() {
 
  <div className="mt-8 flex items-center justify-between gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={goBack}
  id="step-4-back"
  >

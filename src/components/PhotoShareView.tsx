@@ -49,12 +49,12 @@ export default function PhotoShareView({ photo }: PhotoShareViewProps) {
   return (
     <div className="mx-auto max-w-3xl">
       {/* Breadcrumb */}
-      <nav className="text-stone-500 mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+      <nav className="text-muted-foreground mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
         <Link href="/community" className="hover:underline">Show Ring</Link>
-        <span aria-hidden="true" className="text-stone-300">/</span>
+        <span aria-hidden="true" className="text-muted-foreground">/</span>
         <Link href={`/community/${photo.horseId}`} className="hover:underline">{photo.horseName}</Link>
-        <span aria-hidden="true" className="text-stone-300">/</span>
-        <span className="text-stone-700">Photo</span>
+        <span aria-hidden="true" className="text-muted-foreground">/</span>
+        <span className="text-foreground">Photo</span>
       </nav>
 
       {/* Main Photo Card */}
@@ -70,17 +70,17 @@ export default function PhotoShareView({ photo }: PhotoShareViewProps) {
         {/* Info bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-input px-6 py-4">
           <div>
-            <h1 className="text-lg font-bold text-stone-900">{photo.horseName}</h1>
+            <h1 className="text-lg font-bold text-foreground">{photo.horseName}</h1>
             {photo.catalogRef && (
-              <p className="text-sm text-stone-500">{photo.catalogRef}</p>
+              <p className="text-sm text-muted-foreground">{photo.catalogRef}</p>
             )}
             {photo.finishType && (
-              <span className="mt-1 inline-block rounded-full border border-input bg-muted px-2.5 py-0.5 text-xs font-medium text-stone-600">
+              <span className="mt-1 inline-block rounded-full border border-input bg-muted px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
                 {photo.finishType}
               </span>
             )}
-            <p className="text-xs text-stone-400 mt-1">
-              Shared by <strong className="text-stone-600">{photo.ownerAlias}</strong>
+            <p className="text-xs text-muted-foreground mt-1">
+              Shared by <strong className="text-secondary-foreground">{photo.ownerAlias}</strong>
             </p>
           </div>
 
@@ -89,7 +89,7 @@ export default function PhotoShareView({ photo }: PhotoShareViewProps) {
               onClick={handleNativeShare}
               className="inline-flex min-h-[36px] cursor-pointer items-center gap-2 rounded-lg
                          border border-input bg-card px-4 py-2 text-sm font-semibold
-                         text-stone-700 shadow-sm transition-all hover:bg-muted"
+                         text-foreground shadow-sm transition-all hover:bg-muted"
               title="Share this photo"
             >
               📤 Share
@@ -98,7 +98,7 @@ export default function PhotoShareView({ photo }: PhotoShareViewProps) {
               onClick={handleCopyLink}
               className="inline-flex min-h-[36px] cursor-pointer items-center gap-2 rounded-lg
                          border border-input bg-card px-4 py-2 text-sm font-semibold
-                         text-stone-700 shadow-sm transition-all hover:bg-muted"
+                         text-foreground shadow-sm transition-all hover:bg-muted"
               title="Copy link"
             >
               {copied ? "✅ Copied!" : "🔗 Copy Link"}

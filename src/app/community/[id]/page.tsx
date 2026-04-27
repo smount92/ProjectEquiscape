@@ -294,7 +294,7 @@ editionSize: rawPedigree.edition_size,
  return (
  <ExplorerLayout title={horse.custom_name} description="View this model in the community showcase.">
  {/* Breadcrumb */}
- <nav className="text-stone-600 animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+ <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
  <Link href="/community">Show Ring</Link>
  <span className="separator" aria-hidden="true">
  /
@@ -319,7 +319,7 @@ editionSize: rawPedigree.edition_size,
  <span className="text-[1.3em]">🚨</span>
  <div>
  <strong className="text-[rgb(220,38,38)]">Stolen / Missing</strong>
- <p className="m-[4px 0 0] text-stone-500 text-sm">
+ <p className="m-[4px 0 0] text-muted-foreground text-sm">
  This model has been flagged by its owner. Transfers and offers are blocked.
  </p>
  </div>
@@ -347,9 +347,9 @@ editionSize: rawPedigree.edition_size,
  {/* Owner Pill */}
  <Link
  href={`/profile/${encodeURIComponent(ownerAlias)}`}
- className="p-[6px 14px 6px 6px] bg-card border-input text-stone-900 inline-flex w-fit items-center gap-1 rounded-full rounded-lg border text-sm font-semibold no-underline shadow-md transition-all"
+ className="p-[6px 14px 6px 6px] bg-card border-input text-foreground inline-flex w-fit items-center gap-1 rounded-full rounded-lg border text-sm font-semibold no-underline shadow-md transition-all"
  >
- <span className="bg-muted border-input text-stone-500 flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border">
+ <span className="bg-muted border-input text-muted-foreground flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border">
  <svg
  width="14"
  height="14"
@@ -377,7 +377,7 @@ editionSize: rawPedigree.edition_size,
  {!isOwnHorse && (
  <Link
  href={`/profile/${encodeURIComponent(ownerAlias)}`}
- className="text-stone-500 text-sm no-underline transition-all"
+ className="text-muted-foreground text-sm no-underline transition-all"
  id="see-more-seller"
  >
  See all models from @{ownerAlias} →
@@ -395,10 +395,10 @@ editionSize: rawPedigree.edition_size,
 
  {horse.asset_category && horse.asset_category !=="model" && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Category
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
   {horse.asset_category ==="tack"
   ?"🏇 Tack & Gear"
   : horse.asset_category ==="prop"
@@ -412,10 +412,10 @@ editionSize: rawPedigree.edition_size,
 
  {horse.finish_type && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Finish Type
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {horse.finish_type}
  </span>
  </div>
@@ -423,7 +423,7 @@ editionSize: rawPedigree.edition_size,
 
  {horse.condition_grade && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Condition
  </span>
  <span className="text-emerald-700 inline-flex items-center gap-[4px] rounded-full border border-emerald-200/50 bg-emerald-50/20 px-[10px] py-[2px] text-sm font-semibold">
@@ -435,38 +435,38 @@ editionSize: rawPedigree.edition_size,
  {refInfo ? (
  <>
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  {refInfo.type}
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {refInfo.name}
  </span>
  </div>
 
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  {refInfo.type ==="Mold" ?"Manufacturer" :"Sculptor"}
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {refInfo.maker}
  </span>
  </div>
 
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Scale
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {refInfo.scale}
  </span>
  </div>
 
  {refInfo.extra && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  {refInfo.type ==="Mold" ?"Released" :"Medium"}
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {refInfo.extra}
  </span>
  </div>
@@ -474,11 +474,11 @@ editionSize: rawPedigree.edition_size,
  </>
  ) : (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Reference
  </span>
  <span
- className="text-stone-900 max-w-[60%] text-right text-sm font-semibold italic opacity-60"
+ className="text-foreground max-w-[60%] text-right text-sm font-semibold italic opacity-60"
  >
  Not linked to database — Custom Entry
  </span>
@@ -488,20 +488,20 @@ editionSize: rawPedigree.edition_size,
  {releaseInfo && (
  <>
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Release
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {releaseInfo.name}
  </span>
  </div>
 
  {releaseInfo.modelNumber && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Model #
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  #{releaseInfo.modelNumber}
  </span>
  </div>
@@ -509,10 +509,10 @@ editionSize: rawPedigree.edition_size,
 
  {releaseInfo.color && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Color
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {releaseInfo.color}
  </span>
  </div>
@@ -520,10 +520,10 @@ editionSize: rawPedigree.edition_size,
 
  {releaseInfo.yearStart && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Release Years
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {releaseInfo.yearStart}
  {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
  ? `–${releaseInfo.yearEnd}`
@@ -536,10 +536,10 @@ editionSize: rawPedigree.edition_size,
 
  {horse.finishing_artist && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  🎨 Finished by
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {horse.finishing_artist}
  {horse.finishing_artist_verified && (
  <span
@@ -555,10 +555,10 @@ editionSize: rawPedigree.edition_size,
 
  {(horse.edition_number || horse.edition_size) && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  📋 Edition
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {horse.edition_number && horse.edition_size
  ? `${horse.edition_number} of ${horse.edition_size}`
  : horse.edition_size
@@ -569,8 +569,8 @@ editionSize: rawPedigree.edition_size,
  )}
 
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">Added</span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-secondary-foreground text-sm font-medium">Added</span>
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {new Date(horse.created_at).toLocaleDateString("en-US", {
  year:"numeric",
  month:"long",
@@ -594,10 +594,10 @@ editionSize: rawPedigree.edition_size,
  <span aria-hidden="true">✨</span> Finish
  </h3>
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-600 text-sm font-medium">
+ <span className="text-secondary-foreground text-sm font-medium">
  Finish Details
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {horse.finish_details}
  </span>
  </div>
@@ -612,40 +612,40 @@ editionSize: rawPedigree.edition_size,
  </h3>
  {horse.assigned_breed && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-500 text-sm font-medium">
+ <span className="text-muted-foreground text-sm font-medium">
  Breed
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {horse.assigned_breed}
  </span>
  </div>
  )}
  {horse.assigned_gender && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-500 text-sm font-medium">
+ <span className="text-muted-foreground text-sm font-medium">
  Gender
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {horse.assigned_gender}
  </span>
  </div>
  )}
  {horse.assigned_age && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-500 text-sm font-medium">
+ <span className="text-muted-foreground text-sm font-medium">
  Age
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {horse.assigned_age}
  </span>
  </div>
  )}
  {horse.regional_id && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-stone-500 text-sm font-medium">
+ <span className="text-muted-foreground text-sm font-medium">
  Regional ID
  </span>
- <span className="text-stone-900 max-w-[60%] text-right text-sm font-semibold">
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
  {horse.regional_id}
  </span>
  </div>
@@ -659,7 +659,7 @@ editionSize: rawPedigree.edition_size,
  <h3>
  <span aria-hidden="true">📝</span> Notes
  </h3>
- <p className="text-stone-600 m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
+ <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
  </div>
  )}
 
@@ -706,7 +706,7 @@ editionSize: rawPedigree.edition_size,
   {assetConfig.showHoofprint && (
   <Link
   href={`/community/${horseId}/hoofprint`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
   🐾 View Hoofprint
   </Link>

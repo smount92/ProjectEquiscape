@@ -90,7 +90,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}
  </span>
  </div>
- <p className="text-stone-600 mt-1 text-sm">
+ <p className="text-secondary-foreground mt-1 text-sm">
  by{""}
  <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest">
  @{profile.ownerAlias}
@@ -98,7 +98,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  </p>
 
  {profile.bioArtist && (
- <p className="text-stone-600 mt-4 max-w-[600] leading-[1.6]">{profile.bioArtist}</p>
+ <p className="text-secondary-foreground mt-4 max-w-[600] leading-[1.6]">{profile.bioArtist}</p>
  )}
 
  {profile.specialties.length > 0 && (
@@ -134,7 +134,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  </Link>
  <Link
  href="/studio/setup"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ✏️ Edit Studio
  </Link>
@@ -159,7 +159,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  <div className="grid gap-2">
  {(profile.priceRangeMin || profile.priceRangeMax) && (
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">
+ <span className="text-muted-foreground text-sm">
  Price Range
  </span>
  <span className="text-sm font-bold">
@@ -173,7 +173,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  )}
  {(profile.turnaroundMinDays || profile.turnaroundMaxDays) && (
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">Turnaround</span>
+ <span className="text-muted-foreground text-sm">Turnaround</span>
  <span className="text-sm font-bold">
  {profile.turnaroundMinDays && profile.turnaroundMaxDays
  ? `${profile.turnaroundMinDays}–${profile.turnaroundMaxDays} days`
@@ -184,7 +184,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  </div>
  )}
  <div className="flex items-center justify-between py-1">
- <span className="text-stone-500 text-sm">
+ <span className="text-muted-foreground text-sm">
  Commission Slots
  </span>
  <span className="text-sm font-bold">
@@ -196,7 +196,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.mediums.length > 0 && (
  <div className="mt-4">
  <span
- className="mb-1 block text-sm text-stone-500"
+ className="mb-1 block text-sm text-muted-foreground"
  >
  Mediums
  </span>
@@ -216,7 +216,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.scalesOffered.length > 0 && (
  <div className="mt-4">
  <span
- className="mb-1 block text-sm text-stone-500"
+ className="mb-1 block text-sm text-muted-foreground"
  >
  Scales
  </span>
@@ -238,7 +238,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.termsText && (
  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
  <h2 className="mb-4 text-lg">📄 Terms & Conditions</h2>
- <p className="text-stone-600 text-sm leading-[1.6] whitespace-pre-wrap">
+ <p className="text-secondary-foreground text-sm leading-[1.6] whitespace-pre-wrap">
  {profile.termsText}
  </p>
  </div>
@@ -250,7 +250,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
  <h2 className="mb-4 text-lg">📋 Commission Queue</h2>
  {queue.length === 0 ? (
- <p className="text-stone-500 text-sm">
+ <p className="text-muted-foreground text-sm">
  No active commissions in the queue.
  </p>
  ) : (

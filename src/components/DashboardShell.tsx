@@ -121,20 +121,20 @@ export default function DashboardShell({
  id="dashboard-view-toggle"
  >
  <button
- className={`font-inherit cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${view ==="grid" ? "bg-forest font-semibold text-white" : "bg-transparent text-stone-600 hover:text-stone-900"}`}
+ className={`font-inherit cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${view ==="grid" ? "bg-forest font-semibold text-white" : "bg-transparent text-secondary-foreground hover:text-foreground"}`}
  onClick={() => handleViewChange("grid")}
  >
  🖼️ Gallery
  </button>
  <button
- className={`font-inherit cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${view ==="ledger" ? "bg-forest font-semibold text-white" : "bg-transparent text-stone-600 hover:text-stone-900"}`}
+ className={`font-inherit cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${view ==="ledger" ? "bg-forest font-semibold text-white" : "bg-transparent text-secondary-foreground hover:text-foreground"}`}
  onClick={() => handleViewChange("ledger")}
  >
  📋 Ledger
  </button>
  </div>
  <button
- className={`font-inherit ml-2 cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${selectMode ? "bg-forest font-semibold text-white" : "bg-transparent text-stone-600 hover:text-stone-900"}`}
+ className={`font-inherit ml-2 cursor-pointer rounded-full border-none px-4 py-1.5 text-sm transition-all duration-200 ${selectMode ? "bg-forest font-semibold text-white" : "bg-transparent text-secondary-foreground hover:text-foreground"}`}
  onClick={() => {
  if (selectMode) clearSelection();
  else setSelectMode(true);
@@ -150,12 +150,12 @@ export default function DashboardShell({
  {selectMode && horseCards.length > 0 && (
  <div className="bg-muted mb-4 flex items-center gap-4 rounded-md px-3 py-1.5">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={selectAll}
  >
  Select All ({horseCards.length})
  </button>
- {selectedIds.size > 0 && <span className="text-stone-500 text-sm">{selectedIds.size} selected</span>}
+ {selectedIds.size > 0 && <span className="text-muted-foreground text-sm">{selectedIds.size} selected</span>}
  </div>
  )}
 
@@ -186,7 +186,7 @@ export default function DashboardShell({
  <div className="flex flex-wrap items-center gap-2">
  {/* Move to Collection */}
  <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-muted text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-muted text-foreground font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
  value=""
  onChange={(e) => {
  const val = e.target.value;
@@ -207,7 +207,7 @@ export default function DashboardShell({
 
  {/* Trade Status */}
  <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-muted text-stone-900 font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-input bg-muted text-foreground font-inherit cursor-pointer rounded-md border px-2.5 py-1.5 text-sm"
  value=""
  onChange={(e) => {
  if (e.target.value) handleBulkTradeStatus(e.target.value);
@@ -233,7 +233,7 @@ export default function DashboardShell({
  </div>
 
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={clearSelection}
  >
  Cancel
@@ -248,14 +248,14 @@ export default function DashboardShell({
  <DialogContent className="sm:max-w-md">
  
  <h3 className="mb-4">🗑️ Confirm Delete</h3>
- <p className="text-stone-600 mb-6">
+ <p className="text-secondary-foreground mb-6">
  Are you sure you want to delete <strong>{selectedIds.size}</strong> item
  {selectedIds.size !== 1 ?"s" :""}? This cannot be undone. All photos and associated
  data will be permanently removed.
  </p>
  <div className="flex justify-end gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => setShowDeleteConfirm(false)}
  >
  Cancel

@@ -155,23 +155,23 @@ export default function UnifiedReferenceSearch({
                 {TYPE_BADGES[selectedItem.itemType]?.icon || "\u{1F4CB}"}{" "}
                 {TYPE_BADGES[selectedItem.itemType]?.label || selectedItem.itemType}
               </span>
-              <span className="text-stone-900 font-bold">{selectedItem.title}</span>
-              <span className="text-sm text-stone-500">{selectedItem.maker}</span>
+              <span className="text-foreground font-bold">{selectedItem.title}</span>
+              <span className="text-sm text-muted-foreground">{selectedItem.maker}</span>
               {selectedItem.parentTitle && (
                 <span className="ref-selected-parent"> on {selectedItem.parentTitle}</span>
               )}
-              {selectedItem.scale && <span className="text-stone-500 text-sm"> {"\u00B7"} {selectedItem.scale}</span>}
+              {selectedItem.scale && <span className="text-muted-foreground text-sm"> {"\u00B7"} {selectedItem.scale}</span>}
               <MarketValueBadge catalogId={selectedCatalogId} compact />
             </div>
             <button
-              className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+              className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
               onClick={handleClear}
               aria-label="Clear selection"
             >
               {"\u2715"}
             </button>
           </div>
-          <div className="bg-forest/10 border-forest/25 mt-2 rounded-md border px-4 py-2 text-sm text-stone-500">
+          <div className="bg-forest/10 border-forest/25 mt-2 rounded-md border px-4 py-2 text-sm text-muted-foreground">
             {"\u{1F517}"} <strong>Linked</strong> {"\u2014"} Manufacturer, scale, and release info will auto-fill on your passport.
           </div>
         </>
@@ -180,7 +180,7 @@ export default function UnifiedReferenceSearch({
           {/* Search Input */}
           <div className="relative mb-4">
             <svg
-              className="text-stone-400 pointer-events-none absolute top-[50%] left-[16px] z-[1] translate-y-[-50%]"
+              className="text-muted-foreground pointer-events-none absolute top-[50%] left-[16px] z-[1] translate-y-[-50%]"
               width="18"
               height="18"
               viewBox="0 0 24 24"
@@ -208,7 +208,7 @@ export default function UnifiedReferenceSearch({
             />
             {query && (
               <button
-                className="text-stone-500 hover:text-stone-900 absolute top-[50%] right-[12px] flex h-[28px] w-[28px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgb(245_245_244)] text-[0.8rem] transition-all duration-150"
+                className="text-muted-foreground hover:text-foreground absolute top-[50%] right-[12px] flex h-[28px] w-[28px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgb(245_245_244)] text-[0.8rem] transition-all duration-150"
                 onClick={() => {
                   setQuery("");
                   setShowDropdown(false);
@@ -224,7 +224,7 @@ export default function UnifiedReferenceSearch({
           {showDropdown && (
             <div className="animate-fade-in-up mt-1 flex max-h-[420px] w-full flex-col overflow-y-auto rounded-lg border border-edge bg-[#FEFCF8] shadow-lg">
               {isSearching ? (
-                <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-stone-400">
+                <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-muted-foreground">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-input border-t-forest" />
                   Searching catalog...
                 </div>
@@ -233,7 +233,7 @@ export default function UnifiedReferenceSearch({
                   {/* Molds */}
                   {molds.length > 0 && (
                     <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
+                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         <span>{"\u{1F3ED}"}</span> Base Molds
                       </div>
                       {molds.map((item) => (
@@ -243,8 +243,8 @@ export default function UnifiedReferenceSearch({
                           onClick={() => handleMoldClick(item)}
                         >
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm font-semibold text-stone-800">{item.title}</div>
-                            <div className="mt-0.5 text-xs text-stone-400">
+                            <div className="text-sm font-semibold text-foreground">{item.title}</div>
+                            <div className="mt-0.5 text-xs text-muted-foreground">
                               {item.maker}{item.scale ? ` ${"\u00B7"} ${item.scale}` : ""}
                             </div>
                           </div>
@@ -259,7 +259,7 @@ export default function UnifiedReferenceSearch({
                   {/* Releases */}
                   {releaseResults.length > 0 && (
                     <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
+                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         <span>{"\u{1F4E6}"}</span> Releases
                       </div>
                       {releaseResults.map((item) => (
@@ -269,15 +269,15 @@ export default function UnifiedReferenceSearch({
                           onClick={() => handleSelect(item)}
                         >
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm font-semibold text-stone-800">
+                            <div className="text-sm font-semibold text-foreground">
                               {item.title}
                               {!!item.attributes.model_number && (
-                                <span className="ml-1 font-normal text-stone-400">
+                                <span className="ml-1 font-normal text-muted-foreground">
                                   #{String(item.attributes.model_number)}
                                 </span>
                               )}
                             </div>
-                            <div className="mt-0.5 text-xs text-stone-400">{item.maker}</div>
+                            <div className="mt-0.5 text-xs text-muted-foreground">{item.maker}</div>
                           </div>
                           <span className="shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest opacity-0 transition-all group-hover:opacity-100">
                             Select
@@ -290,7 +290,7 @@ export default function UnifiedReferenceSearch({
                   {/* Resins */}
                   {resins.length > 0 && (
                     <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-stone-400">
+                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         <span>{"\u{1F3A8}"}</span> Artist Resins
                       </div>
                       {resins.map((item) => (
@@ -300,8 +300,8 @@ export default function UnifiedReferenceSearch({
                           onClick={() => handleSelect(item)}
                         >
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm font-semibold text-stone-800">{item.title}</div>
-                            <div className="mt-0.5 text-xs text-stone-400">
+                            <div className="text-sm font-semibold text-foreground">{item.title}</div>
+                            <div className="mt-0.5 text-xs text-muted-foreground">
                               {item.maker}{item.scale ? ` ${"\u00B7"} ${item.scale}` : ""}
                             </div>
                           </div>
@@ -316,8 +316,8 @@ export default function UnifiedReferenceSearch({
                   {/* No results */}
                   {noResults && (
                     <div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
-                      <p className="text-sm text-stone-500">No references found for {"\u201C"}{query}{"\u201D"}</p>
-                      <p className="text-xs text-stone-400">
+                      <p className="text-sm text-muted-foreground">No references found for {"\u201C"}{query}{"\u201D"}</p>
+                      <p className="text-xs text-muted-foreground">
                         Check the{" "}
                         <a href="/market" className="text-forest font-medium hover:underline">
                           {"\u{1F4C8}"} Price Guide
@@ -325,7 +325,7 @@ export default function UnifiedReferenceSearch({
                         for market data, or suggest a new entry.
                       </p>
                       <button
-                        className="mt-1 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-edge bg-transparent px-6 py-2 text-sm font-medium text-stone-600 transition-all hover:border-forest hover:text-forest"
+                        className="mt-1 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-edge bg-transparent px-6 py-2 text-sm font-medium text-secondary-foreground transition-all hover:border-forest hover:text-forest"
                         onClick={() => {
                           setShowSuggestModal(true);
                           setShowDropdown(false);
@@ -344,11 +344,11 @@ export default function UnifiedReferenceSearch({
           {releases.length > 0 && selectedItem && selectedItem.itemType === "plastic_mold" && (
             <div className="animate-fade-in-up mt-4 flex flex-col overflow-hidden rounded-lg border border-edge bg-[#FEFCF8] shadow-md transition-all">
               <div className="flex items-center justify-between border-b border-input bg-emerald-50/60 px-4 py-2.5">
-                <span className="text-sm text-stone-600">
-                  Releases for <strong className="text-stone-800">{selectedItem.title}</strong>
+                <span className="text-sm text-secondary-foreground">
+                  Releases for <strong className="text-foreground">{selectedItem.title}</strong>
                 </span>
                 <button
-                  className="cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-xs font-medium text-stone-500 transition-colors hover:border-red-300 hover:text-red-600"
+                  className="cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-red-300 hover:text-red-600"
                   onClick={handleClear}
                 >
                   {"\u2715"} Clear
@@ -362,9 +362,9 @@ export default function UnifiedReferenceSearch({
                   onClick={() => handleSelect(selectedItem)}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-stone-800">
+                    <div className="text-sm font-semibold text-foreground">
                       {"\u{1F3ED}"} {selectedItem.title}{" "}
-                      <span className="font-normal text-stone-400">(any release)</span>
+                      <span className="font-normal text-muted-foreground">(any release)</span>
                     </div>
                   </div>
                   <span className="shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest transition-colors group-hover:bg-forest group-hover:text-white">
@@ -373,7 +373,7 @@ export default function UnifiedReferenceSearch({
                 </button>
 
                 {loadingReleases ? (
-                  <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-stone-400">
+                  <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-muted-foreground">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-input border-t-forest" />
                     Loading releases...
                   </div>
@@ -385,16 +385,16 @@ export default function UnifiedReferenceSearch({
                       onClick={() => handleSelect(rel)}
                     >
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold text-stone-800">
+                        <div className="text-sm font-semibold text-foreground">
                           {rel.title}
                           {!!rel.attributes.model_number && (
-                            <span className="ml-1 font-normal text-stone-400">
+                            <span className="ml-1 font-normal text-muted-foreground">
                               #{String(rel.attributes.model_number)}
                             </span>
                           )}
                         </div>
                         {!!rel.attributes.color_description && (
-                          <div className="mt-0.5 line-clamp-1 text-xs text-stone-400">
+                          <div className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
                             {String(rel.attributes.color_description)}
                           </div>
                         )}

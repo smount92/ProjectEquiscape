@@ -26,19 +26,19 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
  {/* Tab Bar */}
  <div className="border-input my-6 flex gap-[2px] rounded-lg border bg-black/[0.03] p-1">
  <button
- className={`text-stone-500 hover:text-stone-900 flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="feed" ?"text-stone-900 border border-emerald-300 bg-emerald-100/70" :""}`}
+ className={`text-muted-foreground hover:text-foreground flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="feed" ?"text-foreground border border-emerald-300 bg-emerald-100/70" :""}`}
  onClick={() => setActiveTab("feed")}
  >
  💬 Feed
  </button>
  <button
- className={`text-stone-500 hover:text-stone-900 flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="files" ?"text-stone-900 border border-emerald-300 bg-emerald-100/70" :""}`}
+ className={`text-muted-foreground hover:text-foreground flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="files" ?"text-foreground border border-emerald-300 bg-emerald-100/70" :""}`}
  onClick={() => setActiveTab("files")}
  >
  📁 Files
  </button>
  <button
- className={`text-stone-500 hover:text-stone-900 flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="registry" ?"text-stone-900 border border-emerald-300 bg-emerald-100/70" :""}`}
+ className={`text-muted-foreground hover:text-foreground flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab ==="registry" ?"text-foreground border border-emerald-300 bg-emerald-100/70" :""}`}
  onClick={() => setActiveTab("registry")}
  >
  📋 Registry
@@ -49,7 +49,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
  {activeTab ==="feed" && channels.length > 1 && (
  <div className="scrollbar-none mb-6 flex gap-1 overflow-x-auto pb-1">
  <button
- className={`border-input text-stone-600 hover:text-stone-900 cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === null ?"text-forest border-emerald-400 bg-emerald-100" :""}`}
+ className={`border-input text-secondary-foreground hover:text-foreground cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === null ?"text-forest border-emerald-400 bg-emerald-100" :""}`}
  onClick={() => setActiveChannel(null)}
  >
  # all
@@ -57,7 +57,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
  {channels.map((ch) => (
  <button
  key={ch.id}
- className={`border-input text-stone-600 hover:text-stone-900 cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === ch.id ?"text-forest border-emerald-400 bg-emerald-100" :""}`}
+ className={`border-input text-secondary-foreground hover:text-foreground cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === ch.id ?"text-forest border-emerald-400 bg-emerald-100" :""}`}
  onClick={() => setActiveChannel(ch.id)}
  >
  # {ch.name.toLowerCase()}

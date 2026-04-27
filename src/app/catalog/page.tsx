@@ -63,16 +63,16 @@ export default async function ReferencePage() {
   {/* Stats */}
   <div className="mt-2 mb-8 flex flex-wrap items-center justify-center gap-8">
   <div className="flex flex-col items-center">
-   <span className="text-3xl font-bold text-stone-900">{(count ?? 0).toLocaleString()}</span>
-   <span className="text-sm text-stone-600">Catalog Entries</span>
+   <span className="text-3xl font-bold text-foreground">{(count ?? 0).toLocaleString()}</span>
+   <span className="text-sm text-secondary-foreground">Catalog Entries</span>
   </div>
   <div className="flex flex-col items-center">
-   <span className="text-3xl font-bold text-stone-900">{pendingSuggestions ?? 0}</span>
-   <span className="text-sm text-stone-600">Pending Suggestions</span>
+   <span className="text-3xl font-bold text-foreground">{pendingSuggestions ?? 0}</span>
+   <span className="text-sm text-secondary-foreground">Pending Suggestions</span>
   </div>
   <div className="flex flex-col items-center">
-   <span className="text-3xl font-bold text-stone-900">{recentChanges ?? 0}</span>
-   <span className="text-sm text-stone-600">Changes This Week</span>
+   <span className="text-3xl font-bold text-foreground">{recentChanges ?? 0}</span>
+   <span className="text-sm text-secondary-foreground">Changes This Week</span>
   </div>
   </div>
 
@@ -91,7 +91,7 @@ export default async function ReferencePage() {
   <aside className="flex flex-col gap-4">
    {/* Quick Links */}
    <div className="flex flex-col gap-3 rounded-lg border border-input bg-card p-5 shadow-sm">
-   <h3 className="text-sm font-bold uppercase tracking-wider text-stone-600">📋 Community</h3>
+   <h3 className="text-sm font-bold uppercase tracking-wider text-secondary-foreground">📋 Community</h3>
    <div className="flex flex-col gap-2">
     <a
     href="/catalog/suggestions"
@@ -122,7 +122,7 @@ export default async function ReferencePage() {
    {/* Top Curators */}
    {(curators ?? []).length > 0 && (
    <div className="flex flex-col gap-3 rounded-lg border border-input bg-card p-5 shadow-sm">
-    <h3 className="text-sm font-bold uppercase tracking-wider text-stone-600">🏆 Top Curators</h3>
+    <h3 className="text-sm font-bold uppercase tracking-wider text-secondary-foreground">🏆 Top Curators</h3>
     <ul className="m-0 list-none p-0">
     {(
      curators as {
@@ -142,7 +142,7 @@ export default async function ReferencePage() {
      >
       @{curator.alias_name}
      </a>
-     <span className="text-stone-500 ml-auto text-xs">
+     <span className="text-muted-foreground ml-auto text-xs">
       {curator.approved_suggestions_count} contributions
      </span>
      </li>

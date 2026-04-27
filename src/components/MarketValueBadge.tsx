@@ -68,14 +68,14 @@ export default function MarketValueBadge({ catalogId, compact = false }: MarketV
 
  return (
  <div className="bg-muted border-input mt-6 rounded-lg border p-6">
- <h4 className="mb-2 flex items-center gap-1 text-sm font-semibold text-stone-500">
+ <h4 className="mb-2 flex items-center gap-1 text-sm font-semibold text-muted-foreground">
  <span aria-hidden="true">📈</span> Market Value
  </h4>
  <div className="text-forest text-lg font-bold">
  {formatCurrency(price.lowest)}
  {price.lowest !== price.highest ? ` – ${formatCurrency(price.highest)}` :""}
  </div>
- <div className="mt-1 flex flex-wrap gap-4 text-sm text-stone-500">
+ <div className="mt-1 flex flex-wrap gap-4 text-sm text-muted-foreground">
  <span>Avg: {formatCurrency(price.average)}</span>
  <span>Median: {formatCurrency(price.median)}</span>
  <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-accent-primary-glow)] px-[6px] py-[1px] text-xs font-semibold">

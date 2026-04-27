@@ -38,7 +38,7 @@ function getFinishBadgeVariant(finishType: string): { className: string } {
         case "Artist Resin":
             return { className: "bg-pink-50 text-pink-600 border-pink-200" };
         default:
-            return { className: "bg-muted text-stone-600 border-input" };
+            return { className: "bg-muted text-secondary-foreground border-input" };
     }
 }
 
@@ -156,7 +156,7 @@ export default function StableLedger({
             )}
 
             {searchQuery.trim() && (
-                <div className="mb-6 pl-1 text-sm text-stone-500">
+                <div className="mb-6 pl-1 text-sm text-muted-foreground">
                     {filteredCards.length === 0
                         ? "No models match your search"
                         : `Showing ${filteredCards.length} of ${horseCards.length} models`}
@@ -179,49 +179,49 @@ export default function StableLedger({
                                 <TableHead className="w-[50px]">📷</TableHead>
                                 <TableHead
                                     onClick={() => toggleSort("name")}
-                                    className="cursor-pointer select-none text-stone-500 transition-colors hover:text-forest"
+                                    className="cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest"
                                 >
                                     Name{sortIndicator("name")}
                                 </TableHead>
                                 <TableHead
                                     onClick={() => toggleSort("ref")}
-                                    className="cursor-pointer select-none text-stone-500 transition-colors hover:text-forest max-md:hidden"
+                                    className="cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest max-md:hidden"
                                 >
                                     Reference{sortIndicator("ref")}
                                 </TableHead>
                                 <TableHead
                                     onClick={() => toggleSort("finish")}
-                                    className="cursor-pointer select-none text-stone-500 transition-colors hover:text-forest"
+                                    className="cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest"
                                 >
                                     Finish{sortIndicator("finish")}
                                 </TableHead>
                                 <TableHead
                                     onClick={() => toggleSort("condition")}
-                                    className="cursor-pointer select-none text-stone-500 transition-colors hover:text-forest max-md:hidden"
+                                    className="cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest max-md:hidden"
                                 >
                                     Condition{sortIndicator("condition")}
                                 </TableHead>
                                 <TableHead
                                     onClick={() => toggleSort("collection")}
-                                    className="cursor-pointer select-none text-stone-500 transition-colors hover:text-forest max-md:hidden"
+                                    className="cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest max-md:hidden"
                                 >
                                     Collection{sortIndicator("collection")}
                                 </TableHead>
                                 <TableHead
                                     onClick={() => toggleSort("trade")}
-                                    className="cursor-pointer select-none text-stone-500 transition-colors hover:text-forest max-md:hidden"
+                                    className="cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest max-md:hidden"
                                 >
                                     Status{sortIndicator("trade")}
                                 </TableHead>
                                 <TableHead
                                     onClick={() => toggleSort("value")}
-                                    className="cursor-pointer select-none text-stone-500 transition-colors hover:text-forest max-md:hidden"
+                                    className="cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest max-md:hidden"
                                 >
                                     Value{sortIndicator("value")}
                                 </TableHead>
                                 <TableHead
                                     onClick={() => toggleSort("added")}
-                                    className="cursor-pointer select-none text-stone-500 transition-colors hover:text-forest"
+                                    className="cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest"
                                 >
                                     Added{sortIndicator("added")}
                                 </TableHead>
@@ -259,12 +259,12 @@ export default function StableLedger({
                                     <TableCell>
                                         <Link
                                             href={`/stable/${horse.id}`}
-                                            className="font-semibold text-stone-900 no-underline transition-colors hover:text-forest"
+                                            className="font-semibold text-foreground no-underline transition-colors hover:text-forest"
                                         >
                                             {horse.customName}
                                         </Link>
                                     </TableCell>
-                                    <TableCell className="max-w-[180px] text-stone-500 max-md:hidden">
+                                    <TableCell className="max-w-[180px] text-muted-foreground max-md:hidden">
                                         <span className="block truncate">{horse.refName}</span>
                                     </TableCell>
                                     <TableCell>
@@ -272,8 +272,8 @@ export default function StableLedger({
                                             {horse.finishType || "—"}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-stone-600 max-md:hidden">{horse.conditionGrade || "—"}</TableCell>
-                                    <TableCell className="text-xs text-stone-500 max-md:hidden">
+                                    <TableCell className="text-secondary-foreground max-md:hidden">{horse.conditionGrade || "—"}</TableCell>
+                                    <TableCell className="text-xs text-muted-foreground max-md:hidden">
                                         {horse.collectionName ? `📁 ${horse.collectionName}` : "—"}
                                     </TableCell>
                                     <TableCell className="max-md:hidden">
@@ -287,12 +287,12 @@ export default function StableLedger({
                                                 🤝 Offers
                                             </Badge>
                                         )}
-                                        {horse.tradeStatus === "Not for Sale" && <span className="text-stone-400">—</span>}
+                                        {horse.tradeStatus === "Not for Sale" && <span className="text-muted-foreground">—</span>}
                                     </TableCell>
-                                    <TableCell className="text-stone-600 max-md:hidden">
+                                    <TableCell className="text-secondary-foreground max-md:hidden">
                                         {horse.vaultValue ? `$${horse.vaultValue.toLocaleString()}` : "—"}
                                     </TableCell>
-                                    <TableCell className="text-xs text-stone-500">{formatRelDate(horse.createdAt)}</TableCell>
+                                    <TableCell className="text-xs text-muted-foreground">{formatRelDate(horse.createdAt)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

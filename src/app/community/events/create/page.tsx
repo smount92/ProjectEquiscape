@@ -77,7 +77,7 @@ export default function CreateEventPage() {
  >
   <form onSubmit={handleSubmit}>
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Event Name *</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Event Name *</label>
    <Input
    value={name}
    onChange={(e) => setName(e.target.value)}
@@ -87,7 +87,7 @@ export default function CreateEventPage() {
   </div>
 
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Event Type *</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Event Type *</label>
    <select className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" value={eventType} onChange={(e) => setEventType(e.target.value)} title="Event type">
    {Object.entries(EVENT_TYPE_LABELS).map(([key, label]) => (
     <option key={key} value={key}>
@@ -100,7 +100,7 @@ export default function CreateEventPage() {
    {/* NAMHSA Template Selector — only for show types */}
    {isShowType && (
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">
+    <label className="text-foreground mb-1 block text-sm font-semibold">
     Starting Template (optional)
     </label>
     <Select value={templateId} onValueChange={setTemplateId}>
@@ -117,13 +117,13 @@ export default function CreateEventPage() {
     </SelectContent>
     </Select>
     {selectedTemplate && (
-    <p className="mt-1 text-xs text-stone-500">{selectedTemplate.description}</p>
+    <p className="mt-1 text-xs text-muted-foreground">{selectedTemplate.description}</p>
     )}
    </div>
    )}
 
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Judging Method</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Judging Method</label>
    <div className="flex gap-4">
    <label className="flex cursor-pointer items-center gap-1">
     <input
@@ -146,7 +146,7 @@ export default function CreateEventPage() {
     🏅 Expert Judge
    </label>
    </div>
-   <span className="text-stone-500 mt-1 block text-xs">
+   <span className="text-muted-foreground mt-1 block text-xs">
    {judgingMethod ==="community_vote"
     ?"Attendees can vote on entries."
     :"Only the event creator (or assigned judge) can assign placings."}
@@ -154,7 +154,7 @@ export default function CreateEventPage() {
   </div>
 
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Description</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Description</label>
    <Textarea
    className="w-full resize-y"
    rows={4}
@@ -166,7 +166,7 @@ export default function CreateEventPage() {
 
   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
    <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Start *</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Start *</label>
    <Input
     type="datetime-local"
     value={startsAt}
@@ -175,7 +175,7 @@ export default function CreateEventPage() {
    />
    </div>
    <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">End</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">End</label>
    <Input
     type="datetime-local"
     value={endsAt}
@@ -201,7 +201,7 @@ export default function CreateEventPage() {
 
   {isVirtual ? (
    <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Virtual URL</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Virtual URL</label>
    <Input
     type="url"
     value={virtualUrl}
@@ -212,7 +212,7 @@ export default function CreateEventPage() {
   ) : (
    <>
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Location Name</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Location Name</label>
     <Input
     value={locationName}
     onChange={(e) => setLocationName(e.target.value)}
@@ -220,7 +220,7 @@ export default function CreateEventPage() {
     />
    </div>
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Address</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Address</label>
     <Input
     value={locationAddress}
     onChange={(e) => setLocationAddress(e.target.value)}
@@ -231,7 +231,7 @@ export default function CreateEventPage() {
   )}
 
   <div className="mb-6">
-   <label className="text-stone-900 mb-1 block text-sm font-semibold">Region</label>
+   <label className="text-foreground mb-1 block text-sm font-semibold">Region</label>
    <Input
    value={region}
    onChange={(e) => setRegion(e.target.value)}
@@ -255,7 +255,7 @@ export default function CreateEventPage() {
    </button>
    <button
    type="button"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    onClick={() => router.push("/community/events")}
    >
    Cancel

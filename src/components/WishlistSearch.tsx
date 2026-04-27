@@ -120,7 +120,7 @@ export default function WishlistSearch() {
  {/* Search input */}
  <div className="bg-muted border-input flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors">
  <svg
- className="text-stone-500 shrink-0"
+ className="text-muted-foreground shrink-0"
  width="18"
  height="18"
  viewBox="0 0 24 24"
@@ -136,7 +136,7 @@ export default function WishlistSearch() {
  </svg>
  <input
  type="text"
- className="text-stone-500"
+ className="text-muted-foreground"
  placeholder="Search molds, releases & resins to add to your wishlist…"
  value={query}
  onChange={(e) => setQuery(e.target.value)}
@@ -149,7 +149,7 @@ export default function WishlistSearch() {
  />
  {query && (
  <button
- className="bg-muted text-stone-500 flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
+ className="bg-muted text-muted-foreground flex h-[24px] w-[24px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
  onClick={() => {
  setQuery("");
  setShowDropdown(false);
@@ -165,27 +165,27 @@ export default function WishlistSearch() {
  {showDropdown && (
  <div className="wishlist-search-dropdown animate-fade-in-up">
  {loading ? (
- <div className="text-stone-500 p-4 text-center text-sm">Searching…</div>
+ <div className="text-muted-foreground p-4 text-center text-sm">Searching…</div>
  ) : (
  <>
  {/* Molds */}
  {molds.length > 0 && (
  <>
- <div className="text-stone-600 border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-secondary-foreground border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  🏭 Base Molds
  </div>
  {molds.map((item) => (
  <button
  key={item.id}
- className="text-stone-900 hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
+ className="text-foreground hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
  onClick={() => handleAdd(item)}
  disabled={adding}
  >
  <div className="min-w-0 flex-1">
- <span className="text-stone-900 hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+ <span className="text-foreground hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
  {item.title}
  </span>
- <span className="text-stone-900 hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+ <span className="text-foreground hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
  {""}
  · {item.maker}
  {item.scale ? ` · ${item.scale}` :""}
@@ -202,27 +202,27 @@ export default function WishlistSearch() {
  {/* Releases */}
  {releases.length > 0 && (
  <>
- <div className="text-stone-600 border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-secondary-foreground border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  📦 Releases
  </div>
  {releases.map((item) => (
  <button
  key={item.id}
- className="text-stone-900 hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
+ className="text-foreground hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
  onClick={() => handleAdd(item)}
  disabled={adding}
  >
  <div className="min-w-0 flex-1">
- <span className="text-stone-900 hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+ <span className="text-foreground hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
  {item.title}
  </span>
  {!!item.attributes.model_number && (
- <span className="text-stone-900 hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+ <span className="text-foreground hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
  {""}
  (#{String(item.attributes.model_number)})
  </span>
  )}
- <span className="text-stone-900 hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+ <span className="text-foreground hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
  {""}
  · {item.maker}
  </span>
@@ -238,21 +238,21 @@ export default function WishlistSearch() {
  {/* Resins */}
  {resins.length > 0 && (
  <>
- <div className="text-stone-600 border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+ <div className="text-secondary-foreground border-input bg-[rgb(250 250 249)] border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
  🎨 Artist Resins
  </div>
  {resins.map((item) => (
  <button
  key={item.id}
- className="text-stone-900 hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
+ className="text-foreground hover:0.25)] hover:0.08)] flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all"
  onClick={() => handleAdd(item)}
  disabled={adding}
  >
  <div className="min-w-0 flex-1">
- <span className="text-stone-900 hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+ <span className="text-foreground hover:0.25)] hover:0.08)]-name flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
  {item.title}
  </span>
- <span className="text-stone-900 hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
+ <span className="text-foreground hover:0.25)] hover:0.08)]-meta flex w-full cursor-pointer items-center justify-between border-0 border-b border-[rgb(250 250 249)] bg-transparent px-4 py-2 text-left font-[inherit] transition-all">
  {""}
  · {item.maker}
  {item.scale ? ` · ${item.scale}` :""}
@@ -268,7 +268,7 @@ export default function WishlistSearch() {
 
  {/* No results — escape hatch */}
  {noResults && (
- <div className="text-stone-500 px-4 py-6 text-center text-sm">
+ <div className="text-muted-foreground px-4 py-6 text-center text-sm">
  <p>No references match &ldquo;{query}&rdquo;</p>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"

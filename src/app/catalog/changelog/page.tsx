@@ -24,9 +24,9 @@ export default async function ChangelogPage() {
   title={<>📋 <span className="text-forest">Catalog Changelog</span></>}
   description={`Community-approved updates to the reference catalog. ${count ?? 0} total changes.`}
  >
-  <nav className="text-stone-500 mb-6 flex items-center gap-1 text-sm">
+  <nav className="text-muted-foreground mb-6 flex items-center gap-1 text-sm">
   <Link href="/catalog">📚 Reference Catalog</Link>
-  <span className="text-stone-500">›</span>
+  <span className="text-muted-foreground">›</span>
   <span>Changelog</span>
   </nav>
 
@@ -46,7 +46,7 @@ export default async function ChangelogPage() {
     :"🗑"}
     </span>
     <div className="space-y-4">
-    <p className="mb-[4px] text-sm font-medium text-stone-900">
+    <p className="mb-[4px] text-sm font-medium text-foreground">
      {entry.change_summary}
     </p>
     <p className="text-forest">
@@ -62,7 +62,7 @@ export default async function ChangelogPage() {
      {entry.catalog_item_id && (
      <>
       {" ·"}
-      <Link href={`/catalog/${entry.catalog_item_id}`} className="font-semibold text-stone-600 hover:text-stone-900">View entry →</Link>
+      <Link href={`/catalog/${entry.catalog_item_id}`} className="font-semibold text-secondary-foreground hover:text-foreground">View entry →</Link>
      </>
      )}
     </p>
@@ -72,7 +72,7 @@ export default async function ChangelogPage() {
   })}
 
   {(entries ?? []).length === 0 && (
-   <div className="bg-card border-input text-stone-500 rounded-lg border p-8 text-center shadow-md transition-all">
+   <div className="bg-card border-input text-muted-foreground rounded-lg border p-8 text-center shadow-md transition-all">
    <p>No changes yet. The catalog awaits your contributions!</p>
    <Link
     href="/catalog"

@@ -26,10 +26,10 @@ export default function DioramaFormFields({
 }: DioramaFormFieldsProps) {
   return (
     <div className="mt-4 space-y-4 rounded-lg border border-[#E0D5C1] bg-[#FEFCF8] p-4">
-      <h4 className="text-sm font-semibold text-stone-900">🎭 Diorama Details</h4>
+      <h4 className="text-sm font-semibold text-foreground">🎭 Diorama Details</h4>
 
       <div>
-        <label htmlFor="diorama-theme" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="diorama-theme" className="mb-1 block text-sm font-semibold text-foreground">
           Scene Theme
         </label>
         <select
@@ -46,7 +46,7 @@ export default function DioramaFormFields({
       </div>
 
       <div>
-        <label htmlFor="diorama-discipline" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="diorama-discipline" className="mb-1 block text-sm font-semibold text-foreground">
           Discipline
         </label>
         <select
@@ -63,7 +63,7 @@ export default function DioramaFormFields({
       </div>
 
       <div>
-        <label htmlFor="diorama-components" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="diorama-components" className="mb-1 block text-sm font-semibold text-foreground">
           Components
         </label>
         <Textarea
@@ -77,7 +77,7 @@ export default function DioramaFormFields({
       </div>
 
       <div>
-        <label htmlFor="diorama-base-dims" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="diorama-base-dims" className="mb-1 block text-sm font-semibold text-foreground">
           Base Dimensions
         </label>
         <Input
@@ -91,7 +91,7 @@ export default function DioramaFormFields({
       </div>
 
       <div>
-        <label htmlFor="diorama-documentation" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="diorama-documentation" className="mb-1 block text-sm font-semibold text-foreground">
           Documentation Notes
         </label>
         <Textarea
@@ -102,7 +102,7 @@ export default function DioramaFormFields({
           maxLength={1000}
           rows={3}
         />
-        <span className="mt-1 block text-xs text-stone-500">
+        <span className="mt-1 block text-xs text-muted-foreground">
           For shows: describe scale accuracy, materials, and how the scene should be presented.
         </span>
       </div>

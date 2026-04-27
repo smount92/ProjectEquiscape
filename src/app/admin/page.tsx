@@ -110,18 +110,18 @@ export default async function AdminPage() {
    <div className="grid-cols-[repeat(auto-fit,minmax(200px,1fr))] grid gap-4">
    <div className="bg-card border-input shadow-sm rounded-lg border p-6 text-center transition-all">
     <div className="mb-1 text-[2rem]">👥</div>
-    <div className="text-stone-900 text-3xl leading-none font-bold">{totalUsers}</div>
-    <div className="text-stone-500 mt-1 text-xs font-medium">Registered Users</div>
+    <div className="text-foreground text-3xl leading-none font-bold">{totalUsers}</div>
+    <div className="text-muted-foreground mt-1 text-xs font-medium">Registered Users</div>
    </div>
    <div className="bg-card border-input shadow-sm rounded-lg border p-6 text-center transition-all">
     <div className="mb-1 text-[2rem]">🐴</div>
-    <div className="text-stone-900 text-3xl leading-none font-bold">{totalHorses.toLocaleString()}</div>
-    <div className="text-stone-500 mt-1 text-xs font-medium">Horses in Database</div>
+    <div className="text-foreground text-3xl leading-none font-bold">{totalHorses.toLocaleString()}</div>
+    <div className="text-muted-foreground mt-1 text-xs font-medium">Horses in Database</div>
    </div>
    <div className="bg-card border-input shadow-sm rounded-lg border p-6 text-center text-[#ef4444] transition-all">
     <div className="mb-1 text-[2rem]">📨</div>
-    <div className="text-stone-900 text-3xl leading-none font-bold">{unreadMessages}</div>
-    <div className="text-stone-500 mt-1 text-xs font-medium">Unread Messages</div>
+    <div className="text-foreground text-3xl leading-none font-bold">{unreadMessages}</div>
+    <div className="text-muted-foreground mt-1 text-xs font-medium">Unread Messages</div>
    </div>
    </div>
 

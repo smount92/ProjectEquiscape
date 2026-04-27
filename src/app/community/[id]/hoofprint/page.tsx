@@ -60,7 +60,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
   <>
    <Link
    href={`/community/${horseId}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ← Back to Passport
    </Link>
@@ -100,10 +100,10 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
       :"🏅"}
     </span>
     <span className="font-semibold">{r.show_name}</span>
-    {r.division && <span className="text-stone-500">— {r.division}</span>}
-    {r.placing && <span className="text-stone-500">({r.placing})</span>}
+    {r.division && <span className="text-muted-foreground">— {r.division}</span>}
+    {r.placing && <span className="text-muted-foreground">({r.placing})</span>}
     {r.show_date && (
-     <span className="text-stone-500 ml-auto text-xs">
+     <span className="text-muted-foreground ml-auto text-xs">
      {new Date(r.show_date).toLocaleDateString("en-US", {
       month:"short",
       year:"numeric",

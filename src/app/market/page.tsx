@@ -103,7 +103,7 @@ export default async function MarketPricePage({
     ?"No matching price data"
     :"The Blue Book Grows With Every Sale"}
    </h3>
-   <p className="text-stone-600 mx-auto max-w-[400]">
+   <p className="text-secondary-foreground mx-auto max-w-[400]">
     {query || itemType !=="all"
     ?"Try broadening your search or changing the filter."
     :"Complete a transaction to contribute market data. Prices appear here after verified sales."}
@@ -112,7 +112,7 @@ export default async function MarketPricePage({
   ) : (
    <>
    <div className="mb-4">
-    <span className="text-stone-500 text-sm">
+    <span className="text-muted-foreground text-sm">
     {total} item{total !== 1 ?"s" :""} with price data
     </span>
    </div>
@@ -149,7 +149,7 @@ export default async function MarketPricePage({
       ? ` – ${formatCurrency(item.highestPrice)}`
       :""}
      </div>
-     <div className="mt-[2px] text-sm text-stone-500">
+     <div className="mt-[2px] text-sm text-muted-foreground">
       <span>Avg: {formatCurrency(item.averagePrice)}</span>
       <span> · Median: {formatCurrency(item.medianPrice)}</span>
      </div>
@@ -160,7 +160,7 @@ export default async function MarketPricePage({
       {item.transactionVolume} sale{item.transactionVolume !== 1 ?"s" :""}
      </span>
      {item.lastSoldAt && (
-      <span className="text-stone-500">
+      <span className="text-muted-foreground">
       Last sold: {formatRelativeTime(item.lastSoldAt)}
       </span>
      )}
@@ -175,31 +175,31 @@ export default async function MarketPricePage({
     {page > 1 ? (
      <Link
      href={buildPageUrl(page - 1)}
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
      >
      ← Previous
      </Link>
     ) : (
      <button
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
      disabled
      >
      ← Previous
      </button>
     )}
-    <span className="text-stone-500 text-sm">
+    <span className="text-muted-foreground text-sm">
      Page {page} of {totalPages} ({total} items)
     </span>
     {page < totalPages ? (
      <Link
      href={buildPageUrl(page + 1)}
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
      >
      Next →
      </Link>
     ) : (
      <button
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
      disabled
      >
      Next →

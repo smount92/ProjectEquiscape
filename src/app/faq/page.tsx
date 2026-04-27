@@ -161,7 +161,7 @@ export default function FaqPage() {
  <h1>
  Frequently Asked <span className="text-forest">Questions</span>
  </h1>
- <p className="mt-2 text-lg text-stone-600">
+ <p className="mt-2 text-lg text-secondary-foreground">
  Everything you need to know about Model Horse Hub. Can&apos;t find your answer?{" "}
  <Link href="/contact">Contact us</Link>.
  </p>
@@ -172,7 +172,7 @@ export default function FaqPage() {
  {categories.map((cat) => (
  <button
  key={cat}
- className={`border-input cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat ?"bg-forest !border-forest text-white" :"text-stone-500 hover:text-stone-900 hover:border-emerald-700 bg-white"}`}
+ className={`border-input cursor-pointer rounded-full border px-4 py-1 text-sm font-semibold whitespace-nowrap transition-all ${activeCategory === cat ?"bg-forest !border-forest text-white" :"text-muted-foreground hover:text-foreground hover:border-emerald-700 bg-white"}`}
  onClick={() => {
  setActiveCategory(cat);
  setOpenIndex(null);
@@ -193,12 +193,12 @@ export default function FaqPage() {
  className={`overflow-hidden rounded-lg border transition-colors ${isOpen ?"border-forest/30" :"border-input"}`}
  >
  <button
- className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-white px-6 py-5 text-left text-base font-semibold text-stone-900 transition-colors hover:bg-[var(--color-bg-white-hover)]"
+ className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-white px-6 py-5 text-left text-base font-semibold text-foreground transition-colors hover:bg-[var(--color-bg-white-hover)]"
  onClick={() => toggle(idx)}
  >
  <span>{item.q}</span>
  <svg
- className={`shrink-0 transition-transform ${isOpen ?"text-forest rotate-180" :"text-stone-500"}`}
+ className={`shrink-0 transition-transform ${isOpen ?"text-forest rotate-180" :"text-muted-foreground"}`}
  width="20"
  height="20"
  viewBox="0 0 24 24"
@@ -214,7 +214,7 @@ export default function FaqPage() {
  </button>
  {isOpen && (
  <div
- className="animate-fade-in-up rounded-lg bg-white px-6 pb-5 text-base leading-[1.8] text-stone-600"
+ className="animate-fade-in-up rounded-lg bg-white px-6 pb-5 text-base leading-[1.8] text-secondary-foreground"
  id={`faq-a-${idx}`}
  >
  <p>{item.a}</p>

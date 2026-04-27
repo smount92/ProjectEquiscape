@@ -37,7 +37,7 @@ export default function SearchBar({
         >
             {/* Search icon */}
             <svg
-                className="shrink-0 text-stone-400 transition-colors"
+                className="shrink-0 text-muted-foreground transition-colors"
                 width="18"
                 height="18"
                 viewBox="0 0 24 24"
@@ -55,7 +55,7 @@ export default function SearchBar({
             <input
                 ref={inputRef}
                 type="text"
-                className="min-w-0 flex-1 border-none bg-transparent text-sm text-stone-900 outline-none placeholder:text-stone-400"
+                className="min-w-0 flex-1 border-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -67,7 +67,7 @@ export default function SearchBar({
             {/* Keyboard hint or clear button */}
             {value ? (
                 <button
-                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-input bg-muted text-stone-500 transition-all hover:bg-stone-200"
+                    className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-input bg-muted text-muted-foreground transition-all hover:bg-muted"
                     onClick={() => {
                         onChange("");
                         inputRef.current?.focus();
@@ -90,7 +90,7 @@ export default function SearchBar({
                     </svg>
                 </button>
             ) : (
-                <kbd className="flex h-6 items-center rounded border border-input bg-muted px-1.5 text-xs text-stone-400">
+                <kbd className="flex h-6 items-center rounded border border-input bg-muted px-1.5 text-xs text-muted-foreground">
                     /
                 </kbd>
             )}

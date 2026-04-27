@@ -91,14 +91,14 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
 
  return (
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label className="text-foreground mb-1 block text-sm font-semibold">
  📁 Collections <span className="font-normal opacity-[0.6]">(Optional — multi-select)</span>
  </label>
 
  {loading ? (
- <div className="text-stone-500 text-sm">Loading collections…</div>
+ <div className="text-muted-foreground text-sm">Loading collections…</div>
  ) : collections.length === 0 ? (
- <div className="text-stone-500 mb-2 text-sm">No collections yet. Create one to organize your models.</div>
+ <div className="text-muted-foreground mb-2 text-sm">No collections yet. Create one to organize your models.</div>
  ) : (
  <div
  className="flex max-h-[180px] flex-col gap-1 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-bg-input,rgb(250 250 249))] p-2"
@@ -138,7 +138,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  )}
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => setShowModal(true)}
  aria-label="Create new collection"
  id="create-collection-btn"
@@ -147,7 +147,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  </button>
  </div>
 
- <span className="text-stone-500 mt-1 block text-xs">
+ <span className="text-muted-foreground mt-1 block text-xs">
  Organize your models into collections like &quot;Childhood Herd&quot;, &quot;Show String&quot;, or
  &quot;Wishlist&quot;.
  </span>
@@ -163,7 +163,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div>
  <label
  htmlFor="new-collection-name"
- className="text-stone-900 mb-1 block text-sm font-semibold"
+ className="text-foreground mb-1 block text-sm font-semibold"
  >
  Collection Name *
  </label>
@@ -184,7 +184,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div>
  <label
  htmlFor="new-collection-desc"
- className="text-stone-900 mb-1 block text-sm font-semibold"
+ className="text-foreground mb-1 block text-sm font-semibold"
  >
  Description <span className="opacity-[0.6]">(Optional)</span>
  </label>
@@ -208,7 +208,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  />
  <label
  htmlFor="new-collection-public"
- className="text-stone-900 m-0 block text-sm font-semibold"
+ className="text-foreground m-0 block text-sm font-semibold"
  >
  🌐 Make public on profile
  </label>
@@ -218,7 +218,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div className="flex justify-end gap-4 pt-2">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => setShowModal(false)}
  >
  Cancel

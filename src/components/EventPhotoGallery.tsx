@@ -127,7 +127,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  {error && <p className="mb-2 text-[0.85rem] text-[var(--color-error)]">{error}</p>}
 
  {photos.length === 0 ? (
- <p className="text-stone-600 font-medium my-4">No photos yet — share yours!</p>
+ <p className="text-secondary-foreground font-medium my-4">No photos yet — share yours!</p>
  ) : (
  <div className="grid-cols-[repeat(auto-fill,minmax(140px,1fr))] mt-2 grid gap-2">
  {photos.map((p) => (
@@ -138,7 +138,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  <button
  onClick={() => handleDelete(p.id)}
  disabled={isPending}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  style={{
  position:"absolute",
  top: 4,

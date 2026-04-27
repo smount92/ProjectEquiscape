@@ -43,13 +43,13 @@ export default function ReportButton({
  };
 
  if (done) {
- return <span className="text-stone-500 text-xs">✅ Reported</span>;
+ return <span className="text-muted-foreground text-xs">✅ Reported</span>;
  }
 
  if (!showForm) {
  return (
  <button
- className="cursor-pointer border-none bg-transparent p-1 text-xs text-stone-500"
+ className="cursor-pointer border-none bg-transparent p-1 text-xs text-muted-foreground"
  onClick={() => setShowForm(true)}
  title="Report"
  >
@@ -91,7 +91,7 @@ export default function ReportButton({
  {saving ?"…" :"Submit Report"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => setShowForm(false)}
  >
  Cancel

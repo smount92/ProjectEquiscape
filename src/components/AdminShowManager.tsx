@@ -32,7 +32,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  };
 
  if (shows.length === 0) {
- return <p className="text-stone-500">No shows yet. Create one above.</p>;
+ return <p className="text-muted-foreground">No shows yet. Create one above.</p>;
  }
 
  return (
@@ -44,7 +44,7 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  >
  <div className="min-w-[200px] flex-1">
  <div className="font-semibold">{show.title}</div>
- <div className="text-stone-500 text-xs">
+ <div className="text-muted-foreground text-xs">
  🐴 {show.entryCount} entries
  {show.endAt && <> · ⏰ {new Date(show.endAt).toLocaleDateString()}</>}
  </div>

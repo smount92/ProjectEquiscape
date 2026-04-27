@@ -130,7 +130,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Timeline */}
  {records.length === 0 ? (
- <div className="text-stone-600 py-6 text-center text-sm">
+ <div className="text-secondary-foreground py-6 text-center text-sm">
  {isOwner ?"No show records yet. Add your first win! 🏆" :"No show records yet."}
  </div>
  ) : (
@@ -169,13 +169,13 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  </span>
  )}
  {(record.verificationTier === "self_reported" || (!record.verificationTier && !record.isNan)) && (
- <span className="inline-flex items-center gap-[2px] rounded-sm bg-muted px-2 py-[1px] text-xs font-medium text-stone-500" title="Self-reported by collector">
+ <span className="inline-flex items-center gap-[2px] rounded-sm bg-muted px-2 py-[1px] text-xs font-medium text-muted-foreground" title="Self-reported by collector">
  📝 Self-Reported
  </span>
  )}
  </div>
 
- <div className="text-stone-600 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+ <div className="text-secondary-foreground flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
  {record.placing && <span>🎖️ {record.placing}</span>}
  {record.division && <span>📂 {record.division}</span>}
@@ -186,7 +186,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Advanced details row */}
  {(record.sectionName || record.awardCategory || record.competitionLevel) && (
- <div className="text-stone-600 mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
+ <div className="text-secondary-foreground mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  {record.sectionName && <span>🏷️ {record.sectionName}</span>}
  {record.awardCategory && <span>🎯 {record.awardCategory}</span>}
  {record.competitionLevel && <span>📊 {record.competitionLevel}</span>}
@@ -194,7 +194,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  )}
 
  {record.notes && (
- <div className="text-stone-600 mt-1 text-sm italic">
+ <div className="text-secondary-foreground mt-1 text-sm italic">
  {record.notes}
  </div>
  )}
@@ -202,7 +202,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  {isOwner && (
  <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover/record:opacity-100">
  <button
- className="text-stone-500 hover:text-forest cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors"
+ className="text-muted-foreground hover:text-forest cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors"
  onClick={() => handleEdit(record)}
  title="Edit"
  aria-label="Edit record"
@@ -210,7 +210,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  ✏️
  </button>
  <button
- className="text-stone-500 cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors hover:text-[#e74c6f]"
+ className="text-muted-foreground cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors hover:text-[#e74c6f]"
  onClick={() => handleDelete(record.id)}
  disabled={deletingId === record.id}
  title="Delete"

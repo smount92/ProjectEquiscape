@@ -59,7 +59,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
         <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="mb-8 text-center animate-fade-in-up">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-input bg-card px-4 py-1.5 text-sm font-medium text-stone-600 shadow-sm">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-input bg-card px-4 py-1.5 text-sm font-medium text-secondary-foreground shadow-sm">
                     📸 Show Results
                     {event.isSanctioned && (
                         <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
@@ -67,10 +67,10 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                         </span>
                     )}
                 </div>
-                <h1 className="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                     {event.name}
                 </h1>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-stone-500">
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                     {event.date && <span>📅 {event.date}</span>}
                     <span>🎤 Hosted by @{event.host}</span>
                 </div>
@@ -78,16 +78,16 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                 {/* Stats */}
                 <div className="mt-6 flex justify-center gap-8">
                     <div className="flex flex-col items-center">
-                        <span className="text-2xl font-bold text-stone-900">{totalEntries}</span>
-                        <span className="text-xs text-stone-500">Entries</span>
+                        <span className="text-2xl font-bold text-foreground">{totalEntries}</span>
+                        <span className="text-xs text-muted-foreground">Entries</span>
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="text-2xl font-bold text-stone-900">{totalClasses}</span>
-                        <span className="text-xs text-stone-500">Classes</span>
+                        <span className="text-2xl font-bold text-foreground">{totalClasses}</span>
+                        <span className="text-xs text-muted-foreground">Classes</span>
                     </div>
                     <div className="flex flex-col items-center">
-                        <span className="text-2xl font-bold text-stone-900">{placedCount}</span>
-                        <span className="text-xs text-stone-500">Placed</span>
+                        <span className="text-2xl font-bold text-foreground">{placedCount}</span>
+                        <span className="text-xs text-muted-foreground">Placed</span>
                     </div>
                 </div>
             </div>
@@ -96,7 +96,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
             <div className="mb-8 flex justify-center animate-fade-in-up">
                 <a
                     href={`/api/export/show-results/${event.id}`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-input bg-card px-5 py-2.5 text-sm font-medium text-stone-700 shadow-sm transition-all hover:bg-muted hover:shadow-md no-underline"
+                    className="inline-flex items-center gap-2 rounded-lg border border-input bg-card px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted hover:shadow-md no-underline"
                 >
                     📥 Download Results CSV
                 </a>
@@ -108,7 +108,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                     <div key={division.name} className="overflow-hidden rounded-xl border border-input bg-card shadow-sm">
                         {/* Division Header */}
                         <div className="border-b border-input bg-muted px-6 py-3">
-                            <h2 className="text-lg font-semibold text-stone-800">
+                            <h2 className="text-lg font-semibold text-foreground">
                                 📂 {division.name}
                             </h2>
                         </div>
@@ -117,9 +117,9 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                         <div className="divide-y divide-stone-100">
                             {division.classes.map((cls) => (
                                 <div key={`${division.name}-${cls.name}`} className="px-6 py-4">
-                                    <h3 className="mb-3 text-sm font-bold text-stone-600">
+                                    <h3 className="mb-3 text-sm font-bold text-secondary-foreground">
                                         {cls.classNumber && (
-                                            <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-bold text-stone-500">
+                                            <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
                                                 {cls.classNumber}
                                             </span>
                                         )}
@@ -127,7 +127,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                                     </h3>
 
                                     {cls.results.length === 0 ? (
-                                        <p className="text-sm italic text-stone-400">No placements in this class</p>
+                                        <p className="text-sm italic text-muted-foreground">No placements in this class</p>
                                     ) : (
                                         <div className="space-y-1.5">
                                             {cls.results.map((result, idx) => (
@@ -155,16 +155,16 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
 
                                                     {/* Name + Owner */}
                                                     <div className="flex-1 min-w-0">
-                                                        <span className="font-semibold text-stone-800">
+                                                        <span className="font-semibold text-foreground">
                                                             {result.horseName}
                                                         </span>
-                                                        <span className="ml-2 text-sm text-stone-500">
+                                                        <span className="ml-2 text-sm text-muted-foreground">
                                                             by @{result.ownerAlias}
                                                         </span>
                                                     </div>
 
                                                     {/* Placing Badge */}
-                                                    <span className="shrink-0 rounded-md bg-muted px-2.5 py-1 text-xs font-bold text-stone-600">
+                                                    <span className="shrink-0 rounded-md bg-muted px-2.5 py-1 text-xs font-bold text-secondary-foreground">
                                                         {result.placement}
                                                     </span>
                                                 </div>
@@ -182,22 +182,22 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
             {divisions.length === 0 && (
                 <div className="rounded-xl border border-input bg-card px-8 py-16 text-center shadow-sm">
                     <div className="mb-4 text-5xl">📋</div>
-                    <h2 className="text-xl font-semibold text-stone-800">No Results Available</h2>
-                    <p className="mt-2 text-stone-500">This show hasn&apos;t announced results yet, or no entries were placed.</p>
+                    <h2 className="text-xl font-semibold text-foreground">No Results Available</h2>
+                    <p className="mt-2 text-muted-foreground">This show hasn&apos;t announced results yet, or no entries were placed.</p>
                 </div>
             )}
 
             {/* Footer */}
             <footer className="mt-12 border-t border-input pt-6 text-center">
-                <p className="text-sm text-stone-400">
+                <p className="text-sm text-muted-foreground">
                     Show results managed by{" "}
-                    <Link href="/" className="font-medium text-stone-600 hover:text-stone-800">
+                    <Link href="/" className="font-medium text-secondary-foreground hover:text-foreground">
                         Model Horse Hub
                     </Link>
                     {event.isSanctioned && " in partnership with NAMHSA"}
                 </p>
-                <p className="mt-2 text-xs text-stone-300">
-                    <Link href={`/shows/${event.id}`} className="text-stone-400 hover:text-stone-600">
+                <p className="mt-2 text-xs text-muted-foreground">
+                    <Link href={`/shows/${event.id}`} className="text-muted-foreground hover:text-secondary-foreground">
                         View full show details →
                     </Link>
                 </p>

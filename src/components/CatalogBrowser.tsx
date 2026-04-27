@@ -154,9 +154,9 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                 {/* Filter Chips */}
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="flex flex-wrap items-center gap-[6px]">
-                        <span className="text-sm font-semibold text-stone-700">Maker:</span>
+                        <span className="text-sm font-semibold text-foreground">Maker:</span>
                         <button
-                            className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-all ${activeMaker === null ? "border-forest bg-forest text-white" : "border-input bg-card text-stone-600 hover:border-stone-300 hover:bg-muted"}`}
+                            className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-all ${activeMaker === null ? "border-forest bg-forest text-white" : "border-input bg-card text-secondary-foreground hover:border-input hover:bg-muted"}`}
                             onClick={() => handleMakerFilter(null)}
                         >
                             All
@@ -164,7 +164,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                         {makers.slice(0, 10).map((maker) => (
                             <button
                                 key={maker}
-                                className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-all ${activeMaker === maker ? "border-forest bg-forest text-white" : "border-input bg-card text-stone-600 hover:border-stone-300 hover:bg-muted"}`}
+                                className={`cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-all ${activeMaker === maker ? "border-forest bg-forest text-white" : "border-input bg-card text-secondary-foreground hover:border-input hover:bg-muted"}`}
                                 onClick={() => handleMakerFilter(activeMaker === maker ? null : maker)}
                             >
                                 {maker}
@@ -173,10 +173,10 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                     </div>
                     {scales.length > 0 && (
                         <div className="flex flex-wrap items-center gap-[6px]">
-                            <span className="text-sm font-semibold text-stone-700">Scale:</span>
+                            <span className="text-sm font-semibold text-foreground">Scale:</span>
                             <select
                                 id="catalog-scale-filter"
-                                className="rounded-md border border-input bg-card px-3 py-1.5 text-sm text-stone-700"
+                                className="rounded-md border border-input bg-card px-3 py-1.5 text-sm text-foreground"
                                 title="Filter by scale"
                                 value={activeScale ?? ""}
                                 onChange={(e) => handleScaleFilter(e.target.value || null)}
@@ -193,13 +193,13 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                 </div>
 
                 {/* Results Count */}
-                <div className="mt-3 flex items-center justify-between text-sm text-stone-600">
+                <div className="mt-3 flex items-center justify-between text-sm text-secondary-foreground">
                     <span>
                         {total.toLocaleString()} {total === 1 ? "entry" : "entries"} found
                     </span>
                     {(search || activeMaker || activeScale) && (
                         <button
-                            className="shrink-0 cursor-pointer border-none bg-transparent text-sm text-stone-600 transition-colors hover:text-stone-900"
+                            className="shrink-0 cursor-pointer border-none bg-transparent text-sm text-secondary-foreground transition-colors hover:text-foreground"
                             onClick={() => {
                                 setSearch("");
                                 setActiveMaker(null);
@@ -220,26 +220,26 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                 <TableHeader>
                     <TableRow className="hover:bg-transparent">
                         <TableHead
-                            className="cursor-pointer select-none text-stone-500"
+                            className="cursor-pointer select-none text-muted-foreground"
                             onClick={() => handleSort("title")}
                         >
                             Name {sortIndicator("title")}
                         </TableHead>
                         <TableHead
-                            className="cursor-pointer select-none text-stone-500"
+                            className="cursor-pointer select-none text-muted-foreground"
                             onClick={() => handleSort("maker")}
                         >
                             Maker {sortIndicator("maker")}
                         </TableHead>
-                        <TableHead className="text-stone-500">Color</TableHead>
-                        <TableHead className="text-stone-500">Mold</TableHead>
+                        <TableHead className="text-muted-foreground">Color</TableHead>
+                        <TableHead className="text-muted-foreground">Mold</TableHead>
                         <TableHead
-                            className="cursor-pointer select-none text-stone-500"
+                            className="cursor-pointer select-none text-muted-foreground"
                             onClick={() => handleSort("scale")}
                         >
                             Scale {sortIndicator("scale")}
                         </TableHead>
-                        <TableHead className="w-[120px] text-stone-500">Actions</TableHead>
+                        <TableHead className="w-[120px] text-muted-foreground">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -249,13 +249,13 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                             className="cursor-pointer transition-colors hover:bg-muted"
                             onClick={() => router.push(`/catalog/${item.id}`)}
                         >
-                            <TableCell className="font-semibold text-stone-900">
+                            <TableCell className="font-semibold text-foreground">
                                 {item.title}
                             </TableCell>
-                            <TableCell className="text-stone-600">{item.maker}</TableCell>
-                            <TableCell className="text-stone-600">{getAttr(item, "color")}</TableCell>
-                            <TableCell className="text-stone-600">{getAttr(item, "mold")}</TableCell>
-                            <TableCell className="text-stone-600">{item.scale ?? "—"}</TableCell>
+                            <TableCell className="text-secondary-foreground">{item.maker}</TableCell>
+                            <TableCell className="text-secondary-foreground">{getAttr(item, "color")}</TableCell>
+                            <TableCell className="text-secondary-foreground">{getAttr(item, "mold")}</TableCell>
+                            <TableCell className="text-secondary-foreground">{item.scale ?? "—"}</TableCell>
                             <TableCell className="text-right">
                                 <button
                                     className="cursor-pointer border-0 bg-transparent text-sm text-forest opacity-0 transition-all group-hover:opacity-100"
@@ -271,7 +271,7 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
                     ))}
                     {items.length === 0 && (
                         <TableRow>
-                            <TableCell colSpan={6} className="p-8 text-center text-stone-500">
+                            <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
                                 No entries match your search.{" "}
                                 <a href="/catalog/suggestions" className="text-forest hover:underline">Suggest a new entry?</a>
                             </TableCell>
@@ -285,17 +285,17 @@ export default function CatalogBrowser({ initialItems, totalCount, makers, scale
             {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-4 border-t border-input px-6 py-4">
                     <button
-                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-muted disabled:opacity-40"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-card px-6 py-2 text-sm font-semibold text-secondary-foreground transition-all hover:bg-muted disabled:opacity-40"
                         disabled={page <= 1}
                         onClick={() => handlePage(page - 1)}
                     >
                         ← Previous
                     </button>
-                    <span className="text-sm text-stone-500">
+                    <span className="text-sm text-muted-foreground">
                         Page {page} of {totalPages}
                     </span>
                     <button
-                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-card px-6 py-2 text-sm font-semibold text-stone-600 transition-all hover:bg-muted disabled:opacity-40"
+                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-card px-6 py-2 text-sm font-semibold text-secondary-foreground transition-all hover:bg-muted disabled:opacity-40"
                         disabled={page >= totalPages}
                         onClick={() => handlePage(page + 1)}
                     >

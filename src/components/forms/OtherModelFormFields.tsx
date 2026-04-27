@@ -22,10 +22,10 @@ export default function OtherModelFormFields({
 }: OtherModelFormFieldsProps) {
   return (
     <div className="mt-4 space-y-4 rounded-lg border border-[#E0D5C1] bg-[#FEFCF8] p-4">
-      <h4 className="text-sm font-semibold text-stone-900">🐄 Other Model Details</h4>
+      <h4 className="text-sm font-semibold text-foreground">🐄 Other Model Details</h4>
 
       <div>
-        <label htmlFor="other-species" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="other-species" className="mb-1 block text-sm font-semibold text-foreground">
           Species
         </label>
         <select
@@ -42,7 +42,7 @@ export default function OtherModelFormFields({
       </div>
 
       <div>
-        <label htmlFor="other-breed" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="other-breed" className="mb-1 block text-sm font-semibold text-foreground">
           Breed / Type
         </label>
         <Input
@@ -56,7 +56,7 @@ export default function OtherModelFormFields({
       </div>
 
       <div>
-        <label htmlFor="other-manufacturer" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="other-manufacturer" className="mb-1 block text-sm font-semibold text-foreground">
           Manufacturer
         </label>
         <Input
@@ -70,7 +70,7 @@ export default function OtherModelFormFields({
       </div>
 
       <div>
-        <label htmlFor="other-model-number" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="other-model-number" className="mb-1 block text-sm font-semibold text-foreground">
           Model / Item Number
         </label>
         <Input

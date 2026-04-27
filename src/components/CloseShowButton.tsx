@@ -38,7 +38,7 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
  >
  <div className="mb-2 text-[2rem]">⏰</div>
  <h3 className="mb-1">Entry Period Has Ended</h3>
- <p className="text-stone-500 mb-4 text-sm">
+ <p className="text-muted-foreground mb-4 text-sm">
  Close this show to calculate results and generate show records for the top finishers.
  </p>
  <button

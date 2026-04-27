@@ -110,14 +110,14 @@ export default function NotificationList({ initialNotifications }: NotificationL
  <div className="border-input mb-6 flex gap-2 border-b pb-2">
  {unreadCount > 0 && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleMarkAllRead}
  >
  ✓ Mark All Read
  </button>
  )}
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-500 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={handleClear}
  disabled={clearing}
  >
@@ -149,7 +149,7 @@ export default function NotificationList({ initialNotifications }: NotificationL
  <span className="text-sm">
  {n.content ||"New notification"}
  </span>
- <span className="text-stone-500 text-xs">
+ <span className="text-muted-foreground text-xs">
  {timeAgo(n.createdAt)}
  </span>
  </div>

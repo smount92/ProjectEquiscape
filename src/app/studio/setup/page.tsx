@@ -175,7 +175,7 @@ export default function StudioSetupPage() {
  return (
   <FocusLayout title={<><span className="text-forest">Art Studio</span></>}>
   <div className="bg-white border-input mx-auto max-w-[700px] rounded-lg border p-12 text-center shadow-md transition-all">
-   <p className="text-stone-500">Loading studio settings…</p>
+   <p className="text-muted-foreground">Loading studio settings…</p>
   </div>
   </FocusLayout>
  );
@@ -193,7 +193,7 @@ export default function StudioSetupPage() {
    <legend>🏷️ Studio Identity</legend>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Studio Name *</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Studio Name *</label>
     <Input
     type="text"
     value={studioName}
@@ -205,9 +205,9 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Studio URL Slug</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Studio URL Slug</label>
     <div className="flex items-center gap-1">
-    <span className="text-stone-500 whitespace-nowrap text-sm">/studio/</span>
+    <span className="text-muted-foreground whitespace-nowrap text-sm">/studio/</span>
     <Input
      type="text"
      className="font-mono"
@@ -222,7 +222,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Artist Bio</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Artist Bio</label>
     <Textarea
     value={bioArtist}
     onChange={(e) => setBioArtist(e.target.value)}
@@ -238,7 +238,7 @@ export default function StudioSetupPage() {
    <legend>🛠️ Skills & Services</legend>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Specialties</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Specialties</label>
     <div className="flex flex-wrap gap-1">
     {SPECIALTIES.map((s) => (
      <button
@@ -254,7 +254,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Mediums</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Mediums</label>
     <div className="flex flex-wrap gap-1">
     {MEDIUMS.map((m) => (
      <button
@@ -270,7 +270,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Scales Offered</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Scales Offered</label>
     <div className="flex flex-wrap gap-1">
     {SCALES.map((s) => (
      <button
@@ -286,7 +286,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">
+    <label className="text-foreground mb-1 block text-sm font-semibold">
     Commission Types Accepted
     </label>
     <div className="flex flex-wrap gap-1">
@@ -309,7 +309,7 @@ export default function StudioSetupPage() {
    <legend>📋 Commission Settings</legend>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Commission Status</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Commission Status</label>
     <div className="flex gap-2">
     {(["open","waitlist","closed"] as const).map((s) => (
      <button
@@ -327,7 +327,7 @@ export default function StudioSetupPage() {
 
    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">
+    <label className="text-foreground mb-1 block text-sm font-semibold">
      Max Commission Slots
     </label>
     <Input
@@ -350,7 +350,7 @@ export default function StudioSetupPage() {
 
    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">
+    <label className="text-foreground mb-1 block text-sm font-semibold">
      Turnaround (min days)
     </label>
     <Input
@@ -362,7 +362,7 @@ export default function StudioSetupPage() {
     />
     </div>
     <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">
+    <label className="text-foreground mb-1 block text-sm font-semibold">
      Turnaround (max days)
     </label>
     <Input
@@ -377,7 +377,7 @@ export default function StudioSetupPage() {
 
    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Price Range (min $)</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Price Range (min $)</label>
     <Input
      type="number"
      value={priceMin}
@@ -388,7 +388,7 @@ export default function StudioSetupPage() {
     />
     </div>
     <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Price Range (max $)</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Price Range (max $)</label>
     <Input
      type="number"
      value={priceMax}
@@ -406,7 +406,7 @@ export default function StudioSetupPage() {
    <legend>💰 Policies & Payment</legend>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">Terms & Conditions</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">Terms & Conditions</label>
     <Textarea
     value={termsText}
     onChange={(e) => setTermsText(e.target.value)}
@@ -417,7 +417,7 @@ export default function StudioSetupPage() {
    </div>
 
    <div className="mb-6">
-    <label className="text-stone-900 mb-1 block text-sm font-semibold">PayPal.me Link</label>
+    <label className="text-foreground mb-1 block text-sm font-semibold">PayPal.me Link</label>
     <Input
     type="url"
     value={paypalMeLink}
@@ -452,7 +452,7 @@ export default function StudioSetupPage() {
    <div className="mt-4 text-center">
     <a
     href={`/studio/${existing.studioSlug}`}
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
     >
     👁️ View Public Studio Page
     </a>

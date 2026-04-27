@@ -91,10 +91,10 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  className="rounded-lg border border-input bg-card no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
  >
  <div className="p-5">
- <div className="mb-2 text-base font-semibold text-stone-900">
+ <div className="mb-2 text-base font-semibold text-foreground">
  {STATUS_EMOJI[a.status]} {a.studioName}
  </div>
- <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-stone-500">
+ <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
  <span>🎨 @{a.ownerAlias}</span>
  {a.priceRangeMin != null && (
  <span>💰 ${a.priceRangeMin}–${a.priceRangeMax}</span>
@@ -105,7 +105,7 @@ export default function ArtistBrowser({ artists }: { artists: ArtistProfile[] })
  {a.specialties.slice(0, 3).map((s) => (
  <span
  key={s}
- className="rounded-full border border-input bg-muted px-2.5 py-0.5 text-xs text-stone-500"
+ className="rounded-full border border-input bg-muted px-2.5 py-0.5 text-xs text-muted-foreground"
  >
  {s}
  </span>

@@ -55,7 +55,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  >
  {tab.label}
  {count > 0 && (
- <span className="flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-2 py-1 text-xs text-stone-500 transition-all">
+ <span className="flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-2 py-1 text-xs text-muted-foreground transition-all">
  {count}
  </span>
  )}
@@ -69,7 +69,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  <div
  className="bg-card border-input rounded-lg border text-center shadow-md transition-all"
  >
- <p className="text-stone-500 text-sm">No commissions in this category.</p>
+ <p className="text-muted-foreground text-sm">No commissions in this category.</p>
  </div>
  ) : (
  <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 max-md:grid-cols-1">
@@ -94,18 +94,18 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  </span>
  </div>
 
- <div className="text-stone-500 mb-2 flex gap-4 text-sm">
+ <div className="text-muted-foreground mb-2 flex gap-4 text-sm">
  {c.clientAlias && <span>👤 @{c.clientAlias}</span>}
  {c.slotNumber && <span>📌 Slot {c.slotNumber}</span>}
  {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
  </div>
 
- <p className="text-stone-600 mb-2 text-sm leading-normal">
+ <p className="text-secondary-foreground mb-2 text-sm leading-normal">
  {c.description.length > 120 ? c.description.substring(0, 120) +"…" : c.description}
  </p>
 
  <div className="border-input mt-auto flex items-center justify-between border-t pt-2">
- <span className="text-stone-500 text-xs">
+ <span className="text-muted-foreground text-xs">
  {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
@@ -115,7 +115,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  <div className="flex flex-wrap gap-1">
  <Link
  href={`/studio/commission/${c.id}`}
- className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-xs font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-xs font-semibold text-secondary-foreground no-underline transition-all"
  >
  View
  </Link>

@@ -19,15 +19,15 @@ function ShowRingSkeleton() {
  <div className="space-y-6">
   {/* Search bar skeleton */}
   <div className="animate-pulse rounded-xl bg-muted p-4">
-   <div className="h-10 rounded-lg bg-stone-200" />
+   <div className="h-10 rounded-lg bg-muted" />
   </div>
   {/* Grid skeleton — 12 card placeholders */}
   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
    {Array.from({ length: 12 }).map((_, i) => (
     <div key={i} className="animate-pulse rounded-lg border border-input bg-card shadow-sm">
-     <div className="aspect-square rounded-t-lg bg-stone-200" />
+     <div className="aspect-square rounded-t-lg bg-muted" />
      <div className="space-y-2 p-3">
-      <div className="h-4 w-3/4 rounded bg-stone-200" />
+      <div className="h-4 w-3/4 rounded bg-muted" />
       <div className="h-3 w-1/2 rounded bg-muted" />
       <div className="h-3 w-1/3 rounded bg-muted" />
      </div>
@@ -244,7 +244,7 @@ async function ShowRingContent({
   </div>
   <Link
   href="/community/help-id"
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-card px-5 py-2 text-sm font-semibold text-stone-700 no-underline shadow-sm transition-all hover:border-stone-400 hover:bg-muted"
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-card px-5 py-2 text-sm font-semibold text-foreground no-underline shadow-sm transition-all hover:border-stone-400 hover:bg-muted"
   id="help-id-link"
   >
   🔍 Help Me ID

@@ -108,7 +108,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  <div className={`overflow-hidden px-8 transition-all duration-300 ${isUnlocked ? "max-h-[500px] py-4" : "max-h-0 py-0"}`} id="vault-data">
  {!hasData ? (
- <div className="text-stone-500 py-6 text-center text-sm">
+ <div className="text-muted-foreground py-6 text-center text-sm">
  <p>📭 No financial data recorded yet. You can add purchase details by editing this horse.</p>
  </div>
  ) : (
@@ -116,7 +116,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
  {vault.purchase_price !== null && (
  <div className="border-input rounded-md border bg-card p-4">
- <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-secondary-foreground mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Price
  </div>
  <div className="text-success text-base font-bold">
@@ -127,7 +127,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  {vault.estimated_current_value !== null && (
  <div className="border-input rounded-md border bg-card p-4">
- <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-secondary-foreground mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Estimated Value
  </div>
  <div className="text-success text-base font-bold">
@@ -138,10 +138,10 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  {vault.purchase_date !== null && (
  <div className="border-input rounded-md border bg-card p-4">
- <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-secondary-foreground mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Date
  </div>
- <div className="text-stone-900 text-base font-bold">
+ <div className="text-foreground text-base font-bold">
  {formatDate(vault.purchase_date)}
  </div>
  </div>
@@ -149,24 +149,24 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  {vault.purchase_date_text && !vault.purchase_date && (
  <div className="border-input rounded-md border bg-card p-4">
- <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-secondary-foreground mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Purchase Date
  </div>
- <div className="text-stone-900 text-base font-bold">{vault.purchase_date_text}</div>
+ <div className="text-foreground text-base font-bold">{vault.purchase_date_text}</div>
  </div>
  )}
 
  {vault.insurance_notes !== null && (
  <div className="border-input rounded-md border bg-card p-4">
- <div className="text-stone-600 mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ <div className="text-secondary-foreground mb-1 text-xs font-medium tracking-[0.05em] uppercase">
  Insurance Notes
  </div>
- <div className="text-stone-900 text-base font-bold">{vault.insurance_notes}</div>
+ <div className="text-foreground text-base font-bold">{vault.insurance_notes}</div>
  </div>
  )}
  </div>
 
- <div className="border-input text-stone-600 mt-4 flex items-center gap-1 border-t pt-4 text-xs">
+ <div className="border-input text-secondary-foreground mt-4 flex items-center gap-1 border-t pt-4 text-xs">
  <span>🛡️</span>
  <span>
  This data is encrypted and only visible to you. Protected by Row Level Security.

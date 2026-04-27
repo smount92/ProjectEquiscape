@@ -55,7 +55,7 @@ export default function LinkHorseToCommission({ commissionId }: { commissionId: 
  return (
  <div className="bg-card border-input mb-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-2">🔗 Link a Horse from Your Stable</h3>
- <p className="text-stone-500 mb-4 text-sm">
+ <p className="text-muted-foreground mb-4 text-sm">
  Link a horse so WIP photos are added to its Hoofprint™ when this commission is delivered.
  </p>
  <div className="flex items-center gap-2">

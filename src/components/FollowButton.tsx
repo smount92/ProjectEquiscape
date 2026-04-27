@@ -42,7 +42,7 @@ export default function FollowButton({
  >
  {loading ?"…" : isFollowing ?"✓ Following" :"+ Follow"}
  </button>
- <span className="text-stone-500 text-sm">
+ <span className="text-muted-foreground text-sm">
  {followerCount} follower{followerCount !== 1 ?"s" :""}
  </span>
  </div>

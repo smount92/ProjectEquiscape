@@ -78,7 +78,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  return (
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Commission Type *</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Commission Type *</label>
  <select
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={commissionType}
@@ -96,7 +96,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Link a Horse (optional)</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Link a Horse (optional)</label>
  <select
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={selectedHorseId}
@@ -110,13 +110,13 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  </option>
  ))}
  </select>
- <span className="text-stone-500 mt-1 block text-xs">
+ <span className="text-muted-foreground mt-1 block text-xs">
  Select the model you&apos;re sending in for this commission.
  </span>
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Description *</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Description *</label>
  <Textarea
  
  value={description}
@@ -129,7 +129,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Your Budget ($)</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Your Budget ($)</label>
  <Input
  type="number"
  
@@ -141,7 +141,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  />
  {(artist.priceRangeMin || artist.priceRangeMax) && (
  <span
- className="text-stone-500 mt-[4] block text-xs"
+ className="text-muted-foreground mt-[4] block text-xs"
  >
  Artist&apos;s range: ${artist.priceRangeMin ||"?"} – ${artist.priceRangeMax ||"?"}
  </span>

@@ -85,7 +85,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  setFiles(files.filter((f) => f.id !== fileId));
  };
 
- if (loading) return <p className="text-stone-500">Loading files…</p>;
+ if (loading) return <p className="text-muted-foreground">Loading files…</p>;
 
  return (
  <div>
@@ -94,7 +94,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  <div className="group-file-upload mb-6">
  <div className="flex flex-wrap items-end gap-2">
  <div className="min-w-[200] flex-1">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Upload File</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Upload File</label>
  <Input
  ref={fileRef}
  type="file"
@@ -104,7 +104,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  />
  </div>
  <div className="min-w-[200] flex-1">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Description (optional)</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Description (optional)</label>
  <Input
  
  value={description}
@@ -137,10 +137,10 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  >
  <div className="shrink-0 text-2xl">{fileIcon(f.fileType)}</div>
  <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
- <span className="text-stone-900 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
+ <span className="text-foreground overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
  {f.fileName}
  </span>
- <span className="text-stone-600 text-xs">
+ <span className="text-secondary-foreground text-xs">
  {formatSize(f.fileSize)}
  {f.description && <> · {f.description}</>}
  {" ·"}@{f.uploaderAlias} · {timeAgo(f.createdAt)}
@@ -149,7 +149,7 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  <div className="flex gap-1">
  {canDelete && (
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => handleDelete(f.id)}
  title="Delete file"
  >

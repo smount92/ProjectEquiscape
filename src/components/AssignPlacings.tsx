@@ -57,13 +57,13 @@ export default function AssignPlacings({
  return (
  <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
  <h3 className="mb-4">🏅 Assign Placings</h3>
- <p className="text-stone-500 mb-4 text-sm">As the event host, assign placings to each entry below.</p>
+ <p className="text-muted-foreground mb-4 text-sm">As the event host, assign placings to each entry below.</p>
  <div className="flex flex-col gap-2">
  {entries.map((entry) => (
  <div key={entry.id} className="flex items-center gap-2">
  <span className="flex-1">
  <strong>{entry.horseName}</strong>
- <span className="text-stone-500 ml-1">by @{entry.ownerAlias}</span>
+ <span className="text-muted-foreground ml-1">by @{entry.ownerAlias}</span>
  </span>
  <select
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-[140px]"

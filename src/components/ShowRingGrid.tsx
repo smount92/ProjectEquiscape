@@ -47,7 +47,7 @@ const FINISH_BADGE_CLASSES: Record<string, string> = {
  "Artist Resin": "bg-rose-50 text-rose-700 border-rose-200",
  "Test Run": "bg-cyan-50 text-cyan-700 border-cyan-200",
  "Decorator": "bg-emerald-50 text-emerald-700 border-emerald-200",
- "default": "bg-muted text-stone-600 border-input",
+ "default": "bg-muted text-secondary-foreground border-input",
 };
 
 const containerVariants = {
@@ -217,7 +217,7 @@ export default function ShowRingGrid({
    )}
 
    {isFiltering && (
-    <div className="text-stone-500 mb-6 pl-1 text-sm">
+    <div className="text-muted-foreground mb-6 pl-1 text-sm">
      {communityCards.length === 0
       ? "No models match your filters"
       : `Showing ${communityCards.length} models`}
@@ -227,8 +227,8 @@ export default function ShowRingGrid({
    {communityCards.length === 0 && !isFiltering ? (
     <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
      <span className="mb-4 text-6xl">🏟️</span>
-     <h2 className="mb-2 font-serif text-xl font-semibold text-stone-900">The Show Ring is Empty</h2>
-     <p className="mb-6 max-w-sm text-center text-stone-500">No models have been shared yet. Be the first to showcase your collection!</p>
+     <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">The Show Ring is Empty</h2>
+     <p className="mb-6 max-w-sm text-center text-muted-foreground">No models have been shared yet. Be the first to showcase your collection!</p>
      <Link
       href="/add-horse"
       className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
@@ -239,8 +239,8 @@ export default function ShowRingGrid({
    ) : communityCards.length === 0 && isFiltering ? (
     <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
      <span className="mb-4 text-6xl">🔍</span>
-     <h2 className="mb-2 font-serif text-xl font-semibold text-stone-900">No Results</h2>
-     <p className="max-w-sm text-center text-stone-500">No models match your search. Try different filters.</p>
+     <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">No Results</h2>
+     <p className="max-w-sm text-center text-muted-foreground">No models match your search. Try different filters.</p>
     </div>
    ) : (
     <motion.div
@@ -264,7 +264,7 @@ export default function ShowRingGrid({
        >
         <Link
          href={`/community/${horse.id}`}
-         className="flex flex-col text-stone-900 no-underline"
+         className="flex flex-col text-foreground no-underline"
         >
          {/* Image container — locked aspect ratio */}
          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
@@ -281,7 +281,7 @@ export default function ShowRingGrid({
             className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
            />
           ) : (
-           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-500">
+           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
             <span className="text-4xl opacity-50">🐴</span>
             <span className="text-xs font-medium">No photo</span>
            </div>
@@ -312,7 +312,7 @@ export default function ShowRingGrid({
 
          {/* Content area */}
          <div className="mt-3 px-1">
-          <h3 className="truncate font-serif text-lg font-bold text-stone-900">
+          <h3 className="truncate font-serif text-lg font-bold text-foreground">
            {horse.customName}
            {(horse.hoofprintCount ?? 0) > 0 && (
             <span
@@ -323,7 +323,7 @@ export default function ShowRingGrid({
             </span>
            )}
           </h3>
-          <p className="truncate text-sm text-stone-600">{horse.refName}</p>
+          <p className="truncate text-sm text-secondary-foreground">{horse.refName}</p>
 
           {/* Badge row */}
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -331,13 +331,13 @@ export default function ShowRingGrid({
           </div>
 
           {/* Metadata line */}
-          <div className="mt-2 flex items-center gap-2 text-xs text-stone-600">
+          <div className="mt-2 flex items-center gap-2 text-xs text-secondary-foreground">
            <span>{timeAgo(horse.createdAt)}</span>
            {horse.sculptor && <span>· ✂️ {horse.sculptor}</span>}
           </div>
 
           {isListed && horse.marketplaceNotes && (
-           <div className="mt-1.5 truncate rounded-md bg-muted px-2 py-1 text-xs text-stone-600" title={horse.marketplaceNotes}>
+           <div className="mt-1.5 truncate rounded-md bg-muted px-2 py-1 text-xs text-secondary-foreground" title={horse.marketplaceNotes}>
             📝 {horse.marketplaceNotes.length > 60 ? horse.marketplaceNotes.slice(0, 60) + "…" : horse.marketplaceNotes}
            </div>
           )}
@@ -374,13 +374,13 @@ export default function ShowRingGrid({
    {/* Load More */}
    {allCards.length > 0 && hasMore && (
     <div className="mt-10 flex flex-col items-center gap-3">
-     <p className="text-sm text-stone-500">
+     <p className="text-sm text-muted-foreground">
       Showing {allCards.length} of {totalCount} models
      </p>
      <button
       onClick={handleLoadMore}
       disabled={loadingMore}
-      className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl border border-input bg-card px-10 py-3 text-sm font-semibold text-stone-700 shadow-sm transition-all hover:border-stone-300 hover:bg-muted hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl border border-input bg-card px-10 py-3 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-input hover:bg-muted hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
       id="showring-load-more"
      >
       {loadingMore ? (
@@ -396,7 +396,7 @@ export default function ShowRingGrid({
    )}
 
    {allCards.length > 0 && !hasMore && allCards.length > 24 && (
-    <p className="mt-8 text-center text-sm text-stone-400">
+    <p className="mt-8 text-center text-sm text-muted-foreground">
      You&apos;ve seen all {totalCount} models in the Show Ring 🏆
     </p>
    )}

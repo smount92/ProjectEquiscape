@@ -18,7 +18,7 @@ export default function AboutPage() {
  <h1>
  About <span className="text-forest">Model Horse Hub</span>
  </h1>
- <p className="mt-2 text-lg text-stone-600">
+ <p className="mt-2 text-lg text-secondary-foreground">
  Built by a collector who was tired of the status quo.
  </p>
  </div>
@@ -26,7 +26,7 @@ export default function AboutPage() {
  {/* Our Story */}
  <section className="mb-12">
  <h2>Our Story</h2>
- <div className="space-y-4 text-base leading-relaxed text-stone-600">
+ <div className="space-y-4 text-base leading-relaxed text-secondary-foreground">
  <p>
  It started the way it starts for most of us: a notebook. Then a spreadsheet. Then another
  spreadsheet because the first one got too messy. Then Facebook albums and mental notes about
@@ -98,7 +98,7 @@ export default function AboutPage() {
  {/* The Vision */}
  <section className="mb-12">
  <h2>Where We&apos;re Going</h2>
- <div className="space-y-4 text-base leading-relaxed text-stone-600">
+ <div className="space-y-4 text-base leading-relaxed text-secondary-foreground">
  <p>
  Model Horse Hub isn&apos;t just a collection manager &mdash; it&apos;s becoming the operating
  system for the hobby. Every feature on this platform exists because a real collector said

@@ -133,7 +133,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  </div>
 
  {transaction.offerMessage && (
- <p className="text-stone-500 mt-2 text-sm leading-relaxed italic">
+ <p className="text-muted-foreground mt-2 text-sm leading-relaxed italic">
  &ldquo;{transaction.offerMessage}&rdquo;
  </p>
  )}
@@ -151,7 +151,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  {saving ?"…" :"✅ Accept Offer"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => handleRespond("decline")}
  disabled={saving}
  >
@@ -160,9 +160,9 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  </div>
  ) : (
  <div>
- <p className="text-stone-500 text-sm">⏳ Waiting for seller response…</p>
+ <p className="text-muted-foreground text-sm">⏳ Waiting for seller response…</p>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-500 mt-1 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground mt-1 no-underline transition-all"
  onClick={async () => {
  setSaving(true);
  const result = await retractOffer(transaction.transactionId);
@@ -202,11 +202,11 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  </div>
  )}
  {isBuyer && hasPaid && (
- <p className="text-stone-500 text-sm">💳 Payment marked as sent. Waiting for seller to verify…</p>
+ <p className="text-muted-foreground text-sm">💳 Payment marked as sent. Waiting for seller to verify…</p>
  )}
  {isSeller && hasPaid && (
  <div className="mt-2 flex flex-wrap items-center gap-2">
- <p className="text-stone-500 text-sm">💳 Buyer says they&apos;ve paid.</p>
+ <p className="text-muted-foreground text-sm">💳 Buyer says they&apos;ve paid.</p>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleVerify}
@@ -225,7 +225,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  )}
  {isSeller && !hasPaid && (
  <div className="mt-2 flex flex-wrap items-center gap-2">
- <p className="text-stone-500 text-sm">⏳ Waiting for buyer to send payment…</p>
+ <p className="text-muted-foreground text-sm">⏳ Waiting for buyer to send payment…</p>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={handleCancel}
@@ -243,7 +243,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  <div className="mt-4">
  {isBuyer && pin ? (
  <div className="border-success mt-2 rounded-lg border-2 bg-emerald-50 p-6 text-center">
- <span className="text-stone-500 mb-1 block text-xs">🔑 Your Claim PIN</span>
+ <span className="text-muted-foreground mb-1 block text-xs">🔑 Your Claim PIN</span>
  <strong className="block font-mono text-2xl font-extrabold tracking-[0.15em] text-[#22c55e]">
  {pin}
  </strong>
@@ -255,9 +255,9 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  </Link>
  </div>
  ) : isBuyer ? (
- <p className="text-stone-500 text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>
+ <p className="text-muted-foreground text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>
  ) : (
- <p className="text-stone-500 text-sm">✅ PIN released to buyer. Transfer in progress…</p>
+ <p className="text-muted-foreground text-sm">✅ PIN released to buyer. Transfer in progress…</p>
  )}
  </div>
  )}

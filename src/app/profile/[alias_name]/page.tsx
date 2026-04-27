@@ -302,13 +302,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </span>
  )}
  </h1>
- <p className="mb-2 text-sm leading-normal text-stone-500">
+ <p className="mb-2 text-sm leading-normal text-muted-foreground">
  {isOwnProfile
  ?"Your public stable — this is how other collectors see your models."
  : `@${profileUser.alias_name}'s public collection`}
  </p>
  {profileUser.bio && (
- <p className="mt-2 max-w-[480px] text-sm leading-relaxed text-stone-600">
+ <p className="mt-2 max-w-[480px] text-sm leading-relaxed text-secondary-foreground">
  {profileUser.bio}
  </p>
  )}
@@ -316,16 +316,16 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {studioSlug && (
  <Link
  href={`/studio/${studioSlug}`}
- className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  🎨 {isOwnProfile ?"My Studio" : `Visit ${studioName ||"Studio"}`}
  </Link>
  )}
  <div className="flex flex-wrap gap-6">
- <span className="text-sm text-stone-500">
+ <span className="text-sm text-muted-foreground">
  🐴 {(totalHorseCount ?? 0)} model{(totalHorseCount ?? 0) !== 1 ?"s" :""}{profileCards.length !== (totalHorseCount ?? 0) && ` (${profileCards.length} public)`}
  </span>
- <span className="text-sm text-stone-500">
+ <span className="text-sm text-muted-foreground">
  📅 Member since {memberSince}
  </span>
  <ShareButton
@@ -337,12 +337,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
  )}
  {(completedTxCount ?? 0) > 0 && (
- <span className="text-sm text-[#22C55E] text-stone-500">
+ <span className="text-sm text-[#22C55E] text-muted-foreground">
  ✅ {completedTxCount} transaction{completedTxCount !== 1 ?"s" :""} completed
  </span>
  )}
  {forSaleCount > 0 && (
- <span className="text-amber-500 text-sm text-stone-500">
+ <span className="text-amber-500 text-sm text-muted-foreground">
  💲 {forSaleCount} for sale/trade
  </span>
  )}
@@ -354,7 +354,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  isOwnProfile={isOwnProfile}
  />
  {(followStats.followerCount > 0 || followStats.followingCount > 0) && (
- <div className="mt-1 flex items-center gap-2 text-sm text-stone-600">
+ <div className="mt-1 flex items-center gap-2 text-sm text-secondary-foreground">
  <span>
  {followStats.followerCount} follower{followStats.followerCount !== 1 ?"s" :""}
  </span>
@@ -378,7 +378,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Public Collections */}
  {publicCollections && publicCollections.length > 0 && (
  <div className="animate-fade-in-up mb-6">
- <h3 className="mb-2 text-sm text-stone-600">📁 Public Collections</h3>
+ <h3 className="mb-2 text-sm text-secondary-foreground">📁 Public Collections</h3>
  <div className="flex flex-wrap gap-2">
   {publicCollections.map((col) => (
  <Link
@@ -396,7 +396,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Trophy Case — only if user hasn't hidden badges (owner always sees their own) */}
  {userBadges.length > 0 && (isOwnProfile || (profileUser.show_badges ?? true)) && (
  <div className="animate-fade-in-up mb-6" id="trophies">
- <h3 className="mb-2 text-sm text-stone-600">🏆 Trophy Case</h3>
+ <h3 className="mb-2 text-sm text-secondary-foreground">🏆 Trophy Case</h3>
  <TrophyCase badges={userBadges} />
  </div>
  )}
@@ -415,7 +415,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
  {/* Breadcrumb */}
  <nav
- className="text-stone-500 animate-fade-in-up mb-8 flex items-center gap-2 text-sm"
+ className="text-muted-foreground animate-fade-in-up mb-8 flex items-center gap-2 text-sm"
  aria-label="Breadcrumb"
  >
  <Link href="/community">Show Ring</Link>
@@ -454,7 +454,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <Link
  key={horse.id}
  href={`/community/${horse.id}`}
- className="border-input text-stone-900 flex flex-col overflow-hidden rounded-lg border bg-muted no-underline transition-all"
+ className="border-input text-foreground flex flex-col overflow-hidden rounded-lg border bg-muted no-underline transition-all"
  id={`profile-card-${horse.id}`}
  >
  <div className="relative">
@@ -464,7 +464,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  ) : (
  <div className="flex flex-col items-center justify-center bg-muted px-4 py-8">
  <span className="text-4xl">🐴</span>
- <span className="mt-1 text-sm text-stone-500">No photo</span>
+ <span className="mt-1 text-sm text-muted-foreground">No photo</span>
  </div>
  )}
  <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
@@ -488,29 +488,29 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  )}
  </div>
  <div className="p-4">
- <div className="text-sm font-semibold text-stone-900">
+ <div className="text-sm font-semibold text-foreground">
  {horse.customName}
  </div>
- <div className="mt-0.5 text-xs text-stone-600">
+ <div className="mt-0.5 text-xs text-secondary-foreground">
  {horse.refName}
  </div>
  {horse.releaseLine && (
- <div className="mt-0.5 text-xs text-stone-500">
+ <div className="mt-0.5 text-xs text-muted-foreground">
  🎨 {horse.releaseLine}
  </div>
  )}
- <div className="mt-2 flex items-center justify-between text-xs text-stone-500">
+ <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
  <span>{horse.conditionGrade}</span>
  <span>{formatDate(horse.createdAt)}</span>
  </div>
  {horse.collectionName && (
- <div className="mt-2 text-xs text-stone-600">
+ <div className="mt-2 text-xs text-secondary-foreground">
  📁 {horse.collectionName}
  </div>
  )}
  {(horse.tradeStatus ==="For Sale" || horse.tradeStatus ==="Open to Offers") &&
  horse.marketplaceNotes && (
- <div className="mt-1 truncate text-xs text-stone-500" title={horse.marketplaceNotes}>
+ <div className="mt-1 truncate text-xs text-muted-foreground" title={horse.marketplaceNotes}>
  📝{""}
  {horse.marketplaceNotes.length > 50
  ? horse.marketplaceNotes.slice(0, 50) +"…"
@@ -554,11 +554,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {ratingSummary.ratings.map((r) => (
  <div key={r.id} className="border-input border-b py-4 last:border-b-0">
  <div className="mb-1 flex items-center justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
- <span className="text-sm text-stone-600">
+ <span className="text-sm text-secondary-foreground">
  @{r.reviewerAlias} — {"★".repeat(r.stars)}
  {"☆".repeat(5 - r.stars)}
  </span>
- <span className="text-xs text-stone-500">
+ <span className="text-xs text-muted-foreground">
  {new Date(r.createdAt).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
@@ -567,7 +567,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </span>
  </div>
  {r.reviewText && (
- <p className="mt-1 text-sm italic text-stone-600">
+ <p className="mt-1 text-sm italic text-secondary-foreground">
  &ldquo;{r.reviewText}&rdquo;
  </p>
  )}

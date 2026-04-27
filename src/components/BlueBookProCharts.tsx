@@ -46,7 +46,7 @@ export default function BlueBookProCharts({
                 <div className="mb-4 flex items-center gap-3">
                     <span className="text-2xl">📊</span>
                     <div>
-                        <h3 className="text-lg font-bold text-stone-800">{title}</h3>
+                        <h3 className="text-lg font-bold text-foreground">{title}</h3>
                         <p className="text-sm text-ink-light">
                             Avg: {formatCurrency(averagePrice)} · Median: {formatCurrency(medianPrice)} · {transactionVolume} sale{transactionVolume !== 1 ? "s" : ""}
                         </p>
@@ -65,7 +65,7 @@ export default function BlueBookProCharts({
                                 />
                             ))}
                         </div>
-                        <div className="mt-2 flex justify-between text-xs text-stone-500">
+                        <div className="mt-2 flex justify-between text-xs text-muted-foreground">
                             <span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span>
                         </div>
                     </div>
@@ -75,7 +75,7 @@ export default function BlueBookProCharts({
                         <div className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
                             ✨ MHH Pro Feature
                         </div>
-                        <p className="mt-2 max-w-[280px] text-center text-sm font-semibold text-stone-700">
+                        <p className="mt-2 max-w-[280px] text-center text-sm font-semibold text-foreground">
                             Unlock 5-Year Historical Price Trends
                         </p>
                         <Link
@@ -102,7 +102,7 @@ export default function BlueBookProCharts({
                 <div className="flex items-center gap-3">
                     <span className="text-2xl">📊</span>
                     <div>
-                        <h3 className="text-lg font-bold text-stone-800">{title}</h3>
+                        <h3 className="text-lg font-bold text-foreground">{title}</h3>
                         <p className="text-sm text-ink-light">
                             Avg: {formatCurrency(averagePrice)} · Median: {formatCurrency(medianPrice)} · {transactionVolume} sale{transactionVolume !== 1 ? "s" : ""}
                         </p>

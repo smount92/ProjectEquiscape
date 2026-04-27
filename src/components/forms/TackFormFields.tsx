@@ -27,10 +27,10 @@ export default function TackFormFields({
 }: TackFormFieldsProps) {
   return (
     <div className="mt-4 space-y-4 rounded-lg border border-[#E0D5C1] bg-[#FEFCF8] p-4">
-      <h4 className="text-sm font-semibold text-stone-900">🏇 Tack Details</h4>
+      <h4 className="text-sm font-semibold text-foreground">🏇 Tack Details</h4>
 
       <div>
-        <label htmlFor="tack-type" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="tack-type" className="mb-1 block text-sm font-semibold text-foreground">
           Tack Type
         </label>
         <select
@@ -47,7 +47,7 @@ export default function TackFormFields({
       </div>
 
       <div>
-        <label htmlFor="tack-discipline" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="tack-discipline" className="mb-1 block text-sm font-semibold text-foreground">
           Discipline
         </label>
         <select
@@ -72,7 +72,7 @@ export default function TackFormFields({
       />
 
       <div>
-        <label htmlFor="tack-fits-molds" className="mb-1 block text-sm font-semibold text-stone-900">
+        <label htmlFor="tack-fits-molds" className="mb-1 block text-sm font-semibold text-foreground">
           Fits Molds
         </label>
         <Input
@@ -83,7 +83,7 @@ export default function TackFormFields({
           onChange={(e) => setFitsMolds(e.target.value)}
           maxLength={200}
         />
-        <span className="mt-1 block text-xs text-stone-500">
+        <span className="mt-1 block text-xs text-muted-foreground">
           Which molds does this tack fit? Comma-separated.
         </span>
       </div>

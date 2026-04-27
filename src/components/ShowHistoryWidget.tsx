@@ -57,9 +57,9 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  className="mt-6 rounded-xl border border-input bg-card p-4 shadow-sm"
  open
  >
- <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-base font-bold text-stone-900 select-none [&::-webkit-details-marker]:hidden">
+ <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-base font-bold text-foreground select-none [&::-webkit-details-marker]:hidden">
  🎪 <span>Show Placings</span>
- <span className="text-stone-600 ml-auto text-xs font-normal">
+ <span className="text-secondary-foreground ml-auto text-xs font-normal">
  {totalRibbons} ribbons · {totalShows} shows
  </span>
  </summary>
@@ -69,7 +69,7 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  <div key={year} className="mb-1">
  <button
  type="button"
- className={`text-stone-900 flex w-full cursor-pointer items-center gap-2 rounded-sm border-none bg-transparent px-2 py-2 text-sm font-semibold transition-colors hover:bg-muted ${expandedYear === year ?"bg-muted" :""}`}
+ className={`text-foreground flex w-full cursor-pointer items-center gap-2 rounded-sm border-none bg-transparent px-2 py-2 text-sm font-semibold transition-colors hover:bg-muted ${expandedYear === year ?"bg-muted" :""}`}
  onClick={() => setExpandedYear(expandedYear === year ? null : year)}
  >
  <span className="flex items-center gap-1">
@@ -80,10 +80,10 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  </span>
  )}
  </span>
- <span className="text-stone-600 flex-1 text-right text-xs font-normal">
+ <span className="text-secondary-foreground flex-1 text-right text-xs font-normal">
  {summarizeYear(records)}
  </span>
- <span className="text-stone-600 text-[0.8em]">{expandedYear === year ?"▾" :"▸"}</span>
+ <span className="text-secondary-foreground text-[0.8em]">{expandedYear === year ?"▾" :"▸"}</span>
  </button>
 
  {expandedYear === year && (
@@ -96,11 +96,11 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  <div className="flex min-w-0 flex-col">
  <Link
  href={`/community/${record.horseId}`}
- className="text-stone-900 overflow-hidden font-semibold text-ellipsis whitespace-nowrap no-underline hover:underline"
+ className="text-foreground overflow-hidden font-semibold text-ellipsis whitespace-nowrap no-underline hover:underline"
  >
  {record.horseName}
  </Link>
- <span className="text-stone-600 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+ <span className="text-secondary-foreground overflow-hidden text-xs text-ellipsis whitespace-nowrap">
  {record.showName} · {record.placing}
  </span>
  </div>

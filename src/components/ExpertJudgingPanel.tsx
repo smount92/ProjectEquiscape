@@ -27,14 +27,14 @@ interface ClassInfo {
 
 const RIBBON_OPTIONS = [
   { value: "1st", label: "🥇 1st", bg: "bg-amber-100 border-amber-300 text-amber-800" },
-  { value: "2nd", label: "🥈 2nd", bg: "bg-stone-200 border-stone-400 text-stone-700" },
+  { value: "2nd", label: "🥈 2nd", bg: "bg-muted border-stone-400 text-foreground" },
   { value: "3rd", label: "🥉 3rd", bg: "bg-orange-100 border-orange-300 text-orange-800" },
-  { value: "4th", label: "4th", bg: "bg-muted border-stone-300 text-stone-600" },
-  { value: "5th", label: "5th", bg: "bg-muted border-stone-300 text-stone-600" },
-  { value: "6th", label: "6th", bg: "bg-muted border-stone-300 text-stone-600" },
+  { value: "4th", label: "4th", bg: "bg-muted border-stone-300 text-secondary-foreground" },
+  { value: "5th", label: "5th", bg: "bg-muted border-stone-300 text-secondary-foreground" },
+  { value: "6th", label: "6th", bg: "bg-muted border-stone-300 text-secondary-foreground" },
   { value: "HM", label: "🎗️ HM", bg: "bg-emerald-50 border-emerald-300 text-emerald-700" },
   { value: "Champion", label: "🏆 Champ", bg: "bg-amber-200 border-amber-400 text-amber-900" },
-  { value: "Reserve Champion", label: "🥈 Reserve", bg: "bg-stone-200 border-stone-400 text-stone-700" },
+  { value: "Reserve Champion", label: "🥈 Reserve", bg: "bg-muted border-stone-400 text-foreground" },
 ];
 
 const MEDAL_EMOJI: Record<string, string> = {
@@ -50,9 +50,9 @@ const RIBBON_BADGE_COLORS: Record<string, string> = {
   "1st": "bg-amber-500 text-white",
   "2nd": "bg-stone-400 text-white",
   "3rd": "bg-orange-500 text-white",
-  "4th": "bg-stone-300 text-stone-800",
-  "5th": "bg-stone-300 text-stone-800",
-  "6th": "bg-stone-300 text-stone-800",
+  "4th": "bg-stone-300 text-foreground",
+  "5th": "bg-stone-300 text-foreground",
+  "6th": "bg-stone-300 text-foreground",
   "HM": "bg-emerald-500 text-white",
   "Champion": "bg-amber-600 text-white",
   "Reserve Champion": "bg-stone-500 text-white",
@@ -189,7 +189,7 @@ export default function ExpertJudgingPanel({
           {overrideMode ? "Override Final Placings" : "Expert Judging Panel"}
         </span>
       </h3>
-      <p className="mb-4 text-sm text-stone-500">
+      <p className="mb-4 text-sm text-muted-foreground">
         {overrideMode
           ? "Adjust placings after the show has been judged or closed."
           : "Select a ribbon below, then click a photo to stamp it. Click again to remove."}
@@ -219,7 +219,7 @@ export default function ExpertJudgingPanel({
             ))}
           </select>
           {currentClass && (
-            <div className="mt-1 text-sm text-stone-500">
+            <div className="mt-1 text-sm text-muted-foreground">
               Judging: <strong>{currentClass.divisionName}</strong> ›{" "}
               <strong>{currentClass.name}</strong>
             </div>
@@ -239,7 +239,7 @@ export default function ExpertJudgingPanel({
                 className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition-all ${
                   isActive
                     ? `ring-2 ring-forest scale-105 shadow-lg ${ribbon.bg}`
-                    : `border-input bg-[#FEFCF8] text-stone-600 hover:shadow-md hover:border-stone-300`
+                    : `border-input bg-[#FEFCF8] text-secondary-foreground hover:shadow-md hover:border-input`
                 }`}
                 onClick={() => setActiveRibbon(isActive ? null : ribbon.value)}
               >
@@ -258,7 +258,7 @@ export default function ExpertJudgingPanel({
 
       {/* ─── Entry Grid ─── */}
       {filteredEntries.length === 0 ? (
-        <div className="py-8 text-center text-stone-500">
+        <div className="py-8 text-center text-muted-foreground">
           No entries {selectedClassId !== "all" ? "in this class" : "to judge"}.
         </div>
       ) : (
@@ -331,7 +331,7 @@ export default function ExpertJudgingPanel({
                     >
                       <MessageCircle
                         className={`h-4 w-4 ${
-                          notes[entry.id] ? "text-forest" : "text-stone-400"
+                          notes[entry.id] ? "text-forest" : "text-muted-foreground"
                         }`}
                       />
                     </button>
@@ -352,10 +352,10 @@ export default function ExpertJudgingPanel({
 
               {/* Entry Info */}
               <CardContent className="p-3">
-                <div className="text-sm font-semibold text-stone-900">
+                <div className="text-sm font-semibold text-foreground">
                   🐴 {entry.horseName}
                 </div>
-                <div className="text-xs text-stone-500">
+                <div className="text-xs text-muted-foreground">
                   by @{entry.ownerAlias}
                 </div>
               </CardContent>
@@ -377,7 +377,7 @@ export default function ExpertJudgingPanel({
 
       {/* Save Button + Summary */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
-        <span className="text-sm text-stone-500">
+        <span className="text-sm text-muted-foreground">
           {placedCount} of {filteredEntries.length} entries placed
         </span>
         <button

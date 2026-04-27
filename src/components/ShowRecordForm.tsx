@@ -125,7 +125,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  </div>
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">
+ <label className="text-foreground mb-1 block text-sm font-semibold">
  Show Name <span className="text-[#e74c6f]">*</span>
  </label>
  <Input
@@ -142,7 +142,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
 
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
- <label htmlFor="show-record-date" className="text-stone-900 mb-1 block text-sm font-semibold">Show Date</label>
+ <label htmlFor="show-record-date" className="text-foreground mb-1 block text-sm font-semibold">Show Date</label>
  <Input
  
  type="date"
@@ -153,7 +153,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  />
  </div>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Division / Section</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Division / Section</label>
  <Input
  
  type="text"
@@ -167,7 +167,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
 
  {/* Class Name — between Division and Placing */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Class Name</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Class Name</label>
  <Input
  
  type="text"
@@ -176,14 +176,14 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  placeholder="e.g. OF Stock Horse Mare, CM Decorator"
  id="show-record-class-name"
  />
- <small className="text-stone-500 text-[var(--font-size-xs)]">
+ <small className="text-muted-foreground text-[var(--font-size-xs)]">
  Individual class name (not division or section callbacks).
  </small>
  </div>
 
  {/* Fuzzy Date fallback */}
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Approximate Date</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Approximate Date</label>
  <Input
  
  type="text"
@@ -192,14 +192,14 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  placeholder="e.g. Spring 2023, BreyerFest 2015"
  id="show-record-date-text"
  />
- <small className="text-stone-500 text-[var(--font-size-xs)]">
+ <small className="text-muted-foreground text-[var(--font-size-xs)]">
  Use this when you don&apos;t know the exact date.
  </small>
  </div>
 
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Placing</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Placing</label>
  <Input
  
  type="text"
@@ -210,7 +210,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  />
  </div>
  <div className="mb-6">
- <label htmlFor="show-record-ribbon" className="text-stone-900 mb-1 block text-sm font-semibold">Ribbon Color</label>
+ <label htmlFor="show-record-ribbon" className="text-foreground mb-1 block text-sm font-semibold">Ribbon Color</label>
  <select
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={ribbonColor}
@@ -227,7 +227,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Judge</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Judge</label>
  <Input
  
  type="text"
@@ -246,13 +246,13 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  id="show-record-nan"
  className="h-[18px] w-[18px] accent-amber-500"
  />
- <label htmlFor="show-record-nan" className="text-stone-900 mb-0 mb-1 block text-sm font-semibold">
+ <label htmlFor="show-record-nan" className="text-foreground mb-0 mb-1 block text-sm font-semibold">
  ⭐ NAN Achievement
  </label>
  </div>
 
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Notes</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Notes</label>
  <textarea
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  value={notes}
@@ -268,7 +268,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mb-6">
  <button
  type="button"
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={() => setShowAdvanced(!showAdvanced)}
  id="show-record-advanced-toggle"
  >
@@ -280,7 +280,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <>
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Location</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Location</label>
  <Input
  
  type="text"
@@ -291,7 +291,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  />
  </div>
  <div className="mb-6">
- <label className="text-stone-900 mb-1 block text-sm font-semibold">Section</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Section</label>
  <Input
  
  type="text"
@@ -305,7 +305,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
 
  <div className="grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
  <div className="mb-6">
- <label htmlFor="show-record-award-category" className="text-stone-900 mb-1 block text-sm font-semibold">Award Category</label>
+ <label htmlFor="show-record-award-category" className="text-foreground mb-1 block text-sm font-semibold">Award Category</label>
  <select
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={awardCategory}
@@ -322,7 +322,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  </select>
  </div>
  <div className="mb-6">
- <label htmlFor="show-record-competition-level" className="text-stone-900 mb-1 block text-sm font-semibold">Competition Level</label>
+ <label htmlFor="show-record-competition-level" className="text-foreground mb-1 block text-sm font-semibold">Competition Level</label>
  <select
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={competitionLevel}
@@ -345,7 +345,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <div className="mt-6 flex justify-end gap-2">
  <button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={onCancel}
  >
  Cancel

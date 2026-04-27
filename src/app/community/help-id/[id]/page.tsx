@@ -118,7 +118,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     </span>
     )}
    </h1>
-   <p className="text-stone-600 mt-1">
+   <p className="text-secondary-foreground mt-1">
     Submitted by {requesterName} on {new Date(req.created_at).toLocaleDateString()}
    </p>
    </div>

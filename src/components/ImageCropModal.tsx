@@ -303,7 +303,7 @@ export default function ImageCropModal({
  {ASPECT_PRESETS.map((preset) => (
  <button
  key={preset.label}
- className={`inline-flex cursor-pointer items-center justify-center rounded-sm border px-2.5 py-1 text-xs transition-all ${aspectRatio === preset.value ? 'border-0 bg-forest font-bold text-white' : 'border-input bg-transparent font-normal text-stone-600'}`}
+ className={`inline-flex cursor-pointer items-center justify-center rounded-sm border px-2.5 py-1 text-xs transition-all ${aspectRatio === preset.value ? 'border-0 bg-forest font-bold text-white' : 'border-input bg-transparent font-normal text-secondary-foreground'}`}
  onClick={() => setAspectRatio(preset.value)}
  >
  {preset.label}
@@ -423,7 +423,7 @@ export default function ImageCropModal({
  {/* Footer actions */}
  <div className="flex items-center justify-between gap-2 border-t border-input px-6 py-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={onCancel}
  disabled={processing}
  >
@@ -431,7 +431,7 @@ export default function ImageCropModal({
  </button>
  <div className="flex gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-600 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  onClick={handleSkip}
  disabled={processing}
  >

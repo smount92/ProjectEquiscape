@@ -21,8 +21,8 @@ export default function AssetDetailRenderer({ category, attributes }: AssetDetai
     if (!displayValue) return null;
     return (
       <div key={label} className="flex flex-col gap-0.5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-stone-500">{label}</span>
-        <span className="text-sm text-stone-800">{displayValue}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+        <span className="text-sm text-foreground">{displayValue}</span>
       </div>
     );
   };
@@ -71,7 +71,7 @@ export default function AssetDetailRenderer({ category, attributes }: AssetDetai
 
   return (
     <div className="rounded-lg border border-[#E0D5C1] bg-[#FEFCF8] p-4">
-      <h4 className="mb-3 text-sm font-semibold text-stone-700">{catLabel} Details</h4>
+      <h4 className="mb-3 text-sm font-semibold text-foreground">{catLabel} Details</h4>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {fields}
       </div>

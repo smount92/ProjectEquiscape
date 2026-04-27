@@ -99,7 +99,7 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  {isPending && processingId === s.id ?"…" :"✅ Approve"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-stone-500 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => handleReview(s.id,"rejected")}
  disabled={isPending && processingId === s.id}
  >

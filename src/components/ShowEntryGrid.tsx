@@ -65,7 +65,7 @@ export default function ShowEntryGrid({
             key={entry.id}
             className="flex items-center gap-4 border-b border-input px-6 py-4 transition-colors last:border-b-0 hover:bg-muted"
           >
-            <div className="min-w-[32px] text-center text-lg font-bold text-stone-500">
+            <div className="min-w-[32px] text-center text-lg font-bold text-muted-foreground">
               {isExpertJudged && showStatus === "closed" && entry.placing
                 ? entry.placing
                 : `#${index + 1}`}
@@ -112,7 +112,7 @@ export default function ShowEntryGrid({
                 )}
               </span>
               {entry.caption && (
-                <p className="mt-1 text-xs italic leading-tight text-stone-500">
+                <p className="mt-1 text-xs italic leading-tight text-muted-foreground">
                   &ldquo;{entry.caption}&rdquo;
                 </p>
               )}
@@ -124,7 +124,7 @@ export default function ShowEntryGrid({
                     {entry.placing}
                   </span>
                 ) : isJudging ? (
-                  <span className="text-xs text-stone-500">🏅 Expert judging</span>
+                  <span className="text-xs text-muted-foreground">🏅 Expert judging</span>
                 ) : null
               ) : (
                 <VoteButton

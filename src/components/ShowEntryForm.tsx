@@ -234,7 +234,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
   if (userHorses.length === 0) {
     return (
       <div className="flex flex-col gap-4">
-        <p className="text-stone-500">You need at least one public horse to enter shows.</p>
+        <p className="text-muted-foreground">You need at least one public horse to enter shows.</p>
       </div>
     );
   }
@@ -285,7 +285,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
       {/* ─── View 1: Class Browser (when classes exist) ─── */}
       {hasClasses ? (
         <div className="mt-4">
-          <label className="mb-1 block text-sm font-semibold text-stone-900">
+          <label className="mb-1 block text-sm font-semibold text-foreground">
             📋 Select a Class to Enter
           </label>
           <Input
@@ -298,7 +298,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
           <div className="max-h-[320px] overflow-y-auto rounded-md border border-input bg-muted">
             {Array.from(divisionGroups.entries()).map(([divName, items]) => (
               <div key={divName}>
-                <div className="border-b border-input bg-muted px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-stone-500">
+                <div className="border-b border-input bg-muted px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {divName}
                 </div>
                 {items.map((c) => (
@@ -306,12 +306,12 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                     key={c.id}
                     className="class-browser-item"
                   >
-                    <span className="flex-1 text-sm font-medium text-stone-900">
+                    <span className="flex-1 text-sm font-medium text-foreground">
                       {c.name}
                     </span>
                     <span className="flex items-center gap-1.5">
                       {c.currentEntryCount !== undefined && (
-                        <span className="text-xs text-stone-500">
+                        <span className="text-xs text-muted-foreground">
                           {c.currentEntryCount}{" "}
                           {c.currentEntryCount === 1 ? "entry" : "entries"}
                         </span>
@@ -334,7 +334,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
               </div>
             ))}
             {filteredClasses.length === 0 && classSearch && (
-              <div className="px-4 py-3 text-sm italic text-stone-500">
+              <div className="px-4 py-3 text-sm italic text-muted-foreground">
                 No classes match &ldquo;{classSearch}&rdquo;
               </div>
             )}
@@ -411,13 +411,13 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                           🐴
                         </div>
                       )}
-                      <span className="max-w-full truncate text-xs font-medium text-stone-900">
+                      <span className="max-w-full truncate text-xs font-medium text-foreground">
                         {h.name}
                       </span>
                     </button>
                   ))}
                   {filteredHorses.length === 0 && (
-                    <div className="col-span-full py-6 text-center text-sm text-stone-500">
+                    <div className="col-span-full py-6 text-center text-sm text-muted-foreground">
                       No horses match your search.
                     </div>
                   )}
@@ -451,13 +451,13 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
 
                 {/* Photo Grid */}
                 <div>
-                  <label className="mb-1 block text-sm font-semibold text-stone-900">
+                  <label className="mb-1 block text-sm font-semibold text-foreground">
                     📸 Select Entry Photo
                   </label>
                   {loadingPhotos ? (
-                    <p className="text-sm text-stone-500">Loading photos…</p>
+                    <p className="text-sm text-muted-foreground">Loading photos…</p>
                   ) : horsePhotos.length === 0 ? (
-                    <p className="text-sm text-stone-500">
+                    <p className="text-sm text-muted-foreground">
                       No photos found. Upload photos to your horse&apos;s passport first.
                     </p>
                   ) : (
@@ -507,7 +507,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                     <div className="mt-2 flex items-center gap-2">
                       <button
                         type="button"
-                        className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-3 py-1.5 text-xs font-semibold text-stone-700 transition-all hover:bg-muted"
+                        className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-3 py-1.5 text-xs font-semibold text-foreground transition-all hover:bg-muted"
                         onClick={handleCropClick}
                         disabled={uploadingCrop}
                       >
@@ -516,15 +516,15 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                       {croppedPreviewUrl && (
                         <span className="text-xs text-emerald-600">✓ Cropped</span>
                       )}
-                      <span className="text-xs text-stone-400">Shows display at 4:3 ratio</span>
+                      <span className="text-xs text-muted-foreground">Shows display at 4:3 ratio</span>
                     </div>
                   </div>
                 )}
 
                 {/* Caption */}
                 <div>
-                  <label className="mb-1 block text-sm font-semibold text-stone-900" htmlFor="entry-caption">
-                    ✏️ Caption <span className="font-normal text-stone-500">(optional)</span>
+                  <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="entry-caption">
+                    ✏️ Caption <span className="font-normal text-muted-foreground">(optional)</span>
                   </label>
                   <textarea
                     id="entry-caption"
@@ -536,7 +536,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                     placeholder="Tell judges what makes this model special…"
                   />
                   <span
-                    className={`float-right text-xs ${caption.length > 250 ? "text-red-700" : "text-stone-500"}`}
+                    className={`float-right text-xs ${caption.length > 250 ? "text-red-700" : "text-muted-foreground"}`}
                   >
                     {caption.length}/280
                   </span>
