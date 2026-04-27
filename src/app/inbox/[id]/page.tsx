@@ -217,7 +217,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  return (
  <div className="mx-auto flex min-h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col px-4 md:px-8">
  {/* Header — compact on mobile */}
- <div className="bg-parchment border-edge animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border px-4 py-3 sm:mb-4 sm:gap-4 sm:py-4 sm:px-6">
+ <div className="bg-card border-input animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border px-4 py-3 sm:mb-4 sm:gap-4 sm:py-4 sm:px-6">
  <Link
  href="/inbox"
  className="bg-black/5 text-muted-foreground flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full no-underline transition-all"
@@ -255,21 +255,21 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <div className="mt-0.5 hidden flex-wrap gap-1 sm:flex">
  {memberSince && (
  <span
- className="border-edge text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Account age"
  >
  📅 Member since {memberSince}
  </span>
  )}
  <span
- className="border-edge text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Completed Hoofprint transfers"
  >
  📦 {transferCount || 0} transfer{transferCount !== 1 ?"s" :""}
  </span>
  {avgRating !== null && (
  <span
- className="border-edge text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
+ className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Average user rating"
  >
  ⭐ {avgRating} ({ratingsArr.length})
@@ -303,7 +303,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  {horseContext && (
  <Link
  href={`/community/${horseContext.id}`}
- className="group animate-fade-in-up mb-2 flex shrink-0 items-center gap-4 rounded-xl border border-edge bg-card p-3 text-ink no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md sm:mb-4 sm:p-4"
+ className="group animate-fade-in-up mb-2 flex shrink-0 items-center gap-4 rounded-xl border border-input bg-card p-3 text-foreground no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md sm:mb-4 sm:p-4"
  id="chat-horse-link"
  >
  {horseContext.thumbnailUrl ? (
@@ -314,7 +314,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  className="h-10 w-10 shrink-0 rounded-md object-cover sm:h-14 sm:w-14"
  />
  ) : (
- <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-parchment text-xl sm:h-14 sm:w-14 sm:text-2xl">
+ <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-card text-xl sm:h-14 sm:w-14 sm:text-2xl">
  🐴
  </div>
  )}

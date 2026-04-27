@@ -228,7 +228,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  return (
  <>
  {/* Message area */}
- <div className="bg-parchment border-edge mb-4 flex flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
+ <div className="bg-card border-input mb-4 flex flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
  {messages.length === 0 ? (
  <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 text-center">
  <div className="text-5xl opacity-50">💬</div>
@@ -270,7 +270,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  )
  )}
  <div
- className={`max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] bg-[#2C5545] text-white" : "border-edge rounded-bl-[4px] border bg-card text-ink"}`}
+ className={`max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] bg-[#2C5545] text-white" : "border-input rounded-bl-[4px] border bg-card text-foreground"}`}
  >
  <div className="break-words whitespace-pre-wrap">{msg.content}</div>
 
@@ -372,11 +372,11 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  )}
 
  {/* Input area */}
- <div className="bg-parchment border-edge shrink-0 rounded-lg border p-4">
+ <div className="bg-card border-input shrink-0 rounded-lg border p-4">
  <div className="flex items-end gap-2">
  {/* Attach photo button */}
  <label
- className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#E0D5C1] bg-[#FEFCF8] text-muted-foreground transition-all hover:bg-[#F4EFE6] hover:text-ink"
+ className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#E0D5C1] bg-[#FEFCF8] text-muted-foreground transition-all hover:bg-[#F4EFE6] hover:text-foreground"
  title="Attach photo"
  >
  <input
@@ -399,7 +399,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
 
  <textarea
  ref={inputRef}
- className="border-edge text-ink font-inherit placeholder:text-muted-foreground max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
+ className="border-input text-foreground font-inherit placeholder:text-muted-foreground max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
  value={newMessage}
  onChange={(e) => setNewMessage(e.target.value)}
  onKeyDown={handleKeyDown}

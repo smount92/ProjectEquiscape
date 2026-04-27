@@ -64,7 +64,7 @@ export default async function DiscoverPage() {
  >
   <div className="mb-6 flex items-baseline gap-2">
   <span className="text-2xl font-bold text-forest">{activeUsers.length}</span>
-  <span className="text-sm font-medium text-ink-light">Active Collectors</span>
+  <span className="text-sm font-medium text-secondary-foreground">Active Collectors</span>
   </div>
   <DiscoverGrid users={activeUsers} currentUserId={user.id} followedIds={Array.from(followedIds)} />
  </ExplorerLayout>

@@ -190,7 +190,7 @@ export default function UniversalFeed({
  };
 
  return (
- <div className="mt-6 rounded-lg border border-edge bg-card p-6 shadow-md transition-all">
+ <div className="mt-6 rounded-lg border border-input bg-card p-6 shadow-md transition-all">
  <h3 className="mb-4">
  💬 {label} ({posts.length}
  {hasMore ?"+" :""})
@@ -198,9 +198,9 @@ export default function UniversalFeed({
 
  {/* ── Composer ── */}
  {showComposer && (
- <div className="mb-6 rounded-lg border border-edge bg-parchment p-4">
+ <div className="mb-6 rounded-lg border border-input bg-card p-4">
  <textarea
- className="w-full min-h-[100px] resize-y rounded-md border border-edge bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
+ className="w-full min-h-[100px] resize-y rounded-md border border-input bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
  placeholder={composerPlaceholder}
  value={composerText}
  onChange={(e) => setComposerText(e.target.value)}
@@ -232,7 +232,7 @@ export default function UniversalFeed({
  <div className="flex items-center gap-2">
  <button
  type="button"
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-2 py-1 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => fileInputRef.current?.click()}
  disabled={imageFiles.length >= 4}
  title="Attach images (up to 4)"
@@ -365,7 +365,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  const hiddenCount = replies.length - 2;
 
  return (
- <div className={`border-b border-edge pb-3 ${post.isPinned ? "border-l-4 border-l-amber-400 bg-amber-50/30 pl-4" : ""}`}>
+ <div className={`border-b border-input pb-3 ${post.isPinned ? "border-l-4 border-l-amber-400 bg-amber-50/30 pl-4" : ""}`}>
  {post.isPinned && (
  <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-amber-600">📌 Pinned</span>
  )}
@@ -380,7 +380,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  actions={post.authorId === currentUserId ? (
  <>
  <button
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-parchment"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-card"
  onClick={() => {
  setIsEditing(!isEditing);
  setEditText(displayContent);
@@ -390,7 +390,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  ✏️
  </button>
  <button
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-parchment"
+ className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-card"
  onClick={handleDelete}
  disabled={isPending}
  >
@@ -405,7 +405,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  {isEditing ? (
  <div className="flex flex-col gap-1">
  <textarea
- className="min-h-[36px] w-full resize-y rounded-md border border-edge bg-transparent px-4 py-2 text-sm no-underline transition-all"
+ className="min-h-[36px] w-full resize-y rounded-md border border-input bg-transparent px-4 py-2 text-sm no-underline transition-all"
  value={editText}
  onChange={(e) => setEditText(e.target.value)}
  rows={3}
@@ -421,7 +421,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  {isPending ?"Saving…" :"Save"}
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => setIsEditing(false)}
  >
  Cancel
@@ -473,7 +473,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  avatarSize="xs"
  actions={r.authorId === currentUserId ? (
  <button
- className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-muted-foreground no-underline transition-all hover:bg-parchment"
+ className="inline-flex min-h-0 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-[0.7rem] font-semibold text-muted-foreground no-underline transition-all hover:bg-card"
  onClick={() => {
  if (!confirm("Delete this reply?")) return;
  startTransition(async () => {

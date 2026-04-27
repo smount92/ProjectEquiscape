@@ -76,7 +76,7 @@ export default async function ChangelogPage() {
    <p>No changes yet. The catalog awaits your contributions!</p>
    <Link
     href="/catalog"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
     Browse Catalog
    </Link>

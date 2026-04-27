@@ -21,7 +21,7 @@ export default function FocusLayout({
             {backLink && <div>{backLink}</div>}
 
             <div>
-                <h1 className="font-serif text-3xl font-bold tracking-tight text-ink md:text-4xl">
+                <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                     {title}
                 </h1>
                 {description && (

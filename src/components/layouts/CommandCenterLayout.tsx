@@ -23,7 +23,7 @@ export default function CommandCenterLayout({
             {/* Header row */}
             <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="font-serif text-3xl font-bold tracking-tight text-ink md:text-4xl">
+                    <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                         {title}
                     </h1>
                     {description && (

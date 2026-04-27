@@ -55,13 +55,13 @@ export default function ReplyComposer({
             {replyingTo && (
                 <div className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
                     <span>↩ Replying to</span>
-                    <span className="font-semibold text-ink">@{replyingTo}</span>
+                    <span className="font-semibold text-foreground">@{replyingTo}</span>
                 </div>
             )}
             <div className="flex items-center gap-2">
                 <UserAvatar src={currentUserAvatar} alias={currentUserAlias} size="xs" />
                 <Input
-                    className="flex-1 border-edge bg-card text-sm"
+                    className="flex-1 border-input bg-card text-sm"
                     placeholder={placeholder}
                     value={text}
                     onChange={(e) => setText(e.target.value)}

@@ -115,10 +115,10 @@ export default function ClaimPage() {
  if (success) {
  return (
  <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
- <div className="bg-[#FEFCF8] border-edge animate-fade-in-up mx-auto max-w-[500px] rounded-lg border shadow-md transition-all text-center p-8">
+ <div className="bg-[#FEFCF8] border-input animate-fade-in-up mx-auto max-w-[500px] rounded-lg border shadow-md transition-all text-center p-8">
  <div className="mb-4 text-[3rem]">🎉</div>
- <h1 className="font-serif text-3xl font-bold text-ink">Welcome to your stable!</h1>
- <p className="text-ink-light mt-4 mb-8">
+ <h1 className="font-serif text-3xl font-bold text-foreground">Welcome to your stable!</h1>
+ <p className="text-secondary-foreground mt-4 mb-8">
  <strong>{success.horseName}</strong> has been successfully transferred to your account. The full
  Hoofprint™ history has been preserved.
  </p>
@@ -131,12 +131,12 @@ export default function ClaimPage() {
  </Link>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all hover:bg-[#F4EFE6]"
+ className="inline-flex min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all hover:bg-[#F4EFE6]"
  >
  ← Dashboard
  </Link>
  </div>
- <p className="text-center text-sm text-muted-foreground mt-8 border-t border-edge pt-4">
+ <p className="text-center text-sm text-muted-foreground mt-8 border-t border-input pt-4">
  ⭐ Had a good experience? You can leave a review from the seller&apos;s profile.
  </p>
  </div>
@@ -146,20 +146,20 @@ export default function ClaimPage() {
 
  return (
  <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
- <div className="bg-[#FEFCF8] border-edge animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all p-8">
+ <div className="bg-[#FEFCF8] border-input animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all p-8">
  <div className="mb-8 text-center">
  <div className="mb-2 text-[2.5rem]">📦</div>
- <h1 className="font-serif text-3xl font-bold text-ink">
+ <h1 className="font-serif text-3xl font-bold text-foreground">
  Claim a Horse
  </h1>
- <p className="text-ink-light mt-2 text-sm">
+ <p className="text-secondary-foreground mt-2 text-sm">
  Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
  </p>
  </div>
 
  {/* Preview Card (CoA PIN lookup result) */}
  {preview && (
- <div className="rounded-xl border border-edge p-6 mb-6 bg-[#FEFCF8] shadow-sm transition-all text-left">
+ <div className="rounded-xl border border-input p-6 mb-6 bg-[#FEFCF8] shadow-sm transition-all text-left">
  <div className="flex items-center gap-6">
  {preview.photo ? (
  <img
@@ -173,7 +173,7 @@ export default function ClaimPage() {
  </div>
  )}
  <div className="flex-1">
- <h3 className="mb-1 text-lg font-bold text-ink">
+ <h3 className="mb-1 text-lg font-bold text-foreground">
  {preview.name}
  </h3>
  <p className="text-muted-foreground text-sm">
@@ -182,7 +182,7 @@ export default function ClaimPage() {
  </div>
  </div>
 
- <div className="flex gap-6 mt-4 pt-4 border-t border-edge">
+ <div className="flex gap-6 mt-4 pt-4 border-t border-input">
  <div className="flex-1 text-center">
  <span className="text-forest text-[1.2rem] font-bold">{preview.timelineCount}</span>
  <br />
@@ -212,7 +212,7 @@ export default function ClaimPage() {
  {!preview && (
  <form onSubmit={handleSubmit} className="text-left">
  <div className="mb-6">
- <label className="text-ink mb-2 block text-sm font-semibold">Transfer Code or PIN</label>
+ <label className="text-foreground mb-2 block text-sm font-semibold">Transfer Code or PIN</label>
  <Input
  type="text"
  value={code}
@@ -223,7 +223,7 @@ export default function ClaimPage() {
  }}
  placeholder="ABC123"
  maxLength={6}
- className="font-mono text-3xl font-extrabold text-center tracking-[0.3em] h-16 rounded-lg bg-[#FEFCF8] border-edge text-ink"
+ className="font-mono text-3xl font-extrabold text-center tracking-[0.3em] h-16 rounded-lg bg-[#FEFCF8] border-input text-foreground"
  autoFocus
  />
  </div>
@@ -252,7 +252,7 @@ export default function ClaimPage() {
  </p>
  )}
 
- <p className="text-muted-foreground mt-6 text-xs text-center border-t border-edge pt-4">
+ <p className="text-muted-foreground mt-6 text-xs text-center border-t border-input pt-4">
  The horse&apos;s full Hoofprint™ history will transfer with it.
  <br />
  Photos, show records, and provenance are preserved forever.

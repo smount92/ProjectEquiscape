@@ -124,14 +124,14 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
    </div>
    <Link
    href="/community/help-id"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
    >
    ← Back to Help ID
    </Link>
   </div>
   }
   leftContent={
-  <div className="overflow-hidden rounded-lg border border-edge bg-card shadow-md transition-all">
+  <div className="overflow-hidden rounded-lg border border-input bg-card shadow-md transition-all">
    {signedImageUrl ? (
    <img
     src={signedImageUrl}
@@ -139,14 +139,14 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     className="block h-auto max-h-[500px] w-full object-contain"
    />
    ) : (
-   <div className="flex h-[300px] items-center justify-center bg-parchment text-6xl">
+   <div className="flex h-[300px] items-center justify-center bg-card text-6xl">
     🐴
    </div>
    )}
   </div>
   }
   rightContent={
-  <div className="rounded-lg border border-edge bg-card p-6 shadow-md transition-all">
+  <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all">
    <h2 className="mb-4 text-base font-semibold">Description</h2>
    <p className="text-muted-foreground leading-[1.7]">{req.description ||"No description provided."}</p>
   </div>

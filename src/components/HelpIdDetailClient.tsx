@@ -87,7 +87,7 @@ export default function HelpIdDetailClient({
 
  {suggestions.length === 0 ? (
  <div
- className="rounded-lg border border-edge bg-card p-8 text-center shadow-md transition-all"
+ className="rounded-lg border border-input bg-card p-8 text-center shadow-md transition-all"
  >
  <p className="text-muted-foreground font-medium my-4">No suggestions yet. Be the first to help!</p>
  </div>
@@ -101,7 +101,7 @@ export default function HelpIdDetailClient({
  >
  <div className="mb-4 flex flex-wrap items-center gap-4">
  <UserAvatar src={null} alias={s.userName} size="sm" />
- <span className="text-ink text-sm font-semibold">{s.userName}</span>
+ <span className="text-foreground text-sm font-semibold">{s.userName}</span>
  {s.isAccepted && (
  <span className="bg-emerald-100 text-success rounded-full px-[10px] py-[2px] text-xs font-semibold">
  ✅ Accepted Answer
@@ -128,7 +128,7 @@ export default function HelpIdDetailClient({
 
  <div className="flex items-center gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => handleUpvote(s.id)}
  title="Upvote this suggestion"
  >
@@ -177,7 +177,7 @@ export default function HelpIdDetailClient({
  💡 I Know This Model
  </button>
  ) : (
- <div className="rounded-lg border border-edge bg-card p-6 shadow-md transition-all">
+ <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all">
  <h3 className="mb-4">Your Suggestion</h3>
  <div className="mb-6">
  <Textarea
@@ -190,7 +190,7 @@ export default function HelpIdDetailClient({
  </div>
  <div className="flex gap-4">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
  onClick={() => {
  setShowSuggestForm(false);
  setSuggestText("");
@@ -220,7 +220,7 @@ export default function HelpIdDetailClient({
  {isOwner && (
  <div className="mt-8 text-right">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-edge bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
  onClick={async () => {
  if (confirm("Delete this Help ID request? This cannot be undone.")) {
  const result = await deleteIdRequest(requestId);

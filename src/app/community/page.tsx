@@ -240,7 +240,7 @@ async function ShowRingContent({
   <div className="mt-6 flex items-center gap-6">
   <div className="flex items-baseline gap-2">
   <span className="text-2xl font-bold text-forest">{totalCount ?? communityCards.length}</span>
-  <span className="text-sm font-medium text-ink-light">Models Showcased</span>
+  <span className="text-sm font-medium text-secondary-foreground">Models Showcased</span>
   </div>
   <Link
   href="/community/help-id"

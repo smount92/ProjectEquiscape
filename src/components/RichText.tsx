@@ -28,7 +28,7 @@ function linkifyMentions(text: string): React.ReactNode[] {
 
 export default function RichText({ content }: { content: string }) {
  return (
- <div className="text-ink-light break-words">
+ <div className="text-secondary-foreground break-words">
  <ReactMarkdown
  remarkPlugins={[remarkGfm]}
  components={{

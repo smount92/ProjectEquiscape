@@ -23,7 +23,7 @@ export default function ExplorerLayout({
             {/* Header row */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="font-serif text-3xl font-bold tracking-tight text-ink md:text-4xl">
+                    <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                         {title}
                     </h1>
                     {description && (
@@ -35,7 +35,7 @@ export default function ExplorerLayout({
 
             {/* Controls row (sticky) */}
             {controls && (
-                <div className="sticky top-[calc(var(--header-height)+1rem)] z-40 mb-8 border-b border-edge bg-[#F4EFE6]/90 pb-4 pt-2 backdrop-blur-md">
+                <div className="sticky top-[calc(var(--header-height)+1rem)] z-40 mb-8 border-b border-input bg-[#F4EFE6]/90 pb-4 pt-2 backdrop-blur-md">
                     {controls}
                 </div>
             )}

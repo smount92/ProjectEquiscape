@@ -139,7 +139,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
    <div className="flex flex-col gap-4">
     {fields.map((field, i) => (
     <div key={field.key} className="flex flex-col gap-1.5">
-     <label className="flex items-center gap-2 text-sm font-semibold text-ink">
+     <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
      {field.label}
      {field.current !== field.original && (
       <span className="rounded-full bg-[#ffc107] px-2 py-0.5 text-[0.62rem] font-extrabold tracking-wide text-[#1a1a1a] uppercase">
@@ -164,7 +164,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
 
    {/* Reason */}
    <div className="flex flex-col gap-1.5">
-    <label className="text-sm font-semibold text-ink">
+    <label className="text-sm font-semibold text-foreground">
     Reason for change <span className="text-destructive">*</span>
     </label>
     <Textarea
@@ -195,7 +195,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
     <ul className="mt-2 flex flex-col gap-1 pl-4">
      {changedFields.map((f) => (
      <li key={f.key} className="text-sm">
-      <span className="font-bold text-ink">
+      <span className="font-bold text-foreground">
       {f.label}:
       </span>{" "}
       <span className="text-red-400 line-through">{f.original}</span> →{" "}

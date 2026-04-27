@@ -663,7 +663,7 @@ export default function ManageEventPage() {
 
  <div className="flex items-center gap-2">
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSaveDetails}
  disabled={isSaving || !eventData.name.trim()}
  >
@@ -719,7 +719,7 @@ export default function ManageEventPage() {
  placeholder="Division name"
  />
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleSaveDivision(div.id)}
  disabled={isSaving}
  >
@@ -813,7 +813,7 @@ export default function ManageEventPage() {
  placeholder="Class name"
  />
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleSaveClass(cls.id)}
  disabled={isSaving}
  >
@@ -900,7 +900,7 @@ export default function ManageEventPage() {
  placeholder="Class name (e.g. Arabian/Part-Arabian)"
  />
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => handleAddClass(div.id)}
  disabled={isSaving || !newClassName.trim()}
  >
@@ -936,7 +936,7 @@ export default function ManageEventPage() {
  placeholder="New division name (e.g. OF Plastic Halter)"
  />
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleAddDivision}
  disabled={isSaving || !newDivisionName.trim()}
  >
@@ -1027,7 +1027,7 @@ export default function ManageEventPage() {
  )}
  </div>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleAddJudge}
  disabled={!newJudgeAlias.trim()}
  >
@@ -1128,7 +1128,7 @@ export default function ManageEventPage() {
  Cancel
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleCopy}
  disabled={!selectedSourceEvent}
  >

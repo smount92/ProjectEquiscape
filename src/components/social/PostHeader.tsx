@@ -65,7 +65,7 @@ export default function PostHeader({
                 <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <Link
                         href={`/profile/${encodeURIComponent(alias)}`}
-                        className="truncate text-sm font-semibold text-ink no-underline hover:underline"
+                        className="truncate text-sm font-semibold text-foreground no-underline hover:underline"
                     >
                         @{alias}
                     </Link>

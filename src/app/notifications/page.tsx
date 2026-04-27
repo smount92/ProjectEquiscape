@@ -29,7 +29,7 @@ export default async function NotificationsPage() {
   <span className="text-2xl font-bold text-forest">
    {notifications.filter((n) => !n.isRead).length}
   </span>
-  <span className="text-sm font-medium text-ink-light">Unread</span>
+  <span className="text-sm font-medium text-secondary-foreground">Unread</span>
   </div>
   <NotificationList initialNotifications={notifications} />
  </ExplorerLayout>

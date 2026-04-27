@@ -196,7 +196,7 @@ export default function UnifiedReferenceSearch({
             </svg>
             <input
               type="text"
-              className="flex h-11 w-full rounded-md border border-edge bg-[#FEFCF8] px-10 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              className="flex h-11 w-full rounded-md border border-input bg-[#FEFCF8] px-10 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               placeholder="Search molds, releases, or resins..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -222,7 +222,7 @@ export default function UnifiedReferenceSearch({
 
           {/* Dropdown Results */}
           {showDropdown && (
-            <div className="animate-fade-in-up mt-1 flex max-h-[420px] w-full flex-col overflow-y-auto rounded-lg border border-edge bg-[#FEFCF8] shadow-lg">
+            <div className="animate-fade-in-up mt-1 flex max-h-[420px] w-full flex-col overflow-y-auto rounded-lg border border-input bg-[#FEFCF8] shadow-lg">
               {isSearching ? (
                 <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-muted-foreground">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-input border-t-forest" />
@@ -325,7 +325,7 @@ export default function UnifiedReferenceSearch({
                         for market data, or suggest a new entry.
                       </p>
                       <button
-                        className="mt-1 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-edge bg-transparent px-6 py-2 text-sm font-medium text-secondary-foreground transition-all hover:border-forest hover:text-forest"
+                        className="mt-1 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-transparent px-6 py-2 text-sm font-medium text-secondary-foreground transition-all hover:border-forest hover:text-forest"
                         onClick={() => {
                           setShowSuggestModal(true);
                           setShowDropdown(false);
@@ -342,7 +342,7 @@ export default function UnifiedReferenceSearch({
 
           {/* Expanded Releases (when a mold is clicked) */}
           {releases.length > 0 && selectedItem && selectedItem.itemType === "plastic_mold" && (
-            <div className="animate-fade-in-up mt-4 flex flex-col overflow-hidden rounded-lg border border-edge bg-[#FEFCF8] shadow-md transition-all">
+            <div className="animate-fade-in-up mt-4 flex flex-col overflow-hidden rounded-lg border border-input bg-[#FEFCF8] shadow-md transition-all">
               <div className="flex items-center justify-between border-b border-input bg-emerald-50/60 px-4 py-2.5">
                 <span className="text-sm text-secondary-foreground">
                   Releases for <strong className="text-foreground">{selectedItem.title}</strong>

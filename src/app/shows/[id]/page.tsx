@@ -117,12 +117,12 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  📸 <span className="text-forest">{show.title}</span>
  </h1>
  {show.theme && (
- <p className="mt-2 text-base italic text-ink-light">
+ <p className="mt-2 text-base italic text-secondary-foreground">
  Theme: {show.theme}
  </p>
  )}
  {show.description && (
- <p className="mt-2 text-sm text-ink-light">
+ <p className="mt-2 text-sm text-secondary-foreground">
  {show.description}
  </p>
  )}
@@ -141,7 +141,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  </p>
  )}
  {show.creatorAlias && (
- <p className="mt-1 text-sm text-ink-light">
+ <p className="mt-1 text-sm text-secondary-foreground">
  Hosted by @{show.creatorAlias}
  </p>
  )}
@@ -149,19 +149,19 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div className="mt-6 flex justify-center gap-8">
  <div className="flex flex-col items-center">
  <span className="text-xl font-bold">{entries.length}</span>
- <span className="text-xs text-ink-light">Entries</span>
+ <span className="text-xs text-secondary-foreground">Entries</span>
  </div>
  <div className="flex flex-col items-center">
  <span className="text-xl">
  {show.status ==="open" ?"🟢" : show.status ==="judging" ?"🟡" :"🔴"}
  </span>
- <span className="text-xs text-ink-light">
+ <span className="text-xs text-secondary-foreground">
  {show.status.charAt(0).toUpperCase() + show.status.slice(1)}
  </span>
  </div>
  <div className="flex flex-col items-center">
  <span className="text-xl">{isExpertJudged ?"🏅" :"🗳️"}</span>
- <span className="text-xs text-ink-light">
+ <span className="text-xs text-secondary-foreground">
  {isExpertJudged ?"Expert Judge" :"Community Vote"}
  </span>
  </div>
@@ -174,7 +174,7 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  <div className="animate-fade-in-up mb-4 flex justify-end gap-2">
  <Link
  href={`/community/events/${showId}/manage`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-ink-light no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ⚙️ Manage Classes
  </Link>

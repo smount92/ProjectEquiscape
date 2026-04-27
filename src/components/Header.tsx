@@ -232,7 +232,7 @@ export default function Header() {
 
  return (
  <header
- className="sticky top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b border-edge bg-[#EAE1CD]/90 px-8 py-0 backdrop-blur-md transition-all max-sm:px-4"
+ className="sticky top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b border-input bg-[#EAE1CD]/90 px-8 py-0 backdrop-blur-md transition-all max-sm:px-4"
  role="banner"
  >
  <Link
@@ -250,7 +250,7 @@ export default function Header() {
  {/* ── Hamburger Button (mobile only) ── */}
  {user && (
  <button
- className="relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-edge bg-transparent text-muted-foreground transition-all"
+ className="relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
  aria-expanded={mobileMenuOpen ? "true" : "false"}
@@ -333,7 +333,7 @@ export default function Header() {
  <ChevronDown size={12} strokeWidth={2} className="ml-[2]" />
  </button>
  {moreMenuOpen && (
- <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-edge bg-[#FEFCF8] p-1 shadow-lg">
+ <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-input bg-[#FEFCF8] p-1 shadow-lg">
  {overflowLinks.map((link) => (
  <Link
  key={link.id}
@@ -354,7 +354,7 @@ export default function Header() {
  <NotificationBell />
  <Link
  href="/inbox"
- className="bg-[#FEFCF8] border-edge relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
+ className="bg-[#FEFCF8] border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
  title="Inbox"
  id="nav-inbox-icon"
  >
@@ -378,7 +378,7 @@ export default function Header() {
  </Link>
  <Link
  href="/wishlist"
- className="bg-[#FEFCF8] border-edge relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
+ className="bg-[#FEFCF8] border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
  title="Wishlist"
  id="nav-wishlist-icon"
  >
@@ -427,7 +427,7 @@ export default function Header() {
  </svg>
  </button>
  {userMenuOpen && (
- <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-edge bg-[#FEFCF8] p-1 shadow-lg">
+ <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-input bg-[#FEFCF8] p-1 shadow-lg">
  <Link
  href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` :"/settings"}
  className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
@@ -511,7 +511,7 @@ export default function Header() {
  {user && (
  <nav
  ref={navRef}
- className={`absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-edge bg-[#EAE1CD] px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
+ className={`absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-input bg-[#EAE1CD] px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
  aria-label="Mobile navigation"
  >
  <Link
@@ -658,7 +658,7 @@ export default function Header() {
  </Link>
  )}
  {/* ── Mobile-only: Upgrade + Sign Out + Simple Mode ── */}
- <div className="mt-2 flex flex-col gap-1 border-t border-edge pt-2">
+ <div className="mt-2 flex flex-col gap-1 border-t border-input pt-2">
  <Link
   href="/upgrade"
   className="flex items-center gap-1 rounded-md bg-gradient-to-r from-amber-50 to-orange-50 px-2 py-1.5 text-sm font-semibold whitespace-nowrap text-amber-700 no-underline transition-all"
@@ -677,7 +677,7 @@ export default function Header() {
  <LogOut size={16} strokeWidth={1.5} /> Sign Out
  </button>
  <button
- className="border-edge bg-[#FEFCF8] relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-muted-foreground transition-all"
+ className="border-input bg-[#FEFCF8] relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-muted-foreground transition-all"
  onClick={() => toggleSimpleMode()}
  aria-pressed={isSimpleMode ? "true" : "false"}
  >
@@ -736,7 +736,7 @@ export default function Header() {
  Log In
  </Link>
  <button
- className="border-edge bg-[#FEFCF8] relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-muted-foreground transition-all"
+ className="border-input bg-[#FEFCF8] relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-muted-foreground transition-all"
  onClick={toggleSimpleMode}
  aria-pressed={isSimpleMode ? "true" : "false"}
  aria-label={
@@ -778,7 +778,7 @@ export default function Header() {
  <line x1="1" y1="1" x2="23" y2="23" />
  </svg>
  )}
- <span className="bg-[#FEFCF8] border-edge pointer-events-none absolute right-0 bottom-[-36px] rounded-sm border px-[10px] py-[4px] whitespace-nowrap text-muted-foreground text-[var(--font-size-xs)] opacity-0 transition-opacity">
+ <span className="bg-[#FEFCF8] border-input pointer-events-none absolute right-0 bottom-[-36px] rounded-sm border px-[10px] py-[4px] whitespace-nowrap text-muted-foreground text-[var(--font-size-xs)] opacity-0 transition-opacity">
  {isSimpleMode ?"Simple Mode: ON" :"Simple Mode: OFF"}
  </span>
  </button>

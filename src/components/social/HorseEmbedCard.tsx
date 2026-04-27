@@ -40,7 +40,7 @@ export default function HorseEmbedCard({ horseId }: HorseEmbedCardProps) {
 
     if (loading) {
         return (
-            <div className="mt-2 flex items-center gap-3 rounded-lg border border-edge bg-card p-3">
+            <div className="mt-2 flex items-center gap-3 rounded-lg border border-input bg-card p-3">
                 <Skeleton className="h-16 w-16 shrink-0 rounded-md" />
                 <div className="flex flex-1 flex-col gap-1.5">
                     <Skeleton className="h-4 w-3/4" />
@@ -57,24 +57,24 @@ export default function HorseEmbedCard({ horseId }: HorseEmbedCardProps) {
     return (
         <Link
             href={`/community/${horseId}`}
-            className="mt-2 flex items-center gap-3 rounded-lg border border-edge bg-card p-3 no-underline shadow-sm transition-all hover:shadow-md"
+            className="mt-2 flex items-center gap-3 rounded-lg border border-input bg-card p-3 no-underline shadow-sm transition-all hover:shadow-md"
         >
             {data.thumbnailUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                     src={data.thumbnailUrl}
                     alt={data.name}
-                    className="h-16 w-16 shrink-0 rounded-md border border-edge object-cover"
+                    className="h-16 w-16 shrink-0 rounded-md border border-input object-cover"
                     loading="lazy"
                 />
             ) : (
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border border-edge bg-parchment text-2xl">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border border-input bg-card text-2xl">
                     🐴
                 </div>
             )}
             <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-semibold text-ink">{data.name}</span>
+                    <span className="truncate text-sm font-semibold text-foreground">{data.name}</span>
                     {badgeInfo && (
                         <Badge variant={badgeInfo.variant} className="shrink-0 text-[0.6rem]">
                             {badgeInfo.label}

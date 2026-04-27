@@ -61,7 +61,7 @@ export default function CreateShowForm() {
     <form onSubmit={handleSubmit} className="flex max-w-[500px] flex-col gap-4">
       {/* Template Selector */}
       <div className="mb-6">
-        <label className="text-ink mb-1 block text-sm font-semibold">
+        <label className="text-foreground mb-1 block text-sm font-semibold">
           Starting Template (optional)
         </label>
         <Select value={templateId} onValueChange={setTemplateId}>

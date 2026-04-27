@@ -832,7 +832,7 @@ export default function AddHorsePage() {
  <div className="mt-6">
  <label
  htmlFor="extra-photos-input"
- className="relative flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-edge bg-[#FEFCF8] p-6 text-center transition-all hover:border-forest hover:bg-forest/5"
+ className="relative flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-input bg-[#FEFCF8] p-6 text-center transition-all hover:border-forest hover:bg-forest/5"
  onDragOver={(e) => e.preventDefault()}
  onDrop={(e) => {
  e.preventDefault();
@@ -882,7 +882,7 @@ export default function AddHorsePage() {
  <circle cx="12" cy="13" r="3" />
  <line x1="21" y1="9" x2="21.01" y2="9" />
  </svg>
- <span className="text-ink text-sm font-medium">
+ <span className="text-foreground text-sm font-medium">
  <strong>Additional photos (up to 10)</strong>
  </span>
  <span className="text-muted-foreground text-xs">
@@ -969,7 +969,7 @@ export default function AddHorsePage() {
  — Use CSS display instead of unmounting to preserve component state
  ================================================================ */}
  <div className={`step-content ${activeConfig.showReferenceStep && currentStep === 1 ?"block" :"hidden"}`} key="step-1">
- <div className="relative overflow-visible rounded-xl border border-edge bg-[#FEFCF8] p-6 shadow-sm">
+ <div className="relative overflow-visible rounded-xl border border-input bg-[#FEFCF8] p-6 shadow-sm">
  <div className="mb-6 flex items-center gap-3">
  <div className="text-2xl">
  🔗
@@ -1249,9 +1249,9 @@ export default function AddHorsePage() {
  />
  </div>
  <div className="mb-6 min-w-[150px] flex-1">
- <label className="text-ink mb-1 block text-sm font-semibold">Assigned Gender</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Assigned Gender</label>
  <select
- className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-input bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={assignedGender}
  onChange={(e) => setAssignedGender(e.target.value)}
  id="assigned-gender"
@@ -1310,7 +1310,7 @@ export default function AddHorsePage() {
  className={`flex h-9 w-full rounded-md border px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
  validationErrors.includes("Condition Grade")
  ? "border-red-400 ring-2 ring-red-400 bg-red-50/30"
- : "border-edge bg-[#FEFCF8]"
+ : "border-input bg-[#FEFCF8]"
  } ${shakeFields && validationErrors.includes("Condition Grade") ? "animate-shake" : ""}`}
  value={conditionGrade}
  onChange={(e) => {
@@ -1336,7 +1336,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="life-stage"
- className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-input bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={lifeStage}
  onChange={(e) => setLifeStage(e.target.value)}
  >
@@ -1364,7 +1364,7 @@ export default function AddHorsePage() {
  </label>
  <select
  id="trade-status"
- className="flex h-9 w-full rounded-md border border-edge bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-input bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={tradeStatus}
  onChange={(e) => setTradeStatus(e.target.value)}
  >
@@ -1470,7 +1470,7 @@ export default function AddHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-[#FEFCF8] font-inherit text-foreground hover:border-emerald-700 hover:bg-muted flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-edge"}`}
+ className={`bg-[#FEFCF8] font-inherit text-foreground hover:border-emerald-700 hover:bg-muted flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-input"}`}
  onClick={() => setVisibility(opt.value)}
  id={`visibility-${opt.value}`}
  >

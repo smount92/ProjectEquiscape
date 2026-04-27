@@ -122,7 +122,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
    ) : (
     <Link
     href="/login"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-inverse no-underline shadow-sm transition-all"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
     >
     Log in to Suggest Edit
     </Link>

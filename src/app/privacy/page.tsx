@@ -17,10 +17,10 @@ export default function PrivacyPage() {
  <h1>
  <span className="text-forest">Privacy</span> Policy
  </h1>
- <p className="mt-2 text-lg text-ink-light">
+ <p className="mt-2 text-lg text-secondary-foreground">
  Your data is yours. Full stop.
  </p>
- <p className="text-ink-light mt-2 text-sm">Last updated: March 14, 2026</p>
+ <p className="text-secondary-foreground mt-2 text-sm">Last updated: March 14, 2026</p>
  </div>
 
  {/* Overview */}
