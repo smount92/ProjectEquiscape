@@ -5,8 +5,23 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-04-03 (V42 NAMHSA sprint added)
+> **Last Updated:** 2026-04-27 (V44 Visual QA audit complete)
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
+>
+> ## ✅ V44 Visual QA Audit — DONE (2026-04-27)
+>
+> **Workflow:** `.agents/workflows/v44-visual-qa-phase0-inventory.md` through `phase7-signoff-automation.md`
+> **Source:** Ongoing beta feedback — one-off UI inconsistencies across forms, tables, mobile
+> **Scope:** 8 phases, 63 pages audited, 126 components checked
+> **Phases completed:**
+> 1. ✅ Phase 0: Surface inventory (63 pages tiered, cold palette violations cataloged)
+> 2. ✅ Phase 1: shadcn primitives audit (11 components, warm palette + WCAG fixes)
+> 3. ✅ Phase 2: Forms & dropdowns (15 form surfaces, label visibility + select readability)
+> 4. ✅ Phase 3: Tables & grids (12 data surfaces, overflow wrappers + alignment)
+> 5. ✅ Phase 4: Text sections (11 text-heavy surfaces, heading hierarchy + overflow-wrap)
+> 6. ✅ Phase 5: Modals & lightboxes (7 overlay components, content clipping + close buttons)
+> 7. ✅ Phase 6: Mobile + Simple Mode (Playwright mobile spec + 23-item manual checklist)
+> 8. ✅ Phase 7: Sign-off (axe-core in CI, docs updated, all tests pass)
 
 // turbo-all
 

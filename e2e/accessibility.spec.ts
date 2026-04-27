@@ -112,4 +112,65 @@ test.describe("Accessibility Audit", () => {
         }
         expect(critical).toHaveLength(0);
     });
+
+    // ── V44 Phase 7: Extended Tier 1 public pages ──────────────
+
+    const TIER_1_PUBLIC_EXTRAS = [
+        { path: "/catalog", label: "Catalog" },
+        { path: "/market", label: "Market" },
+        { path: "/discover", label: "Discover" },
+        { path: "/faq", label: "FAQ" },
+        { path: "/shows", label: "Shows" },
+    ];
+
+    for (const { path, label } of TIER_1_PUBLIC_EXTRAS) {
+        test(`${label} has no critical a11y violations`, async ({ page }) => {
+            await page.goto(path);
+            await page.waitForLoadState("networkidle");
+
+            const results = await new AxeBuilder({ page })
+                .withTags(["wcag2a", "wcag2aa"])
+                .disableRules(["color-contrast", "link-in-text-block"])
+                .analyze();
+
+            const critical = results.violations.filter(
+                (v) => v.impact === "critical" || v.impact === "serious"
+            );
+
+            if (critical.length > 0) {
+                console.log(
+                    `Critical a11y violations on ${label}:`,
+                    JSON.stringify(
+                        critical.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
+                        null,
+                        2
+                    )
+                );
+            }
+            expect(critical).toHaveLength(0);
+        });
+    }
+
+    // ── V44 Phase 7: Contrast-specific checks ─────────────────
+
+    test("Public pages pass color-contrast audit", async ({ page }) => {
+        const publicPages = ["/login", "/signup", "/faq"];
+        for (const route of publicPages) {
+            await page.goto(route);
+            await page.waitForLoadState("networkidle");
+
+            const results = await new AxeBuilder({ page })
+                .withRules(["color-contrast"])
+                .analyze();
+
+            const serious = results.violations.filter(
+                (v) => v.impact === "critical" || v.impact === "serious"
+            );
+
+            expect(
+                serious,
+                `Serious contrast violations on ${route}`
+            ).toHaveLength(0);
+        }
+    });
 });
