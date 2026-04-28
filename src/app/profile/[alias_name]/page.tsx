@@ -235,7 +235,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  return {
  id: horse.id,
  customName: horse.custom_name,
-  finishType: horse.finish_type ?? "OF",
+  finishType: horse.finish_type ?? "",
   conditionGrade: horse.condition_grade ?? "",
  createdAt: horse.created_at,
  refName,
@@ -467,9 +467,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <span className="mt-1 text-sm text-muted-foreground">No photo</span>
  </div>
  )}
+ {horse.finishType && (
  <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
  {horse.finishType}
  </span>
+ )}
  {horse.tradeStatus ==="For Sale" && (
  <span className="trade-badge border border-green-500/50 bg-green-500/85 text-white">
  💲{""}

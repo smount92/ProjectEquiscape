@@ -332,8 +332,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  @{entry.ownerAlias}
  </Link>
  )}
- {" ·"}
- {entry.finishType}
+ {entry.finishType && `${" ·"} ${entry.finishType}`}
  {entry.className && (
  <span className="text-forest ml-1">
  · {entry.divisionName && `${entry.divisionName} / `}

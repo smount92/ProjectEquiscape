@@ -173,7 +173,7 @@ export async function getShowEntries(showId: string): Promise<{
 
     const horseMap = new Map<string, { name: string; finish: string }>();
     (horses ?? []).forEach((h: { id: string; custom_name: string; finish_type: string | null }) => {
-        horseMap.set(h.id, { name: h.custom_name, finish: h.finish_type || "OF" });
+        horseMap.set(h.id, { name: h.custom_name, finish: h.finish_type || "" });
     });
 
     // Check if current user has voted on each entry
