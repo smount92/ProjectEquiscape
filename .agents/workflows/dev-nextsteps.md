@@ -331,10 +331,13 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 
 ---
 
-## Task N-1: globals.css Continued Cleanup
+## ✅ Task N-1: globals.css Dead Class Pruning — DONE (2026-04-28)
 
-**Why:** `globals.css` is ~1,750 lines. Many class-based styles (`.show-record-*`, `.settings-toggle`, `.filter-*`, `.profile-hero`, `.collection-hero`) could be replaced with Tailwind utility classes as their consuming components are touched.
-**Approach:** Remove classes organically as layout unification converts pages. Verify each class has zero consumers before deletion.
+**Why:** `globals.css` was 2,182 lines with many orphaned classes from legacy layout/component refactors.
+**Method:** Extracted all 105 custom class selectors, grep-verified each against `.tsx` consumers, removed 21 with zero references.
+**Dead classes removed (21):** `rating-stars-sm/md/lg`, `category-card`, `stepper-step` (4 blocks), `reference-tab.active`, `reference-item.selected`, `modal-card.danger`, `modal-fade-in`/`modal-slide-up` keyframes, `help-id-card.resolved`, `passport-breadcrumb .separator`, `passport-action-icons`, `market-filter-chip.active`, `admin-shield-badge`, `show-entry-body` (2 blocks), `gallery-slot.has-image/.primary`, `ref-suggest-field`, `ref-diff-from`, `nan-dashboard-widget/toggle`, `group-post-card.pinned`, `class-scale-warn`, `asset-category-toggle`
+**Result:** 2,182 → 1,997 lines (−185 lines, −8.5%). Build clean, 266/266 tests pass.
+**Remaining opportunity:** ~56 alive single-consumer classes could be inlined to Tailwind utilities as components are touched.
 
 ---
 
