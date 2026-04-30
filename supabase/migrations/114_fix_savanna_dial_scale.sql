@@ -1,10 +1,24 @@
 -- ============================================================
--- Migration 114: Fix scale for Model #1231 Savanna Dial
--- Beta tester reported: Indian Pony mold #175 is Traditional scale,
--- not Stablemate. Correcting catalog_items.scale.
+-- Migration 114: Fix scale for Indian Pony mold #175
+-- Beta tester reported: Model #1231 (Breyer - Savanna Dial) is on
+-- Indian Pony mold #175 which is Traditional scale, not Stablemate.
+-- The mold row + all its child releases inherited the wrong scale.
 -- ============================================================
 
+-- Fix the mold record (Indian Pony)
 UPDATE catalog_items
 SET scale = 'Traditional'
-WHERE mold_number = '175'
+WHERE item_type = 'plastic_mold'
+  AND title ILIKE '%Indian Pony%'
+  AND scale = 'Stablemate';
+
+-- Fix all releases on that mold (they inherit scale from the mold)
+UPDATE catalog_items
+SET scale = 'Traditional'
+WHERE item_type = 'plastic_release'
+  AND parent_id IN (
+    SELECT id FROM catalog_items
+    WHERE item_type = 'plastic_mold'
+      AND title ILIKE '%Indian Pony%'
+  )
   AND scale = 'Stablemate';
