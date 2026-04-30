@@ -311,7 +311,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  : `${(horse.asset_category ||"model").charAt(0).toUpperCase() + (horse.asset_category ||"model").slice(1)} Details`}
  </h3>
 
- {horse.asset_category && (
+ {horse.asset_category && horse.asset_category !== "model" && (
  <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
  <span className="text-sm font-medium text-[#59493A]">
  Category
