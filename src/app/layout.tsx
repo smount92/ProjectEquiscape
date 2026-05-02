@@ -33,6 +33,7 @@ export const metadata: Metadata = {
  description:
 "The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance, LSQ photography, private financial vault, and community marketplace.",
  locale:"en_US",
+  images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Model Horse Hub" }],
  },
  twitter: {
  card:"summary",

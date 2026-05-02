@@ -52,7 +52,7 @@ export async function sendNewMessageNotification({
     <!-- Logo / Header -->
     <div style="text-align:center;margin-bottom:32px;">
       <h1 style="margin:0;font-size:24px;font-weight:700;">
-        <span style="color:#818cf8;">🐴</span>
+        <img src="https://modelhorsehub.com/logo.png" alt="MHH" width="32" height="32" style="vertical-align:middle;margin-right:8px;" />
         <span style="color:#e2e8f0;"> Model Horse Hub</span>
       </h1>
     </div>

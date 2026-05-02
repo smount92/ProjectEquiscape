@@ -12,7 +12,7 @@ export default function Footer() {
                         href="/"
                         className="mb-2 inline-block text-lg font-extrabold tracking-tight text-foreground no-underline hover:text-forest"
                     >
-                        🐴 Model Horse Hub
+                        <img src="/logo.png" alt="" style={{height:"20px",width:"auto",display:"inline-block",verticalAlign:"middle",marginRight:"4px"}} /> Model Horse Hub
                     </Link>
                     <p className="text-sm leading-relaxed text-secondary-foreground">Built by collectors, for collectors.</p>
                 </div>

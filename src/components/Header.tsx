@@ -240,11 +240,9 @@ export default function Header() {
  className="text-foreground mr-6 flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-[-0.02em] no-underline"
  aria-label="Model Horse Hub — Home"
  >
- <span className="text-[1.5em]" aria-hidden="true">
- 🐴
- </span>
- <span className="hidden md:inline">Model Horse Hub</span>
- <span className="md:hidden">MHH</span>
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+  <img src="/logo.png" alt="Model Horse Hub" className="h-8 w-auto" />
+  <span className="sr-only">MHH</span>
  </Link>
 
  {/* ── Hamburger Button (mobile only) ── */}
