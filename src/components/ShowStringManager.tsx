@@ -10,6 +10,8 @@ import {
  getShowStringEntries,
  deleteShowString,
  duplicateShowString,
+ updateShowString,
+ updateShowStringEntry,
  detectConflicts,
  type ShowString,
  type ShowStringEntry,
@@ -45,6 +47,18 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  const [results, setResults] = useState<Record<string, { placing: string; ribbon: string }>>({});
  const [savingResults, setSavingResults] = useState(false);
  const [resultsSaved, setResultsSaved] = useState(false);
+
+ // Edit show string state
+ const [editingStringId, setEditingStringId] = useState<string | null>(null);
+ const [editStringName, setEditStringName] = useState("");
+ const [editStringDate, setEditStringDate] = useState("");
+
+ // Edit entry state
+ const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+ const [editEntryHorseId, setEditEntryHorseId] = useState("");
+ const [editEntryClassName, setEditEntryClassName] = useState("");
+ const [editEntryDivision, setEditEntryDivision] = useState("");
+ const [editEntryTimeSlot, setEditEntryTimeSlot] = useState("");
 
  async function handleCreate() {
  if (!newName.trim()) return;
@@ -125,6 +139,60 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  router.refresh();
  }
 
+ function handleEditString(ss: ShowString) {
+    setEditingStringId(ss.id);
+    setEditStringName(ss.name);
+    setEditStringDate(ss.showDate || "");
+  }
+
+  async function handleSaveString() {
+    if (!editingStringId || !editStringName.trim()) return;
+    setSaving(true);
+    const result = await updateShowString(editingStringId, {
+      name: editStringName,
+      showDate: editStringDate || null,
+    });
+    if (result.success) {
+      setEditingStringId(null);
+      router.refresh();
+    } else {
+      setError(result.error || "Failed to update");
+    }
+    setSaving(false);
+  }
+
+  function handleEditEntry(entry: ShowStringEntry) {
+    setEditingEntryId(entry.id);
+    setEditEntryHorseId(entry.horseId);
+    setEditEntryClassName(entry.className);
+    setEditEntryDivision(entry.division || "");
+    setEditEntryTimeSlot(entry.timeSlot || "");
+  }
+
+  async function handleSaveEntry() {
+    if (!editingEntryId || !editEntryClassName.trim() || !editEntryHorseId) return;
+    setSaving(true);
+    const result = await updateShowStringEntry(editingEntryId, {
+      horseId: editEntryHorseId,
+      className: editEntryClassName,
+      division: editEntryDivision || null,
+      timeSlot: editEntryTimeSlot || null,
+    });
+    if (result.success) {
+      setEditingEntryId(null);
+      if (activeStringId) {
+        const data = await getShowStringEntries(activeStringId);
+        setEntries(data);
+        const { conflicts: c } = await detectConflicts(activeStringId);
+        setConflicts(c);
+      }
+      router.refresh();
+    } else {
+      setError(result.error || "Failed to update entry");
+    }
+    setSaving(false);
+  }
+
  return (
  <div>
  <p className="text-sm text-muted-foreground mb-4">
@@ -195,54 +263,98 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  ) : (
  <div className="grid gap-2">
  {showStrings.map((ss) => (
- <div key={ss.id} className={`show-string-item ${activeStringId === ss.id ?"active" :""}`}>
- <div
- className="flex cursor-pointer items-center justify-between gap-2 px-6 py-4"
- onClick={() => handleSelectString(ss.id)}
- >
- <div>
- <strong>{ss.name}</strong>
- {ss.showDate && (
- <span className="text-muted-foreground ml-2 text-sm">
- 📅{""}
- {new Date(ss.showDate +"T12:00:00").toLocaleDateString("en-US", {
- month:"short",
- day:"numeric",
- year:"numeric",
- })}
- </span>
- )}
- </div>
- <div className="flex items-center gap-2">
- <span className="flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-2 py-1 text-xs text-muted-foreground transition-all">
- {ss.entryCount}
- </span>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
- onClick={async (e) => {
- e.stopPropagation();
- setSaving(true);
- await duplicateShowString(ss.id);
- setSaving(false);
- router.refresh();
- }}
- title="Duplicate"
- disabled={saving}
- >
- 📋
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
- onClick={(e) => {
- e.stopPropagation();
- handleDeleteString(ss.id);
- }}
- title="Delete"
- >
- 🗑️
- </button>
- </div>
- </div>
+  <div key={ss.id} className={`show-string-item ${activeStringId === ss.id ?"active" :""}`}>
+  {editingStringId === ss.id ? (
+  <div className="flex flex-col gap-3 px-6 py-4" onClick={(e) => e.stopPropagation()}>
+  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+  <Input
+  value={editStringName}
+  onChange={(e) => setEditStringName(e.target.value)}
+  placeholder="Show name"
+  autoFocus
+  />
+  <Input
+  type="date"
+  value={editStringDate}
+  onChange={(e) => setEditStringDate(e.target.value)}
+  title="Show date"
+  />
+  </div>
+  <div className="flex gap-2">
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+  onClick={handleSaveString}
+  disabled={saving || !editStringName.trim()}
+  >
+  {saving ? "Saving..." : "Save"}
+  </button>
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  onClick={() => setEditingStringId(null)}
+  >
+  Cancel
+  </button>
+  </div>
+  </div>
+  ) : (
+  <div
+  className="flex cursor-pointer items-center justify-between gap-2 px-6 py-4"
+  onClick={() => handleSelectString(ss.id)}
+  >
+  <div>
+  <strong>{ss.name}</strong>
+  {ss.showDate && (
+  <span className="text-muted-foreground ml-2 text-sm">
+  📅{""}
+  {new Date(ss.showDate +"T12:00:00").toLocaleDateString("en-US", {
+  month:"short",
+  day:"numeric",
+  year:"numeric",
+  })}
+  </span>
+  )}
+  </div>
+  <div className="flex items-center gap-2">
+  <span className="flex cursor-pointer items-center gap-1 rounded-md border border-input bg-card px-2 py-1 text-xs text-muted-foreground transition-all">
+  {ss.entryCount}
+  </span>
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  onClick={(e) => {
+  e.stopPropagation();
+  handleEditString(ss);
+  }}
+  title="Edit"
+  >
+  ✏️
+  </button>
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  onClick={async (e) => {
+  e.stopPropagation();
+  setSaving(true);
+  await duplicateShowString(ss.id);
+  setSaving(false);
+  router.refresh();
+  }}
+  title="Duplicate"
+  disabled={saving}
+  >
+  📋
+  </button>
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  onClick={(e) => {
+  e.stopPropagation();
+  handleDeleteString(ss.id);
+  }}
+  title="Delete"
+  >
+  🗑️
+  </button>
+  </div>
+  </div>
+  )}
 
  {/* Expanded: entries + add form */}
  {activeStringId === ss.id && (
@@ -294,36 +406,89 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
 
  {/* Entries Table */}
  {entries.length > 0 ? (
- <div className="my-3 grid gap-1">
- {entries.map((entry) => (
- <div
- key={entry.id}
- className="flex items-center gap-2 rounded-md bg-muted px-4 py-2 text-sm"
- >
- <span className="min-w-[140px] font-bold">
- 🐴 {entry.horseName}
- </span>
- <span className="flex-1">{entry.className}</span>
- {entry.division && (
- <span className="rounded-full bg-purple-100/50 px-[8px] py-[2px] text-xs text-[#a78bfa]">
- {entry.division}
- </span>
- )}
- {entry.timeSlot && (
- <span className="text-muted-foreground text-xs">
- 🕐 {entry.timeSlot}
- </span>
- )}
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
- onClick={() => handleRemoveEntry(entry.id)}
- title="Remove"
- >
- ✕
- </button>
- </div>
- ))}
- </div>
+  <div className="my-3 grid gap-1">
+  {entries.map((entry) => (
+  <div key={entry.id}>
+  {editingEntryId === entry.id ? (
+  <div className="rounded-md border border-forest/30 bg-muted p-4">
+  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+  <div>
+  <label className="text-foreground mb-1 block text-xs font-semibold">Horse</label>
+  <select
+  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+  value={editEntryHorseId}
+  onChange={(e) => setEditEntryHorseId(e.target.value)}
+  title="Select horse"
+  >
+  {horses.map((h) => (
+  <option key={h.id} value={h.id}>{h.name}</option>
+  ))}
+  </select>
+  </div>
+  <div>
+  <label className="text-foreground mb-1 block text-xs font-semibold">Class *</label>
+  <Input value={editEntryClassName} onChange={(e) => setEditEntryClassName(e.target.value)} placeholder="e.g. Arabian Stallion" />
+  </div>
+  <div>
+  <label className="text-foreground mb-1 block text-xs font-semibold">Division</label>
+  <Input value={editEntryDivision} onChange={(e) => setEditEntryDivision(e.target.value)} placeholder="e.g. Breed" />
+  </div>
+  <div>
+  <label className="text-foreground mb-1 block text-xs font-semibold">Time Slot</label>
+  <Input value={editEntryTimeSlot} onChange={(e) => setEditEntryTimeSlot(e.target.value)} placeholder="e.g. 10:00 AM" />
+  </div>
+  </div>
+  <div className="mt-3 flex gap-2">
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+  onClick={handleSaveEntry}
+  disabled={saving || !editEntryClassName.trim()}
+  >
+  {saving ? "Saving..." : "Save"}
+  </button>
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  onClick={() => setEditingEntryId(null)}
+  >
+  Cancel
+  </button>
+  </div>
+  </div>
+  ) : (
+  <div className="flex items-center gap-2 rounded-md bg-muted px-4 py-2 text-sm">
+  <span className="min-w-[140px] font-bold">
+  🐴 {entry.horseName}
+  </span>
+  <span className="flex-1">{entry.className}</span>
+  {entry.division && (
+  <span className="rounded-full bg-purple-100/50 px-[8px] py-[2px] text-xs text-[#a78bfa]">
+  {entry.division}
+  </span>
+  )}
+  {entry.timeSlot && (
+  <span className="text-muted-foreground text-xs">
+  🕐 {entry.timeSlot}
+  </span>
+  )}
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent px-3 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  onClick={() => handleEditEntry(entry)}
+  title="Edit"
+  >
+  ✏️
+  </button>
+  <button
+  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent px-3 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  onClick={() => handleRemoveEntry(entry.id)}
+  title="Remove"
+  >
+  ✕
+  </button>
+  </div>
+  )}
+  </div>
+  ))}
+  </div>
  ) : (
  <p className="text-muted-foreground text-sm">
  No entries yet. Add horses below.

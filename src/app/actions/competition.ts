@@ -1029,3 +1029,97 @@ export async function duplicateShowString(
     revalidatePath("/shows/planner");
     return { success: true, newStringId: newId };
 }
+
+/** Update a show string's name, date, or notes */
+export async function updateShowString(
+    showStringId: string,
+    data: {
+        name?: string;
+        showDate?: string | null;
+        notes?: string | null;
+    }
+): Promise<{ success: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    // Verify ownership
+    const { data: existing } = await supabase
+        .from("show_strings")
+        .select("id")
+        .eq("id", showStringId)
+        .eq("user_id", user.id)
+        .single();
+
+    if (!existing) return { success: false, error: "Show string not found or not yours." };
+
+    const update: Record<string, unknown> = {};
+    if (data.name !== undefined) {
+        if (!data.name.trim()) return { success: false, error: "Show string name is required." };
+        update.name = data.name.trim();
+    }
+    if (data.showDate !== undefined) update.show_date = data.showDate || null;
+    if (data.notes !== undefined) update.notes = data.notes?.trim() || null;
+
+    if (Object.keys(update).length === 0) return { success: true };
+
+    const { error } = await supabase
+        .from("show_strings")
+        .update(update)
+        .eq("id", showStringId);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/shows/planner");
+    return { success: true };
+}
+
+/** Update a show string entry's horse, class, division, time slot, or notes */
+export async function updateShowStringEntry(
+    entryId: string,
+    data: {
+        horseId?: string;
+        className?: string;
+        classId?: string | null;
+        division?: string | null;
+        timeSlot?: string | null;
+        notes?: string | null;
+    }
+): Promise<{ success: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    // Verify the entry belongs to a show string owned by this user
+    const { data: entry } = await supabase
+        .from("show_string_entries")
+        .select("id, show_string_id, show_strings!inner(user_id)")
+        .eq("id", entryId)
+        .single();
+
+    if (!entry) return { success: false, error: "Entry not found." };
+    const entryData = entry as unknown as { id: string; show_string_id: string; show_strings: { user_id: string }[] | { user_id: string } };
+    const ownerUserId = Array.isArray(entryData.show_strings) ? entryData.show_strings[0]?.user_id : entryData.show_strings?.user_id;
+    if (ownerUserId !== user.id) {
+        return { success: false, error: "Not your show string." };
+    }
+
+    const update: Record<string, unknown> = {};
+    if (data.horseId !== undefined) update.horse_id = data.horseId;
+    if (data.className !== undefined) {
+        if (!data.className.trim()) return { success: false, error: "Class name is required." };
+        update.class_name = data.className.trim();
+    }
+    if (data.classId !== undefined) update.class_id = data.classId || null;
+    if (data.division !== undefined) update.division = data.division?.trim() || null;
+    if (data.timeSlot !== undefined) update.time_slot = data.timeSlot?.trim() || null;
+    if (data.notes !== undefined) update.notes = data.notes?.trim() || null;
+
+    if (Object.keys(update).length === 0) return { success: true };
+
+    const { error } = await supabase
+        .from("show_string_entries")
+        .update(update)
+        .eq("id", entryId);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/shows/planner");
+    return { success: true };
+}
