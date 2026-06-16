@@ -200,7 +200,8 @@ export async function compressImageWithWatermark(
         ctx.drawImage(img, 0, 0, width, height);
 
         // ── WATERMARK ──
-        const text = `© @${aliasName} — ModelHorseHub`;
+        const cleanAlias = aliasName.replace(/^@+/, "");
+        const text = `© @${cleanAlias} — ModelHorseHub`;
         const fontSize = Math.max(12, Math.floor(width * 0.02));
         ctx.font = `${fontSize}px Inter, sans-serif`;
         ctx.textAlign = "right";

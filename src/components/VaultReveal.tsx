@@ -3,11 +3,12 @@
 import { useState } from"react";
 
 interface VaultData {
- purchase_price: number | null;
- purchase_date: string | null;
- estimated_current_value: number | null;
- insurance_notes: string | null;
- purchase_date_text: string | null;
+  purchase_price: number | null;
+  purchase_date: string | null;
+  estimated_current_value: number | null;
+  insurance_notes: string | null;
+  purchase_date_text: string | null;
+  is_trade?: boolean | null;
 }
 
 interface VaultRevealProps {
@@ -40,7 +41,8 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  vault.purchase_date !== null ||
  vault.estimated_current_value !== null ||
  vault.insurance_notes !== null ||
- vault.purchase_date_text !== null);
+ vault.purchase_date_text !== null ||
+ vault.is_trade);
 
  return (
  <div
@@ -124,6 +126,17 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  </div>
  </div>
  )}
+
+ {vault.is_trade && (
+  <div className="border-input rounded-md border bg-card p-4">
+  <div className="text-secondary-foreground mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+  Acquisition Method
+  </div>
+  <div className="text-success text-base font-bold flex items-center gap-1.5">
+  🔄 Acquired via Trade
+  </div>
+  </div>
+  )}
 
  {vault.estimated_current_value !== null && (
  <div className="border-input rounded-md border bg-card p-4">

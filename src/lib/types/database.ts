@@ -88,6 +88,7 @@ export interface FinancialVault {
   estimated_current_value: number | null;
   insurance_notes: string | null;
   purchase_date_text: string | null;
+  is_trade: boolean;
 }
 
 export interface HorseImage {

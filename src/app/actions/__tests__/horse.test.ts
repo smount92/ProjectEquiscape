@@ -25,7 +25,7 @@ vi.mock("@/app/actions/activity", () => ({
     createActivityEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { createHorseRecord, deleteHorse, quickAddHorse } from "@/app/actions/horse";
+import { createHorseRecord, deleteHorse, quickAddHorse, updateHorseAction } from "@/app/actions/horse";
 
 describe("horse.ts — CRUD", () => {
     beforeEach(() => {
@@ -80,6 +80,41 @@ describe("horse.ts — CRUD", () => {
                 isPublic: true,
             });
             expect(sanitizeText).toHaveBeenCalledWith("  My Horse  ");
+        });
+
+        it("clears condition grade when life stage is in_progress", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: { id: "horse-1" },
+                error: null,
+            });
+            await createHorseRecord({
+                customName: "My WIP Horse",
+                finishType: "OF",
+                isPublic: true,
+                lifeStage: "in_progress",
+                conditionGrade: "Mint",
+            });
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
+                condition_grade: null,
+                life_stage: "in_progress",
+            }));
+        });
+    });
+
+    // ── updateHorseAction ──
+    describe("updateHorseAction", () => {
+        it("clears condition grade in horseUpdate when life stage is in_progress", async () => {
+            mockClient._setImplicitResolve({ data: {}, error: null });
+            await updateHorseAction("horse-1", {
+                horseUpdate: {
+                    life_stage: "in_progress",
+                    condition_grade: "Mint",
+                },
+            });
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(expect.objectContaining({
+                life_stage: "in_progress",
+                condition_grade: null,
+            }));
         });
     });
 

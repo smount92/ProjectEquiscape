@@ -655,6 +655,15 @@ export async function batchRecordResults(records: {
     className: string;
     placing: string | null;
     ribbonColor: string | null;
+    // Advanced fields
+    judgeName?: string | null;
+    isNan?: boolean | null;
+    notes?: string | null;
+    showLocation?: string | null;
+    sectionName?: string | null;
+    awardCategory?: string | null;
+    competitionLevel?: string | null;
+    showDateText?: string | null;
 }[]): Promise<{ success: boolean; error?: string; count?: number }> {
     const { supabase, user } = await requireAuth();
 
@@ -675,22 +684,55 @@ export async function batchRecordResults(records: {
         return { success: false, error: "No valid horses found." };
     }
 
-    const inserts = validRecords.map(r => ({
+    // Deduplication check: get existing records for these horses
+    const { data: existingRecords } = await supabase
+        .from("show_records")
+        .select("horse_id, show_name, class_name")
+        .eq("user_id", user.id)
+        .in("horse_id", horseIds);
+
+    const existingKeySet = new Set(
+        (existingRecords ?? []).map(
+            (er: { horse_id: string; show_name: string; class_name: string | null }) =>
+                `${er.horse_id}::${er.show_name}::${er.class_name ?? ""}`
+        )
+    );
+
+    // Filter out records that already exist
+    const newRecords = validRecords.filter(r => {
+        const key = `${r.horseId}::${r.showName}::${r.className || ""}`;
+        return !existingKeySet.has(key);
+    });
+
+    if (newRecords.length === 0) {
+        return { success: true, count: 0 }; // All records skipped as duplicates
+    }
+
+    const inserts = newRecords.map(r => ({
         horse_id: r.horseId,
         user_id: user.id,
         show_name: r.showName,
         show_date: r.showDate,
         division: r.division,
+        class_name: r.className || null,
         placing: r.placing,
         ribbon_color: r.ribbonColor,
         verification_tier: "self_reported",
+        judge_name: r.judgeName || null,
+        is_nan: !!r.isNan,
+        notes: r.notes || null,
+        show_location: r.showLocation || null,
+        section_name: r.sectionName || null,
+        award_category: r.awardCategory || null,
+        competition_level: r.competitionLevel || null,
+        show_date_text: r.showDateText || null,
     }));
 
     const { error } = await supabase.from("show_records").insert(inserts);
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/shows/planner");
-    return { success: true, count: validRecords.length };
+    return { success: true, count: newRecords.length };
 }
 
 /**

@@ -161,6 +161,14 @@ export default function AddHorsePage() {
  const [purchaseDate, setPurchaseDate] = useState("");
  const [estimatedValue, setEstimatedValue] = useState("");
  const [insuranceNotes, setInsuranceNotes] = useState("");
+ const [isTrade, setIsTrade] = useState(false);
+
+ useEffect(() => {
+   if (isTrade) {
+     setPurchasePrice("");
+     setEstimatedValue("");
+   }
+ }, [isTrade]);
  const [finishDetails, setFinishDetails] = useState("");
  const [publicNotes, setPublicNotes] = useState("");
  const [assignedBreed, setAssignedBreed] = useState("");
@@ -194,6 +202,13 @@ export default function AddHorsePage() {
  });
  // eslint-disable-next-line react-hooks/exhaustive-deps
  }, []);
+
+  // Clear condition grade if life stage changes to Work in Progress (in_progress)
+  useEffect(() => {
+    if (lifeStage === "in_progress") {
+      setConditionGrade("");
+    }
+  }, [lifeStage]);
 
  // Clean up preview URLs on unmount
  useEffect(() => {
@@ -370,9 +385,9 @@ export default function AddHorsePage() {
  const identityStepIdx = activeConfig.showReferenceStep ? 2 : 1;
 
  const canProceedStep = (step: number): boolean => {
-  if (step === identityStepIdx) {
-   return customName.trim().length > 0 && (isModel ? finishType !=="" && conditionGrade !=="" : true);
-  }
+   if (step === identityStepIdx) {
+    return customName.trim().length > 0 && (isModel ? finishType !=="" && (lifeStage === "in_progress" || conditionGrade !=="") : true);
+   }
   return true; // Gallery, Reference, and Vault are all optional
  };
 
@@ -388,7 +403,7 @@ export default function AddHorsePage() {
          if (currentStep === identityStepIdx) {
            if (!customName.trim()) errors.push("Custom Name");
            if (isModel && !finishType) errors.push("Finish Type");
-           if (isModel && !conditionGrade) errors.push("Condition Grade");
+           if (isModel && lifeStage !== "in_progress" && !conditionGrade) errors.push("Condition Grade");
          }
          setValidationErrors(errors);
          setShakeFields(true);
@@ -397,7 +412,7 @@ export default function AddHorsePage() {
            document.getElementById("custom-name")?.focus();
          } else if (isModel && !finishType) {
            document.getElementById("finish-type")?.focus();
-         } else if (isModel && !conditionGrade) {
+         } else if (isModel && lifeStage !== "in_progress" && !conditionGrade) {
            document.getElementById("condition-grade")?.focus();
          }
        }
@@ -453,6 +468,7 @@ export default function AddHorsePage() {
  purchaseDate: purchaseDate || undefined,
  estimatedValue: estimatedValue ? parseFloat(estimatedValue) : undefined,
  insuranceNotes: insuranceNotes.trim() || undefined,
+ isTrade,
  assetCategory,
  finishDetails: finishDetails.trim() || undefined,
  publicNotes: publicNotes.trim() || undefined,
@@ -650,7 +666,7 @@ export default function AddHorsePage() {
         const errors: string[] = [];
         if (!customName.trim()) errors.push("Custom Name");
         if (isModel && !finishType) errors.push("Finish Type");
-        if (isModel && !conditionGrade) errors.push("Condition Grade");
+        if (isModel && lifeStage !== "in_progress" && !conditionGrade) errors.push("Condition Grade");
         setValidationErrors(errors);
         setShakeFields(true);
         setTimeout(() => setShakeFields(false), 600);
@@ -1301,9 +1317,9 @@ export default function AddHorsePage() {
 
  {/* Condition Grade */}
  {isModel && (
- <div className="mb-6">
+ <div className={`mb-6 ${lifeStage === "in_progress" ? "opacity-40 pointer-events-none" : ""}`}>
  <label htmlFor="condition-grade" className="text-foreground mb-1 block text-sm font-semibold">
- Condition Grade *
+ Condition Grade {lifeStage !== "in_progress" && "*"}
  </label>
  <select
  id="condition-grade"
@@ -1317,6 +1333,7 @@ export default function AddHorsePage() {
  setConditionGrade(e.target.value);
  if (validationErrors.length > 0) setValidationErrors((prev) => prev.filter((f) => f !== "Condition Grade"));
  }}
+ disabled={lifeStage === "in_progress"}
  >
  <option value="">Select condition…</option>
  {CONDITION_GRADES.map((grade) => (
@@ -1325,6 +1342,11 @@ export default function AddHorsePage() {
  </option>
  ))}
  </select>
+ {lifeStage === "in_progress" && (
+   <p className="text-xs text-muted-foreground mt-1">
+     Condition grade is not applicable for Work in Progress horses.
+   </p>
+ )}
  </div>
  )}
 
@@ -1522,9 +1544,22 @@ export default function AddHorsePage() {
  </p>
  </div>
 
+ <div className="flex items-center gap-2 mb-6">
+   <input
+     id="is-trade"
+     type="checkbox"
+     className="h-4 w-4 rounded border-gray-300 text-forest focus:ring-forest accent-forest"
+     checked={isTrade}
+     onChange={(e) => setIsTrade(e.target.checked)}
+   />
+   <label htmlFor="is-trade" className="text-sm font-medium text-foreground cursor-pointer select-none">
+     Acquired via trade (no cash exchanged)
+   </label>
+ </div>
+
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
- <label htmlFor="purchase-price" className="text-foreground mb-1 block text-sm font-semibold">
+ <label htmlFor="purchase-price" className={`text-foreground mb-1 block text-sm font-semibold ${isTrade ? "opacity-50" : ""}`}>
  Purchase Price
  </label>
  <Input
@@ -1536,6 +1571,8 @@ export default function AddHorsePage() {
  step="0.01"
  value={purchasePrice}
  onChange={(e) => setPurchasePrice(e.target.value)}
+ disabled={isTrade}
+ className={isTrade ? "opacity-50 pointer-events-none" : ""}
  />
  </div>
 
@@ -1573,7 +1610,7 @@ export default function AddHorsePage() {
 
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
  <div className="mb-6">
- <label htmlFor="estimated-value" className="text-foreground mb-1 block text-sm font-semibold">
+ <label htmlFor="estimated-value" className={`text-foreground mb-1 block text-sm font-semibold ${isTrade ? "opacity-50" : ""}`}>
  Estimated Current Value
  </label>
  <Input
@@ -1585,6 +1622,8 @@ export default function AddHorsePage() {
  step="0.01"
  value={estimatedValue}
  onChange={(e) => setEstimatedValue(e.target.value)}
+ disabled={isTrade}
+ className={isTrade ? "opacity-50 pointer-events-none" : ""}
  />
  </div>
 

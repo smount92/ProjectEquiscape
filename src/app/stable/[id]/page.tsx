@@ -25,6 +25,7 @@ interface VaultData {
  estimated_current_value: number | null;
  insurance_notes: string | null;
  purchase_date_text: string | null;
+ is_trade: boolean | null;
 }
 
 const ANGLE_LABELS: Record<string, string> = {
@@ -141,7 +142,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  // Fetch financial vault (owner-only via RLS)
  const { data: rawVault } = await supabase
  .from("financial_vault")
- .select("purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text")
+ .select("purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade")
  .eq("horse_id", horseId)
  .single<VaultData>();
 

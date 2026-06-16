@@ -42,11 +42,17 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  const [saving, setSaving] = useState(false);
  const [error, setError] = useState("");
 
- // Batch results state
- const [showResults, setShowResults] = useState(false);
- const [results, setResults] = useState<Record<string, { placing: string; ribbon: string }>>({});
- const [savingResults, setSavingResults] = useState(false);
- const [resultsSaved, setResultsSaved] = useState(false);
+  // Batch results state
+  const [showResults, setShowResults] = useState(false);
+  const [results, setResults] = useState<Record<string, { placing: string; ribbon: string; awardCategory?: string; level?: string; notes?: string; isNan?: boolean }>>({});
+  const [savingResults, setSavingResults] = useState(false);
+  const [resultsSaved, setResultsSaved] = useState(false);
+
+  // Advanced fields state
+  const [showLocation, setShowLocation] = useState("");
+  const [judgeName, setJudgeName] = useState("");
+  const [showDateText, setShowDateText] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
  // Edit show string state
  const [editingStringId, setEditingStringId] = useState<string | null>(null);
@@ -576,10 +582,10 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  // Initialize results map
  const init: Record<
  string,
- { placing: string; ribbon: string }
+ { placing: string; ribbon: string; awardCategory: string; level: string; notes: string; isNan: boolean }
  > = {};
  entries.forEach((e) => {
- init[e.id] = { placing:"", ribbon:"" };
+ init[e.id] = { placing: "", ribbon: "", awardCategory: "", level: "", notes: "", isNan: false };
  });
  setResults(init);
  }}
@@ -593,6 +599,35 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  Tab through to enter placing and ribbon for each entry.
  Results will be saved as show records.
  </p>
+
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-4">
+    <div>
+      <label className="text-foreground mb-1 block text-xs font-semibold">Show Location</label>
+      <Input value={showLocation} onChange={(e) => setShowLocation(e.target.value)} placeholder="e.g. Lexington, KY" />
+    </div>
+    <div>
+      <label className="text-foreground mb-1 block text-xs font-semibold">Judge Name</label>
+      <Input value={judgeName} onChange={(e) => setJudgeName(e.target.value)} placeholder="e.g. Jane Doe" />
+    </div>
+    <div>
+      <label className="text-foreground mb-1 block text-xs font-semibold">Approximate Date</label>
+      <Input value={showDateText} onChange={(e) => setShowDateText(e.target.value)} placeholder="e.g. Summer 2026" />
+    </div>
+  </div>
+
+  <div className="flex items-center gap-2 mb-4">
+    <input
+      id="show-advanced-toggle"
+      type="checkbox"
+      className="h-4 w-4 rounded border-gray-300 text-forest focus:ring-forest accent-forest"
+      checked={showAdvanced}
+      onChange={(e) => setShowAdvanced(e.target.checked)}
+    />
+    <label htmlFor="show-advanced-toggle" className="text-sm font-semibold text-foreground cursor-pointer select-none">
+      Show Advanced Fields for entries
+    </label>
+  </div>
+
  <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
  <table className="sticky top-0 min-w-[560px] bg-[var(--color-surface-secondary)] font-semibold">
  <thead>
@@ -601,6 +636,14 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <th>Class</th>
  <th className="w-[100]">Placing</th>
  <th className="w-[120]">Ribbon</th>
+ {showAdvanced && (
+    <>
+      <th className="w-[120]">Award Category</th>
+      <th className="w-[100]">Level</th>
+      <th className="w-[150]">Notes</th>
+      <th className="w-[60] text-center">NAN</th>
+    </>
+  )}
  </tr>
  </thead>
  <tbody>
@@ -675,6 +718,74 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  </option>
  </select>
  </td>
+ {showAdvanced && (
+    <>
+      <td>
+        <input
+          type="text"
+          placeholder="e.g. Champ"
+          value={results[entry.id]?.awardCategory || ""}
+          onChange={(e) =>
+            setResults((prev) => ({
+              ...prev,
+              [entry.id]: {
+                ...prev[entry.id],
+                awardCategory: e.target.value,
+              },
+            }))
+          }
+        />
+      </td>
+      <td>
+        <input
+          type="text"
+          placeholder="e.g. Open"
+          value={results[entry.id]?.level || ""}
+          onChange={(e) =>
+            setResults((prev) => ({
+              ...prev,
+              [entry.id]: {
+                ...prev[entry.id],
+                level: e.target.value,
+              },
+            }))
+          }
+        />
+      </td>
+      <td>
+        <input
+          type="text"
+          placeholder="e.g. Large class"
+          value={results[entry.id]?.notes || ""}
+          onChange={(e) =>
+            setResults((prev) => ({
+              ...prev,
+              [entry.id]: {
+                ...prev[entry.id],
+                notes: e.target.value,
+              },
+            }))
+          }
+        />
+      </td>
+      <td className="text-center">
+        <input
+          type="checkbox"
+          checked={!!results[entry.id]?.isNan}
+          onChange={(e) =>
+            setResults((prev) => ({
+              ...prev,
+              [entry.id]: {
+                ...prev[entry.id],
+                isNan: e.target.checked,
+              },
+            }))
+          }
+          className="h-4 w-4 rounded border-gray-300 text-forest focus:ring-forest accent-forest"
+        />
+      </td>
+    </>
+  )}
  </tr>
  ))}
  </tbody>
@@ -741,22 +852,31 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  (s) => s.id === activeStringId,
  );
  const records = entries
- .filter(
- (e) =>
- results[e.id]?.placing ||
- results[e.id]?.ribbon,
- )
- .map((e) => ({
- horseId: e.horseId,
- showName:
- activeStr?.name ||"Unknown Show",
- showDate: activeStr?.showDate || null,
- division: e.division || null,
- className: e.className,
- placing: results[e.id]?.placing || null,
- ribbonColor:
- results[e.id]?.ribbon || null,
- }));
+  .filter(
+    (e) =>
+      results[e.id]?.placing ||
+      results[e.id]?.ribbon ||
+      results[e.id]?.awardCategory ||
+      results[e.id]?.level ||
+      results[e.id]?.notes ||
+      results[e.id]?.isNan
+  )
+  .map((e) => ({
+    horseId: e.horseId,
+    showName: activeStr?.name || "Unknown Show",
+    showDate: activeStr?.showDate || null,
+    division: e.division || null,
+    className: e.className,
+    placing: results[e.id]?.placing || null,
+    ribbonColor: results[e.id]?.ribbon || null,
+    showLocation: showLocation || null,
+    judgeName: judgeName || null,
+    showDateText: showDateText || null,
+    awardCategory: results[e.id]?.awardCategory || null,
+    competitionLevel: results[e.id]?.level || null,
+    notes: results[e.id]?.notes || null,
+    isNan: !!results[e.id]?.isNan,
+  }));
  if (records.length > 0) {
  await batchRecordResults(records);
  }
@@ -767,7 +887,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  >
  {savingResults
  ?"Saving..."
- : `💾 Save ${Object.values(results).filter((r) => r.placing || r.ribbon).length} Results`}
+ : `💾 Save ${Object.values(results).filter((r) => r.placing || r.ribbon || r.awardCategory || r.level || r.notes || r.isNan).length} Results`}
  </button>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
@@ -776,10 +896,10 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  Cancel
  </button>
  {resultsSaved && (
- <span className="text-forest font-semibold">
- ✅ Saved!
- </span>
- )}
+  <span className="text-forest font-semibold">
+    ✅ Results saved. Re-saving will skip already-recorded entries.
+  </span>
+)}
  </div>
  </div>
  )}

@@ -184,16 +184,28 @@ export async function updateHorseAction(horseId: string, data: {
         ];
         const VAULT_ALLOWED = [
             'purchase_price', 'purchase_date', 'estimated_current_value',
-            'insurance_notes', 'horse_id', 'purchase_date_text',
+            'insurance_notes', 'horse_id', 'purchase_date_text', 'is_trade',
         ];
 
         const horseUpdate = data.horseUpdate
             ? Object.fromEntries(Object.entries(data.horseUpdate).filter(([k]) => HORSE_ALLOWED.includes(k)))
             : null;
 
+        if (horseUpdate) {
+            // Guard: condition_grade should be null if life_stage is WIP (in_progress)
+            if (horseUpdate.life_stage === "in_progress") {
+                horseUpdate.condition_grade = null;
+            }
+        }
+
         const vaultData = data.vaultData
             ? Object.fromEntries(Object.entries(data.vaultData).filter(([k]) => VAULT_ALLOWED.includes(k)))
             : null;
+
+        if (vaultData && vaultData.is_trade) {
+            vaultData.purchase_price = null;
+            vaultData.estimated_current_value = null;
+        }
 
         if (horseUpdate) {
             // ── Bait & Switch detection: log catalog_id changes ──
@@ -303,6 +315,7 @@ export async function createHorseRecord(data: {
     assignedAge?: string;
     regionalId?: string;
     purchaseDateText?: string;
+    isTrade?: boolean;
     attributes?: Record<string, unknown>;
 }): Promise<{ success: boolean; horseId?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
@@ -317,12 +330,13 @@ export async function createHorseRecord(data: {
         return { success: false, error: "Finish type is required for model horses." };
     }
 
+    const isModel = category === 'model';
     const horseInsert: UserHorseInsert = {
         owner_id: user.id,
         custom_name: sanitizeText(data.customName),
         asset_category: category,
         finish_type: (data.finishType || null) as UserHorseInsert["finish_type"],
-        condition_grade: data.conditionGrade || null,
+        condition_grade: isModel && data.lifeStage !== "in_progress" ? data.conditionGrade || null : null,
         is_public: data.isPublic,
         visibility: data.isPublic ? "public" : "private",
         trade_status: (data.tradeStatus || null) as UserHorseInsert["trade_status"],
@@ -362,12 +376,18 @@ export async function createHorseRecord(data: {
     if (error || !horse) return { success: false, error: error?.message || "Failed to save horse." };
 
     // Insert financial vault if any data provided
-    const hasVault = data.purchasePrice || data.purchaseDate || data.estimatedValue || data.insuranceNotes || data.purchaseDateText;
+    const hasVault = data.purchasePrice || data.purchaseDate || data.estimatedValue || data.insuranceNotes || data.purchaseDateText || data.isTrade;
     if (hasVault) {
         const vaultInsert: FinancialVaultInsert = { horse_id: horse.id };
-        if (data.purchasePrice) vaultInsert.purchase_price = data.purchasePrice;
+        vaultInsert.is_trade = !!data.isTrade;
+        if (data.isTrade) {
+            vaultInsert.purchase_price = null;
+            vaultInsert.estimated_current_value = null;
+        } else {
+            if (data.purchasePrice) vaultInsert.purchase_price = data.purchasePrice;
+            if (data.estimatedValue) vaultInsert.estimated_current_value = data.estimatedValue;
+        }
         if (data.purchaseDate) vaultInsert.purchase_date = data.purchaseDate;
-        if (data.estimatedValue) vaultInsert.estimated_current_value = data.estimatedValue;
         if (data.insuranceNotes) vaultInsert.insurance_notes = data.insuranceNotes;
         if (data.purchaseDateText) vaultInsert.purchase_date_text = data.purchaseDateText.trim();
         await supabase.from("financial_vault").insert(vaultInsert);

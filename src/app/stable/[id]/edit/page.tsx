@@ -33,6 +33,7 @@ interface VaultData {
  estimated_current_value: number | null;
  insurance_notes: string | null;
  purchase_date_text: string | null;
+ is_trade: boolean | null;
 }
 
 const PHOTO_STUDIO_SLOTS: { angle: AngleProfile; label: string; primary?: boolean }[] = [
@@ -123,6 +124,7 @@ export default function EditHorsePage() {
  const [purchaseDate, setPurchaseDate] = useState("");
  const [estimatedValue, setEstimatedValue] = useState("");
  const [insuranceNotes, setInsuranceNotes] = useState("");
+ const [isTrade, setIsTrade] = useState(false);
  const [hasExistingVault, setHasExistingVault] = useState(false);
  const [finishDetails, setFinishDetails] = useState("");
  const [publicNotes, setPublicNotes] = useState("");
@@ -131,6 +133,13 @@ export default function EditHorsePage() {
  const [assignedAge, setAssignedAge] = useState("");
  const [regionalId, setRegionalId] = useState("");
  const [purchaseDateText, setPurchaseDateText] = useState("");
+
+ useEffect(() => {
+    if (isTrade) {
+      setPurchasePrice("");
+      setEstimatedValue("");
+    }
+  }, [isTrade]);
 
  // Multi-angle image management
  const [existingImages, setExistingImages] = useState<Partial<Record<AngleProfile, ExistingImage>>>({});
@@ -292,12 +301,13 @@ export default function EditHorsePage() {
 
  const { data: vault } = await supabase
  .from("financial_vault")
- .select("purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text")
+ .select("purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade")
  .eq("horse_id", horseId)
  .single<VaultData>();
 
  if (vault) {
  setHasExistingVault(true);
+ setIsTrade(!!vault.is_trade);
  if (vault.purchase_price !== null) setPurchasePrice(String(vault.purchase_price));
  if (vault.purchase_date !== null) setPurchaseDate(vault.purchase_date);
  if (vault.estimated_current_value !== null) setEstimatedValue(String(vault.estimated_current_value));
@@ -344,15 +354,22 @@ export default function EditHorsePage() {
  }
 
  loadHorse();
- // Fetch watermark preference
- getProfile().then((profile) => {
- if (profile) {
- setWatermarkEnabled(profile.watermarkPhotos);
- setUserAlias(profile.aliasName);
- }
- });
- // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [horseId]);
+  // Fetch watermark preference
+  getProfile().then((profile) => {
+    if (profile) {
+      setWatermarkEnabled(profile.watermarkPhotos);
+      setUserAlias(profile.aliasName);
+    }
+  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [horseId]);
+
+  // Clear condition grade if life stage changes to Work in Progress (in_progress)
+  useEffect(() => {
+    if (lifeStage === "in_progress") {
+      setConditionGrade("");
+    }
+  }, [lifeStage]);
 
  // ---- Photo Studio handlers ----
  const handleSlotSelect = (angle: AngleProfile, file: File) => {
@@ -468,10 +485,10 @@ export default function EditHorsePage() {
  setSaveError("Please enter a name.");
  return;
  }
- if (isModel && (!finishType || !conditionGrade)) {
- setSaveError("Please fill in all required identity fields.");
- return;
- }
+  if (isModel && (!finishType || (lifeStage !== "in_progress" && !conditionGrade))) {
+  setSaveError("Please fill in all required identity fields.");
+  return;
+  }
 
  setIsSaving(true);
  setSaveError(null);
@@ -521,7 +538,7 @@ export default function EditHorsePage() {
  horseUpdate.attributes = {};
  }
 
- const hasVaultData = purchasePrice || purchaseDate || estimatedValue || insuranceNotes || purchaseDateText;
+ const hasVaultData = purchasePrice || purchaseDate || estimatedValue || insuranceNotes || purchaseDateText || isTrade;
  const vaultData: Record<string, unknown> | null = hasVaultData
  ? {
  purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
@@ -529,6 +546,7 @@ export default function EditHorsePage() {
  estimated_current_value: estimatedValue ? parseFloat(estimatedValue) : null,
  insurance_notes: insuranceNotes || null,
  purchase_date_text: purchaseDateText.trim() || null,
+ is_trade: isTrade,
  }
  : null;
 
@@ -1233,23 +1251,29 @@ export default function EditHorsePage() {
  </select>
  </div>
 
- <div className="mb-6">
- <label htmlFor="edit-condition" className="text-foreground mb-1 block text-sm font-semibold">
- Condition Grade *
- </label>
- <select
- id="edit-condition"
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
- value={conditionGrade}
- onChange={(e) => setConditionGrade(e.target.value)}
- >
- <option value="">Select condition…</option>
- {CONDITION_GRADES.map((g) => (
- <option key={g.value} value={g.value}>
- {g.label}
- </option>
- ))}
- </select>
+ <div className={`mb-6 ${lifeStage === "in_progress" ? "opacity-40 pointer-events-none" : ""}`}>
+  <label htmlFor="edit-condition" className="text-foreground mb-1 block text-sm font-semibold">
+  Condition Grade {lifeStage !== "in_progress" && "*"}
+  </label>
+  <select
+  id="edit-condition"
+  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+  value={conditionGrade}
+  onChange={(e) => setConditionGrade(e.target.value)}
+  disabled={lifeStage === "in_progress"}
+  >
+  <option value="">Select condition…</option>
+  {CONDITION_GRADES.map((g) => (
+  <option key={g.value} value={g.value}>
+  {g.label}
+  </option>
+  ))}
+  </select>
+  {lifeStage === "in_progress" && (
+    <p className="text-xs text-muted-foreground mt-1">
+      Condition grade is not applicable for Work in Progress horses.
+    </p>
+  )}
 
  {/* Condition Change Note - shows when condition was changed */}
  {originalCondition && conditionGrade && conditionGrade !== originalCondition && (
@@ -1469,22 +1493,37 @@ export default function EditHorsePage() {
  </p>
  </div>
 
+  <div className="flex items-center gap-2 mb-6">
+    <input
+      id="is-trade"
+      type="checkbox"
+      className="h-4 w-4 rounded border-gray-300 text-forest focus:ring-forest accent-forest"
+      checked={isTrade}
+      onChange={(e) => setIsTrade(e.target.checked)}
+    />
+    <label htmlFor="is-trade" className="text-sm font-medium text-foreground cursor-pointer select-none">
+      Acquired via trade (no cash exchanged)
+    </label>
+  </div>
+
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
- <div className="mb-6">
- <label htmlFor="edit-price" className="text-foreground mb-1 block text-sm font-semibold">
- Purchase Price
- </label>
- <Input
- id="edit-price"
- type="number"
- 
- placeholder="0.00"
- min="0"
- step="0.01"
- value={purchasePrice}
- onChange={(e) => setPurchasePrice(e.target.value)}
- />
- </div>
+  <div className="mb-6">
+  <label htmlFor="edit-price" className={`text-foreground mb-1 block text-sm font-semibold ${isTrade ? "opacity-50" : ""}`}>
+  Purchase Price
+  </label>
+  <Input
+  id="edit-price"
+  type="number"
+  
+  placeholder="0.00"
+  min="0"
+  step="0.01"
+  value={purchasePrice}
+  onChange={(e) => setPurchasePrice(e.target.value)}
+  disabled={isTrade}
+  className={isTrade ? "opacity-50 pointer-events-none" : ""}
+  />
+  </div>
  <div className="mb-6">
  <label htmlFor="edit-date" className="text-foreground mb-1 block text-sm font-semibold">
  Purchase Date
@@ -1516,21 +1555,23 @@ export default function EditHorsePage() {
  </div>
 
  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
- <div className="mb-6">
- <label htmlFor="edit-value" className="text-foreground mb-1 block text-sm font-semibold">
- Estimated Current Value
- </label>
- <Input
- id="edit-value"
- type="number"
- 
- placeholder="0.00"
- min="0"
- step="0.01"
- value={estimatedValue}
- onChange={(e) => setEstimatedValue(e.target.value)}
- />
- </div>
+  <div className="mb-6">
+  <label htmlFor="edit-value" className={`text-foreground mb-1 block text-sm font-semibold ${isTrade ? "opacity-50" : ""}`}>
+  Estimated Current Value
+  </label>
+  <Input
+  id="edit-value"
+  type="number"
+  
+  placeholder="0.00"
+  min="0"
+  step="0.01"
+  value={estimatedValue}
+  onChange={(e) => setEstimatedValue(e.target.value)}
+  disabled={isTrade}
+  className={isTrade ? "opacity-50 pointer-events-none" : ""}
+  />
+  </div>
  <div className="mb-6">
  <label htmlFor="edit-insurance" className="text-foreground mb-1 block text-sm font-semibold">
  Insurance Notes
@@ -1559,7 +1600,7 @@ export default function EditHorsePage() {
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleSave}
- disabled={isSaving || !customName.trim() || (isModel && (!finishType || !conditionGrade))}
+ disabled={isSaving || !customName.trim() || (isModel && (!finishType || (lifeStage !== "in_progress" && !conditionGrade)))}
  id="edit-save"
  >
  {isSaving ? (

@@ -1452,6 +1452,7 @@ export type Database = {
           horse_id: string
           id: string
           insurance_notes: string | null
+          is_trade: boolean
           purchase_date: string | null
           purchase_date_text: string | null
           purchase_price: number | null
@@ -1461,6 +1462,7 @@ export type Database = {
           horse_id: string
           id?: string
           insurance_notes?: string | null
+          is_trade?: boolean
           purchase_date?: string | null
           purchase_date_text?: string | null
           purchase_price?: number | null
@@ -1470,6 +1472,7 @@ export type Database = {
           horse_id?: string
           id?: string
           insurance_notes?: string | null
+          is_trade?: boolean
           purchase_date?: string | null
           purchase_date_text?: string | null
           purchase_price?: number | null
