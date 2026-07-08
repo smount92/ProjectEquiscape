@@ -51,5 +51,12 @@ public/sw.js.map
 # Supabase CLI temp files
 supabase/.temp/
 supabase_schema_dump.sql
-test-results/  
-playwright-report/  
+test-results/
+playwright-report/
+
+# Generated analysis artifacts — never commit
+repomix*.xml
+lint_results.txt
+
+# Obsidian vault config (repo lives inside an Obsidian vault)
+.obsidian/  
