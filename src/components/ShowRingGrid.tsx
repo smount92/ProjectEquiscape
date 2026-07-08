@@ -348,7 +348,7 @@ export default function ShowRingGrid({
         <div className="mt-3 flex items-center justify-between border-t border-input px-1 pt-2.5 text-xs">
          <Link
           href={`/profile/${encodeURIComponent(horse.ownerAlias)}`}
-          className="flex items-center gap-1 truncate text-[var(--color-accent-primary)] no-underline hover:underline"
+          className="flex items-center gap-1 truncate text-[var(--primary)] no-underline hover:underline"
          >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />

@@ -43,7 +43,7 @@ export default function VoteButton({ entryId, initialVotes, initialHasVoted, dis
  <span className="font-semibold">{votes}</span>
  </button>
  {error && (
- <span className="max-w-[100px] text-center text-[0.625rem] leading-tight text-[var(--color-error,#ef4444)]">
+ <span className="max-w-[100px] text-center text-[0.625rem] leading-tight text-[var(--destructive)]">
  {error}
  </span>
  )}

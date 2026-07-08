@@ -267,11 +267,11 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
     <div className="font-semibold text-foreground">
      {horse.customName}
     </div>
-    <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)]">
+    <div className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-[var(--secondary-foreground)]">
      {horse.refName}
     </div>
     {horse.releaseLine && (
-     <div className="mt-[2px] overflow-hidden text-xs text-ellipsis whitespace-nowrap text-[var(--color-text-secondary)] opacity-70">
+     <div className="mt-[2px] overflow-hidden text-xs text-ellipsis whitespace-nowrap text-[var(--secondary-foreground)] opacity-70">
      🎨 {horse.releaseLine}
      </div>
     )}

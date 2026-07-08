@@ -94,7 +94,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  className="bg-muted border-input flex items-center gap-6 rounded-lg border p-6 transition-colors"
  >
  <div className="bg-muted border-input transition-colors-date flex items-center gap-6 rounded-lg border p-6">
- <span className="text-xs font-bold tracking-[0.05em] text-[#2C5545] uppercase">
+ <span className="text-xs font-bold tracking-[0.05em] text-forest uppercase">
  {month}
  </span>
  <span className="text-foreground text-xl leading-none font-extrabold">

@@ -102,7 +102,7 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
  {!showRejectForm && (
  <input
  type="text"
- className="input bg-yellow-50/50 rounded-r-md my-3-input border-l-[3px] border-[#f9a825] px-4 py-2"
+ className="input bg-yellow-50/50 rounded-r-md my-3-input border-l-[3px] border-tier-gold px-4 py-2"
  placeholder="Optional admin notes…"
  value={notes}
  onChange={(e) => setNotes(e.target.value)}

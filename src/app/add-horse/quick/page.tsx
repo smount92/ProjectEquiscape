@@ -174,7 +174,7 @@ export default function QuickAddPage() {
  <div>
  <label className="text-foreground mb-1 block text-sm font-semibold">Finish</label>
  <select
- className="flex h-9 w-full rounded-md border border-input bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={finishType}
  onChange={(e) => setFinishType(e.target.value)}
  id="quick-finish"
@@ -190,7 +190,7 @@ export default function QuickAddPage() {
  <div>
  <label className="text-foreground mb-1 block text-sm font-semibold">Condition</label>
  <select
- className="flex h-9 w-full rounded-md border border-input bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={conditionGrade}
  onChange={(e) => setConditionGrade(e.target.value)}
  id="quick-condition"
@@ -206,7 +206,7 @@ export default function QuickAddPage() {
  <div>
  <label className="text-foreground mb-1 block text-sm font-semibold">Collection</label>
  <select
- className="flex h-9 w-full rounded-md border border-input bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ className="flex h-9 w-full rounded-md border border-input bg-card px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={collectionId}
  onChange={(e) => setCollectionId(e.target.value)}
  id="quick-collection"

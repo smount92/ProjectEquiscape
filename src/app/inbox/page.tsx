@@ -250,7 +250,7 @@ export default async function InboxPage() {
       className={
        item.horseTradeStatus ==="For Sale"
        ?"rounded-full bg-emerald-100 px-1.5 py-[1px] text-[0.65rem] font-bold text-[#22c55e]"
-       :"rounded-full bg-blue-50 px-1.5 py-[1px] text-[0.65rem] font-bold text-[#3b82f6]"
+       :"rounded-full bg-blue-50 px-1.5 py-[1px] text-[0.65rem] font-bold text-info"
       }
       >
       {item.horseTradeStatus ==="For Sale" ?"💲 For Sale" :"🤝 Offers"}

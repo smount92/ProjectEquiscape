@@ -54,7 +54,7 @@ export default function MessageSellerButton({
  return (
  <>
  <button
- className="bg-emerald-50 border-emerald-300 flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border p-0 text-[#2C5545] transition-all"
+ className="bg-emerald-50 border-emerald-300 flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border p-0 text-forest transition-all"
  onClick={handleClick}
  disabled={loading}
  title={isOfferable ?"Make Offer" :"Message Seller"}

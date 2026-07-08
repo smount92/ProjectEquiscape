@@ -629,7 +629,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
   </div>
 
  <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
- <table className="sticky top-0 min-w-[560px] bg-[var(--color-surface-secondary)] font-semibold">
+ <table className="sticky top-0 min-w-[560px] bg-[var(--secondary)] font-semibold">
  <thead>
  <tr>
  <th>Horse</th>

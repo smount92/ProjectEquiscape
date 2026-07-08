@@ -270,7 +270,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  )
  )}
  <div
- className={`max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] bg-[#2C5545] text-white" : "border-input rounded-bl-[4px] border bg-card text-foreground"}`}
+ className={`max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm max-md:max-w-[85%] ${msg.isMe ? "rounded-br-[4px] bg-forest text-white" : "border-input rounded-bl-[4px] border bg-card text-foreground"}`}
  >
  <div className="break-words whitespace-pre-wrap">{msg.content}</div>
 
@@ -339,7 +339,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
 
  {/* Pending file preview strip */}
  {pendingFiles.length > 0 && (
- <div className="mx-4 mb-2 flex items-center gap-2 overflow-x-auto rounded-lg border border-[#E0D5C1] bg-[#F4EFE6] p-2">
+ <div className="mx-4 mb-2 flex items-center gap-2 overflow-x-auto rounded-lg border border-border bg-background p-2">
  {pendingFiles.map((file, i) => (
  <div key={i} className="relative shrink-0">
  {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -376,7 +376,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  <div className="flex items-end gap-2">
  {/* Attach photo button */}
  <label
- className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#E0D5C1] bg-[#FEFCF8] text-muted-foreground transition-all hover:bg-[#F4EFE6] hover:text-foreground"
+ className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:bg-background hover:text-foreground"
  title="Attach photo"
  >
  <input

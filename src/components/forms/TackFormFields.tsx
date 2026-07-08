@@ -26,7 +26,7 @@ export default function TackFormFields({
   workingParts, setWorkingParts,
 }: TackFormFieldsProps) {
   return (
-    <div className="mt-4 space-y-4 rounded-lg border border-[#E0D5C1] bg-[#FEFCF8] p-4">
+    <div className="mt-4 space-y-4 rounded-lg border border-border bg-card p-4">
       <h4 className="text-sm font-semibold text-foreground">🏇 Tack Details</h4>
 
       <div>
@@ -35,7 +35,7 @@ export default function TackFormFields({
         </label>
         <select
           id="tack-type"
-          className="flex h-9 w-full rounded-md border border-[#E0D5C1] bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="flex h-9 w-full rounded-md border border-border bg-card px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           value={tackType}
           onChange={(e) => setTackType(e.target.value)}
         >
@@ -52,7 +52,7 @@ export default function TackFormFields({
         </label>
         <select
           id="tack-discipline"
-          className="flex h-9 w-full rounded-md border border-[#E0D5C1] bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="flex h-9 w-full rounded-md border border-border bg-card px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           value={discipline}
           onChange={(e) => setDiscipline(e.target.value)}
         >

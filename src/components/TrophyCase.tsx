@@ -35,13 +35,13 @@ function formatDate(dateStr: string): string {
 function getTierClasses(tier: number): string {
  switch (tier) {
  case 1:
- return"border-[#cd7f32] hover:shadow-[0_0_12px_rgba(205,127,50,0.3)]";
+ return"border-tier-bronze hover:shadow-[0_0_12px_rgba(205,127,50,0.3)]";
  case 2:
- return"border-[#c0c0c0] hover:shadow-[0_0_12px_rgba(192,192,192,0.4)]";
+ return"border-tier-silver hover:shadow-[0_0_12px_rgba(192,192,192,0.4)]";
  case 3:
  return"border-[#ffd700] hover:shadow-[0_0_16px_rgba(255,215,0,0.4)]";
  case 4:
- return"border-[#b9f2ff] hover:shadow-[0_0_20px_rgba(185,242,255,0.5)]";
+ return"border-tier-diamond hover:shadow-[0_0_20px_rgba(185,242,255,0.5)]";
  case 5:
  return"border-forest bg-muted/80 hover:shadow-[0_0_24px_rgba(212,165,116,0.5)]";
  default:
@@ -96,7 +96,7 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
  {formatDate(badge.earnedAt)}
  </span>
  {hoveredBadge === badge.id && (
- <div className="border-input [&_p]:text-secondary-foreground [&>span]:text-muted-foreground pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border bg-[var(--color-bg-muted)] px-4 py-2 text-left shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
+ <div className="border-input [&_p]:text-secondary-foreground [&>span]:text-muted-foreground pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border bg-[var(--muted)] px-4 py-2 text-left shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
  <strong>{badge.name}</strong>
  <p>{badge.description}</p>
  <span>Earned {formatDate(badge.earnedAt)}</span>

@@ -76,7 +76,7 @@ export default function MatchmakerMatches({
  </Link>
  <div className="mt-[2px] flex items-center gap-2">
  <span
- className={`rounded-full px-2 py-[2px] text-xs font-bold ${match.trade_status ==="For Sale" ?"bg-emerald-100 text-[#22c55e]" :"bg-blue-50 text-[#3b82f6]"}`}
+ className={`rounded-full px-2 py-[2px] text-xs font-bold ${match.trade_status ==="For Sale" ?"bg-emerald-100 text-[#22c55e]" :"bg-blue-50 text-info"}`}
  >
  {match.trade_status ==="For Sale" ?"💲" :"🤝"}{""}
  {match.listing_price

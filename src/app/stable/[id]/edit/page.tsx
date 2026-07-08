@@ -709,7 +709,7 @@ export default function EditHorsePage() {
  className="mx-auto max-w-[680px] px-0 py-12 text-center"
  >
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[color:var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[color:var(--primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  />
  <p>Loading horse details…</p>
  </div>
@@ -797,7 +797,7 @@ export default function EditHorsePage() {
  <div className="text-foreground mb-1 flex items-center gap-1 text-sm font-semibold">
  {slot.label}
  {slot.primary && (
- <span className="bg-emerald-50 rounded-full px-[8px] py-[2px] text-xs font-bold text-[#2C5545]">
+ <span className="bg-emerald-50 rounded-full px-[8px] py-[2px] text-xs font-bold text-forest">
  Required
  </span>
  )}
@@ -1278,7 +1278,7 @@ export default function EditHorsePage() {
  {/* Condition Change Note - shows when condition was changed */}
  {originalCondition && conditionGrade && conditionGrade !== originalCondition && (
  <div className="condition-change-note animate-fade-in-up mt-2">
- <div className="mb-1 text-xs font-semibold text-[var(--color-accent-warning,#f59e0b)]">
+ <div className="mb-1 text-xs font-semibold text-[var(--color-warning)]">
  📝 Condition changed: {originalCondition} → {conditionGrade}
  </div>
  <Textarea

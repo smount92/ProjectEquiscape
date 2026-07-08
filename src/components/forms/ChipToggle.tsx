@@ -43,7 +43,7 @@ export default function ChipToggle({ label, options, selected, onChange, id }: C
               className={`min-h-[44px] min-w-[44px] cursor-pointer rounded-lg border-2 px-3 py-2 text-sm font-medium transition-all sm:min-h-0 sm:min-w-0 ${
                 isSelected
                   ? "border-forest bg-forest/5 font-semibold text-forest"
-                  : "border-[#E0D5C1] bg-[#FEFCF8] text-secondary-foreground hover:border-stone-400"
+                  : "border-border bg-card text-secondary-foreground hover:border-stone-400"
               }`}
               onClick={() => toggle(option)}
               onKeyDown={(e) => {

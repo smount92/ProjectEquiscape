@@ -240,7 +240,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  <div className="flex min-w-0 flex-1 flex-col">
  <div className="flex items-center gap-2">
  <Link href={`/profile/${encodeURIComponent(otherAlias)}`}>@{otherAlias}</Link>
- <span className="bg-emerald-50 rounded-full px-[8px] py-[2px] text-xs font-medium text-[#2C5545]">
+ <span className="bg-emerald-50 rounded-full px-[8px] py-[2px] text-xs font-medium text-forest">
  {isBuyer ?"Seller" :"Buyer"}
  </span>
  </div>

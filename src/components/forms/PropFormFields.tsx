@@ -22,7 +22,7 @@ export default function PropFormFields({
   materials, setMaterials,
 }: PropFormFieldsProps) {
   return (
-    <div className="mt-4 space-y-4 rounded-lg border border-[#E0D5C1] bg-[#FEFCF8] p-4">
+    <div className="mt-4 space-y-4 rounded-lg border border-border bg-card p-4">
       <h4 className="text-sm font-semibold text-foreground">🌲 Prop Details</h4>
 
       <div>
@@ -31,7 +31,7 @@ export default function PropFormFields({
         </label>
         <select
           id="prop-category"
-          className="flex h-9 w-full rounded-md border border-[#E0D5C1] bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="flex h-9 w-full rounded-md border border-border bg-card px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           value={propCategory}
           onChange={(e) => setPropCategory(e.target.value)}
         >
@@ -62,7 +62,7 @@ export default function PropFormFields({
         </label>
         <select
           id="prop-terrain"
-          className="flex h-9 w-full rounded-md border border-[#E0D5C1] bg-[#FEFCF8] px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="flex h-9 w-full rounded-md border border-border bg-card px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           value={terrainSetting}
           onChange={(e) => setTerrainSetting(e.target.value)}
         >
