@@ -1,4 +1,12 @@
 # Model Horse Hub — Styling Architecture Report
+
+> ⚠️ **STALE — HISTORICAL DOCUMENT ONLY (verified 2026-07-08).**
+> Everything below describes the pre-migration codebase and is no longer true.
+> The Tailwind CSS v4 + shadcn/ui migration (April 2026, "v44" commits) deleted
+> all 53 co-located `.css`/`.module.css` files; the app now has **one** CSS file
+> (`src/app/globals.css`, ~2,000 lines) and styles with Tailwind utilities +
+> shadcn primitives. Do not plan refactors against this report.
+
 **Date:** March 20, 2026  
 **Purpose:** Provide a researcher with the full picture of current CSS architecture so they can recommend a more efficient layout.
 
