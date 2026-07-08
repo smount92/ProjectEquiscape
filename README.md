@@ -43,9 +43,9 @@ git clone <repository-url>
 cd model-horse-hub
 npm install
 
-# Configure environment (see docs/getting-started/setup.md)
-cp .env.local.example .env.local
-# Edit .env.local with your Supabase and Resend credentials
+# Configure environment: create a .env.local file in the project root
+# (see docs/getting-started/setup.md for the full list of required variables)
+# then fill in your Supabase and Resend credentials
 
 # Run development server
 npm run dev
