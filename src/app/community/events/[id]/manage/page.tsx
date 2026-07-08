@@ -387,7 +387,7 @@ export default function ManageEventPage() {
  className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[var(--color-accent-primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[var(--primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  />
  <p>Loading event…</p>
  </div>
@@ -435,7 +435,7 @@ export default function ManageEventPage() {
  <p className="text-secondary-foreground">{eventName}</p>
  </div>
  <div className="flex gap-2">
- <span className="rounded-md bg-[var(--color-accent-primary)] px-2 py-0.5 text-xs font-bold text-white">
+ <span className="rounded-md bg-[var(--primary)] px-2 py-0.5 text-xs font-bold text-white">
  {divisions.length} Division{divisions.length !== 1 ?"s" :""} · {totalClasses} Class
  {totalClasses !== 1 ?"es" :""} · {totalEntries} Entr{totalEntries !== 1 ?"ies" :"y"}
  </span>
@@ -443,7 +443,7 @@ export default function ManageEventPage() {
  </div>
 
  {/* Tab Bar */}
- <div className="flex gap-[var(--space-xs)] mb-[var(--space-xl)] overflow-x-auto border-b border-[#E0D5C1] pb-0 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+ <div className="flex gap-[var(--space-xs)] mb-[var(--space-xl)] overflow-x-auto border-b border-border pb-0 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
  {tabs
  .filter((t) => !t.hidden)
  .map((tab) => (
@@ -452,7 +452,7 @@ export default function ManageEventPage() {
  onClick={() => setActiveTab(tab.id)}
  className={`cursor-pointer border-0 border-b-2 bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-sm transition-all duration-200 ${
  activeTab === tab.id
- ? "border-b-[var(--color-accent-primary)] font-semibold text-foreground"
+ ? "border-b-[var(--primary)] font-semibold text-foreground"
  : "border-b-transparent font-normal text-muted-foreground"
  }`}
  >
@@ -831,7 +831,7 @@ export default function ManageEventPage() {
  <span className="text-muted-foreground min-w-[40px] font-mono text-xs font-semibold">
  {cls.classNumber ||"—"}
  </span>
- <span className="flex-1 text-[var(--color-text-secondary)]">
+ <span className="flex-1 text-[var(--secondary-foreground)]">
  {cls.name}
  </span>
  {cls.isNanQualifying && (
@@ -843,7 +843,7 @@ export default function ManageEventPage() {
  </span>
  )}
  {(cls.entryCount || 0) > 0 && (
- <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-accent-primary-glow)] px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap">
+ <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-forest-glow)] px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap">
  {cls.entryCount} entr
  {cls.entryCount === 1 ?"y" :"ies"}
  </span>
@@ -1001,7 +1001,7 @@ export default function ManageEventPage() {
  }}
  className="flex w-full cursor-pointer items-center gap-[var(--space-sm)] border-0 border-b border-input bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-left text-sm text-foreground hover:bg-[rgb(250 250 249)]"
  >
- <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent-primary-glow)] text-xs">
+ <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-forest-glow)] text-xs">
  {u.avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
@@ -1066,7 +1066,7 @@ export default function ManageEventPage() {
  key={judge.id}
  className="flex items-center gap-[var(--space-md)] rounded-sm bg-[rgb(250 250 249)] px-[var(--space-md)] py-[var(--space-sm)]"
  >
- <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent-primary-glow)] text-base">
+ <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-forest-glow)] text-base">
  {judge.avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img

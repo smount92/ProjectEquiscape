@@ -9,7 +9,7 @@ export default function NotificationBell() {
  return (
  <Link
  href="/notifications"
- className="relative flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-[var(--color-text-secondary)] no-underline transition-all"
+ className="relative flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-[var(--secondary-foreground)] no-underline transition-all"
  id="nav-notifications"
  title="Notifications"
  >

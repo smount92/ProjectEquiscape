@@ -226,9 +226,9 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {s.suggestion_type ==="correction" && s.field_changes && (
  <div className="my-3">
  <h3>Changes</h3>
- <div className="overflow-x-auto rounded-xl border border-[#E0D5C1] bg-[#FEFCF8] shadow-sm [-webkit-overflow-scrolling:touch]">
+ <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm [-webkit-overflow-scrolling:touch]">
       <div className="min-w-[500px]">
-      <div className="grid grid-cols-[1fr_1fr_40px_1fr] border-b border-[#E0D5C1] bg-[#F4EFE6] p-3 text-xs font-bold tracking-wider text-muted-foreground uppercase">
+      <div className="grid grid-cols-[1fr_1fr_40px_1fr] border-b border-border bg-background p-3 text-xs font-bold tracking-wider text-muted-foreground uppercase">
         <div>Field</div>
         <div>Current</div>
         <div></div>
@@ -238,7 +238,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
         {Object.entries(s.field_changes).map(([key, val]) => {
           const v = val as { from: string; to: string };
           return (
-            <div key={key} className="grid grid-cols-[1fr_1fr_40px_1fr] items-center border-b border-[#E0D5C1]/40 p-3 text-sm last:border-0 hover:bg-[#F4EFE6]/50 transition-colors">
+            <div key={key} className="grid grid-cols-[1fr_1fr_40px_1fr] items-center border-b border-border/40 p-3 text-sm last:border-0 hover:bg-background/50 transition-colors">
               <div className="font-semibold text-foreground">
                 {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
               </div>
@@ -285,7 +285,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Admin Notes */}
  {s.admin_notes && (
- <div className="bg-yellow-50/50 rounded-r-md my-3 border-l-[3px] border-[#f9a825] px-4 py-2">
+ <div className="bg-yellow-50/50 rounded-r-md my-3 border-l-[3px] border-tier-gold px-4 py-2">
  <h3>Admin Notes</h3>
  <p>{s.admin_notes}</p>
  </div>

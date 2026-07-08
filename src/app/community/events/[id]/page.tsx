@@ -122,7 +122,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
  <div className="mb-6 flex items-start gap-6">
  <div className="flex h-[56px] min-w-[56px] shrink-0 flex-col items-center justify-center rounded-md border border-forest/30 bg-gradient-to-br from-forest/15 to-violet-500/10">
- <span className="text-xs font-bold tracking-wider text-[#2C5545] uppercase">
+ <span className="text-xs font-bold tracking-wider text-forest uppercase">
  {date.toLocaleDateString("en-US", { month:"short" }).toUpperCase()}
  </span>
  <span className="text-foreground text-xl leading-none font-extrabold">
@@ -394,7 +394,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <Link
  key={a.userId}
  href={`/profile/${encodeURIComponent(a.alias)}`}
- className="text-foreground rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+ className="text-foreground rounded-full bg-[var(--muted)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
  >
  @{a.alias}
  </Link>
@@ -412,7 +412,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <Link
  key={a.userId}
  href={`/profile/${encodeURIComponent(a.alias)}`}
- className="text-foreground rounded-full bg-[var(--color-surface-hover)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
+ className="text-foreground rounded-full bg-[var(--muted)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
  >
  @{a.alias}
  </Link>

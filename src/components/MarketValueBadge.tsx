@@ -78,7 +78,7 @@ export default function MarketValueBadge({ catalogId, compact = false }: MarketV
  <div className="mt-1 flex flex-wrap gap-4 text-sm text-muted-foreground">
  <span>Avg: {formatCurrency(price.average)}</span>
  <span>Median: {formatCurrency(price.median)}</span>
- <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-accent-primary-glow)] px-[6px] py-[1px] text-xs font-semibold">
+ <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-forest-glow)] px-[6px] py-[1px] text-xs font-semibold">
  {price.volume} sale{price.volume !== 1 ?"s" :""}
  </span>
  </div>

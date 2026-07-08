@@ -115,7 +115,7 @@ export default function ClaimPage() {
  if (success) {
  return (
  <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
- <div className="bg-[#FEFCF8] border-input animate-fade-in-up mx-auto max-w-[500px] rounded-lg border shadow-md transition-all text-center p-8">
+ <div className="bg-card border-input animate-fade-in-up mx-auto max-w-[500px] rounded-lg border shadow-md transition-all text-center p-8">
  <div className="mb-4 text-[3rem]">🎉</div>
  <h1 className="font-serif text-3xl font-bold text-foreground">Welcome to your stable!</h1>
  <p className="text-secondary-foreground mt-4 mb-8">
@@ -131,7 +131,7 @@ export default function ClaimPage() {
  </Link>
  <Link
  href="/dashboard"
- className="inline-flex min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all hover:bg-[#F4EFE6]"
+ className="inline-flex min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all hover:bg-background"
  >
  ← Dashboard
  </Link>
@@ -146,7 +146,7 @@ export default function ClaimPage() {
 
  return (
  <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
- <div className="bg-[#FEFCF8] border-input animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all p-8">
+ <div className="bg-card border-input animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all p-8">
  <div className="mb-8 text-center">
  <div className="mb-2 text-[2.5rem]">📦</div>
  <h1 className="font-serif text-3xl font-bold text-foreground">
@@ -159,16 +159,16 @@ export default function ClaimPage() {
 
  {/* Preview Card (CoA PIN lookup result) */}
  {preview && (
- <div className="rounded-xl border border-input p-6 mb-6 bg-[#FEFCF8] shadow-sm transition-all text-left">
+ <div className="rounded-xl border border-input p-6 mb-6 bg-card shadow-sm transition-all text-left">
  <div className="flex items-center gap-6">
  {preview.photo ? (
  <img
  src={preview.photo}
  alt={preview.name}
- className="w-20 h-20 rounded-lg object-cover shadow-sm bg-[#F4EFE6]"
+ className="w-20 h-20 rounded-lg object-cover shadow-sm bg-background"
  />
  ) : (
- <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-[#F4EFE6] text-[2rem]">
+ <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-background text-[2rem]">
  🐴
  </div>
  )}
@@ -223,7 +223,7 @@ export default function ClaimPage() {
  }}
  placeholder="ABC123"
  maxLength={6}
- className="font-mono text-3xl font-extrabold text-center tracking-[0.3em] h-16 rounded-lg bg-[#FEFCF8] border-input text-foreground"
+ className="font-mono text-3xl font-extrabold text-center tracking-[0.3em] h-16 rounded-lg bg-card border-input text-foreground"
  autoFocus
  />
  </div>

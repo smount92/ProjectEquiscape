@@ -107,8 +107,8 @@ export default function SuggestReferenceModal({
  key={type.value}
  className={`flex cursor-pointer items-start gap-2 rounded-sm border px-4 py-2 transition-all duration-200 ${
  suggestionType === type.value
- ? "border-[var(--color-accent-primary)] bg-emerald-50/80"
- : "border-[var(--color-border)] bg-transparent"
+ ? "border-[var(--primary)] bg-emerald-50/80"
+ : "border-[var(--border)] bg-transparent"
  }`}
  >
  <input
@@ -117,7 +117,7 @@ export default function SuggestReferenceModal({
  value={type.value}
  checked={suggestionType === type.value}
  onChange={() => setSuggestionType(type.value)}
- className="mt-[3px] accent-[var(--color-accent-primary)]"
+ className="mt-[3px] accent-[var(--primary)]"
  />
  <div>
  <div className="text-sm font-semibold">{type.label}</div>

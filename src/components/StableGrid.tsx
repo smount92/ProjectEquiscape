@@ -263,7 +263,7 @@ export default function StableGrid({
          <div
           onClick={() => onToggleSelect?.(horse.id)}
           className={`group relative cursor-pointer rounded-2xl border bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
-           isSelected ? "border-[var(--color-accent-primary)] ring-2 ring-forest" : "border-input"
+           isSelected ? "border-[var(--primary)] ring-2 ring-forest" : "border-input"
           }`}
           id={`horse-card-${horse.id}`}
          >

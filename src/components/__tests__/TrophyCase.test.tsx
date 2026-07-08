@@ -84,8 +84,8 @@ describe("TrophyCase", () => {
  const { container } = render(<TrophyCase badges={mockBadges} />);
 
  // Tier-specific border colors are now Tailwind classes
- expect(container.innerHTML).toContain("border-[#cd7f32]"); // tier 1
- expect(container.innerHTML).toContain("border-[#c0c0c0]"); // tier 2
+ expect(container.innerHTML).toContain("border-tier-bronze"); // tier 1
+ expect(container.innerHTML).toContain("border-tier-silver"); // tier 2
  expect(container.innerHTML).toContain("border-[#ffd700]"); // tier 3
  expect(container.innerHTML).toContain("border-forest"); // tier 5
  });

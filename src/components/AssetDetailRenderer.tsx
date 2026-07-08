@@ -70,7 +70,7 @@ export default function AssetDetailRenderer({ category, attributes }: AssetDetai
   const catLabel = getCategoryLabel(category);
 
   return (
-    <div className="rounded-lg border border-[#E0D5C1] bg-[#FEFCF8] p-4">
+    <div className="rounded-lg border border-border bg-card p-4">
       <h4 className="mb-3 text-sm font-semibold text-foreground">{catLabel} Details</h4>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {fields}

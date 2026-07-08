@@ -114,7 +114,7 @@ export default async function HelpIdPage() {
     className="bg-white border-input flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
-    <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
+    <div className="relative aspect-square overflow-hidden bg-[var(--muted)]">
     {signedUrlMap.get(req.id) ? (
     <img
      src={signedUrlMap.get(req.id)!}
@@ -166,7 +166,7 @@ export default async function HelpIdPage() {
     className="bg-white border-input flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
-    <div className="relative aspect-square overflow-hidden bg-[var(--color-surface-hover)]">
+    <div className="relative aspect-square overflow-hidden bg-[var(--muted)]">
     {signedUrlMap.get(req.id) ? (
     <img
      src={signedUrlMap.get(req.id)!}

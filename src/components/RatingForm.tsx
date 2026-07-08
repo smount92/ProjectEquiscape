@@ -118,10 +118,10 @@ export default function RatingForm({
  alignItems:"center",
  gap:"var(--space-xs)",
  padding:"var(--space-xs) var(--space-sm)",
- background:"var(--color-bg-muted)",
+ background:"var(--muted)",
  borderRadius:"var(--radius-sm)",
  fontSize: "0.75rem",
- color:"var(--color-text-muted-foreground)",
+ color:"var(--muted-foreground)",
  marginBottom:"var(--space-md)",
  }}
  >

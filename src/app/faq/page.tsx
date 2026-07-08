@@ -193,7 +193,7 @@ export default function FaqPage() {
  className={`overflow-hidden rounded-lg border transition-colors ${isOpen ?"border-forest/30" :"border-input"}`}
  >
  <button
- className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-white px-6 py-5 text-left text-base font-semibold text-foreground transition-colors hover:bg-[var(--color-bg-white-hover)]"
+ className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-lg border-none bg-white px-6 py-5 text-left text-base font-semibold text-foreground transition-colors hover:bg-[var(--muted)]"
  onClick={() => toggle(idx)}
  >
  <span>{item.q}</span>

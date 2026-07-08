@@ -147,7 +147,7 @@ export default function InsuranceReportButton() {
  </select>
 
  {!selectedCollection && horseCount !== null && horseCount > 200 && (
- <div className="text-[var(--color-accent-warning, #f59e0b)] mt-4 mb-4 rounded-lg border border-emerald-200 bg-emerald-50/80 px-6 py-4 text-sm leading-relaxed">
+ <div className="text-[var(--color-warning)] mt-4 mb-4 rounded-lg border border-emerald-200 bg-emerald-50/80 px-6 py-4 text-sm leading-relaxed">
  ⚠️ Your stable has {horseCount} models. Generating a full report may be slow. Consider
  selecting a collection for faster results.
  </div>

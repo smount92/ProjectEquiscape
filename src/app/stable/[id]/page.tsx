@@ -287,16 +287,16 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
  {/* Title */}
  <div>
- <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-[#2D2318] md:text-5xl">
+ <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
  {horse.custom_name}
  </h1>
  {refInfo ? (
- <p className="mb-1 text-base text-[#59493A]">
+ <p className="mb-1 text-base text-secondary-foreground">
  {refInfo.maker} — {refInfo.name}
  </p>
  ) : (
  <p
- className="mb-1 text-base italic text-[#59493A] opacity-[0.6]"
+ className="mb-1 text-base italic text-secondary-foreground opacity-[0.6]"
  >
  Unlisted / Custom Entry
  </p>
@@ -304,8 +304,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
 
  {/* Model Details Card */}
- <div className="rounded-lg border border-[#b8a484]/30 bg-white/10 p-5">
-              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-[#59493A] uppercase">
+ <div className="rounded-lg border border-border-tan/30 bg-white/10 p-5">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">📋</span>{" "}
  {(horse.asset_category ||"model") ==="model"
  ?"Model Details"
@@ -313,11 +313,11 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </h3>
 
  {horse.asset_category && horse.asset_category !== "model" && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Category
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
   {horse.asset_category === "tack"
   ?"🏇 Tack & Gear"
   : horse.asset_category === "prop"
@@ -330,19 +330,19 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
 
  {horse.finish_type && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Finish Type
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.finish_type}
  </span>
  </div>
  )}
 
  {horse.condition_grade && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Condition
  </span>
  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
@@ -353,51 +353,51 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {refInfo ? (
  <>
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  {refInfo.type}
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {refInfo.name}
  </span>
  </div>
 
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  {refInfo.type ==="Mold" ?"Manufacturer" :"Sculptor"}
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {refInfo.maker}
  </span>
  </div>
 
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Scale
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {refInfo.scale}
  </span>
  </div>
 
  {refInfo.extra && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  {refInfo.type ==="Mold" ?"Released" :"Medium"}
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {refInfo.extra}
  </span>
  </div>
  )}
  </>
  ) : (
-              <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
-                <span className="text-sm font-medium text-[#59493A]">
+              <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+                <span className="text-sm font-medium text-secondary-foreground">
  Reference
  </span>
  <span
- className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318] italic opacity-60"
+ className="max-w-[60%] text-right text-sm font-semibold text-foreground italic opacity-60"
  >
  Not linked to database — Custom Entry
  </span>
@@ -406,43 +406,43 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {releaseInfo && (
  <>
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Release
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {releaseInfo.name}
  </span>
  </div>
 
  {releaseInfo.modelNumber && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Model #
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  #{releaseInfo.modelNumber}
  </span>
  </div>
  )}
 
  {releaseInfo.color && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Color
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {releaseInfo.color}
  </span>
  </div>
  )}
 
  {releaseInfo.yearStart && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Release Years
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {releaseInfo.yearStart}
  {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
  ? `–${releaseInfo.yearEnd}`
@@ -453,9 +453,9 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </>
  )}
 
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">Added</span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">Added</span>
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {new Date(horse.created_at).toLocaleDateString("en-US", {
  month:"long",
  day:"numeric",
@@ -464,30 +464,30 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </span>
  </div>
 
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">Photos</span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">Photos</span>
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {images.length} uploaded
  </span>
  </div>
 
  {horse.sculptor && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Sculptor / Artist
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.sculptor}
  </span>
  </div>
  )}
 
  {horse.finishing_artist && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  🎨 Finished by
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.finishing_artist}
  {horse.finishing_artist_verified && (
  <span
@@ -502,11 +502,11 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
 
  {(horse.edition_number || horse.edition_size) && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  📋 Edition
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.edition_number && horse.edition_size
  ? `${horse.edition_number} of ${horse.edition_size}`
  : horse.edition_size
@@ -526,15 +526,15 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Finish Details */}
  {horse.finish_details && (
- <div className="rounded-lg border border-[#b8a484]/30 bg-white/10 p-5">
+ <div className="rounded-lg border border-border-tan/30 bg-white/10 p-5">
  <h3>
  <span aria-hidden="true">✨</span> Finish
  </h3>
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Finish Details
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.finish_details}
  </span>
  </div>
@@ -543,46 +543,46 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Show Bio — model only */}
  {assetConfig.showShowBio && (horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
-            <div className="rounded-lg border border-[#b8a484]/30 bg-white/10 p-5">
-              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-[#59493A] uppercase">
+            <div className="rounded-lg border border-border-tan/30 bg-white/10 p-5">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">🏅</span> Show Identity
               </h3>
  {horse.assigned_breed && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Breed
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.assigned_breed}
  </span>
  </div>
  )}
  {horse.assigned_gender && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Gender
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.assigned_gender}
  </span>
  </div>
  )}
  {horse.assigned_age && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Age
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.assigned_age}
  </span>
  </div>
  )}
  {horse.regional_id && (
- <div className="flex items-center justify-between border-b border-dashed border-[#b8a484]/20 px-0 py-3 last:border-0">
- <span className="text-sm font-medium text-[#59493A]">
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
  Regional ID
  </span>
- <span className="max-w-[60%] text-right text-sm font-semibold text-[#2D2318]">
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
  {horse.regional_id}
  </span>
  </div>
@@ -592,8 +592,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Public Notes */}
  {horse.public_notes && (
-            <div className="rounded-lg border border-[#b8a484]/30 bg-white/10 p-5">
-              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-[#59493A] uppercase">
+            <div className="rounded-lg border border-border-tan/30 bg-white/10 p-5">
+              <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">📝</span> Notes
               </h3>
  <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>

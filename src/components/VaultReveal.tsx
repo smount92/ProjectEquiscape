@@ -46,7 +46,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
 
  return (
  <div
- className={`vault-reveal relative overflow-hidden rounded-lg border border-orange-200 bg-[var(--color-bg-card)] ${isUnlocked ?"unlocked" :""}`}
+ className={`vault-reveal relative overflow-hidden rounded-lg border border-orange-200 bg-[var(--card)] ${isUnlocked ?"unlocked" :""}`}
  >
  <div className="flex items-center gap-4 p-8">
  <div

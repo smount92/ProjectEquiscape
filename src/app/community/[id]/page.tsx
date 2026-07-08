@@ -328,16 +328,16 @@ editionSize: rawPedigree.edition_size,
 
  {/* Free-floating Title — no card wrapper */}
  <div className="p-0">
- <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-[#2D2318] md:text-5xl">
+ <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
  {horse.custom_name}
  </h1>
  {refInfo ? (
- <p className="mb-1 text-base text-[#59493A]">
+ <p className="mb-1 text-base text-secondary-foreground">
  {refInfo.maker} — {refInfo.name}
  </p>
  ) : (
  <p
- className="mb-1 text-base italic text-[#59493A] opacity-60"
+ className="mb-1 text-base italic text-secondary-foreground opacity-60"
  >
  Unlisted / Custom Entry
  </p>
@@ -543,7 +543,7 @@ editionSize: rawPedigree.edition_size,
  {horse.finishing_artist}
  {horse.finishing_artist_verified && (
  <span
- className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-[var(--color-accent-success,#22c55e)]"
+ className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-[var(--color-success)]"
  title="Verified via commission delivery"
  >
  ✅ Verified
@@ -716,7 +716,7 @@ editionSize: rawPedigree.edition_size,
  {/* Back link */}
  <Link
  href="/community"
- className="px-0 py-1 text-center text-sm text-[#59493A] no-underline opacity-[0.6] transition-all"
+ className="px-0 py-1 text-center text-sm text-secondary-foreground no-underline opacity-[0.6] transition-all"
  >
  ← Back to Show Ring
  </Link>

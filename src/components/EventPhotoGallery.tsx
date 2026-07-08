@@ -124,7 +124,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  </label>
  </div>
 
- {error && <p className="mb-2 text-[0.85rem] text-[var(--color-error)]">{error}</p>}
+ {error && <p className="mb-2 text-[0.85rem] text-[var(--destructive)]">{error}</p>}
 
  {photos.length === 0 ? (
  <p className="text-secondary-foreground font-medium my-4">No photos yet — share yours!</p>
@@ -145,7 +145,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  right: 4,
  background:"rgba(0,0,0,0.6)",
  color:"white",
- borderRadius:"var(--radius-pill)",
+ borderRadius:"var(--radius-full)",
  padding:"2px 6px",
  fontSize:"0.7rem",
  }}

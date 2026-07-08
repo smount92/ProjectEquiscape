@@ -463,7 +463,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
 
  {/* Replies */}
  {showReplies && (
- <div className="mt-3 ml-10 border-l-2 border-[#E0D5C1]/60 pl-4">
+ <div className="mt-3 ml-10 border-l-2 border-border/60 pl-4">
  {visibleReplies.map((r) => (
  <div key={r.id} className="mb-3">
  <PostHeader

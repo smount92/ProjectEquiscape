@@ -138,7 +138,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  {records.map((record) => (
  <div
  key={record.id}
- className={`show-record-item group/record relative mb-4 rounded-md bg-[var(--color-card-bg-hover,rgb(250 250 249))] p-4 transition-colors hover:bg-[rgb(245 245 244)] ${getRibbonClass(record.ribbonColor)}`}
+ className={`show-record-item group/record relative mb-4 rounded-md bg-[var(--muted)] p-4 transition-colors hover:bg-[rgb(245 245 244)] ${getRibbonClass(record.ribbonColor)}`}
  id={`record-${record.id}`}
  >
  {/* Edit Form Inline */}

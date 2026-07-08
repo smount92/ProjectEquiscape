@@ -101,7 +101,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div className="text-muted-foreground mb-2 text-sm">No collections yet. Create one to organize your models.</div>
  ) : (
  <div
- className="flex max-h-[180px] flex-col gap-1 overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-bg-input,rgb(250 250 249))] p-2"
+ className="flex max-h-[180px] flex-col gap-1 overflow-y-auto rounded-md border border-[var(--border)] bg-[var(--card)] p-2"
  >
  {collections.map((c) => (
  <label
@@ -116,7 +116,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  type="checkbox"
  checked={selectedCollectionIds.includes(c.id)}
  onChange={() => handleToggle(c.id)}
- className="h-4 w-4 shrink-0 accent-[var(--color-accent-primary)]"
+ className="h-4 w-4 shrink-0 accent-[var(--primary)]"
  />
  <span
  className={`text-sm ${selectedCollectionIds.includes(c.id) ? "font-semibold" : "font-normal"}`}
@@ -131,7 +131,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div className="mt-2 flex items-center gap-2">
  {selectedNames.length > 0 && (
  <div
- className="text-xs font-medium text-[var(--color-accent-primary)]"
+ className="text-xs font-medium text-[var(--primary)]"
  >
  ✓ In: {selectedNames.join(",")}
  </div>

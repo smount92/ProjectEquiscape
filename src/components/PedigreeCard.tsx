@@ -383,7 +383,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
 
  {pedigree!.sireName && (
- <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
  <span className="text-muted-foreground text-sm">Sire</span>
  <span className="text-sm font-medium">
  {pedigree!.sireId ? (
@@ -400,7 +400,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  )}
  {pedigree!.damName && (
- <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
  <span className="text-muted-foreground text-sm">Dam</span>
  <span className="text-sm font-medium">
  {pedigree!.damId ? (
@@ -417,13 +417,13 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  )}
  {pedigree!.sculptor && (
- <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
  <span className="text-muted-foreground text-sm">Sculptor</span>
  <span className="text-sm font-medium">{pedigree!.sculptor}</span>
  </div>
  )}
  {(pedigree!.castNumber || pedigree!.editionSize) && (
- <div className="flex justify-between border-b border-[var(--color-border,rgb(245 245 244))] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
  <span className="text-muted-foreground text-sm">Cast / Edition</span>
  <span className="text-sm font-medium">
  {pedigree!.castNumber && pedigree!.editionSize

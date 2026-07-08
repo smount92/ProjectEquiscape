@@ -53,7 +53,7 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
  </button>
 
  <Dialog open={showModal} onOpenChange={(open) => { if (!isDeleting) setShowModal(open); }}>
- <DialogContent className="sm:max-w-md border-[#9B3028]/30">
+ <DialogContent className="sm:max-w-md border-destructive/30">
  <DialogHeader>
  <DialogTitle className="text-center">
  <span className="mb-2 block text-[3rem]">⚠️</span>
@@ -84,7 +84,7 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
  Cancel
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-[#9B3028]/40 bg-[#9B3028]/10 px-6 py-2 text-sm font-semibold text-[#9B3028] no-underline transition-all hover:bg-[#9B3028]/20"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/20"
  onClick={handleDelete}
  disabled={isDeleting}
  id="delete-confirm"

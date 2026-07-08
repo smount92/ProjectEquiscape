@@ -179,7 +179,7 @@ export default function ExpertJudgingPanel({
   return (
     <div
       className={`animate-fade-in-up mb-6 rounded-xl border p-6 shadow-sm ${
-        overrideMode ? "border-red-200 bg-red-50/30" : "border-input bg-[#FEFCF8]"
+        overrideMode ? "border-red-200 bg-red-50/30" : "border-input bg-card"
       }`}
     >
       {/* Header */}
@@ -228,7 +228,7 @@ export default function ExpertJudgingPanel({
       )}
 
       {/* ─── Ribbon Palette (Sticky) ─── */}
-      <Card className="sticky top-0 z-20 mb-6 border-input bg-[#FEFCF8] shadow-sm">
+      <Card className="sticky top-0 z-20 mb-6 border-input bg-card shadow-sm">
         <CardContent className="flex flex-wrap gap-2 p-3">
           {RIBBON_OPTIONS.map((ribbon) => {
             const isActive = activeRibbon === ribbon.value;
@@ -239,7 +239,7 @@ export default function ExpertJudgingPanel({
                 className={`cursor-pointer rounded-full border px-4 py-2 text-sm font-bold transition-all ${
                   isActive
                     ? `ring-2 ring-forest scale-105 shadow-lg ${ribbon.bg}`
-                    : `border-input bg-[#FEFCF8] text-secondary-foreground hover:shadow-md hover:border-input`
+                    : `border-input bg-card text-secondary-foreground hover:shadow-md hover:border-input`
                 }`}
                 onClick={() => setActiveRibbon(isActive ? null : ribbon.value)}
               >
@@ -327,7 +327,7 @@ export default function ExpertJudgingPanel({
                     <button
                       type="button"
                       title="Judge notes"
-                      className="absolute bottom-2 right-2 z-10 rounded-full bg-[#FEFCF8]/90 p-2 shadow transition-all hover:bg-[#FEFCF8]"
+                      className="absolute bottom-2 right-2 z-10 rounded-full bg-card/90 p-2 shadow transition-all hover:bg-card"
                     >
                       <MessageCircle
                         className={`h-4 w-4 ${
