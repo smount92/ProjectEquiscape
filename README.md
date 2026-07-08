@@ -31,7 +31,7 @@ Model Horse Hub is a privacy-first platform purpose-built for the model horse co
 | Auth | Supabase Auth (PKCE flow, cookie-based SSR) |
 | Storage | Supabase Storage (private bucket, signed URLs) |
 | Hosting | Vercel (serverless) |
-| CSS | Vanilla CSS design system + 49 CSS files (19 Modules + 30 extracted) |
+| CSS | Tailwind CSS v4 + shadcn/ui primitives (single `globals.css` token system) |
 | Email | Resend |
 | PDF | @react-pdf/renderer |
 
@@ -79,12 +79,12 @@ npm run test:e2e           # Playwright E2E (requires dev server running)
 npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 ```
 
-**266 tests across 24 test files:**
+**268 tests across 24 test files:**
 - Utility functions at 100% coverage (mentions, validation, storage, rateLimit)
 - Server action integration tests (transactions, horse, provenance, collections, hoofprint, shows, catalog-suggestions)
 - API route tests (auth, export, cron, reference-dictionary, identify-mold)
 - Component tests (PhotoLightbox, TrophyCase, MarketFilters, MakeOfferModal, HoofprintTimeline, SuggestionVoteButtons) — 64 React Testing Library tests
-- 8 E2E specs: smoke, auth, inventory, safe-trade, hoofprint-transfer, show-entry, accessibility (axe-core WCAG 2.0 AA), device-layout (60 viewport tests)
+- 9 E2E specs: smoke, auth, inventory, safe-trade, hoofprint-transfer, show-entry, accessibility (axe-core WCAG 2.0 AA), device-layout (60 viewport tests), visual-qa-mobile
 
 **Test Accounts (E2E):** Two test accounts configured in `.env.local` (TestBotA/TestBotB).
 
@@ -96,14 +96,14 @@ npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 
 | Metric | Count |
 |--------|-------|
-| Page routes | 28+ route groups |
-| Client components | 110 |
-| Server action files | 35 |
-| Database migrations | 111 (001–111) |
+| Page routes | 63 pages |
+| Client components | 151 |
+| Server action files | 38 |
+| Database migrations | 111 files (numbered 001–115) |
 | Reference catalog entries | 10,500+ |
-| CSS files | 49 (19 Modules + 30 extracted) |
-| Unit/integration/component tests | 266 (24 test files) |
-| E2E specs | 8 (Playwright + axe-core) |
+| CSS files | 1 (`globals.css` — Tailwind v4 design tokens) |
+| Unit/integration/component tests | 268 (24 test files) |
+| E2E specs | 9 (Playwright + axe-core) |
 | CI | GitHub Actions + Husky pre-commit |
 
 ## 🚀 Deployment
