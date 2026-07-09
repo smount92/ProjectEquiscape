@@ -1,13 +1,17 @@
 /**
- * Shows domain — interim hand-written row/domain types.
+ * Shows domain — row types derived from the generated schema.
  *
- * REPLACE with generated types after migration 117 is applied +
- * `npm run gen-types` (then import from
- * `@/lib/types/database.generated` and delete the Row interfaces
- * below; keep the domain unions/aliases).
- *
- * These mirror supabase/migrations/117_shows_domain.sql exactly.
+ * Base shapes come from `database.generated.ts` (migrations 117/118
+ * applied 2026-07-09), so column additions flow in automatically on
+ * `npm run gen-types`. Columns whose values are constrained by CHECK
+ * constraints are overlaid with the narrow domain unions below —
+ * the generator renders them as plain `string`/`number`, which would
+ * silently accept invalid values.
  */
+
+import type { Database } from "@/lib/types/database.generated";
+
+type Tables = Database["public"]["Tables"];
 
 // ── Domain unions ──
 
@@ -52,128 +56,47 @@ export type CallbackScope = "section" | "division" | "show";
 /** Places are 1..6; null = participation. One vocabulary, everywhere. */
 export type Place = 1 | 2 | 3 | 4 | 5 | 6;
 
-// ── Row types (interim — see header) ──
+// ── Row types (generated base + domain-union overlays) ──
 
-export interface ShowRow {
-    id: string;
-    host_id: string;
-    title: string;
+export type ShowRow = Omit<Tables["shows"]["Row"], "mode" | "judging" | "status"> & {
     mode: ShowMode;
     judging: ShowJudging;
     status: ShowStatus;
-    venue_name: string | null;
-    venue_address: string | null;
-    show_date: string | null; // DATE as ISO string
-    entries_open_at: string | null;
-    entries_close_at: string | null;
-    judging_ends_at: string | null;
-    rules_md: string | null;
-    fee_info: string | null;
-    capacity: number | null;
-    is_mhh_qualifying: boolean;
-    sanctioning_note: string | null;
-    show_year: number | null;
-    created_at: string;
-    updated_at: string;
-}
+};
 
-export interface ShowStaffRow {
-    id: string;
-    show_id: string;
-    user_id: string;
+export type ShowStaffRow = Omit<Tables["show_staff"]["Row"], "role"> & {
     role: StaffRole;
-    coi_flag: boolean;
-    coi_note: string | null;
-    created_at: string;
-}
+};
 
-export interface ShowDivisionRow {
-    id: string;
-    show_id: string;
-    name: string;
+export type ShowDivisionRow = Omit<Tables["show_divisions"]["Row"], "axis"> & {
     axis: DivisionAxis;
-    sort_order: number;
-    created_at: string;
-}
+};
 
-export interface ShowSectionRow {
-    id: string;
-    division_id: string;
-    name: string;
-    sort_order: number;
-    created_at: string;
-}
+export type ShowSectionRow = Tables["show_sections"]["Row"];
 
-export interface ShowClassRow {
-    id: string;
-    section_id: string;
-    class_number: string | null;
-    name: string;
+export type ShowClassRow = Omit<Tables["show_classes"]["Row"], "status"> & {
     status: ClassStatus;
-    split_from_class_id: string | null;
-    combined_into_class_id: string | null;
-    max_per_entrant: number | null;
-    allowed_scales: string[] | null;
-    allowed_finishes: string[] | null;
-    is_qualifying: boolean;
-    sort_order: number;
-    created_at: string;
-}
+};
 
-export interface ShowClassEntryRow {
-    id: string;
-    show_id: string;
-    class_id: string;
-    horse_id: string;
-    owner_id: string;
-    handler_id: string | null;
-    entry_number: number | null;
-    photo_id: string | null;
+export type ShowClassEntryRow = Omit<Tables["show_class_entries"]["Row"], "status"> & {
     status: EntryStatus;
-    /** Staff/system annotation (e.g. auto-scratch reason on combine). */
-    note: string | null;
-    created_at: string;
-}
+};
 
-export interface ShowPlacingRow {
-    id: string;
-    class_id: string;
-    entry_id: string;
+export type ShowPlacingRow = Omit<Tables["show_placings"]["Row"], "place"> & {
     place: Place | null;
-    judge_id: string | null;
-    note: string | null;
-    created_at: string;
-}
+};
 
-export interface ShowCallbackRow {
-    id: string;
-    show_id: string;
+export type ShowCallbackRow = Omit<Tables["show_callbacks"]["Row"], "scope"> & {
     scope: CallbackScope;
-    scope_id: string | null;
-    champion_entry_id: string | null;
-    reserve_entry_id: string | null;
-    judge_id: string | null;
-    created_at: string;
-}
+};
 
-export interface QualificationCardRow {
-    /** The short code IS the primary key (8-char URL-safe). */
-    id: string;
-    show_id: string;
-    class_id: string;
-    horse_id: string;
+export type QualificationCardRow = Omit<
+    Tables["qualification_cards"]["Row"],
+    "earned_place" | "status"
+> & {
+    /** The short code IS the primary key (8-char URL-safe) — `id`. */
     earned_place: 1 | 2;
-    earned_by_owner_id: string;
-    current_owner_id: string;
     status: CardStatus;
-    show_year: number | null;
-    issued_at: string;
-}
+};
 
-export interface ShowResultsDocRow {
-    id: string;
-    show_id: string;
-    format: string;
-    storage_path: string;
-    generated_at: string;
-}
+export type ShowResultsDocRow = Tables["show_results_docs"]["Row"];

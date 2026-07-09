@@ -993,6 +993,7 @@ export type Database = {
           id: string
           judge_critique: string | null
           judge_score: number | null
+          non_horse: boolean | null
           notes: string | null
           placing: string | null
           show_string_id: string | null
@@ -1013,6 +1014,7 @@ export type Database = {
           id?: string
           judge_critique?: string | null
           judge_score?: number | null
+          non_horse?: boolean | null
           notes?: string | null
           placing?: string | null
           show_string_id?: string | null
@@ -1033,6 +1035,7 @@ export type Database = {
           id?: string
           judge_critique?: string | null
           judge_score?: number | null
+          non_horse?: boolean | null
           notes?: string | null
           placing?: string | null
           show_string_id?: string | null
@@ -2659,6 +2662,109 @@ export type Database = {
           },
         ]
       }
+      qualification_cards: {
+        Row: {
+          class_id: string
+          current_owner_id: string
+          earned_by_owner_id: string
+          earned_place: number
+          horse_id: string
+          id: string
+          issued_at: string
+          show_id: string
+          show_year: number | null
+          status: string
+        }
+        Insert: {
+          class_id: string
+          current_owner_id: string
+          earned_by_owner_id: string
+          earned_place: number
+          horse_id: string
+          id: string
+          issued_at?: string
+          show_id: string
+          show_year?: number | null
+          status?: string
+        }
+        Update: {
+          class_id?: string
+          current_owner_id?: string
+          earned_by_owner_id?: string
+          earned_place?: number
+          horse_id?: string
+          id?: string
+          issued_at?: string
+          show_id?: string
+          show_year?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qualification_cards_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "show_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_current_owner_id_fkey"
+            columns: ["current_owner_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_current_owner_id_fkey"
+            columns: ["current_owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_current_owner_id_fkey"
+            columns: ["current_owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_earned_by_owner_id_fkey"
+            columns: ["earned_by_owner_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_earned_by_owner_id_fkey"
+            columns: ["earned_by_owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_earned_by_owner_id_fkey"
+            columns: ["earned_by_owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "user_horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limits: {
         Row: {
           attempts: number
@@ -2759,6 +2865,366 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      show_callbacks: {
+        Row: {
+          champion_entry_id: string | null
+          created_at: string
+          id: string
+          judge_id: string | null
+          reserve_entry_id: string | null
+          scope: string
+          scope_id: string | null
+          show_id: string
+        }
+        Insert: {
+          champion_entry_id?: string | null
+          created_at?: string
+          id?: string
+          judge_id?: string | null
+          reserve_entry_id?: string | null
+          scope: string
+          scope_id?: string | null
+          show_id: string
+        }
+        Update: {
+          champion_entry_id?: string | null
+          created_at?: string
+          id?: string
+          judge_id?: string | null
+          reserve_entry_id?: string | null
+          scope?: string
+          scope_id?: string | null
+          show_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_callbacks_champion_entry_id_fkey"
+            columns: ["champion_entry_id"]
+            isOneToOne: false
+            referencedRelation: "show_class_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_callbacks_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_callbacks_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_callbacks_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_callbacks_reserve_entry_id_fkey"
+            columns: ["reserve_entry_id"]
+            isOneToOne: false
+            referencedRelation: "show_class_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_callbacks_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      show_class_entries: {
+        Row: {
+          class_id: string
+          created_at: string
+          entry_number: number | null
+          handler_id: string | null
+          horse_id: string
+          id: string
+          note: string | null
+          owner_id: string
+          photo_id: string | null
+          show_id: string
+          status: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          entry_number?: number | null
+          handler_id?: string | null
+          horse_id: string
+          id?: string
+          note?: string | null
+          owner_id: string
+          photo_id?: string | null
+          show_id: string
+          status?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          entry_number?: number | null
+          handler_id?: string | null
+          horse_id?: string
+          id?: string
+          note?: string | null
+          owner_id?: string
+          photo_id?: string | null
+          show_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_class_entries_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "show_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_handler_id_fkey"
+            columns: ["handler_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_handler_id_fkey"
+            columns: ["handler_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_handler_id_fkey"
+            columns: ["handler_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "user_horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "horse_images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      show_classes: {
+        Row: {
+          allowed_finishes: string[] | null
+          allowed_scales: string[] | null
+          class_number: string | null
+          combined_into_class_id: string | null
+          created_at: string
+          id: string
+          is_qualifying: boolean
+          max_per_entrant: number | null
+          name: string
+          section_id: string
+          sort_order: number
+          split_from_class_id: string | null
+          status: string
+        }
+        Insert: {
+          allowed_finishes?: string[] | null
+          allowed_scales?: string[] | null
+          class_number?: string | null
+          combined_into_class_id?: string | null
+          created_at?: string
+          id?: string
+          is_qualifying?: boolean
+          max_per_entrant?: number | null
+          name: string
+          section_id: string
+          sort_order?: number
+          split_from_class_id?: string | null
+          status?: string
+        }
+        Update: {
+          allowed_finishes?: string[] | null
+          allowed_scales?: string[] | null
+          class_number?: string | null
+          combined_into_class_id?: string | null
+          created_at?: string
+          id?: string
+          is_qualifying?: boolean
+          max_per_entrant?: number | null
+          name?: string
+          section_id?: string
+          sort_order?: number
+          split_from_class_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_classes_combined_into_class_id_fkey"
+            columns: ["combined_into_class_id"]
+            isOneToOne: false
+            referencedRelation: "show_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_classes_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "show_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_classes_split_from_class_id_fkey"
+            columns: ["split_from_class_id"]
+            isOneToOne: false
+            referencedRelation: "show_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      show_divisions: {
+        Row: {
+          axis: string
+          created_at: string
+          id: string
+          name: string
+          show_id: string
+          sort_order: number
+        }
+        Insert: {
+          axis?: string
+          created_at?: string
+          id?: string
+          name: string
+          show_id: string
+          sort_order?: number
+        }
+        Update: {
+          axis?: string
+          created_at?: string
+          id?: string
+          name?: string
+          show_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_divisions_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      show_placings: {
+        Row: {
+          class_id: string
+          created_at: string
+          entry_id: string
+          id: string
+          judge_id: string | null
+          note: string | null
+          place: number | null
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          entry_id: string
+          id?: string
+          judge_id?: string | null
+          note?: string | null
+          place?: number | null
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          entry_id?: string
+          id?: string
+          judge_id?: string | null
+          note?: string | null
+          place?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_placings_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "show_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_placings_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "show_class_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_placings_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_placings_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_placings_judge_id_fkey"
+            columns: ["judge_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -2912,6 +3378,129 @@ export type Database = {
           },
         ]
       }
+      show_results_docs: {
+        Row: {
+          format: string
+          generated_at: string
+          id: string
+          show_id: string
+          storage_path: string
+        }
+        Insert: {
+          format?: string
+          generated_at?: string
+          id?: string
+          show_id: string
+          storage_path: string
+        }
+        Update: {
+          format?: string
+          generated_at?: string
+          id?: string
+          show_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_results_docs_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      show_sections: {
+        Row: {
+          created_at: string
+          division_id: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          division_id: string
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          division_id?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_sections_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "show_divisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      show_staff: {
+        Row: {
+          coi_flag: boolean
+          coi_note: string | null
+          created_at: string
+          id: string
+          role: string
+          show_id: string
+          user_id: string
+        }
+        Insert: {
+          coi_flag?: boolean
+          coi_note?: string | null
+          created_at?: string
+          id?: string
+          role: string
+          show_id: string
+          user_id: string
+        }
+        Update: {
+          coi_flag?: boolean
+          coi_note?: string | null
+          created_at?: string
+          id?: string
+          role?: string
+          show_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_staff_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_staff_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_staff_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_staff_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       show_string_entries: {
         Row: {
           class_id: string | null
@@ -3016,6 +3605,97 @@ export type Database = {
           {
             foreignKeyName: "show_strings_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shows: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          entries_close_at: string | null
+          entries_open_at: string | null
+          fee_info: string | null
+          host_id: string
+          id: string
+          is_mhh_qualifying: boolean
+          judging: string
+          judging_ends_at: string | null
+          mode: string
+          rules_md: string | null
+          sanctioning_note: string | null
+          show_date: string | null
+          show_year: number | null
+          status: string
+          title: string
+          updated_at: string
+          venue_address: string | null
+          venue_name: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          entries_close_at?: string | null
+          entries_open_at?: string | null
+          fee_info?: string | null
+          host_id: string
+          id?: string
+          is_mhh_qualifying?: boolean
+          judging?: string
+          judging_ends_at?: string | null
+          mode: string
+          rules_md?: string | null
+          sanctioning_note?: string | null
+          show_date?: string | null
+          show_year?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_name?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          entries_close_at?: string | null
+          entries_open_at?: string | null
+          fee_info?: string | null
+          host_id?: string
+          id?: string
+          is_mhh_qualifying?: boolean
+          judging?: string
+          judging_ends_at?: string | null
+          mode?: string
+          rules_md?: string | null
+          sanctioning_note?: string | null
+          show_date?: string | null
+          show_year?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shows_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shows_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "shows_host_id_fkey"
+            columns: ["host_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -3305,6 +3985,7 @@ export type Database = {
           assigned_age: string | null
           assigned_breed: string | null
           assigned_gender: string | null
+          attributes: Json | null
           catalog_id: string | null
           collection_id: string | null
           condition_grade: string | null
@@ -3336,6 +4017,7 @@ export type Database = {
           assigned_age?: string | null
           assigned_breed?: string | null
           assigned_gender?: string | null
+          attributes?: Json | null
           catalog_id?: string | null
           collection_id?: string | null
           condition_grade?: string | null
@@ -3367,6 +4049,7 @@ export type Database = {
           assigned_age?: string | null
           assigned_breed?: string | null
           assigned_gender?: string | null
+          attributes?: Json | null
           catalog_id?: string | null
           collection_id?: string | null
           condition_grade?: string | null
@@ -3712,10 +4395,26 @@ export type Database = {
         Args: { p_event_id: string; p_user_id: string }
         Returns: Json
       }
+      combine_show_classes: {
+        Args: {
+          p_class_ids: string[]
+          p_new_class_number: string
+          p_new_name: string
+        }
+        Returns: string
+      }
       count_user_horses_public: { Args: { p_user_id: string }; Returns: number }
       count_user_horses_total: { Args: { p_user_id: string }; Returns: number }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
       get_photo_limit: { Args: never; Returns: number }
+      get_show_staff_public: {
+        Args: { p_show_id: string }
+        Returns: {
+          role: string
+          show_id: string
+          user_id: string
+        }[]
+      }
       get_user_tier: { Args: never; Returns: string }
       increment_approved_suggestions: {
         Args: { target_user_id: string }
@@ -3736,6 +4435,10 @@ export type Database = {
       }
       refresh_market_prices: { Args: never; Returns: undefined }
       refresh_mv_trusted_sellers: { Args: never; Returns: undefined }
+      reorder_show_nodes: {
+        Args: { p_ids: string[]; p_kind: string; p_sort_orders: number[] }
+        Returns: number
+      }
       respond_to_offer_atomic: {
         Args: {
           p_action: string
@@ -3758,7 +4461,23 @@ export type Database = {
           title: string
         }[]
       }
+      show_id_of_class: { Args: { p_class_id: string }; Returns: string }
+      show_id_of_section: { Args: { p_section_id: string }; Returns: string }
+      show_is_public: { Args: { p_show_id: string }; Returns: boolean }
+      show_role_check: {
+        Args: { p_roles: string[]; p_show_id: string }
+        Returns: boolean
+      }
       soft_delete_account: { Args: { target_uid: string }; Returns: undefined }
+      split_show_class: {
+        Args: {
+          p_class_id: string
+          p_entry_ids: string[]
+          p_new_class_number: string
+          p_new_name: string
+        }
+        Returns: string
+      }
       toggle_activity_like: {
         Args: { p_activity_id: string; p_user_id: string }
         Returns: Json
@@ -3774,6 +4493,18 @@ export type Database = {
       upvote_suggestion: {
         Args: { p_suggestion_id: string }
         Returns: undefined
+      }
+      verify_qualification_card: {
+        Args: { p_code: string }
+        Returns: {
+          class_name: string
+          code: string
+          earned_place: number
+          issued_at: string
+          show_title: string
+          show_year: number
+          status: string
+        }[]
       }
       vote_for_entry: {
         Args: { p_entry_id: string; p_user_id: string }
