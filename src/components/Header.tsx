@@ -6,6 +6,7 @@ import { createClient } from"@/lib/supabase/client";
 import { useRouter, usePathname } from"next/navigation";
 import { useEffect, useState, useCallback, useRef } from"react";
 import NotificationBell from"@/components/NotificationBell";
+import ThemeToggle from"@/components/ThemeToggle";
 import { getHeaderData } from"@/app/actions/header";
 import { useNotifications } from "@/lib/context/NotificationProvider";
 import {
@@ -350,6 +351,7 @@ export default function Header() {
 
  {/* Icon action buttons */}
  <div className="flex items-center gap-1">
+ <ThemeToggle />
  <NotificationBell />
  <Link
  href="/inbox"
@@ -645,6 +647,7 @@ export default function Header() {
  <span className="inbox-unread-badge">{unreadMessages > 9 ?"9+" : unreadMessages}</span>
  )}
  </Link>
+ <ThemeToggle />
  <NotificationBell />
  {isAdmin && (
  <Link

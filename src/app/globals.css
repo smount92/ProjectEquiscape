@@ -2353,13 +2353,11 @@ p {
 }
 
 /* ── Ledger working surfaces (Concept A "Stable Ledger", green) ────
-   Two surfaces share the same paper recipe:
-   .ledger-paper — paper gradient + red margin line + forest top border.
-                   The default working surface; safe behind ANY content
-                   (forms, image grids, arbitrary-height blocks).
-   .ledger-card  — .ledger-paper + the classic green ruling at a 28px
-                   rhythm. ONLY for line-like content (tables, lists);
-                   the ruling looks wrong behind arbitrary heights.
+   .ledger-paper / .ledger-card — paper gradient + red margin line +
+   forest top border + the classic green ruling at a 28px rhythm.
+   (Owner decision 2026-07-09: the full ruled effect applies everywhere,
+   including forms/grids. The two classes are now equivalent; both names
+   kept so they can diverge again if the ruling proves busy somewhere.)
    Both pad 30px on the left so text clears the red margin line. */
 .ledger-paper,
 .ledger-card {
@@ -2369,20 +2367,13 @@ p {
   background:
     /* red margin line */
     linear-gradient(90deg, transparent 0 20px, rgba(155, 48, 40, 0.28) 20px 21.5px, transparent 21.5px),
+    /* green ruling, 28px rhythm */
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(44, 85, 69, 0.11) 27px 28px),
     /* ledger paper */
     linear-gradient(180deg, #FDFAF2, #F6F1E2);
   border: 1px solid #CBC3A4;
   border-top: 3px solid var(--color-forest, #2C5545);
   box-shadow: 0 2px 5px rgba(90, 70, 40, 0.15), 0 8px 14px -10px rgba(90, 70, 40, 0.25);
-}
-.ledger-card {
-  background:
-    /* red margin line */
-    linear-gradient(90deg, transparent 0 20px, rgba(155, 48, 40, 0.28) 20px 21.5px, transparent 21.5px),
-    /* green ruling, 28px rhythm */
-    repeating-linear-gradient(0deg, transparent 0 27px, rgba(44, 85, 69, 0.11) 27px 28px),
-    /* ledger paper */
-    linear-gradient(180deg, #FDFAF2, #F6F1E2);
 }
 
 /* kraft index tab (section label sitting on a ledger surface) */
@@ -3038,20 +3029,13 @@ html[data-theme="night"] .ledger-card {
   background:
     /* red margin line */
     linear-gradient(90deg, transparent 0 20px, rgba(200, 96, 84, 0.25) 20px 21.5px, transparent 21.5px),
+    /* green ruling, 28px rhythm */
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(134, 178, 152, 0.13) 27px 28px),
     /* night ledger paper */
     linear-gradient(180deg, #2B2218, #241B12);
   border-color: #453723;
   border-top-color: #3A6B55;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), 0 8px 14px -10px rgba(0, 0, 0, 0.55);
-}
-html[data-theme="night"] .ledger-card {
-  background:
-    /* red margin line */
-    linear-gradient(90deg, transparent 0 20px, rgba(200, 96, 84, 0.25) 20px 21.5px, transparent 21.5px),
-    /* green ruling, 28px rhythm */
-    repeating-linear-gradient(0deg, transparent 0 27px, rgba(134, 178, 152, 0.13) 27px 28px),
-    /* night ledger paper */
-    linear-gradient(180deg, #2B2218, #241B12);
 }
 html[data-theme="night"] .ledger-card th,
 html[data-theme="night"] .ledger-paper th {
@@ -3229,32 +3213,25 @@ html[data-theme="night"][data-simple-mode="true"] .polaroid {
   box-shadow: none;
 }
 
-/* ── Lamplight toggle (preview affordance; ThemeToggle.tsx) ────────
-   Brass pill, fixed bottom-right, stacked above BackToTop (right-7
-   bottom-7). Self-contained so it can move into the user menu later. */
+/* ── Lamplight toggle (ThemeToggle.tsx) ────────────────────────────
+   Compact brass disc that sits in the Header icon cluster (next to
+   NotificationBell / Inbox), sized to match .leather-icon-btn (36px).
+   The global mobile touch-target rule lifts it to 44px on phones. */
 .lamplight-toggle {
-  position: fixed;
-  right: 18px;
-  bottom: 80px;
-  z-index: 50;
-  min-height: 44px;
-  min-width: 44px;
+  height: 36px;
+  width: 36px;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
+  justify-content: center;
   border-radius: 999px;
   cursor: pointer;
-  font-family: var(--serif-display, Georgia), serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 1rem;
+  line-height: 1;
   background: linear-gradient(165deg, #F0D494, #C6A253 45%, #96762F);
   border: 1px solid #6B501E;
   color: #2A1D08;
-  text-shadow: 0 1px 0 rgba(255, 244, 210, 0.8);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 244, 210, 0.6);
 }
 .lamplight-toggle:hover {
   filter: brightness(1.08);

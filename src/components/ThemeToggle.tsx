@@ -3,18 +3,17 @@
 import { useEffect, useState } from "react";
 
 /**
- * Lamplight night-mode toggle — a design-preview affordance.
+ * Lamplight night-mode toggle.
  *
- * Floating brass pill (bottom-right) that flips the site between
- * daylight and "the tack room by lamplight" by stamping
+ * Compact brass disc in the Header icon cluster that flips the site
+ * between daylight and "the tack room by lamplight" by stamping
  * html[data-theme="night"] and persisting the choice to
  * localStorage("mhh-theme"). A tiny inline script in the root layout
  * <head> re-stamps the attribute before first paint so there is no
  * flash of daylight on reload.
  *
  * Explicit toggle only — deliberately does NOT follow
- * prefers-color-scheme while this is a preview. Self-contained so it
- * can be relocated into the user menu later.
+ * prefers-color-scheme while this is a preview.
  */
 export default function ThemeToggle() {
   const [night, setNight] = useState(false);
@@ -42,9 +41,10 @@ export default function ThemeToggle() {
       className="lamplight-toggle"
       onClick={toggle}
       aria-pressed={night}
+      title={night ? "Switch to daylight" : "Switch to lamplight"}
       aria-label={night ? "Switch to daylight theme" : "Switch to lamplight night theme"}
     >
-      {night ? "☀️ Daylight" : "🌙 Lamplight"}
+      <span aria-hidden="true">{night ? "☀️" : "🌙"}</span>
     </button>
   );
 }
