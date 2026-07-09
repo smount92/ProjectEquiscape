@@ -1942,6 +1942,12 @@ p {
   --leather-text: #EFDDBB;
   --leather-text-soft: #D8BE92;
   --leather-text-muted: #C9AE84;
+  /* "lit paper" — physical paper objects (post frame faces, polaroids)
+     that stay cream under Lamplight night mode. Constant: never
+     overridden by html[data-theme="night"]. */
+  --paper-lit: #FEFCF8;
+  --paper-lit-ink: #2D2318;
+  --paper-lit-ink-soft: #594A3C;
   --serif-display: "Palatino Linotype", Palatino, "Book Antiqua", var(--font-family-serif, Georgia), serif;
 }
 
@@ -2117,7 +2123,7 @@ p {
 /* ── Leather picture frame (feed post cards) ─────────────────────── */
 .leather-frame {
   position: relative;
-  background: var(--card);
+  background: var(--paper-lit, var(--card));
   background-clip: padding-box;
   border: 6px solid transparent;
   border-radius: 6px;
@@ -2690,13 +2696,13 @@ p {
 }
 
 .polaroid {
-  background: var(--card);
+  background: var(--paper-lit, var(--card));
   border-radius: 4px;
   padding: 8px 8px 10px;
   margin-bottom: 20px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.55);
   rotate: -1deg;
-  color: var(--foreground);
+  color: var(--paper-lit-ink, var(--foreground));
 }
 .polaroid:nth-child(2n) {
   rotate: 1.2deg;
@@ -2921,4 +2927,339 @@ a.polaroid:focus-visible {
 [data-simple-mode="true"] .masthead-cta .btn-ghost {
   border: 2px solid #ffffff !important;
   color: #ffffff !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LAMPLIGHT — night mode ("the tack room by lamplight")
+   NOT an inversion. Leather / wood / brass / green-strap materials are
+   already night materials and stay untouched. Only the ambient paper
+   world darkens (warm brown-blacks, never blue-gray). Physical "lit
+   paper" objects — post frame faces, polaroids, brass plaques — stay
+   cream, as if glowing under the lamp.
+   Toggled by html[data-theme="night"] (ThemeToggle component; explicit
+   toggle only, persisted in localStorage "mhh-theme").
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Night token overrides (semantic + brand) ────────────────────── */
+html[data-theme="night"] {
+  --background: #1B140D;
+  --foreground: #E6D9BC;
+  --card: #2A2118;
+  --card-foreground: #E6D9BC;
+  --popover: #2A2118;
+  --popover-foreground: #E6D9BC;
+  --secondary: #33291C;
+  --secondary-foreground: #CDBC9B;
+  --muted: #33291C;
+  --muted-foreground: #A8967A;
+  --accent: #33291C;
+  --accent-foreground: #CDBC9B;
+  --border: #453723;
+  --input: #453723;
+  --primary: #3A6B55;
+  --primary-foreground: #FFFFFF;
+  --ring: #3A6B55;
+  --destructive: #C25B50;
+  --color-success: #7FB893;
+  --color-warning: #D9A93F;
+  --color-info: #6FA3E8;
+  --color-forest: #3A6B55;
+  --color-forest-dark: #2C5545;
+}
+
+/* ── Page ground: warm lamplight vignette ────────────────────────── */
+html[data-theme="night"] body {
+  background: radial-gradient(ellipse 130% 60% at 50% 0%, #2A1F15 0%, #1B140D 55%, #150F09 100%) fixed;
+}
+/* smooth day/night swap in both directions (gradients snap; the flat
+   color and text cross-fade) */
+body {
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+}
+/* plain body links: night primary green is too dim on the dark ground;
+   :where() keeps specificity at 0 so any classed link styling wins */
+html[data-theme="night"] :where(a) {
+  color: #8FC7A5;
+}
+html[data-theme="night"] :where(a:hover) {
+  color: #B5DCC2;
+}
+
+/* ── Lit paper: post frame faces & polaroids stay day-paper ────────
+   The face backgrounds already use the constant --paper-lit tokens;
+   re-bind the semantic tokens for everything rendered ON the face
+   (Tailwind token utilities inherit custom properties), so post text,
+   badges and inputs keep their daylight ink. */
+html[data-theme="night"] .leather-frame,
+html[data-theme="night"] .polaroid {
+  --background: var(--paper-lit);
+  --foreground: var(--paper-lit-ink);
+  --card: var(--paper-lit);
+  --card-foreground: var(--paper-lit-ink);
+  --secondary: #EAE1CD;
+  --secondary-foreground: var(--paper-lit-ink-soft);
+  --muted: #EAE1CD;
+  --muted-foreground: #7A6A58;
+  --accent: #EAE1CD;
+  --accent-foreground: var(--paper-lit-ink-soft);
+  --border: #E0D5C1;
+  --input: #E0D5C1;
+  --primary: #2C5545;
+  --ring: #2C5545;
+  --destructive: #9B3028;
+  --color-success: #356845;
+  --color-warning: #B8860B;
+  --color-info: #3b82f6;
+  --color-forest: #2C5545;
+  --color-forest-dark: #1E3D31;
+}
+html[data-theme="night"] .leather-frame :where(a) {
+  color: var(--primary);
+}
+html[data-theme="night"] .leather-frame :where(a:hover) {
+  color: var(--color-forest-dark);
+}
+/* photographs glow a touch harder in the dark */
+html[data-theme="night"] .polaroid {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.75);
+}
+html[data-theme="night"] .leather-frame {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+/* ── Night ledger (green-ruled paper under lamplight) ────────────── */
+html[data-theme="night"] .ledger-paper,
+html[data-theme="night"] .ledger-card {
+  background:
+    /* red margin line */
+    linear-gradient(90deg, transparent 0 20px, rgba(200, 96, 84, 0.25) 20px 21.5px, transparent 21.5px),
+    /* night ledger paper */
+    linear-gradient(180deg, #2B2218, #241B12);
+  border-color: #453723;
+  border-top-color: #3A6B55;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), 0 8px 14px -10px rgba(0, 0, 0, 0.55);
+}
+html[data-theme="night"] .ledger-card {
+  background:
+    /* red margin line */
+    linear-gradient(90deg, transparent 0 20px, rgba(200, 96, 84, 0.25) 20px 21.5px, transparent 21.5px),
+    /* green ruling, 28px rhythm */
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(134, 178, 152, 0.13) 27px 28px),
+    /* night ledger paper */
+    linear-gradient(180deg, #2B2218, #241B12);
+}
+html[data-theme="night"] .ledger-card th,
+html[data-theme="night"] .ledger-paper th {
+  color: #9FC3AD;
+  border-bottom-color: rgba(134, 178, 152, 0.45);
+}
+html[data-theme="night"] .ledger-card td,
+html[data-theme="night"] .ledger-paper td {
+  color: #C9BA9C;
+  border-bottom-color: rgba(134, 178, 152, 0.14);
+}
+html[data-theme="night"] .ledger-card td:first-child,
+html[data-theme="night"] .ledger-paper td:first-child {
+  color: #EFE3C4;
+}
+html[data-theme="night"] .ledger-tile {
+  background: rgba(0, 0, 0, 0.18);
+}
+html[data-theme="night"] .ledger-tile .tile-num {
+  color: #9FC3AD;
+}
+html[data-theme="night"] .stamp {
+  border-color: #8FC7A5;
+  color: #8FC7A5;
+}
+html[data-theme="night"] .stamp-red {
+  border-color: #E08A80;
+  color: #E08A80;
+}
+
+/* ── Wood & shelves: deepen ambient shadow; shelf-top lamplight ──── */
+html[data-theme="night"] .shelfwrap,
+html[data-theme="night"] .wood-panel {
+  box-shadow:
+    inset 0 3px 5px rgba(255, 215, 160, 0.18),
+    inset 0 -16px 30px rgba(0, 0, 0, 0.55),
+    0 10px 26px rgba(0, 0, 0, 0.65);
+}
+html[data-theme="night"] .shelfrow,
+html[data-theme="night"] .shelf-strip {
+  background:
+    radial-gradient(ellipse 100% 70% at 50% 0%, rgba(255, 205, 130, 0.2), transparent 65%),
+    linear-gradient(180deg, #201409, #150D06);
+}
+
+/* ── Leather panels: faint brass lamplight halo ──────────────────── */
+html[data-theme="night"] .leather-panel {
+  box-shadow:
+    inset 0 2px 3px rgba(255, 220, 170, 0.25),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.45),
+    inset 14px 0 28px rgba(0, 0, 0, 0.25),
+    inset -14px 0 28px rgba(0, 0, 0, 0.25),
+    0 6px 18px rgba(0, 0, 0, 0.6),
+    0 0 60px -12px rgba(232, 200, 120, 0.18);
+}
+
+/* ── Night patches for literal Tailwind utility surfaces ──────────
+   Token-relative replacements: inside the lit-paper scope above,
+   var(--card) / var(--color-warning) etc. re-resolve to their daylight
+   values, so these patches self-correct on cream faces too. */
+html[data-theme="night"] .bg-white {
+  background-color: var(--card);
+}
+html[data-theme="night"] .bg-white\/80 {
+  background-color: color-mix(in srgb, var(--card) 85%, transparent);
+}
+html[data-theme="night"] .bg-white\/70 {
+  background-color: color-mix(in srgb, var(--card) 75%, transparent);
+}
+html[data-theme="night"] .bg-white\/60 {
+  background-color: color-mix(in srgb, var(--card) 65%, transparent);
+}
+html[data-theme="night"] .bg-white\/50 {
+  background-color: color-mix(in srgb, var(--card) 55%, transparent);
+}
+html[data-theme="night"] .bg-white\/40 {
+  background-color: color-mix(in srgb, var(--card) 45%, transparent);
+}
+html[data-theme="night"] :is(.bg-amber-50, .bg-yellow-50) {
+  background-color: color-mix(in srgb, var(--color-warning) 14%, var(--card));
+}
+html[data-theme="night"] :is(.bg-amber-100, .hover\:bg-amber-50:hover, .hover\:bg-amber-100:hover) {
+  background-color: color-mix(in srgb, var(--color-warning) 22%, var(--card));
+}
+html[data-theme="night"] :is(.bg-red-50) {
+  background-color: color-mix(in srgb, var(--destructive) 14%, var(--card));
+}
+html[data-theme="night"] :is(.bg-red-100, .hover\:bg-red-50:hover, .hover\:bg-red-100:hover) {
+  background-color: color-mix(in srgb, var(--destructive) 22%, var(--card));
+}
+html[data-theme="night"] :is(.bg-blue-50) {
+  background-color: color-mix(in srgb, var(--color-info) 12%, var(--card));
+}
+html[data-theme="night"] :is(.bg-blue-100, .hover\:bg-blue-100:hover) {
+  background-color: color-mix(in srgb, var(--color-info) 20%, var(--card));
+}
+html[data-theme="night"] :is(.bg-green-50) {
+  background-color: color-mix(in srgb, var(--color-success) 12%, var(--card));
+}
+html[data-theme="night"] :is(.bg-stone-50, .bg-stone-100) {
+  background-color: var(--secondary);
+}
+html[data-theme="night"] :is(.border-stone-200, .border-stone-300) {
+  border-color: var(--border);
+}
+html[data-theme="night"] :is(.border-amber-200, .border-amber-300) {
+  border-color: color-mix(in srgb, var(--color-warning) 45%, transparent);
+}
+html[data-theme="night"] :is(.border-red-200, .border-red-300) {
+  border-color: color-mix(in srgb, var(--destructive) 45%, transparent);
+}
+html[data-theme="night"] :is(.text-amber-700, .text-amber-800, .text-amber-900) {
+  color: var(--color-warning);
+}
+html[data-theme="night"] :is(.text-red-600, .text-red-700, .text-red-800) {
+  color: var(--destructive);
+}
+html[data-theme="night"] :is(.text-blue-600, .text-blue-700, .text-blue-800) {
+  color: var(--color-info);
+}
+html[data-theme="night"] :is(.text-green-600, .text-green-700, .text-green-800) {
+  color: var(--color-success);
+}
+html[data-theme="night"] :is(.text-stone-500, .text-stone-600) {
+  color: var(--muted-foreground);
+}
+html[data-theme="night"] .text-stone-900 {
+  color: var(--foreground);
+}
+/* filter dropdowns hardcode a black-tint wash; flip to a light wash */
+html[data-theme="night"] .filter-dropdown {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border);
+}
+
+/* ── Simple Mode × Lamplight: flat dark surfaces, light hairlines ──
+   Simple mode strips textures; its hardcoded #111 borders/rings would
+   vanish on the night ground, so flip them light. Night tokens win the
+   custom-property cascade (unlayered vs @layer base), so the flat
+   surfaces are already dark. */
+html[data-theme="night"][data-simple-mode="true"] .header {
+  border-bottom-color: #E6D9BC;
+}
+html[data-theme="night"][data-simple-mode="true"] .btn {
+  border-color: #E6D9BC;
+}
+html[data-theme="night"][data-simple-mode="true"] .brass-ring {
+  box-shadow: 0 0 0 2px #E6D9BC;
+}
+html[data-theme="night"][data-simple-mode="true"] .ledger-paper,
+html[data-theme="night"][data-simple-mode="true"] .ledger-card,
+html[data-theme="night"][data-simple-mode="true"] .workcard-stitched {
+  border-color: rgba(230, 217, 188, 0.4);
+  border-top-color: var(--primary);
+}
+/* the night texture rules above out-rank simple mode's texture-strip
+   rules (0,2,1 vs 0,2,0); re-flatten them when both modes are on */
+html[data-theme="night"][data-simple-mode="true"] body {
+  background: var(--background);
+}
+html[data-theme="night"][data-simple-mode="true"] .ledger-paper,
+html[data-theme="night"][data-simple-mode="true"] .ledger-card {
+  background: var(--card);
+  box-shadow: none;
+}
+html[data-theme="night"][data-simple-mode="true"] .shelfrow,
+html[data-theme="night"][data-simple-mode="true"] .shelf-strip {
+  background: rgba(0, 0, 0, 0.25);
+}
+html[data-theme="night"][data-simple-mode="true"] .shelfwrap,
+html[data-theme="night"][data-simple-mode="true"] .wood-panel,
+html[data-theme="night"][data-simple-mode="true"] .leather-panel,
+html[data-theme="night"][data-simple-mode="true"] .leather-frame,
+html[data-theme="night"][data-simple-mode="true"] .polaroid {
+  box-shadow: none;
+}
+
+/* ── Lamplight toggle (preview affordance; ThemeToggle.tsx) ────────
+   Brass pill, fixed bottom-right, stacked above BackToTop (right-7
+   bottom-7). Self-contained so it can move into the user menu later. */
+.lamplight-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 80px;
+  z-index: 50;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--serif-display, Georgia), serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: linear-gradient(165deg, #F0D494, #C6A253 45%, #96762F);
+  border: 1px solid #6B501E;
+  color: #2A1D08;
+  text-shadow: 0 1px 0 rgba(255, 244, 210, 0.8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.lamplight-toggle:hover {
+  filter: brightness(1.08);
+}
+.lamplight-toggle:focus-visible {
+  outline: 3px solid var(--brass-hi, #E8C878);
+  outline-offset: 2px;
 }

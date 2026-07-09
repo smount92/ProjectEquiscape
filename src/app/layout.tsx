@@ -9,6 +9,7 @@ import { NotificationProvider } from"@/lib/context/NotificationProvider";
 import Header from"@/components/Header";
 import Footer from"@/components/Footer";
 import BackToTop from"@/components/BackToTop";
+import ThemeToggle from"@/components/ThemeToggle";
 import CookieConsent from"@/components/CookieConsent";
 import OfflineIndicator from"@/components/OfflineIndicator";
 import { SerwistProvider } from"@/app/serwist-provider";
@@ -68,8 +69,15 @@ export default function RootLayout({
  children: React.ReactNode;
 }>) {
  return (
- <html lang="en" data-simple-mode="false" className={`${inter.variable} ${playfair.variable}`}>
+ <html lang="en" data-simple-mode="false" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
  <head>
+ {/* Lamplight night mode: stamp data-theme before first paint so a
+     persisted night preference never flashes daylight (ThemeToggle). */}
+ <script
+ dangerouslySetInnerHTML={{
+ __html: `try{if(localStorage.getItem("mhh-theme")==="night"){document.documentElement.dataset.theme="night"}}catch(e){}`,
+ }}
+ />
  <Script
  src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
  strategy="afterInteractive"
@@ -94,6 +102,7 @@ export default function RootLayout({
  <Header />
  <main className="min-h-[calc(100dvh-var(--header-height))]">{children}</main>
  <Footer />
+ <ThemeToggle />
  <BackToTop />
  <CookieConsent />
  <OfflineIndicator />
