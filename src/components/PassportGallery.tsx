@@ -35,8 +35,8 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
  if (images.length === 0) {
  return (
  <div>
- <div className="bg-[color-mix(in srgb, black 15%, transparent)] h-full w-full object-contain">
- <div className="bg-[color-mix(in srgb, black 15%, transparent)]-placeholder h-full w-full object-contain">
+ <div className="bg-black/15 h-full w-full object-contain">
+ <div className="h-full w-full object-contain">
  <span>📷</span>
  <p
  style={{
@@ -63,7 +63,7 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
  <div>
  {/* Hero Image — click to open lightbox */}
  <div
- className="bg-[color-mix(in srgb, black 15%, transparent)] h-full w-full object-contain"
+ className="bg-black/15 h-full w-full object-contain"
  onClick={() => setLightboxIndex(activeIndex)}
  style={{ cursor:"zoom-in" }}
  >

@@ -270,13 +270,13 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
     <>
       {/* Success Toast */}
       {status === "success" && (
-        <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm text-[#22C55E]">
+        <div className="mb-4 rounded-md border border-success/40 bg-success/10 px-4 py-2 text-sm text-success">
           ✅ Entry submitted successfully!
         </div>
       )}
 
       {/* Guidance tip */}
-      <div className="mt-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed">
+      <div className="mt-2 rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm leading-relaxed">
         💡 <strong>How it works:</strong>{" "}
         {hasClasses
           ? "Pick a class below, then select your horse and entry photo."
@@ -318,7 +318,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                         </span>
                       )}
                       {c.isNanQualifying && (
-                        <span className="inline-flex items-center gap-[2px] rounded-full bg-amber-50 px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]">
+                        <span className="inline-flex items-center gap-[2px] rounded-full bg-warning/15 px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-warning">
                           NAN
                         </span>
                       )}

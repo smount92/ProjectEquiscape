@@ -386,7 +386,7 @@ editionSize: rawPedigree.edition_size,
  )}
 
  {/* Model Details Card */}
- <div className="bg-white/40 p-4 border-input rounded-lg border shadow-md transition-all">
+ <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">📋</span>{""}
  {(horse.asset_category ||"model") ==="model"
@@ -590,7 +590,7 @@ editionSize: rawPedigree.edition_size,
 
  {/* Finish Details */}
  {horse.finish_details && (
- <div className="bg-white/40 p-4 border-input rounded-lg border shadow-md transition-all">
+ <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">✨</span> Finish
  </h3>
@@ -607,7 +607,7 @@ editionSize: rawPedigree.edition_size,
 
   {/* Show Bio — model only */}
   {assetConfig.showShowBio && (horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
- <div className="bg-white/40 p-4 border-input rounded-lg border shadow-md transition-all">
+ <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">🏅</span> Show Identity
  </h3>
@@ -656,7 +656,7 @@ editionSize: rawPedigree.edition_size,
 
  {/* Public Notes */}
  {horse.public_notes && (
- <div className="bg-white/40 p-4 border-input rounded-lg border shadow-md transition-all">
+ <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">📝</span> Notes
  </h3>

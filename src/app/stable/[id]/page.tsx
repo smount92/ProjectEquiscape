@@ -305,7 +305,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
 
  {/* Model Details Card */}
- <div className="rounded-lg border border-border-tan/30 bg-white/10 p-5">
+ <div className="rounded-lg border border-border-tan/30 bg-card/20 p-5">
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">📋</span>{" "}
  {(horse.asset_category ||"model") ==="model"
@@ -527,7 +527,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Finish Details */}
  {horse.finish_details && (
- <div className="rounded-lg border border-border-tan/30 bg-white/10 p-5">
+ <div className="rounded-lg border border-border-tan/30 bg-card/20 p-5">
  <h3>
  <span aria-hidden="true">✨</span> Finish
  </h3>
@@ -544,7 +544,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Show Bio — model only */}
  {assetConfig.showShowBio && (horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
-            <div className="rounded-lg border border-border-tan/30 bg-white/10 p-5">
+            <div className="rounded-lg border border-border-tan/30 bg-card/20 p-5">
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">🏅</span> Show Identity
               </h3>
@@ -593,7 +593,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Public Notes */}
  {horse.public_notes && (
-            <div className="rounded-lg border border-border-tan/30 bg-white/10 p-5">
+            <div className="rounded-lg border border-border-tan/30 bg-card/20 p-5">
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">📝</span> Notes
               </h3>

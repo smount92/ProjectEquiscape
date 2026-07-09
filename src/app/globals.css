@@ -1235,8 +1235,9 @@ p {
   flex-direction: column;
   gap: var(--space-xs);
   padding: var(--space-md);
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* token-routed so the wash darkens correctly under lamplight */
+  background: color-mix(in srgb, var(--card) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card) 30%, transparent);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);

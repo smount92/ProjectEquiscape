@@ -203,7 +203,7 @@ export default async function InboxPage() {
    </Link></Button>
   </div>
   ) : (
-  <div className="bg-white/80 backdrop-blur-md border-input animate-fade-in-up flex flex-col gap-[2px] overflow-hidden rounded-lg border">
+  <div className="bg-card/80 backdrop-blur-md border-input animate-fade-in-up flex flex-col gap-[2px] overflow-hidden rounded-lg border">
    {inboxItems.map((item) => (
    <Link
     key={item.id}

@@ -208,7 +208,7 @@ export default async function MarketPricePage({
   )}
 
   {/* Disclaimer */}
-  <div className="border-input mt-12 rounded-lg border bg-white/50 backdrop-blur-sm p-6 text-xs">
+  <div className="border-input mt-12 rounded-lg border bg-card/50 backdrop-blur-sm p-6 text-xs">
    <p>
    📋 Prices based on completed transactions recorded on Model Horse Hub. This is not a
    professional appraisal. Market conditions vary. Always research current listings before
