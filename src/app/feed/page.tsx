@@ -42,6 +42,10 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
  <ExplorerLayout
   title={<>📰 <span className="text-forest">Activity Feed</span></>}
   description="Stay up to date with what's happening in the community."
+  /* Global tab brings its own leather panel — skip the archetype's
+     ledger surface so leather sits directly on the page background
+     (fixes the double-framing artifact). */
+  frameless={activeTab ==="global"}
   controls={
   <div className="flex w-fit gap-1 rounded-lg border border-input bg-muted/60 p-1">
    <Link

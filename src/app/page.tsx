@@ -28,36 +28,38 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <div className="overflow-x-hidden">
-      {/* ─── Hero Section ─── */}
+      {/* ─── Hero Section — the leather cover of the ledger book.
+           Deliberately shallow (~2/3 of the old viewport-height hero):
+           no min-height, tighter rhythm, smaller type. ─── */}
       <section
-        className="leather-panel stitched leather-masthead flex min-h-[calc(100dvh-var(--header-height))] items-center justify-center px-6 py-12"
+        className="leather-panel stitched leather-masthead flex items-center justify-center px-6 py-10 md:py-14"
         id="hero"
       >
         <div className="animate-fade-in-up relative z-[1] max-w-[780px] text-center">
-          <span className="text-forest border-forest/20 mb-8 inline-flex items-center gap-2 rounded-full border bg-forest/5 px-6 py-1.5 text-sm font-semibold tracking-[0.01em]">
+          <span className="text-forest border-forest/20 mb-5 inline-flex items-center gap-2 rounded-full border bg-forest/5 px-5 py-1 text-sm font-semibold tracking-[0.01em]">
             <Fingerprint size={16} strokeWidth={1.5} /> Hoofprint™ — Living Provenance for Model
             Horses
           </span>
-          <h1 className="text-engraved-light text-[clamp(1.8rem,4.5vw,3rem)] mb-6 font-serif leading-[1.15] font-extrabold uppercase tracking-[0.12em]">
+          <h1 className="text-engraved-light text-[clamp(1.6rem,3.8vw,2.4rem)] mb-4 font-serif leading-[1.15] font-extrabold uppercase tracking-[0.12em]">
             The Only Platform Built{" "}
             <span className="text-forest">for This Hobby</span>
           </h1>
-          <p className="text-secondary-foreground mx-auto mb-10 max-w-[620px] text-lg leading-[1.7]">
+          <p className="text-secondary-foreground mx-auto mb-6 max-w-[620px] text-base leading-[1.6]">
             Catalog your herd with a 10,500+ reference database. Track provenance from blank resin
             to finished custom. Enter virtual photo shows with NAMHSA-style class lists. Sell with
             verified trust signals. All in one place — built by collectors, for collectors.
           </p>
-          <div className="strap-nav mb-8 flex flex-wrap items-center justify-center gap-4">
+          <div className="strap-nav mb-5 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="text-engraved-brass inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-forest px-8 py-3 text-base font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90"
+              className="text-engraved-brass inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-forest px-8 py-2.5 text-base font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90"
               id="hero-cta-signup"
             >
               Create Free Account
             </Link>
             <Link
               href="/community"
-              className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-transparent px-8 py-3 text-base font-semibold text-foreground no-underline transition-all hover:border-forest hover:text-forest"
+              className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-transparent px-8 py-2.5 text-base font-semibold text-foreground no-underline transition-all hover:border-forest hover:text-forest"
               id="hero-cta-explore"
             >
               Explore the Show Ring
@@ -70,17 +72,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── How It Works ─── */}
-      <section className="px-8 py-16 text-center" id="how-it-works">
+      {/* ─── How It Works — paper body begins: ledger tabs label the
+           sections, brass bars mark the headings. ─── */}
+      <section className="px-8 py-14 text-center" id="how-it-works">
         <div className="mx-auto max-w-[1100px]">
-          <h2 className="mb-2 font-serif text-2xl font-extrabold tracking-[-0.02em]">
-            Get Started in <span className="text-forest">3 Steps</span>
-          </h2>
-          <p className="text-secondary-foreground mx-auto mb-12 max-w-[540px] text-base">
+          <span className="ledger-tab">Getting Started</span>
+          <div className="brass-heading mb-2 justify-center">
+            <span className="brass-heading-bar" aria-hidden="true" />
+            <h2 className="font-serif text-2xl font-extrabold">
+              Get Started in <span className="text-forest">3 Steps</span>
+            </h2>
+          </div>
+          <p className="text-secondary-foreground mx-auto mb-10 max-w-[540px] text-base">
             From your shelf to the Show Ring in under 5 minutes.
           </p>
-          <div className="mt-12 flex items-start justify-center gap-6 max-md:flex-col max-md:items-center">
-            <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
+          <div className="mt-10 flex items-start justify-center gap-6 max-md:flex-col max-md:items-center">
+            <div className="ledger-paper max-w-[320px] flex-1 px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-foreground shadow-sm">
                 1
               </div>
@@ -100,7 +107,7 @@ export default function LandingPage() {
             >
               →
             </div>
-            <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
+            <div className="ledger-paper max-w-[320px] flex-1 px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-foreground shadow-sm">
                 2
               </div>
@@ -120,7 +127,7 @@ export default function LandingPage() {
             >
               →
             </div>
-            <div className="max-w-[320px] flex-1 rounded-xl border border-input bg-muted px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
+            <div className="ledger-paper max-w-[320px] flex-1 px-6 py-8 text-center transition-all hover:-translate-y-1 hover:shadow-md">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-lg font-bold text-foreground shadow-sm">
                 3
               </div>
@@ -139,11 +146,15 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Features Grid ─── */}
-      <section className="relative px-8 py-16" id="features">
+      <section className="relative px-8 py-14" id="features">
         <div className="mx-auto max-w-7xl text-center">
-          <h2 className="mb-2 font-serif text-2xl font-extrabold tracking-[-0.02em]">
-            Everything You Need. <span className="text-forest">Nothing You Don&apos;t.</span>
-          </h2>
+          <span className="ledger-tab">The Toolkit</span>
+          <div className="brass-heading mb-2 justify-center">
+            <span className="brass-heading-bar" aria-hidden="true" />
+            <h2 className="font-serif text-2xl font-extrabold">
+              Everything You Need. <span className="text-forest">Nothing You Don&apos;t.</span>
+            </h2>
+          </div>
           <p className="text-secondary-foreground mx-auto mb-12 max-w-[540px] text-base">
             Every feature exists because a real collector said &ldquo;I wish this existed.&rdquo;
           </p>
@@ -151,7 +162,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-8">
             {/* Feature 1 — Reference Database */}
             <div
-              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="ledger-paper relative overflow-hidden p-6 text-left transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-reference"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-forest/10 text-forest">
@@ -169,7 +180,7 @@ export default function LandingPage() {
 
             {/* Feature 2 — Financial Vault */}
             <div
-              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="ledger-paper relative overflow-hidden p-6 text-left transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-vault"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
@@ -187,7 +198,7 @@ export default function LandingPage() {
 
             {/* Feature 3 — Virtual Photo Shows */}
             <div
-              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="ledger-paper relative overflow-hidden p-6 text-left transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-shows"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -205,7 +216,7 @@ export default function LandingPage() {
 
             {/* Feature 4 — Blue Book Market Guide */}
             <div
-              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="ledger-paper relative overflow-hidden p-6 text-left transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-bluebook"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
@@ -223,7 +234,7 @@ export default function LandingPage() {
 
             {/* Feature 5 — Art Studio */}
             <div
-              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="ledger-paper relative overflow-hidden p-6 text-left transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-studio"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
@@ -241,7 +252,7 @@ export default function LandingPage() {
 
             {/* Feature 6 — Trusted Marketplace */}
             <div
-              className="relative overflow-hidden rounded-xl border border-input bg-card p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
+              className="ledger-paper relative overflow-hidden p-6 text-left transition-all hover:-translate-y-1 hover:shadow-md md:p-8"
               id="feature-marketplace"
             >
               <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
@@ -260,11 +271,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Hoofprint™ Teaser ─── */}
+      {/* ─── Hoofprint™ Teaser — a page torn from the ledger itself ─── */}
       <section className="hoofprint-teaser-section" id="hoofprint-teaser">
-        <div className="mx-auto max-w-[720px]">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-6 py-1.5 text-sm font-semibold tracking-[0.02em] text-amber-600">
-            <PawPrint size={16} strokeWidth={1.5} /> Now Live
+        <div className="ledger-paper mx-auto max-w-[720px] px-8 py-10">
+          <div className="mb-6">
+            <span className="stamp">Now Live</span>
           </div>
           <h2 className="text-[clamp(1.5rem,3.5vw,2.5rem)] mb-6 font-serif leading-[1.2] font-extrabold">
             Every Horse Has a Story. <span className="text-forest">Hoofprint™ Tells It.</span>
@@ -279,40 +290,44 @@ export default function LandingPage() {
             transfers, customization records, and show results all follow the horse — not the owner.
             Like a passport that never expires.
           </p>
-          <div className="mt-12 flex flex-wrap justify-center gap-6">
-            <div className="flex max-w-[220px] min-w-[180px] flex-1 flex-col items-center gap-1">
+          <div className="mt-10 flex flex-wrap justify-center gap-6">
+            <div className="ledger-tile flex max-w-[220px] min-w-[180px] flex-1 flex-col items-center gap-1 text-forest">
               <span>
                 <Camera size={20} strokeWidth={1.5} />
               </span>
-              <strong>Photo Timeline</strong>
-              <span>Track every stage from blank to finished</span>
+              <strong className="text-foreground">Photo Timeline</strong>
+              <span className="text-sm text-secondary-foreground">Track every stage from blank to finished</span>
             </div>
-            <div className="flex max-w-[220px] min-w-[180px] flex-1 flex-col items-center gap-1">
+            <div className="ledger-tile flex max-w-[220px] min-w-[180px] flex-1 flex-col items-center gap-1 text-forest">
               <span>
                 <Handshake size={20} strokeWidth={1.5} />
               </span>
-              <strong>Ownership Chain</strong>
-              <span>Verified history follows the horse forever</span>
+              <strong className="text-foreground">Ownership Chain</strong>
+              <span className="text-sm text-secondary-foreground">Verified history follows the horse forever</span>
             </div>
-            <div className="flex max-w-[220px] min-w-[180px] flex-1 flex-col items-center gap-1">
+            <div className="ledger-tile flex max-w-[220px] min-w-[180px] flex-1 flex-col items-center gap-1 text-forest">
               <span>
                 <Package size={20} strokeWidth={1.5} />
               </span>
-              <strong>One-Click Transfer</strong>
-              <span>Sell a horse and pass its entire history along</span>
+              <strong className="text-foreground">One-Click Transfer</strong>
+              <span className="text-sm text-secondary-foreground">Sell a horse and pass its entire history along</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ─── Who It's For ─── */}
-      <section className="px-8 py-16 text-center" id="who-its-for">
+      <section className="px-8 py-14 text-center" id="who-its-for">
         <div className="mx-auto max-w-7xl text-center">
-          <h2 className="mb-2 font-serif text-2xl font-extrabold tracking-[-0.02em]">
-            Built for <span className="text-forest">Every Part of the Hobby</span>
-          </h2>
-          <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
-            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+          <span className="ledger-tab">For Every Collector</span>
+          <div className="brass-heading mb-2 justify-center">
+            <span className="brass-heading-bar" aria-hidden="true" />
+            <h2 className="font-serif text-2xl font-extrabold">
+              Built for <span className="text-forest">Every Part of the Hobby</span>
+            </h2>
+          </div>
+          <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
+            <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Home size={32} strokeWidth={1.5} />
               </div>
@@ -322,7 +337,7 @@ export default function LandingPage() {
                 and a private vault. Import your entire spreadsheet in minutes with CSV batch import.
               </p>
             </div>
-            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Palette size={32} strokeWidth={1.5} />
               </div>
@@ -333,7 +348,7 @@ export default function LandingPage() {
                 Hoofprint&trade; — forever.
               </p>
             </div>
-            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center">
                 <Trophy size={32} strokeWidth={1.5} />
               </div>
@@ -348,49 +363,47 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── Social Proof / Stats ─── */}
-      <section
-        className="border-input border-t border-b bg-muted px-8 py-12"
-        id="stats"
-      >
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-12 max-sm:gap-8">
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-foreground text-2xl font-extrabold">10,500+</span>
-            <span className="text-muted-foreground text-sm font-medium">Releases &amp; Resins</span>
+      {/* ─── Social Proof / Stats — green strap, engraved brass numerals ─── */}
+      <section className="px-8 py-8" id="stats">
+        <div className="stats-strap mx-auto max-w-5xl" role="group" aria-label="Platform statistics">
+          <div>
+            <div className="stat-num">10,500+</div>
+            <div className="stat-label">Releases &amp; Resins</div>
           </div>
-          <div className="bg-muted h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-foreground text-2xl font-extrabold">
+          <div>
+            <div className="stat-num flex justify-center">
               <PawPrint size={28} strokeWidth={1.5} />
-            </span>
-            <span className="text-muted-foreground text-sm font-medium">Hoofprint™ Tracking</span>
+            </div>
+            <div className="stat-label">Hoofprint™ Tracking</div>
           </div>
-          <div className="bg-muted h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-foreground text-2xl font-extrabold">
+          <div>
+            <div className="stat-num flex justify-center">
               <Shield size={28} strokeWidth={1.5} />
-            </span>
-            <span className="text-muted-foreground text-sm font-medium">Privacy-First</span>
+            </div>
+            <div className="stat-label">Privacy-First</div>
           </div>
-          <div className="bg-muted h-[48px] w-[1px] max-sm:hidden" aria-hidden="true" />
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-foreground text-2xl font-extrabold">100%</span>
-            <span className="text-muted-foreground text-sm font-medium">Free to Start</span>
+          <div>
+            <div className="stat-num">100%</div>
+            <div className="stat-label">Free to Start</div>
           </div>
         </div>
       </section>
 
       {/* ─── Already Live ─── */}
-      <section className="px-8 py-16 text-center" id="already-live">
+      <section className="px-8 py-14 text-center" id="already-live">
         <div className="mx-auto max-w-7xl text-center">
-          <h2 className="mb-2 font-serif text-2xl font-extrabold tracking-[-0.02em]">
-            Already <span className="text-forest">Live</span>
-          </h2>
+          <span className="ledger-tab">Open Now</span>
+          <div className="brass-heading mb-2 justify-center">
+            <span className="brass-heading-bar" aria-hidden="true" />
+            <h2 className="font-serif text-2xl font-extrabold">
+              Already <span className="text-forest">Live</span>
+            </h2>
+          </div>
           <p className="text-secondary-foreground mx-auto mb-12 max-w-[540px] text-base">
             These aren&apos;t promises — they&apos;re features you can use right now.
           </p>
-          <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
-            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+          <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-8">
+            <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Users size={32} strokeWidth={1.5} />
               </div>
@@ -400,7 +413,7 @@ export default function LandingPage() {
                 Dedicated spaces for breed circles, regional clubs, or trading networks.
               </p>
             </div>
-            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Smartphone size={32} strokeWidth={1.5} />
               </div>
@@ -410,7 +423,7 @@ export default function LandingPage() {
                 you can access your stable and show string without cell service.
               </p>
             </div>
-            <div className="[&_p]:text-secondary-foreground rounded-xl border border-input bg-muted p-8 text-center transition-transform duration-300 hover:-translate-y-1 hover:border-emerald-700/30 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
+            <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
               <div className="mb-4 flex justify-center text-forest">
                 <Bot size={32} strokeWidth={1.5} />
               </div>
@@ -426,41 +439,45 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Pro Tier Teaser ─── */}
-      <section className="px-8 py-16" id="pro-tier">
-        <div className="mx-auto max-w-[720px] text-center">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-1.5 text-sm font-bold tracking-[0.02em] text-amber-700">
-            <Sparkles size={16} strokeWidth={1.5} /> MHH Pro
+      <section className="px-8 py-14" id="pro-tier">
+        <div className="ledger-paper mx-auto max-w-[720px] px-8 py-10 text-center">
+          <div className="mb-6 inline-flex items-center gap-2">
+            <Sparkles size={16} strokeWidth={1.5} className="text-amber-600" />
+            <span className="stamp-red stamp">MHH Pro</span>
           </div>
-          <h2 className="font-serif text-2xl font-extrabold tracking-[-0.02em]">
-            Go Pro When You&apos;re <span className="text-forest">Ready</span>
-          </h2>
+          <div className="brass-heading justify-center">
+            <span className="brass-heading-bar" aria-hidden="true" />
+            <h2 className="font-serif text-2xl font-extrabold">
+              Go Pro When You&apos;re <span className="text-forest">Ready</span>
+            </h2>
+          </div>
           <p className="text-secondary-foreground mx-auto mt-4 mb-8 max-w-[540px] text-base leading-[1.7]">
             The free tier has everything you need to catalog and connect. When you want more, Pro
             unlocks the premium tools — but never locks you out of the basics.
           </p>
           <div className="mt-8 grid grid-cols-2 gap-4 text-left max-sm:grid-cols-1">
-            <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
+            <div className="ledger-tile flex items-start gap-3">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
                 <p className="text-sm font-semibold text-foreground">Photo Suite+</p>
                 <p className="text-xs text-muted-foreground">30 extra photos per horse</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
+            <div className="ledger-tile flex items-start gap-3">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
                 <p className="text-sm font-semibold text-foreground">Blue Book PRO Charts</p>
                 <p className="text-xs text-muted-foreground">Historical price trends &amp; analytics</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
+            <div className="ledger-tile flex items-start gap-3">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
                 <p className="text-sm font-semibold text-foreground">AI Stablemaster</p>
                 <p className="text-xs text-muted-foreground">Monthly collection analysis</p>
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-lg border border-input bg-card p-4">
+            <div className="ledger-tile flex items-start gap-3">
               <span className="mt-0.5 text-amber-500">✦</span>
               <div>
                 <p className="text-sm font-semibold text-foreground">Show Tags PDF</p>
@@ -479,8 +496,8 @@ export default function LandingPage() {
       </section>
 
       {/* ─── Transparency Banner ─── */}
-      <section className="border-input border-t bg-muted px-8 py-10" id="transparency">
-        <div className="mx-auto flex max-w-[720px] items-start gap-4 max-sm:flex-col">
+      <section className="px-8 py-8" id="transparency">
+        <div className="ledger-paper mx-auto flex max-w-[720px] items-start gap-4 max-sm:flex-col">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-forest/10 text-forest">
             <Shield size={24} strokeWidth={1.5} />
           </div>

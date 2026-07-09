@@ -44,7 +44,7 @@ export default function CommandCenterLayout({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                 >
-                    <main className="workcard-stitched flex min-w-0 flex-col gap-8">{mainContent}</main>
+                    <main className="ledger-paper flex min-w-0 flex-col gap-8">{mainContent}</main>
                     <aside className="flex flex-col gap-6">{sidebarContent}</aside>
                 </motion.div>
             ) : (
@@ -53,7 +53,7 @@ export default function CommandCenterLayout({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                 >
-                    <main className="workcard-stitched flex min-w-0 flex-col gap-8">{mainContent}</main>
+                    <main className="ledger-paper flex min-w-0 flex-col gap-8">{mainContent}</main>
                 </motion.div>
             )}
         </div>

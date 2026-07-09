@@ -15,22 +15,8 @@ import MessageUserButton from"@/components/MessageUserButton";
 import RatingForm from"@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import TrophyCase from"@/components/TrophyCase";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import ProfileLoadMore from"@/components/ProfileLoadMore";
 
-
-function getFinishBadgeClass(finish: string): string {
- switch (finish) {
- case"OF":
- return"of";
- case"Custom":
- return"custom";
- case"Artist Resin":
- return"resin";
- default:
- return"";
- }
-}
 
 function formatDate(dateStr: string): string {
  return new Date(dateStr).toLocaleDateString("en-US", {
@@ -38,6 +24,11 @@ function formatDate(dateStr: string): string {
  day:"numeric",
  year:"numeric",
  });
+}
+
+/** Green stamp for wins/qualifications, red stamp for everything else. */
+function isWinningPlacing(placing: string): boolean {
+ return /(^1st|champ|grand|nan|top ten)/i.test(placing.trim());
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ alias_name: string }> }) {
@@ -208,9 +199,95 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  .eq("owner_id", profileUser.id)
  .is("deleted_at", null);
 
- // Generate signed URLs for thumbnails
+ // ================================================================
+ // STRAP STATS + SHOW LEDGER — read-only aggregates over EXISTING
+ // tables; every query is scoped to public horses so the showcase
+ // never leaks private stable data. 🔒 No financial/vault reads.
+ // ================================================================
+
+ // NAN cards: show_records flagged is_nan_qualifying on public horses
+ const { count: nanCardCount } = await supabase
+ .from("show_records")
+ .select("id, user_horses!inner(visibility)", { count:"exact", head: true })
+ .eq("user_id", profileUser.id)
+ .eq("is_nan_qualifying", true)
+ .eq("user_horses.visibility","public");
+
+ // Shows hosted: events created by this user that are shows
+ const { count: showsHostedCount } = await supabase
+ .from("events")
+ .select("id", { count:"exact", head: true })
+ .eq("created_by", profileUser.id)
+ .in("event_type", ["live_show","photo_show"]);
+
+ // Show records on public horses — one dataset drives both the
+ // "Stars of the Stable" auto-pick and the recent show ledger.
+ // Capped at 400 recent records; plenty for a count-based pick.
+ const { data: rawRecords } = await supabase
+ .from("show_records")
+ .select(
+ "id, horse_id, show_name, class_name, division, placing, show_date, is_nan_qualifying, nan_card_type, created_at, user_horses!inner(custom_name, visibility)",
+ )
+ .eq("user_id", profileUser.id)
+ .eq("user_horses.visibility","public")
+ .order("show_date", { ascending: false, nullsFirst: false })
+ .limit(400);
+
+  const showRecords = (rawRecords ?? []).map((r) => ({
+  id: r.id,
+  horseId: r.horse_id,
+  horseName: (r.user_horses as unknown as { custom_name: string } | null)?.custom_name ?? "—",
+  showName: r.show_name,
+  className: r.class_name || r.division || null,
+  placing: r.placing,
+  showDate: r.show_date,
+  isNanQualifying: r.is_nan_qualifying ?? false,
+  nanCardType: r.nan_card_type,
+  }));
+
+ // ================================================================
+ // STARS OF THE STABLE — auto-pick: the 3 public horses with the
+ // most show records, falling back to the most recently added
+ // public horses. An owner-curated "feature these 3" picker is
+ // deferred to the production build (needs a storage column).
+ // ================================================================
+ const recordCountByHorse = new Map<string, number>();
+ for (const rec of showRecords) {
+ recordCountByHorse.set(rec.horseId, (recordCountByHorse.get(rec.horseId) ?? 0) + 1);
+ }
+ const starIds: string[] = [...recordCountByHorse.entries()]
+ .sort((a, b) => b[1] - a[1])
+ .slice(0, 3)
+ .map(([id]) => id);
+ // Fallback fill: most recently added public horses
+ for (const horse of horses) {
+ if (starIds.length >= 3) break;
+ if (!starIds.includes(horse.id)) starIds.push(horse.id);
+ }
+
+ // Star horses outside the first page need their own fetch
+ const missingStarIds = starIds.filter((id) => !horses.some((h) => h.id === id));
+ let extraStarHorses: typeof horses = [];
+ if (missingStarIds.length > 0) {
+ const { data: extra } = await supabase
+ .from("user_horses")
+ .select(
+ `
+ id, custom_name, finish_type, condition_grade, created_at, trade_status, listing_price, marketplace_notes,
+ user_collections(name),
+ catalog_items:catalog_id(title, maker, item_type),
+ horse_images(image_url, angle_profile)
+ `,
+ )
+ .eq("owner_id", profileUser.id)
+ .eq("visibility","public")
+ .in("id", missingStarIds);
+  extraStarHorses = (extra ?? []) as typeof horses;
+ }
+
+ // Generate signed URLs for thumbnails (stable grid + star polaroids)
  const thumbnailUrls: string[] = [];
- horses.forEach((horse) => {
+ [...horses, ...extraStarHorses].forEach((horse) => {
  const thumb = horse.horse_images?.find((img) => img.angle_profile ==="Primary_Thumbnail");
  const first = horse.horse_images?.[0];
  const url = thumb?.image_url || first?.image_url;
@@ -220,7 +297,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  const signedUrlMap = getPublicImageUrls(thumbnailUrls);
 
  // Build display data
- const profileCards = horses.map((horse) => {
+ const buildCard = (horse: (typeof horses)[number]) => {
  const thumb = horse.horse_images?.find((img) => img.angle_profile ==="Primary_Thumbnail");
  const firstImage = horse.horse_images?.[0];
  const imageUrl = thumb?.image_url || firstImage?.image_url;
@@ -230,8 +307,6 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  ? `${horse.catalog_items.maker} ${horse.catalog_items.title}`
  :"Unlisted Mold";
 
- const releaseLine = null; // Now unified in catalog_items
-
  return {
  id: horse.id,
  customName: horse.custom_name,
@@ -239,14 +314,37 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
   conditionGrade: horse.condition_grade ?? "",
  createdAt: horse.created_at,
  refName,
- releaseLine,
  thumbnailUrl: signedUrl || null,
  collectionName: horse.user_collections?.name || null,
  tradeStatus: horse.trade_status ||"Not for Sale",
  listingPrice: horse.listing_price ?? null,
  marketplaceNotes: horse.marketplace_notes || null,
  };
+ };
+
+ const profileCards = horses.map(buildCard);
+ const extraStarCards = extraStarHorses.map(buildCard);
+
+ // Star polaroids: card + a star line from the horse's best record
+ const starCards = starIds
+ .map((id) => profileCards.find((c) => c.id === id) ?? extraStarCards.find((c) => c.id === id))
+ .filter((c): c is NonNullable<typeof c> => Boolean(c))
+ .map((card) => {
+ const horseRecords = showRecords.filter((r) => r.horseId === card.id);
+ const nanRec = horseRecords.find((r) => r.isNanQualifying);
+ const placedRec = horseRecords.find((r) => r.placing);
+ let starLine: string | null = null;
+ if (nanRec) {
+ starLine = `★ NAN Qualified${nanRec.nanCardType ? ` — ${nanRec.nanCardType} card` :""}`;
+ } else if (placedRec) {
+ starLine = `★ ${placedRec.placing} — ${placedRec.showName}`;
+ } else if (horseRecords.length > 0) {
+ starLine = `★ ${horseRecords.length} show record${horseRecords.length !== 1 ?"s" :""}`;
+ }
+ return { ...card, starLine };
  });
+
+ const recentRecords = showRecords.slice(0, 8);
 
  const memberSince = new Date(profileUser.created_at).toLocaleDateString("en-US", {
  month:"long",
@@ -259,263 +357,67 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
  const hasMoreHorses = (publicHorseCount ?? 0) > PROFILE_PAGE_SIZE;
 
- return (
- <ExplorerLayout
-  title={<>@{profileUser.alias_name}{isOwnProfile && <span className="bg-forest ml-2 inline-flex align-middle rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase">You</span>}</>}
-  description={isOwnProfile ?"Your public stable — this is how other collectors see your models." :`@${profileUser.alias_name}'s public collection`}
- >
- {/* Profile Header */}
- <div className="profile-hero animate-fade-in-up max-md:flex-col max-md:items-center max-md:text-center max-sm:flex-col max-sm:px-4 max-sm:py-8 max-sm:text-center">
- <div className="bg-emerald-50 border-emerald-200 text-forest flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full border-[2px]">
- {profileUser.avatar_url ? (
- // eslint-disable-next-line @next/next/no-img-element
- <img
- src={profileUser.avatar_url}
- alt={profileUser.alias_name}
- className="h-full w-full rounded-full object-cover"
- />
- ) : (
- <svg
- width="40"
- height="40"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="1.5"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- >
- <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
- <circle cx="12" cy="7" r="4" />
- </svg>
- )}
- </div>
- <div className="text-forest mb-1 text-2xl font-bold tracking-tight">
- <h1>
- @{profileUser.alias_name}
- {isOwnProfile && (
- <span
- className="bg-forest ml-2 inline-flex align-middle rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase"
- >
- You
- </span>
- )}
- </h1>
- <p className="mb-2 text-sm leading-normal text-muted-foreground">
- {isOwnProfile
- ?"Your public stable — this is how other collectors see your models."
- : `@${profileUser.alias_name}'s public collection`}
- </p>
- {profileUser.bio && (
- <p className="mt-2 max-w-[480px] text-sm leading-relaxed text-secondary-foreground">
- {profileUser.bio}
- </p>
- )}
- {isOwnProfile && <EditBioButton currentBio={profileUser.bio} />}
- {studioSlug && (
- <Link
- href={`/studio/${studioSlug}`}
- className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
- >
- 🎨 {isOwnProfile ?"My Studio" : `Visit ${studioName ||"Studio"}`}
- </Link>
- )}
- <div className="flex flex-wrap gap-6">
- <span className="text-sm text-muted-foreground">
- 🐴 {(totalHorseCount ?? 0)} model{(totalHorseCount ?? 0) !== 1 ?"s" :""}{profileCards.length !== (totalHorseCount ?? 0) && ` (${profileCards.length} public)`}
- </span>
- <span className="text-sm text-muted-foreground">
- 📅 Member since {memberSince}
- </span>
- <ShareButton
- title={`@${profileUser.alias_name}'s Stable — Model Horse Hub`}
- text={`Check out @${profileUser.alias_name}'s model horse collection on Model Horse Hub!`}
- variant="icon"
- />
- {ratingSummary.count > 0 && (
- <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
- )}
- {(completedTxCount ?? 0) > 0 && (
- <span className="text-sm text-[#22C55E] text-muted-foreground">
- ✅ {completedTxCount} transaction{completedTxCount !== 1 ?"s" :""} completed
- </span>
- )}
- {forSaleCount > 0 && (
- <span className="text-amber-500 text-sm text-muted-foreground">
- 💲 {forSaleCount} for sale/trade
- </span>
- )}
- </div>
- <FollowButton
- targetUserId={profileUser.id}
- initialIsFollowing={followStats.isFollowing}
- initialFollowerCount={followStats.followerCount}
- isOwnProfile={isOwnProfile}
- />
- {(followStats.followerCount > 0 || followStats.followingCount > 0) && (
- <div className="mt-1 flex items-center gap-2 text-sm text-secondary-foreground">
- <span>
- {followStats.followerCount} follower{followStats.followerCount !== 1 ?"s" :""}
- </span>
- <span>·</span>
- <span>{followStats.followingCount} following</span>
- </div>
- )}
- {!isOwnProfile && (
- <div className="mt-2 flex flex-wrap items-center gap-2">
- <MessageUserButton targetUserId={profileUser.id} targetAlias={profileUser.alias_name} />
- <BlockButton
- targetId={profileUser.id}
- targetAlias={profileUser.alias_name}
- initialBlocked={blocked}
- />
- </div>
- )}
- </div>
- </div>
+ const strapStats: { num: string; label: string }[] = [
+ { num: String(totalHorseCount ?? 0), label:"Horses" },
+ { num: String(publicHorseCount ?? 0), label:"Public" },
+ ];
+ if ((nanCardCount ?? 0) > 0) {
+ strapStats.push({ num: String(nanCardCount), label:"NAN Cards" });
+ }
+ strapStats.push({
+ num: String(followStats.followerCount),
+ label: followStats.followerCount === 1 ?"Follower" :"Followers",
+ });
+ if ((showsHostedCount ?? 0) > 0) {
+ strapStats.push({ num: String(showsHostedCount), label:"Shows Hosted" });
+ }
 
- {/* Public Collections */}
- {publicCollections && publicCollections.length > 0 && (
- <div className="animate-fade-in-up mb-6">
- <h3 className="mb-2 text-sm text-secondary-foreground">📁 Public Collections</h3>
- <div className="flex flex-wrap gap-2">
-  {publicCollections.map((col) => (
- <Link
- key={col.id}
- href={`/stable/collection/${col.id}`}
- className="text-forest inline-flex items-center gap-1 rounded-md border border-indigo-200/20 bg-indigo-100/10 px-3.5 py-1.5 text-sm no-underline transition-all hover:translate-y-[-1px]"
- >
- 📁 {col.name}
- </Link>
- ))}
- </div>
- </div>
- )}
-
- {/* Trophy Case — only if user hasn't hidden badges (owner always sees their own) */}
- {userBadges.length > 0 && (isOwnProfile || (profileUser.show_badges ?? true)) && (
- <div className="animate-fade-in-up mb-6" id="trophies">
- <div className="brass-heading mb-2">
- <span className="brass-heading-bar" aria-hidden="true" />
- <h3 className="text-base text-secondary-foreground">🏆 Trophy Case</h3>
- </div>
- <TrophyCase badges={userBadges} />
- </div>
- )}
-
- {/* Unreviewed Transaction Prompt */}
- {unreviewedTxn && (
- <div className="animate-fade-in-up mb-6">
- <RatingForm
- transactionId={unreviewedTxn.id}
- targetId={profileUser.id}
- targetAlias={profileUser.alias_name}
- existingRating={null}
- />
- </div>
- )}
-
- {/* Breadcrumb */}
- <nav
- className="text-muted-foreground animate-fade-in-up mb-8 flex items-center gap-2 text-sm"
- aria-label="Breadcrumb"
- >
- <Link href="/community">Show Ring</Link>
- <span className="separator" aria-hidden="true">
- /
- </span>
- <span>@{profileUser.alias_name}</span>
- </nav>
-
- {/* Grid */}
- {profileCards.length === 0 ? (
- <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
- <div className="mb-4 text-5xl">🔒</div>
- <h2>
- {isOwnProfile
- ?"You haven't made any models public yet"
- : `@${profileUser.alias_name} hasn't made any models public yet`}
- </h2>
- <p>
- {isOwnProfile
- ? 'Toggle"Show in Public Community Feed" on any of your models to showcase them here.'
- :"Check back later — they may share some soon!"}
- </p>
- {isOwnProfile && (
- <Link
- href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
- >
- 🏠 Go to My Stable
- </Link>
- )}
- </div>
- ) : (
- <div className="grid-cols-[repeat(auto-fill,minmax(300px,1fr))] animate-fade-in-up grid gap-6">
- {profileCards.map((horse) => (
+ const renderPolaroid = (horse: (typeof profileCards)[number]) => (
  <Link
  key={horse.id}
  href={`/community/${horse.id}`}
- className="border-input text-foreground flex flex-col overflow-hidden rounded-lg border bg-muted no-underline transition-all"
+ className="polaroid w-[220px]"
  id={`profile-card-${horse.id}`}
  >
- <div className="relative">
+ <div className="polaroid-photo">
  {horse.thumbnailUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
- <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" className="w-full object-cover" />
+ <img src={horse.thumbnailUrl} alt={horse.customName} loading="lazy" />
  ) : (
- <div className="flex flex-col items-center justify-center bg-muted px-4 py-8">
- <span className="text-4xl">🐴</span>
- <span className="mt-1 text-sm text-muted-foreground">No photo</span>
- </div>
- )}
- {horse.finishType && (
- <span className={`horse-card-badge ${getFinishBadgeClass(horse.finishType)}`}>
- {horse.finishType}
- </span>
- )}
- {horse.tradeStatus ==="For Sale" && (
- <span className="trade-badge border border-green-500/50 bg-green-500/85 text-white">
- 💲{""}
- {horse.listingPrice
- ? `$${horse.listingPrice.toLocaleString("en-US")}`
- :"For Sale"}
- </span>
- )}
- {horse.tradeStatus ==="Open to Offers" && (
- <span className="trade-badge border border-blue-500/50 bg-blue-500/85 text-white">
- 🤝{""}
- {horse.listingPrice
- ? `~$${horse.listingPrice.toLocaleString("en-US")}`
- :"Open to Offers"}
- </span>
+ <span>No Photo</span>
  )}
  </div>
- <div className="p-4">
- <div className="text-sm font-semibold text-foreground">
- {horse.customName}
- </div>
- <div className="mt-0.5 text-xs text-secondary-foreground">
+ <div className="polaroid-name">{horse.customName}</div>
+ <div className="polaroid-breed">
  {horse.refName}
+ {horse.finishType ? ` · ${horse.finishType}` :""}
  </div>
- {horse.releaseLine && (
- <div className="mt-0.5 text-xs text-muted-foreground">
- 🎨 {horse.releaseLine}
- </div>
- )}
- <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+ <div className="mt-1 flex items-center justify-between px-1 text-[0.68rem] text-muted-foreground">
  <span>{horse.conditionGrade}</span>
  <span>{formatDate(horse.createdAt)}</span>
  </div>
  {horse.collectionName && (
- <div className="mt-2 text-xs text-secondary-foreground">
+ <div className="px-1 text-center text-[0.68rem] text-secondary-foreground">
  📁 {horse.collectionName}
+ </div>
+ )}
+ {horse.tradeStatus ==="For Sale" && (
+ <div className="mt-1 text-center">
+ <span className="stamp stamp-red">
+ For Sale{horse.listingPrice ? ` $${horse.listingPrice.toLocaleString("en-US")}` :""}
+ </span>
+ </div>
+ )}
+ {horse.tradeStatus ==="Open to Offers" && (
+ <div className="mt-1 text-center">
+ <span className="stamp">
+ Open to Offers{horse.listingPrice ? ` ~$${horse.listingPrice.toLocaleString("en-US")}` :""}
+ </span>
  </div>
  )}
  {(horse.tradeStatus ==="For Sale" || horse.tradeStatus ==="Open to Offers") &&
  horse.marketplaceNotes && (
- <div className="mt-1 truncate text-xs text-muted-foreground" title={horse.marketplaceNotes}>
+ <div className="mt-1 truncate px-1 text-center text-[0.65rem] text-muted-foreground" title={horse.marketplaceNotes}>
  📝{""}
  {horse.marketplaceNotes.length > 50
  ? horse.marketplaceNotes.slice(0, 50) +"…"
@@ -524,7 +426,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  )}
  {!isOwnProfile &&
  (horse.tradeStatus ==="For Sale" || horse.tradeStatus ==="Open to Offers") && (
- <div className="mt-2">
+ <div className="mt-2 px-1">
  <MessageSellerButton
  sellerId={profileUser.id}
  horseId={horse.id}
@@ -534,11 +436,247 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  />
  </div>
  )}
+ </Link>
+ );
+
+ return (
+ <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+ {/* ── LEATHER MASTHEAD — the stable's nameplate ── */}
+ <header className="leather-panel stitched animate-fade-in-up relative rounded-[14px] px-6 pt-8 pb-9 text-center">
+ <div className="brass-medallion mx-auto mb-3">
+ {profileUser.avatar_url ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={profileUser.avatar_url}
+ alt={profileUser.alias_name}
+ className="h-full w-full object-cover"
+ />
+ ) : (
+ <span aria-hidden="true">{profileUser.alias_name.charAt(0).toUpperCase()}</span>
+ )}
  </div>
+ <h1 className="text-engraved-light mb-1 font-serif text-[clamp(1.5rem,4vw,2.3rem)] font-bold tracking-[0.13em] uppercase text-balance">
+ {profileUser.alias_name}
+ {isOwnProfile && (
+ <span className="bg-forest ml-3 inline-flex align-middle rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase">
+ You
+ </span>
+ )}
+ </h1>
+ <div className="font-serif text-[0.78rem] tracking-[0.2em] uppercase text-(--leather-text-soft)">
+ @{profileUser.alias_name} · Member since {memberSince}
+ </div>
+ {profileUser.bio && (
+ <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] italic text-(--leather-text)">
+ {profileUser.bio}
+ </p>
+ )}
+ <div className="masthead-cta mt-5 flex flex-wrap items-center justify-center gap-3">
+ <FollowButton
+ targetUserId={profileUser.id}
+ initialIsFollowing={followStats.isFollowing}
+ initialFollowerCount={followStats.followerCount}
+ isOwnProfile={isOwnProfile}
+ />
+ {!isOwnProfile && (
+ <span className="msg-slot">
+ <MessageUserButton targetUserId={profileUser.id} targetAlias={profileUser.alias_name} />
+ </span>
+ )}
+ <a href="#stable" className="btn-ghostleather">
+ Browse Stable →
+ </a>
+ </div>
+ </header>
+
+ {/* ── GREEN STRAP STATS ── */}
+ <div className="stats-strap relative -mt-4 mx-6 sm:mx-10" role="group" aria-label="Stable statistics">
+ {strapStats.map((stat) => (
+ <div key={stat.label}>
+ <div className="stat-num">{stat.num}</div>
+ <div className="stat-label">{stat.label}</div>
+ </div>
+ ))}
+ </div>
+
+ {/* ── Quiet meta row: share / studio / reviews / moderation ── */}
+ <div className="animate-fade-in-up mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+ {isOwnProfile && (
+ <span className="text-sm text-muted-foreground">
+ Your public stable — this is how other collectors see your models.
+ </span>
+ )}
+ <ShareButton
+ title={`@${profileUser.alias_name}'s Stable — Model Horse Hub`}
+ text={`Check out @${profileUser.alias_name}'s model horse collection on Model Horse Hub!`}
+ variant="icon"
+ />
+ {ratingSummary.count > 0 && (
+ <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
+ )}
+ {(completedTxCount ?? 0) > 0 && (
+ <span className="text-sm text-muted-foreground">
+ ✅ {completedTxCount} transaction{completedTxCount !== 1 ?"s" :""} completed
+ </span>
+ )}
+ {forSaleCount > 0 && (
+ <span className="text-sm text-muted-foreground">
+ 💲 {forSaleCount} for sale/trade
+ </span>
+ )}
+ {followStats.followingCount > 0 && (
+ <span className="text-sm text-muted-foreground">
+ {followStats.followingCount} following
+ </span>
+ )}
+ {studioSlug && (
+ <Link
+ href={`/studio/${studioSlug}`}
+ className="inline-flex items-center gap-1.5 rounded-md border border-input bg-transparent px-4 py-1.5 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ >
+ 🎨 {isOwnProfile ?"My Studio" : `Visit ${studioName ||"Studio"}`}
+ </Link>
+ )}
+ {isOwnProfile && <EditBioButton currentBio={profileUser.bio} />}
+ {!isOwnProfile && (
+ <BlockButton
+ targetId={profileUser.id}
+ targetAlias={profileUser.alias_name}
+ initialBlocked={blocked}
+ />
+ )}
+ </div>
+
+ {/* Public Collections */}
+ {publicCollections && publicCollections.length > 0 && (
+ <div className="animate-fade-in-up mt-6">
+ <div className="flex flex-wrap items-center justify-center gap-2">
+  {publicCollections.map((col) => (
+ <Link
+ key={col.id}
+ href={`/stable/collection/${col.id}`}
+ className="ledger-tab !mb-0 no-underline transition-all hover:translate-y-[-1px]"
+ >
+ 📁 {col.name}
  </Link>
  ))}
  </div>
+ </div>
  )}
+
+ {/* Unreviewed Transaction Prompt */}
+ {unreviewedTxn && (
+ <div className="animate-fade-in-up mt-6">
+ <RatingForm
+ transactionId={unreviewedTxn.id}
+ targetId={profileUser.id}
+ targetAlias={profileUser.alias_name}
+ existingRating={null}
+ />
+ </div>
+ )}
+
+ {/* ── STARS OF THE STABLE — wood shelf, three tilted polaroids.
+      Auto-picked (most show records → most recent); the
+      owner-curated picker is deferred to the production build. ── */}
+ {starCards.length > 0 && (
+ <section className="animate-fade-in-up mt-10" id="stars">
+ <div className="brass-heading mb-3">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h2 className="font-serif text-base font-bold text-foreground">Stars of the Stable</h2>
+ <span className="ml-auto text-xs italic text-muted-foreground">
+ auto-picked from show records
+ </span>
+ </div>
+ <div className="shelfwrap">
+ <div className="shelfrow">
+ {starCards.map((star) => (
+ <Link
+ key={star.id}
+ href={`/community/${star.id}`}
+ className="polaroid"
+ id={`star-card-${star.id}`}
+ >
+ <div className="polaroid-photo">
+ {star.thumbnailUrl ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img src={star.thumbnailUrl} alt={star.customName} loading="lazy" />
+ ) : (
+ <span>No Photo</span>
+ )}
+ </div>
+ <div className="polaroid-name">{star.customName}</div>
+ <div className="polaroid-breed">
+ {star.refName}
+ {star.finishType ? ` · ${star.finishType}` :""}
+ </div>
+ {star.starLine && <div className="polaroid-star">{star.starLine}</div>}
+ </Link>
+ ))}
+ </div>
+ </div>
+ </section>
+ )}
+
+ {/* Trophy Case — only if user hasn't hidden badges (owner always sees their own) */}
+ {userBadges.length > 0 && (isOwnProfile || (profileUser.show_badges ?? true)) && (
+ <section className="animate-fade-in-up mt-10" id="trophies">
+ <div className="brass-heading mb-3">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h2 className="font-serif text-base font-bold text-foreground">🏆 Trophy Case</h2>
+ </div>
+ <TrophyCase badges={userBadges} />
+ </section>
+ )}
+
+ {/* Breadcrumb */}
+ <nav
+ className="text-muted-foreground animate-fade-in-up mt-8 flex items-center gap-2 text-sm"
+ aria-label="Breadcrumb"
+ >
+ <Link href="/community">Show Ring</Link>
+ <span className="separator" aria-hidden="true">
+ /
+ </span>
+ <span>@{profileUser.alias_name}</span>
+ </nav>
+
+ {/* ── THE STABLE — full public herd on a scrollable wood shelf ── */}
+ <section className="animate-fade-in-up mt-4 scroll-mt-24" id="stable">
+ <div className="brass-heading mb-3">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h2 className="font-serif text-base font-bold text-foreground">The Stable</h2>
+ <span className="ml-auto text-xs italic text-muted-foreground">
+ {publicHorseCount ?? 0} public model{(publicHorseCount ?? 0) !== 1 ?"s" :""} — scroll the shelf
+ </span>
+ </div>
+ {profileCards.length === 0 ? (
+ <div className="ledger-paper px-8 py-12 text-center">
+ <div className="mb-4 text-5xl">🔒</div>
+ <h3 className="mb-2 text-lg font-bold text-foreground">
+ {isOwnProfile
+ ?"You haven't made any models public yet"
+ : `@${profileUser.alias_name} hasn't made any models public yet`}
+ </h3>
+ <p className="text-secondary-foreground">
+ {isOwnProfile
+ ? 'Toggle"Show in Public Community Feed" on any of your models to showcase them here.'
+ :"Check back later — they may share some soon!"}
+ </p>
+ {isOwnProfile && (
+ <Link
+ href="/dashboard"
+ className="mt-4 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ >
+ 🏠 Go to My Stable
+ </Link>
+ )}
+ </div>
+ ) : (
+ <div className="shelfwrap">
+ <div className="shelf-strip" tabIndex={0} role="region" aria-label="Public horses shelf">
+ {profileCards.map(renderPolaroid)}
+ </div>
  {hasMoreHorses && (
  <ProfileLoadMore
  userId={profileUser.id}
@@ -546,13 +684,69 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  totalCount={publicHorseCount ?? 0}
  />
  )}
+ </div>
+ )}
+ </section>
+
+ {/* ── RECENT SHOW RECORD — the green-ruled ledger ── */}
+ {recentRecords.length > 0 && (
+ <section className="animate-fade-in-up mt-10" id="show-ledger">
+ <div className="brass-heading mb-3">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h2 className="font-serif text-base font-bold text-foreground">Recent Show Record</h2>
+ </div>
+ <div className="ledger-card">
+ <span className="ledger-tab">Show Ledger — @{profileUser.alias_name}</span>
+ <div className="overflow-x-auto">
+ <table className="w-full min-w-[480px] border-collapse text-sm">
+ <thead>
+ <tr>
+ <th className="px-2.5 py-1.5">Horse</th>
+ <th className="px-2.5 py-1.5">Class</th>
+ <th className="px-2.5 py-1.5">Show</th>
+ <th className="px-2.5 py-1.5">Date</th>
+ <th className="px-2.5 py-1.5">Result</th>
+ </tr>
+ </thead>
+ <tbody>
+ {recentRecords.map((rec) => (
+ <tr key={rec.id}>
+ <td className="px-2.5 py-2 font-bold text-foreground">
+ <Link href={`/community/${rec.horseId}`} className="text-foreground no-underline hover:underline">
+ {rec.horseName}
+ </Link>
+ </td>
+ <td className="px-2.5 py-2 text-secondary-foreground">{rec.className ??"—"}</td>
+ <td className="px-2.5 py-2 text-secondary-foreground">{rec.showName}</td>
+ <td className="px-2.5 py-2 text-secondary-foreground">
+ {rec.showDate ? formatDate(rec.showDate) :"—"}
+ </td>
+ <td className="px-2.5 py-2">
+ {rec.placing ? (
+ <span className={isWinningPlacing(rec.placing) ?"stamp" :"stamp stamp-red"}>
+ {rec.placing}
+ </span>
+ ) : rec.isNanQualifying ? (
+ <span className="stamp">NAN</span>
+ ) : (
+ <span className="text-muted-foreground">—</span>
+ )}
+ {rec.placing && rec.isNanQualifying && (
+ <span className="stamp ml-2">NAN</span>
+ )}
+ </td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ </div>
+ </div>
+ </section>
+ )}
 
  {/* Reviews Section */}
  {ratingSummary.count > 0 && (
- <div
- className="bg-card border border-input animate-fade-in-up mt-8 rounded-lg border p-6 shadow-md"
- id="reviews"
- >
+ <section className="ledger-paper animate-fade-in-up mt-10" id="reviews">
  <div className="mb-6 flex items-center gap-2">
  <h2 className="m-0 text-lg">⭐ Reviews ({ratingSummary.count})</h2>
  </div>
@@ -578,8 +772,8 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  )}
  </div>
  ))}
- </div>
+ </section>
  )}
- </ExplorerLayout>
+ </div>
  );
 }

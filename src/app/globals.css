@@ -2342,6 +2342,428 @@ p {
   color: var(--leather-text);
 }
 
+/* ── Ledger working surfaces (Concept A "Stable Ledger", green) ────
+   Two surfaces share the same paper recipe:
+   .ledger-paper — paper gradient + red margin line + forest top border.
+                   The default working surface; safe behind ANY content
+                   (forms, image grids, arbitrary-height blocks).
+   .ledger-card  — .ledger-paper + the classic green ruling at a 28px
+                   rhythm. ONLY for line-like content (tables, lists);
+                   the ruling looks wrong behind arbitrary heights.
+   Both pad 30px on the left so text clears the red margin line. */
+.ledger-paper,
+.ledger-card {
+  position: relative;
+  border-radius: 6px;
+  padding: 18px 18px 18px 30px;
+  background:
+    /* red margin line */
+    linear-gradient(90deg, transparent 0 20px, rgba(155, 48, 40, 0.28) 20px 21.5px, transparent 21.5px),
+    /* ledger paper */
+    linear-gradient(180deg, #FDFAF2, #F6F1E2);
+  border: 1px solid #CBC3A4;
+  border-top: 3px solid var(--color-forest, #2C5545);
+  box-shadow: 0 2px 5px rgba(90, 70, 40, 0.15), 0 8px 14px -10px rgba(90, 70, 40, 0.25);
+}
+.ledger-card {
+  background:
+    /* red margin line */
+    linear-gradient(90deg, transparent 0 20px, rgba(155, 48, 40, 0.28) 20px 21.5px, transparent 21.5px),
+    /* green ruling, 28px rhythm */
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(44, 85, 69, 0.11) 27px 28px),
+    /* ledger paper */
+    linear-gradient(180deg, #FDFAF2, #F6F1E2);
+}
+
+/* kraft index tab (section label sitting on a ledger surface) */
+.ledger-tab {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 5px 16px 4px;
+  background: linear-gradient(180deg, #37664F, var(--color-forest-dark, #1E3D31));
+  border-radius: 3px 10px 3px 3px;
+  font-family: var(--serif-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #EDE4CC;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 245, 220, 0.25);
+}
+
+/* tables on ledger surfaces: forest th underline, faint green row rules */
+.ledger-card th,
+.ledger-paper th {
+  font-family: var(--serif-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--color-forest, #2C5545);
+  border-bottom: 2px solid rgba(44, 85, 69, 0.55);
+}
+.ledger-card td,
+.ledger-paper td {
+  border-bottom: 1px solid rgba(44, 85, 69, 0.16);
+  font-variant-numeric: tabular-nums;
+}
+
+/* double-forest-border stat tile on a ledger surface */
+.ledger-tile {
+  padding: 10px 12px;
+  border-left: 3px double var(--color-forest, #2C5545);
+  background: rgba(255, 252, 245, 0.6);
+}
+.ledger-tile .tile-num {
+  font-family: var(--serif-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-forest, #2C5545);
+}
+.ledger-tile .tile-label {
+  font-family: var(--serif-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* rubber-stamp status chips */
+.stamp {
+  display: inline-block;
+  padding: 1px 9px;
+  rotate: -2deg;
+  border: 2px solid var(--color-forest, #2C5545);
+  border-radius: 4px;
+  color: var(--color-forest, #2C5545);
+  font-family: var(--serif-display);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  mask-image: var(--noise);
+  mask-size: 220px;
+}
+.stamp-red {
+  border-color: #9B3028;
+  color: #9B3028;
+  rotate: 2deg;
+}
+
+/* ── Green strap stats bar (profile / landing) ───────────────────── */
+.stats-strap {
+  position: relative;
+  z-index: 1;
+  background:
+    var(--noise),
+    linear-gradient(180deg, #37664F 0%, var(--color-forest, #2C5545) 40%, var(--color-forest-dark, #1E3D31) 100%);
+  background-blend-mode: overlay, normal;
+  border-radius: 10px;
+  padding: 14px 18px 12px;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.35),
+    0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  gap: clamp(18px, 6vw, 64px);
+  flex-wrap: wrap;
+}
+.stats-strap .stat-num {
+  text-align: center;
+  font-family: var(--serif-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--brass-hi);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.7);
+}
+.stats-strap .stat-label {
+  text-align: center;
+  font-family: var(--serif-display);
+  font-size: 0.64rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #CFE0D3;
+}
+
+/* ── Brass-bound avatar medallion (profile masthead) ─────────────── */
+.brass-medallion {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 32% 28%, #8A5A30, var(--leather) 55%, var(--leather-deep));
+  border: 4px solid var(--brass);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45), inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  color: var(--brass-hi);
+  font-family: var(--serif-display);
+  font-size: 1.7rem;
+}
+
+/* ── Brass / ghost-leather CTA buttons (on leather surfaces) ─────── */
+.btn-brass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 26px;
+  border-radius: 5px;
+  cursor: pointer;
+  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+  border-top: 1px solid #F6E3AE;
+  border-bottom: 2px solid #5C441A;
+  border-left: 1px solid #E3C67E;
+  border-right: 2px solid #6B501E;
+  font-family: var(--serif-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brass-ink);
+  text-shadow: 0 1px 0 rgba(255, 244, 210, 0.9);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
+  text-decoration: none;
+}
+.btn-ghostleather {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 22px;
+  border-radius: 5px;
+  cursor: pointer;
+  background: transparent;
+  border: 2px solid var(--thread);
+  font-family: var(--serif-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--leather-text);
+  text-decoration: none;
+}
+.btn-brass:hover {
+  filter: brightness(1.08);
+  text-decoration: none;
+  color: var(--brass-ink);
+}
+.btn-ghostleather:hover {
+  color: #ffffff;
+  border-color: var(--brass-hi);
+  text-decoration: none;
+}
+.btn-brass:focus-visible,
+.btn-ghostleather:focus-visible {
+  outline: 3px solid var(--brass-hi);
+  outline-offset: 2px;
+}
+
+/* existing follow/message buttons restyled when placed in a leather
+   masthead CTA row — restyle, don't rebuild (FollowButton et al.) */
+.masthead-cta .btn-primary {
+  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+  border: 0;
+  border-top: 1px solid #F6E3AE;
+  border-bottom: 2px solid #5C441A;
+  color: var(--brass-ink);
+  font-family: var(--serif-display);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 244, 210, 0.9);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
+}
+.masthead-cta .btn-ghost {
+  border: 2px solid var(--thread) !important;
+  color: var(--leather-text) !important;
+  font-family: var(--serif-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: transparent;
+}
+.masthead-cta span {
+  color: var(--leather-text-soft);
+}
+/* existing components bring their own margins/borders; flatten them
+   so the CTA row lines up on the leather */
+.masthead-cta > div {
+  margin-top: 0;
+}
+.masthead-cta .msg-slot > div {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+.masthead-cta .msg-slot button {
+  border: 2px solid var(--thread);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--leather-text);
+  font-family: var(--serif-display);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.masthead-cta .msg-slot button:hover {
+  color: #ffffff;
+  border-color: var(--brass-hi);
+}
+
+/* ── Wood display shelf + tilted polaroids (profile showcase) ────── */
+.shelfwrap {
+  border-radius: 12px;
+  padding: 20px 18px 8px;
+  background:
+    var(--grain),
+    linear-gradient(180deg, #55381F 0%, #46301C 30%, var(--wood-deep) 100%);
+  background-blend-mode: overlay, normal;
+  box-shadow:
+    inset 0 3px 5px rgba(255, 215, 160, 0.18),
+    inset 0 -16px 30px rgba(0, 0, 0, 0.55),
+    0 8px 22px rgba(30, 20, 10, 0.4);
+}
+/* recessed alcove shared by both shelf variants; ::after = shelf lip */
+.shelfrow,
+.shelf-strip {
+  position: relative;
+  border-radius: 6px;
+  padding: 18px 12px 2px;
+  background:
+    radial-gradient(ellipse 100% 70% at 50% 0%, rgba(255, 205, 130, 0.14), transparent 65%),
+    linear-gradient(180deg, #241710, #1B110B);
+  box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.75);
+  margin-bottom: 18px;
+}
+.shelfrow::after,
+.shelf-strip::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  bottom: -12px;
+  height: 14px;
+  background: var(--grain), linear-gradient(180deg, #6B4A2A, #33220F);
+  background-blend-mode: overlay, normal;
+  border-radius: 3px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 220, 170, 0.35);
+}
+/* fixed 3-up grid (Stars of the Stable) */
+.shelfrow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 620px) {
+  .shelfrow {
+    grid-template-columns: 1fr;
+  }
+}
+/* horizontally scrollable strip (The Stable) — keyboard/touch friendly */
+.shelf-strip {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232, 200, 120, 0.55) rgba(0, 0, 0, 0.35);
+}
+.shelf-strip::-webkit-scrollbar {
+  height: 8px;
+}
+.shelf-strip::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+}
+.shelf-strip::-webkit-scrollbar-thumb {
+  background: rgba(232, 200, 120, 0.55);
+  border-radius: 4px;
+}
+.shelf-strip > * {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.polaroid {
+  background: var(--card);
+  border-radius: 4px;
+  padding: 8px 8px 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.55);
+  rotate: -1deg;
+  color: var(--foreground);
+}
+.polaroid:nth-child(2n) {
+  rotate: 1.2deg;
+}
+.polaroid:nth-child(3n) {
+  rotate: -0.5deg;
+}
+a.polaroid {
+  text-decoration: none;
+}
+a.polaroid:focus-visible {
+  outline: 3px solid var(--brass-hi);
+  outline-offset: 2px;
+}
+.polaroid .polaroid-photo {
+  height: 150px;
+  border-radius: 2px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 90% at 60% 100%, rgba(80, 58, 36, 0.55), transparent 60%),
+    linear-gradient(165deg, #D8C8A8, #A98D66);
+  display: grid;
+  place-items: center;
+  color: rgba(62, 44, 26, 0.5);
+  font-family: var(--serif-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.polaroid .polaroid-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.polaroid .polaroid-name {
+  text-align: center;
+  font-family: var(--serif-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+.polaroid .polaroid-breed {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
+.polaroid .polaroid-star {
+  text-align: center;
+  margin-top: 4px;
+  font-family: var(--serif-display);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: var(--color-saddle, #8B5A2B);
+  text-transform: uppercase;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  a.polaroid {
+    transition: translate 0.2s ease, box-shadow 0.2s ease;
+  }
+  a.polaroid:hover {
+    translate: 0 -4px;
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.55);
+  }
+}
+
 /* ── Motion: hover brightness only, respects reduced-motion ──────── */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .brass-plaque {
@@ -2426,4 +2848,77 @@ p {
   font-variant: normal;
   letter-spacing: normal;
   color: var(--muted-foreground);
+}
+/* ledger surfaces: flat white card, plain border, no ruling/margin */
+[data-simple-mode="true"] .ledger-paper,
+[data-simple-mode="true"] .ledger-card {
+  background: var(--card);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-top: 3px solid var(--primary);
+  box-shadow: none;
+  padding: 18px;
+}
+[data-simple-mode="true"] .ledger-tab {
+  background: var(--primary);
+  background-image: none;
+  box-shadow: none;
+  border-radius: 3px;
+}
+[data-simple-mode="true"] .ledger-tile {
+  background: none;
+  border-left: 3px solid var(--primary);
+}
+[data-simple-mode="true"] .stamp,
+[data-simple-mode="true"] .stamp-red {
+  rotate: none;
+  mask-image: none;
+  opacity: 1;
+}
+/* strap, shelves, polaroids: flat blocks, no grain or tilt */
+[data-simple-mode="true"] .stats-strap {
+  background: var(--color-forest, #2C5545);
+  background-image: none;
+  box-shadow: none;
+}
+[data-simple-mode="true"] .stats-strap .stat-num {
+  text-shadow: none;
+  color: #ffffff;
+}
+[data-simple-mode="true"] .shelfwrap {
+  background: var(--color-forest-dark, #1E3D31);
+  background-image: none;
+  box-shadow: none;
+}
+[data-simple-mode="true"] .shelfrow,
+[data-simple-mode="true"] .shelf-strip {
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: none;
+}
+[data-simple-mode="true"] .shelfrow::after,
+[data-simple-mode="true"] .shelf-strip::after {
+  display: none;
+}
+[data-simple-mode="true"] .polaroid {
+  rotate: none;
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+[data-simple-mode="true"] .brass-medallion {
+  background: #ffffff;
+  border: 2px solid #111111;
+  box-shadow: none;
+  color: #111111;
+}
+[data-simple-mode="true"] .btn-brass,
+[data-simple-mode="true"] .masthead-cta .btn-primary {
+  background: #ffffff;
+  border: 2px solid #111111;
+  color: #111111;
+  text-shadow: none;
+  box-shadow: none;
+}
+[data-simple-mode="true"] .btn-ghostleather,
+[data-simple-mode="true"] .masthead-cta .btn-ghost {
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
 }

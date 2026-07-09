@@ -32,8 +32,10 @@ export default function FocusLayout({
                 )}
             </div>
 
+            {/* Unruled ledger paper — Focus pages are forms/detail flows;
+                the 28px green ruling would fight arbitrary field heights. */}
             <motion.div
-                className="w-full workcard-stitched"
+                className="w-full ledger-paper"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}

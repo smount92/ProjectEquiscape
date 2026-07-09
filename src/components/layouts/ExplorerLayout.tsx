@@ -8,6 +8,10 @@ interface ExplorerLayoutProps {
     description?: ReactNode;
     headerActions?: ReactNode;
     controls?: ReactNode;
+    /** Escape hatch: skip the ledger-paper surface so content that brings
+     *  its own material (e.g. the feed's leather panel) sits directly on
+     *  the page background instead of being double-framed. */
+    frameless?: boolean;
     children: ReactNode;
 }
 
@@ -16,6 +20,7 @@ export default function ExplorerLayout({
     description,
     headerActions,
     controls,
+    frameless = false,
     children,
 }: ExplorerLayoutProps) {
     return (
@@ -43,9 +48,10 @@ export default function ExplorerLayout({
                 </div>
             )}
 
-            {/* Content — animated */}
+            {/* Content — animated. Unruled ledger paper: browse pages hold
+                grids/cards of arbitrary height, so no green ruling here. */}
             <motion.div
-                className="workcard-stitched"
+                className={frameless ? undefined : "ledger-paper"}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
