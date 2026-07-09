@@ -164,13 +164,17 @@ main {
 }
 
 a {
-  color: var(--primary);
+  /* --link/--link-hover are only bound under Lamplight night mode,
+     where the primary green is too dim on the dark ground; by day
+     these fall through to the original colors. Kept on this base rule
+     so classed/utility link styling wins exactly as it always did. */
+  color: var(--link, var(--primary));
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 a:hover {
-  color: var(--color-forest-dark);
+  color: var(--link-hover, var(--color-forest-dark));
   text-decoration: underline;
 }
 
@@ -2981,13 +2985,12 @@ body {
     transition: none;
   }
 }
-/* plain body links: night primary green is too dim on the dark ground;
-   :where() keeps specificity at 0 so any classed link styling wins */
-html[data-theme="night"] :where(a) {
-  color: #8FC7A5;
-}
-html[data-theme="night"] :where(a:hover) {
-  color: #B5DCC2;
+/* plain body links: night primary green is too dim on the dark ground.
+   Bound via the --link indirection on the base `a` rule (see @layer
+   base) so classed/utility link styling still wins the cascade. */
+html[data-theme="night"] {
+  --link: #8FC7A5;
+  --link-hover: #B5DCC2;
 }
 
 /* ── Lit paper: post frame faces & polaroids stay day-paper ────────
@@ -3017,12 +3020,9 @@ html[data-theme="night"] .polaroid {
   --color-info: #3b82f6;
   --color-forest: #2C5545;
   --color-forest-dark: #1E3D31;
-}
-html[data-theme="night"] .leather-frame :where(a) {
-  color: var(--primary);
-}
-html[data-theme="night"] .leather-frame :where(a:hover) {
-  color: var(--color-forest-dark);
+  /* plain links revert to daylight greens on the cream face */
+  --link: #2C5545;
+  --link-hover: #1E3D31;
 }
 /* photographs glow a touch harder in the dark */
 html[data-theme="night"] .polaroid {
