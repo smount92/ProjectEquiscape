@@ -12,6 +12,17 @@
  *  - Owner ≠ handler (proxy showing) is first-class and legal.
  *  - Per-class max_per_entrant, allowed_scales / allowed_finishes.
  *  - Entries only while the show is entries_open (window check).
+ *
+ * SCRATCH / RE-ENTRY CONTRACT (mirrors the partial unique index
+ * uq_show_class_entries_live in migration 117):
+ *  - Scratched rows are HISTORY. They are never reactivated and
+ *    never move between classes (split/combine leave them in their
+ *    source class).
+ *  - Re-entering a class after a scratch creates a NEW row; the
+ *    scratched row stays behind as the audit trail.
+ *  - Uniqueness ("a horse enters a class at most once") therefore
+ *    applies only to LIVE rows (status <> 'scratched') — which is
+ *    exactly what the `active` filter below evaluates against.
  */
 
 import type {

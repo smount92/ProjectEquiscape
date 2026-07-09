@@ -31,6 +31,9 @@ const SECTION_ID = "423e4567-e89b-42d3-a456-426614174000";
 const DIVISION_ID = "523e4567-e89b-42d3-a456-426614174000";
 const ENTRY_ID = "623e4567-e89b-42d3-a456-426614174000";
 const CLASS_ID_2 = "723e4567-e89b-42d3-a456-426614174000";
+const SECTION_ID_2 = "823e4567-e89b-42d3-a456-426614174000";
+const DIVISION_ID_2 = "923e4567-e89b-42d3-a456-426614174000";
+const HOST_UUID = "a23e4567-e89b-42d3-a456-426614174000";
 
 /** shows row as loaded by getShowRole */
 function showRow(overrides: Record<string, unknown> = {}) {
@@ -99,6 +102,16 @@ describe("shows-v2 — createShow", () => {
         });
         const result = await createShow({ title: "Spring Fling", mode: "online" });
         expect(result).toEqual({ success: false, error: "insert denied" });
+    });
+
+    it("rolls the show row back when the staff mirror insert fails", async () => {
+        mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: SHOW_ID }, error: null });
+        mockClient._setImplicitResolve({ data: null, error: { message: "staff denied" } });
+        const result = await createShow({ title: "Spring Fling", mode: "live" });
+        expect(result).toEqual({ success: false, error: "staff denied" });
+        // The orphaned show row is deleted so no half-created show survives.
+        expect(mockClient._mockQuery.delete).toHaveBeenCalled();
+        expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("id", SHOW_ID);
     });
 });
 
@@ -262,6 +275,39 @@ describe("shows-v2 — classlist structure", () => {
         }));
     });
 
+    it("addDivision refuses once the classlist is frozen (completed show)", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow({ status: "completed" }), error: null });
+        const result = await addDivision({ showId: SHOW_ID, name: "Too Late Division" });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/no longer be edited/i);
+        expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+    });
+
+    it("addClass refuses once the classlist is frozen (archived show)", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "archived" }), error: null });
+        const result = await addClass({ sectionId: SECTION_ID, name: "Too Late Class" });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/no longer be edited/i);
+        expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+    });
+
+    it("reorderClasslist refuses once the classlist is frozen (results_review)", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow({ status: "results_review" }), error: null });
+        const result = await reorderClasslist({
+            showId: SHOW_ID,
+            kind: "class",
+            items: [{ id: CLASS_ID, sortOrder: 0 }],
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/no longer be edited/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
+    });
+
     it("reorderClasslist calls the batch RPC once (no per-row loop)", async () => {
         mockClient._mockQuery.maybeSingle
             .mockResolvedValueOnce({ data: showRow(), error: null });
@@ -285,7 +331,12 @@ describe("shows-v2 — classlist structure", () => {
 });
 
 describe("shows-v2 — updateClass (steward limits + class state machine)", () => {
-    function mockClassChain(clsOverrides: Record<string, unknown>, role: string | null, hostId = "someone-else") {
+    function mockClassChain(
+        clsOverrides: Record<string, unknown>,
+        role: string | null,
+        hostId = "someone-else",
+        showOverrides: Record<string, unknown> = {},
+    ) {
         mockClient._mockQuery.maybeSingle
             .mockResolvedValueOnce({
                 data: { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled", ...clsOverrides },
@@ -293,7 +344,7 @@ describe("shows-v2 — updateClass (steward limits + class state machine)", () =
             })
             .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
             .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
-            .mockResolvedValueOnce({ data: showRow({ host_id: hostId }), error: null });
+            .mockResolvedValueOnce({ data: showRow({ host_id: hostId, ...showOverrides }), error: null });
         if (hostId !== "user-1") {
             mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
                 data: role ? { role } : null,
@@ -343,23 +394,34 @@ describe("shows-v2 — updateClass (steward limits + class state machine)", () =
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/cannot go from placed/i);
     });
+
+    it("structural edits are refused once the show's classlist is frozen", async () => {
+        mockClassChain({}, null, "user-1", { status: "results_review" });
+        const result = await updateClass({ classId: CLASS_ID, patch: { name: "Too Late" } });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/no longer be edited/i);
+        expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
+    });
+
+    it("status flips remain open on a frozen show (results corrections)", async () => {
+        mockClassChain({ status: "placed" }, null, "user-1", { status: "results_review" });
+        mockClient._setImplicitResolve({ data: null, error: null });
+        const result = await updateClass({ classId: CLASS_ID, patch: { status: "judging" } });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ status: "judging" });
+    });
 });
 
 describe("shows-v2 — splitClass", () => {
-    function mockSplitContext(status = "scheduled") {
+    function mockSplitContext(status = "scheduled", showOverrides: Record<string, unknown> = {}) {
         mockClient._mockQuery.maybeSingle
             .mockResolvedValueOnce({
-                data: {
-                    id: CLASS_ID, section_id: SECTION_ID, name: "Other Stock",
-                    class_number: "114", status, max_per_entrant: null,
-                    allowed_scales: null, allowed_finishes: null,
-                    is_qualifying: true, sort_order: 4,
-                },
+                data: { id: CLASS_ID, section_id: SECTION_ID, status },
                 error: null,
             })
             .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
             .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+            .mockResolvedValueOnce({ data: showRow(showOverrides), error: null });
     }
 
     it("refuses splitting a class already judging", async () => {
@@ -371,11 +433,43 @@ describe("shows-v2 — splitClass", () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/scheduled or called/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
     });
 
-    it("refuses when a selected entry is not in the class", async () => {
+    it("refuses non-managers (steward) before touching the RPC", async () => {
+        mockSplitContext("scheduled", { host_id: "someone-else" });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: { role: "steward" },
+            error: null,
+        });
+        const result = await splitClass({
+            classId: CLASS_ID,
+            newClassName: "Other Stock B",
+            entryIdsToMove: [ENTRY_ID],
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/host or a co-host/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
+    });
+
+    it("refuses once the show's classlist is frozen (results_review)", async () => {
+        mockSplitContext("scheduled", { status: "results_review" });
+        const result = await splitClass({
+            classId: CLASS_ID,
+            newClassName: "Other Stock B",
+            entryIdsToMove: [ENTRY_ID],
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/no longer be edited/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
+    });
+
+    it("surfaces the RPC's membership refusal", async () => {
         mockSplitContext();
-        mockClient._setImplicitResolve({ data: [], error: null }); // entries lookup finds none
+        mockClient.rpc.mockResolvedValueOnce({
+            data: null,
+            error: { message: "Some selected entries do not belong to this class." },
+        });
         const result = await splitClass({
             classId: CLASS_ID,
             newClassName: "Other Stock B",
@@ -385,25 +479,26 @@ describe("shows-v2 — splitClass", () => {
         if (!result.success) expect(result.error).toMatch(/do not belong/i);
     });
 
-    it("creates the split class with lineage and moves entries in one batch", async () => {
+    it("splits through the transactional RPC and returns the new class id", async () => {
         mockSplitContext();
-        mockClient._setImplicitResolve({ data: [{ id: ENTRY_ID }], error: null });
-        mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: CLASS_ID_2 }, error: null });
+        mockClient.rpc.mockResolvedValueOnce({ data: CLASS_ID_2, error: null });
         const result = await splitClass({
             classId: CLASS_ID,
             newClassName: "Other Stock B",
+            newClassNumber: "114b",
             entryIdsToMove: [ENTRY_ID],
         });
         expect(result).toEqual({ success: true, newClassId: CLASS_ID_2 });
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-            section_id: SECTION_ID,
-            name: "Other Stock B",
-            split_from_class_id: CLASS_ID,
-            status: "scheduled",
-            is_qualifying: true,
-        }));
-        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ class_id: CLASS_ID_2 });
-        expect(mockClient._mockQuery.in).toHaveBeenCalledWith("id", [ENTRY_ID]);
+        expect(mockClient.rpc).toHaveBeenCalledTimes(1);
+        expect(mockClient.rpc).toHaveBeenCalledWith("split_show_class", {
+            p_class_id: CLASS_ID,
+            p_new_name: "Other Stock B",
+            p_new_class_number: "114b",
+            p_entry_ids: [ENTRY_ID],
+        });
+        // No direct writes — the RPC owns the transaction.
+        expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+        expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
     });
 });
 
@@ -411,8 +506,8 @@ describe("shows-v2 — combineClasses", () => {
     it("refuses when any source class is not combinable", async () => {
         mockClient._setImplicitResolve({
             data: [
-                { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled", is_qualifying: true },
-                { id: CLASS_ID_2, section_id: SECTION_ID, status: "placed", is_qualifying: true },
+                { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled" },
+                { id: CLASS_ID_2, section_id: SECTION_ID, status: "placed" },
             ],
             error: null,
         });
@@ -422,11 +517,12 @@ describe("shows-v2 — combineClasses", () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/scheduled or called/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
     });
 
     it("refuses when a class id is missing", async () => {
         mockClient._setImplicitResolve({
-            data: [{ id: CLASS_ID, section_id: SECTION_ID, status: "scheduled", is_qualifying: true }],
+            data: [{ id: CLASS_ID, section_id: SECTION_ID, status: "scheduled" }],
             error: null,
         });
         const result = await combineClasses({
@@ -437,11 +533,76 @@ describe("shows-v2 — combineClasses", () => {
         if (!result.success) expect(result.error).toMatch(/not found/i);
     });
 
-    it("combines: creates the target, moves live entries, closes sources with lineage", async () => {
+    it("refuses combining classes from different shows", async () => {
         mockClient._setImplicitResolve({
             data: [
-                { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled", is_qualifying: true },
-                { id: CLASS_ID_2, section_id: SECTION_ID, status: "called", is_qualifying: false },
+                { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled" },
+                { id: CLASS_ID_2, section_id: SECTION_ID_2, status: "scheduled" },
+            ],
+            error: null,
+        });
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: SECTION_ID_2, division_id: DIVISION_ID_2 }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID_2, show_id: OTHER_ID }, error: null });
+        const result = await combineClasses({
+            classIds: [CLASS_ID, CLASS_ID_2],
+            newClassName: "Frankenclass",
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/different shows/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
+    });
+
+    it("refuses non-managers (judge) before touching the RPC", async () => {
+        mockClient._setImplicitResolve({
+            data: [
+                { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled" },
+                { id: CLASS_ID_2, section_id: SECTION_ID, status: "called" },
+            ],
+            error: null,
+        });
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ host_id: "someone-else" }), error: null })
+            .mockResolvedValueOnce({ data: { role: "judge" }, error: null });
+        const result = await combineClasses({
+            classIds: [CLASS_ID, CLASS_ID_2],
+            newClassName: "Combined Stock",
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/host or a co-host/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
+    });
+
+    it("refuses once the show's classlist is frozen (completed)", async () => {
+        mockClient._setImplicitResolve({
+            data: [
+                { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled" },
+                { id: CLASS_ID_2, section_id: SECTION_ID, status: "called" },
+            ],
+            error: null,
+        });
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "completed" }), error: null });
+        const result = await combineClasses({
+            classIds: [CLASS_ID, CLASS_ID_2],
+            newClassName: "Combined Stock",
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/no longer be edited/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
+    });
+
+    it("combines through the transactional RPC and returns the new class id", async () => {
+        mockClient._setImplicitResolve({
+            data: [
+                { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled" },
+                { id: CLASS_ID_2, section_id: SECTION_ID, status: "called" },
             ],
             error: null,
         });
@@ -449,27 +610,46 @@ describe("shows-v2 — combineClasses", () => {
             .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
             .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
             .mockResolvedValueOnce({ data: showRow(), error: null });
-        mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: OTHER_ID }, error: null });
+        mockClient.rpc.mockResolvedValueOnce({ data: OTHER_ID, error: null });
 
         const result = await combineClasses({
             classIds: [CLASS_ID, CLASS_ID_2],
             newClassName: "Combined Stock",
         });
         expect(result).toEqual({ success: true, newClassId: OTHER_ID });
-        // combined class only qualifies if EVERY source did
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-            name: "Combined Stock",
-            is_qualifying: false,
-            status: "scheduled",
-        }));
-        // live entries moved, scratched left behind
-        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ class_id: OTHER_ID });
-        expect(mockClient._mockQuery.neq).toHaveBeenCalledWith("status", "scratched");
-        // sources closed with lineage
-        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({
-            status: "combined",
-            combined_into_class_id: OTHER_ID,
+        expect(mockClient.rpc).toHaveBeenCalledTimes(1);
+        expect(mockClient.rpc).toHaveBeenCalledWith("combine_show_classes", {
+            p_class_ids: [CLASS_ID, CLASS_ID_2],
+            p_new_name: "Combined Stock",
+            p_new_class_number: null,
         });
+        // No direct writes — the RPC owns the transaction.
+        expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+        expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
+    });
+
+    it("surfaces RPC errors verbatim", async () => {
+        mockClient._setImplicitResolve({
+            data: [
+                { id: CLASS_ID, section_id: SECTION_ID, status: "scheduled" },
+                { id: CLASS_ID_2, section_id: SECTION_ID, status: "called" },
+            ],
+            error: null,
+        });
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient.rpc.mockResolvedValueOnce({
+            data: null,
+            error: { message: "Classes from different shows cannot be combined." },
+        });
+        const result = await combineClasses({
+            classIds: [CLASS_ID, CLASS_ID_2],
+            newClassName: "Combined Stock",
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/different shows/i);
     });
 });
 
@@ -574,10 +754,17 @@ describe("shows-v2 — staff management (host only)", () => {
     });
 
     it("host cannot add themself", async () => {
+        // The caller's id must be a REAL uuid so zod passes and the
+        // action's own self-add guard is what refuses the request.
+        mockClient.auth.getUser.mockResolvedValue({
+            data: { user: { id: HOST_UUID, email: "host@test.com" } },
+        });
         mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
-        const result = await addShowStaff({ showId: SHOW_ID, userId: "user-1" as never, role: "steward" });
+            .mockResolvedValueOnce({ data: showRow({ host_id: HOST_UUID }), error: null });
+        const result = await addShowStaff({ showId: SHOW_ID, userId: HOST_UUID, role: "steward" });
         expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/already the host/i);
+        expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
 
     it("duplicate staff insert maps the unique violation to a friendly error", async () => {

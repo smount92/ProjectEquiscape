@@ -41,6 +41,7 @@ import {
     canSplitClass,
     canTransition,
     canTransitionClass,
+    isShowMutableForClasslist,
 } from "@/lib/shows/stateMachine";
 import { getClasslistTemplate } from "@/lib/shows/namhsaTemplate";
 import type { ShowMode, ShowStatus, StaffRole } from "@/lib/shows/types";
@@ -88,6 +89,10 @@ async function getShowRole(
 }
 
 const MANAGER_ROLES: StaffRole[] = ["host", "co_host"];
+
+/** Uniform refusal for structural classlist edits on a frozen show. */
+const CLASSLIST_FROZEN_ERROR =
+    "The classlist can no longer be edited — this show has moved past its running phase.";
 
 /** showId lookup for a class via its section → division chain. */
 async function getShowIdOfClass(
@@ -150,10 +155,15 @@ export async function createShow(
     if (error || !show) return { success: false, error: error?.message ?? "Failed to create show." };
 
     // Mirror the host into show_staff so staff queries see one roster.
+    // If the mirror fails, roll the show row back — a show without
+    // its host in the roster would be half-created.
     const { error: staffError } = await supabase
         .from("show_staff")
         .insert({ show_id: show.id, user_id: user.id, role: "host" });
-    if (staffError) return { success: false, error: staffError.message };
+    if (staffError) {
+        await supabase.from("shows").delete().eq("id", show.id);
+        return { success: false, error: staffError.message };
+    }
 
     return { success: true, showId: show.id as string };
 }
@@ -235,6 +245,9 @@ export async function addDivision(
     if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
         return { success: false, error: "Only the host or a co-host can edit the classlist." };
     }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
 
     const { data, error } = await supabase
         .from("show_divisions")
@@ -271,6 +284,9 @@ export async function addSection(
     if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
         return { success: false, error: "Only the host or a co-host can edit the classlist." };
     }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
 
     const { data, error } = await supabase
         .from("show_sections")
@@ -300,6 +316,9 @@ export async function addClass(
     if ("error" in ctx) return { success: false, error: ctx.error };
     if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
         return { success: false, error: "Only the host or a co-host can edit the classlist." };
+    }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
     }
 
     const { data, error } = await supabase
@@ -357,6 +376,12 @@ export async function updateClass(
         };
     }
 
+    // Structural edits freeze once the show leaves its running
+    // phases; status flips stay open for results corrections.
+    if (structuralKeys.length > 0 && !isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
+
     if (patch.status && patch.status !== cls.status) {
         const legal = canTransitionClass(cls.status, patch.status);
         if (!legal.ok) return { success: false, error: legal.reason };
@@ -395,6 +420,9 @@ export async function reorderClasslist(
     if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
         return { success: false, error: "Only the host or a co-host can reorder the classlist." };
     }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
 
     const { data, error } = await supabase.rpc("reorder_show_nodes", {
         p_kind: v.kind,
@@ -422,7 +450,7 @@ export async function splitClass(
 
     const { data: cls, error: cErr } = await supabase
         .from("show_classes")
-        .select("id, section_id, name, class_number, status, max_per_entrant, allowed_scales, allowed_finishes, is_qualifying, sort_order")
+        .select("id, section_id, status")
         .eq("id", v.classId)
         .maybeSingle();
     if (cErr) return { success: false, error: cErr.message };
@@ -436,49 +464,29 @@ export async function splitClass(
     if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
         return { success: false, error: "Only the host or a co-host can split a class." };
     }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
 
     const legal = canSplitClass(cls.status);
     if (!legal.ok) return { success: false, error: legal.reason };
 
-    // Every moved entry must belong to the class being split.
-    const { data: moveable, error: eErr } = await supabase
-        .from("show_class_entries")
-        .select("id")
-        .eq("class_id", v.classId)
-        .in("id", v.entryIdsToMove);
-    if (eErr) return { success: false, error: eErr.message };
-    if ((moveable?.length ?? 0) !== v.entryIdsToMove.length) {
-        return { success: false, error: "Some selected entries do not belong to this class." };
-    }
+    // One transactional RPC (SECURITY INVOKER — RLS still gates
+    // every touched row): creates the lineage-linked class and
+    // moves the selected entries, or does neither. The RPC
+    // re-verifies class status + entry membership inside the
+    // transaction; scratched entries are refused (they stay with
+    // the original class as history).
+    const { data: newClassId, error: rpcError } = await supabase.rpc("split_show_class", {
+        p_class_id: v.classId,
+        p_new_name: v.newClassName,
+        p_new_class_number: v.newClassNumber ?? null,
+        p_entry_ids: v.entryIdsToMove,
+    });
+    if (rpcError) return { success: false, error: rpcError.message };
+    if (!newClassId) return { success: false, error: "Failed to create the split class." };
 
-    // New class inherits the original's eligibility rules; lineage
-    // via split_from_class_id.
-    const { data: newClass, error: nErr } = await supabase
-        .from("show_classes")
-        .insert({
-            section_id: cls.section_id,
-            name: v.newClassName,
-            class_number: v.newClassNumber ?? null,
-            status: "scheduled",
-            split_from_class_id: v.classId,
-            max_per_entrant: cls.max_per_entrant,
-            allowed_scales: cls.allowed_scales,
-            allowed_finishes: cls.allowed_finishes,
-            is_qualifying: cls.is_qualifying,
-            sort_order: (cls.sort_order as number) + 1,
-        })
-        .select("id")
-        .single();
-    if (nErr || !newClass) return { success: false, error: nErr?.message ?? "Failed to create the split class." };
-
-    // Move the selected entries in one batch update.
-    const { error: mErr } = await supabase
-        .from("show_class_entries")
-        .update({ class_id: newClass.id })
-        .in("id", v.entryIdsToMove);
-    if (mErr) return { success: false, error: mErr.message };
-
-    return { success: true, newClassId: newClass.id as string };
+    return { success: true, newClassId: newClassId as string };
 }
 
 export async function combineClasses(
@@ -491,7 +499,7 @@ export async function combineClasses(
 
     const { data: classes, error: cErr } = await supabase
         .from("show_classes")
-        .select("id, section_id, status, is_qualifying")
+        .select("id, section_id, status")
         .in("id", v.classIds);
     if (cErr) return { success: false, error: cErr.message };
     if (!classes || classes.length !== v.classIds.length) {
@@ -524,37 +532,26 @@ export async function combineClasses(
     if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
         return { success: false, error: "Only the host or a co-host can combine classes." };
     }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
 
-    // The combined class qualifies only if every source did.
-    const { data: newClass, error: nErr } = await supabase
-        .from("show_classes")
-        .insert({
-            section_id: classes[0].section_id,
-            name: v.newClassName,
-            class_number: v.newClassNumber ?? null,
-            status: "scheduled",
-            is_qualifying: classes.every((c) => c.is_qualifying === true),
-        })
-        .select("id")
-        .single();
-    if (nErr || !newClass) return { success: false, error: nErr?.message ?? "Failed to create the combined class." };
+    // One transactional RPC (SECURITY INVOKER — RLS still gates
+    // every touched row): creates the combined class (qualifying
+    // only if every source did; eligibility rules inherited only
+    // when uniform across sources), de-duplicates any horse entered
+    // in several source classes (earliest entry wins, later ones
+    // auto-scratched in place with a note), moves the live entries
+    // and closes the sources with lineage — or does none of it.
+    const { data: newClassId, error: rpcError } = await supabase.rpc("combine_show_classes", {
+        p_class_ids: v.classIds,
+        p_new_name: v.newClassName,
+        p_new_class_number: v.newClassNumber ?? null,
+    });
+    if (rpcError) return { success: false, error: rpcError.message };
+    if (!newClassId) return { success: false, error: "Failed to create the combined class." };
 
-    // Move all live entries; scratched entries stay behind as history.
-    const { error: mErr } = await supabase
-        .from("show_class_entries")
-        .update({ class_id: newClass.id })
-        .in("class_id", v.classIds)
-        .neq("status", "scratched");
-    if (mErr) return { success: false, error: mErr.message };
-
-    // Close out the source classes with lineage.
-    const { error: sErr } = await supabase
-        .from("show_classes")
-        .update({ status: "combined", combined_into_class_id: newClass.id })
-        .in("id", v.classIds);
-    if (sErr) return { success: false, error: sErr.message };
-
-    return { success: true, newClassId: newClass.id as string };
+    return { success: true, newClassId: newClassId as string };
 }
 
 // ══════════════════════════════════════════════════════════════

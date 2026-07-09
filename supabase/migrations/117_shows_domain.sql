@@ -7,10 +7,11 @@
 -- in its own tables.
 --
 -- NAMING NOTE: the design doc calls the entries table
--- `show_entries`, but that name is already taken by the legacy
--- photo-show table (migration 016). The new table is
--- `show_class_entries`. Everything here is additive — zero
--- changes to existing tables.
+-- `show_entries`. A legacy photo-show table once held that name
+-- (migration 016) but was dropped in migration 052 — the
+-- `show_class_entries` name is a precautionary rename for
+-- clarity, not a live collision. Everything here is additive —
+-- zero changes to existing tables.
 --
 -- Companion: migration 118 adds RLS policies + helper functions.
 -- ============================================================
@@ -76,7 +77,10 @@ CREATE INDEX IF NOT EXISTS idx_shows_show_year ON shows (show_year);
 -- the PREVIOUS show year). Anchor date = show_date for live,
 -- else entries_close_at.
 CREATE OR REPLACE FUNCTION trg_shows_derive_show_year()
-RETURNS trigger AS $$
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
 DECLARE
   anchor DATE;
 BEGIN
@@ -92,11 +96,34 @@ BEGIN
   NEW.updated_at := now();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 CREATE OR REPLACE TRIGGER trg_shows_show_year
   BEFORE INSERT OR UPDATE ON shows
   FOR EACH ROW EXECUTE FUNCTION trg_shows_derive_show_year();
+
+-- host_id is immutable: RLS lets hosts/co-hosts UPDATE their show,
+-- but reassigning ownership (host_id) would let a co-host hijack a
+-- show — or a host dodge accountability. A deliberate host-transfer
+-- flow can land later as a SECURITY DEFINER function; until then
+-- any change to host_id is refused at the row level.
+CREATE OR REPLACE FUNCTION trg_shows_host_immutable()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.host_id IS DISTINCT FROM OLD.host_id THEN
+    RAISE EXCEPTION 'shows.host_id is immutable — host transfer requires a dedicated flow';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER trg_shows_host_guard
+  BEFORE UPDATE ON shows
+  FOR EACH ROW EXECUTE FUNCTION trg_shows_host_immutable();
 
 -- ══════════════════════════════════════════════════════════════
 -- 2. show_staff — delegated roles (co-hosts, stewards, judges)
@@ -189,8 +216,8 @@ CREATE INDEX IF NOT EXISTS idx_show_classes_combined_into
 
 -- ══════════════════════════════════════════════════════════════
 -- 4. show_class_entries — one horse in one class
--- (design doc name `show_entries` is taken by the legacy
--- photo-show table from migration 016)
+-- (design doc name `show_entries` belonged to the legacy
+-- photo-show table, dropped in 052; renamed here for clarity)
 -- ══════════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS show_class_entries (
@@ -212,10 +239,20 @@ CREATE TABLE IF NOT EXISTS show_class_entries (
   photo_id      UUID REFERENCES horse_images(id) ON DELETE SET NULL,
   status        TEXT NOT NULL DEFAULT 'entered'
                 CHECK (status IN ('entered', 'scratched', 'placed')),
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  -- A horse enters a given class at most once.
-  UNIQUE (class_id, horse_id)
+  -- Free-text annotation (e.g. why an entry was auto-scratched
+  -- when classes were combined). Written by staff/system paths.
+  note          TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Scratch/re-entry contract (documented in
+-- src/lib/shows/entryRules.ts): scratched rows are HISTORY and
+-- stay in place; re-entering after a scratch creates a NEW row.
+-- Uniqueness is therefore partial — a horse may appear in a class
+-- many times scratched, but at most once live.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_show_class_entries_live
+  ON show_class_entries (class_id, horse_id)
+  WHERE status <> 'scratched';
 
 CREATE INDEX IF NOT EXISTS idx_show_class_entries_show
   ON show_class_entries (show_id);
@@ -227,6 +264,39 @@ CREATE INDEX IF NOT EXISTS idx_show_class_entries_owner
   ON show_class_entries (owner_id);
 CREATE INDEX IF NOT EXISTS idx_show_class_entries_handler
   ON show_class_entries (handler_id) WHERE handler_id IS NOT NULL;
+
+-- Integrity: the denormalized show_id MUST match the show the
+-- class actually belongs to (class → section → division → show).
+-- Without this, an entrant could INSERT an entry whose class_id
+-- points into someone else's show while show_id points at a show
+-- where entries happen to be open — injecting entries cross-show.
+-- SECURITY DEFINER: the ownership chain must be readable even when
+-- the writer can't see every row through RLS.
+CREATE OR REPLACE FUNCTION trg_show_class_entries_match_show()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  class_show_id UUID;
+BEGIN
+  SELECT d.show_id INTO class_show_id
+  FROM show_classes c
+  JOIN show_sections s ON s.id = c.section_id
+  JOIN show_divisions d ON d.id = s.division_id
+  WHERE c.id = NEW.class_id;
+
+  IF class_show_id IS NULL OR class_show_id <> NEW.show_id THEN
+    RAISE EXCEPTION 'entry show_id does not match the show of class %', NEW.class_id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER trg_show_class_entries_show_guard
+  BEFORE INSERT OR UPDATE ON show_class_entries
+  FOR EACH ROW EXECUTE FUNCTION trg_show_class_entries_match_show();
 
 -- ══════════════════════════════════════════════════════════════
 -- 5. show_placings — ONE result vocabulary
@@ -252,6 +322,33 @@ CREATE TABLE IF NOT EXISTS show_placings (
 CREATE INDEX IF NOT EXISTS idx_show_placings_class ON show_placings (class_id);
 CREATE INDEX IF NOT EXISTS idx_show_placings_entry ON show_placings (entry_id);
 
+-- Integrity: a placing's entry must actually be in the class being
+-- placed — otherwise staff of one show could hang results on
+-- entries from another class/show.
+CREATE OR REPLACE FUNCTION trg_show_placings_entry_in_class()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  entry_class_id UUID;
+BEGIN
+  SELECT e.class_id INTO entry_class_id
+  FROM show_class_entries e
+  WHERE e.id = NEW.entry_id;
+
+  IF entry_class_id IS NULL OR entry_class_id <> NEW.class_id THEN
+    RAISE EXCEPTION 'placing entry % does not belong to class %', NEW.entry_id, NEW.class_id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER trg_show_placings_class_guard
+  BEFORE INSERT OR UPDATE ON show_placings
+  FOR EACH ROW EXECUTE FUNCTION trg_show_placings_entry_in_class();
+
 -- ══════════════════════════════════════════════════════════════
 -- 6. show_callbacks — champion / reserve ladder
 -- Placed 1sts queue to the section callback; section champions to
@@ -275,6 +372,58 @@ CREATE INDEX IF NOT EXISTS idx_show_callbacks_show ON show_callbacks (show_id);
 CREATE INDEX IF NOT EXISTS idx_show_callbacks_scope
   ON show_callbacks (scope, scope_id) WHERE scope_id IS NOT NULL;
 
+-- Integrity: champion/reserve entries and the scoped
+-- section/division must all belong to the callback's own show —
+-- staff of show A must not be able to point a callback at show B's
+-- entries or structure.
+CREATE OR REPLACE FUNCTION trg_show_callbacks_same_show()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.champion_entry_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM show_class_entries e
+    WHERE e.id = NEW.champion_entry_id AND e.show_id = NEW.show_id
+  ) THEN
+    RAISE EXCEPTION 'callback champion entry does not belong to show %', NEW.show_id;
+  END IF;
+
+  IF NEW.reserve_entry_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM show_class_entries e
+    WHERE e.id = NEW.reserve_entry_id AND e.show_id = NEW.show_id
+  ) THEN
+    RAISE EXCEPTION 'callback reserve entry does not belong to show %', NEW.show_id;
+  END IF;
+
+  IF NEW.scope = 'section' AND NOT EXISTS (
+    SELECT 1 FROM show_sections s
+    JOIN show_divisions d ON d.id = s.division_id
+    WHERE s.id = NEW.scope_id AND d.show_id = NEW.show_id
+  ) THEN
+    RAISE EXCEPTION 'callback section scope_id does not belong to show %', NEW.show_id;
+  END IF;
+
+  IF NEW.scope = 'division' AND NOT EXISTS (
+    SELECT 1 FROM show_divisions d
+    WHERE d.id = NEW.scope_id AND d.show_id = NEW.show_id
+  ) THEN
+    RAISE EXCEPTION 'callback division scope_id does not belong to show %', NEW.show_id;
+  END IF;
+
+  IF NEW.scope = 'show' AND NEW.scope_id IS NOT NULL THEN
+    RAISE EXCEPTION 'show-scope callbacks must not carry a scope_id';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER trg_show_callbacks_show_guard
+  BEFORE INSERT OR UPDATE ON show_callbacks
+  FOR EACH ROW EXECUTE FUNCTION trg_show_callbacks_same_show();
+
 -- ══════════════════════════════════════════════════════════════
 -- 7. qualification_cards — bearer tokens on the horse's Hoofprint
 -- id IS the short code (8-char URL-safe, generated in
@@ -285,8 +434,12 @@ CREATE INDEX IF NOT EXISTS idx_show_callbacks_scope
 
 CREATE TABLE IF NOT EXISTS qualification_cards (
   id                  TEXT PRIMARY KEY CHECK (id ~ '^[A-HJ-NP-Za-km-z2-9]{8}$'),
-  show_id             UUID NOT NULL REFERENCES shows(id) ON DELETE CASCADE,
-  class_id            UUID NOT NULL REFERENCES show_classes(id) ON DELETE CASCADE,
+  -- RESTRICT (not CASCADE) on show/class: cards are earned results
+  -- of a completed show — deleting the show or class must never
+  -- silently vaporize them. Both FKs restrict because a show
+  -- delete would otherwise reach cards via the class cascade chain.
+  show_id             UUID NOT NULL REFERENCES shows(id) ON DELETE RESTRICT,
+  class_id            UUID NOT NULL REFERENCES show_classes(id) ON DELETE RESTRICT,
   horse_id            UUID NOT NULL REFERENCES user_horses(id) ON DELETE CASCADE,
   earned_place        INTEGER NOT NULL CHECK (earned_place IN (1, 2)),
   earned_by_owner_id  UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -298,7 +451,11 @@ CREATE TABLE IF NOT EXISTS qualification_cards (
   show_year           INTEGER,
   issued_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
   -- One card per horse per class (the 1st/2nd distinction lives
-  -- in earned_place).
+  -- in earned_place). Deliberately ABSOLUTE — unlike the entries
+  -- table's status-partial uniqueness — because a card represents
+  -- the one real 1st/2nd result for that horse in that class
+  -- (issuance is guarded by the RLS placing check in 118); voided
+  -- cards are corrections, not room for a duplicate.
   UNIQUE (class_id, horse_id)
 );
 
@@ -329,5 +486,8 @@ CREATE INDEX IF NOT EXISTS idx_show_results_docs_show ON show_results_docs (show
 -- Added: shows, show_staff, show_divisions, show_sections,
 --        show_classes, show_class_entries, show_placings,
 --        show_callbacks, qualification_cards, show_results_docs
+-- Integrity triggers: shows host_id immutable; entry show_id must
+-- match its class's show; placing entry must be in its class;
+-- callback entries/scope must belong to the callback's show.
 -- RLS lands in migration 118.
 -- ============================================================

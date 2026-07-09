@@ -130,6 +130,8 @@ export interface ShowClassEntryRow {
     entry_number: number | null;
     photo_id: string | null;
     status: EntryStatus;
+    /** Staff/system annotation (e.g. auto-scratch reason on combine). */
+    note: string | null;
     created_at: string;
 }
 
