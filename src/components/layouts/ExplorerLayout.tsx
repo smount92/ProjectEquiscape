@@ -23,9 +23,12 @@ export default function ExplorerLayout({
             {/* Header row */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                        {title}
-                    </h1>
+                    <div className="brass-heading">
+                        <span className="brass-heading-bar" aria-hidden="true" />
+                        <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                            {title}
+                        </h1>
+                    </div>
                     {description && (
                         <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">{description}</p>
                     )}
@@ -42,6 +45,7 @@ export default function ExplorerLayout({
 
             {/* Content — animated */}
             <motion.div
+                className="workcard-stitched"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}

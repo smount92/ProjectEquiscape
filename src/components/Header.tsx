@@ -232,7 +232,7 @@ export default function Header() {
 
  return (
  <header
- className="sticky top-0 z-[100] flex h-[var(--header-height)] items-center justify-between border-b border-input bg-secondary/90 px-8 py-0 backdrop-blur-md transition-all max-sm:px-4"
+ className="leather-band sticky top-0 z-[100] flex h-[var(--header-height)] items-center justify-between px-8 py-0 transition-all max-sm:px-4"
  role="banner"
  >
  <Link
@@ -248,7 +248,7 @@ export default function Header() {
  {/* ── Hamburger Button (mobile only) ── */}
  {user && (
  <button
- className="relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
+ className="leather-icon-btn relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
  aria-expanded={mobileMenuOpen ? "true" : "false"}
@@ -296,7 +296,7 @@ export default function Header() {
  <div className="hidden md:flex min-w-0 flex-1 items-center justify-end gap-4">
  {/* Primary text links — measured by ResizeObserver */}
  <nav
- className="relative flex min-w-0 flex-1 items-center gap-[2px] overflow-hidden"
+ className="leather-nav relative flex min-w-0 flex-1 items-center gap-[2px] overflow-hidden"
  aria-label="Main navigation"
  ref={primaryNavRef}
  >
@@ -306,6 +306,7 @@ export default function Header() {
  href={link.href}
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id={link.id}
+ aria-current={pathname === link.href ? "page" : undefined}
  data-nav-item="true"
  style={
  i >= visibleCount
@@ -322,7 +323,7 @@ export default function Header() {
  {hasOverflow && (
  <div className="relative shrink-0" ref={moreMenuRef}>
  <button
- className="flex cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 py-1 font-[inherit] text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ className="leather-nav-link flex cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 py-1 font-[inherit] text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setMoreMenuOpen(!moreMenuOpen)}
  aria-expanded={moreMenuOpen ? "true" : "false"}
  aria-label="More navigation links"
@@ -352,7 +353,7 @@ export default function Header() {
  <NotificationBell />
  <Link
  href="/inbox"
- className="bg-card border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
+ className="leather-icon-btn bg-card border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
  title="Inbox"
  id="nav-inbox-icon"
  >
@@ -376,7 +377,7 @@ export default function Header() {
  </Link>
  <Link
  href="/wishlist"
- className="bg-card border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
+ className="leather-icon-btn bg-card border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
  title="Wishlist"
  id="nav-wishlist-icon"
  >
@@ -392,7 +393,7 @@ export default function Header() {
  aria-expanded={userMenuOpen ? "true" : "false"}
  aria-label="User menu"
  >
- <span className="inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-muted-foreground">
+ <span className="brass-ring inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-muted-foreground">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
@@ -509,7 +510,7 @@ export default function Header() {
  {user && (
  <nav
  ref={navRef}
- className={`absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
+ className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
  aria-label="Mobile navigation"
  >
  <Link
@@ -696,7 +697,7 @@ export default function Header() {
  {/* ── Public Navigation (not signed in) ── */}
  {!user && (
  <nav
- className="flex flex-row items-center gap-4"
+ className="leather-nav flex flex-row items-center gap-4"
  aria-label="Public navigation"
  >
  <Link

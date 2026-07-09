@@ -30,16 +30,15 @@ export default function LandingPage() {
     <div className="overflow-x-hidden">
       {/* ─── Hero Section ─── */}
       <section
-        className="flex min-h-[calc(100dvh-var(--header-height))] items-center justify-center px-6 py-12"
+        className="leather-panel stitched leather-masthead flex min-h-[calc(100dvh-var(--header-height))] items-center justify-center px-6 py-12"
         id="hero"
       >
-        <div className="absolute inset-0 rounded-full bg-forest/10 blur-3xl" aria-hidden="true" />
-        <div className="animate-fade-in-up relative z-[1] max-w-[780px]">
+        <div className="animate-fade-in-up relative z-[1] max-w-[780px] text-center">
           <span className="text-forest border-forest/20 mb-8 inline-flex items-center gap-2 rounded-full border bg-forest/5 px-6 py-1.5 text-sm font-semibold tracking-[0.01em]">
             <Fingerprint size={16} strokeWidth={1.5} /> Hoofprint™ — Living Provenance for Model
             Horses
           </span>
-          <h1 className="text-[clamp(2rem,5vw,3.5rem)] mb-6 font-serif leading-[1.1] font-extrabold tracking-[-0.03em]">
+          <h1 className="text-engraved-light text-[clamp(1.8rem,4.5vw,3rem)] mb-6 font-serif leading-[1.15] font-extrabold uppercase tracking-[0.12em]">
             The Only Platform Built{" "}
             <span className="text-forest">for This Hobby</span>
           </h1>
@@ -48,10 +47,10 @@ export default function LandingPage() {
             to finished custom. Enter virtual photo shows with NAMHSA-style class lists. Sell with
             verified trust signals. All in one place — built by collectors, for collectors.
           </p>
-          <div className="mb-8 flex flex-wrap items-center justify-center gap-4">
+          <div className="strap-nav mb-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-forest px-8 py-3 text-base font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90"
+              className="text-engraved-brass inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-forest px-8 py-3 text-base font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90"
               id="hero-cta-signup"
             >
               Create Free Account

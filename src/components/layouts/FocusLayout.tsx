@@ -21,16 +21,19 @@ export default function FocusLayout({
             {backLink && <div>{backLink}</div>}
 
             <div>
-                <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                    {title}
-                </h1>
+                <div className="brass-heading">
+                    <span className="brass-heading-bar" aria-hidden="true" />
+                    <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                        {title}
+                    </h1>
+                </div>
                 {description && (
                     <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">{description}</p>
                 )}
             </div>
 
             <motion.div
-                className="w-full"
+                className="w-full workcard-stitched"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}

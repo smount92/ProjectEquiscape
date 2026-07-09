@@ -4,13 +4,13 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="mt-auto border-t border-input bg-secondary px-8 pt-16 text-sm text-secondary-foreground">
+        <footer className="leather-band leather-footer mt-auto px-8 pt-16 text-sm text-secondary-foreground">
             <div className="mx-auto flex max-w-[var(--max-width)] justify-between gap-16 pb-12 max-md:flex-col max-md:gap-12">
                 {/* Brand */}
                 <div className="max-w-[260px] max-md:max-w-full max-md:text-center">
                     <Link
                         href="/"
-                        className="mb-2 inline-block text-lg font-extrabold tracking-tight text-foreground no-underline hover:text-forest"
+                        className="leather-footer-brand text-engraved-light mb-2 inline-block text-lg font-extrabold tracking-tight text-foreground no-underline hover:text-forest"
                     >
                         <img src="/logo.png" alt="" style={{height:"20px",width:"auto",display:"inline-block",verticalAlign:"middle",marginRight:"4px"}} /> Model Horse Hub
                     </Link>
@@ -44,7 +44,7 @@ export default function Footer() {
             </div>
 
             {/* Bottom bar */}
-            <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-between border-t border-input py-6 text-xs text-secondary-foreground max-md:flex-col max-md:gap-2 max-md:text-center">
+            <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-between border-t border-[rgba(232,200,120,0.25)] py-6 text-xs text-secondary-foreground max-md:flex-col max-md:gap-2 max-md:text-center">
                 <span>© {currentYear} Model Horse Hub. All rights reserved.</span>
                 <span className="flex items-center gap-1 [&_a]:text-secondary-foreground [&_a]:no-underline [&_a]:transition-colors [&_a:hover]:text-forest">
                     <Link href="/privacy">Privacy</Link>

@@ -1913,3 +1913,418 @@ p {
   --ring: #2C5545;
   --radius: 0.625rem;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MATERIALS — "Leather Edition" (design/leather-edition preview)
+   Skeuomorphic textures in pure CSS: layered gradients + inline SVG
+   noise/grain filters. Zero image assets. All colors derive from the
+   existing token palette (saddle, forest, parchment, tier-gold).
+   Simple Mode ([data-simple-mode="true"]) strips every texture back
+   to flat tokens — see the end of this section.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* texture data-URIs */
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='60'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.35' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='300' height='60' filter='url(%23g)'/%3E%3C/svg%3E");
+  /* material color ramps (derived from --color-saddle / --color-forest / tier-gold) */
+  --leather-deep: #3E2414;
+  --leather: #5C3A20;
+  --leather-hi: #7A4E2C;
+  --wood-deep: #2E1E12;
+  --wood: #4A3220;
+  --brass-dark: #7A5C22;
+  --brass: #B08D3E;
+  --brass-hi: #E8C878;
+  --brass-ink: #2A1D08;
+  --thread: #D9B978;
+  /* text-on-leather ramp */
+  --leather-text: #EFDDBB;
+  --leather-text-soft: #D8BE92;
+  --leather-text-muted: #C9AE84;
+  --serif-display: "Palatino Linotype", Palatino, "Book Antiqua", var(--font-family-serif, Georgia), serif;
+}
+
+/* ── Leather ─────────────────────────────────────────────────────── */
+.leather-panel {
+  position: relative;
+  background:
+    var(--noise),
+    radial-gradient(ellipse 120% 90% at 50% 0%, var(--leather-hi) 0%, var(--leather) 45%, var(--leather-deep) 100%);
+  background-blend-mode: overlay, normal;
+  border-radius: 14px;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 220, 170, 0.25),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.45),
+    inset 14px 0 28px rgba(0, 0, 0, 0.25),
+    inset -14px 0 28px rgba(0, 0, 0, 0.25),
+    0 6px 18px rgba(46, 30, 18, 0.35);
+}
+
+/* full-width leather strip (header / footer bands) — no radius, softer inset */
+.leather-band {
+  position: relative;
+  color: var(--leather-text);
+  background:
+    var(--noise),
+    linear-gradient(180deg, var(--leather-hi) 0%, var(--leather) 55%, var(--leather-deep) 100%);
+  background-blend-mode: overlay, normal;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.45);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 220, 170, 0.22),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.35),
+    0 3px 12px rgba(46, 30, 18, 0.35);
+}
+
+/* stitched saddle-thread border (pairs with .leather-panel / .leather-band) */
+.stitched {
+  position: relative;
+}
+.stitched::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+  border: 2px dashed var(--thread);
+  border-radius: 8px;
+  opacity: 0.75;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6));
+}
+
+/* ── Engraved / embossed text ────────────────────────────────────── */
+.text-engraved-light {
+  color: var(--leather-text);
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.85), 0 1px 1px rgba(255, 230, 180, 0.28);
+}
+.text-engraved-brass,
+.strap-nav a.text-engraved-brass {
+  color: var(--brass-ink);
+  text-shadow: 0 1px 0 rgba(255, 244, 210, 0.9);
+}
+
+/* ── Green strap (forest webbing band for nav / CTA rows) ────────── */
+.strap-nav {
+  position: relative;
+  background:
+    var(--noise),
+    linear-gradient(180deg, #37664F 0%, var(--color-forest, #2C5545) 40%, var(--color-forest-dark, #1E3D31) 100%);
+  background-blend-mode: overlay, normal;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.35),
+    0 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 14px 20px;
+}
+.strap-nav a {
+  color: #E9E2CE;
+  font-family: var(--serif-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.strap-nav a:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+.strap-nav a:focus-visible {
+  outline: 2px solid var(--brass-hi);
+  outline-offset: 3px;
+}
+.strap-nav a.text-engraved-brass {
+  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+  border: 0;
+  border-top: 1px solid #F6E3AE;
+  border-bottom: 2px solid #5C441A;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+}
+.strap-nav a.text-engraved-brass:hover {
+  color: var(--brass-ink);
+}
+
+/* ── Wood ────────────────────────────────────────────────────────── */
+.wood-panel {
+  position: relative;
+  border-radius: 12px;
+  padding: 20px;
+  background:
+    var(--grain),
+    linear-gradient(180deg, #55381F 0%, #46301C 30%, var(--wood-deep) 100%);
+  background-blend-mode: overlay, normal;
+  box-shadow:
+    inset 0 3px 5px rgba(255, 215, 160, 0.18),
+    inset 0 -16px 30px rgba(0, 0, 0, 0.55),
+    0 8px 22px rgba(30, 20, 10, 0.4);
+}
+
+/* ── Brass plaque (high-contrast engraving recipe) ───────────────── */
+.brass-plaque {
+  position: relative;
+  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+  border-radius: 4px;
+  border-top: 1px solid #F6E3AE;
+  border-left: 1px solid #E3C67E;
+  border-bottom: 2px solid #5C441A;
+  border-right: 2px solid #6B501E;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+  color: var(--brass-ink);
+}
+
+/* brass avatar/crest ring */
+.brass-ring {
+  box-shadow: 0 0 0 2px var(--brass), 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Brass heading (bar + smallcaps serif title) ─────────────────── */
+.brass-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brass-heading-bar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 10px;
+  border-radius: 2px;
+  background: linear-gradient(165deg, var(--brass-hi), var(--brass-dark));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 240, 200, 0.7);
+}
+.brass-heading h1,
+.brass-heading h2,
+.brass-heading h3 {
+  font-family: var(--serif-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── Calm working surface: parchment card, whisper of stitching ──── */
+.workcard-stitched {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(90, 70, 40, 0.12);
+}
+.workcard-stitched::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  pointer-events: none;
+  border-radius: 6px;
+  border: 1.5px dashed rgba(139, 90, 43, 0.35);
+}
+
+/* ── Leather picture frame (feed post cards) ─────────────────────── */
+.leather-frame {
+  position: relative;
+  background: var(--card);
+  background-clip: padding-box;
+  border: 6px solid transparent;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+}
+.leather-frame::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  z-index: -1;
+  border-radius: 8px;
+  background: var(--noise), linear-gradient(150deg, var(--leather-hi), var(--leather-deep));
+  background-blend-mode: overlay, normal;
+}
+/* brass-ringed avatars inside a frame */
+.leather-frame .ring-border {
+  box-shadow: 0 0 0 2px var(--brass), 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Leather header chrome (nav links, icon buttons, mobile menu) ── */
+.leather-nav a,
+.leather-nav-link {
+  color: var(--leather-text);
+  font-family: var(--serif-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.leather-nav a:hover,
+.leather-nav-link:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+.leather-nav a[aria-current="page"] {
+  color: var(--brass-hi);
+  box-shadow: inset 0 -2px 0 var(--brass);
+  border-radius: 0;
+}
+.leather-nav a:focus-visible,
+.leather-nav-link:focus-visible,
+.leather-icon-btn:focus-visible {
+  outline: 2px solid var(--brass-hi);
+  outline-offset: 2px;
+}
+.leather-icon-btn {
+  background: rgba(0, 0, 0, 0.18);
+  border-color: rgba(232, 200, 120, 0.35);
+  color: var(--leather-text);
+}
+.leather-icon-btn:hover {
+  color: #ffffff;
+  border-color: var(--brass-hi);
+}
+.leather-band #nav-notifications {
+  color: var(--leather-text);
+}
+/* notification / unread badges in brass on the leather band */
+.leather-band .inbox-unread-badge,
+.leather-band #nav-notifications > span,
+.leather-menu .inbox-unread-badge,
+.leather-menu #nav-notifications > span {
+  background: linear-gradient(160deg, var(--brass-hi), var(--brass-dark));
+  color: var(--brass-ink);
+  font-weight: 800;
+}
+
+/* mobile hamburger dropdown panel */
+.leather-menu {
+  background:
+    var(--noise),
+    linear-gradient(180deg, var(--leather) 0%, var(--leather-deep) 100%);
+  background-blend-mode: overlay, normal;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 2px 3px rgba(255, 220, 170, 0.18), 0 12px 24px rgba(46, 30, 18, 0.45);
+}
+.leather-menu a,
+.leather-menu button {
+  color: var(--leather-text);
+  font-family: var(--serif-display);
+  letter-spacing: 0.06em;
+}
+.leather-menu a:hover,
+.leather-menu button:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+.leather-menu #nav-upgrade-m {
+  color: var(--brass-hi);
+  background: rgba(232, 200, 120, 0.12);
+}
+.leather-menu #nav-notifications {
+  color: var(--leather-text);
+}
+
+/* ── Leather footer band ─────────────────────────────────────────── */
+.leather-footer {
+  border-top: 2px solid rgba(0, 0, 0, 0.5);
+  border-bottom: 0;
+}
+.leather-footer a {
+  color: var(--leather-text);
+}
+.leather-footer a:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+.leather-footer h4 {
+  color: var(--brass-hi);
+  font-family: var(--serif-display);
+  letter-spacing: 0.18em;
+}
+.leather-footer p,
+.leather-footer span {
+  color: var(--leather-text-soft);
+}
+.leather-footer .leather-footer-brand {
+  color: var(--brass-hi);
+}
+
+/* ── Leather masthead (landing hero) ─────────────────────────────── */
+.leather-masthead {
+  border-radius: 0;
+}
+.leather-masthead::after {
+  border-radius: 14px;
+}
+.leather-masthead h1 {
+  font-family: var(--serif-display);
+}
+.leather-masthead p {
+  color: var(--leather-text-soft);
+}
+.leather-masthead .text-forest {
+  color: var(--brass-hi);
+  border-color: rgba(232, 200, 120, 0.4);
+  background: rgba(232, 200, 120, 0.08);
+}
+.leather-masthead a:not(.text-engraved-brass) {
+  border-color: rgba(239, 221, 187, 0.55);
+  color: var(--leather-text);
+}
+
+/* ── Motion: hover brightness only, respects reduced-motion ──────── */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .brass-plaque {
+    transition: filter 0.25s;
+  }
+  .brass-plaque:hover {
+    filter: brightness(1.12);
+  }
+}
+
+/* ── SIMPLE MODE — strip textures back to flat tokens ────────────── */
+[data-simple-mode="true"] .leather-panel,
+[data-simple-mode="true"] .leather-band,
+[data-simple-mode="true"] .leather-menu,
+[data-simple-mode="true"] .strap-nav {
+  background: var(--color-forest, #2C5545);
+  background-image: none;
+  box-shadow: none;
+}
+[data-simple-mode="true"] .leather-panel {
+  background: var(--color-saddle, #8B5A2B);
+}
+[data-simple-mode="true"] .wood-panel {
+  background: var(--color-forest-dark, #1E3D31);
+  background-image: none;
+  box-shadow: none;
+}
+[data-simple-mode="true"] .brass-plaque {
+  background: #F4EFE6;
+  background-image: none;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: none;
+  color: #111111;
+}
+[data-simple-mode="true"] .leather-frame {
+  box-shadow: none;
+}
+[data-simple-mode="true"] .leather-frame::before {
+  background: var(--color-saddle, #8B5A2B);
+  background-image: none;
+}
+[data-simple-mode="true"] .stitched::after,
+[data-simple-mode="true"] .workcard-stitched::after,
+[data-simple-mode="true"] .brass-heading-bar {
+  display: none;
+}
+[data-simple-mode="true"] .text-engraved-light,
+[data-simple-mode="true"] .text-engraved-brass,
+[data-simple-mode="true"] .leather-masthead h1 {
+  text-shadow: none;
+}
+[data-simple-mode="true"] .text-engraved-brass,
+[data-simple-mode="true"] .strap-nav a.text-engraved-brass {
+  color: #111111;
+  background: #ffffff;
+  border: 2px solid #111111;
+  box-shadow: none;
+}
+[data-simple-mode="true"] .brass-ring,
+[data-simple-mode="true"] .leather-frame .ring-border {
+  box-shadow: 0 0 0 2px #111111;
+}
+[data-simple-mode="true"] .workcard-stitched {
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}

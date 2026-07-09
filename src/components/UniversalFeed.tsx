@@ -365,7 +365,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  const hiddenCount = replies.length - 2;
 
  return (
- <div className={`border-b border-input pb-3 ${post.isPinned ? "border-l-4 border-l-amber-400 bg-amber-50/30 pl-4" : ""}`}>
+ <div className={`leather-frame pb-3 ${post.isPinned ? "bg-amber-50/30" : ""}`}>
  {post.isPinned && (
  <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-amber-600">📌 Pinned</span>
  )}

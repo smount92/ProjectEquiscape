@@ -23,9 +23,12 @@ export default function CommandCenterLayout({
             {/* Header row */}
             <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                    <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                        {title}
-                    </h1>
+                    <div className="brass-heading">
+                        <span className="brass-heading-bar" aria-hidden="true" />
+                        <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                            {title}
+                        </h1>
+                    </div>
                     {description && (
                         <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">{description}</p>
                     )}
@@ -41,7 +44,7 @@ export default function CommandCenterLayout({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                 >
-                    <main className="flex min-w-0 flex-col gap-8">{mainContent}</main>
+                    <main className="workcard-stitched flex min-w-0 flex-col gap-8">{mainContent}</main>
                     <aside className="flex flex-col gap-6">{sidebarContent}</aside>
                 </motion.div>
             ) : (
@@ -50,7 +53,7 @@ export default function CommandCenterLayout({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
                 >
-                    <main className="flex min-w-0 flex-col gap-8">{mainContent}</main>
+                    <main className="workcard-stitched flex min-w-0 flex-col gap-8">{mainContent}</main>
                 </motion.div>
             )}
         </div>

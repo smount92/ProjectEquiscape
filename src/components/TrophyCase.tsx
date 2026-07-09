@@ -74,25 +74,25 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
  );
 
  return (
- <div className="mt-2">
+ <div className="wood-panel mt-2">
  {sortedCategories.map((category) => (
  <div key={category}>
- <h4 className="text-muted-foreground my-6 mb-2 text-sm font-semibold tracking-[0.05em] uppercase first:mt-0">
+ <h4 className="text-engraved-light my-6 mb-2 text-center font-serif text-sm font-semibold tracking-[0.16em] uppercase first:mt-0">
  {CATEGORY_LABELS[category] || category}
  </h4>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 max-[480px]:grid-cols-[repeat(auto-fill,minmax(90px,1fr))] max-[480px]:gap-2">
  {grouped.get(category)!.map((badge) => (
  <div
  key={badge.id}
- className={`bg-muted relative cursor-default rounded-lg border p-4 text-center transition-transform hover:-translate-y-0.5 max-[480px]:p-2 ${getTierClasses(badge.tier)}`}
+ className={`brass-plaque relative cursor-default rounded-lg border p-4 text-center transition-transform hover:-translate-y-0.5 max-[480px]:p-2 ${getTierClasses(badge.tier)}`}
  onMouseEnter={() => setHoveredBadge(badge.id)}
  onMouseLeave={() => setHoveredBadge(null)}
  >
- <span className="mb-1 block text-[2rem] max-[480px]:text-2xl">{badge.icon}</span>
- <span className="block text-xs font-semibold">
+ <span className="mb-1 block text-[2rem] drop-shadow-[0_3px_3px_rgba(0,0,0,0.35)] max-[480px]:text-2xl">{badge.icon}</span>
+ <span className="text-engraved-brass block font-serif text-xs font-bold tracking-[0.06em] uppercase">
  {badge.name}
  </span>
- <span className="text-muted-foreground mt-0.5 block text-xs">
+ <span className="text-engraved-brass mt-0.5 block text-xs opacity-80">
  {formatDate(badge.earnedAt)}
  </span>
  {hoveredBadge === badge.id && (

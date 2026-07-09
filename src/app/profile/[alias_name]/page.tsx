@@ -396,7 +396,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  {/* Trophy Case — only if user hasn't hidden badges (owner always sees their own) */}
  {userBadges.length > 0 && (isOwnProfile || (profileUser.show_badges ?? true)) && (
  <div className="animate-fade-in-up mb-6" id="trophies">
- <h3 className="mb-2 text-sm text-secondary-foreground">🏆 Trophy Case</h3>
+ <div className="brass-heading mb-2">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h3 className="text-base text-secondary-foreground">🏆 Trophy Case</h3>
+ </div>
  <TrophyCase badges={userBadges} />
  </div>
  )}

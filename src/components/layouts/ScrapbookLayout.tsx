@@ -30,7 +30,7 @@ export default function ScrapbookLayout({
                 <div className="flex flex-col gap-8">{leftContent}</div>
 
                 {/* Right: Data card (sticky on desktop) */}
-                <div className="flex flex-col gap-6 lg:sticky lg:top-[calc(var(--header-height)+2rem)]">
+                <div className="workcard-stitched flex flex-col gap-6 lg:sticky lg:top-[calc(var(--header-height)+2rem)]">
                     {rightContent}
                 </div>
             </motion.div>
