@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,9 +12,10 @@ import {
 
 /**
  * Design gallery — every Button/Card variant and design token in one place.
- * Dev-only: 404s in production. Used for design iteration sessions; when a
- * variant changes in ui/button.tsx or ui/card.tsx, this page shows the result
- * everywhere it will apply.
+ * Open in dev; admin-only in production (same ADMIN_EMAIL gate as /admin).
+ * Used for design iteration sessions; when a variant changes in
+ * ui/button.tsx or ui/card.tsx, this page shows the result everywhere it
+ * will apply.
  */
 
 const VARIANTS = [
@@ -47,9 +49,19 @@ const SWATCHES = [
   ["tier-diamond", "bg-tier-diamond"],
 ] as const;
 
-export default function DesignGalleryPage() {
+export default async function DesignGalleryPage() {
   if (process.env.NODE_ENV === "production") {
-    notFound();
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    // Admin-only in production (case-insensitive, matching /admin)
+    if (
+      !user ||
+      user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()
+    ) {
+      notFound();
+    }
   }
 
   return (
@@ -57,8 +69,8 @@ export default function DesignGalleryPage() {
       <header>
         <h1 className="font-serif text-2xl text-foreground">Design Gallery</h1>
         <p className="text-sm text-muted-foreground">
-          Dev-only. Edit <code>ui/button.tsx</code> / <code>ui/card.tsx</code>{" "}
-          and watch every variant update.
+          Internal (admin-only in production). Edit <code>ui/button.tsx</code>{" "}
+          / <code>ui/card.tsx</code> and watch every variant update.
         </p>
       </header>
 
