@@ -1,0 +1,261 @@
+<title>Working Surfaces — Three Concepts</title>
+<style>
+  :root {
+    --parchment: #F4EFE6; --card: #FEFCF8; --ink: #2D2318; --ink-soft: #594A3C;
+    --muted: #7A6A58; --forest: #2C5545; --forest-dark: #1E3D31; --saddle: #8B5A2B;
+    --edge: #E0D5C1; --kraft: #C8B596; --kraft-deep: #B09A72;
+    --brass-dark: #7A5C22; --brass: #B08D3E; --brass-hi: #E8C878;
+    --display: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --body: Georgia, "Times New Roman", serif;
+    --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--parchment); color: var(--ink); font-family: var(--body); line-height: 1.5; }
+  .page { max-width: 880px; margin: 0 auto; padding: 28px 16px 72px; }
+
+  .intro { text-align: center; max-width: 60ch; margin: 0 auto 8px; }
+  .intro h1 { font-family: var(--display); letter-spacing: 0.12em; text-transform: uppercase; font-size: 1.35rem; margin: 0 0 8px; }
+  .intro p { color: var(--ink-soft); font-size: 0.95rem; margin: 0; }
+  .intro .pick { margin-top: 10px; font-style: italic; color: var(--muted); font-size: 0.88rem; }
+
+  .concept { margin-top: 44px; }
+  .concept-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .concept-head .letter {
+    font-family: var(--display); font-size: 1.9rem; font-weight: 700; color: var(--saddle);
+  }
+  .concept-head h2 { font-family: var(--display); letter-spacing: 0.1em; text-transform: uppercase; font-size: 1.1rem; margin: 0; }
+  .concept-head .why { width: 100%; color: var(--muted); font-size: 0.88rem; font-style: italic; margin: 0; }
+
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  @media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } }
+  .tile-num { font-family: var(--display); font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tile-label { font-family: var(--display); font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+
+  table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+  th { font-family: var(--display); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 7px 10px; }
+  td { padding: 8px 10px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  td:first-child { color: var(--ink); font-weight: 700; }
+  .tablewrap { overflow-x: auto; }
+  table { min-width: 460px; }
+
+  .formrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  @media (max-width: 560px) { .formrow { grid-template-columns: 1fr; } }
+  label { display: block; font-family: var(--display); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .input { width: 100%; padding: 8px 10px; font-family: var(--body); font-size: 0.9rem; color: var(--ink); }
+
+  /* ═══════════ A · THE STABLE LEDGER ═══════════ */
+  .ledger-card {
+    position: relative; border-radius: 6px; padding: 18px 18px 18px 30px;
+    background:
+      /* classic ledger: green ruling + red margin line */
+      linear-gradient(90deg, transparent 0 20px, rgba(155,48,40,0.28) 20px 21.5px, transparent 21.5px),
+      repeating-linear-gradient(0deg, transparent 0 27px, rgba(44,85,69,0.11) 27px 28px),
+      linear-gradient(180deg, #FDFAF2, #F6F1E2);
+    border: 1px solid #CBC3A4;
+    border-top: 3px solid var(--forest);
+    box-shadow: 0 2px 5px rgba(90,70,40,0.15), 0 8px 14px -10px rgba(90,70,40,0.25);
+  }
+  .ledger-card .brad {
+    position: absolute; width: 9px; height: 9px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--brass-hi), var(--brass-dark) 75%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  }
+  .brad.tl { top: 7px; left: 7px; } .brad.tr { top: 7px; right: 7px; }
+  .brad.bl { bottom: 7px; left: 7px; } .brad.br { bottom: 7px; right: 7px; }
+  .ledger-tab {
+    display: inline-block; margin-bottom: 12px; padding: 5px 16px 4px;
+    background: linear-gradient(180deg, #37664F, var(--forest-dark));
+    border-radius: 3px 10px 3px 3px;
+    font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #EDE4CC; box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,245,220,0.25);
+  }
+  .ledger-card th { border-bottom: 2px solid rgba(44,85,69,0.55); color: var(--forest); }
+  .ledger-card td { border-bottom: 1px solid rgba(44,85,69,0.16); }
+  .ledger-card .tile { padding: 10px 12px; border-left: 3px double var(--forest); background: rgba(255,252,245,0.6); }
+  .ledger-card .tile .tile-num { color: var(--forest); }
+  .stamp {
+    display: inline-block; padding: 1px 9px; rotate: -2deg;
+    border: 2px solid var(--forest); border-radius: 4px; color: var(--forest);
+    font-family: var(--display); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+    opacity: 0.85; mask-image: var(--noise); mask-size: 220px;
+  }
+  .stamp.red { border-color: #9B3028; color: #9B3028; rotate: 2deg; }
+  .ledger-card .input { background: rgba(255,252,245,0.8); border: none; border-bottom: 2px solid #C9B689; border-radius: 0; }
+  .ledger-card .input:focus { outline: none; border-bottom-color: var(--forest); }
+
+  /* ═══════════ B · THE SHOW BINDER ═══════════ */
+  .binder-card {
+    position: relative; margin-top: 26px; border-radius: 0 8px 8px 8px; padding: 18px 18px 18px 40px;
+    background: linear-gradient(180deg, var(--card), #FAF5EA);
+    border: 1px solid var(--edge);
+    box-shadow: 0 2px 5px rgba(90,70,40,0.14), 2px 4px 0 -1px #EADFC6, 3px 6px 0 -2px #DECFAC;
+  }
+  .binder-tab {
+    position: absolute; top: -26px; left: -1px; padding: 5px 22px 4px;
+    background: linear-gradient(180deg, #3A6B55, var(--forest));
+    border-radius: 8px 8px 0 0; border: 1px solid var(--forest-dark); border-bottom: none;
+    font-family: var(--display); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #EFE6CE; text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+  }
+  .binder-card .holes { position: absolute; left: 12px; top: 18px; bottom: 18px; width: 14px; display: flex; flex-direction: column; justify-content: space-around; }
+  .binder-card .holes i {
+    width: 13px; height: 13px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, var(--parchment) 55%, #D9CCAE 70%);
+    box-shadow: inset 0 1px 3px rgba(90,70,40,0.55);
+  }
+  .binder-card th { border-bottom: 2px solid var(--forest); color: var(--forest); }
+  .binder-card td { border-bottom: 1px dashed var(--edge); }
+  .binder-card td:first-child::before {
+    content: counter(row, decimal-leading-zero) ". "; counter-increment: row;
+    font-family: var(--display); color: var(--saddle); font-weight: 700;
+  }
+  .binder-card tbody { counter-reset: row; }
+  .binder-card .tile {
+    padding: 10px 12px; background: var(--card); border: 1px solid var(--edge); border-radius: 6px;
+    box-shadow: 1px 2px 0 -0.5px #EADFC6, 2px 4px 0 -1px #DECFAC; /* stacked pocket pages */
+  }
+  .binder-card .input { background: var(--card); border: 1px solid var(--edge); border-radius: 6px; }
+  .binder-card .input:focus { outline: 2px solid rgba(44,85,69,0.4); }
+  .chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-family: var(--display); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; }
+  .chip.blue { background: #2B4C8C; } .chip.gold { background: linear-gradient(160deg, var(--brass), var(--brass-dark)); } .chip.red { background: #9B3028; }
+
+  /* ═══════════ C · SADDLE-PAD LINEN ═══════════ */
+  .linen-card {
+    position: relative; border-radius: 10px; overflow: hidden;
+    background:
+      repeating-linear-gradient(0deg, rgba(139,90,43,0.035) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(139,90,43,0.035) 0 1px, transparent 1px 3px),
+      var(--card);
+    border: 1px solid var(--edge);
+    box-shadow: 0 2px 6px rgba(90,70,40,0.12);
+  }
+  .linen-band {
+    display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+    background: var(--noise), linear-gradient(180deg, #33604C, var(--forest-dark));
+    background-blend-mode: overlay, normal;
+  }
+  .linen-band .button {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--brass-hi), var(--brass-dark));
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  .linen-band h3 { margin: 0; font-family: var(--display); font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; color: #EDE4CC; }
+  .linen-body { padding: 16px; }
+  .linen-card th { border-bottom: 1px solid var(--edge); }
+  .linen-card td { border-bottom: 1px solid rgba(224,213,193,0.6); }
+  .linen-card .tile { padding: 10px 12px; border: 1px solid var(--edge); border-radius: 8px; background: rgba(255,252,248,0.75); }
+  .linen-card .tile .tile-num { color: var(--forest); }
+  .linen-card .input { background: rgba(255,252,248,0.9); border: 1px solid var(--edge); border-radius: 8px; }
+  .linen-card .input:focus { outline: 2px solid rgba(44,85,69,0.35); }
+
+  .footer-note { margin-top: 48px; text-align: center; color: var(--muted); font-size: 0.85rem; font-style: italic; max-width: 56ch; margin-left: auto; margin-right: auto; }
+</style>
+
+<div class="page">
+  <div class="intro">
+    <h1>The Working Surfaces</h1>
+    <p>Dashboard, market, settings, forms — the pages you <em>use</em>, not the ones you admire.
+       Leather stays at the landmarks; these need their own material. Three concepts, same content.</p>
+    <p class="pick">Pick one, or mix: &ldquo;B&rsquo;s tables, C&rsquo;s header bands.&rdquo;</p>
+  </div>
+
+  <!-- ═══════════ A ═══════════ -->
+  <section class="concept">
+    <div class="concept-head">
+      <span class="letter">A</span><h2>The Stable Ledger</h2>
+      <p class="why">The barn office: ruled ledger paper, kraft index tabs, brass fasteners, rubber-stamped statuses. Warmest; most skeuomorphic of the three.</p>
+    </div>
+    <div class="ledger-card">
+      <span class="brad tl"></span><span class="brad tr"></span><span class="brad bl"></span><span class="brad br"></span>
+      <div class="ledger-tab">Stable Ledger — 2026</div>
+      <div class="tiles">
+        <div class="tile"><div class="tile-num">214</div><div class="tile-label">Horses</div></div>
+        <div class="tile"><div class="tile-num">12</div><div class="tile-label">NAN Cards</div></div>
+        <div class="tile"><div class="tile-num">$8,450</div><div class="tile-label">Est. Value</div></div>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Class</th><th>Show</th><th>Entries</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>OF Stock Halter</td><td>Region 4 Live</td><td>31</td><td><span class="stamp">Champion</span></td></tr>
+            <tr><td>Western Pleasure</td><td>Region 4 Live</td><td>18</td><td><span class="stamp red">2nd Place</span></td></tr>
+            <tr><td>OF Quarter Horse</td><td>County Fair</td><td>44</td><td><span class="stamp">1st Place</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="formrow">
+        <div><label for="a1">Horse Name</label><input class="input" id="a1" value="Avalon"></div>
+        <div><label for="a2">Breed Assignment</label><input class="input" id="a2" value="American Quarter Horse"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ B ═══════════ -->
+  <section class="concept">
+    <div class="concept-head">
+      <span class="letter">B</span><h2>The Show Binder</h2>
+      <p class="why">How collectors actually organize: tabbed dividers, ring-punched pages, numbered class lists, stacked pocket pages. Most hobby-native; playful.</p>
+    </div>
+    <div class="binder-card">
+      <span class="binder-tab">Show Records</span>
+      <span class="holes" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <div class="tiles">
+        <div class="tile"><div class="tile-num">214</div><div class="tile-label">Horses</div></div>
+        <div class="tile"><div class="tile-num">12</div><div class="tile-label">NAN Cards</div></div>
+        <div class="tile"><div class="tile-num">$8,450</div><div class="tile-label">Est. Value</div></div>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Class</th><th>Show</th><th>Entries</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>OF Stock Halter</td><td>Region 4 Live</td><td>31</td><td><span class="chip gold">Champion</span></td></tr>
+            <tr><td>Western Pleasure</td><td>Region 4 Live</td><td>18</td><td><span class="chip red">2nd</span></td></tr>
+            <tr><td>OF Quarter Horse</td><td>County Fair</td><td>44</td><td><span class="chip blue">1st</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="formrow">
+        <div><label for="b1">Horse Name</label><input class="input" id="b1" value="Avalon"></div>
+        <div><label for="b2">Breed Assignment</label><input class="input" id="b2" value="American Quarter Horse"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ C ═══════════ -->
+  <section class="concept">
+    <div class="concept-head">
+      <span class="letter">C</span><h2>Saddle-Pad Linen</h2>
+      <p class="why">Quietest of the three: a whisper of woven texture, wool-felt green header band with a brass button, minimal chrome. Closest to a modern app; ages best.</p>
+    </div>
+    <div class="linen-card">
+      <div class="linen-band"><span class="button" aria-hidden="true"></span><h3>Show Records</h3></div>
+      <div class="linen-body">
+        <div class="tiles">
+          <div class="tile"><div class="tile-num">214</div><div class="tile-label">Horses</div></div>
+          <div class="tile"><div class="tile-num">12</div><div class="tile-label">NAN Cards</div></div>
+          <div class="tile"><div class="tile-num">$8,450</div><div class="tile-label">Est. Value</div></div>
+        </div>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Class</th><th>Show</th><th>Entries</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>OF Stock Halter</td><td>Region 4 Live</td><td>31</td><td><span class="chip gold">Champion</span></td></tr>
+              <tr><td>Western Pleasure</td><td>Region 4 Live</td><td>18</td><td><span class="chip red">2nd</span></td></tr>
+              <tr><td>OF Quarter Horse</td><td>County Fair</td><td>44</td><td><span class="chip blue">1st</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="formrow">
+          <div><label for="c1">Horse Name</label><input class="input" id="c1" value="Avalon"></div>
+          <div><label for="c2">Breed Assignment</label><input class="input" id="c2" value="American Quarter Horse"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer-note">
+    All three share the leather header/footer and the serif smallcaps voice, so any choice still
+    reads as one product with the landmark pages. Every texture here is CSS-only, same as the
+    leather edition.
+  </p>
+</div>

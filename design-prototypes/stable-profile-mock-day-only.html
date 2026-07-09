@@ -1,0 +1,245 @@
+<title>Public Profile — Showcase Mock</title>
+<style>
+  :root {
+    --parchment: #F4EFE6; --card: #FEFCF8; --ink: #2D2318; --ink-soft: #594A3C;
+    --muted: #7A6A58; --forest: #2C5545; --forest-dark: #1E3D31; --saddle: #8B5A2B;
+    --edge: #E0D5C1;
+    --leather-deep: #3E2414; --leather: #5C3A20; --leather-hi: #7A4E2C;
+    --wood-deep: #2E1E12;
+    --brass-dark: #7A5C22; --brass: #B08D3E; --brass-hi: #E8C878; --thread: #D9B978;
+    --display: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --body: Georgia, "Times New Roman", serif;
+    --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='60'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.35' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='300' height='60' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--parchment); color: var(--ink); font-family: var(--body); line-height: 1.5; }
+  .page { max-width: 920px; margin: 0 auto; padding: 24px 16px 72px; }
+  .protolabel { text-align:center; font-size:.8rem; color:var(--muted); font-style:italic; margin-bottom:16px; }
+
+  .display { font-family: var(--display); text-transform: uppercase; }
+
+  /* ── LEATHER MASTHEAD ── */
+  .masthead {
+    position: relative; border-radius: 14px; padding: 30px 26px 26px; text-align: center;
+    background: var(--noise), radial-gradient(ellipse 120% 90% at 50% 0%, var(--leather-hi) 0%, var(--leather) 45%, var(--leather-deep) 100%);
+    background-blend-mode: overlay, normal;
+    box-shadow: inset 0 2px 3px rgba(255,220,170,.25), inset 0 -14px 28px rgba(0,0,0,.45), inset 14px 0 28px rgba(0,0,0,.25), inset -14px 0 28px rgba(0,0,0,.25), 0 6px 18px rgba(46,30,18,.35);
+  }
+  .masthead::after { content:""; position:absolute; inset:10px; pointer-events:none; border:2px dashed var(--thread); border-radius:8px; opacity:.7; }
+  .medal {
+    width: 92px; height: 92px; margin: 0 auto 12px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #8A5A30, var(--leather) 55%, var(--leather-deep));
+    border: 4px solid var(--brass);
+    box-shadow: 0 4px 10px rgba(0,0,0,.45), inset 0 2px 6px rgba(0,0,0,.6);
+    display: grid; place-items: center;
+    color: var(--brass-hi); font-family: var(--display); font-size: 1.7rem;
+  }
+  .masthead h1 {
+    margin: 0 0 4px; font-family: var(--display); font-weight: 700; text-transform: uppercase;
+    font-size: clamp(1.5rem, 4vw, 2.3rem); letter-spacing: 0.13em; color: #F3E2C0; text-wrap: balance;
+    text-shadow: 0 -1px 1px rgba(0,0,0,.85), 0 1px 1px rgba(255,230,180,.28);
+  }
+  .masthead .who { color: #D8BE92; font-family: var(--display); letter-spacing: .2em; text-transform: uppercase; font-size: .78rem; }
+  .masthead .bio { max-width: 52ch; margin: 12px auto 16px; color: #E4D2B0; font-size: .92rem; font-style: italic; }
+  .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-brass {
+    display: inline-block; padding: 9px 26px; border-radius: 5px; cursor: pointer;
+    background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+    border-top: 1px solid #F6E3AE; border-bottom: 2px solid #5C441A; border-left: 1px solid #E3C67E; border-right: 2px solid #6B501E;
+    font-family: var(--display); font-weight: 700; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+    color: #2A1D08; text-shadow: 0 1px 0 rgba(255,244,210,.9);
+    box-shadow: 0 3px 6px rgba(0,0,0,.45); text-decoration: none;
+  }
+  .btn-ghostleather {
+    display: inline-block; padding: 9px 22px; border-radius: 5px; cursor: pointer;
+    background: transparent; border: 2px solid var(--thread);
+    font-family: var(--display); font-weight: 700; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase;
+    color: #EFDDBB; text-decoration: none;
+  }
+  .btn-brass:focus-visible, .btn-ghostleather:focus-visible { outline: 3px solid var(--brass-hi); outline-offset: 2px; }
+
+  /* ── GREEN STRAP STATS ── */
+  .strap {
+    margin: -14px 30px 0; position: relative; z-index: 1;
+    background: var(--noise), linear-gradient(180deg, #37664F 0%, var(--forest) 40%, var(--forest-dark) 100%);
+    background-blend-mode: overlay, normal;
+    border-radius: 10px; padding: 14px 18px 12px;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,.2), inset 0 -6px 12px rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.3);
+    display: flex; justify-content: center; gap: clamp(18px, 6vw, 64px); flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat .n { font-family: var(--display); font-weight: 700; font-size: 1.35rem; color: var(--brass-hi); font-variant-numeric: tabular-nums; text-shadow: 0 -1px 1px rgba(0,0,0,.7); }
+  .stat .l { font-family: var(--display); font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; color: #CFE0D3; }
+
+  /* ── SECTION HEADINGS ── */
+  .sect { display: flex; align-items: center; gap: 12px; margin: 38px 4px 14px; }
+  .sect .bar { width: 34px; height: 10px; border-radius: 2px; background: linear-gradient(165deg, var(--brass-hi), var(--brass-dark)); box-shadow: 0 1px 2px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,240,200,.7); }
+  .sect h2 { margin: 0; font-family: var(--display); font-size: 1rem; letter-spacing: .14em; text-transform: uppercase; }
+  .sect .hint { margin-left: auto; font-size: .78rem; color: var(--muted); font-style: italic; }
+
+  /* ── STARS OF THE STABLE (wood shelf + polaroids) ── */
+  .shelfwrap {
+    border-radius: 12px; padding: 20px 18px 8px;
+    background: var(--grain), linear-gradient(180deg, #55381F 0%, #46301C 30%, var(--wood-deep) 100%);
+    background-blend-mode: overlay, normal;
+    box-shadow: inset 0 3px 5px rgba(255,215,160,.18), inset 0 -16px 30px rgba(0,0,0,.55), 0 8px 22px rgba(30,20,10,.4);
+  }
+  .shelfrow {
+    position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 18px 12px 2px;
+    border-radius: 6px;
+    background: radial-gradient(ellipse 100% 70% at 50% 0%, rgba(255,205,130,.14), transparent 65%), linear-gradient(180deg, #241710, #1B110B);
+    box-shadow: inset 0 6px 18px rgba(0,0,0,.75);
+    margin-bottom: 18px;
+  }
+  @media (max-width: 620px) { .shelfrow { grid-template-columns: 1fr; } }
+  .shelfrow::after {
+    content:""; position:absolute; left:-8px; right:-8px; bottom:-12px; height:14px;
+    background: var(--grain), linear-gradient(180deg, #6B4A2A, #33220F); background-blend-mode: overlay, normal;
+    border-radius: 3px; box-shadow: 0 4px 8px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,220,170,.35);
+  }
+  .polaroid {
+    background: var(--card); border-radius: 4px; padding: 8px 8px 10px; margin-bottom: 20px;
+    box-shadow: 0 6px 12px rgba(0,0,0,.55);
+    rotate: -1deg;
+  }
+  .polaroid:nth-child(2) { rotate: 1.2deg; } .polaroid:nth-child(3) { rotate: -0.5deg; }
+  .polaroid .ph {
+    height: 120px; border-radius: 2px;
+    background: radial-gradient(ellipse 80% 90% at 60% 100%, rgba(80,58,36,.55), transparent 60%), linear-gradient(165deg, #D8C8A8, #A98D66);
+    display: grid; place-items: center; color: rgba(62,44,26,.5);
+    font-family: var(--display); font-size: .62rem; letter-spacing: .3em; text-transform: uppercase;
+  }
+  .polaroid .nm { text-align: center; font-family: var(--display); font-weight: 700; font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; margin-top: 8px; }
+  .polaroid .bd { text-align: center; font-size: .72rem; color: var(--muted); }
+  .polaroid .aw { text-align: center; margin-top: 4px; font-family: var(--display); font-size: .64rem; letter-spacing: .1em; color: var(--saddle); text-transform: uppercase; }
+
+  /* ── TROPHY CABINET (compact) ── */
+  .plaqrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 16px 12px 20px; }
+  @media (max-width: 620px) { .plaqrow { grid-template-columns: repeat(2, 1fr); } }
+  .plaque {
+    position: relative; text-align: center; padding: 10px 10px 11px; border-radius: 4px;
+    background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+    border-top: 1px solid #F6E3AE; border-bottom: 2px solid #5C441A; border-left: 1px solid #E3C67E; border-right: 2px solid #6B501E;
+    box-shadow: 0 3px 6px rgba(0,0,0,.5);
+  }
+  .plaque .t { font-family: var(--display); font-weight: 700; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; line-height: 1.35; color: #2A1D08; text-shadow: 0 1px 0 rgba(255,244,210,.9); }
+  .plaque .d { margin-top: 3px; font-family: var(--display); font-size: .7rem; color: #3D2C0E; text-shadow: 0 1px 0 rgba(255,244,210,.8); }
+
+  /* ── LEDGER (A + green) show records ── */
+  .ledger {
+    position: relative; border-radius: 6px; padding: 18px 18px 18px 30px;
+    background:
+      linear-gradient(90deg, transparent 0 20px, rgba(155,48,40,.28) 20px 21.5px, transparent 21.5px),
+      repeating-linear-gradient(0deg, transparent 0 27px, rgba(44,85,69,.11) 27px 28px),
+      linear-gradient(180deg, #FDFAF2, #F6F1E2);
+    border: 1px solid #CBC3A4; border-top: 3px solid var(--forest);
+    box-shadow: 0 2px 5px rgba(90,70,40,.15), 0 8px 14px -10px rgba(90,70,40,.25);
+  }
+  .ledger .tab {
+    display: inline-block; margin-bottom: 10px; padding: 5px 16px 4px;
+    background: linear-gradient(180deg, #37664F, var(--forest-dark));
+    border-radius: 3px 10px 3px 3px; color: #EDE4CC;
+    font-family: var(--display); font-size: .7rem; letter-spacing: .18em; text-transform: uppercase;
+    box-shadow: 0 1px 2px rgba(0,0,0,.3);
+  }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 480px; font-size: .86rem; }
+  th { font-family: var(--display); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--forest); text-align: left; padding: 7px 10px; border-bottom: 2px solid rgba(44,85,69,.55); }
+  td { padding: 8px 10px; border-bottom: 1px solid rgba(44,85,69,.16); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  td:first-child { color: var(--ink); font-weight: 700; }
+  .stamp {
+    display: inline-block; padding: 1px 9px; rotate: -2deg;
+    border: 2px solid var(--forest); border-radius: 4px; color: var(--forest);
+    font-family: var(--display); font-size: .64rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    opacity: .85; mask-image: var(--noise); mask-size: 220px;
+  }
+  .stamp.red { border-color: #9B3028; color: #9B3028; rotate: 2deg; }
+
+  .note { margin-top: 44px; text-align: center; color: var(--muted); font-size: .85rem; font-style: italic; max-width: 58ch; margin-left: auto; margin-right: auto; }
+
+</style>
+
+<div class="page">
+  <p class="protolabel">Public profile showcase mock — "come look at me and my stuff." Structure, not final data.</p>
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="medal">BFF</div>
+    <h1>Black Fox Farm</h1>
+    <div class="who">@SarahJenkins · Lexington, KY · Collecting since 1998</div>
+    <p class="bio">OF Breyer specialist with a soft spot for stock breeds. Photographer, occasional judge, always buying dapple greys.</p>
+    <div class="cta-row">
+      <a class="btn-brass" href="#">Follow Stable</a>
+      <a class="btn-ghostleather" href="#">Message</a>
+      <a class="btn-ghostleather" href="#">Browse Stable →</a>
+    </div>
+  </header>
+
+  <!-- STATS STRAP -->
+  <div class="strap" role="group" aria-label="Stable statistics">
+    <div class="stat"><div class="n">214</div><div class="l">Horses</div></div>
+    <div class="stat"><div class="n">37</div><div class="l">Public</div></div>
+    <div class="stat"><div class="n">12</div><div class="l">NAN Cards</div></div>
+    <div class="stat"><div class="n">96</div><div class="l">Followers</div></div>
+    <div class="stat"><div class="n">3</div><div class="l">Shows Hosted</div></div>
+  </div>
+
+  <!-- STARS OF THE STABLE -->
+  <div class="sect"><span class="bar"></span><h2>Stars of the Stable</h2><span class="hint">owner picks 3 to feature</span></div>
+  <div class="shelfwrap">
+    <div class="shelfrow">
+      <div class="polaroid">
+        <div class="ph">Photo</div>
+        <div class="nm">Avalon</div>
+        <div class="bd">OF Breyer · Quarter Horse</div>
+        <div class="aw">★ Grand Champion 2026</div>
+      </div>
+      <div class="polaroid">
+        <div class="ph">Photo</div>
+        <div class="nm">Stonewall</div>
+        <div class="bd">Artist Resin · Dapple Grey</div>
+        <div class="aw">★ NAN Qualified</div>
+      </div>
+      <div class="polaroid">
+        <div class="ph">Photo</div>
+        <div class="nm">Oberon</div>
+        <div class="bd">Custom · Bay Overo</div>
+        <div class="aw">★ Best Workmanship</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TROPHY CASE -->
+  <div class="sect"><span class="bar"></span><h2>Trophy Case</h2><span class="hint">top honors; full case one click away</span></div>
+  <div class="shelfwrap">
+    <div class="plaqrow">
+      <div class="plaque"><div class="t">Grand Champion — OF Stock Halter</div><div class="d">Region 4 Live · 2026</div></div>
+      <div class="plaque"><div class="t">NAN Qualified — Halter</div><div class="d">Card No. 2214 · 2026</div></div>
+      <div class="plaque"><div class="t">Reserve Champion — Performance</div><div class="d">Western Pleasure · 2026</div></div>
+      <div class="plaque"><div class="t">Verified Provenance</div><div class="d">Hoofprint™ · 12 records</div></div>
+    </div>
+  </div>
+
+  <!-- SHOW RECORD LEDGER -->
+  <div class="sect"><span class="bar"></span><h2>Recent Show Record</h2><span class="hint">the working surface — Ledger A, green-ruled</span></div>
+  <div class="ledger">
+    <span class="tab">Show Ledger — 2026</span>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Horse</th><th>Class</th><th>Show</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Avalon</td><td>OF Stock Halter</td><td>Region 4 Live</td><td><span class="stamp">Champion</span></td></tr>
+          <tr><td>Stonewall</td><td>AR Sport Halter</td><td>Region 4 Live</td><td><span class="stamp red">2nd Place</span></td></tr>
+          <tr><td>Oberon</td><td>CM Workmanship</td><td>County Fair</td><td><span class="stamp">1st Place</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="note">
+    New coding (not just styling): featured-horses picker + storage, stats aggregation on the strap,
+    trophy-case "top honors" selection, and the masthead bio/CTA row. Everything else reuses
+    materials already on the leather branch.
+  </p>
+</div>
