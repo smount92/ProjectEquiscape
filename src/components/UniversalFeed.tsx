@@ -25,6 +25,14 @@ interface UniversalFeedProps {
  composerPlaceholder?: string;
  /** Label override — e.g."Comments" vs"Posts" vs"Discussion" */
  label?: string;
+ /**
+  * Visual variant."leather" is ONLY for the global /feed page: the page
+  * wraps the feed in a .feed-leather panel (deep leather + brass spine),
+  * so this component drops its own card chrome and pins each post's
+  * first photo flush to the frame top. Every other context (groups,
+  * events, shows, passports) keeps the default look.
+  */
+ variant?: "default" | "leather";
 }
 
 function timeAgo(dateStr: string): string {
@@ -48,7 +56,9 @@ export default function UniversalFeed({
  showComposer = true,
  composerPlaceholder ="Share an update…",
  label ="Posts",
+ variant = "default",
 }: UniversalFeedProps) {
+ const isLeather = variant === "leather";
  const router = useRouter();
  const [posts, setPosts] = useState(initialPosts);
  const [composerText, setComposerText] = useState("");
@@ -190,9 +200,11 @@ export default function UniversalFeed({
  };
 
  return (
- <div className="mt-6 rounded-lg border border-input bg-card p-6 shadow-md transition-all">
- <h3 className="mb-4">
- 💬 {label} ({posts.length}
+ // Leather variant: the surrounding .feed-leather panel provides the
+ // background/border, so skip the default card chrome.
+ <div className={isLeather ? "relative" : "mt-6 rounded-lg border border-input bg-card p-6 shadow-md transition-all"}>
+ <h3 className={`mb-4 ${isLeather ? "feed-leather-label" : ""}`}>
+ {isLeather ? "" : "💬 "}{label} ({posts.length}
  {hasMore ?"+" :""})
  </h3>
 
@@ -268,11 +280,11 @@ export default function UniversalFeed({
 
  {/* ── Post List ── */}
  {posts.length === 0 ? (
- <p className="text-muted-foreground font-medium my-4">No {label.toLowerCase()} yet — be the first!</p>
+ <p className={`font-medium my-4 ${isLeather ? "feed-leather-note text-center" : "text-muted-foreground"}`}>No {label.toLowerCase()} yet — be the first!</p>
  ) : (
  <div className="flex flex-col gap-5">
  {posts.map((post) => (
- <PostCard key={post.id} post={post} currentUserId={currentUserId} currentUserAlias={currentUserAlias} currentUserAvatar={currentUserAvatar} />
+ <PostCard key={post.id} post={post} currentUserId={currentUserId} currentUserAlias={currentUserAlias} currentUserAvatar={currentUserAvatar} variant={variant} />
  ))}
  </div>
  )}
@@ -280,7 +292,7 @@ export default function UniversalFeed({
  {/* ── Load More Sentinel ── */}
  {hasMore && <div ref={sentinelRef} className="h-[1]" />}
  {isLoadingMore && (
- <p className="text-muted-foreground mt-4 text-center">
+ <p className={`mt-4 text-center ${isLeather ? "feed-leather-note" : "text-muted-foreground"}`}>
  Loading more…
  </p>
  )}
@@ -292,7 +304,7 @@ export default function UniversalFeed({
 // POST CARD — renders a single post + replies
 // ============================================================
 
-function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: { post: Post; currentUserId: string; currentUserAlias: string; currentUserAvatar: string | null }) {
+function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, variant = "default" }: { post: Post; currentUserId: string; currentUserAlias: string; currentUserAvatar: string | null; variant?: "default" | "leather" }) {
  const router = useRouter();
  const [showReplies, setShowReplies] = useState(false);
  const [showAllReplies, setShowAllReplies] = useState(false);
@@ -364,8 +376,20 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  const visibleReplies = replies.length > 3 && !showAllReplies ? replies.slice(0, 2) : replies;
  const hiddenCount = replies.length - 2;
 
+ // Leather feed (global /feed only): the FIRST photo becomes a hero image
+ // flush to the frame's top edge (prototype look); the rest stay in the
+ // collage grid below. Other contexts keep all photos in the grid.
+ const isLeather = variant === "leather";
+ const heroMedia = isLeather ? post.media[0] : undefined;
+ const gridMedia = post.media.slice(heroMedia ? 1 : 0, 4);
+
  return (
  <div className={`leather-frame pb-3 ${post.isPinned ? "bg-amber-50/30" : ""}`}>
+ {/* Hero photo — same plain <img> the grid renders (no click handler to preserve) */}
+ {heroMedia && (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img className="feed-leather-hero" src={heroMedia.imageUrl} alt={heroMedia.caption || "Post photo"} loading="lazy" />
+ )}
  {post.isPinned && (
  <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-amber-600">📌 Pinned</span>
  )}
@@ -436,13 +460,13 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  {embedHorseId && <HorseEmbedCard horseId={embedHorseId} />}
  </div>
 
- {/* Media Collage */}
- {post.media.length > 0 && (
+ {/* Media Collage (leather variant: first photo already shown as hero) */}
+ {gridMedia.length > 0 && (
  <div
  className="mt-2 grid gap-[4px] overflow-hidden rounded-md pl-10"
- data-count={Math.min(post.media.length, 4)}
+ data-count={gridMedia.length}
  >
- {post.media.slice(0, 4).map((m, i) => (
+ {gridMedia.map((m, i) => (
  // eslint-disable-next-line @next/next/no-img-element
  <img key={m.id || i} src={m.imageUrl} alt={m.caption || `Image ${i + 1}`} loading="lazy" />
  ))}

@@ -2138,6 +2138,86 @@ p {
   box-shadow: 0 0 0 2px var(--brass), 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
+/* ── Feed leather context (global /feed tab ONLY) ─────────────────
+   UniversalFeed renders in many contexts (groups, events, shows,
+   passports); everything below is scoped under .feed-leather so
+   those contexts keep the plain .leather-frame above. Pair the
+   wrapper with .leather-panel + .stitched for the deep-leather
+   background and saddle-thread border. */
+.feed-leather {
+  position: relative;
+  padding: 22px 20px 24px 56px; /* extra left gutter for the timeline spine */
+}
+/* vertical brass timeline spine down the left gutter */
+.feed-leather::before {
+  content: "";
+  position: absolute;
+  left: 34px;
+  top: 72px; /* starts below the embossed title */
+  bottom: 30px;
+  width: 2px;
+  background: linear-gradient(var(--brass-dark), rgba(122, 92, 34, 0.25));
+}
+/* embossed smallcaps panel title */
+.feed-leather-title {
+  margin: 2px 0 18px;
+  text-align: center;
+  font-family: var(--serif-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--leather-text);
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.9), 0 1px 1px rgba(255, 225, 170, 0.25);
+}
+/* quiet engraved section label (post count line under the title) */
+.feed-leather-label {
+  font-family: var(--serif-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--leather-text-soft);
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.7);
+}
+/* empty-state / loading notes sitting directly on the leather */
+.feed-leather-note {
+  color: var(--leather-text-soft);
+  font-family: var(--font-family-serif, Georgia), serif;
+  font-style: italic;
+}
+/* radial-gradient brass dot on the spine beside each post frame */
+.feed-leather .leather-frame::after {
+  content: "";
+  position: absolute;
+  /* offsets are from the frame's padding edge; the 6px leather border
+     sits outside it, so -32px lands the dot centered on the spine */
+  left: -32px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--brass-hi), var(--brass-dark));
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.35);
+}
+/* serif small-caps brass-tinted timestamps (PostHeader <time>) */
+.feed-leather .leather-frame time {
+  font-family: var(--serif-display);
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--leather-text-muted); /* #C9AE84 */
+}
+/* first photo sits flush to the frame's top edge (rounded top corners
+   only) — negative margins swallow the frame's 12px padding */
+.feed-leather .leather-frame .feed-leather-hero {
+  display: block;
+  width: calc(100% + 24px);
+  max-width: none;
+  margin: -12px -12px 10px;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 2px 2px 0 0;
+}
+
 /* ── Leather header chrome (nav links, icon buttons, mobile menu) ── */
 .leather-nav a,
 .leather-nav-link {
@@ -2327,4 +2407,23 @@ p {
 [data-simple-mode="true"] .workcard-stitched {
   box-shadow: none;
   border: 1px solid rgba(0, 0, 0, 0.2);
+}
+/* feed-leather additions: drop the spine, dots, embossing and serif
+   timestamp styling; reclaim the spine gutter */
+[data-simple-mode="true"] .feed-leather {
+  padding-left: 20px;
+}
+[data-simple-mode="true"] .feed-leather::before,
+[data-simple-mode="true"] .feed-leather .leather-frame::after {
+  display: none;
+}
+[data-simple-mode="true"] .feed-leather-title,
+[data-simple-mode="true"] .feed-leather-label {
+  text-shadow: none;
+}
+[data-simple-mode="true"] .feed-leather .leather-frame time {
+  font-family: inherit;
+  font-variant: normal;
+  letter-spacing: normal;
+  color: var(--muted-foreground);
 }

@@ -77,9 +77,10 @@ export default function PostHeader({
                         </span>
                     )}
                     <span className="text-muted-foreground text-xs">·</span>
+                    {/* Semantic <time> also lets material contexts (e.g. .feed-leather) restyle timestamps */}
                     {permalink ? (
                         <Link href={permalink} className="text-muted-foreground text-xs no-underline hover:underline">
-                            {timeAgo(createdAt)}
+                            <time dateTime={createdAt}>{timeAgo(createdAt)}</time>
                             {isEdited && (
                                 <span className="ml-0.5 opacity-60" title="This post was edited">
                                     (edited)
@@ -88,7 +89,7 @@ export default function PostHeader({
                         </Link>
                     ) : (
                         <span className="text-muted-foreground text-xs">
-                            {timeAgo(createdAt)}
+                            <time dateTime={createdAt}>{timeAgo(createdAt)}</time>
                             {isEdited && (
                                 <span className="ml-0.5 opacity-60" title="This post was edited">
                                     (edited)

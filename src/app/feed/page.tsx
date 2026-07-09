@@ -60,15 +60,22 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
   }
  >
   {activeTab ==="global" ? (
-  /* ── Global Tab: UniversalFeed (posts table) ── */
-  <UniversalFeed
-   initialPosts={globalPosts}
-   context={{ globalFeed: true }}
-   currentUserId={user.id}
-   showComposer={true}
-   composerPlaceholder="Share an update with the community… (supports @mentions)"
-   label="Community Posts"
-  />
+  /* ── Global Tab: UniversalFeed (posts table) ──
+     Wrapped in the leather stable-feed panel (approved prototype:
+     /design/feed). .feed-leather scopes the spine/dot/hero treatment
+     to this page only — other UniversalFeed contexts stay plain. */
+  <div className="feed-leather leather-panel stitched mt-6">
+   <h2 className="feed-leather-title">Stable Activity Feed</h2>
+   <UniversalFeed
+    initialPosts={globalPosts}
+    context={{ globalFeed: true }}
+    currentUserId={user.id}
+    showComposer={true}
+    composerPlaceholder="Share an update with the community… (supports @mentions)"
+    label="Community Posts"
+    variant="leather"
+   />
+  </div>
   ) : (
   /* ── Following Tab: Legacy system events feed ── */
   <LoadMoreFeed
