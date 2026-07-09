@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from"react";
+import { Button } from "@/components/ui/button";
 
 interface VaultData {
   purchase_price: number | null;
@@ -63,8 +64,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  :"Click to reveal private financial details"}
  </p>
  </div>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ <Button variant="outline"
  onClick={() => setIsUnlocked(!isUnlocked)}
  aria-expanded={isUnlocked}
  aria-controls="vault-data"
@@ -105,7 +105,7 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  Reveal
  </>
  )}
- </button>
+ </Button>
  </div>
 
  <div className={`overflow-hidden px-8 transition-all duration-300 ${isUnlocked ? "max-h-[500px] py-4" : "max-h-0 py-0"}`} id="vault-data">

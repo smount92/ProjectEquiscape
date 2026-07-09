@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from"react";
 import Link from"next/link";
+import { Button } from "@/components/ui/button";
 
 const COOKIE_CONSENT_KEY ="mhh-cookie-consent";
 
@@ -60,20 +61,18 @@ export default function CookieConsent() {
  </p>
  </div>
  <div className="flex shrink-0 gap-2 max-md:w-full max-md:justify-center">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleAccept}
  id="cookie-accept"
  >
  Accept
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline" size="wide"
  onClick={handleDecline}
  id="cookie-decline"
  >
  Decline Analytics
- </button>
+ </Button>
  </div>
  </div>
  </div>

@@ -10,6 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface CollectionManagerProps {
  collection: {
@@ -58,12 +59,11 @@ export default function CollectionManager({ collection }: CollectionManagerProps
 
  return (
  <>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setShowModal(true)}
  >
  ⚙️ Manage Collection
- </button>
+ </Button>
 
  <Dialog open={showModal} onOpenChange={setShowModal}>
  <DialogContent className="sm:max-w-[480px]">
@@ -90,27 +90,24 @@ export default function CollectionManager({ collection }: CollectionManagerProps
  </p>
  )}
  <div className="mt-6 flex justify-between">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ <Button variant="destructive-outline" size="wide"
  onClick={handleDelete}
  disabled={saving}
  >
  🗑️ Delete
- </button>
+ </Button>
  <div className="flex gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setShowModal(false)}
  >
  Cancel
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleSave}
  disabled={saving || !name.trim()}
  >
  {saving ?"Saving…" :"Save"}
- </button>
+ </Button>
  </div>
  </div>
  </DialogContent>

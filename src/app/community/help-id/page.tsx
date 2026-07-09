@@ -5,6 +5,7 @@ import type { Metadata } from"next";
 import { getPublicImageUrl } from"@/lib/utils/storage";
 import HelpIdRequestForm from"@/components/HelpIdRequestForm";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
  title:"Help Me ID This Model — Model Horse Hub",
@@ -91,12 +92,11 @@ export default async function HelpIdPage() {
   title={<><span className="text-forest">Help Me ID This Model</span></>}
   description="Upload a mystery model and let the community help identify it"
   headerActions={
-  <Link
+  <Button asChild variant="outline" size="wide"><Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
    ← Back to Show Ring
-  </Link>
+  </Link></Button>
   }
  >
   {/* Submit New Request Form */}

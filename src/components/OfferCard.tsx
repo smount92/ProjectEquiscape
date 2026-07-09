@@ -10,6 +10,7 @@ import {
  cancelTransaction,
  retractOffer,
 } from"@/app/actions/transactions";
+import { Button } from "@/components/ui/button";
 
 interface OfferCardProps {
  transaction: {
@@ -143,26 +144,23 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  <div className="mt-4">
  {isSeller ? (
  <div className="mt-2 flex flex-wrap items-center gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => handleRespond("accept")}
  disabled={saving}
  >
  {saving ?"…" :"✅ Accept Offer"}
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline" size="wide"
  onClick={() => handleRespond("decline")}
  disabled={saving}
  >
  Decline
- </button>
+ </Button>
  </div>
  ) : (
  <div>
  <p className="text-muted-foreground text-sm">⏳ Waiting for seller response…</p>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground mt-1 no-underline transition-all"
+ <Button variant="outline" size="wide" className="text-muted-foreground mt-1"
  onClick={async () => {
  setSaving(true);
  const result = await retractOffer(transaction.transactionId);
@@ -177,7 +175,7 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  disabled={saving}
  >
  ↩️ Retract Offer
- </button>
+ </Button>
  </div>
  )}
  </div>
@@ -192,13 +190,12 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  </p>
  {isBuyer && !hasPaid && (
  <div className="mt-2 flex flex-wrap items-center gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleMarkPaid}
  disabled={saving}
  >
  {saving ?"…" :"💳 External Payment Sent"}
- </button>
+ </Button>
  </div>
  )}
  {isBuyer && hasPaid && (
@@ -207,32 +204,29 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  {isSeller && hasPaid && (
  <div className="mt-2 flex flex-wrap items-center gap-2">
  <p className="text-muted-foreground text-sm">💳 Buyer says they&apos;ve paid.</p>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleVerify}
  disabled={saving}
  >
  {saving ?"Verifying…" :"✅ Acknowledge External Payment & Release"}
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ </Button>
+ <Button variant="destructive-outline" size="wide"
  onClick={handleCancel}
  disabled={saving}
  >
  {saving ?"…" :"🚫 Cancel / Dispute"}
- </button>
+ </Button>
  </div>
  )}
  {isSeller && !hasPaid && (
  <div className="mt-2 flex flex-wrap items-center gap-2">
  <p className="text-muted-foreground text-sm">⏳ Waiting for buyer to send payment…</p>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ <Button variant="destructive-outline" size="wide"
  onClick={handleCancel}
  disabled={saving}
  >
  {saving ?"…" :"🚫 Cancel / Dispute"}
- </button>
+ </Button>
  </div>
  )}
  </div>
@@ -247,12 +241,11 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  <strong className="block font-mono text-2xl font-extrabold tracking-[0.15em] text-[#22c55e]">
  {pin}
  </strong>
- <Link
+ <Button asChild variant="outline"><Link
  href="/claim"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  >
  Go to Claim Page →
- </Link>
+ </Link></Button>
  </div>
  ) : isBuyer ? (
  <p className="text-muted-foreground text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>

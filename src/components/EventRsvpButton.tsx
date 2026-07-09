@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { rsvpEvent } from"@/app/actions/events";
 import { useRouter } from"next/navigation";
+import { Button } from "@/components/ui/button";
 
 interface Props {
  eventId: string;
@@ -37,13 +38,12 @@ export default function EventRsvpButton({ eventId, currentStatus }: Props) {
  ⭐ Interested
  </button>
  {currentStatus && currentStatus !=="not_going" && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => handleRsvp("not_going")}
  disabled={saving}
  >
  ✕ Cancel
- </button>
+ </Button>
  )}
  </div>
  );

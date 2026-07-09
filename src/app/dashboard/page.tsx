@@ -27,6 +27,7 @@ import NanDashboardWidget from"@/components/NanDashboardWidget";
 import ShowHistoryWidget from"@/components/ShowHistoryWidget";
 import { getShowHistory } from"@/app/actions/shows";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
+import { Button } from "@/components/ui/button";
 
 
 
@@ -298,12 +299,11 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   </span>
   </div>
   </div>
-  <Link
+  <Button asChild variant="outline"><Link
   href="/add-horse"
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
   >
   <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
-  </Link>
+  </Link></Button>
   </div>
   )}
 
@@ -331,37 +331,33 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   {totalPages > 1 && (
   <div className="border-input mt-6 mt-8 flex flex-wrap items-center justify-between gap-2 border-t pt-6">
   {page > 1 ? (
-  <Link
+  <Button asChild variant="outline" size="wide"><Link
   href={`/dashboard?page=${page - 1}`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
   ← Previous
-  </Link>
+  </Link></Button>
   ) : (
-  <button
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  <Button variant="outline" size="wide"
   disabled
   >
   ← Previous
-  </button>
+  </Button>
   )}
   <span className="text-muted-foreground text-sm">
   Page {page} of {totalPages}
   </span>
   {page < totalPages ? (
-  <Link
+  <Button asChild variant="outline" size="wide"><Link
   href={`/dashboard?page=${page + 1}`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
   Next →
-  </Link>
+  </Link></Button>
   ) : (
-  <button
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+  <Button variant="outline" size="wide"
   disabled
   >
   Next →
-  </button>
+  </Button>
   )}
   </div>
   )}
@@ -500,27 +496,24 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   }
   headerActions={
   <>
-   <Link
+   <Button asChild variant="outline" size="wide"><Link
    href="/stable/import"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    id="batch-import-button"
    >
    <FileText size={16} strokeWidth={1.5} /> Batch Import
-   </Link>
-   <Link
+   </Link></Button>
+   <Button asChild variant="outline" size="wide"><Link
    href="/add-horse/quick"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    id="quick-add-button"
    >
    <Zap size={16} strokeWidth={1.5} /> Quick Add
-   </Link>
-   <Link
+   </Link></Button>
+   <Button asChild><Link
    href="/add-horse"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    id="add-horse-button"
    >
    <Plus size={16} strokeWidth={1.5} /> Add to Stable
-   </Link>
+   </Link></Button>
   </>
   }
   mainContent={

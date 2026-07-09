@@ -4,6 +4,7 @@ import Link from"next/link";
 import { getArtistProfileBySlug } from"@/app/actions/art-studio";
 import ShareButton from"@/components/ShareButton";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -116,28 +117,25 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
 
  <div className="mt-6 flex flex-wrap gap-2">
  {profile.status !=="closed" && !isOwner && (
- <Link
+ <Button asChild><Link
  href={`/studio/${slug}/request`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  id="request-commission-btn"
  >
  🎨 Request a Commission
- </Link>
+ </Link></Button>
  )}
  {isOwner && (
  <>
- <Link
+ <Button asChild><Link
  href="/studio/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  >
  📊 Dashboard
- </Link>
- <Link
+ </Link></Button>
+ <Button asChild variant="outline" size="wide"><Link
  href="/studio/setup"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ✏️ Edit Studio
- </Link>
+ </Link></Button>
  </>
  )}
  <ShareButton

@@ -4,6 +4,7 @@ import { useState } from"react";
 import { useRouter } from"next/navigation";
 import { createOrFindConversation } from"@/app/actions/messaging";
 import MakeOfferModal from"@/components/MakeOfferModal";
+import { Button } from "@/components/ui/button";
 
 interface MessageSellerButtonProps {
  sellerId: string;
@@ -98,8 +99,7 @@ export default function MessageSellerButton({
 
  return (
  <>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ <Button variant="outline"
  onClick={handleClick}
  disabled={loading}
  >
@@ -131,7 +131,7 @@ export default function MessageSellerButton({
  Message Seller
  </>
  )}
- </button>
+ </Button>
  {showOfferModal && (
  <MakeOfferModal
  horseId={horseId}

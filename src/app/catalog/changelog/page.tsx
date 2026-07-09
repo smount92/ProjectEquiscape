@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import Link from"next/link";
 import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
  title:"Catalog Changelog — Model Horse Hub",
@@ -74,12 +75,11 @@ export default async function ChangelogPage() {
   {(entries ?? []).length === 0 && (
    <div className="bg-card border-input text-muted-foreground rounded-lg border p-8 text-center shadow-md transition-all">
    <p>No changes yet. The catalog awaits your contributions!</p>
-   <Link
+   <Button asChild><Link
     href="/catalog"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
     Browse Catalog
-   </Link>
+   </Link></Button>
    </div>
   )}
   </div>

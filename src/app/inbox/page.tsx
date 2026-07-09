@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 export const metadata = {
  title:"Inbox — Model Horse Hub",
@@ -182,13 +183,12 @@ export default async function InboxPage() {
   title={<>✉️ <span className="text-forest">Inbox</span></>}
   description={`Your private conversations — ${inboxItems.length} thread${inboxItems.length !== 1 ?"s" :""}`}
   headerActions={
-  <Link
+  <Button asChild><Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    id="browse-showring"
   >
    🏆 Browse Show Ring
-  </Link>
+  </Link></Button>
   }
  >
   {inboxItems.length === 0 ? (
@@ -196,12 +196,11 @@ export default async function InboxPage() {
    <div className="mb-4 text-5xl">✉️</div>
    <h2>Your Inbox is Empty</h2>
    <p>Browse the Show Ring and message sellers about models you&apos;re interested in!</p>
-   <Link
+   <Button asChild><Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    🏆 Browse the Show Ring
-   </Link>
+   </Link></Button>
   </div>
   ) : (
   <div className="bg-white/80 backdrop-blur-md border-input animate-fade-in-up flex flex-col gap-[2px] overflow-hidden rounded-lg border">

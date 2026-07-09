@@ -7,6 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 interface ImageCropModalProps {
  file: File;
  aspectRatio?: number | null; // e.g., 4/3 for passport hero. null = free crop
@@ -422,28 +423,25 @@ export default function ImageCropModal({
 
  {/* Footer actions */}
  <div className="flex items-center justify-between gap-2 border-t border-input px-6 py-4">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={onCancel}
  disabled={processing}
  >
  Cancel
- </button>
+ </Button>
  <div className="flex gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleSkip}
  disabled={processing}
  >
  Skip Crop
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleCropConfirm}
  disabled={processing || !imageLoaded}
  >
  {processing ?"Processing…" :"✂️ Apply Crop"}
- </button>
+ </Button>
  </div>
  </div>
  </div>

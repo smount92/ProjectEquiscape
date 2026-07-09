@@ -7,6 +7,7 @@ import { createCommission } from"@/app/actions/art-studio";
 import type { ArtistProfile } from"@/app/actions/art-studio";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 export default function CommissionRequestForm({ artist }: { artist: ArtistProfile }) {
  const router = useRouter();
@@ -156,14 +157,13 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
  </p>
  )}
 
- <button
- type="submit"
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
+ type="submit" className="w-full"
  disabled={saving}
  id="submit-commission-btn"
  >
  {saving ?"Submitting…" :"🎨 Submit Commission Request"}
- </button>
+ </Button>
  </form>
  );
 }

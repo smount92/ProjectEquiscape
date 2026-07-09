@@ -11,6 +11,7 @@ import {
 import { useRouter } from"next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/social";
+import { Button } from "@/components/ui/button";
 
 interface Suggestion {
  id: string;
@@ -127,26 +128,23 @@ export default function HelpIdDetailClient({
  </div>
 
  <div className="flex items-center gap-4">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ <Button variant="outline" size="wide" className="text-muted-foreground"
  onClick={() => handleUpvote(s.id)}
  title="Upvote this suggestion"
  >
  👍 {s.upvotes}
- </button>
+ </Button>
 
  {isOwner && !isResolved && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => handleAccept(s.id)}
  >
  ✅ Accept
- </button>
+ </Button>
  )}
 
  {s.isAccepted && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => handleAddToStable(s.id)}
  disabled={addingHorse === s.id}
  >
@@ -157,7 +155,7 @@ export default function HelpIdDetailClient({
  ) : (
 "🐴 Add to My Stable"
  )}
- </button>
+ </Button>
  )}
  </div>
  </div>
@@ -169,13 +167,12 @@ export default function HelpIdDetailClient({
  {!isResolved && (
  <div className="mt-8">
  {!showSuggestForm ? (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => setShowSuggestForm(true)}
  id="add-suggestion-btn"
  >
  💡 I Know This Model
- </button>
+ </Button>
  ) : (
  <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all">
  <h3 className="mb-4">Your Suggestion</h3>
@@ -189,17 +186,15 @@ export default function HelpIdDetailClient({
  />
  </div>
  <div className="flex gap-4">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ <Button variant="outline" size="wide" className="text-muted-foreground"
  onClick={() => {
  setShowSuggestForm(false);
  setSuggestText("");
  }}
  >
  Cancel
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleSuggest}
  disabled={submitting || !suggestText.trim()}
  >
@@ -210,7 +205,7 @@ export default function HelpIdDetailClient({
  ) : (
 "Submit Suggestion"
  )}
- </button>
+ </Button>
  </div>
  </div>
  )}
@@ -219,8 +214,7 @@ export default function HelpIdDetailClient({
  {/* Owner: Delete Request */}
  {isOwner && (
  <div className="mt-8 text-right">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ <Button variant="destructive-outline" size="wide"
  onClick={async () => {
  if (confirm("Delete this Help ID request? This cannot be undone.")) {
  const result = await deleteIdRequest(requestId);
@@ -233,7 +227,7 @@ export default function HelpIdDetailClient({
  }}
  >
  🗑️ Delete Request
- </button>
+ </Button>
  </div>
  )}
  </div>

@@ -7,6 +7,7 @@ import type { ArtistProfile } from"@/app/actions/art-studio";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 // ── Option Lists ──
 const SPECIALTIES = [
@@ -439,23 +440,21 @@ export default function StudioSetupPage() {
    </p>
    )}
 
-   <button
-   type="submit"
-   className="inline-flex w-full min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+   <Button
+   type="submit" className="w-full"
    disabled={saving || !studioName.trim()}
    id="save-studio-btn"
    >
    {saving ?"Saving…" : existing ?"💾 Save Changes" :"🎨 Create Studio"}
-   </button>
+   </Button>
 
    {existing && (
    <div className="mt-4 text-center">
-    <a
+    <Button asChild variant="outline" size="wide"><a
     href={`/studio/${existing.studioSlug}`}
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
     >
     👁️ View Public Studio Page
-    </a>
+    </a></Button>
    </div>
    )}
   </form>

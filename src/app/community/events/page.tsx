@@ -5,6 +5,7 @@ import { getEvents } from"@/app/actions/events";
 import EventBrowser from"@/components/EventBrowser";
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 export const metadata = {
@@ -26,12 +27,11 @@ export default async function EventsPage() {
   title={<>📅 Events</>}
   description="Shows, swap meets, meetups, and more"
   headerActions={
-  <Link
+  <Button asChild><Link
    href="/community/events/create"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
   >
    + Create Event
-  </Link>
+  </Link></Button>
   }
  >
   <EventBrowser events={events} typeLabels={EVENT_TYPE_LABELS} />

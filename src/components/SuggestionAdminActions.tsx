@@ -4,6 +4,7 @@ import { useState, useTransition } from"react";
 import { reviewSuggestion } from"@/app/actions/catalog-suggestions";
 import { useRouter } from"next/navigation";
 import { useToast } from"@/lib/context/ToastContext";
+import { Button } from "@/components/ui/button";
 
 interface Props {
  suggestionId: string;
@@ -56,20 +57,18 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
  <div className="mt-2 flex flex-col gap-2">
  {!showRejectForm ? (
  <div className="flex gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleApprove}
  disabled={isPending}
  >
  {isPending ?"Applying…" :"✅ Approve"}
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ </Button>
+ <Button variant="outline"
  onClick={() => setShowRejectForm(true)}
  disabled={isPending}
  >
  ❌ Reject
- </button>
+ </Button>
  </div>
  ) : (
  <div className="flex flex-col gap-2">
@@ -81,19 +80,17 @@ export default function SuggestionAdminActions({ suggestionId }: Props) {
  rows={2}
  />
  <div className="flex gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ <Button variant="outline"
  onClick={handleReject}
  disabled={isPending || !notes.trim()}
  >
  {isPending ?"Rejecting…" :"Confirm Reject"}
- </button>
- <button
- className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline"
  onClick={() => setShowRejectForm(false)}
  >
  Cancel
- </button>
+ </Button>
  </div>
  </div>
  )}

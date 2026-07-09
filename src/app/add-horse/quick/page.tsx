@@ -9,6 +9,7 @@ import type { CatalogItem } from"@/app/actions/reference";
 import { createClient } from"@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 const FINISH_TYPES = ["OF","Custom","Artist Resin"];
 const CONDITION_GRADES = [
@@ -121,12 +122,11 @@ export default function QuickAddPage() {
  <h1>
  ⚡ <span className="text-forest">Quick Add</span>
  </h1>
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ← Back
- </Link>
+ </Link></Button>
  </div>
 
  <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
@@ -231,22 +231,20 @@ export default function QuickAddPage() {
 
  {/* Action Buttons */}
  <div className="flex flex-wrap items-center gap-4">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleAdd}
  disabled={isAdding || (!selectedCatalog && !customName.trim())}
  id="quick-add-submit"
  >
  {isAdding ?"Adding…" :"🐴 Add to Stable"}
- </button>
+ </Button>
  {selectedCatalog && recentAdds.length > 0 && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleDuplicate}
  id="quick-duplicate"
  >
  + Duplicate as New Finish
- </button>
+ </Button>
  )}
  </div>
  </div>
@@ -272,20 +270,18 @@ export default function QuickAddPage() {
  <span className="text-muted-foreground">
  {item.finish} · {item.condition} — {timeSince(item.timestamp)}
  </span>
- <Link
+ <Button asChild variant="outline" className="px-4 text-xs"><Link
  href={`/stable/${item.id}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-1 text-xs font-semibold text-secondary-foreground no-underline transition-all"
  >
  View →
- </Link>
+ </Link></Button>
  </div>
  ))}
- <button
- className="inline-flex min-h-[36px] mt-4 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide" className="mt-4 w-full"
  onClick={() => router.push("/dashboard")}
  >
  ← Back to Dashboard ({recentAdds.length} added)
- </button>
+ </Button>
  </div>
  )}
  </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
  return (
  <div className="mx-auto max-w-6xl px-6 py-8">
@@ -7,12 +9,11 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
  <div className="mb-4 text-5xl">⚠️</div>
  <h2>Something Went Wrong</h2>
  <p>An unexpected error occurred. Please try again.</p>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={reset}
  >
  Try Again
- </button>
+ </Button>
  </div>
  </div>
  );

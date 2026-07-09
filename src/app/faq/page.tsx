@@ -4,6 +4,7 @@ import { useState } from"react";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import AiDataPolicySection from"@/components/AiDataPolicySection";
+import { Button } from "@/components/ui/button";
 
 /* ------------------------------------------------------------------ */
 /* FAQ Data */
@@ -231,13 +232,12 @@ export default function FaqPage() {
  {/* CTA */}
  <div className="bg-white border-input mt-12 rounded-lg border text-center">
  <p>Still have questions?</p>
- <Link
+ <Button asChild variant="outline"><Link
  href="/contact"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  id="faq-cta-contact"
  >
  Contact Us
- </Link>
+ </Link></Button>
  </div>
  </div>
   </ExplorerLayout>

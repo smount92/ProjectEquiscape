@@ -5,6 +5,7 @@ import Link from"next/link";
 import { forgotPasswordAction, type AuthFormState } from"@/app/auth/actions";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 const initialState: AuthFormState = { error: null, success: false };
 
@@ -25,13 +26,12 @@ export default function ForgotPasswordPage() {
     inbox and spam folder.
    </p>
    </div>
-   <Link
+   <Button asChild><Link
    href="/login"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    id="back-to-login"
    >
    Back to Sign In
-   </Link>
+   </Link></Button>
   </div>
   </FocusLayout>
  );
@@ -82,9 +82,8 @@ export default function ForgotPasswordPage() {
    />
    </div>
 
-   <button
+   <Button
    type="submit"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    disabled={isPending}
    id="forgot-submit"
    >
@@ -99,7 +98,7 @@ export default function ForgotPasswordPage() {
    ) : (
     "Send Reset Link"
    )}
-   </button>
+   </Button>
   </form>
 
   <div className="text-muted-foreground mt-8 text-center text-sm">

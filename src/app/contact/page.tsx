@@ -6,6 +6,7 @@ import { useRef, useEffect } from"react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 const initialState: ContactFormState = {
  error: null,
@@ -124,9 +125,8 @@ export default function ContactPage() {
     />
    </div>
 
-   <button
+   <Button
     type="submit"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
     id="contact-submit"
     disabled={isPending}
    >
@@ -141,7 +141,7 @@ export default function ContactPage() {
     ) : (
     "Send Message"
     )}
-   </button>
+   </Button>
    </form>
   )}
   </section>

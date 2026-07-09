@@ -5,6 +5,7 @@ import Papa from"papaparse";
 import fuzzysort from"fuzzysort";
 import type { CsvRow, MatchResult, ReferenceMatch } from"@/lib/types/csv-import";
 import { executeBatchImport } from"@/app/actions/csv-import";
+import { Button } from "@/components/ui/button";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DictRelease = { i: string; n: string; m: string | null; c: string | null; mn: string | null; mf: string | null };
@@ -412,13 +413,12 @@ export default function CsvImport() {
  )}
 
  <div className="mt-6 text-center">
- <a
+ <Button asChild variant="outline" size="wide"><a
  href="/templates/mhh_import_template.csv"
  download
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  📥 Download CSV Template
- </a>
+ </a></Button>
  </div>
  </div>
  )}
@@ -486,14 +486,12 @@ export default function CsvImport() {
  </div>
 
  <div className="border-input flex items-center justify-between gap-4 border-t pt-6">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setStep(1)}
  >
  ← Back
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={proceedToMatch}
  disabled={isMatching || !Object.values(columnMapping).some((v) => v ==="name")}
  id="proceed-to-match-btn"
@@ -505,7 +503,7 @@ export default function CsvImport() {
  ) : (
 "Match Against Database →"
  )}
- </button>
+ </Button>
  </div>
 
  {!Object.values(columnMapping).some((v) => v ==="name") && (
@@ -622,12 +620,11 @@ export default function CsvImport() {
  </div>
 
  <div className="border-input flex items-center justify-between gap-4 border-t pt-6">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setStep(2)}
  >
  ← Back
- </button>
+ </Button>
  <div className="flex flex-col items-end gap-2">
  <label
  className="flex cursor-pointer items-center gap-2 text-sm"
@@ -642,8 +639,7 @@ export default function CsvImport() {
  <span className="text-secondary-foreground mt-1 block text-right text-xs">
  Models without photos will be excluded regardless.
  </span>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleImport}
  disabled={isImporting}
  id="import-btn"
@@ -655,7 +651,7 @@ export default function CsvImport() {
  ) : (
  `Import ${matchResults.length} Models →`
  )}
- </button>
+ </Button>
  </div>
  </div>
  </div>
@@ -673,14 +669,12 @@ export default function CsvImport() {
  {importResult.imported !== 1 ?"s" :""} to your stable.
  </p>
  <div className="flex flex-wrap justify-center gap-4">
- <a
+ <Button asChild variant="outline"><a
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  >
  🐴 View Your Stable
- </a>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ </a></Button>
+ <Button variant="outline" size="wide"
  onClick={() => {
  setStep(1);
  setCsvData([]);
@@ -691,7 +685,7 @@ export default function CsvImport() {
  }}
  >
  📄 Import Another CSV
- </button>
+ </Button>
  </div>
  </div>
  ) : (
@@ -699,12 +693,11 @@ export default function CsvImport() {
  <div className="mb-6 text-[4rem]">❌</div>
  <h2>Import Failed</h2>
  <p>{importResult?.error ||"An unexpected error occurred."}</p>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => setStep(3)}
  >
  ← Back to Review
- </button>
+ </Button>
  </div>
  )}
  </div>

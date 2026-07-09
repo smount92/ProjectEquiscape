@@ -11,6 +11,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface SuggestReferenceModalProps {
  isOpen: boolean;
@@ -170,21 +171,19 @@ export default function SuggestReferenceModal({
  {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
 
  <div className="flex justify-end gap-2">
- <button
- type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button
+ type="button" variant="outline" size="wide"
  onClick={handleClose}
  disabled={status ==="submitting"}
  >
  Cancel
- </button>
- <button
+ </Button>
+ <Button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={!name.trim() || status ==="submitting"}
  >
  {status ==="submitting" ?"Submitting…" :"📤 Submit Suggestion"}
- </button>
+ </Button>
  </div>
  </form>
  )}

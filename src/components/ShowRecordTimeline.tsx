@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { deleteShowRecord } from"@/app/actions/provenance";
 import ShowRecordForm from"@/components/ShowRecordForm";
+import { Button } from "@/components/ui/button";
 
 interface ShowRecordDisplay {
  id: string;
@@ -115,13 +116,12 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  {records.length > 0 && ` (${records.length})`}
  </h3>
  {isOwner && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleAdd}
  id="add-show-record"
  >
  + Add Record
- </button>
+ </Button>
  )}
  </div>
 

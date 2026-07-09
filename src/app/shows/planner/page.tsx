@@ -4,6 +4,7 @@ import Link from"next/link";
 import { getShowStrings } from"@/app/actions/competition";
 import ShowStringManager from"@/components/ShowStringManager";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
+import { Button } from "@/components/ui/button";
 
 
 export const metadata = {
@@ -37,12 +38,11 @@ export default async function ShowPlannerPage() {
   title="🧳 Live Show Packer"
   description="Pack your string of horses for real-world live shows. Detect ring time conflicts and convert results into ribbons when you get home."
   headerActions={
-  <Link
+  <Button asChild variant="outline" size="wide"><Link
    href="/shows"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
    ← Back to Shows
-  </Link>
+  </Link></Button>
   }
   mainContent={<ShowStringManager showStrings={showStrings} horses={horseList} />}
  />

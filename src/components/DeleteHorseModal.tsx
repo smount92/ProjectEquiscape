@@ -10,6 +10,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface DeleteHorseModalProps {
  horseId: string;
@@ -38,8 +39,7 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
 
  return (
  <>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ <Button variant="outline"
  onClick={() => setShowModal(true)}
  id="delete-horse-button"
  >
@@ -50,7 +50,7 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
  <line x1="14" y1="11" x2="14" y2="17" />
  </svg>
  Delete from Stable
- </button>
+ </Button>
 
  <Dialog open={showModal} onOpenChange={(open) => { if (!isDeleting) setShowModal(open); }}>
  <DialogContent className="sm:max-w-md border-destructive/30">
@@ -75,22 +75,20 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
  )}
 
  <div className="flex justify-end gap-4 pt-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setShowModal(false)}
  disabled={isDeleting}
  id="delete-cancel"
  >
  Cancel
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/20"
+ </Button>
+ <Button variant="destructive" className="border-destructive/40"
  onClick={handleDelete}
  disabled={isDeleting}
  id="delete-confirm"
  >
  {isDeleting ? "Deleting…" : "🗑️ Yes, Delete Permanently"}
- </button>
+ </Button>
  </div>
  </DialogContent>
  </Dialog>

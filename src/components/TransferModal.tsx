@@ -12,6 +12,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface TransferModalProps {
  horseId: string;
@@ -82,12 +83,11 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
 
  return (
  <>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setIsOpen(true)}
  >
  📦 Transfer Ownership
- </button>
+ </Button>
 
  <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
  <DialogContent className="sm:max-w-[420px]">
@@ -162,19 +162,17 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  )}
 
  <div className="mt-4 flex justify-end gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleClose}
  >
  Cancel
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleGenerate}
  disabled={generating}
  >
  {generating ?"Generating…" :"Generate Code"}
- </button>
+ </Button>
  </div>
  </>
  ) : (
@@ -186,12 +184,11 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  <div className="font-mono text-[2.5rem] font-extrabold tracking-[0.3em] text-[#f59e0b]">
  {generatedCode}
  </div>
- <button
- className="mt-2 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide" className="mt-2"
  onClick={handleCopy}
  >
  {copied ?"✅ Copied!" :"📋 Copy Code"}
- </button>
+ </Button>
  </div>
  <p className="text-muted-foreground text-center text-sm">
  Send this code to the buyer/receiver. They can enter it on
@@ -200,18 +197,16 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  <span className="text-[var(--color-accent,#f59e0b)]">Expires in 48 hours.</span>
  </p>
  <div className="mt-4 flex justify-center gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleCancel}
  >
  Cancel Transfer
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleClose}
  >
  Done
- </button>
+ </Button>
  </div>
  </>
  )}

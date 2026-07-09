@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 export default function CreateEventPage() {
  const router = useRouter();
@@ -246,20 +247,18 @@ export default function CreateEventPage() {
   )}
 
   <div className="mt-6 flex gap-2">
-   <button
+   <Button
    type="submit"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    disabled={saving || !name.trim()}
    >
    {saving ?"Creating..." :"Create Event"}
-   </button>
-   <button
-   type="button"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+   </Button>
+   <Button
+   type="button" variant="outline" size="wide"
    onClick={() => router.push("/community/events")}
    >
    Cancel
-   </button>
+   </Button>
   </div>
   </form>
  </FocusLayout>

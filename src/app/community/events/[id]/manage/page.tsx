@@ -28,6 +28,7 @@ import { updateEvent, getEventJudges, addEventJudge, removeEventJudge, searchUse
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 type TabId ="details" |"classes" |"judges";
 
@@ -402,12 +403,11 @@ export default function ManageEventPage() {
  className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
  >
  <p className="text-red-700">{error}</p>
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href="/community/events"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ← Back to Events
- </Link>
+ </Link></Button>
  </div>
  </ExplorerLayout>
  );
@@ -662,13 +662,12 @@ export default function ManageEventPage() {
  </div>
 
  <div className="flex items-center gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleSaveDetails}
  disabled={isSaving || !eventData.name.trim()}
  >
  {isSaving ?"Saving…" :"💾 Save Details"}
- </button>
+ </Button>
  {detailsSaved && <span className="text-sm text-[#22c55e]">✅ Saved!</span>}
  </div>
  </div>
@@ -718,19 +717,17 @@ export default function ManageEventPage() {
  autoFocus
  placeholder="Division name"
  />
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => handleSaveDivision(div.id)}
  disabled={isSaving}
  >
  Save
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline" size="wide"
  onClick={() => setEditingDivision(null)}
  >
  Cancel
- </button>
+ </Button>
  </div>
  ) : (
  <>
@@ -758,8 +755,7 @@ export default function ManageEventPage() {
  >
  🗑️
  </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => {
  setAddingClassToDivision(div.id);
  setNewClassName("");
@@ -767,7 +763,7 @@ export default function ManageEventPage() {
  }}
  >
  + Class
- </button>
+ </Button>
  </div>
  </>
  )}
@@ -812,19 +808,17 @@ export default function ManageEventPage() {
  autoFocus
  placeholder="Class name"
  />
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => handleSaveClass(cls.id)}
  disabled={isSaving}
  >
  Save
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline" size="wide"
  onClick={() => setEditingClass(null)}
  >
  Cancel
- </button>
+ </Button>
  </div>
  ) : (
  <>
@@ -899,19 +893,17 @@ export default function ManageEventPage() {
  autoFocus
  placeholder="Class name (e.g. Arabian/Part-Arabian)"
  />
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => handleAddClass(div.id)}
  disabled={isSaving || !newClassName.trim()}
  >
  Add
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline" size="wide"
  onClick={() => setAddingClassToDivision(null)}
  >
  Cancel
- </button>
+ </Button>
  </div>
  )}
 
@@ -935,25 +927,23 @@ export default function ManageEventPage() {
  onKeyDown={(e) => e.key ==="Enter" && handleAddDivision()}
  placeholder="New division name (e.g. OF Plastic Halter)"
  />
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleAddDivision}
  disabled={isSaving || !newDivisionName.trim()}
  >
  + Add Division
- </button>
+ </Button>
  </div>
  </div>
 
  {/* Quick Actions */}
  <div className="mt-6 flex flex-wrap gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={loadUserEvents}
  disabled={isSaving}
  >
  📋 Copy From Another Event…
- </button>
+ </Button>
  </div>
  </>
  )}
@@ -1026,13 +1016,12 @@ export default function ManageEventPage() {
  </div>
  )}
  </div>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleAddJudge}
  disabled={!newJudgeAlias.trim()}
  >
  + Add Judge
- </button>
+ </Button>
  </div>
  <p className="text-muted-foreground mt-[4] text-xs">
  Type 2+ characters to search. Click a result to select, then"Add Judge".
@@ -1081,12 +1070,11 @@ export default function ManageEventPage() {
  <div className="flex-1">
  <div className="text-sm font-semibold">@{judge.aliasName}</div>
  </div>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-red-700 no-underline transition-all"
+ <Button variant="destructive-outline" size="wide" className="text-xs"
  onClick={() => handleRemoveJudge(judge.id)}
  >
  Remove
- </button>
+ </Button>
  </div>
  ))}
  </div>
@@ -1121,19 +1109,17 @@ export default function ManageEventPage() {
  ))}
  </select>
  <div className="flex justify-end gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setShowCopyModal(false)}
  >
  Cancel
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleCopy}
  disabled={!selectedSourceEvent}
  >
  Copy Classes
- </button>
+ </Button>
  </div>
  </>
  )}

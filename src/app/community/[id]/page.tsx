@@ -19,6 +19,7 @@ import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
+import { Button } from "@/components/ui/button";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -695,21 +696,19 @@ editionSize: rawPedigree.edition_size,
  />
  )}
  {isOwnHorse && (
- <Link
+ <Button asChild><Link
  href={`/stable/${horse.id}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  >
  🔒 My Passport
- </Link>
+ </Link></Button>
  )}
  </div>
   {assetConfig.showHoofprint && (
-  <Link
+  <Button asChild variant="outline" size="wide"><Link
   href={`/community/${horseId}/hoofprint`}
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
   🐾 View Hoofprint
-  </Link>
+  </Link></Button>
   )}
  </div>
 

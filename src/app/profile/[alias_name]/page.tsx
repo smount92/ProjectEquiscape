@@ -16,6 +16,7 @@ import RatingForm from"@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import TrophyCase from"@/components/TrophyCase";
 import ProfileLoadMore from"@/components/ProfileLoadMore";
+import { Button } from "@/components/ui/button";
 
 
 function formatDate(dateStr: string): string {
@@ -664,12 +665,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  :"Check back later — they may share some soon!"}
  </p>
  {isOwnProfile && (
- <Link
+ <Button asChild className="mt-4"><Link
  href="/dashboard"
- className="mt-4 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  >
  🏠 Go to My Stable
- </Link>
+ </Link></Button>
  )}
  </div>
  ) : (

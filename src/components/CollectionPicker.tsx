@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { getCollectionsAction, createCollectionAction } from"@/app/actions/collections";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface Collection {
  id: string;
@@ -136,15 +137,14 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  ✓ In: {selectedNames.join(",")}
  </div>
  )}
- <button
- type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button
+ type="button" variant="outline" size="wide"
  onClick={() => setShowModal(true)}
  aria-label="Create new collection"
  id="create-collection-btn"
  >
  + New
- </button>
+ </Button>
  </div>
 
  <span className="text-muted-foreground mt-1 block text-xs">
@@ -216,21 +216,19 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  </div>
 
  <div className="flex justify-end gap-4 pt-2">
- <button
- type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button
+ type="button" variant="outline" size="wide"
  onClick={() => setShowModal(false)}
  >
  Cancel
- </button>
- <button
+ </Button>
+ <Button
  type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={handleCreate}
  disabled={creating || !newName.trim()}
  >
  {creating ?"Creating…" :"Create Collection"}
- </button>
+ </Button>
  </div>
  </DialogContent>
  </Dialog>

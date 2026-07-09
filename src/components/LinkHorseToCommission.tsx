@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from"react";
 import { createClient } from"@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export default function LinkHorseToCommission({ commissionId }: { commissionId: string }) {
  const [horses, setHorses] = useState<{ id: string; name: string }[]>([]);
@@ -72,13 +73,12 @@ export default function LinkHorseToCommission({ commissionId }: { commissionId: 
  </option>
  ))}
  </select>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleLink}
  disabled={!selectedHorseId || saving}
  >
  {saving ?"…" :"Link"}
- </button>
+ </Button>
  </div>
  </div>
  );

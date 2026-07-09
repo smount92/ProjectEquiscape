@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { searchCatalogAction, getReleasesForMold, getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import MarketValueBadge from "@/components/MarketValueBadge";
 import SuggestReferenceModal from "@/components/SuggestReferenceModal";
+import { Button } from "@/components/ui/button";
 
 /* ------------------------------------------------------------------ */
 /* Props                                                              */
@@ -163,13 +164,12 @@ export default function UnifiedReferenceSearch({
               {selectedItem.scale && <span className="text-muted-foreground text-sm"> {"\u00B7"} {selectedItem.scale}</span>}
               <MarketValueBadge catalogId={selectedCatalogId} compact />
             </div>
-            <button
-              className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+            <Button variant="outline" size="wide"
               onClick={handleClear}
               aria-label="Clear selection"
             >
               {"\u2715"}
-            </button>
+            </Button>
           </div>
           <div className="bg-forest/10 border-forest/25 mt-2 rounded-md border px-4 py-2 text-sm text-muted-foreground">
             {"\u{1F517}"} <strong>Linked</strong> {"\u2014"} Manufacturer, scale, and release info will auto-fill on your passport.

@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { useRouter } from"next/navigation";
 import { updateShowStatus, deleteShow } from"@/app/actions/shows";
+import { Button } from "@/components/ui/button";
 
 interface AdminShow {
  id: string;
@@ -60,13 +61,12 @@ export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
  <option value="judging">🟡 Judging</option>
  <option value="closed">🔴 Closed</option>
  </select>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ <Button variant="destructive-outline" size="wide"
  onClick={() => handleDelete(show.id, show.title)}
  disabled={busy === show.id}
  >
  🗑 Delete
- </button>
+ </Button>
  </div>
  ))}
  </div>

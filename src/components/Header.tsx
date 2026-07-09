@@ -34,6 +34,7 @@ import {
  BookOpen,
  Gem,
 } from"lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Priority-ordered nav links — highest priority first
 const NAV_LINKS = [
@@ -730,13 +731,12 @@ export default function Header() {
  {/* ── Desktop auth actions for logged-out users ── */}
  {!user && (
  <div className="flex shrink-0 items-center gap-4">
- <Link
+ <Button asChild><Link
  href="/login"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  id="header-login-button"
  >
  Log In
- </Link>
+ </Link></Button>
  <button
  className="border-input bg-card relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-muted-foreground transition-all"
  onClick={toggleSimpleMode}

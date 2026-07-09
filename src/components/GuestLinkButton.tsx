@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from"react";
+import { Button } from "@/components/ui/button";
 
 export default function GuestLinkButton({ commissionId, guestToken }: { commissionId: string; guestToken: string }) {
  const [copied, setCopied] = useState(false);
@@ -13,11 +14,10 @@ export default function GuestLinkButton({ commissionId, guestToken }: { commissi
  };
 
  return (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleCopy}
  >
  {copied ?"✅ Link Copied!" :"🔗 Copy Guest Link"}
- </button>
+ </Button>
  );
 }

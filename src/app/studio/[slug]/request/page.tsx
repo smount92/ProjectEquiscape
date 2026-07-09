@@ -4,6 +4,7 @@ import Link from"next/link";
 import { getArtistProfileBySlug } from"@/app/actions/art-studio";
 import CommissionRequestForm from"@/components/CommissionRequestForm";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -31,12 +32,11 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   <div className="animate-fade-in-up text-center">
    <div className="mb-4 text-[2.5rem]">🔴</div>
    <p className="text-secondary-foreground mt-2">{profile.studioName} is not accepting commissions right now.</p>
-   <Link
+   <Button asChild variant="outline" size="wide"><Link
    href={`/studio/${slug}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ← Back to Studio
-   </Link>
+   </Link></Button>
   </div>
   </FocusLayout>
  );
@@ -50,12 +50,11 @@ export default async function CommissionRequestPage({ params }: { params: Promis
    <p className="text-secondary-foreground mt-2">
    You can&apos;t commission yourself. Manage your commissions from the dashboard.
    </p>
-   <Link
+   <Button asChild><Link
    href="/studio/dashboard"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    📊 Go to Dashboard
-   </Link>
+   </Link></Button>
   </div>
   </FocusLayout>
  );
@@ -66,12 +65,11 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   title={<><span className="text-forest">Request a Commission</span></>}
   description={<>from <strong>{profile.studioName}</strong> by @{profile.ownerAlias}</>}
   backLink={
-  <Link
+  <Button asChild variant="outline" size="wide"><Link
    href={`/studio/${slug}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
    ← Back to Studio
-  </Link>
+  </Link></Button>
   }
  >
   {profile.status ==="waitlist" && (

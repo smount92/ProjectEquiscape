@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { addShowRecord, updateShowRecord } from"@/app/actions/provenance";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const RIBBON_COLORS = [
  { value:"", label:"Select ribbon/award…" },
@@ -266,14 +267,13 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
 
  {/* Advanced Details Toggle */}
  <div className="mb-6">
- <button
- type="button"
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button
+ type="button" variant="outline" size="wide" className="w-full"
  onClick={() => setShowAdvanced(!showAdvanced)}
  id="show-record-advanced-toggle"
  >
  {showAdvanced ?"▾ Hide" :"▸ Show"} Advanced Details
- </button>
+ </Button>
  </div>
 
  {showAdvanced && (
@@ -343,20 +343,18 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
 
  <div className="mt-6 flex justify-end gap-2">
- <button
- type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button
+ type="button" variant="outline" size="wide"
  onClick={onCancel}
  >
  Cancel
- </button>
- <button
+ </Button>
+ <Button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={!showName.trim() || status ==="saving"}
  >
  {status ==="saving" ?"Saving…" : isEdit ?"Update" :"Add Record"}
- </button>
+ </Button>
  </div>
  </form>
  </div>

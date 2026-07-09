@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import type { Metadata } from"next";
 import CatalogBrowser from"@/components/CatalogBrowser";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
  title:"Reference Catalog — Model Horse Hub",
@@ -93,9 +94,8 @@ export default async function ReferencePage() {
    <div className="flex flex-col gap-3 rounded-lg border border-input bg-card p-5 shadow-sm">
    <h3 className="text-sm font-bold uppercase tracking-wider text-secondary-foreground">📋 Community</h3>
    <div className="flex flex-col gap-2">
-    <a
+    <Button asChild variant="outline"><a
     href="/catalog/suggestions"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
     >
     View Suggestions
     {(pendingSuggestions ?? 0) > 0 && (
@@ -103,19 +103,17 @@ export default async function ReferencePage() {
      {pendingSuggestions}
      </span>
     )}
-    </a>
-    <a
+    </a></Button>
+    <Button asChild><a
     href="/catalog/suggestions/new"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
     >
     📗 Suggest New Entry
-    </a>
-    <a
+    </a></Button>
+    <Button asChild variant="outline"><a
     href="/catalog/changelog"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
     >
     📋 View Changelog
-    </a>
+    </a></Button>
    </div>
    </div>
 

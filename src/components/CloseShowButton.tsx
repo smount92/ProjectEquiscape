@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { useRouter } from"next/navigation";
 import { updateShowStatus } from"@/app/actions/shows";
+import { Button } from "@/components/ui/button";
 
 interface CloseShowButtonProps {
  showId: string;
@@ -41,13 +42,12 @@ export default function CloseShowButton({ showId }: CloseShowButtonProps) {
  <p className="text-muted-foreground mb-4 text-sm">
  Close this show to calculate results and generate show records for the top finishers.
  </p>
- <button
- className="inline-flex min-h-[36px] min-w-[220px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button className="min-w-[220px]"
  onClick={handleClose}
  disabled={busy}
  >
  {busy ?"Calculating Results…" :"🏆 Close Show & Calculate Results"}
- </button>
+ </Button>
  {error && (
  <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
  {error}

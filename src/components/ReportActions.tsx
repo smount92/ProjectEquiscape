@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { dismissReport, actionReport } from"@/app/actions/moderation";
 import { useRouter } from"next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function ReportActions({ reportId }: { reportId: string }) {
  const router = useRouter();
@@ -24,20 +25,18 @@ export default function ReportActions({ reportId }: { reportId: string }) {
 
  return (
  <div className="mt-1 flex gap-1">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleDismiss}
  disabled={saving}
  >
  ✅ Dismiss
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleAction}
  disabled={saving}
  >
  ⚡ Take Action
- </button>
+ </Button>
  </div>
  );
 }

@@ -2,6 +2,7 @@ import Link from"next/link";
 import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import AiDataPolicySection from"@/components/AiDataPolicySection";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
  title:"About — Model Horse Hub",
@@ -179,13 +180,12 @@ export default function AboutPage() {
  {/* CTA */}
  <div className="bg-white border-input rounded-lg border text-center">
  <p>Your herd is waiting. Give it the home it deserves.</p>
- <Link
+ <Button asChild variant="outline"><Link
  href="/signup"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
  id="about-cta-signup"
  >
  Start Your Digital Stable — Free
- </Link>
+ </Link></Button>
  </div>
  </div>
   </ExplorerLayout>

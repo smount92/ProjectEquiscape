@@ -24,6 +24,7 @@ import TackFormFields from "@/components/forms/TackFormFields";
 import PropFormFields from "@/components/forms/PropFormFields";
 import DioramaFormFields from "@/components/forms/DioramaFormFields";
 import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
+import { Button } from "@/components/ui/button";
 
 // ---- Types ----
 
@@ -724,12 +725,11 @@ export default function EditHorsePage() {
  <div className="mb-4 text-5xl">🚫</div>
  <h1>Access Denied</h1>
  <p>{error}</p>
- <Link
+ <Button asChild><Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  >
  Back to Stable
- </Link>
+ </Link></Button>
  </div>
  </FocusLayout>
  );
@@ -1590,15 +1590,13 @@ export default function EditHorsePage() {
 
  {/* ===== Actions ===== */}
  <div className="flex justify-end gap-4">
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href={`/stable/${horseId}`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  id="edit-cancel"
  >
  Cancel
- </Link>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Link></Button>
+ <Button
  onClick={handleSave}
  disabled={isSaving || !customName.trim() || (isModel && (!finishType || (lifeStage !== "in_progress" && !conditionGrade)))}
  id="edit-save"
@@ -1614,7 +1612,7 @@ export default function EditHorsePage() {
  ) : (
  <>✅ Save Changes</>
  )}
- </button>
+ </Button>
  </div>
  </div>
 

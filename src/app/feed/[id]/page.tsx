@@ -5,6 +5,7 @@ import RichText from"@/components/RichText";
 import LikeToggle from"@/components/LikeToggle";
 import { togglePostLike } from"@/app/actions/posts";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -72,12 +73,11 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  return (
   <ExplorerLayout title="Post" description="View and interact with this post.">
  <div className="mx-auto max-w-6xl px-6 max-w-[640]">
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href="/feed"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ← Back to Feed
- </Link>
+ </Link></Button>
 
  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
  <div className="flex flex-wrap items-center justify-between gap-1">

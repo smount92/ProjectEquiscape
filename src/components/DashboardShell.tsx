@@ -11,6 +11,7 @@ import { useRouter } from"next/navigation";
 import StableGrid from"@/components/StableGrid";
 import StableLedger from"@/components/StableLedger";
 import { bulkUpdateHorses, bulkDeleteHorses } from"@/app/actions/horse";
+import { Button } from "@/components/ui/button";
 
 interface HorseCardData {
  id: string;
@@ -149,12 +150,11 @@ export default function DashboardShell({
  {/* Select All / Clear */}
  {selectMode && horseCards.length > 0 && (
  <div className="bg-muted mb-4 flex items-center gap-4 rounded-md px-3 py-1.5">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={selectAll}
  >
  Select All ({horseCards.length})
- </button>
+ </Button>
  {selectedIds.size > 0 && <span className="text-muted-foreground text-sm">{selectedIds.size} selected</span>}
  </div>
  )}
@@ -223,21 +223,19 @@ export default function DashboardShell({
  </select>
 
  {/* Delete */}
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ <Button variant="outline"
  onClick={() => setShowDeleteConfirm(true)}
  disabled={isProcessing}
  >
  🗑️ Delete
- </button>
+ </Button>
  </div>
 
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={clearSelection}
  >
  Cancel
- </button>
+ </Button>
  </div>
  )}
 
@@ -254,21 +252,19 @@ export default function DashboardShell({
  data will be permanently removed.
  </p>
  <div className="flex justify-end gap-4">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setShowDeleteConfirm(false)}
  >
  Cancel
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ </Button>
+ <Button variant="outline"
  onClick={handleBulkDelete}
  disabled={isProcessing}
  >
  {isProcessing
  ?"Deleting…"
  : `Delete ${selectedIds.size} item${selectedIds.size !== 1 ?"s" :""}`}
- </button>
+ </Button>
  </div>
  </DialogContent>
  </Dialog>

@@ -4,6 +4,7 @@ import { useState } from"react";
 import { leaveReview, deleteReview } from"@/app/actions/transactions";
 import RatingStars from"@/components/RatingStars";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface ExistingRating {
  id: string;
@@ -91,13 +92,12 @@ export default function RatingForm({
  {rating.reviewText && (
  <p className="text-muted-foreground mt-4 text-sm italic">&ldquo;{rating.reviewText}&rdquo;</p>
  )}
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleRetract}
  disabled={status ==="retracting"}
  >
  {status ==="retracting" ?"Retracting…" :"Retract Rating"}
- </button>
+ </Button>
  </div>
  {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700">{errorMsg}</div>}
  </div>
@@ -163,13 +163,12 @@ export default function RatingForm({
  )}
 
  <div className="show-record-form-actions">
- <button
+ <Button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={stars === 0 || status ==="saving"}
  >
  {status ==="saving" ?"Submitting…" :"Submit Rating"}
- </button>
+ </Button>
  </div>
  </form>
  </div>

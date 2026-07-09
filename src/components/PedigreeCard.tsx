@@ -7,6 +7,7 @@ import { savePedigree } from"@/app/actions/provenance";
 import { searchPublicHorses } from"@/app/actions/horse";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface PedigreeData {
  id: string;
@@ -173,13 +174,12 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  >
  <div className="text-muted-foreground py-4 text-center">
  <p>No pedigree data yet.</p>
- <button
- className="mt-2 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button className="mt-2"
  onClick={() => setIsEditing(true)}
  id="add-pedigree"
  >
  🧬 Add Pedigree
- </button>
+ </Button>
  </div>
  </div>
  );
@@ -342,20 +342,18 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
 
  <div className="mt-6 flex justify-end gap-2">
- <button
- type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button
+ type="button" variant="outline" size="wide"
  onClick={handleCancel}
  >
  Cancel
- </button>
- <button
+ </Button>
+ <Button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={status ==="saving"}
  >
  {status ==="saving" ?"Saving…" :"Save Pedigree"}
- </button>
+ </Button>
  </div>
  </form>
  </div>
@@ -373,12 +371,11 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <span aria-hidden="true">🧬</span> Pedigree
  </h3>
  {isOwner && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-1 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" className="px-4"
  onClick={() => setIsEditing(true)}
  >
  ✏️ Edit
- </button>
+ </Button>
  )}
  </div>
 

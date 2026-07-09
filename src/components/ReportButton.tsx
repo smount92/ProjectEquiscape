@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from"react";
 import { submitReport, getReportReasons } from"@/app/actions/moderation";
+import { Button } from "@/components/ui/button";
 
 export default function ReportButton({
  targetType,
@@ -83,19 +84,17 @@ export default function ReportButton({
  />
  {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
  <div className="flex gap-1">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleSubmit}
  disabled={saving || !reason}
  >
  {saving ?"…" :"Submit Report"}
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline" size="wide"
  onClick={() => setShowForm(false)}
  >
  Cancel
- </button>
+ </Button>
  </div>
  </div>
  );

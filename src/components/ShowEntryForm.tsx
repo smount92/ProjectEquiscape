@@ -13,6 +13,7 @@ import { getPublicImageUrl } from "@/lib/utils/storage";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import ImageCropModal from "@/components/ImageCropModal";
+import { Button } from "@/components/ui/button";
 
 interface ClassDetail {
   id: string;
@@ -343,13 +344,12 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
       ) : (
         /* ─── No Classes: Simple Entry Button ─── */
         <div className="mt-4">
-          <button
-            type="button"
-            className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-forest/90"
+          <Button
+            type="button" className="py-2 hover:bg-forest/90"
             onClick={() => openEntryModal(null)}
           >
             🐴 Enter a Horse
-          </button>
+          </Button>
         </div>
       )}
 
@@ -549,14 +549,13 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
 
                 {/* Submit */}
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex min-h-[36px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-forest/90 disabled:opacity-50"
+                  <Button
+                    type="button" className="flex-1 py-2 hover:bg-forest/90"
                     onClick={handleSubmit}
                     disabled={!selectedPhoto || status === "submitting"}
                   >
                     {status === "submitting" ? "Entering…" : "✅ Submit Entry"}
-                  </button>
+                  </Button>
                 </div>
               </motion.div>
             )}

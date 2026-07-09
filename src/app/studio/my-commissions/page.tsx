@@ -3,6 +3,7 @@ import { redirect } from"next/navigation";
 import Link from"next/link";
 import { getClientCommissions } from"@/app/actions/art-studio";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 export const metadata = {
@@ -95,12 +96,11 @@ export default async function MyCommissionsPage() {
   >
    <p className="mb-4 text-[2rem]">🎨</p>
    <p className="text-muted-foreground">You haven&apos;t requested any commissions yet.</p>
-   <Link
+   <Button asChild><Link
    href="/discover"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    Browse Artists →
-   </Link>
+   </Link></Button>
   </div>
   ) : (
   <div className="animate-fade-in-up">

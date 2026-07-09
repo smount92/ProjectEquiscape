@@ -17,6 +17,7 @@ import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
 import { getPublicImageUrl } from"@/lib/utils/storage";
+import { Button } from "@/components/ui/button";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -113,12 +114,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  return (
  <ExplorerLayout title={event.name} description={<>{EVENT_TYPE_LABELS[event.eventType] || event.eventType} · 👥 {event.rsvpCount} attending</>}>
  <div className="mx-auto max-w-6xl px-6 max-w-[720]">
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href="/community/events"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ← All Events
- </Link>
+ </Link></Button>
 
  <div className="mb-6 flex items-start gap-6">
  <div className="flex h-[56px] min-w-[56px] shrink-0 flex-col items-center justify-center rounded-md border border-forest/30 bg-gradient-to-br from-forest/15 to-violet-500/10">
@@ -233,12 +233,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {/* Creator Actions */}
  {user.id === event.createdBy && (
  <div className="mt-6 flex flex-wrap justify-end gap-2">
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href={`/community/events/${event.id}/manage`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ⚙️ Manage Classes
- </Link>
+ </Link></Button>
  <EventDeleteButton eventId={event.id} />
  </div>
  )}

@@ -5,6 +5,7 @@ import SuggestEditModal from"@/components/SuggestEditModal";
 import Link from"next/link";
 import FocusLayout from"@/components/layouts/FocusLayout";
 import { buildEbaySearchUrl } from"@/lib/utils/ebayAffiliate";
+import { Button } from "@/components/ui/button";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -120,12 +121,11 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
    {user ? (
     <SuggestEditModal catalogItem={catalogItem} openOnMount={suggest ==="true"} />
    ) : (
-    <Link
+    <Button asChild><Link
     href="/login"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
     >
     Log in to Suggest Edit
-    </Link>
+    </Link></Button>
    )}
    <a
     href={buildEbaySearchUrl(catalogItem.title, catalogItem.maker, (attrs as Record<string, string>).item_number ?? null)}

@@ -3,6 +3,7 @@
 import { useState } from"react";
 import Link from"next/link";
 import { markNotificationRead, markAllNotificationsRead, clearNotifications } from"@/app/actions/notifications";
+import { Button } from "@/components/ui/button";
 
 interface NotifItem {
  id: string;
@@ -109,20 +110,18 @@ export default function NotificationList({ initialNotifications }: NotificationL
  {notifs.length > 0 && (
  <div className="border-input mb-6 flex gap-2 border-b pb-2">
  {unreadCount > 0 && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleMarkAllRead}
  >
  ✓ Mark All Read
- </button>
+ </Button>
  )}
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ <Button variant="outline" size="wide" className="text-muted-foreground"
  onClick={handleClear}
  disabled={clearing}
  >
  {clearing ?"Clearing…" :"🗑️ Clear All"}
- </button>
+ </Button>
  </div>
  )}
 

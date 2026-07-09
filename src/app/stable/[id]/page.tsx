@@ -16,6 +16,7 @@ import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
+import { Button } from "@/components/ui/button";
 
 
 // Types
@@ -626,16 +627,14 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Actions */}
  <div className="flex flex-wrap gap-4">
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  id="back-to-stable"
  >
  ← Back to Stable
- </Link>
- <Link
+ </Link></Button>
+ <Button asChild><Link
  href={`/stable/${horseId}/edit`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  id="edit-horse-button"
  >
  <svg
@@ -652,7 +651,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
  </svg>
  Edit Details
- </Link>
+ </Link></Button>
  <ParkedExportPanel
  horseId={horseId}
  horseName={horse.custom_name}

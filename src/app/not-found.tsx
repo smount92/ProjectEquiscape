@@ -1,4 +1,5 @@
 import Link from"next/link";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
  return (
@@ -7,12 +8,11 @@ export default function NotFound() {
  <div className="mb-4 text-5xl">🔍</div>
  <h2>Page Not Found</h2>
  <p>The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
- <Link
+ <Button asChild><Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  >
  Back to Stable
- </Link>
+ </Link></Button>
  </div>
  </div>
  );

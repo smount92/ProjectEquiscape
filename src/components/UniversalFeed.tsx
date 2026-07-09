@@ -8,6 +8,7 @@ import { createClient } from"@/lib/supabase/client";
 import RichText from"@/components/RichText";
 import { safeUUID } from"@/lib/utils/uuid";
 import { PostHeader, HorseEmbedCard, ReactionBar, ReplyComposer } from"@/components/social";
+import { Button } from "@/components/ui/button";
 
 // ============================================================
 // UNIVERSAL FEED — renders posts for ANY context
@@ -262,13 +263,12 @@ export default function UniversalFeed({
  />
  <span className="text-muted-foreground font-medium text-xs">{composerText.length}/2000</span>
  </div>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handlePost}
  disabled={isPosting || (!composerText.trim() && imageFiles.length === 0)}
  >
  {isPosting ?"Posting…" :"📝 Post"}
- </button>
+ </Button>
  </div>
  {error && (
  <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
@@ -437,19 +437,17 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  aria-label="Edit post content"
  />
  <div className="flex gap-1">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleEdit}
  disabled={isPending || !editText.trim()}
  >
  {isPending ?"Saving…" :"Save"}
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline" size="wide" className="text-muted-foreground"
  onClick={() => setIsEditing(false)}
  >
  Cancel
- </button>
+ </Button>
  </div>
  </div>
  ) : (

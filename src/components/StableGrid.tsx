@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import SearchBar from "@/components/SearchBar";
 import { Badge } from "@/components/ui/badge";
 import { getThumbUrl } from "@/lib/utils/imageUrl";
+import { Button } from "@/components/ui/button";
 
 interface HorseCardData {
  id: string;
@@ -149,13 +150,12 @@ export default function StableGrid({
      <span className="mb-4 text-6xl">🏠</span>
      <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">Your Stable is Empty</h2>
      <p className="mb-6 max-w-sm text-center text-muted-foreground">You haven&apos;t added any models yet. Click the button above to catalog your first horse!</p>
-     <Link
+     <Button asChild><Link
       href="/add-horse"
-      className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
       id="add-first-horse"
      >
       🐴 Add Your First Horse
-     </Link>
+     </Link></Button>
     </div>
    ) : filteredCards.length === 0 && searchQuery.trim() ? (
     <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">

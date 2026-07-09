@@ -3,6 +3,7 @@ import { Suspense } from"react";
 import { searchMarketPrices } from"@/app/actions/market";
 import MarketFilters from"@/components/MarketFilters";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 const formatCurrency = (value: number) =>
  new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits: 0 }).format(value);
@@ -173,37 +174,33 @@ export default async function MarketPricePage({
    {totalPages > 1 && (
     <div className="border-input mt-8 flex flex-wrap items-center justify-between gap-2 border-t pt-6">
     {page > 1 ? (
-     <Link
+     <Button asChild variant="outline" size="wide"><Link
      href={buildPageUrl(page - 1)}
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
      >
      ← Previous
-     </Link>
+     </Link></Button>
     ) : (
-     <button
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+     <Button variant="outline" size="wide"
      disabled
      >
      ← Previous
-     </button>
+     </Button>
     )}
     <span className="text-muted-foreground text-sm">
      Page {page} of {totalPages} ({total} items)
     </span>
     {page < totalPages ? (
-     <Link
+     <Button asChild variant="outline" size="wide"><Link
      href={buildPageUrl(page + 1)}
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
      >
      Next →
-     </Link>
+     </Link></Button>
     ) : (
-     <button
-     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+     <Button variant="outline" size="wide"
      disabled
      >
      Next →
-     </button>
+     </Button>
     )}
     </div>
    )}

@@ -4,6 +4,7 @@ import Link from"next/link";
 import { getArtistProfile, getArtistCommissions } from"@/app/actions/art-studio";
 import CommissionBoard from"@/components/CommissionBoard";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
+import { Button } from "@/components/ui/button";
 
 
 export const metadata = {
@@ -34,18 +35,16 @@ export default async function StudioDashboardPage() {
   description="Studio Dashboard"
   headerActions={
   <>
-   <Link
+   <Button asChild variant="outline" size="wide"><Link
    href={`/studio/${profile.studioSlug}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    👁️ Public Page
-   </Link>
-   <Link
+   </Link></Button>
+   <Button asChild variant="outline" size="wide"><Link
    href="/studio/setup"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ✏️ Edit Studio
-   </Link>
+   </Link></Button>
   </>
   }
   mainContent={

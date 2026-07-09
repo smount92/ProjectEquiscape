@@ -4,6 +4,7 @@ import { useState } from"react";
 import { updateBio } from"@/app/actions/profile";
 import { useRouter } from"next/navigation";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface EditBioButtonProps {
  currentBio: string | null;
@@ -31,14 +32,13 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
 
  if (!isEditing) {
  return (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-secondary-foreground no-underline opacity-70 transition-all"
+ <Button variant="outline" size="wide" className="text-xs opacity-70"
  onClick={() => setIsEditing(true)}
  id="edit-bio-btn"
  title="Edit bio"
  >
  ✏️ {currentBio ?"Edit Bio" :"Add Bio"}
- </button>
+ </Button>
  );
  }
 
@@ -60,8 +60,7 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  {bio.length}/500
  </span>
  <div className="flex gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => {
  setBio(currentBio ||"");
  setIsEditing(false);
@@ -70,15 +69,14 @@ export default function EditBioButton({ currentBio }: EditBioButtonProps) {
  disabled={saving}
  >
  Cancel
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleSave}
  disabled={saving}
  id="save-bio-btn"
  >
  {saving ?"Saving…" :"Save"}
- </button>
+ </Button>
  </div>
  </div>
  {error && (

@@ -2,6 +2,7 @@
 
 import { useState } from"react";
 import { saveExpertPlacings } from"@/app/actions/shows";
+import { Button } from "@/components/ui/button";
 
 interface Entry {
  id: string;
@@ -88,13 +89,12 @@ export default function AssignPlacings({
  {error && <div className="mt-2 text-sm text-red-700 mt-2">{error}</div>}
 
  <div className="mt-6 flex items-center gap-2">
- <button
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button className="w-full"
  onClick={handleSave}
  disabled={saving || Object.values(placings).filter((v) => v).length === 0}
  >
  {saving ?"Saving…" : `💾 Save ${Object.values(placings).filter((v) => v).length} Placings`}
- </button>
+ </Button>
  {saved && (
  <span className="text-forest whitespace-nowrap font-semibold">
  ✅ Saved!

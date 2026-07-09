@@ -5,6 +5,7 @@ import { createIdRequest } from"@/app/actions/help-id";
 import { compressImage } from"@/lib/utils/imageCompression";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 export default function HelpIdRequestForm() {
  const [isOpen, setIsOpen] = useState(false);
@@ -67,13 +68,12 @@ export default function HelpIdRequestForm() {
 
  if (!isOpen) {
  return (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all mt-8"
+ <Button className="mt-8"
  onClick={() => setIsOpen(true)}
  id="new-id-request-btn"
  >
  🔍 Submit a Mystery Model
- </button>
+ </Button>
  );
  }
 
@@ -161,9 +161,8 @@ export default function HelpIdRequestForm() {
  )}
 
  <div className="mt-6 flex gap-4">
- <button
- type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button
+ type="button" variant="outline" size="wide"
  onClick={() => {
  setIsOpen(false);
  setPreview(null);
@@ -171,10 +170,9 @@ export default function HelpIdRequestForm() {
  }}
  >
  Cancel
- </button>
- <button
+ </Button>
+ <Button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={status ==="submitting"}
  id="submit-id-request-btn"
  >
@@ -185,7 +183,7 @@ export default function HelpIdRequestForm() {
  ) : (
 "Submit Request"
  )}
- </button>
+ </Button>
  </div>
  </form>
  )}

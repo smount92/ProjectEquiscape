@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface CatalogItem {
  id: string;
@@ -117,13 +118,12 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
 
  return (
  <>
-  <button
+  <Button
   id="suggest-edit-btn"
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
   onClick={() => setIsOpen(true)}
   >
   ✏️ Suggest Edit
-  </button>
+  </Button>
 
   <Dialog open={isOpen} onOpenChange={setIsOpen}>
   <DialogContent className="sm:max-w-[580px] max-h-[85dvh] overflow-y-auto">
@@ -208,19 +208,17 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
    </div>
 
    <div className="flex justify-end gap-2 pt-4">
-   <button
-    className="inline-flex min-h-[36px] max-md:min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-transparent px-6 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+   <Button variant="outline"
     onClick={() => setIsOpen(false)}
    >
     Cancel
-   </button>
-   <button
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+   </Button>
+   <Button
     onClick={handleSubmit}
     disabled={isPending || !hasChanges}
    >
     {isPending ? "Submitting…" : "Submit Suggestion"}
-   </button>
+   </Button>
    </div>
   </DialogContent>
   </Dialog>

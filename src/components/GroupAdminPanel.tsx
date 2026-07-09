@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from"react";
 import { getGroupMembers, updateMemberRole, removeMember, togglePinPost, type GroupMember } from"@/app/actions/groups";
+import { Button } from "@/components/ui/button";
 
 interface Props {
  groupId: string;
@@ -116,14 +117,13 @@ export default function GroupAdminPanel({ groupId, currentUserId, memberRole }: 
  <option value="admin">Admin</option>
  </select>
  )}
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ <Button variant="destructive-outline" size="wide"
  onClick={() => handleRemove(m.userId, m.alias)}
  disabled={isPending}
  title="Remove member"
  >
  ✕
- </button>
+ </Button>
  </div>
  )}
  </div>
@@ -150,13 +150,12 @@ export function PinPostButton({ postId, isPinned }: { postId: string; isPinned: 
  };
 
  return (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-xs font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide" className="text-xs"
  onClick={handleToggle}
  disabled={isPending}
  title={pinned ?"Unpin post" :"Pin post"}
  >
  📌 {pinned ?"Unpin" :"Pin"}
- </button>
+ </Button>
  );
 }

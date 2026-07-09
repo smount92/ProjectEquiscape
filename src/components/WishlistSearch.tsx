@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from"react";
 import { searchCatalogAction, type CatalogItem } from"@/app/actions/reference";
 import { addToWishlist } from"@/app/actions/wishlist";
 import { useRouter } from"next/navigation";
+import { Button } from "@/components/ui/button";
 
 const TYPE_ICONS: Record<string, string> = {
  plastic_mold:"🏭",
@@ -270,8 +271,7 @@ export default function WishlistSearch() {
  {noResults && (
  <div className="text-muted-foreground px-4 py-6 text-center text-sm">
  <p>No references match &ldquo;{query}&rdquo;</p>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
+ <Button variant="outline" className="px-4 py-2"
  onClick={handleCustomAdd}
  disabled={adding}
  >
@@ -291,7 +291,7 @@ export default function WishlistSearch() {
  <line x1="8" y1="12" x2="16" y2="12" />
  </svg>
  Can&apos;t find it? Add &ldquo;{query}&rdquo; to Wishlist
- </button>
+ </Button>
  </div>
  )}
  </>

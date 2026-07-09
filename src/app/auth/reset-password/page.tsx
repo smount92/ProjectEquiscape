@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from"next/navigation";
 import { createClient } from"@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 export default function ResetPasswordPage() {
  const router = useRouter();
@@ -102,12 +103,11 @@ export default function ResetPasswordPage() {
    </div>
    <p className="mt-4">{error ||"Please wait while we verify your reset link..."}</p>
    {error && (
-    <a
+    <Button asChild><a
     href="/forgot-password"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
     >
     Request New Reset Link
-    </a>
+    </a></Button>
    )}
    </div>
   </div>
@@ -167,9 +167,8 @@ export default function ResetPasswordPage() {
    />
    </div>
 
-   <button
+   <Button
    type="submit"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    disabled={isPending}
    id="reset-submit"
    >
@@ -181,7 +180,7 @@ export default function ResetPasswordPage() {
    ) : (
     "Update Password"
    )}
-   </button>
+   </Button>
   </form>
   </div>
  </FocusLayout>

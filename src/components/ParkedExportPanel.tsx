@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from"react";
 import { QRCodeSVG, QRCodeCanvas } from"qrcode.react";
 import { parkHorse, unparkHorse, getCoaData } from"@/app/actions/parked-export";
+import { Button } from "@/components/ui/button";
 
 interface ParkedExportPanelProps {
  horseId: string;
@@ -101,14 +102,13 @@ export default function ParkedExportPanel({
 
  if (!isOpen) {
  return (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setIsOpen(true)}
  id="park-export-btn"
  title="Sell off-platform with a Certificate of Authenticity"
  >
  {isParked ?"🔒 Parked — View CoA" :"📤 Sell Off-Platform"}
- </button>
+ </Button>
  );
  }
 
@@ -116,12 +116,11 @@ export default function ParkedExportPanel({
  <div className="bg-card border-input animate-fade-in-up mt-6 rounded-lg border shadow-md transition-all">
  <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
  <h3>{isParked ?"🔒 Horse is Parked" :"📤 Sell Off-Platform"}</h3>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setIsOpen(false)}
  >
  ✕
- </button>
+ </Button>
  </div>
 
  {!isParked ? (
@@ -138,8 +137,7 @@ export default function ParkedExportPanel({
  <li>3. Give it to the buyer with the model</li>
  <li>4. They scan the QR or enter the PIN to claim the horse on MHH</li>
  </ul>
- <button
- className="mt-6 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button className="mt-6"
  onClick={handlePark}
  disabled={status ==="parking"}
  id="park-horse-btn"
@@ -151,7 +149,7 @@ export default function ParkedExportPanel({
  ) : (
 "🔒 Park This Horse"
  )}
- </button>
+ </Button>
  </div>
  ) : (
  /* ── Parked: Show PIN, QR, download CoA ── */
@@ -167,12 +165,11 @@ export default function ParkedExportPanel({
  <div className="bg-muted border-forest mb-6 flex items-center gap-4 rounded-lg border-[2px] p-6">
  <span className="text-muted-foreground text-sm font-semibold">Claim PIN</span>
  <span className="parked-export-pin">{pin}</span>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={handleCopyPin}
  >
  {copied ?"✅ Copied!" :"📋 Copy"}
- </button>
+ </Button>
  </div>
 
  {/* QR Code (visible) */}
@@ -196,8 +193,7 @@ export default function ParkedExportPanel({
 
  {/* Actions */}
  <div className="flex flex-col gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleDownloadCoA}
  disabled={status ==="downloading"}
  id="download-coa-btn"
@@ -209,15 +205,14 @@ export default function ParkedExportPanel({
  ) : (
 "📄 Download Certificate of Authenticity"
  )}
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-red-700 no-underline transition-all"
+ </Button>
+ <Button variant="destructive-outline" size="wide"
  onClick={handleUnpark}
  disabled={status ==="unparking"}
  id="unpark-btn"
  >
  {status ==="unparking" ?"Unparking…" :"Cancel & Unpark"}
- </button>
+ </Button>
  </div>
  </div>
  )}

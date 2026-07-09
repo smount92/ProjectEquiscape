@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from"react";
 import { getGroupFiles, uploadGroupFile, deleteGroupFile, type GroupFile } from"@/app/actions/groups";
 import { safeUUID } from"@/lib/utils/uuid";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface Props {
  groupId: string;
@@ -112,13 +113,12 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  placeholder="What's this file about?"
  />
  </div>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleUpload}
  disabled={uploading}
  >
  {uploading ?"Uploading…" :"📤 Upload"}
- </button>
+ </Button>
  </div>
  </div>
  )}
@@ -148,13 +148,12 @@ export default function GroupFiles({ groupId, canUpload, canDelete }: Props) {
  </div>
  <div className="flex gap-1">
  {canDelete && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => handleDelete(f.id)}
  title="Delete file"
  >
  🗑️
- </button>
+ </Button>
  )}
  </div>
  </div>

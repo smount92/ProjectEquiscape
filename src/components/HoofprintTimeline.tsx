@@ -8,6 +8,7 @@ import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from"@/app/act
 import type { TimelineEvent, OwnershipRecord } from"@/app/actions/hoofprint";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface HoofprintTimelineProps {
  horseId: string;
@@ -126,12 +127,11 @@ export default function HoofprintTimeline({
  <option value="completed">✅ Completed</option>
  <option value="for_sale">💲 For Sale</option>
  </select>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={() => setShowForm(!showForm)}
  >
  {showForm ?"Cancel" :"📝 Add Note"}
- </button>
+ </Button>
  </>
  )}
  </div>
@@ -191,13 +191,12 @@ export default function HoofprintTimeline({
  </div>
  <div className="mt-2 flex items-center gap-4">
  <span className="text-muted-foreground text-xs">📝 Notes appear on the Hoofprint™ timeline</span>
- <button
- type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all ml-auto"
+ <Button
+ type="submit" className="ml-auto"
  disabled={saving}
  >
  {saving ?"Saving…" :"Add Note"}
- </button>
+ </Button>
  </div>
  </form>
  )}

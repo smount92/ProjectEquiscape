@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
  { key:"show_votes", emoji:"📸", label:"Show votes on your entries" },
@@ -418,13 +419,12 @@ export default function SettingsPage() {
  />
  </div>
 
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleChangePassword}
  disabled={isSavingPassword || !newPassword || !confirmPassword}
  >
  {isSavingPassword ?"Changing…" :"Change Password"}
- </button>
+ </Button>
 
  {passwordMsg && (
  <p
@@ -472,13 +472,12 @@ export default function SettingsPage() {
  <div className="flex flex-col gap-6">
  {/* CSV Export */}
  <div>
- <a
+ <Button asChild variant="outline" size="wide"><a
  href="/api/export"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  download
  >
  📄 Download Collection (CSV)
- </a>
+ </a></Button>
  <p className="text-secondary-foreground mt-1 mt-[4] block text-xs">
  Spreadsheet format — compatible with Excel, Google Sheets.
  </p>
@@ -486,13 +485,12 @@ export default function SettingsPage() {
 
  {/* Insurance PDF */}
  <div>
- <a
+ <Button asChild><a
  href="/api/insurance-report"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  download
  >
  🛡️ Download Insurance Report (PDF)
- </a>
+ </a></Button>
  <p className="text-secondary-foreground mt-1 mt-[4] block text-xs">
  Professional PDF with photos and values — share with your insurance agent.
  </p>

@@ -12,6 +12,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface MakeOfferModalProps {
  horseId: string;
@@ -126,21 +127,19 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  {error && <div className="mt-2 text-sm text-red-700">{error}</div>}
 
  <div className="mt-6 flex gap-3 max-sm:flex-col">
- <button
- type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button
+ type="button" variant="outline" size="wide"
  onClick={onClose}
  disabled={saving}
  >
  Cancel
- </button>
- <button
+ </Button>
+ <Button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={saving || !disclaimerAccepted}
  >
  {saving ?"Submitting…" :"Submit Offer"}
- </button>
+ </Button>
  </div>
  </form>
  </DialogContent>

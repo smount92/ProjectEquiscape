@@ -4,6 +4,7 @@ import { useState } from"react";
 import { featureHorse } from"@/app/actions/admin";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 export default function FeatureHorseForm() {
  const [horseId, setHorseId] = useState("");
@@ -79,13 +80,12 @@ export default function FeatureHorseForm() {
  </div>
  )}
 
- <button
+ <Button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={status ==="saving"}
  >
  {status ==="saving" ?"Featuring…" :"🌟 Feature This Horse"}
- </button>
+ </Button>
  </form>
  );
 }

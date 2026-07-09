@@ -4,6 +4,7 @@ import Link from"next/link";
 import type { Metadata } from"next";
 import CsvImport from"@/components/CsvImport";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
  title:"Batch CSV Import — Model Horse Hub",
@@ -26,12 +27,11 @@ export default async function ImportPage() {
   title={<><span className="text-forest">Batch Import</span></>}
   description="Import your collection from a CSV spreadsheet"
   backLink={
-  <Link
+  <Button asChild variant="outline" size="wide"><Link
    href="/dashboard"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
   >
    ← Back to Stable
-  </Link>
+  </Link></Button>
   }
  >
   <CsvImport />

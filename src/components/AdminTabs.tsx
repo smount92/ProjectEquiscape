@@ -11,6 +11,7 @@ import AdminShowManager from"@/components/AdminShowManager";
 import AdminSuggestionsPanel from"@/components/AdminSuggestionsPanel";
 import ReportActions from"@/components/ReportActions";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
+import { Button } from "@/components/ui/button";
 
 interface ContactMessage {
  id: string;
@@ -119,13 +120,12 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
  >
  {deleting ?"…" :"Confirm"}
  </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ <Button variant="outline"
  onClick={() => setConfirming(false)}
  disabled={deleting}
  >
  Cancel
- </button>
+ </Button>
  </span>
  );
  }

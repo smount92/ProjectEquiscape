@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { getThumbUrl } from "@/lib/utils/imageUrl";
 import { loadMoreShowRing } from "@/app/actions/community";
 import type { ShowRingCard } from "@/app/actions/community";
+import { Button } from "@/components/ui/button";
 
 interface CommunityCardData {
  id: string;
@@ -229,12 +230,11 @@ export default function ShowRingGrid({
      <span className="mb-4 text-6xl">🏟️</span>
      <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">The Show Ring is Empty</h2>
      <p className="mb-6 max-w-sm text-center text-muted-foreground">No models have been shared yet. Be the first to showcase your collection!</p>
-     <Link
+     <Button asChild><Link
       href="/add-horse"
-      className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
      >
       🐴 Add to Stable
-     </Link>
+     </Link></Button>
     </div>
    ) : communityCards.length === 0 && isFiltering ? (
     <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">

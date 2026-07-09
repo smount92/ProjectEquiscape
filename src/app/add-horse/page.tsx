@@ -31,6 +31,7 @@ import TackFormFields from "@/components/forms/TackFormFields";
 import PropFormFields from "@/components/forms/PropFormFields";
 import DioramaFormFields from "@/components/forms/DioramaFormFields";
 import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
+import { Button } from "@/components/ui/button";
 
 // ---- AI Detection types ----
 interface AiDetectionResult {
@@ -591,19 +592,17 @@ export default function AddHorsePage() {
  your Digital Stable.
  </p>
  <div className="flex justify-center gap-4">
- <Link
+ <Button asChild><Link
  href="/add-horse"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  onClick={() => window.location.reload()}
  >
  Add Another
- </Link>
- <Link
+ </Link></Button>
+ <Button asChild variant="outline" size="wide"><Link
  href="/dashboard"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  View Stable
- </Link>
+ </Link></Button>
  </div>
  </div>
  </div>
@@ -969,13 +968,12 @@ export default function AddHorsePage() {
 
  <div className="mt-8 flex items-center justify-between gap-4">
  <div className="mt-8-spacer flex items-center justify-between gap-4" />
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={goNext}
  id="step-1-next"
  >
  {activeConfig.showReferenceStep ? "Next: Reference Link →" : `Next: ${activeConfig.label} Details →`}
- </button>
+ </Button>
  </div>
  </div>
  )}
@@ -1051,21 +1049,19 @@ export default function AddHorsePage() {
  </div>
 
  <div className="mt-8 flex items-center justify-between gap-4">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={goBack}
  id="step-2-back"
  >
  ← Back
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={goNext}
  disabled={!canProceedStep(1)}
  id="step-2-next"
  >
  {selectedCatalogId ?"Next: Identity →" :"Skip → No Reference"}
- </button>
+ </Button>
  </div>
  </div>
 
@@ -1443,21 +1439,19 @@ export default function AddHorsePage() {
  </div>
 
  <div className="mt-8 flex items-center justify-between gap-4">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={goBack}
  id="step-3-back"
  >
  ← Back
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={goNext}
  disabled={!canProceedStep(2)}
  id="step-3-next"
  >
  Next: Financial Vault →
- </button>
+ </Button>
  </div>
 
  {/* Community visibility selector */}
@@ -1651,15 +1645,13 @@ export default function AddHorsePage() {
  </div>
 
  <div className="mt-8 flex items-center justify-between gap-4">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ <Button variant="outline" size="wide"
  onClick={goBack}
  id="step-4-back"
  >
  ← Back
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ </Button>
+ <Button
  onClick={handleSubmit}
  disabled={isSubmitting || !canProceedStep(2)}
  id="submit-horse"
@@ -1675,7 +1667,7 @@ export default function AddHorsePage() {
  ) : (
  <>🐴 Add to Stable</>
  )}
- </button>
+ </Button>
  </div>
  </div>
  )}

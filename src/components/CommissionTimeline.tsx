@@ -8,6 +8,7 @@ import type { CommissionUpdate } from"@/app/actions/art-studio";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/social";
+import { Button } from "@/components/ui/button";
 
 const UPDATE_ICONS: Record<string, string> = {
  wip_photo:"📸",
@@ -201,12 +202,11 @@ export default function CommissionTimeline({
  <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
  <h2 className="m-0 text-lg">📋 Timeline</h2>
  {(isArtist || isClient) && !isTerminal && !showForm && (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => setShowForm(true)}
  >
  + Add Update
- </button>
+ </Button>
  )}
  </div>
 
@@ -258,20 +258,18 @@ export default function CommissionTimeline({
  onChange={(e) => setStatusNote(e.target.value)}
  />
  <div className="flex gap-2">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={() => handleClientAction("approval")}
  disabled={acting}
  >
  ✅ Approve
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ </Button>
+ <Button variant="outline" size="wide" className="text-muted-foreground"
  onClick={() => handleClientAction("revision_request")}
  disabled={acting}
  >
  ✏️ Request Revision
- </button>
+ </Button>
  </div>
  </div>
  )}
@@ -358,23 +356,21 @@ export default function CommissionTimeline({
  )}
 
  <div className="flex gap-2">
- <button
+ <Button
  type="submit"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
  disabled={saving}
  >
  {saving ?"Posting…" :"Post Update"}
- </button>
- <button
- type="button"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ </Button>
+ <Button
+ type="button" variant="outline" size="wide" className="text-muted-foreground"
  onClick={() => {
  setShowForm(false);
  setUploadError(null);
  }}
  >
  Cancel
- </button>
+ </Button>
  </div>
  </form>
  )}

@@ -5,6 +5,7 @@ import { getGroups, getMyGroups } from"@/app/actions/groups";
 import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
 import GroupBrowser from"@/components/GroupBrowser";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 export const metadata = {
@@ -26,12 +27,11 @@ export default async function GroupsPage() {
   title={<>🏛️ Groups</>}
   description="Clubs, circuits, and communities"
   headerActions={
-  <Link
+  <Button asChild><Link
    href="/community/groups/create"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
   >
    + Create Group
-  </Link>
+  </Link></Button>
   }
  >
   <GroupBrowser allGroups={allGroups} myGroups={myGroups} typeLabels={GROUP_TYPE_LABELS} />

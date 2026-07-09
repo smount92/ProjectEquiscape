@@ -4,6 +4,7 @@ import Link from"next/link";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import CollectionManager from"@/components/CollectionManager";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 
@@ -223,12 +224,11 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
    Add models to this collection from the &quot;Add to Stable&quot; form or by editing an existing
    model.
    </p>
-   <Link
+   <Button asChild><Link
    href="/add-horse"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    🐴 Add to Stable
-   </Link>
+   </Link></Button>
   </div>
   ) : (
   <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] animate-fade-in-up grid gap-6">

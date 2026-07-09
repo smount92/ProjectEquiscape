@@ -5,6 +5,7 @@ import { getHoofprint } from"@/app/actions/hoofprint";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import ShareButton from"@/components/ShareButton";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -58,12 +59,11 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
   description={<>Full provenance record for <strong>{h.custom_name}</strong>{refName && <> · {refName} · {h.finish_type} · {h.condition_grade}</>}</>}
   headerActions={
   <>
-   <Link
+   <Button asChild variant="outline" size="wide"><Link
    href={`/community/${horseId}`}
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ← Back to Passport
-   </Link>
+   </Link></Button>
    <ShareButton
    title={`🐾 Hoofprint™ — ${h.custom_name}`}
    text={`Check out the full provenance record for ${h.custom_name} on Model Horse Hub!`}

@@ -13,6 +13,7 @@ import ExpertJudgingPanel from"@/components/ExpertJudgingPanel";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { getUserTier } from"@/lib/auth";
 import { getPublicImageUrl } from"@/lib/utils/storage";
+import { Button } from "@/components/ui/button";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
@@ -172,12 +173,11 @@ export default async function ShowDetailPage({ params }: { params: Promise<{ id:
  {/* Creator Actions */}
  {(isCreator || isAdmin) && (
  <div className="animate-fade-in-up mb-4 flex justify-end gap-2">
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href={`/community/events/${showId}/manage`}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ⚙️ Manage Classes
- </Link>
+ </Link></Button>
  {userTier !== "free" ? (
  <a
   href={`/api/export/show-tags?showId=${showId}&all=true`}

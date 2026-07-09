@@ -7,6 +7,7 @@ import RatingForm from"@/components/RatingForm";
 import GuestLinkButton from"@/components/GuestLinkButton";
 import LinkHorseToCommission from"@/components/LinkHorseToCommission";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 const STATUS_STYLES: Record<string, string> = {
@@ -207,20 +208,18 @@ export default async function CommissionDetailPage({
   {/* Navigation */}
   <div className="mt-6 flex flex-wrap gap-2">
   {isArtist && (
-   <Link
+   <Button asChild variant="outline" size="wide"><Link
    href="/studio/dashboard"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ← Dashboard
-   </Link>
+   </Link></Button>
   )}
   {isClient && (
-   <Link
+   <Button asChild variant="outline" size="wide"><Link
    href="/studio/my-commissions"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
    >
    ← My Commissions
-   </Link>
+   </Link></Button>
   )}
   </div>
  </ExplorerLayout>

@@ -5,6 +5,7 @@ import { useRouter } from"next/navigation";
 import { addEventMedia, deleteEventMedia } from"@/app/actions/posts";
 import { createClient } from"@/lib/supabase/client";
 import { safeUUID } from"@/lib/utils/uuid";
+import { Button } from "@/components/ui/button";
 
 interface EventPhoto {
  id: string;
@@ -135,10 +136,9 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={p.imageUrl} alt={p.caption ||"Event photo"} loading="lazy" />
  {p.userId === currentUserId && (
- <button
+ <Button
  onClick={() => handleDelete(p.id)}
- disabled={isPending}
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
+ disabled={isPending} variant="outline" size="wide"
  style={{
  position:"absolute",
  top: 4,
@@ -151,7 +151,7 @@ export default function EventPhotoGallery({ eventId, currentUserId, initialPhoto
  }}
  >
  ✕
- </button>
+ </Button>
  )}
  {p.caption && (
  <div

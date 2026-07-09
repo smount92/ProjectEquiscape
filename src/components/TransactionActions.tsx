@@ -3,6 +3,7 @@
 import { useState } from"react";
 import { useRouter } from"next/navigation";
 import { markTransactionComplete } from"@/app/actions/messaging";
+import { Button } from "@/components/ui/button";
 
 interface TransactionActionsProps {
  conversationId: string;
@@ -54,13 +55,12 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
  >
  <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
  <span className="text-muted-foreground text-sm">Transaction is open</span>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-forest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
+ <Button
  onClick={handleComplete}
  disabled={saving}
  >
  {saving ?"Completing…" :"✅ Mark as Complete"}
- </button>
+ </Button>
  </div>
  {error && <div className="mt-2 text-sm text-red-700 mt-2">{error}</div>}
  </div>

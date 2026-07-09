@@ -6,6 +6,7 @@ import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
 import { getPosts } from"@/app/actions/posts";
 import GroupDetailClient from"@/components/GroupDetailClient";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -38,12 +39,11 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  <div className="mx-auto max-w-6xl px-6">
  {/* Group Header */}
  <div className="border-input mb-6 border-b pb-6">
- <Link
+ <Button asChild variant="outline" size="wide"><Link
  href="/community/groups"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-secondary-foreground no-underline transition-all"
  >
  ← All Groups
- </Link>
+ </Link></Button>
  <h1>{group.name}</h1>
  <div
  className="text-muted-foreground mt-2 flex flex-wrap gap-4 text-sm"

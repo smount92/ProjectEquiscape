@@ -3,6 +3,7 @@
 import { useState } from "react";
 import UserAvatar from "./UserAvatar";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface ReplyComposerProps {
     /** Current user's avatar URL */
@@ -68,13 +69,12 @@ export default function ReplyComposer({
                     onKeyDown={handleKeyDown}
                     maxLength={maxLength}
                 />
-                <button
-                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center rounded-md border-0 bg-forest px-4 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                <Button className="px-4"
                     onClick={handleSubmit}
                     disabled={isDisabled}
                 >
                     {submitting ? "…" : "Reply"}
-                </button>
+                </Button>
             </div>
             {text.length > maxLength * 0.8 && (
                 <span className="mt-0.5 block text-right text-[0.65rem] text-muted-foreground">

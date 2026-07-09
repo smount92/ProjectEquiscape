@@ -5,6 +5,7 @@ import type { Metadata } from"next";
 import { getPublicImageUrl } from"@/lib/utils/storage";
 import HelpIdDetailClient from"@/components/HelpIdDetailClient";
 import ScrapbookLayout from"@/components/layouts/ScrapbookLayout";
+import { Button } from "@/components/ui/button";
 
 
 export const metadata: Metadata = {
@@ -122,12 +123,11 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     Submitted by {requesterName} on {new Date(req.created_at).toLocaleDateString()}
    </p>
    </div>
-   <Link
+   <Button asChild variant="outline" size="wide" className="text-muted-foreground"><Link
    href="/community/help-id"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-8 py-2 text-sm font-semibold text-muted-foreground no-underline transition-all"
    >
    ← Back to Help ID
-   </Link>
+   </Link></Button>
   </div>
   }
   leftContent={
