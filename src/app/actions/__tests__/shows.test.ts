@@ -24,13 +24,18 @@ vi.mock("@/app/actions/notifications", () => ({
 vi.mock("@/app/actions/achievements", () => ({
     evaluateAchievements: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock("@/lib/logger", () => ({
+    logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+}));
 
 import {
     enterShow,
     updateShowStatus,
+    saveExpertPlacings,
     overrideFinalPlacings,
     getShowHistory,
 } from "@/app/actions/shows";
+import { logger } from "@/lib/logger";
 
 /**
  * Shows server actions test suite
@@ -122,6 +127,61 @@ describe("shows.ts — Show Actions", () => {
             const result = await updateShowStatus("show-1", "closed");
             expect(result.success).toBe(false);
             expect(result.error).toMatch(/creator|permission|unauthorized/i);
+        });
+    });
+
+    // ── saveExpertPlacings ──
+    describe("saveExpertPlacings", () => {
+        const mockExpertEvent = () => {
+            // Drain stale queued values (earlier tests queue .single() results
+            // that their action never consumes, e.g. updateShowStatus which
+            // returns "Unauthorized" before querying)
+            mockClient._mockQuery.single.mockReset().mockResolvedValue({ data: null, error: null });
+            mockAdmin._mockQuery.maybeSingle.mockReset().mockResolvedValue({ data: null, error: null });
+            // Event query — caller is the creator, expert judging
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: {
+                    created_by: "user-1", judging_method: "expert_judge",
+                    name: "Test Show", starts_at: "2026-01-01T00:00:00Z",
+                },
+                error: null,
+            });
+            // Placing update + placed-entries fetch (implicit awaits)
+            mockClient._setImplicitResolve({
+                data: [{ id: "e1", horse_id: "horse-1", user_id: "owner-1", placing: "1st" }],
+                error: null,
+            });
+            // No existing show_record → insert path
+            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+        };
+
+        it("reports show_record insert failures instead of swallowing them", async () => {
+            mockExpertEvent();
+            // Record insert fails (e.g. CHECK constraint violation)
+            mockAdmin._setImplicitResolve({
+                data: null,
+                error: { message: 'new row violates check constraint "show_records_verification_tier_check"' },
+            });
+
+            const result = await saveExpertPlacings("show-1", [{ entryId: "e1", placing: "1st" }]);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/show records/i);
+            expect(result.error).toMatch(/check constraint/i);
+            expect(logger.error).toHaveBeenCalled();
+        });
+
+        it("succeeds and inserts a platform_generated record when the insert works", async () => {
+            mockExpertEvent();
+            mockAdmin._setImplicitResolve({ data: null, error: null });
+
+            const result = await saveExpertPlacings("show-1", [{ entryId: "e1", placing: "1st" }]);
+
+            expect(result.success).toBe(true);
+            expect(result.error).toBeUndefined();
+            expect(mockAdmin._mockQuery.insert).toHaveBeenCalledWith(
+                expect.objectContaining({ verification_tier: "platform_generated" })
+            );
         });
     });
 

@@ -804,6 +804,7 @@ export async function saveExpertPlacings(
         "Top 10": "Blue",
     };
 
+    let recordError: string | null = null;
     try {
         // Fetch placed entries with horse + user details
         const entryIds = placings.map(p => p.entryId);
@@ -835,7 +836,7 @@ export async function saveExpertPlacings(
 
                 if (!existing) {
                     const judgeNote = placings.find(p => p.entryId === entry.id)?.notes || undefined;
-                    await admin.from("show_records").insert({
+                    const { error: insertError } = await admin.from("show_records").insert({
                         horse_id: entry.horse_id,
                         user_id: entry.user_id,
                         show_name: ev.name,
@@ -848,6 +849,10 @@ export async function saveExpertPlacings(
                         judge_notes: judgeNote || null,
                         verification_tier: "platform_generated",
                     });
+                    if (insertError) {
+                        logger.error("Shows", `Failed to insert show_record for entry ${entry.id}`, insertError);
+                        recordError = insertError.message;
+                    }
                 } else {
                     // Update judge_notes if provided
                     const judgeNote = placings.find(p => p.entryId === entry.id)?.notes;
@@ -859,11 +864,20 @@ export async function saveExpertPlacings(
                 }
             }
         }
-    } catch {
-        // Non-blocking — placing updates already saved
+    } catch (err) {
+        logger.error("Shows", "Show record generation failed after saving placings", err);
+        recordError = err instanceof Error ? err.message : "Unexpected error generating show records";
     }
 
     revalidatePath(`/community/events/${eventId}`);
+    if (recordError) {
+        // Placings themselves were saved; retrying is safe (record
+        // generation dedupes against existing show_records)
+        return {
+            success: false,
+            error: `Placings were saved, but generating show records failed: ${recordError}`,
+        };
+    }
     return { success: true };
 }
 
