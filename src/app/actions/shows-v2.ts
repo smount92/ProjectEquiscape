@@ -2013,10 +2013,7 @@ export async function getShowGallery(
 ): Promise<ActionResult<{ gallery: ShowGalleryData }>> {
     const parsed = getShowGallerySchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
-    // Untyped client alias — blind_browsing / show_entry_votes are
-    // migration-119 additions not yet in database.generated.ts.
-    // INTERIM: drop the annotation after the owner runs gen-types.
-    const supabase: SupabaseClient = await createClient();
+    const supabase = await createClient();
     const { showId } = parsed.data;
 
     const {

@@ -3163,6 +3163,56 @@ export type Database = {
           },
         ]
       }
+      show_entry_votes: {
+        Row: {
+          created_at: string
+          entry_id: string
+          id: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          id?: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_entry_votes_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "show_class_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_entry_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_entry_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_entry_votes_voter_id_fkey"
+            columns: ["voter_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       show_placings: {
         Row: {
           class_id: string
@@ -3613,6 +3663,7 @@ export type Database = {
       }
       shows: {
         Row: {
+          blind_browsing: boolean
           capacity: number | null
           created_at: string
           entries_close_at: string | null
@@ -3635,6 +3686,7 @@ export type Database = {
           venue_name: string | null
         }
         Insert: {
+          blind_browsing?: boolean
           capacity?: number | null
           created_at?: string
           entries_close_at?: string | null
@@ -3657,6 +3709,7 @@ export type Database = {
           venue_name?: string | null
         }
         Update: {
+          blind_browsing?: boolean
           capacity?: number | null
           created_at?: string
           entries_close_at?: string | null
@@ -4405,6 +4458,8 @@ export type Database = {
       }
       count_user_horses_public: { Args: { p_user_id: string }; Returns: number }
       count_user_horses_total: { Args: { p_user_id: string }; Returns: number }
+      entry_owner_of: { Args: { p_entry_id: string }; Returns: string }
+      entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
       get_photo_limit: { Args: never; Returns: number }
       get_show_staff_public: {
@@ -4462,6 +4517,7 @@ export type Database = {
         }[]
       }
       show_id_of_class: { Args: { p_class_id: string }; Returns: string }
+      show_id_of_entry: { Args: { p_entry_id: string }; Returns: string }
       show_id_of_section: { Args: { p_section_id: string }; Returns: string }
       show_is_public: { Args: { p_show_id: string }; Returns: boolean }
       show_role_check: {
