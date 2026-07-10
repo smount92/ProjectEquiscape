@@ -493,9 +493,10 @@ export async function finalizeHorseImages(
 // ============================================================
 
 /**
- * Bulk update collection, trade status, or visibility for up to 200 horses.
+ * Bulk update collection, trade status, or visibility for up to 500 horses.
+ * (500 matches the Stable v2 "Select all matching" cap.)
  * Verifies ownership of every horse in the batch before applying changes.
- * @param horseIds - Array of horse UUIDs to update (max 200)
+ * @param horseIds - Array of horse UUIDs to update (max 500)
  * @param updates - Fields to set across all selected horses
  */
 export async function bulkUpdateHorses(
@@ -508,7 +509,7 @@ export async function bulkUpdateHorses(
 ): Promise<{ success: boolean; count?: number; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (horseIds.length === 0) return { success: false, error: "No horses selected." };
-    if (horseIds.length > 200) return { success: false, error: "Too many items (max 200)." };
+    if (horseIds.length > 500) return { success: false, error: "Too many items (max 500)." };
 
     // Verify ownership of ALL horses
     const { data: owned } = await supabase

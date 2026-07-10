@@ -25,7 +25,7 @@ vi.mock("@/app/actions/activity", () => ({
     createActivityEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { createHorseRecord, deleteHorse, quickAddHorse, updateHorseAction } from "@/app/actions/horse";
+import { bulkDeleteHorses, bulkUpdateHorses, createHorseRecord, deleteHorse, quickAddHorse, updateHorseAction } from "@/app/actions/horse";
 
 describe("horse.ts — CRUD", () => {
     beforeEach(() => {
@@ -160,6 +160,115 @@ describe("horse.ts — CRUD", () => {
 
             const result = await deleteHorse("h1");
             expect(result.success).toBe(true);
+        });
+    });
+
+    // ── bulkUpdateHorses ──
+    describe("bulkUpdateHorses", () => {
+        it("rejects unauthenticated users", async () => {
+            mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
+            await expect(bulkUpdateHorses(["h1"], { tradeStatus: "For Sale" })).rejects.toThrow(AuthError);
+        });
+
+        it("rejects an empty selection", async () => {
+            const result = await bulkUpdateHorses([], { tradeStatus: "For Sale" });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/no horses/i);
+        });
+
+        it("rejects batches over the 500 cap (the select-all-matching cap)", async () => {
+            const ids = Array.from({ length: 501 }, (_, i) => `h${i}`);
+            const result = await bulkUpdateHorses(ids, { tradeStatus: "For Sale" });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/max 500/i);
+        });
+
+        it("refuses when ANY horse in the batch is not owned by the caller", async () => {
+            // Ownership check finds only one of the two requested horses
+            mockClient._setImplicitResolve({ data: [{ id: "h1" }], error: null });
+            const result = await bulkUpdateHorses(["h1", "h2"], { tradeStatus: "For Sale" });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/not yours|not found/i);
+            expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
+        });
+
+        it("rejects when no updates are specified", async () => {
+            mockClient._setImplicitResolve({ data: [{ id: "h1" }], error: null });
+            const result = await bulkUpdateHorses(["h1"], {});
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/no updates/i);
+        });
+
+        it("applies a visibility change for owned horses (the new bulk toggle)", async () => {
+            mockClient._setImplicitResolve({ data: [{ id: "h1" }], error: null });
+            const result = await bulkUpdateHorses(["h1"], { visibility: "private" });
+            expect(result.success).toBe(true);
+            expect(result.count).toBe(1);
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ visibility: "private" });
+            expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("owner_id", "user-1");
+        });
+
+        it("clears the collection when collectionId is null", async () => {
+            mockClient._setImplicitResolve({ data: [{ id: "h1" }], error: null });
+            const result = await bulkUpdateHorses(["h1"], { collectionId: null });
+            expect(result.success).toBe(true);
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ collection_id: null });
+        });
+    });
+
+    // ── bulkDeleteHorses ──
+    describe("bulkDeleteHorses", () => {
+        it("rejects unauthenticated users", async () => {
+            mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
+            await expect(bulkDeleteHorses(["h1"])).rejects.toThrow(AuthError);
+        });
+
+        it("rejects an empty selection", async () => {
+            const result = await bulkDeleteHorses([]);
+            expect(result.success).toBe(false);
+        });
+
+        it("rejects batches over the 100 cap", async () => {
+            const ids = Array.from({ length: 101 }, (_, i) => `h${i}`);
+            const result = await bulkDeleteHorses(ids);
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/max 100/i);
+        });
+
+        it("refuses when ANY horse in the batch is not owned by the caller", async () => {
+            mockClient._setImplicitResolve({ data: [{ id: "h1" }], error: null });
+            const result = await bulkDeleteHorses(["h1", "h2"]);
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/not yours|not found/i);
+            expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
+        });
+
+        it("blocks deletion when any horse has an active transaction", async () => {
+            mockClient._setImplicitResolve({ data: [{ id: "h1" }], error: null });
+            mockAdmin._setImplicitResolve({ data: [{ horse_id: "h1" }], error: null });
+            const result = await bulkDeleteHorses(["h1"]);
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/active transaction/i);
+            expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
+        });
+
+        it("soft-deletes owned horses with no active transactions", async () => {
+            // One resolve serves the ownership check (id) AND the image
+            // cleanup query (image_url) — the mock returns it for both.
+            mockClient._setImplicitResolve({
+                data: [{ id: "h1", image_url: "https://x/storage/v1/object/public/horse-images/a.webp" }],
+                error: null,
+            });
+            mockAdmin._setImplicitResolve({ data: [], error: null });
+            const result = await bulkDeleteHorses(["h1"]);
+            expect(result.success).toBe(true);
+            expect(result.count).toBe(1);
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+                expect.objectContaining({ visibility: "private", custom_name: "[Deleted]" }),
+            );
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+                expect.objectContaining({ deleted_at: expect.any(String) }),
+            );
         });
     });
 

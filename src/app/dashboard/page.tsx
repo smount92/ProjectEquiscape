@@ -20,6 +20,8 @@ import {
 } from"lucide-react";
 import DashboardToast from"@/components/DashboardToast";
 import DashboardShell from"@/components/DashboardShell";
+import DashboardV2 from"./DashboardV2";
+import { stableV2Enabled } from"@/lib/stable/flags";
 import ExportButton from"@/components/ExportButton";
 import InsuranceReportButton from"@/components/InsuranceReportButton";
 import TransferHistorySection from"@/components/TransferHistorySection";
@@ -466,7 +468,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  );
 }
 
-export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
  const supabase = await createClient();
  const {
  data: { user },
@@ -477,10 +479,25 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  }
 
  const params = await searchParams;
- const page = Math.max(1, parseInt(params.page ||"1"));
+ const page = Math.max(1, parseInt((typeof params.page ==="string" ? params.page :"") ||"1"));
 
  // Fast query for profile name (needed for shelf header)
  const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>();
+
+ // ── Digital Stable v2 (NEXT_PUBLIC_STABLE_V2): the filter ledger ──
+ // Flag off = the current dashboard below, untouched.
+ if (stableV2Enabled()) {
+ return (
+ <div className="mx-auto w-full max-w-[1920px] px-4 py-8 sm:px-6 md:py-12 lg:px-8">
+  <Suspense fallback={null}>
+  <DashboardToast />
+  </Suspense>
+  <Suspense fallback={<DashboardSkeleton />}>
+  <DashboardV2 userId={user.id} aliasName={profile?.alias_name ?? null} searchParams={params} />
+  </Suspense>
+ </div>
+ );
+ }
 
  return (
  <CommandCenterLayout
