@@ -96,32 +96,39 @@ describe("ThreadView", () => {
     });
 
     it("submits a reply through replyToThread and appends it", async () => {
-        const user = userEvent.setup();
+        // delay:null pastes keystrokes instantly — per-keystroke typing of a
+        // 40-char sentence flakes when parallel suite workers saturate the CPU
+        const user = userEvent.setup({ delay: null });
         renderThread();
         const box = screen.getByLabelText("Write a reply");
         await user.type(box, "Can we stop at that bakery in Centralia?");
         await user.click(screen.getByText("Reply"));
 
-        await waitFor(() =>
-            expect(replyToThread).toHaveBeenCalledWith({
-                postId: "op-1",
-                content: "Can we stop at that bakery in Centralia?",
-            }),
+        await waitFor(
+            () =>
+                expect(replyToThread).toHaveBeenCalledWith({
+                    postId: "op-1",
+                    content: "Can we stop at that bakery in Centralia?",
+                }),
+            { timeout: 5000 },
         );
-        // optimistic append (generous timeout: flakes at the default 1s
-        // when the full suite runs on a loaded machine)
-        expect(
-            await screen.findByText(
-                "Can we stop at that bakery in Centralia?",
-                {},
-                { timeout: 5000 },
-            ),
-        ).toBeInTheDocument();
-        await waitFor(() =>
-            expect(screen.getAllByTestId("thread-reply")).toHaveLength(3),
+        // optimistic append. Re-query INSIDE waitFor: the component swaps
+        // the optimistic node for the confirmed one on re-render, so a
+        // handle captured by findByText can be detached by assertion time
+        // (the load-dependent flake this replaced).
+        await waitFor(
+            () =>
+                expect(
+                    screen.getByText("Can we stop at that bakery in Centralia?"),
+                ).toBeInTheDocument(),
+            { timeout: 5000 },
+        );
+        await waitFor(
+            () => expect(screen.getAllByTestId("thread-reply")).toHaveLength(3),
+            { timeout: 5000 },
         );
         expect(box).toHaveValue("");
-    });
+    }, 20000);
 
     it("caps the composer at 2000 characters", () => {
         renderThread();
