@@ -21,21 +21,29 @@ import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { getPublicImageUrl } from "@/lib/utils/storage";
 import {
     addClassSchema,
     addDivisionSchema,
     addSectionSchema,
     addShowStaffSchema,
+    castVoteSchema,
     combineClassesSchema,
     createShowSchema,
     enterClassSchema,
+    finalizeCommunityVotesSchema,
     findUserByAliasSchema,
     firstZodError,
+    getJudgeQueueSchema,
     getMyShowEntriesSchema,
     getPublicShowSchema,
     getShowConsoleSchema,
+    getShowGallerySchema,
     loadTemplateSchema,
+    recordPlacingsSchema,
     removeShowStaffSchema,
+    removeVoteSchema,
     reorderClasslistSchema,
     scratchEntrySchema,
     splitClassSchema,
@@ -43,6 +51,18 @@ import {
     updateClassSchema,
     updateShowSettingsSchema,
 } from "@/lib/shows/schemas";
+import { deriveVotePlacings, type VoteTally } from "@/lib/shows/deriveVotePlacings";
+import { buildShowRecords } from "@/lib/shows/writeShowRecords";
+import {
+    GALLERY_STATUSES,
+    isOwnerRevealed,
+    RESULTS_STATUSES,
+    type GalleryClass,
+    type GalleryEntry,
+    type JudgeQueueClass,
+    type JudgeQueueData,
+    type ShowGalleryData,
+} from "@/lib/shows/gallery";
 import { validateEntry } from "@/lib/shows/entryRules";
 import {
     PUBLIC_BROWSE_STATUSES,
@@ -72,6 +92,7 @@ import type {
     ClassStatus,
     DivisionAxis,
     EntryStatus,
+    Place,
     ShowJudging,
     ShowMode,
     ShowStatus,
@@ -89,6 +110,7 @@ interface ShowCore {
     host_id: string;
     status: ShowStatus;
     mode: ShowMode;
+    judging: ShowJudging;
 }
 
 /**
@@ -102,7 +124,7 @@ async function getShowRole(
 ): Promise<{ show: ShowCore; role: StaffRole | null } | { error: string }> {
     const { data: show, error } = await supabase
         .from("shows")
-        .select("id, host_id, status, mode")
+        .select("id, host_id, status, mode, judging")
         .eq("id", showId)
         .maybeSingle();
     if (error) return { error: error.message };
@@ -232,6 +254,7 @@ export async function updateShowSettings(
     if (patch.capacity !== undefined) update.capacity = patch.capacity;
     if (patch.isMhhQualifying !== undefined) update.is_mhh_qualifying = patch.isMhhQualifying;
     if (patch.sanctioningNote !== undefined) update.sanctioning_note = patch.sanctioningNote;
+    if (patch.blindBrowsing !== undefined) update.blind_browsing = patch.blindBrowsing;
 
     const { error } = await supabase.from("shows").update(update).eq("id", showId);
     if (error) return { success: false, error: error.message };
@@ -255,9 +278,141 @@ export async function transitionShowStatus(
     const legal = canTransition(ctx.show.status, to, ctx.show.mode);
     if (!legal.ok) return { success: false, error: legal.reason };
 
+    // RESULTS PUBLISH (results_review → completed): every placed
+    // entry becomes a permanent trophy-case row. Records are
+    // written BEFORE the status flips — writeShowRecords is
+    // idempotent, so a failure here leaves the show safely in
+    // results_review and the host simply retries.
+    if (to === "completed") {
+        const published = await writeShowRecordsForShow(supabase, showId);
+        if ("error" in published) {
+            return {
+                success: false,
+                error: `Results could not be written to the horses' records — the show stays in results review. (${published.error})`,
+            };
+        }
+    }
+
     const { error } = await supabase.from("shows").update({ status: to }).eq("id", showId);
     if (error) return { success: false, error: error.message };
     return { success: true };
+}
+
+/**
+ * Load the placed results of a show and write them to the legacy
+ * show_records ledger (trophy case) via buildShowRecords — the
+ * single vocabulary→legacy mapping. Idempotent: already-written
+ * rows are skipped by (horse, class name) within this show.
+ */
+async function writeShowRecordsForShow(
+    supabase: SupabaseClient,
+    showId: string,
+): Promise<{ written: number; skipped: number } | { error: string }> {
+    const { data: show, error: showError } = await supabase
+        .from("shows")
+        .select("id, title, mode, show_date, entries_close_at, judging_ends_at")
+        .eq("id", showId)
+        .maybeSingle();
+    if (showError) return { error: showError.message };
+    if (!show) return { error: "Show not found." };
+
+    // ── Classlist tree (ids + names only) ──
+    const { data: divisionRows, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, name")
+        .eq("show_id", showId);
+    if (dErr) return { error: dErr.message };
+    const divisions = (divisionRows ?? []) as { id: string; name: string }[];
+
+    let sections: { id: string; name: string; division_id: string }[] = [];
+    let classes: { id: string; name: string; section_id: string }[] = [];
+    if (divisions.length > 0) {
+        const { data: sectionRows, error: sErr } = await supabase
+            .from("show_sections")
+            .select("id, name, division_id")
+            .in("division_id", divisions.map((d) => d.id));
+        if (sErr) return { error: sErr.message };
+        sections = sectionRows ?? [];
+        if (sections.length > 0) {
+            const { data: classRows, error: cErr } = await supabase
+                .from("show_classes")
+                .select("id, name, section_id")
+                .in("section_id", sections.map((s) => s.id));
+            if (cErr) return { error: cErr.message };
+            classes = classRows ?? [];
+        }
+    }
+    if (classes.length === 0) return { written: 0, skipped: 0 };
+
+    // ── Live entries + placings ──
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, class_id, horse_id, owner_id, status")
+        .eq("show_id", showId);
+    if (eErr) return { error: eErr.message };
+    const liveEntries = (entryRows ?? []).filter(
+        (e: { status: string }) => e.status !== "scratched",
+    );
+
+    const { data: placingRows, error: pErr } = await supabase
+        .from("show_placings")
+        .select("entry_id, class_id, place, note")
+        .in("class_id", classes.map((c) => c.id));
+    if (pErr) return { error: pErr.message };
+    const placings = placingRows ?? [];
+    if (placings.length === 0) return { written: 0, skipped: 0 };
+
+    // Admin client — REQUIRED here: show_records rows belong to the
+    // entry OWNERS, and RLS (011) only lets a user insert/read their
+    // own rows. The publishing host cannot write (or even see) other
+    // entrants' records through their own client. Guarded above by
+    // the explicit host/co-host role check in transitionShowStatus.
+    const admin = getAdminClient();
+    const { data: existingRows, error: exErr } = await admin
+        .from("show_records")
+        .select("horse_id, class_name")
+        .eq("show_name", show.title as string)
+        .eq("verification_tier", "platform_generated");
+    if (exErr) return { error: exErr.message };
+
+    const { rows, skipped } = buildShowRecords({
+        show: {
+            id: show.id as string,
+            title: show.title as string,
+            mode: show.mode as ShowMode,
+            showDate: (show.show_date as string | null) ?? null,
+            entriesCloseAt: (show.entries_close_at as string | null) ?? null,
+            judgingEndsAt: (show.judging_ends_at as string | null) ?? null,
+        },
+        placings: placings.map((p) => ({
+            entryId: p.entry_id as string,
+            classId: p.class_id as string,
+            place: (p.place as Place | null) ?? null,
+            note: (p.note as string | null) ?? null,
+        })),
+        entries: liveEntries.map((e) => ({
+            id: e.id as string,
+            classId: e.class_id as string,
+            horseId: e.horse_id as string,
+            ownerId: e.owner_id as string,
+        })),
+        classes: classes.map((c) => ({ id: c.id, name: c.name, sectionId: c.section_id })),
+        sections: sections.map((s) => ({ id: s.id, name: s.name, divisionId: s.division_id })),
+        divisions,
+        existing: (existingRows ?? []).map(
+            (r: { horse_id: string; class_name: string | null }) => ({
+                horseId: r.horse_id,
+                className: r.class_name,
+            }),
+        ),
+        fallbackDate: new Date().toISOString().slice(0, 10),
+    });
+
+    if (rows.length > 0) {
+        const { error: insertError } = await admin.from("show_records").insert(rows);
+        if (insertError) return { error: insertError.message };
+    }
+    return { written: rows.length, skipped };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -858,7 +1013,7 @@ export async function getShowConsole(
     const { data: show, error: showError } = await supabase
         .from("shows")
         .select(
-            "id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, created_at",
+            "id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, blind_browsing, created_at",
         )
         .eq("id", showId)
         .maybeSingle();
@@ -1036,6 +1191,7 @@ export async function getShowConsole(
                 capacity: show.capacity as number | null,
                 isMhhQualifying: show.is_mhh_qualifying as boolean,
                 sanctioningNote: show.sanctioning_note as string | null,
+                blindBrowsing: show.blind_browsing as boolean,
                 createdAt: show.created_at as string,
             },
             viewerRole: ctx.role,
@@ -1383,6 +1539,29 @@ export async function getMyShowEntries(
     );
     if (!(aliases instanceof Map)) return { success: false, error: aliases.error };
 
+    // Result stamps — published results only. Provisional placings
+    // (results_review) stay with the host until the show completes.
+    const placeByEntry = new Map<string, Place>();
+    if (entries.length > 0) {
+        const { data: show } = await supabase
+            .from("shows")
+            .select("status")
+            .eq("id", parsed.data.showId)
+            .maybeSingle();
+        if (show && RESULTS_STATUSES.includes(show.status as ShowStatus)) {
+            const { data: placingRows, error: pErr } = await supabase
+                .from("show_placings")
+                .select("entry_id, place")
+                .in("entry_id", entries.map((e) => e.id as string));
+            if (pErr) return { success: false, error: pErr.message };
+            for (const p of placingRows ?? []) {
+                if (p.place !== null) {
+                    placeByEntry.set(p.entry_id as string, p.place as Place);
+                }
+            }
+        }
+    }
+
     return {
         success: true,
         entries: entries.map((e) => ({
@@ -1397,6 +1576,7 @@ export async function getMyShowEntries(
                     ? (aliases.get(e.handler_id as string) ?? "unknown")
                     : null,
             photoId: (e.photo_id as string | null) ?? null,
+            place: placeByEntry.get(e.id as string) ?? null,
         })),
     };
 }
@@ -1700,4 +1880,755 @@ export async function scratchEntry(
         .eq("owner_id", user.id);
     if (uErr) return { success: false, error: uErr.message };
     return { success: true };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Online judging — Phase E1. The entry gallery (blind rule
+// enforced HERE, server-side — a blind payload simply does not
+// contain owner identities), community voting, the judge queue,
+// and the community-vote finalizer.
+// ══════════════════════════════════════════════════════════════
+
+/** Flat class context (skips cancelled/combined classes), ordered
+ *  by division → section → class sort. Shared by the gallery,
+ *  the judge queue, and the vote finalizer. */
+interface ClassContext {
+    classId: string;
+    className: string;
+    classNumber: string | null;
+    status: ClassStatus;
+    sectionName: string;
+    divisionName: string;
+}
+
+async function loadClassContexts(
+    supabase: SupabaseClient,
+    showId: string,
+): Promise<ClassContext[] | { error: string }> {
+    const { data: divisionRows, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, name, sort_order")
+        .eq("show_id", showId)
+        .order("sort_order", { ascending: true });
+    if (dErr) return { error: dErr.message };
+    const divisions = (divisionRows ?? []) as { id: string; name: string }[];
+    if (divisions.length === 0) return [];
+
+    const { data: sectionRows, error: sErr } = await supabase
+        .from("show_sections")
+        .select("id, name, division_id, sort_order")
+        .in("division_id", divisions.map((d) => d.id))
+        .order("sort_order", { ascending: true });
+    if (sErr) return { error: sErr.message };
+    const sections = (sectionRows ?? []) as { id: string; name: string; division_id: string }[];
+    if (sections.length === 0) return [];
+
+    const { data: classRows, error: cErr } = await supabase
+        .from("show_classes")
+        .select("id, name, class_number, status, section_id, sort_order")
+        .in("section_id", sections.map((s) => s.id))
+        .order("sort_order", { ascending: true });
+    if (cErr) return { error: cErr.message };
+
+    const divisionById = new Map(divisions.map((d) => [d.id, d]));
+
+    // Walk sections in their division-major order so the flat list
+    // matches the published classlist; classes are already sorted.
+    const divisionIndex = new Map(divisions.map((d, i) => [d.id, i]));
+    const orderedSections = [...sections].sort(
+        (a, b) =>
+            (divisionIndex.get(a.division_id) ?? 0) - (divisionIndex.get(b.division_id) ?? 0),
+    );
+
+    const contexts: ClassContext[] = [];
+    for (const section of orderedSections) {
+        for (const c of classRows ?? []) {
+            if (c.section_id !== section.id) continue;
+            const status = c.status as ClassStatus;
+            if (status === "cancelled" || status === "combined") continue;
+            contexts.push({
+                classId: c.id as string,
+                className: c.name as string,
+                classNumber: (c.class_number as string | null) ?? null,
+                status,
+                sectionName: section.name,
+                divisionName: divisionById.get(section.division_id)?.name ?? "",
+            });
+        }
+    }
+    return contexts;
+}
+
+/** Entry photo urls: photo_id → public storage URL. */
+async function getEntryPhotoUrls(
+    supabase: SupabaseClient,
+    photoIds: string[],
+): Promise<Map<string, string> | { error: string }> {
+    const unique = [...new Set(photoIds)];
+    if (unique.length === 0) return new Map();
+    const { data, error } = await supabase
+        .from("horse_images")
+        .select("id, image_url")
+        .in("id", unique);
+    if (error) return { error: error.message };
+    return new Map(
+        (data ?? []).map((r: { id: string; image_url: string }) => [
+            r.id,
+            getPublicImageUrl(r.image_url),
+        ]),
+    );
+}
+
+/** Horse display names in one query. */
+async function getHorseNames(
+    supabase: SupabaseClient,
+    horseIds: string[],
+): Promise<Map<string, string> | { error: string }> {
+    const unique = [...new Set(horseIds)];
+    if (unique.length === 0) return new Map();
+    const { data, error } = await supabase
+        .from("user_horses")
+        .select("id, custom_name")
+        .in("id", unique);
+    if (error) return { error: error.message };
+    return new Map(
+        (data ?? []).map((r: { id: string; custom_name: string | null }) => [
+            r.id,
+            r.custom_name ?? "Unnamed horse",
+        ]),
+    );
+}
+
+/**
+ * THE ENTRY GALLERY read — public, anon included; online shows
+ * only, visible from entries_open onward.
+ *
+ * BLIND RULE (server-enforced): while the show sits before
+ * results_review AND blind_browsing is on, owner aliases/ids are
+ * NOT queried and NOT included in the payload. Blindness is a
+ * property of the data, never of the CSS.
+ */
+export async function getShowGallery(
+    input: z.input<typeof getShowGallerySchema>,
+): Promise<ActionResult<{ gallery: ShowGalleryData }>> {
+    const parsed = getShowGallerySchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    // Untyped client alias — blind_browsing / show_entry_votes are
+    // migration-119 additions not yet in database.generated.ts.
+    // INTERIM: drop the annotation after the owner runs gen-types.
+    const supabase: SupabaseClient = await createClient();
+    const { showId } = parsed.data;
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    const { data: show, error: showError } = await supabase
+        .from("shows")
+        .select("id, mode, status, judging, blind_browsing")
+        .eq("id", showId)
+        .maybeSingle();
+    if (showError) return { success: false, error: showError.message };
+    if (!show || show.status === "draft") return { success: false, error: "Show not found." };
+    if (show.mode !== "online") {
+        // Live shows have no entry photos by design — their
+        // spectator moment is the published results.
+        return { success: false, error: "Live shows have no entry gallery." };
+    }
+    const status = show.status as ShowStatus;
+    if (!GALLERY_STATUSES.includes(status)) {
+        return { success: false, error: "The entry gallery opens when entries open." };
+    }
+
+    const contexts = await loadClassContexts(supabase, showId);
+    if ("error" in contexts) return { success: false, error: contexts.error };
+
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at")
+        .eq("show_id", showId)
+        .order("created_at", { ascending: true });
+    if (eErr) return { success: false, error: eErr.message };
+    const entries = (entryRows ?? []).filter(
+        (e: { status: string }) => e.status !== "scratched",
+    );
+
+    const photoUrls = await getEntryPhotoUrls(
+        supabase,
+        entries.flatMap((e) => (e.photo_id ? [e.photo_id as string] : [])),
+    );
+    if (!(photoUrls instanceof Map)) return { success: false, error: photoUrls.error };
+
+    const horseNames = await getHorseNames(
+        supabase,
+        entries.map((e) => e.horse_id as string),
+    );
+    if (!(horseNames instanceof Map)) return { success: false, error: horseNames.error };
+
+    // ── Votes (community-vote shows only) ──
+    const votingEnabled = show.judging === "community_vote";
+    const voteCounts = new Map<string, number>();
+    const viewerVotes = new Set<string>();
+    if (votingEnabled && entries.length > 0) {
+        const { data: voteRows, error: vErr } = await supabase
+            .from("show_entry_votes")
+            .select("entry_id, voter_id")
+            .in("entry_id", entries.map((e) => e.id as string));
+        if (vErr) return { success: false, error: vErr.message };
+        for (const v of voteRows ?? []) {
+            const entryId = v.entry_id as string;
+            voteCounts.set(entryId, (voteCounts.get(entryId) ?? 0) + 1);
+            if (user && v.voter_id === user.id) viewerVotes.add(entryId);
+        }
+    }
+
+    // ── Published placings (completed shows — the RESULTS view) ──
+    const resultsPublished = RESULTS_STATUSES.includes(status);
+    const placeByEntry = new Map<string, Place>();
+    if (resultsPublished && entries.length > 0) {
+        const { data: placingRows, error: pErr } = await supabase
+            .from("show_placings")
+            .select("entry_id, place")
+            .in("entry_id", entries.map((e) => e.id as string));
+        if (pErr) return { success: false, error: pErr.message };
+        for (const p of placingRows ?? []) {
+            if (p.place !== null) placeByEntry.set(p.entry_id as string, p.place as Place);
+        }
+    }
+
+    // ── The blind rule: aliases are fetched ONLY when revealed ──
+    const revealed = isOwnerRevealed(status, show.blind_browsing as boolean);
+    let aliases = new Map<string, string>();
+    if (revealed) {
+        const loaded = await getAliases(supabase, entries.map((e) => e.owner_id as string));
+        if (!(loaded instanceof Map)) return { success: false, error: loaded.error };
+        aliases = loaded;
+    }
+
+    const entriesByClass = new Map<string, GalleryEntry[]>();
+    for (const e of entries) {
+        const entryId = e.id as string;
+        const ownerId = e.owner_id as string;
+        const list = entriesByClass.get(e.class_id as string) ?? [];
+        list.push({
+            id: entryId,
+            horseName: horseNames.get(e.horse_id as string) ?? "Unnamed horse",
+            entryNumber: (e.entry_number as number | null) ?? null,
+            photoUrl: e.photo_id ? (photoUrls.get(e.photo_id as string) ?? null) : null,
+            ownerAlias: revealed ? (aliases.get(ownerId) ?? "unknown") : null,
+            ownerId: revealed ? ownerId : null,
+            voteCount: voteCounts.get(entryId) ?? 0,
+            viewerHasVoted: viewerVotes.has(entryId),
+            isOwn: !!user && ownerId === user.id,
+            place: placeByEntry.get(entryId) ?? null,
+        });
+        entriesByClass.set(e.class_id as string, list);
+    }
+
+    // Placed entries lead once results publish; otherwise arrival order.
+    if (resultsPublished) {
+        for (const list of entriesByClass.values()) {
+            list.sort((a, b) => (a.place ?? 99) - (b.place ?? 99));
+        }
+    }
+
+    const classes: GalleryClass[] = contexts
+        .filter((ctx) => (entriesByClass.get(ctx.classId)?.length ?? 0) > 0)
+        .map((ctx) => ({
+            classId: ctx.classId,
+            className: ctx.className,
+            classNumber: ctx.classNumber,
+            divisionName: ctx.divisionName,
+            sectionName: ctx.sectionName,
+            classStatus: ctx.status,
+            entries: entriesByClass.get(ctx.classId) ?? [],
+        }));
+
+    return {
+        success: true,
+        gallery: {
+            votingEnabled,
+            votingOpen: votingEnabled && status === "judging",
+            revealed,
+            resultsPublished,
+            classes,
+        },
+    };
+}
+
+// ── Community voting ──
+
+/** Entry + show context for the vote actions. */
+async function getVoteContext(
+    supabase: SupabaseClient,
+    entryId: string,
+): Promise<
+    | {
+          entry: { id: string; owner_id: string; status: string; show_id: string };
+          show: { status: ShowStatus; judging: ShowJudging };
+      }
+    | { error: string }
+> {
+    const { data: entry, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, owner_id, status, show_id")
+        .eq("id", entryId)
+        .maybeSingle();
+    if (eErr) return { error: eErr.message };
+    if (!entry) return { error: "Entry not found." };
+
+    const { data: show, error: sErr } = await supabase
+        .from("shows")
+        .select("status, judging")
+        .eq("id", entry.show_id as string)
+        .maybeSingle();
+    if (sErr) return { error: sErr.message };
+    if (!show) return { error: "Show not found." };
+
+    return {
+        entry: entry as { id: string; owner_id: string; status: string; show_id: string },
+        show: { status: show.status as ShowStatus, judging: show.judging as ShowJudging },
+    };
+}
+
+/**
+ * Cast a community vote — one per user per entry, never your own.
+ * The RLS policies from migration 119 are the backstop for every
+ * check made here.
+ */
+export async function castVote(
+    input: z.input<typeof castVoteSchema>,
+): Promise<ActionResult> {
+    const parsed = castVoteSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+
+    const ctx = await getVoteContext(supabase, parsed.data.entryId);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (ctx.show.judging !== "community_vote") {
+        return {
+            success: false,
+            error: "This show is expert-judged — there is no community voting.",
+        };
+    }
+    if (ctx.show.status !== "judging") {
+        return { success: false, error: "Voting is only open while the show is judging." };
+    }
+    if (ctx.entry.status === "scratched") {
+        return { success: false, error: "This entry was scratched." };
+    }
+    if (ctx.entry.owner_id === user.id) {
+        return { success: false, error: "You can't vote for your own entry." };
+    }
+
+    const { error } = await supabase
+        .from("show_entry_votes")
+        .insert({ entry_id: parsed.data.entryId, voter_id: user.id });
+    if (error) {
+        return {
+            success: false,
+            error:
+                error.code === "23505"
+                    ? "You already voted for this entry."
+                    : error.message,
+        };
+    }
+    return { success: true };
+}
+
+/** Remove your own vote while voting is still open. */
+export async function removeVote(
+    input: z.input<typeof removeVoteSchema>,
+): Promise<ActionResult> {
+    const parsed = removeVoteSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+
+    const ctx = await getVoteContext(supabase, parsed.data.entryId);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (ctx.show.status !== "judging") {
+        return { success: false, error: "Voting has closed — the tally is frozen." };
+    }
+
+    const { error } = await supabase
+        .from("show_entry_votes")
+        .delete()
+        .eq("entry_id", parsed.data.entryId)
+        .eq("voter_id", user.id);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+// ── The judge queue ──
+
+/** Roles that may open the judge queue (the judge's bench;
+ *  stewards work the entries panel). */
+const JUDGE_QUEUE_ROLES: StaffRole[] = ["host", "co_host", "judge"];
+
+/** Roles that may record placings — matches the RLS policy (118). */
+const PLACING_RECORDER_ROLES: StaffRole[] = ["host", "co_host", "steward", "judge"];
+
+/**
+ * Everything the /shows/host/[id]/judge queue needs. Staff-gated
+ * (judge/host/co_host). The blind rule applies to judges too —
+ * the digital leg-tag convention: entry numbers, never names.
+ */
+export async function getJudgeQueue(
+    input: z.input<typeof getJudgeQueueSchema>,
+): Promise<ActionResult<{ queue: JudgeQueueData }>> {
+    const parsed = getJudgeQueueSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const { showId } = parsed.data;
+
+    const ctx = await getShowRole(supabase, showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !JUDGE_QUEUE_ROLES.includes(ctx.role)) {
+        return {
+            success: false,
+            error: "Only the judge, host, or a co-host can open the judge queue.",
+        };
+    }
+    if (ctx.show.mode !== "online") {
+        return {
+            success: false,
+            error: "The judge queue is for online shows — live shows use the ring console.",
+        };
+    }
+    if (ctx.show.judging !== "judged") {
+        return {
+            success: false,
+            error: "This show is judged by community vote — there is no judge queue.",
+        };
+    }
+
+    const { data: show, error: showError } = await supabase
+        .from("shows")
+        .select("id, title, status, judging, blind_browsing")
+        .eq("id", showId)
+        .maybeSingle();
+    if (showError) return { success: false, error: showError.message };
+    if (!show) return { success: false, error: "Show not found." };
+
+    const contexts = await loadClassContexts(supabase, showId);
+    if ("error" in contexts) return { success: false, error: contexts.error };
+
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at")
+        .eq("show_id", showId)
+        .order("created_at", { ascending: true });
+    if (eErr) return { success: false, error: eErr.message };
+    const entries = (entryRows ?? []).filter(
+        (e: { status: string }) => e.status !== "scratched",
+    );
+
+    const photoUrls = await getEntryPhotoUrls(
+        supabase,
+        entries.flatMap((e) => (e.photo_id ? [e.photo_id as string] : [])),
+    );
+    if (!(photoUrls instanceof Map)) return { success: false, error: photoUrls.error };
+
+    const horseNames = await getHorseNames(
+        supabase,
+        entries.map((e) => e.horse_id as string),
+    );
+    if (!(horseNames instanceof Map)) return { success: false, error: horseNames.error };
+
+    // Recorded placings (resume / corrections).
+    const placingByEntry = new Map<string, { place: Place | null; note: string | null }>();
+    if (entries.length > 0) {
+        const { data: placingRows, error: pErr } = await supabase
+            .from("show_placings")
+            .select("entry_id, place, note")
+            .in("entry_id", entries.map((e) => e.id as string));
+        if (pErr) return { success: false, error: pErr.message };
+        for (const p of placingRows ?? []) {
+            placingByEntry.set(p.entry_id as string, {
+                place: (p.place as Place | null) ?? null,
+                note: (p.note as string | null) ?? null,
+            });
+        }
+    }
+
+    // Blind judging: same server-side rule as the public gallery.
+    const revealed = isOwnerRevealed(
+        show.status as ShowStatus,
+        show.blind_browsing as boolean,
+    );
+    let aliases = new Map<string, string>();
+    if (revealed) {
+        const loaded = await getAliases(supabase, entries.map((e) => e.owner_id as string));
+        if (!(loaded instanceof Map)) return { success: false, error: loaded.error };
+        aliases = loaded;
+    }
+
+    const entriesByClass = new Map<string, JudgeQueueClass["entries"]>();
+    for (const e of entries) {
+        const list = entriesByClass.get(e.class_id as string) ?? [];
+        const recorded = placingByEntry.get(e.id as string);
+        list.push({
+            id: e.id as string,
+            horseName: horseNames.get(e.horse_id as string) ?? "Unnamed horse",
+            entryNumber: (e.entry_number as number | null) ?? null,
+            photoUrl: e.photo_id ? (photoUrls.get(e.photo_id as string) ?? null) : null,
+            ownerAlias: revealed ? (aliases.get(e.owner_id as string) ?? "unknown") : null,
+            place: recorded?.place ?? null,
+            note: recorded?.note ?? null,
+        });
+        entriesByClass.set(e.class_id as string, list);
+    }
+
+    const classes: JudgeQueueClass[] = contexts.map((c) => ({
+        classId: c.classId,
+        className: c.className,
+        classNumber: c.classNumber,
+        divisionName: c.divisionName,
+        sectionName: c.sectionName,
+        status: c.status,
+        entries: entriesByClass.get(c.classId) ?? [],
+    }));
+
+    return {
+        success: true,
+        queue: {
+            show: {
+                id: show.id as string,
+                title: show.title as string,
+                status: show.status as ShowStatus,
+                judging: show.judging as ShowJudging,
+                blindBrowsing: show.blind_browsing as boolean,
+            },
+            viewerRole: ctx.role,
+            classes,
+        },
+    };
+}
+
+/**
+ * Record a whole class's placings in one batch (replace-all
+ * semantics: the submitted slate IS the class's result). Roles
+ * per RLS 118 (+ the judge class-status policy from 119). The
+ * class auto-flips to 'judging' when recording starts and to
+ * 'placed' when markDone is set — every flip runs through the
+ * class state machine.
+ */
+export async function recordPlacings(
+    input: z.input<typeof recordPlacingsSchema>,
+): Promise<ActionResult<{ recorded: number }>> {
+    const parsed = recordPlacingsSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    const { data: cls, error: cErr } = await supabase
+        .from("show_classes")
+        .select("id, section_id, status")
+        .eq("id", v.classId)
+        .maybeSingle();
+    if (cErr) return { success: false, error: cErr.message };
+    if (!cls) return { success: false, error: "Class not found." };
+
+    const located = await getShowIdOfClass(supabase, cls.section_id as string);
+    if ("error" in located) return { success: false, error: located.error };
+
+    const ctx = await getShowRole(supabase, located.showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !PLACING_RECORDER_ROLES.includes(ctx.role)) {
+        return { success: false, error: "Only show staff can record placings." };
+    }
+
+    // The show must be in its judging phase (running for live shows).
+    const recordingStatus: ShowStatus = ctx.show.mode === "online" ? "judging" : "running";
+    if (ctx.show.status !== recordingStatus) {
+        return {
+            success: false,
+            error:
+                ctx.show.mode === "online"
+                    ? "Placings can only be recorded while the show is judging."
+                    : "Placings can only be recorded while the show is running.",
+        };
+    }
+
+    let classStatus = cls.status as ClassStatus;
+    if (classStatus === "cancelled" || classStatus === "combined") {
+        return { success: false, error: `This class is ${classStatus} and cannot be placed.` };
+    }
+
+    // Every placed entry must be a LIVE entry of this class (the
+    // 117 placing trigger is the backstop).
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, status")
+        .eq("class_id", v.classId);
+    if (eErr) return { success: false, error: eErr.message };
+    const liveIds = new Set(
+        (entryRows ?? [])
+            .filter((e: { status: string }) => e.status !== "scratched")
+            .map((e: { id: string }) => e.id as string),
+    );
+    for (const p of v.placings) {
+        if (!liveIds.has(p.entryId)) {
+            return {
+                success: false,
+                error: "One or more entries do not belong to this class (or were scratched).",
+            };
+        }
+    }
+
+    // Flip to 'judging' when recording starts (scheduled/called/
+    // placed all legally reach judging via the class state machine).
+    if (classStatus !== "judging") {
+        const legal = canTransitionClass(classStatus, "judging");
+        if (!legal.ok) return { success: false, error: legal.reason };
+        const { error: flipError } = await supabase
+            .from("show_classes")
+            .update({ status: "judging" })
+            .eq("id", v.classId);
+        if (flipError) return { success: false, error: flipError.message };
+        classStatus = "judging";
+    }
+
+    // Replace-all: clear the class's slate, then write the new one.
+    const { error: clearError } = await supabase
+        .from("show_placings")
+        .delete()
+        .eq("class_id", v.classId);
+    if (clearError) return { success: false, error: clearError.message };
+
+    if (v.placings.length > 0) {
+        const { error: insertError } = await supabase.from("show_placings").insert(
+            v.placings.map((p) => ({
+                class_id: v.classId,
+                entry_id: p.entryId,
+                place: p.place,
+                judge_id: user.id,
+                note: p.note?.length ? p.note : null,
+            })),
+        );
+        if (insertError) return { success: false, error: insertError.message };
+    }
+
+    if (v.markDone) {
+        const legal = canTransitionClass(classStatus, "placed");
+        if (!legal.ok) return { success: false, error: legal.reason };
+        const { error: doneError } = await supabase
+            .from("show_classes")
+            .update({ status: "placed" })
+            .eq("id", v.classId);
+        if (doneError) return { success: false, error: doneError.message };
+    }
+
+    return { success: true, recorded: v.placings.length };
+}
+
+/**
+ * Derive provisional placings from community votes — host/co-host
+ * only, only in results_review. Top 6 per class by vote count,
+ * ties broken by earliest entry (deriveVotePlacings is the single
+ * source of those rules). Re-runnable: each run re-derives the
+ * full slate from the frozen tally.
+ */
+export async function finalizeCommunityVotes(
+    input: z.input<typeof finalizeCommunityVotesSchema>,
+): Promise<ActionResult<{ classesPlaced: number; placingsWritten: number }>> {
+    const parsed = finalizeCommunityVotesSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const { showId } = parsed.data;
+
+    const ctx = await getShowRole(supabase, showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
+        return {
+            success: false,
+            error: "Only the host or a co-host can finalize community votes.",
+        };
+    }
+    if (ctx.show.judging !== "community_vote") {
+        return {
+            success: false,
+            error: "This show is expert-judged — placings come from the judge queue.",
+        };
+    }
+    if (ctx.show.status !== "results_review") {
+        return {
+            success: false,
+            error: "Community votes are finalized in results review — move the show there first.",
+        };
+    }
+
+    const contexts = await loadClassContexts(supabase, showId);
+    if ("error" in contexts) return { success: false, error: contexts.error };
+    if (contexts.length === 0) return { success: true, classesPlaced: 0, placingsWritten: 0 };
+
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, class_id, status, created_at")
+        .eq("show_id", showId);
+    if (eErr) return { success: false, error: eErr.message };
+    const entries = (entryRows ?? []).filter(
+        (e: { status: string }) => e.status !== "scratched",
+    );
+    if (entries.length === 0) return { success: true, classesPlaced: 0, placingsWritten: 0 };
+
+    const { data: voteRows, error: vErr } = await supabase
+        .from("show_entry_votes")
+        .select("entry_id")
+        .in("entry_id", entries.map((e) => e.id as string));
+    if (vErr) return { success: false, error: vErr.message };
+    const voteCounts = new Map<string, number>();
+    for (const row of voteRows ?? []) {
+        const entryId = row.entry_id as string;
+        voteCounts.set(entryId, (voteCounts.get(entryId) ?? 0) + 1);
+    }
+
+    // Tally per class → deriveVotePlacings (the ONE rules function).
+    const talliesByClass = new Map<string, VoteTally[]>();
+    for (const e of entries) {
+        const list = talliesByClass.get(e.class_id as string) ?? [];
+        list.push({
+            entryId: e.id as string,
+            voteCount: voteCounts.get(e.id as string) ?? 0,
+            createdAt: e.created_at as string,
+        });
+        talliesByClass.set(e.class_id as string, list);
+    }
+
+    const inserts: {
+        class_id: string;
+        entry_id: string;
+        place: number;
+        judge_id: string;
+        note: null;
+    }[] = [];
+    let classesPlaced = 0;
+    for (const context of contexts) {
+        const derived = deriveVotePlacings(talliesByClass.get(context.classId) ?? []);
+        if (derived.length === 0) continue;
+        classesPlaced += 1;
+        for (const d of derived) {
+            inserts.push({
+                class_id: context.classId,
+                entry_id: d.entryId,
+                place: d.place,
+                judge_id: user.id,
+                note: null,
+            });
+        }
+    }
+
+    // Re-derive from scratch each run: clear, then insert.
+    const { error: clearError } = await supabase
+        .from("show_placings")
+        .delete()
+        .in("class_id", contexts.map((c) => c.classId));
+    if (clearError) return { success: false, error: clearError.message };
+
+    if (inserts.length > 0) {
+        const { error: insertError } = await supabase.from("show_placings").insert(inserts);
+        if (insertError) return { success: false, error: insertError.message };
+    }
+
+    return { success: true, classesPlaced, placingsWritten: inserts.length };
 }

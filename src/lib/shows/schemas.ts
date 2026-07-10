@@ -95,6 +95,8 @@ export const updateShowSettingsSchema = z.object({
             capacity: z.number().int().positive().max(10000).nullable().optional(),
             isMhhQualifying: z.boolean().optional(),
             sanctioningNote: shortText.nullable().optional(),
+            /** Blind entry gallery during judging (119; default ON). */
+            blindBrowsing: z.boolean().optional(),
         })
         .refine((p) => Object.keys(p).length > 0, {
             message: "Nothing to update.",
@@ -233,6 +235,54 @@ export const scratchEntrySchema = z.object({
 
 export const findUserByAliasSchema = z.object({
     alias: z.string().trim().min(1, "Enter an alias to look up.").max(60),
+});
+
+// ── Online judging (Phase E1) ──
+
+export const getShowGallerySchema = z.object({
+    showId: uuidSchema,
+});
+
+export const castVoteSchema = z.object({
+    entryId: uuidSchema,
+});
+
+export const removeVoteSchema = z.object({
+    entryId: uuidSchema,
+});
+
+export const finalizeCommunityVotesSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const getJudgeQueueSchema = z.object({
+    showId: uuidSchema,
+});
+
+/** Whole-class batch: the judge's full slate for one class.
+ *  An empty slate is legal (clears recorded placings). */
+export const recordPlacingsSchema = z.object({
+    classId: uuidSchema,
+    placings: z
+        .array(
+            z.object({
+                entryId: uuidSchema,
+                place: z.number().int().min(1).max(6),
+                /** Optional per-entry critique (the MEPSA tradition). */
+                note: z.string().trim().max(2000).optional(),
+            }),
+        )
+        .max(6)
+        .refine(
+            (rows) => new Set(rows.map((r) => r.place)).size === rows.length,
+            { message: "Each place can only be assigned once." },
+        )
+        .refine(
+            (rows) => new Set(rows.map((r) => r.entryId)).size === rows.length,
+            { message: "An entry can only take one place." },
+        ),
+    /** Also mark the class 'placed' (the per-class done tick). */
+    markDone: z.boolean().default(false),
 });
 
 /** First zod issue as a user-facing error string. */

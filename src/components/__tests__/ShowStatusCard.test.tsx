@@ -7,6 +7,7 @@ import type { ConsoleShow } from "@/lib/shows/console";
 
 const actions = vi.hoisted(() => ({
     transitionShowStatus: vi.fn().mockResolvedValue({ success: true }),
+    updateShowSettings: vi.fn().mockResolvedValue({ success: true }),
 }));
 
 vi.mock("@/app/actions/shows-v2", () => actions);
@@ -31,6 +32,7 @@ function consoleShow(overrides: Partial<ConsoleShow> = {}): ConsoleShow {
         capacity: null,
         isMhhQualifying: true,
         sanctioningNote: null,
+        blindBrowsing: true,
         createdAt: "2026-07-09T00:00:00Z",
         ...overrides,
     };

@@ -52,6 +52,8 @@ export interface ConsoleShow {
     capacity: number | null;
     isMhhQualifying: boolean;
     sanctioningNote: string | null;
+    /** Blind entry gallery during judging (migration 119). */
+    blindBrowsing: boolean;
     createdAt: string;
 }
 

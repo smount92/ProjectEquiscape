@@ -62,7 +62,32 @@ export type ShowRow = Omit<Tables["shows"]["Row"], "mode" | "judging" | "status"
     mode: ShowMode;
     judging: ShowJudging;
     status: ShowStatus;
-};
+} & ShowRow119Columns;
+
+/**
+ * INTERIM (migration 119 not yet applied / not in
+ * database.generated.ts). REPLACE after `npm run gen-types`:
+ * delete this interface — the column then flows in through
+ * Tables["shows"]["Row"] above.
+ */
+interface ShowRow119Columns {
+    /** Blind entry gallery during judging (default TRUE). */
+    blind_browsing: boolean;
+}
+
+/**
+ * INTERIM hand-written row for show_entry_votes (migration 119
+ * not yet applied / not in database.generated.ts). REPLACE after
+ * `npm run gen-types` with
+ * `Tables["show_entry_votes"]["Row"]`. Mirrors
+ * supabase/migrations/119_shows_online_judging.sql exactly.
+ */
+export interface ShowEntryVoteRow {
+    id: string;
+    entry_id: string;
+    voter_id: string;
+    created_at: string;
+}
 
 export type ShowStaffRow = Omit<Tables["show_staff"]["Row"], "role"> & {
     role: StaffRole;

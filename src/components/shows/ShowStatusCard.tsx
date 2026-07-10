@@ -10,7 +10,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { transitionShowStatus } from "@/app/actions/shows-v2";
+import { transitionShowStatus, updateShowSettings } from "@/app/actions/shows-v2";
 import type { ConsoleShow } from "@/lib/shows/console";
 import { formatStatus, legalNextStatuses, SHOW_STATUS_ORDER } from "@/lib/shows/stateMachine";
 import type { ShowStatus } from "@/lib/shows/types";
@@ -68,7 +68,23 @@ interface ShowStatusCardProps {
 export default function ShowStatusCard({ show, entryCount, canManage }: ShowStatusCardProps) {
     const router = useRouter();
     const [pending, setPending] = useState<ShowStatus | null>(null);
+    const [togglingBlind, setTogglingBlind] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const handleBlindToggle = async () => {
+        setTogglingBlind(true);
+        setError(null);
+        const result = await updateShowSettings({
+            showId: show.id,
+            patch: { blindBrowsing: !show.blindBrowsing },
+        });
+        if (result.success) {
+            router.refresh();
+        } else {
+            setError(result.error);
+        }
+        setTogglingBlind(false);
+    };
 
     // Forward moves first so the primary CTA leads the row.
     const nextStatuses = [...legalNextStatuses(show.status, show.mode)].sort(
@@ -193,6 +209,34 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
                                 value={formatDate(show.judgingEndsAt, true)}
                             />
                         </>
+                    )}
+                    {show.mode === "online" && (
+                        <SummaryRow
+                            label="Blind browsing"
+                            value={
+                                <span className="flex flex-wrap items-center gap-2">
+                                    <Badge variant={show.blindBrowsing ? "default" : "outline"}>
+                                        {show.blindBrowsing ? "On" : "Off"}
+                                    </Badge>
+                                    {canManage && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            disabled={togglingBlind}
+                                            title="While on, the public gallery hides owner identities until results publish (the digital leg-tag convention)."
+                                            onClick={handleBlindToggle}
+                                            data-testid="blind-toggle"
+                                        >
+                                            {togglingBlind
+                                                ? "Saving…"
+                                                : show.blindBrowsing
+                                                  ? "Turn off"
+                                                  : "Turn on"}
+                                        </Button>
+                                    )}
+                                </span>
+                            }
+                        />
                     )}
                     <SummaryRow
                         label="Entries"

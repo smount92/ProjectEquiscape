@@ -12,6 +12,7 @@ import { useState } from "react";
 
 import type { ShowConsoleData } from "@/lib/shows/console";
 import ClasslistBuilder from "@/components/shows/ClasslistBuilder";
+import JudgingProgressCard from "@/components/shows/JudgingProgressCard";
 import ShowEntriesPanel from "@/components/shows/ShowEntriesPanel";
 import ShowStaffPanel from "@/components/shows/ShowStaffPanel";
 import ShowStatusCard from "@/components/shows/ShowStatusCard";
@@ -84,7 +85,21 @@ export default function ShowConsole({ data }: { data: ShowConsoleData }) {
 
             <div className="min-h-[300px]">
                 {activeTab === "overview" && (
-                    <ShowStatusCard show={show} entryCount={entries.length} canManage={canManage} />
+                    <div className="flex flex-col gap-6">
+                        {/* Renders only while judging / in results review. */}
+                        <JudgingProgressCard
+                            showId={show.id}
+                            status={show.status}
+                            judging={show.judging}
+                            divisions={divisions}
+                            canManage={canManage}
+                        />
+                        <ShowStatusCard
+                            show={show}
+                            entryCount={entries.length}
+                            canManage={canManage}
+                        />
+                    </div>
                 )}
                 {activeTab === "classlist" && (
                     <ClasslistBuilder

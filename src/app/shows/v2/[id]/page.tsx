@@ -17,13 +17,20 @@
 
 import { notFound } from "next/navigation";
 
-import { getMyEntrantHorses, getMyShowEntries, getPublicShow } from "@/app/actions/shows-v2";
+import {
+    getMyEntrantHorses,
+    getMyShowEntries,
+    getPublicShow,
+    getShowGallery,
+} from "@/app/actions/shows-v2";
 import { showsV2Enabled } from "@/lib/shows/flags";
+import { GALLERY_STATUSES, type ShowGalleryData } from "@/lib/shows/gallery";
 import type { EntrantHorse, MyShowEntry, PublicShow } from "@/lib/shows/public";
 import { formatStatus } from "@/lib/shows/stateMachine";
 import { createClient } from "@/lib/supabase/server";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import RichText from "@/components/RichText";
+import ShowEntryGallery from "@/components/shows/ShowEntryGallery";
 import ShowEntrySection from "@/components/shows/ShowEntrySection";
 import { Badge } from "@/components/ui/badge";
 
@@ -148,6 +155,16 @@ export default async function PublicShowPage({
         }
     }
 
+    // THE ENTRY GALLERY — online shows only, from entries_open
+    // onward. Live shows have no entry photos by design. The blind
+    // rule lives in getShowGallery: a blind payload carries no
+    // owner identities.
+    let gallery: ShowGalleryData | null = null;
+    if (show.mode === "online" && GALLERY_STATUSES.includes(show.status)) {
+        const galleryResult = await getShowGallery({ showId: id });
+        if (galleryResult.success) gallery = galleryResult.gallery;
+    }
+
     return (
         <ExplorerLayout
             title={show.title}
@@ -168,6 +185,8 @@ export default async function PublicShowPage({
                     horses={horses}
                     authed={!!user}
                 />
+
+                {gallery && <ShowEntryGallery gallery={gallery} authed={!!user} />}
 
                 {show.rulesMd && (
                     <section className="ledger-card" aria-labelledby="show-rules-heading">

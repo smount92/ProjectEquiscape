@@ -10,7 +10,7 @@
  * the host console see the same structure.
  */
 
-import type { EntryStatus, ShowJudging, ShowMode, ShowStatus } from "./types";
+import type { EntryStatus, Place, ShowJudging, ShowMode, ShowStatus } from "./types";
 
 /** Statuses the public browse ledger lists. Draft is never public;
  *  completed/archived shows leave the browse page (their results
@@ -83,6 +83,9 @@ export interface MyShowEntry {
     /** Set when someone else shows this horse (proxy). */
     handlerAlias: string | null;
     photoId: string | null;
+    /** The entry's published result — set once the show completes
+     *  (Phase E1); null before then and for participation. */
+    place: Place | null;
 }
 
 /** A horse the viewer can enter (public, in their stable). */

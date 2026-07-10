@@ -20,6 +20,7 @@ import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
 import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
 import { formatStatus } from "@/lib/shows/stateMachine";
+import { placeLabel, ribbonHex } from "@/lib/shows/placings";
 import EnterClassDialog, { type EnterableClass } from "@/components/shows/EnterClassDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,8 @@ export default function ShowEntrySection({
     const router = useRouter();
     const entriesOpen = status === "entries_open";
     const canEnter = authed && entriesOpen;
+    // Result stamps arrive with the completed transition (Phase E1).
+    const hasResults = myEntries.some((e) => e.place !== null);
 
     const [activeClass, setActiveClass] = useState<EnterableClass | null>(null);
     // Remounts the dialog fresh each time it opens.
@@ -120,6 +123,7 @@ export default function ShowEntrySection({
                                 <TableHead>Class</TableHead>
                                 <TableHead>Handler</TableHead>
                                 <TableHead>Status</TableHead>
+                                {hasResults && <TableHead>Result</TableHead>}
                                 {entriesOpen && <TableHead />}
                             </TableRow>
                         </TableHeader>
@@ -149,6 +153,29 @@ export default function ShowEntrySection({
                                                 {entry.status}
                                             </span>
                                         </TableCell>
+                                        {hasResults && (
+                                            <TableCell>
+                                                {entry.place !== null ? (
+                                                    <span
+                                                        className="stamp inline-flex items-center gap-1.5"
+                                                        data-testid="result-stamp"
+                                                    >
+                                                        <span
+                                                            aria-hidden="true"
+                                                            className="inline-block h-2.5 w-2.5 rounded-full border border-border"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    ribbonHex(entry.place) ??
+                                                                    undefined,
+                                                            }}
+                                                        />
+                                                        {placeLabel(entry.place)}
+                                                    </span>
+                                                ) : (
+                                                    "—"
+                                                )}
+                                            </TableCell>
+                                        )}
                                         {entriesOpen && (
                                             <TableCell className="text-right">
                                                 {!scratched && entry.status === "entered" && (
