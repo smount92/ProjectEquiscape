@@ -3562,6 +3562,7 @@ export type Database = {
           notes: string | null
           show_string_id: string
           time_slot: string | null
+          v2_class_id: string | null
         }
         Insert: {
           class_id?: string | null
@@ -3573,6 +3574,7 @@ export type Database = {
           notes?: string | null
           show_string_id: string
           time_slot?: string | null
+          v2_class_id?: string | null
         }
         Update: {
           class_id?: string | null
@@ -3584,6 +3586,7 @@ export type Database = {
           notes?: string | null
           show_string_id?: string
           time_slot?: string | null
+          v2_class_id?: string | null
         }
         Relationships: [
           {
@@ -3605,6 +3608,13 @@ export type Database = {
             columns: ["show_string_id"]
             isOneToOne: false
             referencedRelation: "show_strings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_string_entries_v2_class_id_fkey"
+            columns: ["v2_class_id"]
+            isOneToOne: false
+            referencedRelation: "show_classes"
             referencedColumns: ["id"]
           },
         ]
@@ -4556,6 +4566,7 @@ export type Database = {
           class_name: string
           code: string
           earned_place: number
+          horse_name: string
           issued_at: string
           show_title: string
           show_year: number
