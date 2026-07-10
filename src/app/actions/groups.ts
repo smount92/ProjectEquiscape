@@ -4,6 +4,8 @@ import { logger } from "@/lib/logger";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { GROUP_FILE_MAX_SIZE, GROUP_FILE_ALLOWED_EXTENSIONS } from "@/lib/groupFiles";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
@@ -222,7 +224,7 @@ export async function getGroups(filters?: {
     }
 
     // Check memberships
-    let membershipMap = new Map<string, string>();
+    const membershipMap = new Map<string, string>();
     if (user) {
         const { data: memberships } = await supabase
             .from("group_memberships")
@@ -588,6 +590,8 @@ export interface GroupFile {
     id: string;
     fileName: string;
     fileUrl: string;
+    /** Fresh signed URL for download, or null if the storage object is missing (legacy rows) */
+    downloadUrl: string | null;
     fileSize: number | null;
     fileType: string;
     description: string | null;
@@ -608,10 +612,34 @@ export async function getGroupFiles(groupId: string): Promise<GroupFile[]> {
 
     if (!data || data.length === 0) return [];
 
+    // Batch-sign download URLs with the admin client (bucket is private and
+    // storage RLS only lets uploaders read their own folder — safe here
+    // because group_files table RLS already restricted rows to members).
+    // Legacy rows whose path has no object in storage simply fail to sign
+    // and surface as downloadUrl: null (rendered as unavailable).
+    const paths = (data as { file_url: string }[])
+        .map(f => f.file_url)
+        .filter(url => url.includes("/") && !url.startsWith("http"));
+
+    const signedUrlMap = new Map<string, string>();
+    if (paths.length > 0) {
+        try {
+            const { data: signed } = await getAdminClient().storage
+                .from("group-files")
+                .createSignedUrls(paths, 3600);
+            for (const item of signed ?? []) {
+                if (item.signedUrl && item.path) signedUrlMap.set(item.path, item.signedUrl);
+            }
+        } catch (err) {
+            logger.error("Groups", "Failed to sign group file URLs", err);
+        }
+    }
+
     return (data as Record<string, unknown>[]).map(f => ({
         id: f.id as string,
         fileName: f.file_name as string,
         fileUrl: f.file_url as string,
+        downloadUrl: signedUrlMap.get(f.file_url as string) || null,
         fileSize: f.file_size as number | null,
         fileType: f.file_type as string,
         description: f.description as string | null,
@@ -621,7 +649,9 @@ export async function getGroupFiles(groupId: string): Promise<GroupFile[]> {
     }));
 }
 
-/** Upload a file to a group (admin/owner/mod only) */
+/** Link an uploaded storage object to a group (admin/owner/mod only).
+ *  The file bytes must already be in the group-files bucket (client uploads
+ *  directly, mirroring the chat-attachments flow in ChatThread). */
 export async function uploadGroupFile(
     groupId: string,
     filePath: string,
@@ -644,7 +674,20 @@ export async function uploadGroupFile(
         return { success: false, error: "Only admins and moderators can upload files." };
     }
 
+    // The path must point into the caller's own folder for this group —
+    // prevents linking a row to someone else's storage object.
+    if (!filePath.startsWith(`${user.id}/${groupId}/`)) {
+        return { success: false, error: "Invalid file path." };
+    }
+
+    if (fileSize > GROUP_FILE_MAX_SIZE) {
+        return { success: false, error: "File is too large (max 10MB)." };
+    }
+
     const ext = fileName.split(".").pop()?.toLowerCase() || "file";
+    if (!GROUP_FILE_ALLOWED_EXTENSIONS.includes(ext)) {
+        return { success: false, error: "File type not allowed. Use PDF, Word, or image files." };
+    }
     const fileType = ["pdf"].includes(ext) ? "pdf"
         : ["jpg", "jpeg", "png", "gif", "webp"].includes(ext) ? "image"
             : ["doc", "docx"].includes(ext) ? "doc"
@@ -669,27 +712,31 @@ export async function uploadGroupFile(
 export async function deleteGroupFile(
     fileId: string
 ): Promise<{ success: boolean; error?: string }> {
-    const { supabase, user } = await requireAuth();
+    const { supabase } = await requireAuth();
 
-    // Fetch the file URL before deleting the row
-    try {
-        const { data: file } = await supabase
-            .from("group_files")
-            .select("file_url")
-            .eq("id", fileId)
-            .maybeSingle();
-
-        if (file) {
-            const url = (file as { file_url: string }).file_url;
-            const match = url.match(/horse-images\/(.+?)(\?|$)/);
-            if (match) {
-                await supabase.storage.from("horse-images").remove([match[1]]);
-            }
-        }
-    } catch (err) { logger.error("Groups", "Background task failed", err); }
+    // Fetch the storage path before deleting the row (RLS limits this to
+    // rows the caller can see, and the delete below to uploader/admin/owner)
+    const { data: file } = await supabase
+        .from("group_files")
+        .select("file_url")
+        .eq("id", fileId)
+        .maybeSingle();
 
     const { error } = await supabase.from("group_files").delete().eq("id", fileId);
     if (error) return { success: false, error: error.message };
+
+    // Remove the storage object with the admin client — storage RLS only
+    // lets the original uploader delete their own folder, but group
+    // admins/owners may delete any file (the row delete above already
+    // enforced that permission). Legacy rows (bare filenames) have no object.
+    const path = (file as { file_url: string } | null)?.file_url;
+    if (path && path.includes("/") && !path.startsWith("http")) {
+        try {
+            await getAdminClient().storage.from("group-files").remove([path]);
+        } catch (err) {
+            logger.error("Groups", "Failed to remove group file from storage", err);
+        }
+    }
 
     revalidatePath("/community/groups");
     return { success: true };
