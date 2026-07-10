@@ -50,8 +50,12 @@ function MastheadFact({ label, value }: { label: string; value: React.ReactNode 
     if (value === null || value === undefined || value === "") return null;
     return (
         <div className="flex flex-col gap-0.5">
-            <dt className="text-xs font-semibold tracking-wide uppercase opacity-75">{label}</dt>
-            <dd className="text-sm">{value}</dd>
+            {/* Explicit leather-text colors: inherited ink is dark in day
+                mode and invisible on the leather panel. */}
+            <dt className="text-xs font-semibold tracking-wide uppercase text-(--leather-text-muted)">
+                {label}
+            </dt>
+            <dd className="text-sm text-(--leather-text)">{value}</dd>
         </div>
     );
 }
@@ -64,7 +68,9 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
             aria-label="Show overview"
         >
             <div className="flex flex-wrap items-center gap-3">
-                <span className="stamp text-lg">{formatStatus(show.status)}</span>
+                {/* Lit-paper backing: the forest stamp ink has no contrast
+                    directly on leather. */}
+                <span className="stamp bg-(--paper-lit) text-lg">{formatStatus(show.status)}</span>
                 <Badge variant="secondary">
                     {show.mode === "live" ? "Live show" : "Online photo show"}
                 </Badge>
