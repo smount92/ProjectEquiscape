@@ -126,6 +126,8 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  const content = newMessage.trim();
  setSending(true);
  setNewMessage("");
+ // Collapse the auto-grown composer back to one line
+ if (inputRef.current) inputRef.current.style.height = "";
 
  let attachments: { storagePath: string; caption?: string }[] | undefined;
 
@@ -399,9 +401,14 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
 
  <textarea
  ref={inputRef}
- className="border-input text-foreground font-inherit placeholder:text-muted-foreground max-h-[120px] min-h-[42px] flex-1 resize-none rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
+ className="border-input text-foreground font-inherit placeholder:text-muted-foreground max-h-[40dvh] min-h-[42px] flex-1 resize-none overflow-y-auto rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
  value={newMessage}
- onChange={(e) => setNewMessage(e.target.value)}
+ onChange={(e) => {
+ setNewMessage(e.target.value);
+ // Auto-grow with content (cap via max-h; scrolls past it)
+ e.target.style.height = "";
+ e.target.style.height = `${e.target.scrollHeight + 2}px`;
+ }}
  onKeyDown={handleKeyDown}
  placeholder={pendingFiles.length > 0 ? "Add a caption (optional)…" : "Type a message…"}
  rows={1}
