@@ -1036,18 +1036,29 @@ export async function findUserByAlias(
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase } = await requireAuth();
 
-    // Escape LIKE wildcards so the lookup stays EXACT (case-insensitive).
-    const literal = parsed.data.alias.replace(/[\\%_]/g, "\\$&");
-    const { data, error } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .ilike("alias_name", literal)
-        .limit(1)
-        .maybeSingle();
-    if (error) return { success: false, error: error.message };
-    if (!data) return { success: true, user: null };
-    return {
-        success: true,
-        user: { id: data.id as string, alias: data.alias_name as string },
-    };
+    // People type aliases with or without the @ prefix, and historical
+    // accounts STORE alias_name inconsistently (some with a leading @ —
+    // see the watermark double-@ bug). Normalize the query, then try
+    // both stored forms. Lookup stays EXACT (case-insensitive):
+    // escape LIKE wildcards so % and _ can't widen it.
+    const normalized = parsed.data.alias.replace(/^@+/, "").trim();
+    if (!normalized) return { success: false, error: "Enter an alias to look up." };
+    const literal = normalized.replace(/[\\%_]/g, "\\$&");
+
+    for (const candidate of [literal, `@${literal}`]) {
+        const { data, error } = await supabase
+            .from("users")
+            .select("id, alias_name")
+            .ilike("alias_name", candidate)
+            .limit(1)
+            .maybeSingle();
+        if (error) return { success: false, error: error.message };
+        if (data) {
+            return {
+                success: true,
+                user: { id: data.id as string, alias: data.alias_name as string },
+            };
+        }
+    }
+    return { success: true, user: null };
 }
