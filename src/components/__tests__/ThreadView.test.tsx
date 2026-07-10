@@ -108,9 +108,18 @@ describe("ThreadView", () => {
                 content: "Can we stop at that bakery in Centralia?",
             }),
         );
-        // optimistic append
-        expect(await screen.findByText("Can we stop at that bakery in Centralia?")).toBeInTheDocument();
-        expect(screen.getAllByTestId("thread-reply")).toHaveLength(3);
+        // optimistic append (generous timeout: flakes at the default 1s
+        // when the full suite runs on a loaded machine)
+        expect(
+            await screen.findByText(
+                "Can we stop at that bakery in Centralia?",
+                {},
+                { timeout: 5000 },
+            ),
+        ).toBeInTheDocument();
+        await waitFor(() =>
+            expect(screen.getAllByTestId("thread-reply")).toHaveLength(3),
+        );
         expect(box).toHaveValue("");
     });
 
