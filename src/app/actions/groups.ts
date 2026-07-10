@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { GROUP_FILE_MAX_SIZE, GROUP_FILE_ALLOWED_EXTENSIONS } from "@/lib/groupFiles";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
 
 // ============================================================
@@ -33,33 +32,6 @@ export interface Group {
     isMember: boolean;
     memberRole: string | null;
 }
-
-export interface GroupPost {
-    id: string;
-    groupId: string;
-    userId: string;
-    userAlias: string;
-    content: string;
-    horseId: string | null;
-    horseName: string | null;
-    imageUrls: string[];
-    isPinned: boolean;
-    likesCount: number;
-    replyCount: number;
-    createdAt: string;
-    replies: GroupPostReply[];
-}
-
-export interface GroupPostReply {
-    id: string;
-    postId: string;
-    userId: string;
-    userAlias: string;
-    content: string;
-    createdAt: string;
-}
-
-
 
 // ── CRUD ──
 
@@ -373,161 +345,6 @@ export async function getMyGroups(): Promise<Group[]> {
         isMember: true,
         memberRole: roleMap.get(g.id as string) || "member",
     }));
-}
-
-// ── Group Posts ──
-
-/** Post in a group */
-export async function createGroupPost(
-    groupId: string,
-    content: string,
-    horseId?: string,
-): Promise<{ success: boolean; error?: string }> {
-    const { supabase, user } = await requireAuth();
-
-    if (!content.trim()) return { success: false, error: "Content is required." };
-
-    const { error } = await supabase.from("group_posts").insert({
-        group_id: groupId,
-        user_id: user.id,
-        content: sanitizeText(content),
-        horse_id: horseId || null,
-    });
-
-    if (error) return { success: false, error: error.message };
-
-    // Deferred: notify mentions after response is sent
-    const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
-    const actorAlias = (profile as { alias_name: string } | null)?.alias_name || "Someone";
-    const userId = user.id;
-    const trimmed = content.trim();
-    after(async () => {
-        try {
-            const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
-            await parseAndNotifyMentions(trimmed, userId, actorAlias, `/community/groups`);
-        } catch (err) { logger.error("Groups", "Background task failed", err); }
-    });
-
-    revalidatePath(`/community/groups`);
-    return { success: true };
-}
-
-/** Get group feed */
-export async function getGroupPosts(groupId: string): Promise<GroupPost[]> {
-    const supabase = await createClient();
-
-    const { data: posts } = await supabase
-        .from("group_posts")
-        .select("*, users!group_posts_user_id_fkey(alias_name)")
-        .eq("group_id", groupId)
-        .order("is_pinned", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-    if (!posts || posts.length === 0) return [];
-
-
-
-    // Fetch horse names if any
-    const horseIds = (posts as { horse_id: string | null }[])
-        .map(p => p.horse_id)
-        .filter(Boolean) as string[];
-    const horseNameMap = new Map<string, string>();
-    if (horseIds.length > 0) {
-        const { data: horses } = await supabase
-            .from("user_horses")
-            .select("id, custom_name")
-            .in("id", horseIds);
-        (horses || []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
-    }
-
-    // Fetch replies
-    const postIds = (posts as { id: string }[]).map(p => p.id);
-    const { data: replies } = await supabase
-        .from("group_post_replies")
-        .select("*, users!group_post_replies_user_id_fkey(alias_name)")
-        .in("post_id", postIds)
-        .order("created_at", { ascending: true });
-
-
-
-    const repliesByPost = new Map<string, GroupPostReply[]>();
-    for (const r of (replies || []) as Record<string, unknown>[]) {
-        const postId = r.post_id as string;
-        if (!repliesByPost.has(postId)) repliesByPost.set(postId, []);
-        repliesByPost.get(postId)!.push({
-            id: r.id as string,
-            postId,
-            userId: r.user_id as string,
-            userAlias: (r as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
-            content: r.content as string,
-            createdAt: r.created_at as string,
-        });
-    }
-
-    return (posts as Record<string, unknown>[]).map(p => ({
-        id: p.id as string,
-        groupId: p.group_id as string,
-        userId: p.user_id as string,
-        userAlias: (p as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
-        content: p.content as string,
-        horseId: p.horse_id as string | null,
-        horseName: p.horse_id ? (horseNameMap.get(p.horse_id as string) || null) : null,
-        imageUrls: (p.image_urls as string[]) || [],
-        isPinned: p.is_pinned as boolean,
-        likesCount: p.likes_count as number,
-        replyCount: p.reply_count as number,
-        createdAt: p.created_at as string,
-        replies: repliesByPost.get(p.id as string) || [],
-    }));
-}
-
-/** Reply to a group post */
-export async function replyToPost(postId: string, content: string): Promise<{ success: boolean; error?: string }> {
-    const { supabase, user } = await requireAuth();
-
-    if (!content.trim()) return { success: false, error: "Content is required." };
-
-    const { error } = await supabase.from("group_post_replies").insert({
-        post_id: postId,
-        user_id: user.id,
-        content: sanitizeText(content),
-    });
-
-    if (error) return { success: false, error: error.message };
-
-    // Increment reply count (best effort)
-    try {
-        const { data: p } = await supabase.from("group_posts").select("reply_count").eq("id", postId).single();
-        if (p) await supabase.from("group_posts").update({ reply_count: ((p as { reply_count: number }).reply_count || 0) + 1 }).eq("id", postId);
-    } catch (err) { logger.error("Groups", "Background task failed", err); }
-
-    revalidatePath("/community/groups");
-    return { success: true };
-}
-
-// Re-export type labels for UI
-
-/** Delete a group post (owner only) */
-export async function deleteGroupPost(postId: string): Promise<{ success: boolean; error?: string }> {
-    const { supabase, user } = await requireAuth();
-
-    const { data: post } = await supabase
-        .from("group_posts")
-        .select("id")
-        .eq("id", postId)
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-    if (!post) return { success: false, error: "Post not found or not yours." };
-
-    // Delete replies first
-    await supabase.from("group_post_replies").delete().eq("post_id", postId);
-    const { error } = await supabase.from("group_posts").delete().eq("id", postId);
-    if (error) return { success: false, error: error.message };
-
-    revalidatePath("/community/groups");
-    return { success: true };
 }
 
 // ── Group Registry ──

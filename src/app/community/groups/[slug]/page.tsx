@@ -2,6 +2,8 @@ import { createClient } from"@/lib/supabase/server";
 import { redirect, notFound } from"next/navigation";
 import Link from"next/link";
 import { getGroup, getGroupChannels } from"@/app/actions/groups";
+import { getGroupBoard } from"@/app/actions/groups-forum";
+import { groupsForumEnabled } from"@/lib/groups/flags";
 import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
 import { getPosts } from"@/app/actions/posts";
 import GroupDetailClient from"@/components/GroupDetailClient";
@@ -29,10 +31,17 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  const group = await getGroup(slug);
  if (!group) notFound();
 
- const [posts, channels] = await Promise.all([
+ const forumOn = groupsForumEnabled();
+ const [posts, channels, boardResult] = await Promise.all([
  group.isMember ? getPosts({ groupId: group.id }, { includeReplies: true }) : Promise.resolve([]),
  group.isMember ? getGroupChannels(group.id) : Promise.resolve([]),
+ forumOn && group.isMember ? getGroupBoard({ groupId: group.id }) : Promise.resolve(null),
  ]);
+ // Board failure (e.g. migration 122 not applied yet) falls back to
+ // the legacy feed UI instead of breaking the page.
+ const board = boardResult && boardResult.success
+ ? { threads: boardResult.threads, hasMore: boardResult.hasMore }
+ : null;
 
  return (
  <ExplorerLayout title={group.name} description={<>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}{group.region && <> · 📍 {group.region}</>} · 👥 {group.memberCount} member{group.memberCount !== 1 ?"s" :""}</>}>
@@ -60,7 +69,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
 
  {/* Content */}
  {group.isMember ? (
- <GroupDetailClient group={group} initialPosts={posts} channels={channels} currentUserId={user.id} />
+ <GroupDetailClient group={group} initialPosts={posts} channels={channels} currentUserId={user.id} board={board} />
  ) : (
  <div className="flex flex-col items-center justify-center rounded-lg border border-input bg-card p-8 text-center shadow-sm mt-8">
  <p>Join this group to see posts and participate.</p>
