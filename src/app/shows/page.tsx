@@ -3,6 +3,8 @@ import { redirect } from"next/navigation";
 import { getPhotoShows } from"@/app/actions/shows";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { showsV2Enabled } from"@/lib/shows/flags";
+import { Button } from "@/components/ui/button";
 
 export const metadata = {
  title:"Photo Shows — Model Horse Hub",
@@ -48,6 +50,13 @@ export default async function ShowsPage() {
  <ExplorerLayout
   title={<>📸 <span className="text-forest">Virtual Photo Shows</span></>}
   description="Enter your models, vote for your favorites, and compete for community glory!"
+  headerActions={
+   showsV2Enabled() ? (
+    <Button asChild variant="outline">
+     <Link href="/shows/host">Host a show</Link>
+    </Button>
+   ) : undefined
+  }
  >
   <div className="mb-6 flex items-baseline gap-2">
   <span className="text-2xl font-bold text-forest">

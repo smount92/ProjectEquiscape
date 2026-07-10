@@ -99,6 +99,14 @@ export function formatStatus(status: ShowStatus | ClassStatus): string {
     return status.replace(/_/g, " ");
 }
 
+/**
+ * All statuses a show may legally move to from `from`, respecting
+ * mode-only states. Drives the console's transition buttons.
+ */
+export function legalNextStatuses(from: ShowStatus, mode: ShowMode): ShowStatus[] {
+    return SHOW_STATUS_ORDER.filter((to) => canTransition(from, to, mode).ok);
+}
+
 // ── Class lifecycle ──
 // scheduled → called → judging → placed
 // scheduled | called → combined | cancelled (terminal)

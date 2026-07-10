@@ -202,6 +202,16 @@ export const removeShowStaffSchema = z.object({
     userId: uuidSchema,
 });
 
+// ── Console reads ──
+
+export const getShowConsoleSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const findUserByAliasSchema = z.object({
+    alias: z.string().trim().min(1, "Enter an alias to look up.").max(60),
+});
+
 /** First zod issue as a user-facing error string. */
 export function firstZodError(error: z.ZodError): string {
     return error.issues[0]?.message ?? "Invalid input.";

@@ -6,6 +6,7 @@ import {
     canTransitionClass,
     formatStatus,
     isShowMutableForClasslist,
+    legalNextStatuses,
 } from "@/lib/shows/stateMachine";
 import type { ClassStatus, ShowStatus } from "@/lib/shows/types";
 
@@ -169,5 +170,24 @@ describe("stateMachine — helpers", () => {
         expect(isShowMutableForClasslist("results_review")).toBe(false);
         expect(isShowMutableForClasslist("completed")).toBe(false);
         expect(isShowMutableForClasslist("archived")).toBe(false);
+    });
+});
+
+describe("stateMachine — legalNextStatuses", () => {
+    it("lists exactly the reachable statuses for the show's mode", () => {
+        expect(legalNextStatuses("draft", "live")).toEqual(["published"]);
+        expect(legalNextStatuses("entries_closed", "live")).toEqual([
+            "entries_open",
+            "running",
+        ]);
+        expect(legalNextStatuses("entries_closed", "online")).toEqual([
+            "entries_open",
+            "judging",
+        ]);
+        expect(legalNextStatuses("results_review", "online")).toEqual([
+            "judging",
+            "completed",
+        ]);
+        expect(legalNextStatuses("archived", "live")).toEqual([]);
     });
 });

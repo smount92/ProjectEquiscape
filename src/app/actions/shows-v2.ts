@@ -27,7 +27,9 @@ import {
     addShowStaffSchema,
     combineClassesSchema,
     createShowSchema,
+    findUserByAliasSchema,
     firstZodError,
+    getShowConsoleSchema,
     loadTemplateSchema,
     removeShowStaffSchema,
     reorderClasslistSchema,
@@ -36,6 +38,15 @@ import {
     updateClassSchema,
     updateShowSettingsSchema,
 } from "@/lib/shows/schemas";
+import type {
+    ConsoleClass,
+    ConsoleDivision,
+    ConsoleEntry,
+    ConsoleSection,
+    ConsoleStaffMember,
+    HostedShowSummary,
+    ShowConsoleData,
+} from "@/lib/shows/console";
 import {
     canCombineClass,
     canSplitClass,
@@ -44,7 +55,15 @@ import {
     isShowMutableForClasslist,
 } from "@/lib/shows/stateMachine";
 import { getClasslistTemplate } from "@/lib/shows/namhsaTemplate";
-import type { ShowMode, ShowStatus, StaffRole } from "@/lib/shows/types";
+import type {
+    ClassStatus,
+    DivisionAxis,
+    EntryStatus,
+    ShowJudging,
+    ShowMode,
+    ShowStatus,
+    StaffRole,
+} from "@/lib/shows/types";
 
 // ── Shared result + helpers ──
 
@@ -716,4 +735,319 @@ export async function removeShowStaff(
         .eq("user_id", v.userId);
     if (error) return { success: false, error: error.message };
     return { success: true };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Console reads — Phase C. Same conventions as the mutations:
+// zod → requireAuth → explicit role check → typed result.
+// ══════════════════════════════════════════════════════════════
+
+/** Count rows per key in JS — entry volumes are tiny until Phase D ships entering. */
+function countBy(rows: { key: string }[]): Map<string, number> {
+    const counts = new Map<string, number>();
+    for (const row of rows) counts.set(row.key, (counts.get(row.key) ?? 0) + 1);
+    return counts;
+}
+
+/** Resolve user ids to alias_name in one query. */
+async function getAliases(
+    supabase: SupabaseClient,
+    userIds: string[],
+): Promise<Map<string, string> | { error: string }> {
+    const unique = [...new Set(userIds)];
+    if (unique.length === 0) return new Map();
+    const { data, error } = await supabase
+        .from("users")
+        .select("id, alias_name")
+        .in("id", unique);
+    if (error) return { error: error.message };
+    return new Map(
+        (data ?? []).map((r: { id: string; alias_name: string | null }) => [
+            r.id,
+            r.alias_name ?? "unknown",
+        ]),
+    );
+}
+
+/**
+ * Shows where the caller is host or co_host, newest first —
+ * the /shows/host "My Shows" list.
+ */
+export async function getHostedShows(): Promise<ActionResult<{ shows: HostedShowSummary[] }>> {
+    const { supabase, user } = await requireAuth();
+
+    const { data: staffRows, error: staffError } = await supabase
+        .from("show_staff")
+        .select("show_id, role")
+        .eq("user_id", user.id)
+        .in("role", MANAGER_ROLES);
+    if (staffError) return { success: false, error: staffError.message };
+    if (!staffRows || staffRows.length === 0) return { success: true, shows: [] };
+
+    const roleByShow = new Map<string, StaffRole>(
+        staffRows.map((r: { show_id: string; role: string }) => [r.show_id, r.role as StaffRole]),
+    );
+    const showIds = [...roleByShow.keys()];
+
+    const { data: shows, error: showsError } = await supabase
+        .from("shows")
+        .select("id, title, mode, judging, status, show_date, entries_close_at, created_at")
+        .in("id", showIds)
+        .order("created_at", { ascending: false });
+    if (showsError) return { success: false, error: showsError.message };
+
+    const { data: entryRows, error: entriesError } = await supabase
+        .from("show_class_entries")
+        .select("show_id")
+        .in("show_id", showIds);
+    if (entriesError) return { success: false, error: entriesError.message };
+    const entryCounts = countBy(
+        (entryRows ?? []).map((r: { show_id: string }) => ({ key: r.show_id })),
+    );
+
+    return {
+        success: true,
+        shows: (shows ?? []).map((s) => ({
+            id: s.id as string,
+            title: s.title as string,
+            mode: s.mode as ShowMode,
+            judging: s.judging as ShowJudging,
+            status: s.status as ShowStatus,
+            showDate: (s.show_date as string | null) ?? null,
+            entriesCloseAt: (s.entries_close_at as string | null) ?? null,
+            createdAt: s.created_at as string,
+            role: roleByShow.get(s.id as string) ?? "co_host",
+            entryCount: entryCounts.get(s.id as string) ?? 0,
+        })),
+    };
+}
+
+/**
+ * Everything the /shows/host/[id] console needs in one call.
+ * Staff-gated: any role on the show may view; the client decides
+ * which controls to render from viewerRole (actions re-check).
+ */
+export async function getShowConsole(
+    input: z.input<typeof getShowConsoleSchema>,
+): Promise<ActionResult<{ console: ShowConsoleData }>> {
+    const parsed = getShowConsoleSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const { showId } = parsed.data;
+
+    const ctx = await getShowRole(supabase, showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role) return { success: false, error: "Only show staff can open the console." };
+
+    const { data: show, error: showError } = await supabase
+        .from("shows")
+        .select(
+            "id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, created_at",
+        )
+        .eq("id", showId)
+        .maybeSingle();
+    if (showError) return { success: false, error: showError.message };
+    if (!show) return { success: false, error: "Show not found." };
+
+    // ── Classlist tree ──
+    const { data: divisionRows, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, name, axis, sort_order")
+        .eq("show_id", showId)
+        .order("sort_order", { ascending: true });
+    if (dErr) return { success: false, error: dErr.message };
+    const divisionIds = (divisionRows ?? []).map((d) => d.id as string);
+
+    let sectionRows: { id: string; division_id: string; name: string; sort_order: number }[] = [];
+    let classRows: {
+        id: string;
+        section_id: string;
+        name: string;
+        class_number: string | null;
+        status: string;
+        max_per_entrant: number | null;
+        allowed_scales: string[] | null;
+        allowed_finishes: string[] | null;
+        is_qualifying: boolean;
+        sort_order: number;
+    }[] = [];
+    if (divisionIds.length > 0) {
+        const { data: sections, error: sErr } = await supabase
+            .from("show_sections")
+            .select("id, division_id, name, sort_order")
+            .in("division_id", divisionIds)
+            .order("sort_order", { ascending: true });
+        if (sErr) return { success: false, error: sErr.message };
+        sectionRows = sections ?? [];
+
+        const sectionIds = sectionRows.map((s) => s.id);
+        if (sectionIds.length > 0) {
+            const { data: classes, error: cErr } = await supabase
+                .from("show_classes")
+                .select(
+                    "id, section_id, name, class_number, status, max_per_entrant, allowed_scales, allowed_finishes, is_qualifying, sort_order",
+                )
+                .in("section_id", sectionIds)
+                .order("sort_order", { ascending: true });
+            if (cErr) return { success: false, error: cErr.message };
+            classRows = classes ?? [];
+        }
+    }
+
+    // ── Entries (read-only in Phase C) ──
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, class_id, horse_id, owner_id, handler_id, entry_number, status")
+        .eq("show_id", showId);
+    if (eErr) return { success: false, error: eErr.message };
+    const entries = entryRows ?? [];
+
+    // ── Staff roster ──
+    const { data: staffRows, error: stErr } = await supabase
+        .from("show_staff")
+        .select("user_id, role, coi_flag, coi_note")
+        .eq("show_id", showId)
+        .order("created_at", { ascending: true });
+    if (stErr) return { success: false, error: stErr.message };
+    const staff = staffRows ?? [];
+
+    // ── Names: staff/owner/handler aliases + horse names ──
+    const aliases = await getAliases(supabase, [
+        ...staff.map((s) => s.user_id as string),
+        ...entries.map((e) => e.owner_id as string),
+        ...entries.flatMap((e) => (e.handler_id ? [e.handler_id as string] : [])),
+    ]);
+    if (!(aliases instanceof Map)) return { success: false, error: aliases.error };
+
+    const horseIds = [...new Set(entries.map((e) => e.horse_id as string))];
+    const horseNames = new Map<string, string>();
+    if (horseIds.length > 0) {
+        const { data: horses, error: hErr } = await supabase
+            .from("user_horses")
+            .select("id, custom_name")
+            .in("id", horseIds);
+        if (hErr) return { success: false, error: hErr.message };
+        for (const h of horses ?? []) {
+            horseNames.set(h.id as string, (h.custom_name as string | null) ?? "Unnamed horse");
+        }
+    }
+
+    // ── Assemble the tree ──
+    const entryCountByClass = countBy(entries.map((e) => ({ key: e.class_id as string })));
+
+    const classesBySection = new Map<string, ConsoleClass[]>();
+    for (const c of classRows) {
+        const list = classesBySection.get(c.section_id) ?? [];
+        list.push({
+            id: c.id,
+            name: c.name,
+            classNumber: c.class_number,
+            status: c.status as ClassStatus,
+            maxPerEntrant: c.max_per_entrant,
+            allowedScales: c.allowed_scales,
+            allowedFinishes: c.allowed_finishes,
+            isQualifying: c.is_qualifying,
+            sortOrder: c.sort_order,
+            entryCount: entryCountByClass.get(c.id) ?? 0,
+        });
+        classesBySection.set(c.section_id, list);
+    }
+
+    const sectionsByDivision = new Map<string, ConsoleSection[]>();
+    for (const s of sectionRows) {
+        const list = sectionsByDivision.get(s.division_id) ?? [];
+        list.push({
+            id: s.id,
+            name: s.name,
+            sortOrder: s.sort_order,
+            classes: classesBySection.get(s.id) ?? [],
+        });
+        sectionsByDivision.set(s.division_id, list);
+    }
+
+    const divisions: ConsoleDivision[] = (divisionRows ?? []).map((d) => ({
+        id: d.id as string,
+        name: d.name as string,
+        axis: d.axis as DivisionAxis,
+        sortOrder: d.sort_order as number,
+        sections: sectionsByDivision.get(d.id as string) ?? [],
+    }));
+
+    const staffMembers: ConsoleStaffMember[] = staff.map((s) => ({
+        userId: s.user_id as string,
+        alias: aliases.get(s.user_id as string) ?? "unknown",
+        role: s.role as StaffRole,
+        coiFlag: s.coi_flag as boolean,
+        coiNote: (s.coi_note as string | null) ?? null,
+    }));
+
+    const consoleEntries: ConsoleEntry[] = entries.map((e) => ({
+        id: e.id as string,
+        classId: e.class_id as string,
+        horseName: horseNames.get(e.horse_id as string) ?? "Unnamed horse",
+        ownerAlias: aliases.get(e.owner_id as string) ?? "unknown",
+        handlerAlias:
+            e.handler_id && e.handler_id !== e.owner_id
+                ? (aliases.get(e.handler_id as string) ?? "unknown")
+                : null,
+        entryNumber: (e.entry_number as number | null) ?? null,
+        status: e.status as EntryStatus,
+    }));
+
+    return {
+        success: true,
+        console: {
+            show: {
+                id: show.id as string,
+                title: show.title as string,
+                mode: show.mode as ShowMode,
+                judging: show.judging as ShowJudging,
+                status: show.status as ShowStatus,
+                venueName: show.venue_name as string | null,
+                venueAddress: show.venue_address as string | null,
+                showDate: show.show_date as string | null,
+                entriesOpenAt: show.entries_open_at as string | null,
+                entriesCloseAt: show.entries_close_at as string | null,
+                judgingEndsAt: show.judging_ends_at as string | null,
+                rulesMd: show.rules_md as string | null,
+                feeInfo: show.fee_info as string | null,
+                capacity: show.capacity as number | null,
+                isMhhQualifying: show.is_mhh_qualifying as boolean,
+                sanctioningNote: show.sanctioning_note as string | null,
+                createdAt: show.created_at as string,
+            },
+            viewerRole: ctx.role,
+            divisions,
+            staff: staffMembers,
+            entries: consoleEntries,
+        },
+    };
+}
+
+/**
+ * Exact-alias lookup (case-insensitive) for the staff panel's
+ * add-by-alias flow. Returns null (not an error) when nobody
+ * matches so the UI can show "no user found".
+ */
+export async function findUserByAlias(
+    input: z.input<typeof findUserByAliasSchema>,
+): Promise<ActionResult<{ user: { id: string; alias: string } | null }>> {
+    const parsed = findUserByAliasSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase } = await requireAuth();
+
+    // Escape LIKE wildcards so the lookup stays EXACT (case-insensitive).
+    const literal = parsed.data.alias.replace(/[\\%_]/g, "\\$&");
+    const { data, error } = await supabase
+        .from("users")
+        .select("id, alias_name")
+        .ilike("alias_name", literal)
+        .limit(1)
+        .maybeSingle();
+    if (error) return { success: false, error: error.message };
+    if (!data) return { success: true, user: null };
+    return {
+        success: true,
+        user: { id: data.id as string, alias: data.alias_name as string },
+    };
 }
