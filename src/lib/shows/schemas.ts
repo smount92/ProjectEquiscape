@@ -285,6 +285,44 @@ export const recordPlacingsSchema = z.object({
     markDone: z.boolean().default(false),
 });
 
+// ── Live ring console + callbacks (Phase E2) ──
+
+export const getRingConsoleSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const getRingBoardSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const getShowChampionsSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const callbackScopeSchema = z.enum(["section", "division", "show"]);
+
+/**
+ * One callback round's pick. scopeId is the section/division id
+ * and must be absent exactly when scope='show' (mirrors the 117
+ * CHECK + trigger). Champion is required; reserve optional but
+ * never the same entry.
+ */
+export const recordCallbackSchema = z
+    .object({
+        showId: uuidSchema,
+        scope: callbackScopeSchema,
+        scopeId: uuidSchema.nullable().optional(),
+        championEntryId: uuidSchema,
+        reserveEntryId: uuidSchema.nullable().optional(),
+    })
+    .refine((v) => (v.scope === "show" ? !v.scopeId : !!v.scopeId), {
+        message:
+            "Section and division callbacks need their section/division id; the show callback must not have one.",
+    })
+    .refine((v) => !v.reserveEntryId || v.reserveEntryId !== v.championEntryId, {
+        message: "Champion and reserve must be different entries.",
+    });
+
 /** First zod issue as a user-facing error string. */
 export function firstZodError(error: z.ZodError): string {
     return error.issues[0]?.message ?? "Invalid input.";

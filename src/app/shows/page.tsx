@@ -39,8 +39,8 @@ function v2ShowDate(show: PublicShowSummary): string | null {
 }
 
 /** Phase D — v2 shows as ledger cards, ABOVE the legacy photo-show
- *  list. Links go to the interim /shows/v2/[id] route (the
- *  /shows/[id] slot is legacy's until the Phase E cutover). */
+ *  list. Links go to the canonical /shows/[id] route (the Phase E2
+ *  resolver renders the v2 page for v2 ids). */
 function V2ShowsSection({ shows }: { shows: PublicShowSummary[] }) {
  if (shows.length === 0) return null;
  return (
@@ -52,7 +52,7 @@ function V2ShowsSection({ shows }: { shows: PublicShowSummary[] }) {
     {shows.map((show) => (
      <Link
       key={show.id}
-      href={`/shows/v2/${show.id}`}
+      href={`/shows/${show.id}`}
       className="ledger-card block no-underline transition-all hover:shadow-lg"
      >
       <div className="flex flex-wrap items-center gap-2">

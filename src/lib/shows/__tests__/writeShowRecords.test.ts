@@ -143,6 +143,105 @@ describe("buildShowRecords — the vocabulary → trophy-case mapping", () => {
         expect(rows[0].show_date).toBe("2026-06-20");
     });
 
+    it("writes champion + reserve trophy-case rows from the callback ladder", () => {
+        const { rows } = buildShowRecords(
+            baseInput({
+                callbacks: [
+                    {
+                        scope: "section",
+                        scopeId: "section-1",
+                        championEntryId: "entry-1",
+                        reserveEntryId: "entry-2",
+                    },
+                    {
+                        scope: "division",
+                        scopeId: "division-1",
+                        championEntryId: "entry-1",
+                        reserveEntryId: null,
+                    },
+                    {
+                        scope: "show",
+                        scopeId: null,
+                        championEntryId: "entry-1",
+                        reserveEntryId: "entry-2",
+                    },
+                ],
+            }),
+        );
+        // 2 class placings + 2 section + 1 division + 2 show rows.
+        expect(rows).toHaveLength(7);
+
+        const sectionChampion = rows.find((r) => r.placing === "Section Champion");
+        expect(sectionChampion).toMatchObject({
+            horse_id: "horse-1",
+            user_id: "owner-1",
+            class_name: "OF Plastic Halter — Stock Section Championship",
+            division: "OF Plastic Halter",
+            ribbon_color: "Purple",
+            total_entries: null,
+            judge_critique: null,
+            verification_tier: "platform_generated",
+        });
+        expect(rows.find((r) => r.placing === "Section Reserve Champion")).toMatchObject({
+            horse_id: "horse-2",
+            ribbon_color: "Lavender",
+        });
+        expect(rows.find((r) => r.placing === "Division Champion")).toMatchObject({
+            class_name: "OF Plastic Halter — Division Championship",
+            division: "OF Plastic Halter",
+        });
+        expect(rows.find((r) => r.placing === "Grand Champion")).toMatchObject({
+            class_name: "Grand Championship",
+            division: null,
+        });
+        expect(rows.find((r) => r.placing === "Reserve Grand Champion")).toMatchObject({
+            horse_id: "horse-2",
+        });
+    });
+
+    it("champion rows stay idempotent by horse + championship name", () => {
+        const callbacks: NonNullable<PublishShowInput["callbacks"]> = [
+            {
+                scope: "show",
+                scopeId: null,
+                championEntryId: "entry-1",
+                reserveEntryId: null,
+            },
+        ];
+        const { rows, skipped } = buildShowRecords(
+            baseInput({
+                callbacks,
+                existing: [{ horseId: "horse-1", className: "Grand Championship" }],
+            }),
+        );
+        expect(rows.find((r) => r.placing === "Grand Champion")).toBeUndefined();
+        // 1 class-placing skip would be 0 here; the champion skip counts.
+        expect(skipped).toBe(1);
+    });
+
+    it("champion rows skip scratched/unknown entries and unknown scopes (data drift)", () => {
+        const { rows } = buildShowRecords(
+            baseInput({
+                placings: [],
+                callbacks: [
+                    {
+                        scope: "section",
+                        scopeId: "ghost-section",
+                        championEntryId: "entry-1",
+                        reserveEntryId: null,
+                    },
+                    {
+                        scope: "show",
+                        scopeId: null,
+                        championEntryId: "ghost-entry",
+                        reserveEntryId: null,
+                    },
+                ],
+            }),
+        );
+        expect(rows).toEqual([]);
+    });
+
     it("falls back to entries close, then the fallback date, for undated online shows", () => {
         expect(
             resolveShowRecordDate(

@@ -65,10 +65,15 @@ export async function proxy(request: NextRequest) {
         "/terms",
         "/leaderboard",
         "/search",
-        // Shows v2 (Phase D): the public show page is anon-visible —
-        // RLS (118) already scopes reads to non-draft shows. Only the
-        // /shows/v2 subtree; the legacy /shows pages stay authed.
-        "/shows/v2",
+        // Shows (Phase E2 cutover): /shows/[id] now serves the
+        // anon-visible v2 public page (RLS 118 scopes reads to
+        // non-draft shows) and /shows/host/[id]/ring/board is the
+        // public announcer board — both need anon through. Every
+        // OTHER page under /shows enforces its own server-side
+        // login redirect (browse, the legacy detail body, host
+        // console, judge queue, ring, planner), so opening the
+        // subtree changes nothing for them.
+        "/shows",
     ];
 
     const isPublicRoute =

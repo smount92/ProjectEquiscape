@@ -85,6 +85,13 @@ const CHAMPION_COLORS: Record<ChampionKind, string> = {
     reserve: "lavender",
 };
 
+/** Hex values for UI rendering — like ribbon colors, rosette
+ *  colors are the hobby's convention and never themed. */
+const CHAMPION_HEX: Record<ChampionKind, string> = {
+    champion: "#7c3aed", // purple
+    reserve: "#c4b5fd", // lavender
+};
+
 /**
  * "Section Champion", "Division Reserve Champion",
  * "Grand Champion" (show scope).
@@ -102,6 +109,10 @@ export function championLabel(
 
 export function championColor(kind: ChampionKind): string {
     return CHAMPION_COLORS[kind];
+}
+
+export function championHex(kind: ChampionKind): string {
+    return CHAMPION_HEX[kind];
 }
 
 /**

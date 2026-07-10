@@ -14,6 +14,7 @@
  * name tags.
  */
 
+import type { CallbackRecord } from "./callbacks";
 import type { ClassStatus, Place, ShowJudging, ShowStatus, StaffRole } from "./types";
 
 /** Online shows show their gallery from entries_open onward —
@@ -102,7 +103,9 @@ export interface JudgeQueueClass {
     classId: string;
     className: string;
     classNumber: string | null;
+    divisionId: string;
     divisionName: string;
+    sectionId: string;
     sectionName: string;
     status: ClassStatus;
     entries: JudgeQueueEntry[];
@@ -118,4 +121,9 @@ export interface JudgeQueueData {
     };
     viewerRole: StaffRole;
     classes: JudgeQueueClass[];
+    /** Structure + recorded callbacks — the championship round
+     *  (Phase E2) derives its ladder from these. */
+    sections: { id: string; name: string; divisionId: string }[];
+    divisions: { id: string; name: string }[];
+    callbacks: CallbackRecord[];
 }

@@ -48,7 +48,7 @@ export interface PublicShowSummary {
     createdAt: string;
 }
 
-// ── /shows/v2/[id] — the public show page ──
+// ── /shows/[id] — the public show page (v2, via the E2 resolver) ──
 
 export interface PublicShow {
     id: string;

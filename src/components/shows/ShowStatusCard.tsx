@@ -8,6 +8,7 @@
  */
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { transitionShowStatus, updateShowSettings } from "@/app/actions/shows-v2";
@@ -132,6 +133,26 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
                         {show.status === "archived" && "This show is archived and read-only."}
                     </span>
                 </div>
+
+                {/* Live show day-of surfaces (Phase E2): the ring console
+                    runs the table; the board is the projector view. */}
+                {show.mode === "live" && show.status === "running" && (
+                    <div className="mt-4 flex flex-wrap gap-4">
+                        <Link
+                            href={`/shows/host/${show.id}/ring`}
+                            className="text-sm font-semibold text-forest hover:underline"
+                            data-testid="ring-console-link"
+                        >
+                            Open the ring console →
+                        </Link>
+                        <Link
+                            href={`/shows/host/${show.id}/ring/board`}
+                            className="text-sm font-semibold text-forest hover:underline"
+                        >
+                            Announcer board (public) →
+                        </Link>
+                    </div>
+                )}
 
                 {canManage ? (
                     nextStatuses.length > 0 && (

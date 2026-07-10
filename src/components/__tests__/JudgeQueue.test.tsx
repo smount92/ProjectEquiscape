@@ -16,6 +16,13 @@ const actions = vi.hoisted(() => ({
 }));
 vi.mock("@/app/actions/shows-v2", () => actions);
 
+// The championship round (CallbackLadder) writes through the ring
+// actions module — mocked so jsdom never imports the server file.
+const ringActions = vi.hoisted(() => ({
+    recordCallback: vi.fn().mockResolvedValue({ success: true }),
+}));
+vi.mock("@/app/actions/shows-v2-ring", () => ringActions);
+
 function queueEntry(id: string, name: string, overrides: Partial<JudgeQueueEntry> = {}): JudgeQueueEntry {
     return {
         id,
@@ -44,7 +51,9 @@ function queueData(overrides: Partial<JudgeQueueData> = {}): JudgeQueueData {
                 classId: "class-1",
                 className: "OF Quarter Horse",
                 classNumber: "1",
+                divisionId: "division-1",
                 divisionName: "OF Plastic Halter",
+                sectionId: "section-1",
                 sectionName: "Stock",
                 status: "scheduled",
                 entries: [
@@ -57,12 +66,17 @@ function queueData(overrides: Partial<JudgeQueueData> = {}): JudgeQueueData {
                 classId: "class-2",
                 className: "OF Appaloosa",
                 classNumber: "2",
+                divisionId: "division-1",
                 divisionName: "OF Plastic Halter",
+                sectionId: "section-1",
                 sectionName: "Stock",
                 status: "placed",
                 entries: [],
             },
         ],
+        sections: [{ id: "section-1", name: "Stock", divisionId: "division-1" }],
+        divisions: [{ id: "division-1", name: "OF Plastic Halter" }],
+        callbacks: [],
         ...overrides,
     };
 }
@@ -168,5 +182,27 @@ describe("JudgeQueue — tap-to-place", () => {
         render(<JudgeQueue queue={data} />);
         expect(screen.queryByTestId("save-done")).not.toBeInTheDocument();
         expect(screen.getByText(/results review/i)).toBeInTheDocument();
+    });
+
+    it("opens the championship round once every class is placed", () => {
+        const data = queueData();
+        data.classes[0].status = "placed";
+        data.classes[0].entries = [
+            queueEntry("entry-a", "Dash of Cash", { place: 1, entryNumber: 7 }),
+            queueEntry("entry-b", "Copper Penny", { place: 2 }),
+        ];
+        render(<JudgeQueue queue={data} />);
+        // The section round is open with the 1st-place entry as candidate.
+        expect(screen.getByTestId("ladder-progress")).toHaveTextContent(
+            "0 of 3 callbacks decided",
+        );
+        const candidates = screen.getAllByTestId("callback-candidate");
+        expect(candidates).toHaveLength(1);
+        expect(candidates[0]).toHaveTextContent("Dash of Cash");
+    });
+
+    it("keeps the championship round hidden while classes remain", () => {
+        render(<JudgeQueue queue={queueData()} />);
+        expect(screen.queryByTestId("ladder-progress")).not.toBeInTheDocument();
     });
 });

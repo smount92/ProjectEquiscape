@@ -22,7 +22,6 @@ import { z } from "zod";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { getPublicImageUrl } from "@/lib/utils/storage";
 import {
     addClassSchema,
     addDivisionSchema,
@@ -51,6 +50,13 @@ import {
     updateClassSchema,
     updateShowSettingsSchema,
 } from "@/lib/shows/schemas";
+import {
+    getAliases,
+    getEntryPhotoUrls,
+    getHorseNames,
+    getShowRole,
+    loadClassContexts,
+} from "@/lib/shows/queries";
 import { deriveVotePlacings, type VoteTally } from "@/lib/shows/deriveVotePlacings";
 import { buildShowRecords } from "@/lib/shows/writeShowRecords";
 import {
@@ -89,6 +95,7 @@ import {
 } from "@/lib/shows/stateMachine";
 import { getClasslistTemplate } from "@/lib/shows/namhsaTemplate";
 import type {
+    CallbackScope,
     ClassStatus,
     DivisionAxis,
     EntryStatus,
@@ -100,47 +107,15 @@ import type {
 } from "@/lib/shows/types";
 
 // ── Shared result + helpers ──
+// The query helpers (getShowRole, getAliases, getHorseNames,
+// getEntryPhotoUrls, loadClassContexts) moved to
+// src/lib/shows/queries.ts in Phase E2 so the ring-console action
+// file can share them — "use server" files may only export async
+// server actions.
 
 type ActionResult<T = object> =
     | ({ success: true } & T)
     | { success: false; error: string };
-
-interface ShowCore {
-    id: string;
-    host_id: string;
-    status: ShowStatus;
-    mode: ShowMode;
-    judging: ShowJudging;
-}
-
-/**
- * Load the show and resolve the caller's role on it.
- * Role 'host' comes from shows.host_id; delegated roles from show_staff.
- */
-async function getShowRole(
-    supabase: SupabaseClient,
-    showId: string,
-    userId: string,
-): Promise<{ show: ShowCore; role: StaffRole | null } | { error: string }> {
-    const { data: show, error } = await supabase
-        .from("shows")
-        .select("id, host_id, status, mode, judging")
-        .eq("id", showId)
-        .maybeSingle();
-    if (error) return { error: error.message };
-    if (!show) return { error: "Show not found." };
-
-    if (show.host_id === userId) return { show: show as ShowCore, role: "host" };
-
-    const { data: staff } = await supabase
-        .from("show_staff")
-        .select("role")
-        .eq("show_id", showId)
-        .eq("user_id", userId)
-        .maybeSingle();
-
-    return { show: show as ShowCore, role: (staff?.role as StaffRole) ?? null };
-}
 
 const MANAGER_ROLES: StaffRole[] = ["host", "co_host"];
 
@@ -362,6 +337,14 @@ async function writeShowRecordsForShow(
     const placings = placingRows ?? [];
     if (placings.length === 0) return { written: 0, skipped: 0 };
 
+    // ── The callback ladder — champions/reserves become trophy-case
+    // rows too (Phase E2). ──
+    const { data: callbackRows, error: cbErr } = await supabase
+        .from("show_callbacks")
+        .select("scope, scope_id, champion_entry_id, reserve_entry_id")
+        .eq("show_id", showId);
+    if (cbErr) return { error: cbErr.message };
+
     // Admin client — REQUIRED here: show_records rows belong to the
     // entry OWNERS, and RLS (011) only lets a user insert/read their
     // own rows. The publishing host cannot write (or even see) other
@@ -399,6 +382,12 @@ async function writeShowRecordsForShow(
         classes: classes.map((c) => ({ id: c.id, name: c.name, sectionId: c.section_id })),
         sections: sections.map((s) => ({ id: s.id, name: s.name, divisionId: s.division_id })),
         divisions,
+        callbacks: (callbackRows ?? []).map((r) => ({
+            scope: r.scope as CallbackScope,
+            scopeId: (r.scope_id as string | null) ?? null,
+            championEntryId: (r.champion_entry_id as string | null) ?? null,
+            reserveEntryId: (r.reserve_entry_id as string | null) ?? null,
+        })),
         existing: (existingRows ?? []).map(
             (r: { horse_id: string; class_name: string | null }) => ({
                 horseId: r.horse_id,
@@ -915,26 +904,6 @@ function countBy(rows: { key: string }[]): Map<string, number> {
     const counts = new Map<string, number>();
     for (const row of rows) counts.set(row.key, (counts.get(row.key) ?? 0) + 1);
     return counts;
-}
-
-/** Resolve user ids to alias_name in one query. */
-async function getAliases(
-    supabase: SupabaseClient,
-    userIds: string[],
-): Promise<Map<string, string> | { error: string }> {
-    const unique = [...new Set(userIds)];
-    if (unique.length === 0) return new Map();
-    const { data, error } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", unique);
-    if (error) return { error: error.message };
-    return new Map(
-        (data ?? []).map((r: { id: string; alias_name: string | null }) => [
-            r.id,
-            r.alias_name ?? "unknown",
-        ]),
-    );
 }
 
 /**
@@ -1889,116 +1858,6 @@ export async function scratchEntry(
 // and the community-vote finalizer.
 // ══════════════════════════════════════════════════════════════
 
-/** Flat class context (skips cancelled/combined classes), ordered
- *  by division → section → class sort. Shared by the gallery,
- *  the judge queue, and the vote finalizer. */
-interface ClassContext {
-    classId: string;
-    className: string;
-    classNumber: string | null;
-    status: ClassStatus;
-    sectionName: string;
-    divisionName: string;
-}
-
-async function loadClassContexts(
-    supabase: SupabaseClient,
-    showId: string,
-): Promise<ClassContext[] | { error: string }> {
-    const { data: divisionRows, error: dErr } = await supabase
-        .from("show_divisions")
-        .select("id, name, sort_order")
-        .eq("show_id", showId)
-        .order("sort_order", { ascending: true });
-    if (dErr) return { error: dErr.message };
-    const divisions = (divisionRows ?? []) as { id: string; name: string }[];
-    if (divisions.length === 0) return [];
-
-    const { data: sectionRows, error: sErr } = await supabase
-        .from("show_sections")
-        .select("id, name, division_id, sort_order")
-        .in("division_id", divisions.map((d) => d.id))
-        .order("sort_order", { ascending: true });
-    if (sErr) return { error: sErr.message };
-    const sections = (sectionRows ?? []) as { id: string; name: string; division_id: string }[];
-    if (sections.length === 0) return [];
-
-    const { data: classRows, error: cErr } = await supabase
-        .from("show_classes")
-        .select("id, name, class_number, status, section_id, sort_order")
-        .in("section_id", sections.map((s) => s.id))
-        .order("sort_order", { ascending: true });
-    if (cErr) return { error: cErr.message };
-
-    const divisionById = new Map(divisions.map((d) => [d.id, d]));
-
-    // Walk sections in their division-major order so the flat list
-    // matches the published classlist; classes are already sorted.
-    const divisionIndex = new Map(divisions.map((d, i) => [d.id, i]));
-    const orderedSections = [...sections].sort(
-        (a, b) =>
-            (divisionIndex.get(a.division_id) ?? 0) - (divisionIndex.get(b.division_id) ?? 0),
-    );
-
-    const contexts: ClassContext[] = [];
-    for (const section of orderedSections) {
-        for (const c of classRows ?? []) {
-            if (c.section_id !== section.id) continue;
-            const status = c.status as ClassStatus;
-            if (status === "cancelled" || status === "combined") continue;
-            contexts.push({
-                classId: c.id as string,
-                className: c.name as string,
-                classNumber: (c.class_number as string | null) ?? null,
-                status,
-                sectionName: section.name,
-                divisionName: divisionById.get(section.division_id)?.name ?? "",
-            });
-        }
-    }
-    return contexts;
-}
-
-/** Entry photo urls: photo_id → public storage URL. */
-async function getEntryPhotoUrls(
-    supabase: SupabaseClient,
-    photoIds: string[],
-): Promise<Map<string, string> | { error: string }> {
-    const unique = [...new Set(photoIds)];
-    if (unique.length === 0) return new Map();
-    const { data, error } = await supabase
-        .from("horse_images")
-        .select("id, image_url")
-        .in("id", unique);
-    if (error) return { error: error.message };
-    return new Map(
-        (data ?? []).map((r: { id: string; image_url: string }) => [
-            r.id,
-            getPublicImageUrl(r.image_url),
-        ]),
-    );
-}
-
-/** Horse display names in one query. */
-async function getHorseNames(
-    supabase: SupabaseClient,
-    horseIds: string[],
-): Promise<Map<string, string> | { error: string }> {
-    const unique = [...new Set(horseIds)];
-    if (unique.length === 0) return new Map();
-    const { data, error } = await supabase
-        .from("user_horses")
-        .select("id, custom_name")
-        .in("id", unique);
-    if (error) return { error: error.message };
-    return new Map(
-        (data ?? []).map((r: { id: string; custom_name: string | null }) => [
-            r.id,
-            r.custom_name ?? "Unnamed horse",
-        ]),
-    );
-}
-
 /**
  * THE ENTRY GALLERY read — public, anon included; online shows
  * only, visible from entries_open onward.
@@ -2037,8 +1896,9 @@ export async function getShowGallery(
         return { success: false, error: "The entry gallery opens when entries open." };
     }
 
-    const contexts = await loadClassContexts(supabase, showId);
-    if ("error" in contexts) return { success: false, error: contexts.error };
+    const tree = await loadClassContexts(supabase, showId);
+    if ("error" in tree) return { success: false, error: tree.error };
+    const { contexts } = tree;
 
     const { data: entryRows, error: eErr } = await supabase
         .from("show_class_entries")
@@ -2307,8 +2167,9 @@ export async function getJudgeQueue(
     if (showError) return { success: false, error: showError.message };
     if (!show) return { success: false, error: "Show not found." };
 
-    const contexts = await loadClassContexts(supabase, showId);
-    if ("error" in contexts) return { success: false, error: contexts.error };
+    const tree = await loadClassContexts(supabase, showId);
+    if ("error" in tree) return { success: false, error: tree.error };
+    const { contexts } = tree;
 
     const { data: entryRows, error: eErr } = await supabase
         .from("show_class_entries")
@@ -2380,11 +2241,20 @@ export async function getJudgeQueue(
         classId: c.classId,
         className: c.className,
         classNumber: c.classNumber,
+        divisionId: c.divisionId,
         divisionName: c.divisionName,
+        sectionId: c.sectionId,
         sectionName: c.sectionName,
         status: c.status,
         entries: entriesByClass.get(c.classId) ?? [],
     }));
+
+    // Recorded callbacks — the championship round resumes from these.
+    const { data: callbackRows, error: cbErr } = await supabase
+        .from("show_callbacks")
+        .select("scope, scope_id, champion_entry_id, reserve_entry_id")
+        .eq("show_id", showId);
+    if (cbErr) return { success: false, error: cbErr.message };
 
     return {
         success: true,
@@ -2398,6 +2268,14 @@ export async function getJudgeQueue(
             },
             viewerRole: ctx.role,
             classes,
+            sections: tree.sections,
+            divisions: tree.divisions,
+            callbacks: (callbackRows ?? []).map((r) => ({
+                scope: r.scope as CallbackScope,
+                scopeId: (r.scope_id as string | null) ?? null,
+                championEntryId: (r.champion_entry_id as string | null) ?? null,
+                reserveEntryId: (r.reserve_entry_id as string | null) ?? null,
+            })),
         },
     };
 }
@@ -2555,8 +2433,9 @@ export async function finalizeCommunityVotes(
         };
     }
 
-    const contexts = await loadClassContexts(supabase, showId);
-    if ("error" in contexts) return { success: false, error: contexts.error };
+    const tree = await loadClassContexts(supabase, showId);
+    if ("error" in tree) return { success: false, error: tree.error };
+    const { contexts } = tree;
     if (contexts.length === 0) return { success: true, classesPlaced: 0, placingsWritten: 0 };
 
     const { data: entryRows, error: eErr } = await supabase

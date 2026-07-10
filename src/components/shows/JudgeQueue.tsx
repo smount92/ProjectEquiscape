@@ -21,6 +21,7 @@ import type { JudgeQueueClass, JudgeQueueData } from "@/lib/shows/gallery";
 import { MAX_PLACE, placeLabel, ribbonHex } from "@/lib/shows/placings";
 import type { Place } from "@/lib/shows/types";
 import PhotoLightbox from "@/components/PhotoLightbox";
+import CallbackLadder from "@/components/shows/CallbackLadder";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +31,8 @@ function classLabel(cls: { classNumber: string | null; className: string }): str
 }
 
 export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
-    const { show, classes } = queue;
+    const router = useRouter();
+    const { show, classes, sections, divisions, callbacks } = queue;
     const [activeIndex, setActiveIndex] = useState(() => {
         // Open at the first class still awaiting placement.
         const first = classes.findIndex((c) => c.status !== "placed");
@@ -111,6 +113,33 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
                             ? () => setActiveIndex(activeIndex + 1)
                             : null
                     }
+                />
+            )}
+
+            {/* ── THE CHAMPIONSHIP ROUND (Phase E2) — once every class
+                is placed, the same section → division → show callback
+                ladder as the live ring, photos side by side. ── */}
+            {placedCount === classes.length && (
+                <CallbackLadder
+                    showId={show.id}
+                    canRecord={canRecord}
+                    classes={classes.map((c) => ({
+                        classId: c.classId,
+                        sectionId: c.sectionId,
+                        divisionId: c.divisionId,
+                        status: c.status,
+                        entries: c.entries.map((e) => ({
+                            id: e.id,
+                            horseName: e.horseName,
+                            entryNumber: e.entryNumber,
+                            photoUrl: e.photoUrl,
+                            place: e.place,
+                        })),
+                    }))}
+                    sections={sections}
+                    divisions={divisions}
+                    callbacks={callbacks}
+                    onSaved={() => router.refresh()}
                 />
             )}
         </div>

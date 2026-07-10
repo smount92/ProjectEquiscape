@@ -28,8 +28,14 @@
  * reach the trophy case — only placed entries do.
  */
 
-import { placeLabel, ribbonColor } from "./placings";
-import type { Place, ShowMode } from "./types";
+import {
+    championColor,
+    championLabel,
+    placeLabel,
+    ribbonColor,
+    type ChampionKind,
+} from "./placings";
+import type { CallbackScope, Place, ShowMode } from "./types";
 
 /** Insert shape for the legacy show_records table. */
 export interface ShowRecordInsert {
@@ -72,6 +78,17 @@ export interface PublishShowInput {
     classes: { id: string; name: string; sectionId: string }[];
     sections: { id: string; name: string; divisionId: string }[];
     divisions: { id: string; name: string }[];
+    /**
+     * The callback ladder (Phase E2) — champions and reserves ALSO
+     * become trophy-case rows, labelled via championLabel. Optional:
+     * shows without callbacks publish class placings only.
+     */
+    callbacks?: {
+        scope: CallbackScope;
+        scopeId: string | null;
+        championEntryId: string | null;
+        reserveEntryId: string | null;
+    }[];
     /**
      * Records already written for THIS show (horse + class name) —
      * the idempotency skip-list.
@@ -155,5 +172,73 @@ export function buildShowRecords(input: PublishShowInput): {
         });
     }
 
+    // ── Champion / reserve rows from the callback ladder ──
+    // The "class name" of a championship must be UNIQUE per horse
+    // within the show for the idempotency key (horse::class_name),
+    // so section championships carry their division name — two
+    // divisions can both have a "Stock" section.
+    for (const callback of input.callbacks ?? []) {
+        const scopeName = championshipClassName(callback, sectionById, divisionById);
+        if (!scopeName) continue; // data drift: scope row unknown
+
+        const picks: [ChampionKind, string | null][] = [
+            ["champion", callback.championEntryId],
+            ["reserve", callback.reserveEntryId],
+        ];
+        for (const [kind, entryId] of picks) {
+            if (!entryId) continue;
+            const entry = entryById.get(entryId);
+            if (!entry) continue; // scratched/unknown — never a record
+
+            if (alreadyWritten.has(`${entry.horseId}::${scopeName.className}`)) {
+                skipped += 1;
+                continue;
+            }
+
+            rows.push({
+                horse_id: entry.horseId,
+                user_id: entry.ownerId,
+                show_name: input.show.title,
+                show_date: showDate,
+                division: scopeName.division,
+                class_name: scopeName.className,
+                placing: championLabel(kind, callback.scope),
+                ribbon_color: capitalize(championColor(kind)),
+                total_entries: null,
+                judge_critique: null,
+                verification_tier: "platform_generated",
+            });
+        }
+    }
+
     return { rows, skipped };
+}
+
+/** Championship "class name" + division column per scope. */
+function championshipClassName(
+    callback: {
+        scope: CallbackScope;
+        scopeId: string | null;
+    },
+    sectionById: Map<string, { id: string; name: string; divisionId: string }>,
+    divisionById: Map<string, { id: string; name: string }>,
+): { className: string; division: string | null } | null {
+    if (callback.scope === "show") {
+        return { className: "Grand Championship", division: null };
+    }
+    if (callback.scope === "division") {
+        const division = callback.scopeId ? divisionById.get(callback.scopeId) : undefined;
+        if (!division) return null;
+        return {
+            className: `${division.name} — Division Championship`,
+            division: division.name,
+        };
+    }
+    const section = callback.scopeId ? sectionById.get(callback.scopeId) : undefined;
+    if (!section) return null;
+    const division = divisionById.get(section.divisionId);
+    return {
+        className: `${division ? `${division.name} — ` : ""}${section.name} Section Championship`,
+        division: division?.name ?? null,
+    };
 }
