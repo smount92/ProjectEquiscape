@@ -65,6 +65,10 @@ export async function proxy(request: NextRequest) {
         "/terms",
         "/leaderboard",
         "/search",
+        // Shows v2 (Phase D): the public show page is anon-visible —
+        // RLS (118) already scopes reads to non-draft shows. Only the
+        // /shows/v2 subtree; the legacy /shows pages stay authed.
+        "/shows/v2",
     ];
 
     const isPublicRoute =

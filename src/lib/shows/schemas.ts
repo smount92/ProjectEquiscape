@@ -208,6 +208,29 @@ export const getShowConsoleSchema = z.object({
     showId: uuidSchema,
 });
 
+// ── Public + entrant flow (Phase D) ──
+
+export const getPublicShowSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const getMyShowEntriesSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const enterClassSchema = z.object({
+    classId: uuidSchema,
+    horseId: uuidSchema,
+    /** Online shows: the judged photo (horse_images.id). */
+    photoId: uuidSchema.nullable().optional(),
+    /** Proxy showing: someone else handles this horse. */
+    handlerId: uuidSchema.nullable().optional(),
+});
+
+export const scratchEntrySchema = z.object({
+    entryId: uuidSchema,
+});
+
 export const findUserByAliasSchema = z.object({
     alias: z.string().trim().min(1, "Enter an alias to look up.").max(60),
 });

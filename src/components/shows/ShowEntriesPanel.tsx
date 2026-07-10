@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Console ENTRIES tab — read-only in Phase C. Per-class entry
- * counts plus the entrant table (horse, owner, handler when
- * proxy, status). Entering itself ships in Phase D, so shows
- * without entries get a friendly explainer instead of an empty
- * table.
+ * Console ENTRIES tab — per-class LIVE entry counts (scratched
+ * rows are history, not volume) plus the entrant table (horse,
+ * owner, handler when proxy, entry number, status — scratched
+ * entries stay visible as the audit trail). Fed by the Phase D
+ * entrant flow; the host-side day-of tools land in Phase E.
  */
 
 import type { ConsoleDivision, ConsoleEntry } from "@/lib/shows/console";
@@ -40,18 +40,29 @@ export default function ShowEntriesPanel({ divisions, entries, showStatus }: Sho
         );
     }
 
-    // Class labels for the entrant table + per-class count rows.
+    // Class labels for the entrant table + per-class count rows,
+    // in classlist order.
     const classLabels = new Map<string, string>();
+    const classOrder = new Map<string, number>();
     const countRows: { id: string; label: string; count: number }[] = [];
     for (const division of divisions) {
         for (const section of division.sections) {
             for (const cls of section.classes) {
                 const label = cls.classNumber ? `${cls.classNumber} · ${cls.name}` : cls.name;
                 classLabels.set(cls.id, label);
+                classOrder.set(cls.id, classOrder.size);
                 countRows.push({ id: cls.id, label, count: cls.entryCount });
             }
         }
     }
+
+    // Entrant table follows the classlist, then leg-tag number.
+    const sortedEntries = [...entries].sort((a, b) => {
+        const orderA = classOrder.get(a.classId) ?? Number.MAX_SAFE_INTEGER;
+        const orderB = classOrder.get(b.classId) ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.entryNumber ?? Number.MAX_SAFE_INTEGER) - (b.entryNumber ?? Number.MAX_SAFE_INTEGER);
+    });
 
     return (
         <div className="flex flex-col gap-6">
@@ -59,6 +70,9 @@ export default function ShowEntriesPanel({ divisions, entries, showStatus }: Sho
                 <span className="ledger-tab" id="entry-counts-heading">
                     Entries per Class
                 </span>
+                <p className="mb-2 text-xs text-muted-foreground">
+                    Live entries only — scratched entries stay in the entrant list below.
+                </p>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -93,7 +107,7 @@ export default function ShowEntriesPanel({ divisions, entries, showStatus }: Sho
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {entries.map((entry) => (
+                        {sortedEntries.map((entry) => (
                             <TableRow key={entry.id}>
                                 <TableCell>{entry.entryNumber ?? "—"}</TableCell>
                                 <TableCell>{entry.horseName}</TableCell>

@@ -1,9 +1,13 @@
 import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
 import { getPhotoShows } from"@/app/actions/shows";
+import { getPublicShows } from"@/app/actions/shows-v2";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { showsV2Enabled } from"@/lib/shows/flags";
+import type { PublicShowSummary } from"@/lib/shows/public";
+import { formatStatus } from"@/lib/shows/stateMachine";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
@@ -25,6 +29,59 @@ function statusBadge(status: string) {
 }
 
 
+function v2ShowDate(show: PublicShowSummary): string | null {
+ const iso = show.mode ==="live" ? show.showDate : show.entriesCloseAt;
+ if (!iso) return null;
+ const d = new Date(iso);
+ if (Number.isNaN(d.getTime())) return null;
+ const formatted = d.toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+ return show.mode ==="live" ? formatted : `Entries close ${formatted}`;
+}
+
+/** Phase D — v2 shows as ledger cards, ABOVE the legacy photo-show
+ *  list. Links go to the interim /shows/v2/[id] route (the
+ *  /shows/[id] slot is legacy's until the Phase E cutover). */
+function V2ShowsSection({ shows }: { shows: PublicShowSummary[] }) {
+ if (shows.length === 0) return null;
+ return (
+  <section aria-labelledby="v2-shows-heading" className="mb-10">
+   <span className="ledger-tab" id="v2-shows-heading">
+    Shows — Live &amp; Online
+   </span>
+   <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
+    {shows.map((show) => (
+     <Link
+      key={show.id}
+      href={`/shows/v2/${show.id}`}
+      className="ledger-card block no-underline transition-all hover:shadow-lg"
+     >
+      <div className="flex flex-wrap items-center gap-2">
+       <h3 className="m-0 text-base font-bold text-foreground">{show.title}</h3>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+       <span className="stamp">{formatStatus(show.status)}</span>
+       <Badge variant="secondary">{show.mode ==="live" ?"Live" :"Online"}</Badge>
+       {show.isMhhQualifying && <Badge>MHH Qualifying</Badge>}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+       <span>Hosted by @{show.hostAlias}</span>
+       {v2ShowDate(show) && <span>{v2ShowDate(show)}</span>}
+      </div>
+      <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+       <span>
+        {show.classCount} class{show.classCount !== 1 ?"es" :""}
+       </span>
+       <span>
+        {show.entryCount} entr{show.entryCount !== 1 ?"ies" :"y"}
+       </span>
+      </div>
+     </Link>
+    ))}
+   </div>
+  </section>
+ );
+}
+
 export default async function ShowsPage() {
  const supabase = await createClient();
  const {
@@ -33,6 +90,13 @@ export default async function ShowsPage() {
  if (!user) redirect("/login");
 
  const shows = await getPhotoShows();
+
+ // v2 shows (flag-gated) render ABOVE the legacy photo-show list.
+ let v2Shows: PublicShowSummary[] = [];
+ if (showsV2Enabled()) {
+  const v2Result = await getPublicShows();
+  if (v2Result.success) v2Shows = v2Result.shows;
+ }
 
  // Batch-check which shows this user is a judge for
  const showIds = shows.map((s) => s.id);
@@ -58,6 +122,8 @@ export default async function ShowsPage() {
    ) : undefined
   }
  >
+  <V2ShowsSection shows={v2Shows} />
+
   <div className="mb-6 flex items-baseline gap-2">
   <span className="text-2xl font-bold text-forest">
    {shows.filter((s) => s.status ==="open").length}

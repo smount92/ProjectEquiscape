@@ -306,9 +306,9 @@ function ClassRow({
             {cls.maxPerEntrant !== null && (
                 <Badge variant="secondary">max {cls.maxPerEntrant}/entrant</Badge>
             )}
-            {entriesExist && (
+            {(entriesExist || cls.entryCount > 0) && (
                 <span className="text-xs text-muted-foreground">
-                    {cls.entryCount} entr{cls.entryCount === 1 ? "y" : "ies"}
+                    {cls.entryCount} entered
                 </span>
             )}
             {canEdit && (

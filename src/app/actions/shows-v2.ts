@@ -20,6 +20,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import {
     addClassSchema,
     addDivisionSchema,
@@ -27,17 +28,29 @@ import {
     addShowStaffSchema,
     combineClassesSchema,
     createShowSchema,
+    enterClassSchema,
     findUserByAliasSchema,
     firstZodError,
+    getMyShowEntriesSchema,
+    getPublicShowSchema,
     getShowConsoleSchema,
     loadTemplateSchema,
     removeShowStaffSchema,
     reorderClasslistSchema,
+    scratchEntrySchema,
     splitClassSchema,
     transitionShowStatusSchema,
     updateClassSchema,
     updateShowSettingsSchema,
 } from "@/lib/shows/schemas";
+import { validateEntry } from "@/lib/shows/entryRules";
+import {
+    PUBLIC_BROWSE_STATUSES,
+    type EntrantHorse,
+    type MyShowEntry,
+    type PublicShow,
+    type PublicShowSummary,
+} from "@/lib/shows/public";
 import type {
     ConsoleClass,
     ConsoleDivision,
@@ -796,13 +809,16 @@ export async function getHostedShows(): Promise<ActionResult<{ shows: HostedShow
         .order("created_at", { ascending: false });
     if (showsError) return { success: false, error: showsError.message };
 
+    // Live entries only — scratched rows are audit history, not volume.
     const { data: entryRows, error: entriesError } = await supabase
         .from("show_class_entries")
-        .select("show_id")
+        .select("show_id, status")
         .in("show_id", showIds);
     if (entriesError) return { success: false, error: entriesError.message };
     const entryCounts = countBy(
-        (entryRows ?? []).map((r: { show_id: string }) => ({ key: r.show_id })),
+        (entryRows ?? [])
+            .filter((r: { status: string }) => r.status !== "scratched")
+            .map((r: { show_id: string }) => ({ key: r.show_id })),
     );
 
     return {
@@ -894,11 +910,12 @@ export async function getShowConsole(
         }
     }
 
-    // ── Entries (read-only in Phase C) ──
+    // ── Entries — ordered by arrival so the entrant table is stable ──
     const { data: entryRows, error: eErr } = await supabase
         .from("show_class_entries")
         .select("id, class_id, horse_id, owner_id, handler_id, entry_number, status")
-        .eq("show_id", showId);
+        .eq("show_id", showId)
+        .order("created_at", { ascending: true });
     if (eErr) return { success: false, error: eErr.message };
     const entries = entryRows ?? [];
 
@@ -932,8 +949,13 @@ export async function getShowConsole(
         }
     }
 
-    // ── Assemble the tree ──
-    const entryCountByClass = countBy(entries.map((e) => ({ key: e.class_id as string })));
+    // ── Assemble the tree (per-class counts = LIVE entries only;
+    // scratched rows still show in the entrant table as history) ──
+    const entryCountByClass = countBy(
+        entries
+            .filter((e) => e.status !== "scratched")
+            .map((e) => ({ key: e.class_id as string })),
+    );
 
     const classesBySection = new Map<string, ConsoleClass[]>();
     for (const c of classRows) {
@@ -1061,4 +1083,621 @@ export async function findUserByAlias(
         }
     }
     return { success: true, user: null };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Public reads — Phase D. These two run on the plain server
+// client WITHOUT requireAuth: browse and the show page are
+// anon-visible, and the RLS public-read policies (118) are the
+// gate — drafts never come back.
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Non-draft v2 shows for the /shows browse ledger, newest first.
+ * Completed/archived shows drop off the browse list (their pages
+ * stay reachable); draft is invisible by RLS and by the filter.
+ */
+export async function getPublicShows(): Promise<ActionResult<{ shows: PublicShowSummary[] }>> {
+    const supabase = await createClient();
+
+    const { data: showRows, error: showsError } = await supabase
+        .from("shows")
+        .select(
+            "id, host_id, title, mode, judging, status, venue_name, show_date, entries_open_at, entries_close_at, judging_ends_at, is_mhh_qualifying, created_at",
+        )
+        .in("status", PUBLIC_BROWSE_STATUSES)
+        .order("created_at", { ascending: false })
+        .limit(100);
+    if (showsError) return { success: false, error: showsError.message };
+    const shows = showRows ?? [];
+    if (shows.length === 0) return { success: true, shows: [] };
+
+    const showIds = shows.map((s) => s.id as string);
+
+    // Class counts (enterable classes only) via the tree chain.
+    const { data: divisionRows, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, show_id")
+        .in("show_id", showIds);
+    if (dErr) return { success: false, error: dErr.message };
+    const showByDivision = new Map(
+        (divisionRows ?? []).map((d: { id: string; show_id: string }) => [d.id, d.show_id]),
+    );
+
+    const classCounts = new Map<string, number>();
+    if (showByDivision.size > 0) {
+        const { data: sectionRows, error: sErr } = await supabase
+            .from("show_sections")
+            .select("id, division_id")
+            .in("division_id", [...showByDivision.keys()]);
+        if (sErr) return { success: false, error: sErr.message };
+        const showBySection = new Map(
+            (sectionRows ?? []).map((s: { id: string; division_id: string }) => [
+                s.id,
+                showByDivision.get(s.division_id) ?? "",
+            ]),
+        );
+
+        if (showBySection.size > 0) {
+            const { data: classRows, error: cErr } = await supabase
+                .from("show_classes")
+                .select("id, section_id, status")
+                .in("section_id", [...showBySection.keys()]);
+            if (cErr) return { success: false, error: cErr.message };
+            for (const c of classRows ?? []) {
+                if (c.status === "cancelled" || c.status === "combined") continue;
+                const showId = showBySection.get(c.section_id as string);
+                if (showId) classCounts.set(showId, (classCounts.get(showId) ?? 0) + 1);
+            }
+        }
+    }
+
+    // Live entry counts (scratched rows are history, not volume).
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("show_id, status")
+        .in("show_id", showIds);
+    if (eErr) return { success: false, error: eErr.message };
+    const entryCounts = countBy(
+        (entryRows ?? [])
+            .filter((r: { status: string }) => r.status !== "scratched")
+            .map((r: { show_id: string }) => ({ key: r.show_id })),
+    );
+
+    const aliases = await getAliases(supabase, shows.map((s) => s.host_id as string));
+    if (!(aliases instanceof Map)) return { success: false, error: aliases.error };
+
+    return {
+        success: true,
+        shows: shows.map((s) => ({
+            id: s.id as string,
+            title: s.title as string,
+            mode: s.mode as ShowMode,
+            judging: s.judging as ShowJudging,
+            status: s.status as ShowStatus,
+            hostAlias: aliases.get(s.host_id as string) ?? "unknown",
+            showDate: (s.show_date as string | null) ?? null,
+            venueName: (s.venue_name as string | null) ?? null,
+            entriesOpenAt: (s.entries_open_at as string | null) ?? null,
+            entriesCloseAt: (s.entries_close_at as string | null) ?? null,
+            judgingEndsAt: (s.judging_ends_at as string | null) ?? null,
+            isMhhQualifying: s.is_mhh_qualifying as boolean,
+            classCount: classCounts.get(s.id as string) ?? 0,
+            entryCount: entryCounts.get(s.id as string) ?? 0,
+            createdAt: s.created_at as string,
+        })),
+    };
+}
+
+/**
+ * Everything the public /shows/v2/[id] page needs: the show
+ * header, the classlist tree with live per-class entry counts,
+ * and the host alias. Drafts and missing shows are one error —
+ * the page notFound()s either way.
+ */
+export async function getPublicShow(
+    input: z.input<typeof getPublicShowSchema>,
+): Promise<
+    ActionResult<{ show: PublicShow; divisions: ConsoleDivision[]; entryCount: number }>
+> {
+    const parsed = getPublicShowSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const supabase = await createClient();
+    const { showId } = parsed.data;
+
+    const { data: show, error: showError } = await supabase
+        .from("shows")
+        .select(
+            "id, host_id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note",
+        )
+        .eq("id", showId)
+        .maybeSingle();
+    if (showError) return { success: false, error: showError.message };
+    // RLS hides drafts from the public, but staff can read their own
+    // draft — the PUBLIC page still refuses it (the console is the
+    // place for drafts).
+    if (!show || show.status === "draft") return { success: false, error: "Show not found." };
+
+    // ── Classlist tree (same three-query walk as the console) ──
+    const { data: divisionRows, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, name, axis, sort_order")
+        .eq("show_id", showId)
+        .order("sort_order", { ascending: true });
+    if (dErr) return { success: false, error: dErr.message };
+    const divisionIds = (divisionRows ?? []).map((d) => d.id as string);
+
+    let sectionRows: { id: string; division_id: string; name: string; sort_order: number }[] = [];
+    let classRows: {
+        id: string;
+        section_id: string;
+        name: string;
+        class_number: string | null;
+        status: string;
+        max_per_entrant: number | null;
+        allowed_scales: string[] | null;
+        allowed_finishes: string[] | null;
+        is_qualifying: boolean;
+        sort_order: number;
+    }[] = [];
+    if (divisionIds.length > 0) {
+        const { data: sections, error: sErr } = await supabase
+            .from("show_sections")
+            .select("id, division_id, name, sort_order")
+            .in("division_id", divisionIds)
+            .order("sort_order", { ascending: true });
+        if (sErr) return { success: false, error: sErr.message };
+        sectionRows = sections ?? [];
+
+        const sectionIds = sectionRows.map((s) => s.id);
+        if (sectionIds.length > 0) {
+            const { data: classes, error: cErr } = await supabase
+                .from("show_classes")
+                .select(
+                    "id, section_id, name, class_number, status, max_per_entrant, allowed_scales, allowed_finishes, is_qualifying, sort_order",
+                )
+                .in("section_id", sectionIds)
+                .order("sort_order", { ascending: true });
+            if (cErr) return { success: false, error: cErr.message };
+            classRows = classes ?? [];
+        }
+    }
+
+    // ── Live entry counts per class ──
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("class_id, status")
+        .eq("show_id", showId);
+    if (eErr) return { success: false, error: eErr.message };
+    const liveEntries = (entryRows ?? []).filter(
+        (r: { status: string }) => r.status !== "scratched",
+    );
+    const entryCountByClass = countBy(
+        liveEntries.map((r: { class_id: string }) => ({ key: r.class_id })),
+    );
+
+    const aliases = await getAliases(supabase, [show.host_id as string]);
+    if (!(aliases instanceof Map)) return { success: false, error: aliases.error };
+
+    const classesBySection = new Map<string, ConsoleClass[]>();
+    for (const c of classRows) {
+        const list = classesBySection.get(c.section_id) ?? [];
+        list.push({
+            id: c.id,
+            name: c.name,
+            classNumber: c.class_number,
+            status: c.status as ClassStatus,
+            maxPerEntrant: c.max_per_entrant,
+            allowedScales: c.allowed_scales,
+            allowedFinishes: c.allowed_finishes,
+            isQualifying: c.is_qualifying,
+            sortOrder: c.sort_order,
+            entryCount: entryCountByClass.get(c.id) ?? 0,
+        });
+        classesBySection.set(c.section_id, list);
+    }
+    const sectionsByDivision = new Map<string, ConsoleSection[]>();
+    for (const s of sectionRows) {
+        const list = sectionsByDivision.get(s.division_id) ?? [];
+        list.push({
+            id: s.id,
+            name: s.name,
+            sortOrder: s.sort_order,
+            classes: classesBySection.get(s.id) ?? [],
+        });
+        sectionsByDivision.set(s.division_id, list);
+    }
+    const divisions: ConsoleDivision[] = (divisionRows ?? []).map((d) => ({
+        id: d.id as string,
+        name: d.name as string,
+        axis: d.axis as DivisionAxis,
+        sortOrder: d.sort_order as number,
+        sections: sectionsByDivision.get(d.id as string) ?? [],
+    }));
+
+    return {
+        success: true,
+        show: {
+            id: show.id as string,
+            title: show.title as string,
+            mode: show.mode as ShowMode,
+            judging: show.judging as ShowJudging,
+            status: show.status as ShowStatus,
+            hostAlias: aliases.get(show.host_id as string) ?? "unknown",
+            venueName: (show.venue_name as string | null) ?? null,
+            venueAddress: (show.venue_address as string | null) ?? null,
+            showDate: (show.show_date as string | null) ?? null,
+            entriesOpenAt: (show.entries_open_at as string | null) ?? null,
+            entriesCloseAt: (show.entries_close_at as string | null) ?? null,
+            judgingEndsAt: (show.judging_ends_at as string | null) ?? null,
+            rulesMd: (show.rules_md as string | null) ?? null,
+            feeInfo: (show.fee_info as string | null) ?? null,
+            capacity: (show.capacity as number | null) ?? null,
+            isMhhQualifying: show.is_mhh_qualifying as boolean,
+            sanctioningNote: (show.sanctioning_note as string | null) ?? null,
+        },
+        divisions,
+        entryCount: liveEntries.length,
+    };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Entrant flow — Phase D. zod → requireAuth → load the context
+// validateEntry needs → surface ALL violations verbatim → INSERT
+// (RLS from 118 is the backstop on every write).
+// ══════════════════════════════════════════════════════════════
+
+/** The viewer's entries at one show, for the My Entries panel. */
+export async function getMyShowEntries(
+    input: z.input<typeof getMyShowEntriesSchema>,
+): Promise<ActionResult<{ entries: MyShowEntry[] }>> {
+    const parsed = getMyShowEntriesSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+
+    const { data: rows, error } = await supabase
+        .from("show_class_entries")
+        .select("id, class_id, horse_id, handler_id, entry_number, status, photo_id, created_at")
+        .eq("show_id", parsed.data.showId)
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: true });
+    if (error) return { success: false, error: error.message };
+    const entries = rows ?? [];
+
+    const horseIds = [...new Set(entries.map((e) => e.horse_id as string))];
+    const horseNames = new Map<string, string>();
+    if (horseIds.length > 0) {
+        const { data: horses, error: hErr } = await supabase
+            .from("user_horses")
+            .select("id, custom_name")
+            .in("id", horseIds);
+        if (hErr) return { success: false, error: hErr.message };
+        for (const h of horses ?? []) {
+            horseNames.set(h.id as string, (h.custom_name as string | null) ?? "Unnamed horse");
+        }
+    }
+
+    const aliases = await getAliases(
+        supabase,
+        entries.flatMap((e) => (e.handler_id ? [e.handler_id as string] : [])),
+    );
+    if (!(aliases instanceof Map)) return { success: false, error: aliases.error };
+
+    return {
+        success: true,
+        entries: entries.map((e) => ({
+            id: e.id as string,
+            classId: e.class_id as string,
+            horseId: e.horse_id as string,
+            horseName: horseNames.get(e.horse_id as string) ?? "Unnamed horse",
+            entryNumber: (e.entry_number as number | null) ?? null,
+            status: e.status as EntryStatus,
+            handlerAlias:
+                e.handler_id && e.handler_id !== user.id
+                    ? (aliases.get(e.handler_id as string) ?? "unknown")
+                    : null,
+            photoId: (e.photo_id as string | null) ?? null,
+        })),
+    };
+}
+
+/** The viewer's enterable horses (public, not deleted), for the entry dialog. */
+export async function getMyEntrantHorses(): Promise<ActionResult<{ horses: EntrantHorse[] }>> {
+    const { supabase, user } = await requireAuth();
+
+    const { data: horseRows, error } = await supabase
+        .from("user_horses")
+        .select("id, custom_name, finish_type, catalog_items:catalog_id(scale)")
+        .eq("owner_id", user.id)
+        .eq("is_public", true)
+        .is("deleted_at", null)
+        .order("custom_name", { ascending: true });
+    if (error) return { success: false, error: error.message };
+    const horses = horseRows ?? [];
+
+    // Primary thumbnails, same pattern as the legacy entry form.
+    const horseIds = horses.map((h) => h.id as string);
+    const thumbByHorse = new Map<string, string>();
+    if (horseIds.length > 0) {
+        const { data: images, error: iErr } = await supabase
+            .from("horse_images")
+            .select("horse_id, image_url, angle_profile")
+            .in("horse_id", horseIds);
+        if (iErr) return { success: false, error: iErr.message };
+        for (const horseId of horseIds) {
+            const mine = (images ?? []).filter((i) => i.horse_id === horseId);
+            const primary = mine.find((i) => i.angle_profile === "Primary_Thumbnail") ?? mine[0];
+            if (primary?.image_url) thumbByHorse.set(horseId, primary.image_url as string);
+        }
+    }
+
+    return {
+        success: true,
+        horses: horses.map((h) => ({
+            id: h.id as string,
+            name: h.custom_name as string,
+            thumbnailUrl: thumbByHorse.get(h.id as string) ?? null,
+            // PostgREST returns the to-one catalog join as an object at
+            // runtime; the client types it loosely, hence the cast.
+            scale:
+                ((h.catalog_items as unknown as { scale: string | null } | null)?.scale as
+                    | string
+                    | null) ?? null,
+            finish: (h.finish_type as string | null) ?? null,
+        })),
+    };
+}
+
+/** enterClass failure carries the FULL violation list for the dialog. */
+export type EnterClassResult =
+    | { success: true; entryId: string; entryNumber: number }
+    | { success: false; error: string; violations?: string[] };
+
+/** Entry row + its class's division axis, via one nested select. */
+interface ShowEntryWithAxis {
+    class_id: string;
+    horse_id: string;
+    owner_id: string;
+    status: string;
+    entry_number: number | null;
+    show_classes: {
+        show_sections: { show_divisions: { axis: string } };
+    };
+}
+
+/**
+ * Enter one horse in one class — the core of Phase D.
+ * Class-first: the UI picks the class, then the horse (and photo
+ * for online shows, handler for proxy showing). All rule checks
+ * live in src/lib/shows/entryRules.validateEntry; this action only
+ * loads its context and persists on success.
+ */
+export async function enterClass(
+    input: z.input<typeof enterClassSchema>,
+): Promise<EnterClassResult> {
+    const parsed = enterClassSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    // ── Target class + its division axis + the show ──
+    const { data: cls, error: cErr } = await supabase
+        .from("show_classes")
+        .select("id, section_id, status, max_per_entrant, allowed_scales, allowed_finishes")
+        .eq("id", v.classId)
+        .maybeSingle();
+    if (cErr) return { success: false, error: cErr.message };
+    if (!cls) return { success: false, error: "Class not found." };
+
+    const { data: section, error: sErr } = await supabase
+        .from("show_sections")
+        .select("id, division_id")
+        .eq("id", cls.section_id as string)
+        .maybeSingle();
+    if (sErr) return { success: false, error: sErr.message };
+    if (!section) return { success: false, error: "Section not found." };
+
+    const { data: division, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, show_id, axis")
+        .eq("id", section.division_id as string)
+        .maybeSingle();
+    if (dErr) return { success: false, error: dErr.message };
+    if (!division) return { success: false, error: "Division not found." };
+
+    const showId = division.show_id as string;
+    const { data: show, error: shErr } = await supabase
+        .from("shows")
+        .select("id, mode, status, entries_close_at")
+        .eq("id", showId)
+        .maybeSingle();
+    if (shErr) return { success: false, error: shErr.message };
+    if (!show) return { success: false, error: "Show not found." };
+
+    // ── The horse: ownership, visibility, scale/finish facts ──
+    const { data: horse, error: hErr } = await supabase
+        .from("user_horses")
+        .select("id, owner_id, is_public, deleted_at, finish_type, catalog_items:catalog_id(scale)")
+        .eq("id", v.horseId)
+        .maybeSingle();
+    if (hErr) return { success: false, error: hErr.message };
+    if (!horse || horse.deleted_at) return { success: false, error: "Horse not found." };
+    if (!horse.is_public) {
+        return {
+            success: false,
+            error: "Only public horses can be entered — make this horse public in your stable first.",
+        };
+    }
+
+    // ── Everything already entered at this show (rule context).
+    // One nested select so each entry carries its class's division
+    // axis — the halter-declaration rule needs it. ──
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select(
+            "class_id, horse_id, owner_id, status, entry_number, show_classes!inner(show_sections!inner(show_divisions!inner(axis)))",
+        )
+        .eq("show_id", showId);
+    if (eErr) return { success: false, error: eErr.message };
+    const allEntries = (entryRows ?? []) as unknown as ShowEntryWithAxis[];
+
+    // ── The rules — surface EVERY violation verbatim ──
+    const result = validateEntry({
+        candidate: {
+            horseId: v.horseId,
+            ownerId: user.id,
+            handlerId: v.handlerId && v.handlerId !== user.id ? v.handlerId : null,
+            photoId: v.photoId ?? null,
+        },
+        horse: {
+            id: horse.id as string,
+            ownerId: horse.owner_id as string,
+            scale:
+                ((horse.catalog_items as unknown as { scale: string | null } | null)?.scale as
+                    | string
+                    | null) ?? null,
+            finish: (horse.finish_type as string | null) ?? null,
+        },
+        show: {
+            id: showId,
+            mode: show.mode as ShowMode,
+            status: show.status as ShowStatus,
+            entriesCloseAt: (show.entries_close_at as string | null) ?? null,
+        },
+        targetClass: {
+            id: cls.id as string,
+            status: cls.status as ClassStatus,
+            maxPerEntrant: (cls.max_per_entrant as number | null) ?? null,
+            allowedScales: (cls.allowed_scales as string[] | null) ?? null,
+            allowedFinishes: (cls.allowed_finishes as string[] | null) ?? null,
+            divisionAxis: division.axis as DivisionAxis,
+        },
+        existingEntries: allEntries.map((e) => ({
+            classId: e.class_id,
+            horseId: e.horse_id,
+            ownerId: e.owner_id,
+            status: e.status as EntryStatus,
+            divisionAxis: e.show_classes.show_sections.show_divisions
+                .axis as DivisionAxis,
+        })),
+    });
+
+    const violations = result.ok ? [] : [...result.errors];
+
+    // ── Mode rules the domain fn treats as soft: online shows judge
+    // a photo, so the entry needs one; live shows judge the model. ──
+    let photoId: string | null = null;
+    if (show.mode === "online") {
+        if (!v.photoId) {
+            violations.push(
+                "Online shows judge a photo — pick one of this horse's photos for the entry.",
+            );
+        } else {
+            const { data: photo, error: pErr } = await supabase
+                .from("horse_images")
+                .select("id, horse_id")
+                .eq("id", v.photoId)
+                .maybeSingle();
+            if (pErr) return { success: false, error: pErr.message };
+            if (!photo || photo.horse_id !== v.horseId) {
+                violations.push("That photo does not belong to the selected horse.");
+            } else {
+                photoId = photo.id as string;
+            }
+        }
+    }
+
+    if (violations.length > 0) {
+        return { success: false, error: violations.join(" "), violations };
+    }
+
+    // ── Entry number: the leg tag. The same horse keeps its number
+    // across classes at one show (scratched rows keep theirs too, so
+    // a re-entered horse gets its old tag back); a new horse takes
+    // max+1 across the show. Two entrants submitting in the same
+    // instant can race to the same number — acceptable at beta
+    // scale: numbers are labels, not keys, and hosts can renumber. ──
+    const existingNumber = allEntries.find(
+        (e) => e.horse_id === v.horseId && e.entry_number !== null,
+    )?.entry_number;
+    const entryNumber =
+        existingNumber ??
+        Math.max(0, ...allEntries.map((e) => e.entry_number ?? 0)) + 1;
+
+    const { data: inserted, error: insertError } = await supabase
+        .from("show_class_entries")
+        .insert({
+            show_id: showId,
+            class_id: v.classId,
+            horse_id: v.horseId,
+            owner_id: user.id,
+            handler_id: v.handlerId && v.handlerId !== user.id ? v.handlerId : null,
+            entry_number: entryNumber,
+            photo_id: photoId,
+            status: "entered",
+        })
+        .select("id")
+        .single();
+    if (insertError || !inserted) {
+        return {
+            success: false,
+            // 23505 = the partial unique index (one LIVE row per
+            // class+horse) — someone double-clicked or double-tabbed.
+            error:
+                insertError?.code === "23505"
+                    ? "This horse is already entered in this class."
+                    : insertError?.message ?? "Failed to enter the class.",
+        };
+    }
+
+    return { success: true, entryId: inserted.id as string, entryNumber };
+}
+
+/**
+ * Scratch an entry (owner, while entries are open — the RLS UPDATE
+ * policy is the backstop). Scratched rows are history: re-entering
+ * afterwards creates a NEW row (partial unique index, 117), which
+ * is why the UI says "Scratch" / "Re-enter" rather than "undo".
+ */
+export async function scratchEntry(
+    input: z.input<typeof scratchEntrySchema>,
+): Promise<ActionResult> {
+    const parsed = scratchEntrySchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+
+    const { data: entry, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, owner_id, status, show_id")
+        .eq("id", parsed.data.entryId)
+        .maybeSingle();
+    if (eErr) return { success: false, error: eErr.message };
+    if (!entry) return { success: false, error: "Entry not found." };
+    if (entry.owner_id !== user.id) {
+        return { success: false, error: "Only the entry's owner can scratch it." };
+    }
+    if (entry.status === "scratched") {
+        return { success: false, error: "This entry is already scratched." };
+    }
+
+    const { data: show, error: sErr } = await supabase
+        .from("shows")
+        .select("id, status")
+        .eq("id", entry.show_id as string)
+        .maybeSingle();
+    if (sErr) return { success: false, error: sErr.message };
+    if (!show || show.status !== "entries_open") {
+        return {
+            success: false,
+            error: "Entries are closed — ask the host to scratch this entry for you.",
+        };
+    }
+
+    const { error: uErr } = await supabase
+        .from("show_class_entries")
+        .update({ status: "scratched" })
+        .eq("id", parsed.data.entryId)
+        .eq("owner_id", user.id);
+    if (uErr) return { success: false, error: uErr.message };
+    return { success: true };
 }
