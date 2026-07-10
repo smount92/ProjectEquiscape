@@ -12,6 +12,9 @@ import HoofprintTimeline from"@/components/HoofprintTimeline";
 import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
+import QualificationCardsSection, { type PassportQualificationCard } from"@/components/shows/QualificationCardsSection";
+import { showsV2Enabled } from"@/lib/shows/flags";
+import type { CardStatus } from"@/lib/shows/types";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
@@ -185,6 +188,32 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  verificationTier: r.verification_tier,
  }),
  );
+
+ // ── MHH Qualification Cards (Phase F, flag-gated) ──
+ // RLS scopes reads to the card's people; this page is owner-only,
+ // and the owner is always current_owner_id (the Safe-Trade hook
+ // re-points cards when the horse changes hands).
+ let qualificationCards: PassportQualificationCard[] = [];
+ if (showsV2Enabled()) {
+ const { data: rawCards } = await supabase
+ .from("qualification_cards")
+ .select("id, earned_place, show_year, status, issued_at, shows(title), show_classes(name)")
+ .eq("horse_id", horseId)
+ .order("issued_at", { ascending: false });
+ qualificationCards = (rawCards ?? []).map((c) => {
+ const showRel = Array.isArray(c.shows) ? c.shows[0] : c.shows;
+ const classRel = Array.isArray(c.show_classes) ? c.show_classes[0] : c.show_classes;
+ return {
+ code: c.id as string,
+ earnedPlace: (c.earned_place as 1 | 2) ?? 1,
+ showYear: (c.show_year as number | null) ?? null,
+ status: c.status as CardStatus,
+ issuedAt: c.issued_at as string,
+ showTitle: (showRel as { title: string } | null)?.title ?? "Unknown show",
+ className: (classRel as { name: string } | null)?.name ?? "Unknown class",
+ };
+ });
+ }
 
  const { data: rawPedigree } = await supabase
  .from("horse_pedigrees")
@@ -606,6 +635,9 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Show Records */}
  <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={true} />
+
+ {/* MHH Qualification Cards (Phase F) — renders nothing when empty */}
+ <QualificationCardsSection cards={qualificationCards} />
 
  {/* Pedigree Card */}
  <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={true} />

@@ -100,6 +100,45 @@ describe("ShowStatusCard — legal transitions", () => {
     });
 });
 
+describe("ShowStatusCard — results export (Phase F)", () => {
+    it("offers the NAMHSA-format CSV download to managers of a completed show", () => {
+        render(
+            <ShowStatusCard show={consoleShow({ status: "completed" })} entryCount={12} canManage />,
+        );
+        const link = screen.getByTestId("download-results-csv");
+        expect(link).toHaveTextContent("Download results (CSV)");
+        expect(link).toHaveAttribute("href", `/api/export/show-results-v2/${SHOW_ID}`);
+    });
+
+    it("keeps the download available on archived shows", () => {
+        render(
+            <ShowStatusCard show={consoleShow({ status: "archived" })} entryCount={12} canManage />,
+        );
+        expect(screen.getByTestId("download-results-csv")).toBeInTheDocument();
+    });
+
+    it("hides the download before results are final and from non-managers", () => {
+        const { unmount } = render(
+            <ShowStatusCard
+                show={consoleShow({ status: "results_review" })}
+                entryCount={12}
+                canManage
+            />,
+        );
+        expect(screen.queryByTestId("download-results-csv")).not.toBeInTheDocument();
+        unmount();
+
+        render(
+            <ShowStatusCard
+                show={consoleShow({ status: "completed" })}
+                entryCount={12}
+                canManage={false}
+            />,
+        );
+        expect(screen.queryByTestId("download-results-csv")).not.toBeInTheDocument();
+    });
+});
+
 describe("ShowStatusCard — refusal path", () => {
     it("surfaces the action's refusal reason verbatim", async () => {
         actions.transitionShowStatus.mockResolvedValueOnce({

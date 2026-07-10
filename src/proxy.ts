@@ -74,6 +74,10 @@ export async function proxy(request: NextRequest) {
         // console, judge queue, ring, planner), so opening the
         // subtree changes nothing for them.
         "/shows",
+        // Card verification (Phase F): /cards/[code] is the public
+        // "anyone can verify a card" trust page — anon must reach it.
+        // Reads go through the anon-safe verify_qualification_card RPC.
+        "/cards",
     ];
 
     const isPublicRoute =

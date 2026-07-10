@@ -59,6 +59,7 @@ import {
 } from "@/lib/shows/queries";
 import { deriveVotePlacings, type VoteTally } from "@/lib/shows/deriveVotePlacings";
 import { buildShowRecords } from "@/lib/shows/writeShowRecords";
+import { issueQualificationCardsForShow } from "@/lib/shows/cardIssuance";
 import {
     GALLERY_STATUSES,
     isOwnerRevealed,
@@ -264,6 +265,22 @@ export async function transitionShowStatus(
             return {
                 success: false,
                 error: `Results could not be written to the horses' records — the show stays in results review. (${published.error})`,
+            };
+        }
+
+        // QUALIFICATION CARDS (Phase F): 1st/2nd in qualifying
+        // classes at an is_mhh_qualifying show mint bearer cards on
+        // the horses' Hoofprints. Runs as the PUBLISHING HOST on the
+        // user client — migration 118's INSERT policy (host/co_host
+        // + class-belongs-to-show + real 1st/2nd placing) was built
+        // for exactly this; no admin client. Same failure semantics
+        // as the records write: idempotent, so the show stays in
+        // results_review and the host retries.
+        const cards = await issueQualificationCardsForShow(supabase, showId);
+        if ("error" in cards) {
+            return {
+                success: false,
+                error: `Qualification cards could not be issued — the show stays in results review. (${cards.error})`,
             };
         }
     }

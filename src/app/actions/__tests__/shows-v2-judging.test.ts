@@ -605,10 +605,38 @@ describe("shows-v2 — results publish on completed", () => {
         queueList([
             { entry_id: ENTRY_ID, class_id: CLASS_ID, place: 1, note: "Lovely." },
         ]);
+        queueList([]); // callbacks — no championship ladder recorded
     }
 
-    it("writes trophy-case rows via the admin client, then completes the show", async () => {
+    /** Queue the card-issuance reads that follow the records write
+     *  (Phase F — same publish step, user client). */
+    function mockCardIssuanceReads() {
+        // issueQualificationCardsForShow's show load (3rd maybeSingle).
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: { id: SHOW_ID, is_mhh_qualifying: true, show_year: 2026 },
+            error: null,
+        });
+        queueList([{ id: DIVISION_ID }]);
+        queueList([{ id: SECTION_ID }]);
+        queueList([{ id: CLASS_ID, is_qualifying: true }]);
+        queueList([
+            {
+                id: ENTRY_ID,
+                class_id: CLASS_ID,
+                horse_id: HORSE_ID,
+                owner_id: "owner-9",
+                status: "entered",
+            },
+        ]);
+        queueList([{ entry_id: ENTRY_ID, class_id: CLASS_ID, place: 1 }]);
+        queueList([]); // no cards issued yet
+        queueList([]); // code collision check — all free
+        // card insert + status update ride the default implicit resolve
+    }
+
+    it("writes trophy-case rows via the admin client, issues cards, then completes the show", async () => {
         mockPublishReads();
+        mockCardIssuanceReads();
         mockAdmin._setImplicitResolve({ data: [], error: null }); // no existing rows; insert ok
 
         const result = await transitionShowStatus({ showId: SHOW_ID, to: "completed" });
@@ -630,6 +658,23 @@ describe("shows-v2 — results publish on completed", () => {
                 verification_tier: "platform_generated",
             },
         ]);
+
+        // The 1st place in the qualifying class minted a card — on the
+        // USER client (RLS 118 was built for the publishing host).
+        expect(mockClient.from).toHaveBeenCalledWith("qualification_cards");
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith([
+            expect.objectContaining({
+                show_id: SHOW_ID,
+                class_id: CLASS_ID,
+                horse_id: HORSE_ID,
+                earned_place: 1,
+                earned_by_owner_id: "owner-9",
+                current_owner_id: "owner-9",
+                status: "issued",
+                show_year: 2026,
+            }),
+        ]);
+
         expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ status: "completed" });
     });
 
@@ -640,6 +685,24 @@ describe("shows-v2 — results publish on completed", () => {
         const result = await transitionShowStatus({ showId: SHOW_ID, to: "completed" });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/results review/i);
+        expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
+    });
+
+    it("keeps the show in results_review when card issuance fails", async () => {
+        mockPublishReads();
+        mockAdmin._setImplicitResolve({ data: [], error: null }); // records write succeeds
+        // Card issuance's show load errors out.
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: null,
+            error: { message: "cards read denied" },
+        });
+
+        const result = await transitionShowStatus({ showId: SHOW_ID, to: "completed" });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+            expect(result.error).toMatch(/qualification cards could not be issued/i);
+            expect(result.error).toMatch(/results review/i);
+        }
         expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
     });
 });

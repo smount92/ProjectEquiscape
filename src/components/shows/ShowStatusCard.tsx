@@ -154,6 +154,27 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
                     </div>
                 )}
 
+                {/* NAMHSA-format results file (Phase F): on-demand CSV,
+                    host/co-host only — the route re-checks the role. */}
+                {canManage &&
+                    (show.status === "completed" || show.status === "archived") && (
+                        <div className="mt-4">
+                            <Button asChild variant="outline">
+                                <a
+                                    href={`/api/export/show-results-v2/${show.id}`}
+                                    download
+                                    data-testid="download-results-csv"
+                                >
+                                    Download results (CSV)
+                                </a>
+                            </Button>
+                            <p className="mt-2 text-xs text-muted-foreground">
+                                Searchable NAMHSA-format results — class names, entry
+                                counts, placings, owners, and championships.
+                            </p>
+                        </div>
+                    )}
+
                 {canManage ? (
                     nextStatuses.length > 0 && (
                         <div className="mt-5 flex flex-wrap gap-3">
