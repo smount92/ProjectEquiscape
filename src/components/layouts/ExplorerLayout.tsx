@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 interface ExplorerLayoutProps {
-    title: ReactNode;
+    title?: ReactNode;
     description?: ReactNode;
     headerActions?: ReactNode;
     controls?: ReactNode;
@@ -12,6 +12,9 @@ interface ExplorerLayoutProps {
      *  its own material (e.g. the feed's leather panel) sits directly on
      *  the page background instead of being double-framed. */
     frameless?: boolean;
+    /** Escape hatch: the page brings its own header (e.g. a leather
+     *  masthead inside children) — suppress the default brass header row. */
+    noHeader?: boolean;
     children: ReactNode;
 }
 
@@ -21,11 +24,13 @@ export default function ExplorerLayout({
     headerActions,
     controls,
     frameless = false,
+    noHeader = false,
     children,
 }: ExplorerLayoutProps) {
     return (
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-12 lg:px-8">
             {/* Header row */}
+            {!noHeader && (
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <div className="brass-heading">
@@ -40,6 +45,7 @@ export default function ExplorerLayout({
                 </div>
                 {headerActions && <div className="flex gap-3">{headerActions}</div>}
             </div>
+            )}
 
             {/* Controls row (sticky) */}
             {controls && (

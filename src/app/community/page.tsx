@@ -289,10 +289,9 @@ export default async function CommunityPage({
  // unchanged either way: auth-gated above.
  if (showRingV2Enabled()) {
  return (
- <ExplorerLayout
-  title={<>🏆 The <span className="text-forest">Show Ring</span></>}
-  description="Browse the latest models shared by collectors from around the world. Every horse has a story."
- >
+ // The leather masthead inside ShowRingV2 IS the page header
+ // (title + description live on the band).
+ <ExplorerLayout noHeader>
   <Suspense fallback={<ShowRingSkeleton />}>
   <ShowRingV2 searchParams={params} />
   </Suspense>
