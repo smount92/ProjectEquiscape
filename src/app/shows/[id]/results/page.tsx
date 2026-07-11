@@ -11,18 +11,23 @@ const MEDAL_MAP: Record<string, string> = {
     "Grand Champion": "🏆", "Reserve Grand Champion": "🥈",
 };
 
+// US show-ribbon convention. These are fixed real-world ribbon colors — a
+// blue 1st stays blue in Lamplight too — so they're intentional literal
+// hues (like the tier-gold/silver palette), not theme-flipping tokens.
 const RIBBON_COLOR_MAP: Record<string, string> = {
-    "1st": "border-l-info bg-info/10",
-    "2nd": "border-l-destructive bg-destructive/10",
-    "3rd": "border-l-warning bg-warning/10",
-    "4th": "border-l-input",
-    "5th": "border-l-studio bg-studio/10",
-    "6th": "border-l-success",
-    HM: "border-l-success",
-    Champion: "border-l-info bg-info/10",
-    "Reserve Champion": "border-l-destructive bg-destructive/10",
-    "Grand Champion": "border-l-warning bg-warning/10",
-    "Reserve Grand Champion": "border-l-warning bg-warning/10",
+    "1st": "border-l-[#2563EB] bg-[#2563EB]/10", // blue
+    "2nd": "border-l-[#DC2626] bg-[#DC2626]/10", // red
+    "3rd": "border-l-[#EAB308] bg-[#EAB308]/10", // yellow
+    "4th": "border-l-[#D1D5DB] bg-[#D1D5DB]/12", // white
+    "5th": "border-l-[#EC4899] bg-[#EC4899]/10", // pink
+    "6th": "border-l-[#16A34A] bg-[#16A34A]/10", // green
+    "7th": "border-l-[#7C3AED] bg-[#7C3AED]/10", // purple
+    "8th": "border-l-[#92400E] bg-[#92400E]/10", // brown
+    HM: "border-l-[#9CA3AF] bg-[#9CA3AF]/10", // honorable mention — grey
+    Champion: "border-l-[#C9962B] bg-[#C9962B]/12", // championship gold
+    "Reserve Champion": "border-l-[#9CA3AF] bg-[#9CA3AF]/12", // silver
+    "Grand Champion": "border-l-[#7C3AED] bg-[#7C3AED]/12", // grand — purple
+    "Reserve Grand Champion": "border-l-[#A78BFA] bg-[#A78BFA]/12", // light purple
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

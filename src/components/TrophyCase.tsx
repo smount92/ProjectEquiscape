@@ -39,7 +39,7 @@ function getTierClasses(tier: number): string {
  case 2:
  return"border-tier-silver hover:shadow-[0_0_12px_rgba(192,192,192,0.4)]";
  case 3:
- return"border-[#ffd700] hover:shadow-[0_0_16px_rgba(255,215,0,0.4)]";
+ return"border-tier-gold hover:shadow-[0_0_16px_rgba(255,215,0,0.4)]";
  case 4:
  return"border-tier-diamond hover:shadow-[0_0_20px_rgba(185,242,255,0.5)]";
  case 5:
@@ -92,11 +92,11 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
  <span className="text-engraved-brass block font-serif text-xs font-bold tracking-[0.06em] uppercase">
  {badge.name}
  </span>
- <span className="text-engraved-brass mt-0.5 block text-xs opacity-80">
+ <span className="text-engraved-brass mt-0.5 block text-xs">
  {formatDate(badge.earnedAt)}
  </span>
  {hoveredBadge === badge.id && (
- <div className="border-input [&_p]:text-secondary-foreground [&>span]:text-muted-foreground pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border bg-[var(--muted)] px-4 py-2 text-left shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
+ <div className="[&_p]:text-[var(--paper-lit-ink-soft)] [&>span]:text-[var(--paper-lit-ink-soft)] pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border border-[var(--ledger-border)] bg-[var(--paper-lit)] px-4 py-2 text-left text-[var(--paper-lit-ink)] shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
  <strong>{badge.name}</strong>
  <p>{badge.description}</p>
  <span>Earned {formatDate(badge.earnedAt)}</span>

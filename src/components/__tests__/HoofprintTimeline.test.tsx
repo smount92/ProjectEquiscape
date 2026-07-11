@@ -167,7 +167,7 @@ describe("HoofprintTimeline", () => {
  it("shows empty state when no timeline events", () => {
  render(<HoofprintTimeline {...defaultProps} timeline={[]} ownershipChain={[]} />);
 
- expect(screen.getByText("🐾 No timeline events yet.")).toBeInTheDocument();
+ expect(screen.getByText(/No timeline events yet\./)).toBeInTheDocument();
  });
 
  it("shows life stage selector for owner", () => {

@@ -6,6 +6,7 @@ import Link from"next/link";
 import { motion } from"framer-motion";
 import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from"@/app/actions/hoofprint";
 import type { TimelineEvent, OwnershipRecord } from"@/app/actions/hoofprint";
+import HorseshoeIcon from"@/components/icons/HorseshoeIcon";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -105,7 +106,7 @@ export default function HoofprintTimeline({
  <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
  <div className="flex items-center gap-4">
  <h2 className="text-xl font-bold">
- 🐾 <span className="text-forest">Hoofprint</span>
+ <HorseshoeIcon className="text-forest" /> <span className="text-forest">Hoofprint</span>
  </h2>
  <span className={`hoofprint-stage-badge stage-${lifeStage}`}>
  {STAGE_ICONS[lifeStage] ||"📋"} {STAGE_LABELS[lifeStage] || lifeStage}
@@ -204,7 +205,7 @@ export default function HoofprintTimeline({
  {/* Timeline */}
  {timeline.length === 0 ? (
  <div className="text-muted-foreground p-8 text-center">
- <p>🐾 No timeline events yet.</p>
+ <p><HorseshoeIcon /> No timeline events yet.</p>
  {isOwner && (
  <p className="text-sm">
  Add events to build this horse&apos;s Hoofprint!

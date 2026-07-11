@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { redirect, notFound } from"next/navigation";
 import Link from"next/link";
 import { getPublicImageUrls } from"@/lib/utils/storage";
+import HorseshoeIcon from"@/components/icons/HorseshoeIcon";
 import MarketValueBadge from"@/components/MarketValueBadge";
 import PassportGallery from"@/components/PassportGallery";
 import ShareButton from"@/components/ShareButton";
@@ -701,7 +702,7 @@ editionSize: rawPedigree.edition_size,
   <Button asChild variant="outline" size="wide"><Link
   href={`/community/${horseId}/hoofprint`}
   >
-  🐾 View Hoofprint
+  <HorseshoeIcon /> View Hoofprint
   </Link></Button>
   )}
  </div>
