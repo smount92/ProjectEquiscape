@@ -4376,6 +4376,7 @@ export type Database = {
           role: string | null
           show_badges: boolean
           watermark_photos: boolean | null
+          watermark_text: string | null
         }
         Insert: {
           account_status?: string
@@ -4399,6 +4400,7 @@ export type Database = {
           role?: string | null
           show_badges?: boolean
           watermark_photos?: boolean | null
+          watermark_text?: string | null
         }
         Update: {
           account_status?: string
@@ -4422,6 +4424,7 @@ export type Database = {
           role?: string | null
           show_badges?: boolean
           watermark_photos?: boolean | null
+          watermark_text?: string | null
         }
         Relationships: []
       }
@@ -4578,15 +4581,15 @@ export type Database = {
           p_life_stage?: string
         }
         Returns: {
+          average_price: number
           catalog_id: string
           finish_type: string
+          highest_price: number
+          last_sold_at: string
           life_stage: string
           lowest_price: number
-          highest_price: number
-          average_price: number
           median_price: number
           transaction_volume: number
-          last_sold_at: string
         }[]
       }
       get_photo_limit: { Args: never; Returns: number }
