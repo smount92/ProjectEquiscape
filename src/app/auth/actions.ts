@@ -109,6 +109,40 @@ export async function signupAction(
   };
 }
 
+/**
+ * Re-send the signup confirmation email (the post-signup interstitial's
+ * "Resend" button). Supabase applies its own rate limit to resends; its
+ * error message is surfaced verbatim when that trips.
+ */
+export async function resendConfirmationAction(
+  _prevState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const email = formData.get("email") as string;
+
+  if (!email) {
+    return { error: "Missing email address.", success: false };
+  }
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+
+    if (error) {
+      console.error("[ResendConfirmation] Supabase error:", error.message);
+      return { error: error.message, success: false };
+    }
+
+    return { error: null, success: true };
+  } catch (err) {
+    console.error("[ResendConfirmation] Unexpected error:", err);
+    return {
+      error: "Something went wrong. Please try again.",
+      success: false,
+    };
+  }
+}
+
 export async function forgotPasswordAction(
   _prevState: AuthFormState,
   formData: FormData

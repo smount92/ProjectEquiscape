@@ -2,7 +2,7 @@
 
 import { useState } from"react";
 import Link from"next/link";
-import { signupAction, type AuthFormState } from"@/app/auth/actions";
+import { resendConfirmationAction, signupAction, type AuthFormState } from"@/app/auth/actions";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
 
@@ -11,6 +11,9 @@ export default function SignupPage() {
  const [success, setSuccess] = useState(false);
  const [isPending, setIsPending] = useState(false);
  const [showPassword, setShowPassword] = useState(false);
+ const [signupEmail, setSignupEmail] = useState<string | null>(null);
+ const [resendStatus, setResendStatus] = useState<"idle" |"sending" |"sent" |"error">("idle");
+ const [resendError, setResendError] = useState<string | null>(null);
 
  const handleSubmit = async (formData: FormData) => {
  setIsPending(true);
@@ -19,6 +22,7 @@ export default function SignupPage() {
  const result: AuthFormState = await signupAction({ error: null, success: false }, formData);
 
  if (result.success) {
+  setSignupEmail((formData.get("email") as string) || null);
   setSuccess(true);
  } else {
   setError(result.error);
@@ -26,18 +30,60 @@ export default function SignupPage() {
  setIsPending(false);
  };
 
+ const handleResend = async () => {
+ if (!signupEmail || resendStatus ==="sending") return;
+ setResendStatus("sending");
+ setResendError(null);
+
+ const formData = new FormData();
+ formData.set("email", signupEmail);
+ const result = await resendConfirmationAction({ error: null, success: false }, formData);
+
+ if (result.success) {
+  setResendStatus("sent");
+ } else {
+  setResendStatus("error");
+  setResendError(result.error);
+ }
+ };
+
  if (success) {
  return (
   <FocusLayout title="Check Your Email">
   <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
-   <div className="border-b border-input bg-gradient-to-b from-stone-50 to-card px-8 pb-6 pt-8 text-center">
+   <div className="border-b border-input px-8 pb-6 pt-8 text-center">
    <div className="mb-3 text-4xl" aria-hidden="true">✉️</div>
    <p className="mt-2 text-sm leading-relaxed text-secondary-foreground">
     We&apos;ve sent a confirmation link to your email address. Click the link to activate your
     account and start building your Digital Stable!
    </p>
+   <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+    Can&apos;t find it? Check your spam folder — and confirm soon, since the link expires.
+   </p>
    </div>
    <div className="px-8 pb-8 pt-6 text-center">
+   {signupEmail && (
+    <div className="mb-4">
+    <button
+     type="button"
+     onClick={handleResend}
+     disabled={resendStatus ==="sending" || resendStatus ==="sent"}
+     className="w-full cursor-pointer rounded-lg border border-input bg-transparent px-6 py-3 text-sm font-semibold text-secondary-foreground transition-all hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+     id="resend-confirmation"
+    >
+     {resendStatus ==="sending"
+      ?"Sending…"
+      : resendStatus ==="sent"
+      ?"Confirmation email re-sent ✓"
+      :"Resend confirmation email"}
+    </button>
+    {resendStatus ==="error" && resendError && (
+     <p className="mt-2 text-xs text-destructive" role="alert" id="resend-error">
+     {resendError}
+     </p>
+    )}
+    </div>
+   )}
    <Link
     href="/login"
     className="inline-block w-full cursor-pointer rounded-lg border-0 bg-forest px-6 py-3 text-center text-sm font-semibold text-white shadow-sm transition-all hover:bg-forest-dark hover:shadow-md no-underline"
