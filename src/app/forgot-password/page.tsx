@@ -5,6 +5,7 @@ import Link from"next/link";
 import { forgotPasswordAction, type AuthFormState } from"@/app/auth/actions";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 const initialState: AuthFormState = { error: null, success: false };
@@ -15,7 +16,7 @@ export default function ForgotPasswordPage() {
  if (state.success) {
  return (
   <FocusLayout title="Check Your Email">
-  <div className="bg-white border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-card border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
    <div className="px-6 py-6">
    <div aria-hidden="true" className="mb-4 text-[3rem]">
     ✉️
@@ -38,14 +39,12 @@ export default function ForgotPasswordPage() {
  }
 
  return (
- <FocusLayout
-  title={<>Reset <span className="text-forest">Password</span></>}
-  description="Enter your email and we'll send you a reset link"
- >
-  <div className="bg-white border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+ <FocusLayout noHeader>
+  <PageMasthead compact icon="🔑" title="Reset Password" subtitle="Enter your email and we'll send you a reset link" />
+  <div className="bg-card border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
   {state.error && (
    <div
-   className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
+   className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm"
    role="alert"
    id="forgot-error"
    >

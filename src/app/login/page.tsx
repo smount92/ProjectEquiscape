@@ -5,6 +5,7 @@ import Link from"next/link";
 import { loginAction, type AuthFormState } from"@/app/auth/actions";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 
 const initialState: AuthFormState = {
  error: null,
@@ -16,16 +17,14 @@ export default function LoginPage() {
  const [showPassword, setShowPassword] = useState(false);
 
  return (
- <FocusLayout
-  title={<>Welcome <span className="text-forest">Back</span></>}
-  description="Sign in to your Digital Stable"
- >
+ <FocusLayout noHeader>
+  <PageMasthead compact icon="🔑" title="Welcome Back" subtitle="Sign in to your Digital Stable" />
   <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
   {/* Body */}
   <div className="px-8 pb-8 pt-6">
    {state.error && (
    <div
-    className="mb-6 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+    className="mb-6 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
     role="alert"
     id="login-error"
    >
