@@ -1,0 +1,2 @@
+# generated delta reports (regenerate with a dry run)
+*.delta-report.json
